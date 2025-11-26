@@ -92,7 +92,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.iconBox}>
-            <Ionicons name="hardware-chip-outline" size={24} color={Colors.accent} />
+            <Ionicons name="swap-horizontal" size={24} color={Colors.accent} />
           </View>
           <View>
             <Text style={styles.title}>
