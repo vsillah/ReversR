@@ -7,9 +7,13 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 const getClient = () => {
-  const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || '';
-  const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || undefined;
-  return new GoogleGenAI({ apiKey, httpOptions: baseUrl ? { baseUrl } : undefined });
+  return new GoogleGenAI({
+    apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
+    httpOptions: {
+      apiVersion: "",
+      baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
+    },
+  });
 };
 
 const SIT_SYSTEM_INSTRUCTION = `You are an expert in Systematic Inventive Thinking (SIT), a structured methodology for innovation. You strictly adhere to the "Closed World" principle: all solutions must derive from components already within or immediately adjacent to the product's defined system boundary. You are precise, analytical, and creative within constraints.`;
@@ -80,13 +84,12 @@ app.post('/api/analyze', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
-        responseSchema: schema,
-        thinkingConfig: { thinkingBudget: 0 }
+        responseSchema: schema
       }
     });
 
@@ -129,13 +132,12 @@ app.post('/api/apply-pattern', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
-        responseSchema: schema,
-        thinkingConfig: { thinkingBudget: 0 }
+        responseSchema: schema
       }
     });
 
@@ -174,13 +176,12 @@ app.post('/api/generate-spec', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
-        responseSchema: schema,
-        thinkingConfig: { thinkingBudget: 0 }
+        responseSchema: schema
       }
     });
 
@@ -232,13 +233,12 @@ app.post('/api/generate-3d', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
-        responseSchema: schema,
-        thinkingConfig: { thinkingBudget: 0 }
+        responseSchema: schema
       }
     });
 
