@@ -1,4 +1,4 @@
-const API_BASE = 'https://2551a9e3-8c5f-401c-a96a-6b1ada09713c-00-2aorbt41g8007.janeway.replit.dev:3000';
+const API_BASE = 'https://2551a9e3-8c5f-401c-a96a-6b1ada09713c-00-2aorbt41g8007.janeway.replit.dev';
 
 export interface Component {
   name: string;

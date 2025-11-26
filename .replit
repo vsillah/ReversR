@@ -76,32 +76,17 @@ author = "agent"
 task = "workflow.run"
 args = "Start application"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "API Server"
-
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "yes | npx expo start --tunnel --clear"
-
-[[workflows.workflow]]
-name = "API Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node server/index.js"
-waitForPort = 3000
-
-[workflows.workflow.metadata]
-outputType = "console"
+args = "node server/index.js & sleep 2 && yes | npx expo start --tunnel --clear"
+waitForPort = 5000
 
 [agent]
 expertMode = true
