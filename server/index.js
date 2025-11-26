@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenAI, Type } = require('@google/genai');
+const { GoogleGenAI, Type, Modality } = require('@google/genai');
 
 const app = express();
 app.use(cors());
@@ -247,6 +247,45 @@ app.post('/api/generate-3d', async (req, res) => {
     res.json(JSON.parse(text));
   } catch (error) {
     console.error('Generate 3D error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/generate-2d', async (req, res) => {
+  try {
+    const { innovation } = req.body;
+    const ai = getClient();
+    
+    const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
+    
+Description: ${innovation.conceptDescription}
+Innovation Pattern: ${innovation.patternUsed}
+Market Benefit: ${innovation.marketBenefit}
+
+Generate a clean, professional product concept sketch with:
+- Clear line drawings showing the product from multiple angles
+- Labels pointing to key innovative features
+- Technical/blueprint aesthetic with a modern feel
+- Annotations explaining how the innovation works`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
+      },
+    });
+
+    const candidate = response.candidates?.[0];
+    const imagePart = candidate?.content?.parts?.find((part) => part.inlineData);
+    
+    if (!imagePart?.inlineData?.data) {
+      throw new Error("No image generated");
+    }
+
+    res.json({ imageBase64: imagePart.inlineData.data });
+  } catch (error) {
+    console.error('Generate 2D error:', error);
     res.status(500).json({ error: error.message });
   }
 });

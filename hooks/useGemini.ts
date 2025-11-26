@@ -111,6 +111,11 @@ export const generate3DScene = async (innovation: InnovationResult): Promise<Thr
   });
 };
 
-export const generate2DImage = async (_innovation: InnovationResult): Promise<string> => {
-  return '';
+export const generate2DImage = async (innovation: InnovationResult): Promise<string> => {
+  const response = await fetchWithRetry<{ imageBase64: string }>(`${API_BASE}/api/generate-2d`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ innovation })
+  });
+  return response.imageBase64;
 };
