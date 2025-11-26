@@ -57,3 +57,4 @@ args = "npx eas build --platform android --profile preview"
 
 [agent]
 expertMode = true
+integrations = ["javascript_gemini_ai_integrations:1.0.0"]
