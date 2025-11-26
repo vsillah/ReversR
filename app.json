@@ -19,7 +19,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0a0a"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.vsillah.reversr"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -33,6 +38,11 @@
         }
       ]
     ],
-    "scheme": "reversr"
+    "scheme": "reversr",
+    "extra": {
+      "eas": {
+        "projectId": "9e2de870-06ee-4cb4-ad47-60efbb533baa"
+      }
+    }
   }
 }
