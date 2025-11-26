@@ -1,71 +1,60 @@
-# ReversR - AI-Powered Product Innovation Engine
+# ReversR - AI-Powered Product Innovation Engine (Expo)
 
 ## Overview
-ReversR is a web application that uses Google's Gemini AI and Systematic Inventive Thinking (SIT) methodology to analyze products and generate innovative concepts with 2D sketches and 3D wireframe visualizations.
+ReversR is a React Native mobile application that uses Google's Gemini AI and Systematic Inventive Thinking (SIT) methodology to analyze products and generate innovative concepts.
+
+## How to Use
+1. Open the **Expo Go** app on your phone (download from App Store or Google Play)
+2. Scan the QR code shown in the console output
+3. The app will load on your device
 
 ## Project Structure
 ```
-├── src/
-│   ├── components/
-│   │   ├── PhaseOne.tsx        # Closed World Scan - product analysis
-│   │   ├── PhaseTwo.tsx        # Pattern Application - SIT mutation
-│   │   ├── PhaseThree.tsx      # Architect - specs & visualization
-│   │   ├── ContextViewer.tsx   # Context.md sidebar panel
-│   │   └── PrototypeViewer.tsx # Three.js 3D wireframe viewer
-│   ├── services/
-│   │   └── geminiService.ts    # Gemini AI integration
-│   ├── utils/
-│   │   └── contextMarkdown.ts  # Context export utilities
-│   ├── types.ts                # TypeScript type definitions
-│   ├── App.tsx                 # Main application component
-│   ├── main.tsx               # React entry point
-│   └── index.css              # Tailwind CSS styles
-├── public/
-│   └── icon.png               # App icon
-├── index.html                 # HTML template with Three.js CDN
-├── vite.config.ts            # Vite configuration
-├── tailwind.config.js        # Tailwind with custom theme
-├── tsconfig.json             # TypeScript configuration
-└── package.json              # Dependencies
+├── app/
+│   ├── _layout.tsx      # Root layout with dark theme
+│   └── index.tsx        # Main screen with phase navigation
+├── components/
+│   ├── PhaseOne.tsx     # Closed World Scan - product analysis + camera
+│   ├── PhaseTwo.tsx     # Pattern Application - SIT mutation
+│   └── PhaseThree.tsx   # Architect - specs & visualization
+├── constants/
+│   └── theme.ts         # Colors, spacing, font sizes
+├── hooks/
+│   └── useGemini.ts     # Gemini AI service with all API calls
+├── assets/              # App icons
+├── app.json             # Expo configuration
+├── package.json         # Dependencies
+└── tsconfig.json        # TypeScript configuration
 ```
 
 ## Key Features
 1. **Three-Phase SIT Workflow**
-   - Phase 1 (Scan): Analyze product components, identify essential parts, neighborhood resources
-   - Phase 2 (Mutate): Apply SIT patterns (Subtraction, Task Unification, Multiplication, Division, Attribute Dependency)
-   - Phase 3 (Architect): Generate technical specs, 2D sketches, and interactive 3D wireframes
+   - Phase 1 (Scan): Analyze product via text or camera
+   - Phase 2 (Mutate): Apply SIT patterns
+   - Phase 3 (Architect): Generate specs and visualizations
 
-2. **Camera Support**: Scan physical objects using device camera for analysis
+2. **Camera Support**: Use device camera to scan physical objects
 
-3. **3D Visualization**: Interactive Three.js wireframe viewer with export to .obj and .stl formats
+3. **5 SIT Patterns**: Subtraction, Task Unification, Multiplication, Division, Attribute Dependency
 
-4. **Context.md**: Real-time operational memory sidebar tracking session progress
+4. **Export**: Share specs as JSON, 3D scenes as OBJ/STL
 
 ## Technology Stack
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS with custom cyberpunk theme
-- **AI**: Google Gemini (gemini-2.5-flash for analysis, gemini-2.5-flash-preview-05-20 for images)
-- **3D**: Three.js (loaded via CDN)
-- **Integration**: Replit AI Integrations for Gemini (no user API key required)
+- **Framework**: Expo SDK 52 + React Native
+- **Navigation**: Expo Router
+- **AI**: Google Gemini via @google/genai
+- **Camera**: expo-camera
+- **File System**: expo-file-system, expo-sharing
+- **3D (conceptual)**: expo-three, three.js
 
-## Running the Application
-The app runs on port 5000 using `npm run dev`.
+## Running the App
+The workflow runs: `npx expo start --tunnel`
 
-## SIT Patterns Implemented
-- **Subtraction**: Remove essential component to find new benefits
-- **Task Unification**: Assign new task to existing resource
-- **Multiplication**: Copy component but change attribute
-- **Division**: Split product physically or functionally
-- **Attribute Dependency**: Create correlation between variables
+To use on your phone:
+1. Install Expo Go app
+2. Scan the QR code from the console
+3. Wait for the bundle to load
 
-## User Preferences
-- Dark/cyberpunk UI theme with neon accents
-- Monospace fonts for technical elements
-- Minimal, clean interface design
-
-## Recent Changes
-- Converted from Expo React Native to Vite + React web application
-- Integrated Gemini AI via Replit AI Integrations
-- Implemented complete SIT workflow with all 5 patterns
-- Added camera functionality for object scanning
-- Built 3D wireframe viewer with Three.js
+## Environment Variables
+- Uses Replit AI Integrations for Gemini (automatically configured)
+- No manual API key setup required
