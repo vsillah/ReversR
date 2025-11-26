@@ -5,6 +5,10 @@ modules = ["nodejs-22"]
 channel = "stable-24_05"
 
 [[ports]]
+localPort = 3000
+externalPort = 3001
+
+[[ports]]
 localPort = 5000
 externalPort = 80
 
@@ -68,6 +72,10 @@ author = "agent"
 task = "workflow.run"
 args = "Start application"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "API Server"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -78,6 +86,18 @@ outputType = "console"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "yes | npx expo start --tunnel --clear"
+
+[[workflows.workflow]]
+name = "API Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server/index.js"
+waitForPort = 3000
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [agent]
 expertMode = true
