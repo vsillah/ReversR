@@ -103,3 +103,7 @@ waitForPort = 5000
 [agent]
 expertMode = true
 integrations = ["javascript_gemini_ai_integrations:1.0.0"]
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "server/index.js"]
