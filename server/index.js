@@ -3,8 +3,12 @@ const cors = require('cors');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
 
 const app = express();
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json({ limit: '50mb' }));
 
 const getClient = () => {
   return new GoogleGenAI({

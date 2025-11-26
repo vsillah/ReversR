@@ -47,9 +47,16 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading }: Props)
     try {
       const result = await analyzeProduct(input, capturedImage || undefined);
       onComplete(input, result);
-    } catch (e) {
-      setError("Analysis failed. Please try again.");
-      console.error(e);
+    } catch (e: any) {
+      const errorMsg = e?.message || 'Unknown error';
+      if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {
+        setError("Network error. Check your internet connection and try again.");
+      } else if (errorMsg.includes('timeout') || errorMsg.includes('Timeout')) {
+        setError("Request timed out. Try with a simpler description.");
+      } else {
+        setError(`Analysis failed: ${errorMsg}`);
+      }
+      console.error('Analysis error:', e);
     } finally {
       setIsLoading(false);
     }
@@ -75,13 +82,18 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading }: Props)
   const captureImage = async () => {
     if (cameraRef.current) {
       try {
-        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.7 });
+        const photo = await cameraRef.current.takePictureAsync({ 
+          base64: true, 
+          quality: 0.3,
+          skipProcessing: false,
+        });
         if (photo?.base64) {
           setCapturedImage(`data:image/jpeg;base64,${photo.base64}`);
         }
         setIsCameraOpen(false);
       } catch (e) {
         console.error('Failed to capture:', e);
+        Alert.alert('Camera Error', 'Failed to capture image. Please try again.');
       }
     }
   };
