@@ -80,7 +80,7 @@ app.post('/api/analyze', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
@@ -129,7 +129,7 @@ app.post('/api/apply-pattern', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
@@ -174,7 +174,7 @@ app.post('/api/generate-spec', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,
@@ -232,7 +232,7 @@ app.post('/api/generate-3d', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: SIT_SYSTEM_INSTRUCTION,

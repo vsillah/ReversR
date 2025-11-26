@@ -14,11 +14,15 @@ externalPort = 80
 
 [[ports]]
 localPort = 8081
-externalPort = 3000
+externalPort = 3003
 
 [[ports]]
 localPort = 8082
 externalPort = 8081
+
+[[ports]]
+localPort = 38119
+externalPort = 3000
 
 [[ports]]
 localPort = 40631
@@ -85,7 +89,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node server/index.js & sleep 2 && yes | npx expo start --tunnel --clear"
+args = "npm run dev"
 waitForPort = 5000
 
 [agent]
