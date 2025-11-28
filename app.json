@@ -23,7 +23,8 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.vsillah.reversr"
+      "package": "com.vsillah.reversr",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
