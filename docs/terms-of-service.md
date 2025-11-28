@@ -1,4 +1,3 @@
-
 # Terms of Service for ReversR
 
 **Last Updated:** January 26, 2025
@@ -99,7 +98,9 @@ If any provision of these Terms is found to be unenforceable, the remaining prov
 ## Contact Information
 
 For questions about these Terms, please contact us at:
-[Your Contact Email]
+vsillah@gmail.com
+
+**Location:** Boston, Massachusetts, USA
 
 ## Acknowledgment
 

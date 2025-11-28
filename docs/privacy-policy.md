@@ -1,4 +1,3 @@
-
 # Privacy Policy for ReversR
 
 **Last Updated:** January 26, 2025
@@ -66,7 +65,9 @@ We may update this Privacy Policy from time to time. Changes will be posted with
 ## Contact Us
 
 If you have questions about this Privacy Policy, please contact us at:
-[Your Contact Email]
+vsillah@gmail.com
+
+**Location:** Boston, Massachusetts, USA
 
 ---
 
