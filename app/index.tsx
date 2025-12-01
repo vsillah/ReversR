@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
-import PhaseOne from '../components/PhaseOne';
-import PhaseTwo from '../components/PhaseTwo';
-import PhaseThree from '../components/PhaseThree';
+  SafeAreaView,
+  Image,
+} from "react-native";
+import { Colors, Spacing, FontSizes } from "../constants/theme";
+import WelcomeScreen from "../components/WelcomeScreen";
+import PhaseOne from "../components/PhaseOne";
+import PhaseTwo from "../components/PhaseTwo";
+import PhaseThree from "../components/PhaseThree";
 import {
   AnalysisResult,
   InnovationResult,
   TechnicalSpec,
   ThreeDSceneDescriptor,
   SITPattern,
-} from '../hooks/useGemini';
+} from "../hooks/useGemini";
 
 interface MutationContext {
   phase: number;
@@ -31,9 +32,10 @@ interface MutationContext {
 }
 
 export default function HomeScreen() {
+  const [started, setStarted] = useState(false);
   const [context, setContext] = useState<MutationContext>({
     phase: 1,
-    input: '',
+    input: "",
     analysis: null,
     selectedPattern: null,
     innovation: null,
@@ -44,7 +46,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePhaseOneComplete = (input: string, analysis: AnalysisResult) => {
-    setContext(prev => ({
+    setContext((prev) => ({
       ...prev,
       input,
       analysis,
@@ -53,7 +55,7 @@ export default function HomeScreen() {
   };
 
   const handlePhaseTwoComplete = (innovation: InnovationResult) => {
-    setContext(prev => ({
+    setContext((prev) => ({
       ...prev,
       innovation,
       selectedPattern: innovation.patternUsed,
@@ -64,9 +66,9 @@ export default function HomeScreen() {
   const handlePhaseThreeComplete = (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
-    imageUrl: string | null
+    imageUrl: string | null,
   ) => {
-    setContext(prev => ({
+    setContext((prev) => ({
       ...prev,
       spec,
       threeDScene: scene,
@@ -77,7 +79,7 @@ export default function HomeScreen() {
   const handleReset = () => {
     setContext({
       phase: 1,
-      input: '',
+      input: "",
       analysis: null,
       selectedPattern: null,
       innovation: null,
@@ -87,13 +89,19 @@ export default function HomeScreen() {
     });
   };
 
+  if (!started) {
+    return <WelcomeScreen onStart={() => setStarted(true)} />;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <View style={styles.iconBox}>
-            <Ionicons name="swap-horizontal" size={24} color={Colors.accent} />
-          </View>
+          <Image
+            source={require("../assets/logo-transparent.png")}
+            style={styles.headerLogo}
+            resizeMode="contain"
+          />
           <View>
             <Text style={styles.title}>
               REVERS<Text style={styles.titleAccent}>R</Text>
@@ -104,7 +112,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.progressBar}>
-        {[1, 2, 3].map(step => (
+        {[1, 2, 3].map((step) => (
           <View key={step} style={styles.stepContainer}>
             <View
               style={[
@@ -128,7 +136,7 @@ export default function HomeScreen() {
                 context.phase >= step && styles.stepLabelActive,
               ]}
             >
-              {step === 1 ? 'SCAN' : step === 2 ? 'MUTATE' : 'ARCHITECT'}
+              {step === 1 ? "SCAN" : step === 2 ? "MUTATE" : "ARCHITECT"}
             </Text>
           </View>
         ))}
@@ -183,19 +191,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.panel,
   },
   logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.md,
   },
-  iconBox: {
-    backgroundColor: 'rgba(0, 255, 157, 0.2)',
-    padding: Spacing.sm,
-    borderRadius: 8,
+  headerLogo: {
+    width: 56,
+    height: 56,
   },
   title: {
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
     fontSize: FontSizes.xl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.white,
     letterSpacing: 2,
   },
@@ -208,14 +215,14 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
   },
   progressBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.lg,
-    position: 'relative',
+    position: "relative",
   },
   stepContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 1,
   },
   stepCircle: {
@@ -225,8 +232,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.black,
     borderWidth: 2,
     borderColor: Colors.gray[800],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   stepCircleActive: {
     backgroundColor: Colors.accent,
@@ -237,9 +244,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.green[500],
   },
   stepNumber: {
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
     fontSize: FontSizes.sm,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.gray[600],
   },
   stepNumberActive: {
@@ -248,7 +255,7 @@ const styles = StyleSheet.create({
   stepLabel: {
     marginTop: Spacing.xs,
     fontSize: FontSizes.xs,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.gray[700],
     letterSpacing: 1,
   },
@@ -256,7 +263,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   progressLine: {
-    position: 'absolute',
+    position: "absolute",
     top: 44,
     left: 60,
     right: 60,
@@ -265,7 +272,7 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   progressLineFill: {
-    position: 'absolute',
+    position: "absolute",
     top: 44,
     left: 60,
     height: 2,
