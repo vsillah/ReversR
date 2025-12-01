@@ -5,10 +5,10 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
-  TouchableOpacity,
+  Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
+import WelcomeScreen from '../components/WelcomeScreen';
 import PhaseOne from '../components/PhaseOne';
 import PhaseTwo from '../components/PhaseTwo';
 import PhaseThree from '../components/PhaseThree';
@@ -32,6 +32,7 @@ interface MutationContext {
 }
 
 export default function HomeScreen() {
+  const [started, setStarted] = useState(false);
   const [context, setContext] = useState<MutationContext>({
     phase: 1,
     input: '',
@@ -88,13 +89,19 @@ export default function HomeScreen() {
     });
   };
 
+  if (!started) {
+    return <WelcomeScreen onStart={() => setStarted(true)} />;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <View style={styles.iconBox}>
-            <Ionicons name="hardware-chip-outline" size={24} color={Colors.accent} />
-          </View>
+          <Image
+            source={require('../assets/logo-transparent.png')}
+            style={styles.headerLogo}
+            resizeMode="contain"
+          />
           <View>
             <Text style={styles.title}>
               REVERS<Text style={styles.titleAccent}>R</Text>
@@ -188,10 +195,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.md,
   },
-  iconBox: {
-    backgroundColor: 'rgba(0, 255, 157, 0.2)',
-    padding: Spacing.sm,
-    borderRadius: 8,
+  headerLogo: {
+    width: 56,
+    height: 56,
   },
   title: {
     fontFamily: 'monospace',
