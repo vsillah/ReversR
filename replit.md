@@ -40,9 +40,14 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 
 3. **5 SIT Patterns**: Subtraction, Task Unification, Multiplication, Division, Attribute Dependency
 
-4. **Export**: Share specs as JSON, 3D scenes as OBJ/STL
+4. **Innovation History**: Auto-saves progress after each phase, allows resume and review
+   - Stored locally on device using AsyncStorage
+   - View past innovations from History screen
+   - Resume any saved innovation at any phase
 
-5. **Bill of Materials**: Generate BOM for innovation concepts (Phase 4)
+5. **Export**: Share specs as JSON, 3D scenes as OBJ/STL
+
+6. **Bill of Materials**: Generate BOM for innovation concepts (Phase 4)
 
 ## API Endpoints (Production Server)
 Base URL: `https://reversr-vsillah.replit.app`
