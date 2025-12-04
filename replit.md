@@ -60,6 +60,17 @@ Base URL: `https://reversr-vsillah.replit.app`
 | `/api/gemini/generate-2d` | POST | Generate 2D visualization |
 | `/api/gemini/generate-3d` | POST | Generate 3D scene descriptor |
 | `/api/gemini/generate-bom` | POST | Generate Bill of Materials |
+| `/health` | GET | Server health + API key status |
+
+## Rate Limiting & Resilience
+The server includes built-in protection against API rate limits:
+
+1. **API Key Pool**: Support for multiple Gemini API keys via `GEMINI_API_KEYS` env var (comma-separated)
+2. **Key Rotation**: Automatically rotates to next available key when one is rate-limited
+3. **Exponential Backoff**: Retries with increasing delays (1s, 2s, 4s...) + jitter
+4. **Response Caching**: LRU cache (5 min TTL) for identical text requests
+5. **Graceful Fallback**: Image generation provides fallback message if unavailable
+6. **Structured Errors**: Returns `{ error, code, retryAfter, canRetry }` for client handling
 
 ## Technology Stack
 - **Framework**: Expo SDK 54 + React Native
