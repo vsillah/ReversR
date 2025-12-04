@@ -51,37 +51,21 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     );
   };
 
-  const getPhaseLabel = (phase: number): string => {
-    switch (phase) {
-      case 1: return 'Scanning';
-      case 2: return 'Mutating';
-      case 3: return 'Architecting';
-      default: return 'Complete';
-    }
-  };
-
-  const getPhaseColor = (phase: number): string => {
-    switch (phase) {
-      case 1: return Colors.blue[500];
-      case 2: return Colors.secondary;
-      case 3: return Colors.green[500];
-      default: return Colors.accent;
-    }
-  };
+  const PHASE_LABELS = ['Scan', 'Mutate', 'Architect', 'Build'];
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  };
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+  const getArtifacts = (item: SavedInnovation): string[] => {
+    const artifacts: string[] = [];
+    if (item.spec) artifacts.push('Specs');
+    if (item.bom) artifacts.push('BOM');
+    if (item.imageUrl) artifacts.push('2D');
+    if (item.threeDScene) artifacts.push('3D');
+    return artifacts;
   };
 
   const getInnovationTitle = (item: SavedInnovation): string => {
@@ -127,73 +111,102 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
           </View>
         ) : (
           innovations.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.card}
-              onPress={() => onResume(item)}
-              activeOpacity={0.7}
-            >
+            <View key={item.id} style={styles.card}>
+              {/* Header: Title + Pattern Badge + Delete */}
               <View style={styles.cardHeader}>
                 <View style={styles.cardTitleRow}>
                   <Text style={styles.cardTitle} numberOfLines={1}>
                     {getInnovationTitle(item)}
                   </Text>
-                  <TouchableOpacity
-                    onPress={() => handleDelete(item.id, getInnovationTitle(item))}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Ionicons name="trash-outline" size={18} color={Colors.gray[600]} />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.cardMeta}>
-                  <View
-                    style={[
-                      styles.phaseBadge,
-                      { backgroundColor: `${getPhaseColor(item.phase)}20` },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.phaseDot,
-                        { backgroundColor: getPhaseColor(item.phase) },
-                      ]}
-                    />
-                    <Text
-                      style={[
-                        styles.phaseText,
-                        { color: getPhaseColor(item.phase) },
-                      ]}
-                    >
-                      Phase {item.phase}: {getPhaseLabel(item.phase)}
-                    </Text>
-                  </View>
-                  <Text style={styles.timestamp}>{formatDate(item.updatedAt)}</Text>
-                </View>
-              </View>
-
-              {item.innovation && (
-                <View style={styles.cardBody}>
-                  <Text style={styles.conceptDesc} numberOfLines={2}>
-                    {item.innovation.conceptDescription}
-                  </Text>
                   {item.selectedPattern && (
-                    <View style={styles.patternTag}>
-                      <Ionicons name="git-branch-outline" size={12} color={Colors.secondary} />
-                      <Text style={styles.patternTagText}>
+                    <View style={styles.patternBadge}>
+                      <Text style={styles.patternBadgeText}>
                         {SIT_PATTERN_LABELS[item.selectedPattern]}
                       </Text>
                     </View>
                   )}
+                  <TouchableOpacity
+                    onPress={() => handleDelete(item.id, getInnovationTitle(item))}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={styles.deleteButton}
+                  >
+                    <Ionicons name="trash-outline" size={18} color={Colors.gray[600]} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.dateRow}>
+                  <Ionicons name="calendar-outline" size={12} color={Colors.gray[500]} />
+                  <Text style={styles.dateText}>{formatDate(item.updatedAt)}</Text>
+                </View>
+              </View>
+
+              {/* Description */}
+              {item.innovation && (
+                <View style={styles.cardBody}>
+                  <Text style={styles.conceptDesc} numberOfLines={3}>
+                    {item.innovation.conceptDescription}
+                  </Text>
                 </View>
               )}
 
-              <View style={styles.cardFooter}>
-                <View style={styles.resumeHint}>
-                  <Text style={styles.resumeText}>Tap to resume</Text>
-                  <Ionicons name="chevron-forward" size={16} color={Colors.accent} />
+              {/* Phase Progress Indicator */}
+              <View style={styles.progressSection}>
+                <View style={styles.progressRow}>
+                  {PHASE_LABELS.map((label, index) => {
+                    const phaseNum = index + 1;
+                    const isComplete = item.phase > phaseNum;
+                    const isCurrent = item.phase === phaseNum;
+                    return (
+                      <React.Fragment key={label}>
+                        <View style={styles.progressItem}>
+                          <View style={[
+                            styles.progressCircle,
+                            isComplete && styles.progressCircleComplete,
+                            isCurrent && styles.progressCircleCurrent,
+                          ]}>
+                            {isComplete ? (
+                              <Ionicons name="checkmark" size={12} color={Colors.accent} />
+                            ) : isCurrent ? (
+                              <Ionicons name="play" size={10} color={Colors.white} />
+                            ) : (
+                              <View style={styles.progressDot} />
+                            )}
+                          </View>
+                          <Text style={[
+                            styles.progressLabel,
+                            (isComplete || isCurrent) && styles.progressLabelActive,
+                          ]}>{label}</Text>
+                        </View>
+                        {index < PHASE_LABELS.length - 1 && (
+                          <View style={[
+                            styles.progressConnector,
+                            isComplete && styles.progressConnectorComplete,
+                          ]} />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </View>
               </View>
-            </TouchableOpacity>
+
+              {/* Footer: Artifacts + Continue Button */}
+              <View style={styles.cardFooter}>
+                <View style={styles.artifactsRow}>
+                  {getArtifacts(item).map((artifact) => (
+                    <View key={artifact} style={styles.artifactTag}>
+                      <Ionicons name="document-text-outline" size={10} color={Colors.gray[500]} />
+                      <Text style={styles.artifactText}>{artifact}</Text>
+                    </View>
+                  ))}
+                </View>
+                <TouchableOpacity 
+                  style={styles.continueButton}
+                  onPress={() => onResume(item)}
+                >
+                  <Text style={styles.continueText}>Continue</Text>
+                  <Ionicons name="arrow-forward" size={14} color={Colors.accent} />
+                </TouchableOpacity>
+              </View>
+            </View>
           ))
         )}
       </ScrollView>
@@ -277,79 +290,144 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     padding: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   cardTitleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: Spacing.sm,
     marginBottom: Spacing.sm,
   },
   cardTitle: {
+    fontFamily: 'monospace',
     fontSize: FontSizes.md,
     fontWeight: 'bold',
-    color: Colors.white,
-    flex: 1,
-    marginRight: Spacing.md,
+    color: Colors.accent,
+    flexShrink: 1,
   },
-  cardMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  phaseBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  patternBadge: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    borderWidth: 1,
+    borderColor: Colors.accent,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 4,
-    gap: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
   },
-  phaseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  phaseText: {
+  patternBadgeText: {
     fontSize: FontSizes.xs,
+    color: Colors.accent,
     fontWeight: '600',
   },
-  timestamp: {
+  deleteButton: {
+    marginLeft: 'auto',
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dateText: {
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
   },
   cardBody: {
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
   },
   conceptDesc: {
     fontSize: FontSizes.sm,
     color: Colors.gray[300],
     lineHeight: 20,
   },
-  patternTag: {
+  progressSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: Spacing.sm,
   },
-  patternTagText: {
-    fontSize: FontSizes.xs,
-    color: Colors.secondary,
-    fontFamily: 'monospace',
+  progressItem: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  progressCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressCircleComplete: {
+    borderColor: Colors.accent,
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+  },
+  progressCircleCurrent: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent,
+  },
+  progressDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.gray[600],
+  },
+  progressLabel: {
+    fontSize: 9,
+    color: Colors.gray[600],
+    textTransform: 'uppercase',
+  },
+  progressLabelActive: {
+    color: Colors.accent,
+  },
+  progressConnector: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.gray[700],
+    marginHorizontal: 4,
+    marginBottom: 16,
+  },
+  progressConnectorComplete: {
+    backgroundColor: Colors.accent,
   },
   cardFooter: {
-    padding: Spacing.md,
-    paddingTop: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
-  resumeHint: {
+  artifactsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  artifactTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
     gap: 4,
   },
-  resumeText: {
+  artifactText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  continueButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 6,
+  },
+  continueText: {
     fontSize: FontSizes.xs,
     color: Colors.accent,
+    fontWeight: '600',
   },
 });
