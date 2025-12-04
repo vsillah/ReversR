@@ -95,22 +95,86 @@ export interface ThreeDSceneDescriptor {
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function fetchWithRetry<T>(url: string, options: RequestInit, retries = 3): Promise<T> {
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || `HTTP ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    if (retries > 0) {
-      console.warn(`Request failed, retrying... (${retries} left)`);
-      await wait(2000);
-      return fetchWithRetry(url, options, retries - 1);
-    }
-    throw error;
+interface APIErrorResponse {
+  error: string;
+  code?: string;
+  retryAfter?: number;
+  canRetry?: boolean;
+  fallback?: {
+    message: string;
+    suggestion: string;
+  };
+}
+
+class APIError extends Error {
+  code: string;
+  retryAfter: number;
+  canRetry: boolean;
+  fallback?: { message: string; suggestion: string };
+
+  constructor(response: APIErrorResponse) {
+    super(response.error);
+    this.code = response.code || 'UNKNOWN_ERROR';
+    this.retryAfter = response.retryAfter || 0;
+    this.canRetry = response.canRetry ?? true;
+    this.fallback = response.fallback;
   }
+}
+
+async function fetchWithRetry<T>(url: string, options: RequestInit, retries = 2): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      if (!response.ok) {
+        let errorData: APIErrorResponse;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { error: `Request failed (${response.status})`, canRetry: true };
+        }
+        
+        // If it's a rate limit error and server says we can retry
+        if (response.status === 429 || errorData.code === 'RATE_LIMITED') {
+          if (attempt < retries && errorData.canRetry) {
+            const waitTime = (errorData.retryAfter || 5) * 1000;
+            console.warn(`Rate limited, waiting ${waitTime}ms before retry...`);
+            await wait(waitTime);
+            continue;
+          }
+          throw new APIError({
+            error: 'System is busy. Please wait a moment and try again.',
+            code: 'RATE_LIMITED',
+            retryAfter: errorData.retryAfter || 30,
+            canRetry: true,
+          });
+        }
+        
+        throw new APIError(errorData);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Don't retry for non-retryable errors
+      if (error instanceof APIError && !error.canRetry) {
+        throw error;
+      }
+      
+      // Network errors - retry with backoff
+      if (attempt < retries && !(error instanceof APIError)) {
+        const backoff = Math.min(2000 * Math.pow(2, attempt), 10000);
+        console.warn(`Request failed, retrying in ${backoff}ms... (${retries - attempt} left)`);
+        await wait(backoff);
+        continue;
+      }
+    }
+  }
+  
+  throw lastError || new Error('Request failed after retries');
 }
 
 export const analyzeProduct = async (input: string, imageBase64?: string): Promise<AnalysisResult> => {

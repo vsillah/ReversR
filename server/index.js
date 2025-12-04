@@ -10,9 +10,66 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 
-const getClient = () => {
+// ============================================
+// API KEY POOL & RATE LIMIT HANDLING
+// ============================================
+
+// Parse API keys from environment (comma-separated for multiple keys)
+const parseApiKeys = () => {
+  const primaryKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  const additionalKeys = process.env.GEMINI_API_KEYS || '';
+  
+  const keys = [primaryKey];
+  if (additionalKeys) {
+    keys.push(...additionalKeys.split(',').map(k => k.trim()).filter(Boolean));
+  }
+  
+  return keys.map(apiKey => ({
+    apiKey,
+    cooldownUntil: 0,
+    consecutiveFailures: 0,
+  }));
+};
+
+let apiKeyPool = parseApiKeys();
+let currentKeyIndex = 0;
+
+// Get the next available API key (skip keys in cooldown)
+const getAvailableKey = () => {
+  const now = Date.now();
+  const startIndex = currentKeyIndex;
+  
+  for (let i = 0; i < apiKeyPool.length; i++) {
+    const idx = (startIndex + i) % apiKeyPool.length;
+    const keyInfo = apiKeyPool[idx];
+    
+    if (keyInfo.cooldownUntil <= now) {
+      currentKeyIndex = (idx + 1) % apiKeyPool.length;
+      return keyInfo;
+    }
+  }
+  
+  // All keys in cooldown - return the one with shortest remaining cooldown
+  const sortedByAvailability = [...apiKeyPool].sort((a, b) => a.cooldownUntil - b.cooldownUntil);
+  return sortedByAvailability[0];
+};
+
+// Mark a key as rate limited (put in cooldown)
+const markKeyRateLimited = (keyInfo, retryAfterSeconds = 60) => {
+  keyInfo.cooldownUntil = Date.now() + (retryAfterSeconds * 1000);
+  keyInfo.consecutiveFailures++;
+  console.log(`API key rate limited, cooling down for ${retryAfterSeconds}s. Total keys: ${apiKeyPool.length}, Keys available: ${apiKeyPool.filter(k => k.cooldownUntil <= Date.now()).length}`);
+};
+
+// Mark a key as successful
+const markKeySuccess = (keyInfo) => {
+  keyInfo.consecutiveFailures = 0;
+};
+
+// Create client with specific key
+const createClient = (keyInfo) => {
   return new GoogleGenAI({
-    apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
+    apiKey: keyInfo.apiKey,
     httpOptions: {
       apiVersion: "",
       baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
@@ -20,12 +77,198 @@ const getClient = () => {
   });
 };
 
+// ============================================
+// EXPONENTIAL BACKOFF WITH JITTER
+// ============================================
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const getBackoffDelay = (attempt, baseDelay = 1000, maxDelay = 30000) => {
+  const exponentialDelay = baseDelay * Math.pow(2, attempt);
+  const jitter = Math.random() * 1000;
+  return Math.min(exponentialDelay + jitter, maxDelay);
+};
+
+// ============================================
+// SIMPLE LRU CACHE
+// ============================================
+
+class LRUCache {
+  constructor(maxSize = 50, ttlMs = 300000) { // 5 min default TTL
+    this.cache = new Map();
+    this.maxSize = maxSize;
+    this.ttlMs = ttlMs;
+  }
+
+  _hash(obj) {
+    return JSON.stringify(obj);
+  }
+
+  get(key) {
+    const hash = this._hash(key);
+    const entry = this.cache.get(hash);
+    if (!entry) return null;
+    
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(hash);
+      return null;
+    }
+    
+    // Move to end (most recently used)
+    this.cache.delete(hash);
+    this.cache.set(hash, entry);
+    return entry.value;
+  }
+
+  set(key, value) {
+    const hash = this._hash(key);
+    
+    // Remove oldest if at capacity
+    if (this.cache.size >= this.maxSize) {
+      const oldestKey = this.cache.keys().next().value;
+      this.cache.delete(oldestKey);
+    }
+    
+    this.cache.set(hash, {
+      value,
+      expiresAt: Date.now() + this.ttlMs,
+    });
+  }
+
+  clear() {
+    this.cache.clear();
+  }
+}
+
+const responseCache = new LRUCache(50, 300000); // 50 items, 5 min TTL
+
+// ============================================
+// RESILIENT GEMINI API WRAPPER
+// ============================================
+
+const callGeminiWithRetry = async (generateFn, cacheKey = null, maxRetries = 3) => {
+  // Check cache first
+  if (cacheKey) {
+    const cached = responseCache.get(cacheKey);
+    if (cached) {
+      console.log('Cache hit for request');
+      return cached;
+    }
+  }
+
+  let lastError = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const keyInfo = getAvailableKey();
+    const ai = createClient(keyInfo);
+    
+    // If key is still in cooldown, wait
+    const now = Date.now();
+    if (keyInfo.cooldownUntil > now) {
+      const waitTime = keyInfo.cooldownUntil - now;
+      console.log(`All keys in cooldown, waiting ${waitTime}ms...`);
+      await sleep(waitTime);
+    }
+
+    try {
+      const result = await generateFn(ai);
+      markKeySuccess(keyInfo);
+      
+      // Cache successful result
+      if (cacheKey && result) {
+        responseCache.set(cacheKey, result);
+      }
+      
+      return result;
+    } catch (error) {
+      lastError = error;
+      const errorMessage = error.message || '';
+      const statusCode = error.status || error.code || 0;
+      
+      // Check if rate limited (429) or quota exceeded
+      const isRateLimited = 
+        statusCode === 429 || 
+        errorMessage.includes('429') || 
+        errorMessage.includes('quota') || 
+        errorMessage.includes('RESOURCE_EXHAUSTED') ||
+        errorMessage.includes('rate limit');
+      
+      if (isRateLimited) {
+        // Parse retry-after header if available
+        const retryAfter = parseInt(error.headers?.['retry-after'] || '60', 10);
+        markKeyRateLimited(keyInfo, retryAfter);
+        
+        if (attempt < maxRetries - 1) {
+          const backoffDelay = getBackoffDelay(attempt);
+          console.log(`Rate limited, attempt ${attempt + 1}/${maxRetries}, backing off ${backoffDelay}ms`);
+          await sleep(backoffDelay);
+          continue;
+        }
+      }
+      
+      // For other errors, use shorter backoff
+      if (attempt < maxRetries - 1) {
+        const backoffDelay = getBackoffDelay(attempt, 500, 5000);
+        console.log(`Error on attempt ${attempt + 1}/${maxRetries}: ${errorMessage}, retrying in ${backoffDelay}ms`);
+        await sleep(backoffDelay);
+      }
+    }
+  }
+  
+  throw lastError;
+};
+
+// ============================================
+// ERROR RESPONSE HELPERS
+// ============================================
+
+const createErrorResponse = (error, fallbackMessage = 'An error occurred') => {
+  const errorMessage = error.message || '';
+  
+  const isRateLimited = 
+    errorMessage.includes('429') || 
+    errorMessage.includes('quota') || 
+    errorMessage.includes('RESOURCE_EXHAUSTED') ||
+    errorMessage.includes('rate limit');
+  
+  if (isRateLimited) {
+    return {
+      statusCode: 429,
+      body: {
+        error: 'System is experiencing high demand. Please try again in a moment.',
+        code: 'RATE_LIMITED',
+        retryAfter: 30,
+        canRetry: true,
+      }
+    };
+  }
+  
+  return {
+    statusCode: 500,
+    body: {
+      error: fallbackMessage,
+      code: 'SERVER_ERROR',
+      details: errorMessage,
+      canRetry: true,
+    }
+  };
+};
+
+// ============================================
+// SYSTEM INSTRUCTION
+// ============================================
+
 const SIT_SYSTEM_INSTRUCTION = `You are an expert in Systematic Inventive Thinking (SIT), a structured methodology for innovation. You strictly adhere to the "Closed World" principle: all solutions must derive from components already within or immediately adjacent to the product's defined system boundary. You are precise, analytical, and creative within constraints.`;
 
-app.post('/api/analyze', async (req, res) => {
+// ============================================
+// API ROUTES - WITH /api/gemini PREFIX FOR MOBILE APP
+// ============================================
+
+// Analyze product
+app.post('/api/gemini/analyze', async (req, res) => {
   try {
-    const { input, imageBase64 } = req.body;
-    const ai = getClient();
+    const { input, image } = req.body;
+    const imageBase64 = image;
     
     const textPrompt = `
       PHASE 1: THE CLOSED WORLD SCAN
@@ -41,75 +284,82 @@ app.post('/api/analyze', async (req, res) => {
       Return the result in valid JSON.
     `;
     
-    let contents;
-    if (imageBase64) {
-      const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
-      contents = [
-        { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
-        { text: textPrompt }
-      ];
-    } else {
-      contents = textPrompt;
-    }
-
-    const schema = {
-      type: Type.OBJECT,
-      properties: {
-        productName: { type: Type.STRING },
-        components: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              description: { type: Type.STRING },
-              isEssential: { type: Type.BOOLEAN }
-            },
-            required: ["name", "description", "isEssential"]
-          }
-        },
-        neighborhoodResources: { type: Type.ARRAY, items: { type: Type.STRING } },
-        attributes: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              value: { type: Type.STRING },
-              type: { type: Type.STRING, enum: ["Quantitative", "Qualitative"] }
-            },
-            required: ["name", "value", "type"]
-          }
-        },
-        closedWorldBoundary: { type: Type.STRING },
-        rawAnalysis: { type: Type.STRING }
-      },
-      required: ["productName", "components", "neighborhoodResources", "attributes", "closedWorldBoundary", "rawAnalysis"]
-    };
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents,
-      config: {
-        systemInstruction: SIT_SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: schema
+    const cacheKey = { type: 'analyze', input, hasImage: !!imageBase64 };
+    
+    const result = await callGeminiWithRetry(async (ai) => {
+      let contents;
+      if (imageBase64) {
+        const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+        contents = [
+          { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
+          { text: textPrompt }
+        ];
+      } else {
+        contents = textPrompt;
       }
-    });
 
-    const text = response.text;
-    if (!text) throw new Error("No response from Gemini");
-    res.json(JSON.parse(text));
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          productName: { type: Type.STRING },
+          components: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                description: { type: Type.STRING },
+                isEssential: { type: Type.BOOLEAN }
+              },
+              required: ["name", "description", "isEssential"]
+            }
+          },
+          neighborhoodResources: { type: Type.ARRAY, items: { type: Type.STRING } },
+          attributes: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                value: { type: Type.STRING },
+                type: { type: Type.STRING, enum: ["Quantitative", "Qualitative"] }
+              },
+              required: ["name", "value", "type"]
+            }
+          },
+          closedWorldBoundary: { type: Type.STRING },
+          rawAnalysis: { type: Type.STRING }
+        },
+        required: ["productName", "components", "neighborhoodResources", "attributes", "closedWorldBoundary", "rawAnalysis"]
+      };
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents,
+        config: {
+          systemInstruction: SIT_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error("No response from Gemini");
+      return JSON.parse(text);
+    }, imageBase64 ? null : cacheKey); // Don't cache image requests (too variable)
+
+    res.json(result);
   } catch (error) {
     console.error('Analyze error:', error);
-    res.status(500).json({ error: error.message });
+    const { statusCode, body } = createErrorResponse(error, 'Failed to analyze product');
+    res.status(statusCode).json(body);
   }
 });
 
-app.post('/api/apply-pattern', async (req, res) => {
+// Apply SIT pattern
+app.post('/api/gemini/apply-pattern', async (req, res) => {
   try {
     const { analysis, pattern } = req.body;
-    const ai = getClient();
     
     const prompt = `
       PHASE 2: PATTERN APPLICATION (${pattern})
@@ -120,44 +370,55 @@ app.post('/api/apply-pattern', async (req, res) => {
       Neighborhood Resources: ${JSON.stringify(analysis.neighborhoodResources)}
       Closed World: ${analysis.closedWorldBoundary}
       
-      Generate ONE innovative concept. Return JSON with: patternUsed, conceptName, conceptDescription, constraint, marketBenefit.
+      Generate ONE innovative concept. Include marketGap (unmet need), noveltyScore (1-10), and viabilityScore (1-10).
+      Return JSON with: patternUsed, conceptName, conceptDescription, marketGap, constraint, noveltyScore, viabilityScore, marketBenefit.
     `;
 
-    const schema = {
-      type: Type.OBJECT,
-      properties: {
-        patternUsed: { type: Type.STRING },
-        conceptName: { type: Type.STRING },
-        conceptDescription: { type: Type.STRING },
-        constraint: { type: Type.STRING },
-        marketBenefit: { type: Type.STRING }
-      },
-      required: ["patternUsed", "conceptName", "conceptDescription", "constraint", "marketBenefit"]
-    };
+    const cacheKey = { type: 'apply-pattern', productName: analysis.productName, pattern };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: SIT_SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: schema
-      }
-    });
+    const result = await callGeminiWithRetry(async (ai) => {
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          patternUsed: { type: Type.STRING },
+          conceptName: { type: Type.STRING },
+          conceptDescription: { type: Type.STRING },
+          marketGap: { type: Type.STRING },
+          constraint: { type: Type.STRING },
+          noveltyScore: { type: Type.NUMBER },
+          viabilityScore: { type: Type.NUMBER },
+          marketBenefit: { type: Type.STRING }
+        },
+        required: ["patternUsed", "conceptName", "conceptDescription", "marketGap", "constraint", "noveltyScore", "viabilityScore", "marketBenefit"]
+      };
 
-    const text = response.text;
-    if (!text) throw new Error("No response from Gemini");
-    res.json(JSON.parse(text));
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction: SIT_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error("No response from Gemini");
+      return JSON.parse(text);
+    }, cacheKey);
+
+    res.json(result);
   } catch (error) {
     console.error('Apply pattern error:', error);
-    res.status(500).json({ error: error.message });
+    const { statusCode, body } = createErrorResponse(error, 'Failed to apply pattern');
+    res.status(statusCode).json(body);
   }
 });
 
-app.post('/api/generate-spec', async (req, res) => {
+// Generate technical spec
+app.post('/api/gemini/technical-spec', async (req, res) => {
   try {
     const { innovation } = req.body;
-    const ai = getClient();
     
     const prompt = `
       PHASE 3: THE ARCHITECT - Generate technical specifications.
@@ -169,39 +430,46 @@ app.post('/api/generate-spec', async (req, res) => {
       Create: promptLogic (reasoning chain), componentStructure (how parts interact), implementationNotes (key considerations).
     `;
 
-    const schema = {
-      type: Type.OBJECT,
-      properties: {
-        promptLogic: { type: Type.STRING },
-        componentStructure: { type: Type.STRING },
-        implementationNotes: { type: Type.STRING }
-      },
-      required: ["promptLogic", "componentStructure", "implementationNotes"]
-    };
+    const cacheKey = { type: 'technical-spec', conceptName: innovation.conceptName };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: SIT_SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: schema
-      }
-    });
+    const result = await callGeminiWithRetry(async (ai) => {
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          promptLogic: { type: Type.STRING },
+          componentStructure: { type: Type.STRING },
+          implementationNotes: { type: Type.STRING }
+        },
+        required: ["promptLogic", "componentStructure", "implementationNotes"]
+      };
 
-    const text = response.text;
-    if (!text) throw new Error("No response from Gemini");
-    res.json(JSON.parse(text));
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction: SIT_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error("No response from Gemini");
+      return JSON.parse(text);
+    }, cacheKey);
+
+    res.json(result);
   } catch (error) {
     console.error('Generate spec error:', error);
-    res.status(500).json({ error: error.message });
+    const { statusCode, body } = createErrorResponse(error, 'Failed to generate specifications');
+    res.status(statusCode).json(body);
   }
 });
 
-app.post('/api/generate-3d', async (req, res) => {
+// Generate 3D scene
+app.post('/api/gemini/generate-3d', async (req, res) => {
   try {
     const { innovation } = req.body;
-    const ai = getClient();
     
     const prompt = `
       Generate a 3D schematic for: ${innovation.conceptName}
@@ -212,53 +480,60 @@ app.post('/api/generate-3d', async (req, res) => {
       Keep it minimal and abstract.
     `;
 
-    const schema = {
-      type: Type.OBJECT,
-      properties: {
-        objects: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              id: { type: Type.STRING },
-              type: { type: Type.STRING, enum: ['box', 'sphere', 'cylinder', 'plane'] },
-              position: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-              rotation: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-              scale: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-              color: { type: Type.STRING },
-              material: { type: Type.STRING, enum: ['standard', 'wireframe'] },
-              name: { type: Type.STRING }
-            },
-            required: ["id", "type", "position", "rotation", "scale", "color", "material"]
+    const cacheKey = { type: 'generate-3d', conceptName: innovation.conceptName };
+
+    const result = await callGeminiWithRetry(async (ai) => {
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          objects: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                type: { type: Type.STRING, enum: ['box', 'sphere', 'cylinder', 'plane'] },
+                position: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                rotation: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                scale: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                color: { type: Type.STRING },
+                material: { type: Type.STRING, enum: ['standard', 'wireframe'] },
+                name: { type: Type.STRING }
+              },
+              required: ["id", "type", "position", "rotation", "scale", "color", "material"]
+            }
           }
+        },
+        required: ["objects"]
+      };
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction: SIT_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: schema
         }
-      },
-      required: ["objects"]
-    };
+      });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: SIT_SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: schema
-      }
-    });
+      const text = response.text;
+      if (!text) throw new Error("No 3D scene response from Gemini");
+      return JSON.parse(text);
+    }, cacheKey);
 
-    const text = response.text;
-    if (!text) throw new Error("No 3D scene response from Gemini");
-    res.json(JSON.parse(text));
+    res.json(result);
   } catch (error) {
     console.error('Generate 3D error:', error);
-    res.status(500).json({ error: error.message });
+    const { statusCode, body } = createErrorResponse(error, 'Failed to generate 3D scene');
+    res.status(statusCode).json(body);
   }
 });
 
-app.post('/api/generate-2d', async (req, res) => {
+// Generate 2D image - WITH FALLBACK
+app.post('/api/gemini/generate-2d', async (req, res) => {
   try {
     const { innovation } = req.body;
-    const ai = getClient();
     
     const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
     
@@ -272,33 +547,168 @@ Generate a clean, professional product concept sketch with:
 - Technical/blueprint aesthetic with a modern feel
 - Annotations explaining how the innovation works`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      config: {
-        responseModalities: [Modality.TEXT, Modality.IMAGE],
-      },
-    });
+    // Note: Don't cache images as they can be large and vary
+    const result = await callGeminiWithRetry(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseModalities: [Modality.TEXT, Modality.IMAGE],
+        },
+      });
 
-    const candidate = response.candidates?.[0];
-    const imagePart = candidate?.content?.parts?.find((part) => part.inlineData);
-    
-    if (!imagePart?.inlineData?.data) {
-      throw new Error("No image generated");
-    }
+      const candidate = response.candidates?.[0];
+      const imagePart = candidate?.content?.parts?.find((part) => part.inlineData);
+      
+      if (!imagePart?.inlineData?.data) {
+        throw new Error("No image generated");
+      }
 
-    res.json({ imageBase64: imagePart.inlineData.data });
+      return { imageData: imagePart.inlineData.data };
+    }, null, 4); // More retries for image generation
+
+    res.json(result);
   } catch (error) {
     console.error('Generate 2D error:', error);
-    res.status(500).json({ error: error.message });
+    
+    // For image generation, provide a fallback option
+    const { statusCode, body } = createErrorResponse(error, 'Image generation temporarily unavailable');
+    body.fallback = {
+      message: 'Unable to generate image at this time. Your specifications and 3D scene are still available.',
+      suggestion: 'Try again in a few moments or proceed with text specifications.',
+    };
+    res.status(statusCode).json(body);
   }
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Generate Bill of Materials
+app.post('/api/gemini/generate-bom', async (req, res) => {
+  try {
+    const { innovation, analysis } = req.body;
+    
+    const prompt = `
+      PHASE 4: BILL OF MATERIALS
+      
+      Generate a comprehensive Bill of Materials for manufacturing: ${innovation.conceptName}
+      Description: ${innovation.conceptDescription}
+      Pattern Used: ${innovation.patternUsed}
+      ${analysis ? `Original Components: ${JSON.stringify(analysis.components)}` : ''}
+      
+      Create a detailed BOM with realistic part numbers, materials, estimated costs, and suppliers.
+      Include all components needed to manufacture this innovation.
+    `;
+
+    const cacheKey = { type: 'generate-bom', conceptName: innovation.conceptName };
+
+    const result = await callGeminiWithRetry(async (ai) => {
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          projectName: { type: Type.STRING },
+          version: { type: Type.STRING },
+          dateGenerated: { type: Type.STRING },
+          items: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                partNumber: { type: Type.STRING },
+                partName: { type: Type.STRING },
+                description: { type: Type.STRING },
+                quantity: { type: Type.NUMBER },
+                material: { type: Type.STRING },
+                estimatedCost: { type: Type.STRING },
+                supplier: { type: Type.STRING },
+                leadTime: { type: Type.STRING },
+                notes: { type: Type.STRING }
+              },
+              required: ["partNumber", "partName", "description", "quantity", "material", "estimatedCost", "supplier", "leadTime", "notes"]
+            }
+          },
+          totalEstimatedCost: { type: Type.STRING },
+          manufacturingNotes: { type: Type.STRING }
+        },
+        required: ["projectName", "version", "dateGenerated", "items", "totalEstimatedCost", "manufacturingNotes"]
+      };
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction: SIT_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error("No BOM response from Gemini");
+      return JSON.parse(text);
+    }, cacheKey);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Generate BOM error:', error);
+    const { statusCode, body } = createErrorResponse(error, 'Failed to generate Bill of Materials');
+    res.status(statusCode).json(body);
+  }
 });
+
+// ============================================
+// LEGACY ROUTES (for backwards compatibility)
+// ============================================
+
+app.post('/api/analyze', (req, res) => {
+  req.url = '/api/gemini/analyze';
+  app.handle(req, res);
+});
+
+app.post('/api/apply-pattern', (req, res) => {
+  req.url = '/api/gemini/apply-pattern';
+  app.handle(req, res);
+});
+
+app.post('/api/generate-spec', (req, res) => {
+  req.url = '/api/gemini/technical-spec';
+  app.handle(req, res);
+});
+
+app.post('/api/generate-3d', (req, res) => {
+  req.url = '/api/gemini/generate-3d';
+  app.handle(req, res);
+});
+
+app.post('/api/generate-2d', (req, res) => {
+  req.url = '/api/gemini/generate-2d';
+  app.handle(req, res);
+});
+
+// ============================================
+// HEALTH & STATUS
+// ============================================
+
+app.get('/health', (req, res) => {
+  const now = Date.now();
+  const availableKeys = apiKeyPool.filter(k => k.cooldownUntil <= now).length;
+  res.json({ 
+    status: 'ok',
+    apiKeys: {
+      total: apiKeyPool.length,
+      available: availableKeys,
+      allInCooldown: availableKeys === 0,
+    },
+    cache: {
+      size: responseCache.cache.size,
+    }
+  });
+});
+
+// ============================================
+// START SERVER
+// ============================================
 
 const PORT = 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API server running on port ${PORT}`);
+  console.log(`API keys configured: ${apiKeyPool.length}`);
 });
