@@ -11,6 +11,7 @@ import { Colors, Spacing, FontSizes } from '../constants/theme';
 
 interface WelcomeScreenProps {
   onStart: () => void;
+  onHistory?: () => void;
 }
 
 const phases = [
@@ -34,7 +35,7 @@ const phases = [
   },
 ];
 
-export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -70,10 +71,19 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={onStart}>
-          <Text style={styles.buttonText}>Initialize System</Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.button} onPress={onStart}>
+            <Text style={styles.buttonText}>New Innovation</Text>
+            <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
+          </TouchableOpacity>
+
+          {onHistory && (
+            <TouchableOpacity style={styles.historyButton} onPress={onHistory}>
+              <Ionicons name="time-outline" size={20} color={Colors.gray[400]} />
+              <Text style={styles.historyButtonText}>History</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -151,6 +161,11 @@ const styles = StyleSheet.create({
     color: Colors.dim,
     lineHeight: 20,
   },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    alignItems: 'center',
+  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -168,5 +183,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.accent,
     letterSpacing: 1,
+  },
+  historyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+  },
+  historyButtonText: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
   },
 });

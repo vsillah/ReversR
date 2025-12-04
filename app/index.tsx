@@ -1,26 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
   Image,
+  TouchableOpacity,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, FontSizes } from "../constants/theme";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
 import PhaseTwo from "../components/PhaseTwo";
 import PhaseThree from "../components/PhaseThree";
+import HistoryScreen from "../components/HistoryScreen";
 import {
   AnalysisResult,
   InnovationResult,
   TechnicalSpec,
   ThreeDSceneDescriptor,
   SITPattern,
+  BillOfMaterials,
 } from "../hooks/useGemini";
+import {
+  SavedInnovation,
+  saveInnovation,
+  createNewInnovation,
+} from "../hooks/useStorage";
 
 interface MutationContext {
+  id: string;
+  createdAt: string;
   phase: number;
   input: string;
   analysis: AnalysisResult | null;
@@ -29,11 +39,14 @@ interface MutationContext {
   spec: TechnicalSpec | null;
   threeDScene: ThreeDSceneDescriptor | null;
   imageUrl: string | null;
+  bom: BillOfMaterials | null;
 }
 
-export default function HomeScreen() {
-  const [started, setStarted] = useState(false);
-  const [context, setContext] = useState<MutationContext>({
+const createEmptyContext = (): MutationContext => {
+  const newInnovation = createNewInnovation();
+  return {
+    id: newInnovation.id,
+    createdAt: newInnovation.createdAt,
     phase: 1,
     input: "",
     analysis: null,
@@ -42,55 +55,127 @@ export default function HomeScreen() {
     spec: null,
     threeDScene: null,
     imageUrl: null,
-  });
+    bom: null,
+  };
+};
+
+export default function HomeScreen() {
+  const [started, setStarted] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [context, setContext] = useState<MutationContext>(createEmptyContext());
   const [isLoading, setIsLoading] = useState(false);
 
-  const handlePhaseOneComplete = (input: string, analysis: AnalysisResult) => {
-    setContext((prev) => ({
-      ...prev,
+  const autoSave = useCallback(async (ctx: MutationContext) => {
+    if (ctx.phase > 1 || ctx.input) {
+      const toSave: SavedInnovation = {
+        id: ctx.id,
+        createdAt: ctx.createdAt,
+        updatedAt: new Date().toISOString(),
+        phase: ctx.phase,
+        input: ctx.input,
+        analysis: ctx.analysis,
+        selectedPattern: ctx.selectedPattern,
+        innovation: ctx.innovation,
+        spec: ctx.spec,
+        threeDScene: ctx.threeDScene,
+        imageUrl: ctx.imageUrl,
+        bom: ctx.bom,
+      };
+      await saveInnovation(toSave);
+    }
+  }, []);
+
+  const handlePhaseOneComplete = async (input: string, analysis: AnalysisResult) => {
+    const newContext = {
+      ...context,
       input,
       analysis,
       phase: 2,
-    }));
+    };
+    setContext(newContext);
+    await autoSave(newContext);
   };
 
-  const handlePhaseTwoComplete = (innovation: InnovationResult) => {
-    setContext((prev) => ({
-      ...prev,
+  const handlePhaseTwoComplete = async (innovation: InnovationResult) => {
+    const newContext = {
+      ...context,
       innovation,
       selectedPattern: innovation.patternUsed,
       phase: 3,
-    }));
+    };
+    setContext(newContext);
+    await autoSave(newContext);
   };
 
-  const handlePhaseThreeComplete = (
+  const handlePhaseThreeComplete = async (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
     imageUrl: string | null,
+    bom?: BillOfMaterials | null
   ) => {
-    setContext((prev) => ({
-      ...prev,
+    const newContext = {
+      ...context,
       spec,
       threeDScene: scene,
       imageUrl,
-    }));
+      bom: bom || null,
+    };
+    setContext(newContext);
+    await autoSave(newContext);
   };
 
   const handleReset = () => {
-    setContext({
-      phase: 1,
-      input: "",
-      analysis: null,
-      selectedPattern: null,
-      innovation: null,
-      spec: null,
-      threeDScene: null,
-      imageUrl: null,
-    });
+    setContext(createEmptyContext());
   };
 
+  const handleStartNew = () => {
+    setContext(createEmptyContext());
+    setShowHistory(false);
+    setStarted(true);
+  };
+
+  const handleResume = (saved: SavedInnovation) => {
+    setContext({
+      id: saved.id,
+      createdAt: saved.createdAt,
+      phase: saved.phase,
+      input: saved.input,
+      analysis: saved.analysis,
+      selectedPattern: saved.selectedPattern,
+      innovation: saved.innovation,
+      spec: saved.spec,
+      threeDScene: saved.threeDScene,
+      imageUrl: saved.imageUrl,
+      bom: saved.bom,
+    });
+    setShowHistory(false);
+    setStarted(true);
+  };
+
+  const openHistory = useCallback(() => {
+    setHistoryRefreshKey(prev => prev + 1);
+    setShowHistory(true);
+    setStarted(true);
+  }, []);
+
   if (!started) {
-    return <WelcomeScreen onStart={() => setStarted(true)} />;
+    return (
+      <WelcomeScreen
+        onStart={handleStartNew}
+        onHistory={openHistory}
+      />
+    );
+  }
+
+  if (showHistory) {
+    return (
+      <HistoryScreen
+        onBack={() => setShowHistory(false)}
+        onResume={handleResume}
+        refreshKey={historyRefreshKey}
+      />
+    );
   }
 
   return (
@@ -109,6 +194,12 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>SYSTEMATIC INVENTIVE THINKING</Text>
           </View>
         </View>
+        <TouchableOpacity
+          style={styles.historyButton}
+          onPress={openHistory}
+        >
+          <Ionicons name="time-outline" size={24} color={Colors.gray[400]} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.progressBar}>
@@ -184,6 +275,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark,
   },
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
@@ -213,6 +307,9 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.dim,
     letterSpacing: 3,
+  },
+  historyButton: {
+    padding: Spacing.sm,
   },
   progressBar: {
     flexDirection: "row",
