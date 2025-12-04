@@ -14,6 +14,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 │   ├── _layout.tsx      # Root layout with dark theme
 │   └── index.tsx        # Main screen with phase navigation
 ├── components/
+│   ├── WelcomeScreen.tsx # Welcome/splash screen
 │   ├── PhaseOne.tsx     # Closed World Scan - product analysis + camera
 │   ├── PhaseTwo.tsx     # Pattern Application - SIT mutation
 │   └── PhaseThree.tsx   # Architect - specs & visualization
@@ -21,8 +22,10 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 │   └── theme.ts         # Colors, spacing, font sizes
 ├── hooks/
 │   └── useGemini.ts     # Gemini AI service with all API calls
-├── assets/              # App icons
+├── assets/              # App icons and logo
+├── server/              # Local dev server (production uses reversr-vsillah.replit.app)
 ├── app.json             # Expo configuration
+├── eas.json             # EAS build configuration
 ├── package.json         # Dependencies
 └── tsconfig.json        # TypeScript configuration
 ```
@@ -39,15 +42,32 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 
 4. **Export**: Share specs as JSON, 3D scenes as OBJ/STL
 
+5. **Bill of Materials**: Generate BOM for innovation concepts (Phase 4)
+
+## API Endpoints (Production Server)
+Base URL: `https://reversr-vsillah.replit.app`
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/gemini/analyze` | POST | Analyze product (text/image) |
+| `/api/gemini/apply-pattern` | POST | Apply SIT pattern |
+| `/api/gemini/technical-spec` | POST | Generate technical spec |
+| `/api/gemini/generate-2d` | POST | Generate 2D visualization |
+| `/api/gemini/generate-3d` | POST | Generate 3D scene descriptor |
+| `/api/gemini/generate-bom` | POST | Generate Bill of Materials |
+
 ## Technology Stack
-- **Framework**: Expo SDK 52 + React Native
+- **Framework**: Expo SDK 54 + React Native
 - **Navigation**: Expo Router
-- **AI**: Google Gemini via @google/genai
+- **AI**: Google Gemini via production server
 - **Camera**: expo-camera
 - **File System**: expo-file-system, expo-sharing
-- **3D (conceptual)**: expo-three, three.js
 
-## Running the App
+## Building for Release
+- **APK (testing)**: `npx eas-cli build --platform android --profile preview`
+- **AAB (Google Play)**: `npx eas-cli build --platform android --profile production`
+
+## Running the App (Development)
 The workflow runs: `npx expo start --tunnel`
 
 To use on your phone:
@@ -55,6 +75,6 @@ To use on your phone:
 2. Scan the QR code from the console
 3. Wait for the bundle to load
 
-## Environment Variables
-- Uses Replit AI Integrations for Gemini (automatically configured)
-- No manual API key setup required
+## Synced with ReversR Web
+This Expo app shares the same API backend as the ReversR Web project.
+Last synced: December 4, 2025
