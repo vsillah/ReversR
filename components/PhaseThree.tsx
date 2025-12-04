@@ -17,9 +17,11 @@ import {
   InnovationResult,
   TechnicalSpec,
   ThreeDSceneDescriptor,
+  BillOfMaterials,
   generateTechnicalSpec,
   generate2DImage,
   generate3DScene,
+  generateBOM,
 } from '../hooks/useGemini';
 
 interface Props {
@@ -27,7 +29,8 @@ interface Props {
   onComplete: (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
-    imageUrl: string | null
+    imageUrl: string | null,
+    bom?: BillOfMaterials | null
   ) => void;
   onReset: () => void;
 }
@@ -36,8 +39,9 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
   const [spec, setSpec] = useState<TechnicalSpec | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(null);
+  const [bom, setBom] = useState<BillOfMaterials | null>(null);
   const [status, setStatus] = useState<
-    'generating_specs' | 'specs_ready' | 'generating_visual' | 'complete'
+    'generating_specs' | 'specs_ready' | 'generating_visual' | 'generating_bom' | 'complete'
   >('generating_specs');
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +80,7 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
       const base64 = await generate2DImage(innovation);
       setImageBase64(base64);
       setStatus('complete');
-      onComplete(spec, threeDScene, `data:image/png;base64,${base64}`);
+      onComplete(spec, threeDScene, `data:image/png;base64,${base64}`, bom);
     } catch (err: unknown) {
       console.error('Error generating 2D:', err);
       setError(formatError(err));
@@ -93,13 +97,30 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
       const scene = await generate3DScene(innovation);
       setThreeDScene(scene);
       setStatus('complete');
-      onComplete(spec, scene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+      onComplete(spec, scene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null, bom);
       Alert.alert(
         '3D Scene Generated',
         `Created ${scene.objects.length} objects. 3D viewing on mobile is limited - export to view in desktop apps.`
       );
     } catch (err: unknown) {
       console.error('Error generating 3D:', err);
+      setError(formatError(err));
+      setStatus('specs_ready');
+    }
+  };
+
+  const handleGenerateBOM = async () => {
+    if (!spec) return;
+    setStatus('generating_bom');
+    setError(null);
+
+    try {
+      const bomResult = await generateBOM(innovation);
+      setBom(bomResult);
+      setStatus('complete');
+      onComplete(spec, threeDScene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null, bomResult);
+    } catch (err: unknown) {
+      console.error('Error generating BOM:', err);
       setError(formatError(err));
       setStatus('specs_ready');
     }
@@ -150,6 +171,31 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
     } catch (e) {
       console.error('3D Export error:', e);
       Alert.alert('Error', 'Failed to export 3D model.');
+    }
+  };
+
+  const handleExportBOM = async () => {
+    if (!bom) return;
+
+    try {
+      const csvHeader = 'Part Number,Part Name,Description,Quantity,Material,Est. Cost,Supplier,Lead Time,Notes\n';
+      const csvRows = bom.items.map(item => 
+        `"${item.partNumber}","${item.partName}","${item.description}",${item.quantity},"${item.material}","${item.estimatedCost}","${item.supplier}","${item.leadTime}","${item.notes}"`
+      ).join('\n');
+      const csvContent = csvHeader + csvRows + `\n\nTotal Estimated Cost: ${bom.totalEstimatedCost}\nManufacturing Notes: ${bom.manufacturingNotes}`;
+
+      const name = innovation.conceptName.replace(/\s+/g, '_');
+      const fileUri = FileSystem.documentDirectory + `${name}_BOM.csv`;
+      await FileSystem.writeAsStringAsync(fileUri, csvContent);
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        Alert.alert('Saved', 'Bill of Materials saved to device.');
+      }
+    } catch (e) {
+      console.error('BOM Export error:', e);
+      Alert.alert('Error', 'Failed to export Bill of Materials.');
     }
   };
 
@@ -280,6 +326,64 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
             <Ionicons name="download" size={16} color={Colors.accent} />
             <Text style={styles.downloadButtonText}>Export Specs</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {spec && (
+        <View style={styles.bomPanel}>
+          <Text style={styles.sectionTitle}>Phase 4: Bill of Materials</Text>
+          
+          {status === 'generating_bom' ? (
+            <View style={styles.visualLoading}>
+              <ActivityIndicator size="small" color={Colors.accent} />
+              <Text style={styles.visualLoadingText}>Generating BOM...</Text>
+            </View>
+          ) : bom ? (
+            <View style={styles.bomContent}>
+              <View style={styles.bomHeader}>
+                <Text style={styles.bomProjectName}>{bom.projectName}</Text>
+                <Text style={styles.bomMeta}>v{bom.version} | {bom.dateGenerated}</Text>
+              </View>
+              
+              <View style={styles.bomItemsContainer}>
+                {bom.items.slice(0, 5).map((item, index) => (
+                  <View key={index} style={styles.bomItem}>
+                    <View style={styles.bomItemHeader}>
+                      <Text style={styles.bomPartNumber}>{item.partNumber}</Text>
+                      <Text style={styles.bomQuantity}>x{item.quantity}</Text>
+                    </View>
+                    <Text style={styles.bomPartName}>{item.partName}</Text>
+                    <Text style={styles.bomPartDesc}>{item.description}</Text>
+                    <View style={styles.bomItemMeta}>
+                      <Text style={styles.bomItemMetaText}>{item.material}</Text>
+                      <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
+                    </View>
+                  </View>
+                ))}
+                {bom.items.length > 5 && (
+                  <Text style={styles.bomMoreItems}>+{bom.items.length - 5} more items</Text>
+                )}
+              </View>
+
+              <View style={styles.bomTotalSection}>
+                <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
+                <Text style={styles.bomTotalValue}>{bom.totalEstimatedCost}</Text>
+              </View>
+
+              <Text style={styles.bomNotes}>{bom.manufacturingNotes}</Text>
+
+              <TouchableOpacity style={styles.downloadButton} onPress={handleExportBOM}>
+                <Ionicons name="download" size={16} color={Colors.accent} />
+                <Text style={styles.downloadButtonText}>Export BOM (CSV)</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.generateBomButton} onPress={handleGenerateBOM}>
+              <Ionicons name="list" size={24} color={Colors.gray[400]} />
+              <Text style={styles.generateBomText}>Generate Bill of Materials</Text>
+              <Text style={styles.generateBomSubtext}>Parts, quantities, costs & suppliers</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -557,5 +661,133 @@ const styles = StyleSheet.create({
   downloadButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.accent,
+  },
+  bomPanel: {
+    backgroundColor: Colors.black,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginTop: Spacing.lg,
+  },
+  bomContent: {
+    gap: Spacing.md,
+  },
+  bomHeader: {
+    marginBottom: Spacing.sm,
+  },
+  bomProjectName: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.lg,
+    color: Colors.accent,
+    marginBottom: Spacing.xs,
+  },
+  bomMeta: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  bomItemsContainer: {
+    gap: Spacing.sm,
+  },
+  bomItem: {
+    backgroundColor: Colors.panel,
+    borderRadius: 8,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  bomItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  bomPartNumber: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  bomQuantity: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.sm,
+    color: Colors.accent,
+    fontWeight: 'bold',
+  },
+  bomPartName: {
+    fontSize: FontSizes.sm,
+    color: Colors.white,
+    fontWeight: 'bold',
+    marginBottom: Spacing.xs,
+  },
+  bomPartDesc: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+    marginBottom: Spacing.sm,
+  },
+  bomItemMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  bomItemMetaText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  bomItemCost: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.sm,
+    color: Colors.green[400],
+  },
+  bomMoreItems: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[500],
+    textAlign: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  bomTotalSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'rgba(22, 101, 52, 0.2)',
+    padding: Spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(22, 101, 52, 0.5)',
+  },
+  bomTotalLabel: {
+    fontSize: FontSizes.sm,
+    color: Colors.green[500],
+    fontWeight: 'bold',
+  },
+  bomTotalValue: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.lg,
+    color: Colors.green[400],
+    fontWeight: 'bold',
+  },
+  bomNotes: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    fontStyle: 'italic',
+    marginTop: Spacing.sm,
+  },
+  generateBomButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.panel,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.xl,
+    borderRadius: 8,
+    gap: Spacing.sm,
+  },
+  generateBomText: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[300],
+    fontWeight: 'bold',
+  },
+  generateBomSubtext: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
   },
 });
