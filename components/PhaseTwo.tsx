@@ -13,6 +13,8 @@ import {
   AnalysisResult,
   InnovationResult,
   SITPattern,
+  SIT_PATTERNS,
+  SIT_PATTERN_LABELS,
   applySITPattern,
 } from '../hooks/useGemini';
 
@@ -25,19 +27,19 @@ interface Props {
 }
 
 const PATTERN_DETAILS: Record<SITPattern, { description: string }> = {
-  [SITPattern.SUBTRACTION]: {
+  'subtraction': {
     description: "Remove an essential component from the system.",
   },
-  [SITPattern.TASK_UNIFICATION]: {
+  'task_unification': {
     description: "Assign a new task to an existing resource.",
   },
-  [SITPattern.MULTIPLICATION]: {
+  'multiplication': {
     description: "Copy a component but change a specific attribute.",
   },
-  [SITPattern.DIVISION]: {
+  'division': {
     description: "Divide the product or a component physically or functionally.",
   },
-  [SITPattern.ATTRIBUTE_DEPENDENCY]: {
+  'attribute_dependency': {
     description: "Create a correlation between two independent variables.",
   },
 };
@@ -49,9 +51,7 @@ export default function PhaseTwo({
   setIsLoading,
   onReset,
 }: Props) {
-  const [selectedPattern, setSelectedPattern] = useState<SITPattern>(
-    SITPattern.SUBTRACTION
-  );
+  const [selectedPattern, setSelectedPattern] = useState<SITPattern>('subtraction');
   const [error, setError] = useState<string | null>(null);
 
   const handleApply = async () => {
@@ -127,7 +127,7 @@ export default function PhaseTwo({
       <View style={styles.panel}>
         <Text style={styles.sectionTitle}>Select SIT Pattern</Text>
         <View style={styles.patternGrid}>
-          {Object.values(SITPattern).map(pattern => (
+          {SIT_PATTERNS.map(pattern => (
             <TouchableOpacity
               key={pattern}
               style={[
@@ -142,7 +142,7 @@ export default function PhaseTwo({
                   selectedPattern === pattern && styles.patternButtonTextActive,
                 ]}
               >
-                {pattern}
+                {SIT_PATTERN_LABELS[pattern]}
               </Text>
             </TouchableOpacity>
           ))}
@@ -151,7 +151,7 @@ export default function PhaseTwo({
         <View style={styles.patternInfo}>
           <Ionicons name="information-circle" size={16} color={Colors.secondary} />
           <View style={styles.patternInfoContent}>
-            <Text style={styles.patternInfoTitle}>{selectedPattern}</Text>
+            <Text style={styles.patternInfoTitle}>{SIT_PATTERN_LABELS[selectedPattern]}</Text>
             <Text style={styles.patternInfoDesc}>
               {PATTERN_DETAILS[selectedPattern].description}
             </Text>

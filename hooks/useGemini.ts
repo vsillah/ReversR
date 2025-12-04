@@ -21,19 +21,32 @@ export interface AnalysisResult {
   rawAnalysis: string;
 }
 
-export enum SITPattern {
-  SUBTRACTION = 'Subtraction',
-  TASK_UNIFICATION = 'Task Unification',
-  MULTIPLICATION = 'Multiplication',
-  DIVISION = 'Division',
-  ATTRIBUTE_DEPENDENCY = 'Attribute Dependency',
-}
+export type SITPattern = 'subtraction' | 'task_unification' | 'multiplication' | 'division' | 'attribute_dependency';
+
+export const SIT_PATTERN_LABELS: Record<SITPattern, string> = {
+  'subtraction': 'Subtraction',
+  'task_unification': 'Task Unification',
+  'multiplication': 'Multiplication',
+  'division': 'Division',
+  'attribute_dependency': 'Attribute Dependency',
+};
+
+export const SIT_PATTERNS: SITPattern[] = [
+  'subtraction',
+  'task_unification',
+  'multiplication',
+  'division',
+  'attribute_dependency',
+];
 
 export interface InnovationResult {
   patternUsed: SITPattern;
   conceptName: string;
   conceptDescription: string;
+  marketGap: string;
   constraint: string;
+  noveltyScore: number;
+  viabilityScore: number;
   marketBenefit: string;
 }
 
@@ -41,6 +54,27 @@ export interface TechnicalSpec {
   promptLogic: string;
   componentStructure: string;
   implementationNotes: string;
+}
+
+export interface BOMItem {
+  partNumber: string;
+  partName: string;
+  description: string;
+  quantity: number;
+  material: string;
+  estimatedCost: string;
+  supplier: string;
+  leadTime: string;
+  notes: string;
+}
+
+export interface BillOfMaterials {
+  projectName: string;
+  version: string;
+  dateGenerated: string;
+  items: BOMItem[];
+  totalEstimatedCost: string;
+  manufacturingNotes: string;
 }
 
 export interface SceneObject {
@@ -80,15 +114,15 @@ async function fetchWithRetry<T>(url: string, options: RequestInit, retries = 3)
 }
 
 export const analyzeProduct = async (input: string, imageBase64?: string): Promise<AnalysisResult> => {
-  return fetchWithRetry(`${API_BASE}/api/analyze`, {
+  return fetchWithRetry(`${API_BASE}/api/gemini/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input, imageBase64 })
+    body: JSON.stringify({ input, image: imageBase64 })
   });
 };
 
 export const applySITPattern = async (analysis: AnalysisResult, pattern: SITPattern): Promise<InnovationResult> => {
-  return fetchWithRetry(`${API_BASE}/api/apply-pattern`, {
+  return fetchWithRetry(`${API_BASE}/api/gemini/apply-pattern`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ analysis, pattern })
@@ -96,7 +130,7 @@ export const applySITPattern = async (analysis: AnalysisResult, pattern: SITPatt
 };
 
 export const generateTechnicalSpec = async (innovation: InnovationResult): Promise<TechnicalSpec> => {
-  return fetchWithRetry(`${API_BASE}/api/generate-spec`, {
+  return fetchWithRetry(`${API_BASE}/api/gemini/technical-spec`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ innovation })
@@ -104,7 +138,7 @@ export const generateTechnicalSpec = async (innovation: InnovationResult): Promi
 };
 
 export const generate3DScene = async (innovation: InnovationResult): Promise<ThreeDSceneDescriptor> => {
-  return fetchWithRetry(`${API_BASE}/api/generate-3d`, {
+  return fetchWithRetry(`${API_BASE}/api/gemini/generate-3d`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ innovation })
@@ -112,10 +146,18 @@ export const generate3DScene = async (innovation: InnovationResult): Promise<Thr
 };
 
 export const generate2DImage = async (innovation: InnovationResult): Promise<string> => {
-  const response = await fetchWithRetry<{ imageBase64: string }>(`${API_BASE}/api/generate-2d`, {
+  const response = await fetchWithRetry<{ imageData: string }>(`${API_BASE}/api/gemini/generate-2d`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ innovation })
   });
-  return response.imageBase64;
+  return response.imageData;
+};
+
+export const generateBOM = async (innovation: InnovationResult, analysis?: AnalysisResult): Promise<BillOfMaterials> => {
+  return fetchWithRetry(`${API_BASE}/api/gemini/generate-bom`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ innovation, analysis })
+  });
 };
