@@ -13,6 +13,7 @@ import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
 import PhaseTwo from "../components/PhaseTwo";
 import PhaseThree from "../components/PhaseThree";
+import PhaseFour from "../components/PhaseFour";
 import HistoryScreen from "../components/HistoryScreen";
 import {
   AnalysisResult,
@@ -57,6 +58,14 @@ const createEmptyContext = (): MutationContext => {
     imageUrl: null,
     bom: null,
   };
+};
+
+const PHASE_LABELS = ['SCAN', 'MUTATE', 'ARCHITECT', 'BUILD'];
+const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
+  1: 'layers-outline',
+  2: 'flash-outline',
+  3: 'code-slash-outline',
+  4: 'construct-outline',
 };
 
 export default function HomeScreen() {
@@ -111,22 +120,89 @@ export default function HomeScreen() {
   const handlePhaseThreeComplete = async (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
-    imageUrl: string | null,
-    bom?: BillOfMaterials | null
+    imageUrl: string | null
   ) => {
     const newContext = {
       ...context,
       spec,
       threeDScene: scene,
       imageUrl,
-      bom: bom || null,
     };
     setContext(newContext);
     await autoSave(newContext);
   };
 
+  const handleContinueToBuild = async () => {
+    const newContext = {
+      ...context,
+      phase: 4,
+    };
+    setContext(newContext);
+    await autoSave(newContext);
+  };
+
+  const handleBOMGenerated = async (bom: BillOfMaterials) => {
+    const newContext = {
+      ...context,
+      bom,
+    };
+    setContext(newContext);
+    await autoSave(newContext);
+  };
+
+  const handleBack = async () => {
+    if (context.phase > 1) {
+      const newPhase = context.phase - 1;
+      let clearedContext = { ...context, phase: newPhase };
+      
+      if (newPhase === 1) {
+        clearedContext = {
+          ...clearedContext,
+          analysis: null,
+          selectedPattern: null,
+          innovation: null,
+          spec: null,
+          threeDScene: null,
+          imageUrl: null,
+          bom: null,
+        };
+      } else if (newPhase === 2) {
+        clearedContext = {
+          ...clearedContext,
+          innovation: null,
+          spec: null,
+          threeDScene: null,
+          imageUrl: null,
+          bom: null,
+        };
+      } else if (newPhase === 3) {
+        clearedContext = {
+          ...clearedContext,
+          bom: null,
+        };
+      }
+      
+      setContext(clearedContext);
+      await autoSave(clearedContext);
+    }
+  };
+
   const handleReset = () => {
     setContext(createEmptyContext());
+  };
+
+  const handleTryAnotherPattern = async () => {
+    const newContext = {
+      ...context,
+      phase: 2,
+      innovation: null,
+      spec: null,
+      threeDScene: null,
+      imageUrl: null,
+      bom: null,
+    };
+    setContext(newContext);
+    await autoSave(newContext);
   };
 
   const handleStartNew = () => {
@@ -203,41 +279,48 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.progressBar}>
-        {[1, 2, 3].map((step) => (
-          <View key={step} style={styles.stepContainer}>
-            <View
-              style={[
-                styles.stepCircle,
-                context.phase >= step && styles.stepCircleActive,
-                context.phase > step && styles.stepCircleComplete,
-              ]}
-            >
-              <Text
+        {[1, 2, 3, 4].map((step, index) => (
+          <React.Fragment key={step}>
+            <View style={styles.stepContainer}>
+              <View
                 style={[
-                  styles.stepNumber,
-                  context.phase >= step && styles.stepNumberActive,
+                  styles.stepCircle,
+                  context.phase >= step && styles.stepCircleActive,
+                  context.phase > step && styles.stepCircleComplete,
                 ]}
               >
-                {step}
+                {context.phase > step ? (
+                  <Ionicons name="checkmark" size={16} color={Colors.black} />
+                ) : (
+                  <Text
+                    style={[
+                      styles.stepNumber,
+                      context.phase >= step && styles.stepNumberActive,
+                    ]}
+                  >
+                    {step}
+                  </Text>
+                )}
+              </View>
+              <Text
+                style={[
+                  styles.stepLabel,
+                  context.phase >= step && styles.stepLabelActive,
+                ]}
+              >
+                {PHASE_LABELS[step - 1]}
               </Text>
             </View>
-            <Text
-              style={[
-                styles.stepLabel,
-                context.phase >= step && styles.stepLabelActive,
-              ]}
-            >
-              {step === 1 ? "SCAN" : step === 2 ? "MUTATE" : "ARCHITECT"}
-            </Text>
-          </View>
+            {index < 3 && (
+              <View
+                style={[
+                  styles.stepConnector,
+                  context.phase > step && styles.stepConnectorActive,
+                ]}
+              />
+            )}
+          </React.Fragment>
         ))}
-        <View style={styles.progressLine} />
-        <View
-          style={[
-            styles.progressLineFill,
-            { width: `${((context.phase - 1) / 2) * 100}%` },
-          ]}
-        />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -254,6 +337,7 @@ export default function HomeScreen() {
             onComplete={handlePhaseTwoComplete}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
+            onBack={handleBack}
             onReset={handleReset}
           />
         )}
@@ -261,7 +345,21 @@ export default function HomeScreen() {
           <PhaseThree
             innovation={context.innovation}
             onComplete={handlePhaseThreeComplete}
+            onContinueToBuild={handleContinueToBuild}
+            onBack={handleBack}
             onReset={handleReset}
+            onTryAnotherPattern={handleTryAnotherPattern}
+          />
+        )}
+        {context.phase === 4 && context.innovation && context.spec && (
+          <PhaseFour
+            innovation={context.innovation}
+            spec={context.spec}
+            bom={context.bom}
+            onBOMGenerated={handleBOMGenerated}
+            onBack={handleBack}
+            onReset={handleReset}
+            onTryAnotherPattern={handleTryAnotherPattern}
           />
         )}
       </ScrollView>
@@ -313,19 +411,18 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: Spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.lg,
-    position: "relative",
   },
   stepContainer: {
     alignItems: "center",
-    zIndex: 1,
   },
   stepCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: Colors.black,
     borderWidth: 2,
     borderColor: Colors.gray[800],
@@ -342,7 +439,7 @@ const styles = StyleSheet.create({
   },
   stepNumber: {
     fontFamily: "monospace",
-    fontSize: FontSizes.sm,
+    fontSize: FontSizes.xs,
     fontWeight: "bold",
     color: Colors.gray[600],
   },
@@ -351,7 +448,7 @@ const styles = StyleSheet.create({
   },
   stepLabel: {
     marginTop: Spacing.xs,
-    fontSize: FontSizes.xs,
+    fontSize: 9,
     fontWeight: "bold",
     color: Colors.gray[700],
     letterSpacing: 1,
@@ -359,22 +456,15 @@ const styles = StyleSheet.create({
   stepLabelActive: {
     color: Colors.white,
   },
-  progressLine: {
-    position: "absolute",
-    top: 44,
-    left: 60,
-    right: 60,
+  stepConnector: {
+    width: 24,
     height: 2,
-    backgroundColor: Colors.gray[900],
-    zIndex: 0,
+    backgroundColor: Colors.gray[800],
+    marginHorizontal: 4,
+    marginBottom: 20,
   },
-  progressLineFill: {
-    position: "absolute",
-    top: 44,
-    left: 60,
-    height: 2,
-    backgroundColor: Colors.accent,
-    zIndex: 0,
+  stepConnectorActive: {
+    backgroundColor: Colors.green[500],
   },
   content: {
     flex: 1,

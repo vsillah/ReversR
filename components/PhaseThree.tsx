@@ -17,11 +17,9 @@ import {
   InnovationResult,
   TechnicalSpec,
   ThreeDSceneDescriptor,
-  BillOfMaterials,
   generateTechnicalSpec,
   generate2DImage,
   generate3DScene,
-  generateBOM,
 } from '../hooks/useGemini';
 
 interface Props {
@@ -29,21 +27,34 @@ interface Props {
   onComplete: (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
-    imageUrl: string | null,
-    bom?: BillOfMaterials | null
+    imageUrl: string | null
   ) => void;
+  onContinueToBuild: () => void;
+  onBack: () => void;
   onReset: () => void;
+  onTryAnotherPattern: () => void;
 }
 
-export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
+type VisualTab = '2d' | '3d';
+
+export default function PhaseThree({
+  innovation,
+  onComplete,
+  onContinueToBuild,
+  onBack,
+  onReset,
+  onTryAnotherPattern,
+}: Props) {
   const [spec, setSpec] = useState<TechnicalSpec | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(null);
-  const [bom, setBom] = useState<BillOfMaterials | null>(null);
   const [status, setStatus] = useState<
-    'generating_specs' | 'specs_ready' | 'generating_visual' | 'generating_bom' | 'complete'
+    'generating_specs' | 'specs_ready' | 'generating_visual' | 'complete'
   >('generating_specs');
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<VisualTab>('2d');
+  const [specsExpanded, setSpecsExpanded] = useState(false);
+  const [generationTime, setGenerationTime] = useState(0);
 
   const formatError = (e: unknown) => {
     const err = e as { message?: string };
@@ -71,6 +82,17 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
     fetchSpecs();
   }, [fetchSpecs]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (status === 'generating_visual') {
+      setGenerationTime(0);
+      interval = setInterval(() => {
+        setGenerationTime(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [status]);
+
   const handleGenerate2D = async () => {
     if (!spec) return;
     setStatus('generating_visual');
@@ -80,7 +102,7 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
       const base64 = await generate2DImage(innovation);
       setImageBase64(base64);
       setStatus('complete');
-      onComplete(spec, threeDScene, `data:image/png;base64,${base64}`, bom);
+      onComplete(spec, threeDScene, `data:image/png;base64,${base64}`);
     } catch (err: unknown) {
       console.error('Error generating 2D:', err);
       setError(formatError(err));
@@ -97,30 +119,13 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
       const scene = await generate3DScene(innovation);
       setThreeDScene(scene);
       setStatus('complete');
-      onComplete(spec, scene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null, bom);
+      onComplete(spec, scene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
       Alert.alert(
         '3D Scene Generated',
-        `Created ${scene.objects.length} objects. 3D viewing on mobile is limited - export to view in desktop apps.`
+        `Created ${scene.objects.length} objects. Export to view in desktop apps.`
       );
     } catch (err: unknown) {
       console.error('Error generating 3D:', err);
-      setError(formatError(err));
-      setStatus('specs_ready');
-    }
-  };
-
-  const handleGenerateBOM = async () => {
-    if (!spec) return;
-    setStatus('generating_bom');
-    setError(null);
-
-    try {
-      const bomResult = await generateBOM(innovation);
-      setBom(bomResult);
-      setStatus('complete');
-      onComplete(spec, threeDScene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null, bomResult);
-    } catch (err: unknown) {
-      console.error('Error generating BOM:', err);
       setError(formatError(err));
       setStatus('specs_ready');
     }
@@ -174,31 +179,6 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
     }
   };
 
-  const handleExportBOM = async () => {
-    if (!bom) return;
-
-    try {
-      const csvHeader = 'Part Number,Part Name,Description,Quantity,Material,Est. Cost,Supplier,Lead Time,Notes\n';
-      const csvRows = bom.items.map(item => 
-        `"${item.partNumber}","${item.partName}","${item.description}",${item.quantity},"${item.material}","${item.estimatedCost}","${item.supplier}","${item.leadTime}","${item.notes}"`
-      ).join('\n');
-      const csvContent = csvHeader + csvRows + `\n\nTotal Estimated Cost: ${bom.totalEstimatedCost}\nManufacturing Notes: ${bom.manufacturingNotes}`;
-
-      const name = innovation.conceptName.replace(/\s+/g, '_');
-      const fileUri = FileSystem.documentDirectory + `${name}_BOM.csv`;
-      await FileSystem.writeAsStringAsync(fileUri, csvContent);
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
-      } else {
-        Alert.alert('Saved', 'Bill of Materials saved to device.');
-      }
-    } catch (e) {
-      console.error('BOM Export error:', e);
-      Alert.alert('Error', 'Failed to export Bill of Materials.');
-    }
-  };
-
   if (status === 'generating_specs') {
     return (
       <View style={styles.loadingContainer}>
@@ -228,164 +208,243 @@ export default function PhaseThree({ innovation, onComplete, onReset }: Props) {
           <Ionicons name="code-slash" size={28} color={Colors.accent} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 3: The Architect</Text>
-            <Text style={styles.description}>Blueprint generated. Select visualization.</Text>
+            <Text style={styles.description}>Blueprint generated. Visualize your innovation.</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={onReset} style={styles.resetButton}>
-          <Text style={styles.resetText}>New Session</Text>
-        </TouchableOpacity>
+        <View style={styles.navButtons}>
+          <TouchableOpacity onPress={onBack} style={styles.navButton}>
+            <Ionicons name="arrow-back" size={14} color={Colors.gray[400]} />
+            <Text style={styles.navButtonText}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onReset} style={styles.navButton}>
+            <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
+            <Text style={styles.navButtonText}>Reset</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.innovationCard}>
-        <Text style={styles.innovationName}>{innovation.conceptName}</Text>
-        <Text style={styles.innovationDesc}>{innovation.conceptDescription}</Text>
-        <View style={styles.benefitBadge}>
-          <Text style={styles.benefitLabel}>Benefit</Text>
-          <Text style={styles.benefitText}>{innovation.marketBenefit}</Text>
+      <View style={styles.innovationSummary}>
+        <Text style={styles.conceptName}>{innovation.conceptName}</Text>
+        
+        <View style={styles.summaryGrid}>
+          <View style={styles.summaryLeft}>
+            <View style={styles.patternSection}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="bulb" size={16} color={Colors.secondary} />
+                <Text style={styles.sectionLabel}>SIT Pattern Applied</Text>
+              </View>
+              <Text style={styles.patternName}>
+                {typeof innovation.patternUsed === 'string' 
+                  ? innovation.patternUsed.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                  : 'Pattern Applied'}
+              </Text>
+              <Text style={styles.conceptDescription}>{innovation.conceptDescription}</Text>
+            </View>
+          </View>
+          
+          <View style={styles.summaryRight}>
+            <View style={styles.benefitBox}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="flash" size={16} color={Colors.green[400]} />
+                <Text style={[styles.sectionLabel, { color: Colors.green[400] }]}>Key Benefit</Text>
+              </View>
+              <Text style={styles.benefitText}>{innovation.marketBenefit}</Text>
+            </View>
+            
+            {innovation.constraint && (
+              <View style={styles.constraintBox}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.constraintDot} />
+                  <Text style={[styles.sectionLabel, { color: Colors.purple[500] }]}>Innovation Constraint</Text>
+                </View>
+                <Text style={styles.constraintText}>{innovation.constraint}</Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
 
       <View style={styles.visualPanel}>
-        <Text style={styles.sectionTitle}>Visualization</Text>
-
-        {status === 'generating_visual' ? (
-          <View style={styles.visualLoading}>
-            <ActivityIndicator size="small" color={Colors.accent} />
-            <Text style={styles.visualLoadingText}>Generating...</Text>
-          </View>
-        ) : imageBase64 ? (
-          <Image
-            source={{ uri: `data:image/png;base64,${imageBase64}` }}
-            style={styles.generatedImage}
-            resizeMode="contain"
-          />
-        ) : threeDScene ? (
-          <View style={styles.scene3dInfo}>
-            <Ionicons name="cube" size={48} color={Colors.accent} />
-            <Text style={styles.scene3dText}>
-              3D Scene: {threeDScene.objects.length} objects
+        <View style={styles.tabBar}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === '2d' && styles.tabActive]}
+            onPress={() => setActiveTab('2d')}
+          >
+            <Ionicons 
+              name="image" 
+              size={16} 
+              color={activeTab === '2d' ? Colors.accent : Colors.gray[500]} 
+            />
+            <Text style={[styles.tabText, activeTab === '2d' && styles.tabTextActive]}>
+              2D Sketch
             </Text>
-            <View style={styles.exportButtons}>
-              <TouchableOpacity
-                style={styles.exportButton}
-                onPress={() => handleExport3D('obj')}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === '3d' && styles.tabActive]}
+            onPress={() => setActiveTab('3d')}
+          >
+            <Ionicons 
+              name="cube" 
+              size={16} 
+              color={activeTab === '3d' ? Colors.accent : Colors.gray[500]} 
+            />
+            <Text style={[styles.tabText, activeTab === '3d' && styles.tabTextActive]}>
+              3D Wireframe
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.visualContent}>
+          {status === 'generating_visual' ? (
+            <View style={styles.visualLoading}>
+              <ActivityIndicator size="large" color={Colors.accent} />
+              <Text style={styles.visualLoadingText}>Generating {activeTab === '2d' ? '2D Sketch' : '3D Scene'}...</Text>
+              <Text style={styles.visualLoadingTime}>{generationTime}s elapsed</Text>
+              <TouchableOpacity 
+                style={styles.skipButton}
+                onPress={() => setStatus(spec ? 'specs_ready' : 'generating_specs')}
               >
-                <Text style={styles.exportButtonText}>.OBJ</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.exportButton}
-                onPress={() => handleExport3D('stl')}
-              >
-                <Text style={styles.exportButtonText}>.STL</Text>
+                <Text style={styles.skipButtonText}>Skip</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        ) : (
-          <View style={styles.visualOptions}>
-            <TouchableOpacity style={styles.visualButton} onPress={handleGenerate2D}>
-              <Ionicons name="image" size={24} color={Colors.gray[400]} />
-              <Text style={styles.visualButtonText}>Generate 2D Sketch</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.visualButton} onPress={handleGenerate3D}>
-              <Ionicons name="cube-outline" size={24} color={Colors.gray[400]} />
-              <Text style={styles.visualButtonText}>Generate 3D Scene</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          ) : activeTab === '2d' ? (
+            imageBase64 ? (
+              <View style={styles.generatedImageContainer}>
+                <Image
+                  source={{ uri: `data:image/png;base64,${imageBase64}` }}
+                  style={styles.generatedImage}
+                  resizeMode="contain"
+                />
+                <TouchableOpacity 
+                  style={styles.regenerateButton}
+                  onPress={handleGenerate2D}
+                >
+                  <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
+                  <Text style={styles.regenerateText}>Regenerate</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.generatePrompt}>
+                <Ionicons name="image-outline" size={48} color={Colors.gray[600]} />
+                <Text style={styles.generatePromptTitle}>Generate a high-speed 2D concept</Text>
+                <Text style={styles.generatePromptDesc}>
+                  AI-generated sketch visualization of your innovation
+                </Text>
+                <TouchableOpacity style={styles.generateButton} onPress={handleGenerate2D}>
+                  <Text style={styles.generateButtonText}>Generate Sketch</Text>
+                </TouchableOpacity>
+              </View>
+            )
+          ) : (
+            threeDScene ? (
+              <View style={styles.scene3dInfo}>
+                <Ionicons name="cube" size={48} color={Colors.accent} />
+                <Text style={styles.scene3dText}>
+                  3D Scene: {threeDScene.objects.length} objects
+                </Text>
+                <View style={styles.exportButtons}>
+                  <TouchableOpacity
+                    style={styles.exportButton}
+                    onPress={() => handleExport3D('obj')}
+                  >
+                    <Text style={styles.exportButtonText}>.OBJ</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.exportButton}
+                    onPress={() => handleExport3D('stl')}
+                  >
+                    <Text style={styles.exportButtonText}>.STL</Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity 
+                  style={styles.regenerateButton}
+                  onPress={handleGenerate3D}
+                >
+                  <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
+                  <Text style={styles.regenerateText}>Regenerate</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.generatePrompt}>
+                <Ionicons name="cube-outline" size={48} color={Colors.gray[600]} />
+                <Text style={styles.generatePromptTitle}>Generate 3D wireframe</Text>
+                <Text style={styles.generatePromptDesc}>
+                  Exportable 3D scene description for CAD software
+                </Text>
+                <TouchableOpacity style={styles.generateButton} onPress={handleGenerate3D}>
+                  <Text style={styles.generateButtonText}>Generate 3D</Text>
+                </TouchableOpacity>
+              </View>
+            )
+          )}
+        </View>
 
         {error && <Text style={styles.inlineError}>{error}</Text>}
       </View>
 
       {spec && (
         <View style={styles.specPanel}>
-          <View style={styles.specHeader}>
-            <View style={styles.terminalDots}>
-              <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
-              <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
-              <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
+          <TouchableOpacity 
+            style={styles.specHeader}
+            onPress={() => setSpecsExpanded(!specsExpanded)}
+          >
+            <View style={styles.specHeaderLeft}>
+              <View style={styles.terminalDots}>
+                <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
+                <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
+                <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
+              </View>
+              <Text style={styles.specFileName}>specifications.json</Text>
             </View>
-            <Text style={styles.specFileName}>specifications.json</Text>
-          </View>
-
-          <View style={styles.specSection}>
-            <Text style={styles.specLabel}>Prompt Logic</Text>
-            <Text style={styles.specValue}>{spec.promptLogic}</Text>
-          </View>
-
-          <View style={styles.specSection}>
-            <Text style={styles.specLabel}>Component Structure</Text>
-            <Text style={styles.specValue}>{spec.componentStructure}</Text>
-          </View>
-
-          <View style={styles.specSection}>
-            <Text style={styles.specLabel}>Implementation Notes</Text>
-            <Text style={styles.specValue}>{spec.implementationNotes}</Text>
-          </View>
-
-          <TouchableOpacity style={styles.downloadButton} onPress={handleExportSpecs}>
-            <Ionicons name="download" size={16} color={Colors.accent} />
-            <Text style={styles.downloadButtonText}>Export Specs</Text>
+            <View style={styles.specToggle}>
+              <Text style={styles.specToggleText}>
+                {specsExpanded ? 'Hide Details' : 'Show Details'}
+              </Text>
+              <Ionicons 
+                name={specsExpanded ? 'chevron-up' : 'chevron-down'} 
+                size={16} 
+                color={Colors.gray[400]} 
+              />
+            </View>
           </TouchableOpacity>
+
+          {specsExpanded && (
+            <View style={styles.specContent}>
+              <View style={[styles.specSection, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
+                <Text style={[styles.specLabel, { color: Colors.blue[500] }]}>PROMPT LOGIC</Text>
+                <Text style={styles.specValue}>{spec.promptLogic}</Text>
+              </View>
+
+              <View style={[styles.specSection, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                <Text style={[styles.specLabel, { color: Colors.purple[500] }]}>COMPONENT STRUCTURE</Text>
+                <Text style={styles.specValue}>{spec.componentStructure}</Text>
+              </View>
+
+              <View style={[styles.specSection, { backgroundColor: 'rgba(251, 146, 60, 0.1)' }]}>
+                <Text style={[styles.specLabel, { color: Colors.orange[300] }]}>IMPLEMENTATION NOTES</Text>
+                <Text style={styles.specValue}>{spec.implementationNotes}</Text>
+              </View>
+
+              <TouchableOpacity style={styles.downloadButton} onPress={handleExportSpecs}>
+                <Ionicons name="download" size={16} color={Colors.accent} />
+                <Text style={styles.downloadButtonText}>Export Specs</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
 
       {spec && (
-        <View style={styles.bomPanel}>
-          <Text style={styles.sectionTitle}>Phase 4: Bill of Materials</Text>
-          
-          {status === 'generating_bom' ? (
-            <View style={styles.visualLoading}>
-              <ActivityIndicator size="small" color={Colors.accent} />
-              <Text style={styles.visualLoadingText}>Generating BOM...</Text>
-            </View>
-          ) : bom ? (
-            <View style={styles.bomContent}>
-              <View style={styles.bomHeader}>
-                <Text style={styles.bomProjectName}>{bom.projectName}</Text>
-                <Text style={styles.bomMeta}>v{bom.version} | {bom.dateGenerated}</Text>
-              </View>
-              
-              <View style={styles.bomItemsContainer}>
-                {bom.items.slice(0, 5).map((item, index) => (
-                  <View key={index} style={styles.bomItem}>
-                    <View style={styles.bomItemHeader}>
-                      <Text style={styles.bomPartNumber}>{item.partNumber}</Text>
-                      <Text style={styles.bomQuantity}>x{item.quantity}</Text>
-                    </View>
-                    <Text style={styles.bomPartName}>{item.partName}</Text>
-                    <Text style={styles.bomPartDesc}>{item.description}</Text>
-                    <View style={styles.bomItemMeta}>
-                      <Text style={styles.bomItemMetaText}>{item.material}</Text>
-                      <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
-                    </View>
-                  </View>
-                ))}
-                {bom.items.length > 5 && (
-                  <Text style={styles.bomMoreItems}>+{bom.items.length - 5} more items</Text>
-                )}
-              </View>
-
-              <View style={styles.bomTotalSection}>
-                <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
-                <Text style={styles.bomTotalValue}>{bom.totalEstimatedCost}</Text>
-              </View>
-
-              <Text style={styles.bomNotes}>{bom.manufacturingNotes}</Text>
-
-              <TouchableOpacity style={styles.downloadButton} onPress={handleExportBOM}>
-                <Ionicons name="download" size={16} color={Colors.accent} />
-                <Text style={styles.downloadButtonText}>Export BOM (CSV)</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.generateBomButton} onPress={handleGenerateBOM}>
-              <Ionicons name="list" size={24} color={Colors.gray[400]} />
-              <Text style={styles.generateBomText}>Generate Bill of Materials</Text>
-              <Text style={styles.generateBomSubtext}>Parts, quantities, costs & suppliers</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <TouchableOpacity style={styles.continueButton} onPress={onContinueToBuild}>
+          <Text style={styles.continueButtonText}>Continue to Build</Text>
+          <Ionicons name="arrow-forward" size={20} color={Colors.black} />
+        </TouchableOpacity>
       )}
+
+      <TouchableOpacity style={styles.tryAnotherButton} onPress={onTryAnotherPattern}>
+        <Ionicons name="shuffle" size={18} color={Colors.secondary} />
+        <Text style={styles.tryAnotherText}>Try Another Pattern</Text>
+      </TouchableOpacity>
 
       <View style={{ height: 50 }} />
     </ScrollView>
@@ -465,18 +524,25 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.dim,
   },
-  resetButton: {
+  navButtons: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
     borderWidth: 1,
     borderColor: Colors.border,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: 8,
+    borderRadius: 6,
   },
-  resetText: {
-    fontSize: FontSizes.sm,
-    color: Colors.white,
+  navButtonText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
   },
-  innovationCard: {
+  innovationSummary: {
     backgroundColor: Colors.panel,
     borderRadius: 12,
     borderWidth: 1,
@@ -484,54 +550,116 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
   },
-  innovationName: {
+  conceptName: {
     fontFamily: 'monospace',
     fontSize: FontSizes.lg,
     color: Colors.accent,
-    marginBottom: Spacing.sm,
-  },
-  innovationDesc: {
-    fontSize: FontSizes.sm,
-    color: Colors.gray[300],
     marginBottom: Spacing.md,
   },
-  benefitBadge: {
+  summaryGrid: {
+    gap: Spacing.md,
+  },
+  summaryLeft: {
+    marginBottom: Spacing.sm,
+  },
+  summaryRight: {
+    gap: Spacing.sm,
+  },
+  patternSection: {
+    marginBottom: Spacing.sm,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: 'rgba(22, 101, 52, 0.2)',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(22, 101, 52, 0.5)',
+    marginBottom: Spacing.xs,
   },
-  benefitLabel: {
+  sectionLabel: {
     fontSize: FontSizes.xs,
-    color: Colors.green[500],
+    fontWeight: 'bold',
+    color: Colors.secondary,
     textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  patternName: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.md,
+    color: Colors.white,
+    marginBottom: Spacing.xs,
+  },
+  conceptDescription: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
+    lineHeight: 20,
+  },
+  benefitBox: {
+    backgroundColor: 'rgba(22, 101, 52, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(22, 101, 52, 0.4)',
+    borderRadius: 8,
+    padding: Spacing.md,
   },
   benefitText: {
     fontSize: FontSizes.sm,
     color: Colors.green[400],
-    flex: 1,
+    lineHeight: 20,
+  },
+  constraintBox: {
+    backgroundColor: 'rgba(88, 28, 135, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(88, 28, 135, 0.4)',
+    borderRadius: 8,
+    padding: Spacing.md,
+  },
+  constraintDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.purple[500],
+  },
+  constraintText: {
+    fontSize: FontSizes.sm,
+    color: Colors.purple[500],
+    lineHeight: 20,
   },
   visualPanel: {
     backgroundColor: Colors.black,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    padding: Spacing.lg,
+    overflow: 'hidden',
     marginBottom: Spacing.lg,
-    minHeight: 200,
   },
-  sectionTitle: {
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.panel,
+  },
+  tabActive: {
+    backgroundColor: Colors.black,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.accent,
+  },
+  tabText: {
     fontSize: FontSizes.sm,
+    color: Colors.gray[500],
+  },
+  tabTextActive: {
+    color: Colors.accent,
     fontWeight: 'bold',
-    color: Colors.gray[300],
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginBottom: Spacing.md,
+  },
+  visualContent: {
+    minHeight: 200,
+    padding: Spacing.lg,
   },
   visualLoading: {
     flex: 1,
@@ -544,10 +672,73 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.accent,
   },
+  visualLoadingTime: {
+    marginTop: Spacing.xs,
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  skipButton: {
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 6,
+  },
+  skipButtonText: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
+  },
+  generatePrompt: {
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+  },
+  generatePromptTitle: {
+    fontSize: FontSizes.md,
+    color: Colors.white,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xs,
+  },
+  generatePromptDesc: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[500],
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  generateButton: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: 8,
+  },
+  generateButtonText: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    color: Colors.black,
+  },
+  generatedImageContainer: {
+    alignItems: 'center',
+  },
   generatedImage: {
     width: '100%',
     height: 250,
     borderRadius: 8,
+  },
+  regenerateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 6,
+  },
+  regenerateText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
   },
   scene3dInfo: {
     alignItems: 'center',
@@ -576,28 +767,8 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.accent,
   },
-  visualOptions: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-  },
-  visualButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.panel,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.lg,
-    borderRadius: 8,
-    gap: Spacing.sm,
-  },
-  visualButtonText: {
-    fontSize: FontSizes.sm,
-    color: Colors.gray[400],
-    textAlign: 'center',
-  },
   inlineError: {
-    marginTop: Spacing.md,
+    padding: Spacing.md,
     fontSize: FontSizes.sm,
     color: Colors.red[500],
     textAlign: 'center',
@@ -608,14 +779,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     overflow: 'hidden',
+    marginBottom: Spacing.lg,
   },
   specHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: Colors.panel,
     padding: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+  },
+  specHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   terminalDots: {
     flexDirection: 'row',
@@ -632,6 +807,19 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
   },
+  specToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  specToggleText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+  },
+  specContent: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
   specSection: {
     padding: Spacing.md,
     borderBottomWidth: 1,
@@ -639,7 +827,7 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontSize: FontSizes.xs,
-    color: Colors.gray[500],
+    fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: 2,
     marginBottom: Spacing.sm,
@@ -647,7 +835,7 @@ const styles = StyleSheet.create({
   specValue: {
     fontFamily: 'monospace',
     fontSize: FontSizes.sm,
-    color: Colors.blue[500],
+    color: Colors.gray[300],
     lineHeight: 20,
   },
   downloadButton: {
@@ -662,132 +850,34 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.accent,
   },
-  bomPanel: {
-    backgroundColor: Colors.black,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.lg,
-    marginTop: Spacing.lg,
-  },
-  bomContent: {
-    gap: Spacing.md,
-  },
-  bomHeader: {
-    marginBottom: Spacing.sm,
-  },
-  bomProjectName: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.lg,
-    color: Colors.accent,
-    marginBottom: Spacing.xs,
-  },
-  bomMeta: {
-    fontSize: FontSizes.xs,
-    color: Colors.gray[500],
-  },
-  bomItemsContainer: {
-    gap: Spacing.sm,
-  },
-  bomItem: {
-    backgroundColor: Colors.panel,
-    borderRadius: 8,
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  bomItemHeader: {
+  continueButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  bomPartNumber: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.xs,
-    color: Colors.gray[500],
-  },
-  bomQuantity: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.sm,
-    color: Colors.accent,
-    fontWeight: 'bold',
-  },
-  bomPartName: {
-    fontSize: FontSizes.sm,
-    color: Colors.white,
-    fontWeight: 'bold',
-    marginBottom: Spacing.xs,
-  },
-  bomPartDesc: {
-    fontSize: FontSizes.xs,
-    color: Colors.gray[400],
-    marginBottom: Spacing.sm,
-  },
-  bomItemMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  bomItemMetaText: {
-    fontSize: FontSizes.xs,
-    color: Colors.gray[500],
-  },
-  bomItemCost: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.sm,
-    color: Colors.green[400],
-  },
-  bomMoreItems: {
-    fontSize: FontSizes.sm,
-    color: Colors.gray[500],
-    textAlign: 'center',
-    paddingVertical: Spacing.sm,
-  },
-  bomTotalSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(22, 101, 52, 0.2)',
-    padding: Spacing.md,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(22, 101, 52, 0.5)',
-  },
-  bomTotalLabel: {
-    fontSize: FontSizes.sm,
-    color: Colors.green[500],
-    fontWeight: 'bold',
-  },
-  bomTotalValue: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.lg,
-    color: Colors.green[400],
-    fontWeight: 'bold',
-  },
-  bomNotes: {
-    fontSize: FontSizes.xs,
-    color: Colors.gray[500],
-    fontStyle: 'italic',
-    marginTop: Spacing.sm,
-  },
-  generateBomButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.panel,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.xl,
-    borderRadius: 8,
     gap: Spacing.sm,
+    backgroundColor: Colors.accent,
+    paddingVertical: Spacing.md,
+    borderRadius: 8,
+    marginBottom: Spacing.md,
   },
-  generateBomText: {
-    fontSize: FontSizes.sm,
-    color: Colors.gray[300],
+  continueButtonText: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.md,
     fontWeight: 'bold',
+    color: Colors.black,
   },
-  generateBomSubtext: {
-    fontSize: FontSizes.xs,
-    color: Colors.gray[500],
+  tryAnotherButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    paddingVertical: Spacing.md,
+    borderRadius: 8,
+  },
+  tryAnotherText: {
+    fontSize: FontSizes.sm,
+    color: Colors.secondary,
   },
 });

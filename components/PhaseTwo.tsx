@@ -23,6 +23,7 @@ interface Props {
   onComplete: (innovation: InnovationResult) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  onBack: () => void;
   onReset: () => void;
 }
 
@@ -49,6 +50,7 @@ export default function PhaseTwo({
   onComplete,
   isLoading,
   setIsLoading,
+  onBack,
   onReset,
 }: Props) {
   const [selectedPattern, setSelectedPattern] = useState<SITPattern>('subtraction');
@@ -80,10 +82,16 @@ export default function PhaseTwo({
             </Text>
           </View>
         </View>
-        <TouchableOpacity onPress={onReset} style={styles.resetButton}>
-          <Ionicons name="refresh" size={14} color={Colors.dim} />
-          <Text style={styles.resetText}>Reset</Text>
-        </TouchableOpacity>
+        <View style={styles.navButtons}>
+          <TouchableOpacity onPress={onBack} style={styles.navButton}>
+            <Ionicons name="arrow-back" size={14} color={Colors.gray[400]} />
+            <Text style={styles.navButtonText}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onReset} style={styles.navButton}>
+            <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
+            <Text style={styles.navButtonText}>Reset</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.panel}>
@@ -210,14 +218,23 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.dim,
   },
-  resetButton: {
+  navButtons: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  navButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 6,
   },
-  resetText: {
+  navButtonText: {
     fontSize: FontSizes.xs,
-    color: Colors.dim,
+    color: Colors.gray[400],
   },
   panel: {
     backgroundColor: Colors.panel,

@@ -17,7 +17,8 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 │   ├── WelcomeScreen.tsx # Welcome/splash screen
 │   ├── PhaseOne.tsx     # Closed World Scan - product analysis + camera
 │   ├── PhaseTwo.tsx     # Pattern Application - SIT mutation
-│   └── PhaseThree.tsx   # Architect - specs & visualization
+│   ├── PhaseThree.tsx   # Architect - specs & visualization
+│   └── PhaseFour.tsx    # Build - BOM generation & exports
 ├── constants/
 │   └── theme.ts         # Colors, spacing, font sizes
 ├── hooks/
@@ -31,10 +32,11 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 ```
 
 ## Key Features
-1. **Three-Phase SIT Workflow**
+1. **Four-Phase SIT Workflow**
    - Phase 1 (Scan): Analyze product via text or camera
-   - Phase 2 (Mutate): Apply SIT patterns
-   - Phase 3 (Architect): Generate specs and visualizations
+   - Phase 2 (Mutate): Apply SIT patterns with Back/Reset navigation
+   - Phase 3 (Architect): Generate specs and visualizations with tabbed 2D/3D viewer
+   - Phase 4 (Build): Bill of Materials generation with export options
 
 2. **Camera Support**: Use device camera to scan physical objects
 
@@ -45,9 +47,15 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - View past innovations from History screen
    - Resume any saved innovation at any phase
 
-5. **Export**: Share specs as JSON, 3D scenes as OBJ/STL
+5. **Enhanced Phase 3 UI**:
+   - Streamlined Innovation Summary with SIT Pattern, Key Benefit (green), Constraint (purple)
+   - Tabbed 2D/3D visualization panel with generation timer
+   - Collapsible specifications with color-coded sections
+   - Continue to Build button to advance to Phase 4
 
-6. **Bill of Materials**: Generate BOM for innovation concepts (Phase 4)
+6. **Export Options**: Specs as JSON, 3D scenes as OBJ/STL, BOM as CSV
+
+7. **Global Navigation**: Back + Reset buttons on all phases (2, 3, 4)
 
 ## API Endpoints (Production Server)
 Base URL: `https://reversr-vsillah.replit.app`
