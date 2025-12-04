@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -23,16 +24,58 @@ interface Props {
   innovation: InnovationResult;
   spec: TechnicalSpec;
   bom: BillOfMaterials | null;
+  has2D: boolean;
+  has3D: boolean;
   onBOMGenerated: (bom: BillOfMaterials) => void;
   onBack: () => void;
   onReset: () => void;
   onTryAnotherPattern: () => void;
 }
 
+type ArtifactStatus = {
+  id: string;
+  name: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  ready: boolean;
+};
+
+const MANUFACTURERS = [
+  {
+    id: 'xometry',
+    name: 'Xometry',
+    subtitle: 'CNC, 3D Printing, Sheet Metal',
+    icon: 'build-outline' as const,
+    url: 'https://www.xometry.com',
+  },
+  {
+    id: 'shapeways',
+    name: 'Shapeways',
+    subtitle: '3D Printing Marketplace',
+    icon: 'print-outline' as const,
+    url: 'https://www.shapeways.com',
+  },
+  {
+    id: 'protolabs',
+    name: 'Protolabs',
+    subtitle: 'Rapid Prototyping',
+    icon: 'flash-outline' as const,
+    url: 'https://www.protolabs.com',
+  },
+  {
+    id: 'jlcpcb',
+    name: 'JLCPCB',
+    subtitle: 'PCB & 3D Printing',
+    icon: 'hardware-chip-outline' as const,
+    url: 'https://www.jlcpcb.com',
+  },
+];
+
 export default function PhaseFour({
   innovation,
   spec,
   bom,
+  has2D,
+  has3D,
   onBOMGenerated,
   onBack,
   onReset,
@@ -145,6 +188,56 @@ export default function PhaseFour({
         <Text style={styles.conceptDesc}>{innovation.conceptDescription}</Text>
       </View>
 
+      {/* Manufacturing Readiness Tracker */}
+      {(() => {
+        const artifacts: ArtifactStatus[] = [
+          { id: 'specs', name: 'Specs', icon: 'checkmark-circle', ready: !!spec },
+          { id: 'bom', name: 'BOM', icon: 'checkmark-circle', ready: !!localBom },
+          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
+          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
+        ];
+        const readyCount = artifacts.filter(a => a.ready).length;
+        const percentage = Math.round((readyCount / artifacts.length) * 100);
+        
+        return (
+          <View style={styles.readinessPanel}>
+            <View style={styles.readinessHeader}>
+              <View style={styles.readinessLeft}>
+                <Ionicons name="rocket-outline" size={18} color={Colors.gray[400]} />
+                <View>
+                  <Text style={styles.readinessTitle}>Manufacturing Readiness</Text>
+                  <Text style={styles.readinessSubtitle}>Generate artifacts for prototype manufacturing</Text>
+                </View>
+              </View>
+              <View style={styles.readinessBadge}>
+                <Text style={styles.readinessPercent}>{percentage}% Ready</Text>
+              </View>
+            </View>
+            <View style={styles.artifactGrid}>
+              {artifacts.map((artifact) => (
+                <View 
+                  key={artifact.id} 
+                  style={[
+                    styles.artifactItem,
+                    artifact.ready && styles.artifactItemReady,
+                  ]}
+                >
+                  <Ionicons 
+                    name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
+                    size={24} 
+                    color={artifact.ready ? Colors.accent : Colors.gray[600]} 
+                  />
+                  <Text style={[
+                    styles.artifactName,
+                    artifact.ready && styles.artifactNameReady,
+                  ]}>{artifact.name}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      })()}
+
       <View style={styles.bomPanel}>
         <View style={styles.panelHeader}>
           <View style={styles.terminalDots}>
@@ -231,6 +324,31 @@ export default function PhaseFour({
           </View>
         </View>
       )}
+
+      {/* Send to Manufacturer Section */}
+      <View style={styles.manufacturerPanel}>
+        <View style={styles.manufacturerHeader}>
+          <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
+          <Text style={styles.manufacturerTitle}>Send to Manufacturer</Text>
+        </View>
+        <View style={styles.manufacturerGrid}>
+          {MANUFACTURERS.map((mfr) => (
+            <TouchableOpacity
+              key={mfr.id}
+              style={styles.manufacturerCard}
+              onPress={() => Linking.openURL(mfr.url)}
+            >
+              <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
+              <Text style={styles.manufacturerName}>{mfr.name}</Text>
+              <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
+              <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={styles.manufacturerNote}>
+          Upload your 3D files (.OBJ, .STL) and BOM to get instant quotes from these manufacturers.
+        </Text>
+      </View>
 
       <View style={styles.actionsPanel}>
         <Text style={styles.actionsTitle}>What's Next?</Text>
@@ -319,6 +437,76 @@ const styles = StyleSheet.create({
   conceptDesc: {
     fontSize: FontSizes.sm,
     color: Colors.gray[300],
+  },
+  readinessPanel: {
+    backgroundColor: Colors.panel,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  readinessHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.lg,
+  },
+  readinessLeft: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    flex: 1,
+  },
+  readinessTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  readinessSubtitle: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    marginTop: 2,
+  },
+  readinessBadge: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 16,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+  },
+  readinessPercent: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.xs,
+    color: Colors.accent,
+    fontWeight: 'bold',
+  },
+  artifactGrid: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  artifactItem: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: Spacing.md,
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  artifactItemReady: {
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    borderColor: Colors.accent,
+  },
+  artifactName: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  artifactNameReady: {
+    color: Colors.accent,
   },
   bomPanel: {
     backgroundColor: Colors.black,
@@ -559,6 +747,64 @@ const styles = StyleSheet.create({
   exportButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.accent,
+  },
+  manufacturerPanel: {
+    backgroundColor: Colors.panel,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  manufacturerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  manufacturerTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  manufacturerGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  manufacturerCard: {
+    width: '48%',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.md,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  manufacturerName: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.sm,
+    color: Colors.white,
+    marginTop: Spacing.sm,
+    marginBottom: 2,
+  },
+  manufacturerSubtitle: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    textAlign: 'center',
+  },
+  externalIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  manufacturerNote: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    textAlign: 'center',
+    lineHeight: 16,
   },
   actionsPanel: {
     backgroundColor: Colors.panel,

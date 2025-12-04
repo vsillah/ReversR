@@ -27,21 +27,51 @@ interface Props {
   onReset: () => void;
 }
 
-const PATTERN_DETAILS: Record<SITPattern, { description: string }> = {
+const PATTERN_DETAILS: Record<SITPattern, { description: string; steps: string[] }> = {
   'subtraction': {
     description: "Remove an essential component from the system.",
+    steps: [
+      "List the product's internal components.",
+      "Identify an ESSENTIAL component (not just an accessory).",
+      "Remove the component completely from the virtual product.",
+      "Ask: 'What is the benefit of this new form?' or 'How can we replace the missing function using existing resources?'"
+    ],
   },
   'task_unification': {
     description: "Assign a new task to an existing resource.",
+    steps: [
+      "List all internal components and external resources.",
+      "Select one component or resource.",
+      "Assign it an additional task it doesn't currently perform.",
+      "Evaluate: 'Does this new role create value or solve a problem?'"
+    ],
   },
   'multiplication': {
     description: "Copy a component but change a specific attribute.",
+    steps: [
+      "Choose a component from the product.",
+      "Create a copy of that component.",
+      "Modify one attribute of the copy (size, material, location, etc.).",
+      "Explore: 'What new functionality does this variation enable?'"
+    ],
   },
   'division': {
     description: "Divide the product or a component physically or functionally.",
+    steps: [
+      "Select the product or a key component.",
+      "Divide it into separate physical or functional parts.",
+      "Rearrange the parts in space or time.",
+      "Consider: 'Does this separation create new use cases or benefits?'"
+    ],
   },
   'attribute_dependency': {
     description: "Create a correlation between two independent variables.",
+    steps: [
+      "List the product's attributes (color, size, speed, etc.).",
+      "Identify two currently independent attributes.",
+      "Create a dependency: when one changes, the other responds.",
+      "Assess: 'Does this dynamic relationship add value?'"
+    ],
   },
 };
 
@@ -156,13 +186,22 @@ export default function PhaseTwo({
           ))}
         </View>
 
-        <View style={styles.patternInfo}>
-          <Ionicons name="information-circle" size={16} color={Colors.secondary} />
-          <View style={styles.patternInfoContent}>
-            <Text style={styles.patternInfoTitle}>{SIT_PATTERN_LABELS[selectedPattern]}</Text>
-            <Text style={styles.patternInfoDesc}>
-              {PATTERN_DETAILS[selectedPattern].description}
-            </Text>
+        <View style={styles.breakdownPanel}>
+          <View style={styles.breakdownHeader}>
+            <Ionicons name="information-circle" size={18} color={Colors.secondary} />
+            <Text style={styles.breakdownTitle}>{SIT_PATTERN_LABELS[selectedPattern]} Breakdown</Text>
+          </View>
+          <Text style={styles.breakdownQuote}>
+            "{PATTERN_DETAILS[selectedPattern].description}"
+          </Text>
+          <View style={styles.breakdownSteps}>
+            {PATTERN_DETAILS[selectedPattern].steps.map((step, index) => (
+              <View key={index} style={styles.stepItem}>
+                <Text style={styles.stepArrow}>→</Text>
+                <Text style={styles.stepNumber}>{index + 1}.</Text>
+                <Text style={styles.stepText}>{step}</Text>
+              </View>
+            ))}
           </View>
         </View>
 
@@ -352,30 +391,56 @@ const styles = StyleSheet.create({
   patternButtonTextActive: {
     color: Colors.white,
   },
-  patternInfo: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+  breakdownPanel: {
+    backgroundColor: 'rgba(0,0,0,0.3)',
     borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.md,
+    borderColor: Colors.secondary,
     borderRadius: 8,
+    padding: Spacing.md,
     marginBottom: Spacing.lg,
   },
-  patternInfoContent: {
-    flex: 1,
+  breakdownHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
-  patternInfoTitle: {
+  breakdownTitle: {
     fontFamily: 'monospace',
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
     color: Colors.secondary,
-    marginBottom: 4,
   },
-  patternInfoDesc: {
+  breakdownQuote: {
     fontSize: FontSizes.sm,
     color: Colors.gray[300],
     fontStyle: 'italic',
+    marginBottom: Spacing.md,
+    paddingLeft: Spacing.sm,
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.secondary,
+  },
+  breakdownSteps: {
+    gap: Spacing.sm,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+  },
+  stepArrow: {
+    fontSize: FontSizes.sm,
+    color: Colors.secondary,
+    width: 16,
+  },
+  stepNumber: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[500],
+    width: 18,
+  },
+  stepText: {
+    flex: 1,
+    fontSize: FontSizes.sm,
+    color: Colors.gray[300],
   },
   errorText: {
     color: Colors.red[500],
