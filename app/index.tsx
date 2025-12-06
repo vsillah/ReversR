@@ -468,14 +468,17 @@ export default function HomeScreen() {
             />
           ) : (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-              <Text style={{ color: '#9CA3AF', fontSize: 16, textAlign: 'center', marginBottom: 16 }}>
-                Technical specifications are required for the Build phase.
+              <Text style={{ color: '#9CA3AF', fontSize: 16, textAlign: 'center', marginBottom: 8 }}>
+                Specifications not found
+              </Text>
+              <Text style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', marginBottom: 20 }}>
+                Go back to the Architect phase to generate the technical specs for your innovation.
               </Text>
               <TouchableOpacity 
                 onPress={handleBack}
                 style={{ backgroundColor: '#22D3EE', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 }}
               >
-                <Text style={{ color: '#000', fontWeight: 'bold' }}>Go Back to Architect</Text>
+                <Text style={{ color: '#000', fontWeight: 'bold' }}>Go to Architect</Text>
               </TouchableOpacity>
             </View>
           )
