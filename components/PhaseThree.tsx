@@ -262,6 +262,7 @@ export default function PhaseThree({
     if (existingSpec) {
       setSpec(existingSpec);
       setStatus(existingImageUrl || existingThreeDScene ? 'complete' : 'specs_ready');
+      onComplete(existingSpec, existingThreeDScene ?? null, existingImageUrl ?? null);
       return;
     }
     setError(null);
@@ -270,11 +271,12 @@ export default function PhaseThree({
       const result = await generateTechnicalSpec(innovation);
       setSpec(result);
       setStatus('specs_ready');
+      onComplete(result, existingThreeDScene ?? null, existingImageUrl ?? null);
     } catch (err: unknown) {
       console.error('Error generating specs:', err);
       setError(formatError(err));
     }
-  }, [innovation, existingSpec, existingImageUrl, existingThreeDScene]);
+  }, [innovation, existingSpec, existingImageUrl, existingThreeDScene, onComplete]);
 
   useEffect(() => {
     fetchSpecs();
