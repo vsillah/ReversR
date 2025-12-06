@@ -106,9 +106,9 @@ export default function PhaseTwo({
         <View style={styles.headerLeft}>
           <Ionicons name="options-outline" size={28} color={Colors.secondary} />
           <View style={styles.headerText}>
-            <Text style={styles.title}>Phase 2: Pattern Application</Text>
+            <Text style={styles.title}>Phase 2: Reverse</Text>
             <Text style={styles.description}>
-              Force a change. Select a SIT pattern to mutate the Closed World.
+              Force a change. Select a SIT pattern to reverse the Closed World.
             </Text>
           </View>
         </View>
