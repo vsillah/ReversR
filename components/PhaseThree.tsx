@@ -804,12 +804,18 @@ export default function PhaseThree({
         </View>
       )}
 
-      {spec && (
+      {/* Continue to Build button - shows generating status or active button */}
+      {status === 'generating_specs' ? (
+        <View style={[styles.continueButton, styles.continueButtonDisabled]}>
+          <ActivityIndicator size="small" color={Colors.gray[500]} style={{ marginRight: 8 }} />
+          <Text style={styles.continueButtonTextDisabled}>Generating specifications...</Text>
+        </View>
+      ) : spec ? (
         <TouchableOpacity style={styles.continueButton} onPress={onContinueToBuild}>
           <Text style={styles.continueButtonText}>Continue to Build</Text>
           <Ionicons name="arrow-forward" size={20} color={Colors.black} />
         </TouchableOpacity>
-      )}
+      ) : null}
 
       <TouchableOpacity style={styles.tryAnotherButton} onPress={onTryAnotherPattern}>
         <Ionicons name="shuffle" size={18} color={Colors.secondary} />
@@ -1498,6 +1504,14 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     fontWeight: 'bold',
     color: Colors.black,
+  },
+  continueButtonDisabled: {
+    backgroundColor: Colors.gray[800],
+  },
+  continueButtonTextDisabled: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.md,
+    color: Colors.gray[500],
   },
   tryAnotherButton: {
     flexDirection: 'row',
