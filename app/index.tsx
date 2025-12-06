@@ -24,6 +24,8 @@ import {
   SITPattern,
   BillOfMaterials,
   useGemini,
+  AngleImage,
+  generate2DMultiAngleImages,
 } from "../hooks/useGemini";
 import {
   SavedInnovation,
@@ -79,6 +81,7 @@ export default function HomeScreen() {
   
   const [imageGenStatus, setImageGenStatus] = useState<ImageGenStatus>('idle');
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
+  const [generatedMultiAngleImages, setGeneratedMultiAngleImages] = useState<AngleImage[]>([]);
   const imageGenInnovationId = useRef<string | null>(null);
   
   const { generate2DVisualization } = useGemini();
@@ -108,24 +111,32 @@ export default function HomeScreen() {
     imageGenInnovationId.current = generationToken;
     setImageGenStatus('generating');
     setGeneratedImageBase64(null);
+    setGeneratedMultiAngleImages([]);
     
     try {
-      const result = await generate2DVisualization(
-        innovation.conceptName,
-        innovation.conceptDescription
-      );
+      const result = await generate2DMultiAngleImages(innovation, ['front', 'side', 'iso']);
       
       if (imageGenInnovationId.current !== generationToken) {
+        console.log('Image generation result discarded (token mismatch)');
         return;
       }
       
-      if (result) {
-        setGeneratedImageBase64(result);
+      const successfulImages = result.filter(img => img.imageData);
+      
+      if (successfulImages.length > 0) {
+        const formattedImages = result.map(img => ({
+          ...img,
+          imageData: img.imageData ? `data:image/png;base64,${img.imageData}` : null,
+        }));
+        
+        setGeneratedMultiAngleImages(formattedImages);
+        const primaryImage = formattedImages.find(img => img.imageData)?.imageData || null;
+        setGeneratedImageBase64(primaryImage);
         setImageGenStatus('complete');
         
         setContext(prev => {
           if (prev.id === innovationId) {
-            const updated = { ...prev, imageUrl: result };
+            const updated = { ...prev, imageUrl: primaryImage };
             autoSave(updated);
             return updated;
           }
@@ -140,7 +151,7 @@ export default function HomeScreen() {
         setImageGenStatus('error');
       }
     }
-  }, [generate2DVisualization, autoSave]);
+  }, [autoSave]);
 
   const handleImageNotificationPress = useCallback(() => {
     if (imageGenStatus === 'complete' && context.phase !== 3) {
@@ -421,6 +432,7 @@ export default function HomeScreen() {
             existingImageUrl={context.imageUrl}
             existingThreeDScene={context.threeDScene}
             imageGenerating={imageGenStatus === 'generating'}
+            multiAngleImages={generatedMultiAngleImages}
             onComplete={handlePhaseThreeComplete}
             onContinueToBuild={handleContinueToBuild}
             onBack={handleBack}
