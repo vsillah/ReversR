@@ -65,6 +65,19 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 
 8. **Global Navigation**: Back + Reset buttons on all phases (2, 3, 4)
 
+9. **Background Image Generation**:
+   - 2D sketches generate lazily in the background after Phase 2 completes
+   - Floating notification shows generation progress across all phases
+   - Users can navigate freely while generation continues
+   - Notification auto-dismisses after 5 seconds when complete
+   - Tapping notification navigates directly to Phase 3 to view the sketch
+
+10. **Interactive 2D Image Viewer**:
+    - Fullscreen modal with dark background
+    - Pinch-to-zoom and pan controls
+    - Save to device photo library
+    - Share via system share sheet
+
 ## API Endpoints (Production Server)
 Base URL: `https://reversr-vsillah.replit.app`
 
