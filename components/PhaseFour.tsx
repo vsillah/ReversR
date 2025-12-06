@@ -282,18 +282,18 @@ export default function PhaseFour({
               {localBom.items.map((item, index) => (
                 <View key={index} style={styles.bomItem}>
                   <View style={styles.bomItemHeader}>
-                    <Text style={styles.bomPartNumber}>{item.partNumber}</Text>
+                    <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
                     <Text style={styles.bomQuantity}>x{item.quantity}</Text>
                   </View>
-                  <Text style={styles.bomPartName}>{item.partName}</Text>
-                  <Text style={styles.bomPartDesc}>{item.description}</Text>
+                  <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
+                  <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
                   <View style={styles.bomItemMeta}>
                     <Text style={styles.bomItemMetaText}>{item.material}</Text>
                     <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
                   </View>
                   <View style={styles.bomItemFooter}>
-                    <Text style={styles.bomSupplier}>{item.supplier}</Text>
-                    <Text style={styles.bomLeadTime}>{item.leadTime}</Text>
+                    <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
+                    <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
                   </View>
                 </View>
               ))}
@@ -608,6 +608,7 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
+    flex: 1,
   },
   bomQuantity: {
     fontFamily: 'monospace',
@@ -644,14 +645,17 @@ const styles = StyleSheet.create({
   bomItemFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   bomSupplier: {
     fontSize: FontSizes.xs,
     color: Colors.blue[500],
+    flex: 1,
   },
   bomLeadTime: {
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
+    marginLeft: Spacing.xs,
   },
   bomTotalSection: {
     flexDirection: 'row',
