@@ -102,6 +102,12 @@ export default function PhaseThree({
   
   const currentAngleImage = availableAngles.find(img => img.id === selectedAngleId) || availableAngles[0] || null;
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
+  
+  const normalizeImageUri = (data: string | null | undefined): string | null => {
+    if (!data) return null;
+    if (data.startsWith('data:image/')) return data;
+    return `data:image/png;base64,${data}`;
+  };
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
   
   const scale = useRef(new Animated.Value(1)).current;
@@ -565,7 +571,7 @@ export default function PhaseThree({
                   }}
                 >
                   <Image
-                    source={{ uri: currentAngleImage?.imageData || `data:image/png;base64,${imageBase64}` }}
+                    source={{ uri: normalizeImageUri(currentAngleImage?.imageData) || `data:image/png;base64,${imageBase64}` }}
                     style={styles.generatedImage}
                     resizeMode="contain"
                   />
@@ -835,7 +841,7 @@ export default function PhaseThree({
           
           <View style={styles.modalImageContainer} {...panResponder.panHandlers}>
             <Animated.Image
-              source={{ uri: currentAngleImage?.imageData || `data:image/png;base64,${imageBase64}` }}
+              source={{ uri: normalizeImageUri(currentAngleImage?.imageData) || `data:image/png;base64,${imageBase64}` }}
               style={[
                 styles.modalImage,
                 {
