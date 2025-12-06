@@ -25,6 +25,7 @@ import {
   generateTechnicalSpec,
   generate2DImage,
   generate3DScene,
+  AngleImage,
 } from '../hooks/useGemini';
 
 interface Props {
@@ -33,6 +34,7 @@ interface Props {
   existingImageUrl?: string | null;
   existingThreeDScene?: ThreeDSceneDescriptor | null;
   imageGenerating?: boolean;
+  multiAngleImages?: AngleImage[];
   onComplete: (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
@@ -52,6 +54,7 @@ export default function PhaseThree({
   existingImageUrl,
   existingThreeDScene,
   imageGenerating = false,
+  multiAngleImages = [],
   onComplete,
   onContinueToBuild,
   onBack,
@@ -81,6 +84,10 @@ export default function PhaseThree({
   const [specsExpanded, setSpecsExpanded] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [selectedAngleIndex, setSelectedAngleIndex] = useState(0);
+  
+  const availableAngles = multiAngleImages.filter(img => img.imageData);
+  const currentAngleImage = availableAngles[selectedAngleIndex] || null;
   
   const scale = useRef(new Animated.Value(1)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -140,7 +147,8 @@ export default function PhaseThree({
   };
 
   const handleSaveImage = async () => {
-    if (!imageBase64) return;
+    const imageToSave = currentAngleImage?.imageData || (imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+    if (!imageToSave) return;
     
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -149,27 +157,63 @@ export default function PhaseThree({
         return;
       }
 
-      const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_2D.png`;
+      const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
+      const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
+      const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
       const fileUri = FileSystem.documentDirectory + filename;
-      await FileSystem.writeAsStringAsync(fileUri, imageBase64, {
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
       await MediaLibrary.saveToLibraryAsync(fileUri);
-      Alert.alert('Saved', 'Image saved to your photo library.');
+      Alert.alert('Saved', `${currentAngleImage?.label || 'Image'} saved to your photo library.`);
     } catch (e) {
       console.error('Save image error:', e);
       Alert.alert('Error', 'Failed to save image.');
     }
   };
 
+  const handleSaveAllAngles = async () => {
+    if (availableAngles.length === 0) return;
+    
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please allow access to save images.');
+        return;
+      }
+
+      let savedCount = 0;
+      for (const angle of availableAngles) {
+        if (angle.imageData) {
+          const base64Data = angle.imageData.replace(/^data:image\/\w+;base64,/, '');
+          const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angle.label.replace(/\s+/g, '_')}.png`;
+          const fileUri = FileSystem.documentDirectory + filename;
+          await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          await MediaLibrary.saveToLibraryAsync(fileUri);
+          savedCount++;
+        }
+      }
+      
+      Alert.alert('Saved', `${savedCount} images saved to your photo library.`);
+    } catch (e) {
+      console.error('Save all images error:', e);
+      Alert.alert('Error', 'Failed to save images.');
+    }
+  };
+
   const handleShareImage = async () => {
-    if (!imageBase64) return;
+    const imageToShare = currentAngleImage?.imageData || (imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+    if (!imageToShare) return;
 
     try {
-      const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_2D.png`;
+      const base64Data = imageToShare.replace(/^data:image\/\w+;base64,/, '');
+      const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
+      const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
       const fileUri = FileSystem.documentDirectory + filename;
-      await FileSystem.writeAsStringAsync(fileUri, imageBase64, {
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
@@ -453,8 +497,30 @@ export default function PhaseThree({
               </TouchableOpacity>
             </View>
           ) : activeTab === '2d' ? (
-            imageBase64 ? (
+            (availableAngles.length > 0 || imageBase64) ? (
               <View style={styles.generatedImageContainer}>
+                {availableAngles.length > 1 && (
+                  <View style={styles.angleSelector}>
+                    {availableAngles.map((angle, index) => (
+                      <TouchableOpacity
+                        key={angle.id}
+                        style={[
+                          styles.angleSelectorButton,
+                          selectedAngleIndex === index && styles.angleSelectorButtonActive
+                        ]}
+                        onPress={() => setSelectedAngleIndex(index)}
+                      >
+                        <Text style={[
+                          styles.angleSelectorText,
+                          selectedAngleIndex === index && styles.angleSelectorTextActive
+                        ]}>
+                          {angle.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                
                 <TouchableOpacity 
                   activeOpacity={0.9}
                   onPress={() => {
@@ -463,7 +529,7 @@ export default function PhaseThree({
                   }}
                 >
                   <Image
-                    source={{ uri: `data:image/png;base64,${imageBase64}` }}
+                    source={{ uri: currentAngleImage?.imageData || `data:image/png;base64,${imageBase64}` }}
                     style={styles.generatedImage}
                     resizeMode="contain"
                   />
@@ -472,6 +538,29 @@ export default function PhaseThree({
                     <Text style={styles.expandHintText}>Tap to expand</Text>
                   </View>
                 </TouchableOpacity>
+                
+                {availableAngles.length > 1 && (
+                  <View style={styles.angleNavigation}>
+                    <TouchableOpacity 
+                      style={[styles.angleNavButton, selectedAngleIndex === 0 && styles.angleNavButtonDisabled]}
+                      onPress={() => setSelectedAngleIndex(Math.max(0, selectedAngleIndex - 1))}
+                      disabled={selectedAngleIndex === 0}
+                    >
+                      <Ionicons name="chevron-back" size={20} color={selectedAngleIndex === 0 ? Colors.gray[600] : Colors.accent} />
+                    </TouchableOpacity>
+                    <Text style={styles.angleIndicator}>
+                      {selectedAngleIndex + 1} / {availableAngles.length}
+                    </Text>
+                    <TouchableOpacity 
+                      style={[styles.angleNavButton, selectedAngleIndex === availableAngles.length - 1 && styles.angleNavButtonDisabled]}
+                      onPress={() => setSelectedAngleIndex(Math.min(availableAngles.length - 1, selectedAngleIndex + 1))}
+                      disabled={selectedAngleIndex === availableAngles.length - 1}
+                    >
+                      <Ionicons name="chevron-forward" size={20} color={selectedAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.accent} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                
                 <View style={styles.imageActions}>
                   <TouchableOpacity 
                     style={styles.imageActionButton}
@@ -497,13 +586,15 @@ export default function PhaseThree({
                     <Ionicons name="share-outline" size={18} color={Colors.accent} />
                     <Text style={styles.imageActionText}>Share</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.imageActionButton}
-                    onPress={handleGenerate2D}
-                  >
-                    <Ionicons name="refresh" size={18} color={Colors.gray[400]} />
-                    <Text style={[styles.imageActionText, { color: Colors.gray[400] }]}>Regen</Text>
-                  </TouchableOpacity>
+                  {availableAngles.length > 1 && (
+                    <TouchableOpacity 
+                      style={styles.imageActionButton}
+                      onPress={handleSaveAllAngles}
+                    >
+                      <Ionicons name="images-outline" size={18} color={Colors.secondary} />
+                      <Text style={[styles.imageActionText, { color: Colors.secondary }]}>Save All</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ) : imageGenerating ? (
@@ -686,7 +777,10 @@ export default function PhaseThree({
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>2D Concept Sketch</Text>
+            <Text style={styles.modalTitle}>
+              {currentAngleImage?.label || '2D Concept Sketch'}
+              {availableAngles.length > 1 && ` (${selectedAngleIndex + 1}/${availableAngles.length})`}
+            </Text>
             <TouchableOpacity 
               style={styles.modalCloseButton}
               onPress={() => setImageModalVisible(false)}
@@ -697,7 +791,7 @@ export default function PhaseThree({
           
           <View style={styles.modalImageContainer} {...panResponder.panHandlers}>
             <Animated.Image
-              source={{ uri: `data:image/png;base64,${imageBase64}` }}
+              source={{ uri: currentAngleImage?.imageData || `data:image/png;base64,${imageBase64}` }}
               style={[
                 styles.modalImage,
                 {
@@ -711,6 +805,41 @@ export default function PhaseThree({
               resizeMode="contain"
             />
           </View>
+
+          {availableAngles.length > 1 && (
+            <View style={styles.modalAngleNav}>
+              <TouchableOpacity 
+                style={[styles.modalAngleButton, selectedAngleIndex === 0 && styles.modalAngleButtonDisabled]}
+                onPress={() => {
+                  resetZoom();
+                  setSelectedAngleIndex(Math.max(0, selectedAngleIndex - 1));
+                }}
+                disabled={selectedAngleIndex === 0}
+              >
+                <Ionicons name="chevron-back" size={28} color={selectedAngleIndex === 0 ? Colors.gray[600] : Colors.white} />
+              </TouchableOpacity>
+              
+              <View style={styles.modalAngleDots}>
+                {availableAngles.map((_, index) => (
+                  <View 
+                    key={index} 
+                    style={[styles.modalAngleDot, selectedAngleIndex === index && styles.modalAngleDotActive]} 
+                  />
+                ))}
+              </View>
+              
+              <TouchableOpacity 
+                style={[styles.modalAngleButton, selectedAngleIndex === availableAngles.length - 1 && styles.modalAngleButtonDisabled]}
+                onPress={() => {
+                  resetZoom();
+                  setSelectedAngleIndex(Math.min(availableAngles.length - 1, selectedAngleIndex + 1));
+                }}
+                disabled={selectedAngleIndex === availableAngles.length - 1}
+              >
+                <Ionicons name="chevron-forward" size={28} color={selectedAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.white} />
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View style={styles.modalControls}>
             <TouchableOpacity style={styles.zoomButton} onPress={handleZoomOut}>
@@ -731,6 +860,12 @@ export default function PhaseThree({
               <Ionicons name="share-outline" size={20} color={Colors.accent} />
               <Text style={styles.modalActionText}>Share</Text>
             </TouchableOpacity>
+            {availableAngles.length > 1 && (
+              <TouchableOpacity style={styles.modalActionButton} onPress={handleSaveAllAngles}>
+                <Ionicons name="images-outline" size={20} color={Colors.secondary} />
+                <Text style={[styles.modalActionText, { color: Colors.secondary }]}>All</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>
@@ -1028,6 +1163,94 @@ const styles = StyleSheet.create({
   regenerateText: {
     fontSize: FontSizes.xs,
     color: Colors.gray[400],
+  },
+  angleSelector: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 8,
+    marginBottom: Spacing.sm,
+  },
+  angleSelectorButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: 6,
+    backgroundColor: Colors.panel,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  angleSelectorButtonActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  angleSelectorText: {
+    fontSize: FontSizes.xs,
+    fontFamily: 'monospace',
+    color: Colors.gray[400],
+  },
+  angleSelectorTextActive: {
+    color: Colors.black,
+    fontWeight: 'bold',
+  },
+  angleNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  angleNavButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.panel,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  angleNavButtonDisabled: {
+    opacity: 0.5,
+  },
+  angleIndicator: {
+    fontSize: FontSizes.sm,
+    fontFamily: 'monospace',
+    color: Colors.gray[400],
+  },
+  modalAngleNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalAngleButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalAngleButtonDisabled: {
+    opacity: 0.3,
+  },
+  modalAngleDots: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  modalAngleDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.gray[600],
+  },
+  modalAngleDotActive: {
+    backgroundColor: Colors.accent,
   },
   scene3dContainer: {
     padding: Spacing.md,
