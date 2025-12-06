@@ -482,11 +482,13 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       
-      <ImageGenerationNotification
-        status={imageGenStatus}
-        onPress={handleImageNotificationPress}
-        onDismiss={handleImageNotificationDismiss}
-      />
+      {context.phase >= 3 && (
+        <ImageGenerationNotification
+          status={imageGenStatus}
+          onPress={handleImageNotificationPress}
+          onDismiss={handleImageNotificationDismiss}
+        />
+      )}
     </View>
   );
 }
