@@ -84,8 +84,6 @@ export default function PhaseThree({
   const [specsExpanded, setSpecsExpanded] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
   const [imageModalVisible, setImageModalVisible] = useState(false);
-  const [selectedAngleIndex, setSelectedAngleIndex] = useState(0);
-  
   const ALL_ANGLES = [
     { id: 'front', label: 'Front View' },
     { id: 'side', label: 'Side View' },
@@ -93,7 +91,17 @@ export default function PhaseThree({
   ];
   
   const availableAngles = multiAngleImages.filter(img => img.imageData);
-  const currentAngleImage = availableAngles[selectedAngleIndex] || null;
+  const [selectedAngleId, setSelectedAngleId] = useState<string | null>(null);
+  
+  // Auto-select first available angle when it loads
+  useEffect(() => {
+    if (availableAngles.length > 0 && !selectedAngleId) {
+      setSelectedAngleId(availableAngles[0].id);
+    }
+  }, [availableAngles, selectedAngleId]);
+  
+  const currentAngleImage = availableAngles.find(img => img.id === selectedAngleId) || availableAngles[0] || null;
+  const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
   
   const scale = useRef(new Animated.Value(1)).current;
@@ -508,11 +516,10 @@ export default function PhaseThree({
               <View style={styles.generatedImageContainer}>
                 {(availableAngles.length > 0 || imageGenerating) && (
                   <View style={styles.angleSelector}>
-                    {ALL_ANGLES.map((angleDef, index) => {
+                    {ALL_ANGLES.map((angleDef) => {
                       const loadedAngle = multiAngleImages.find(img => img.id === angleDef.id);
                       const isLoaded = loadedAngle?.imageData;
-                      const loadedIndex = availableAngles.findIndex(img => img.id === angleDef.id);
-                      const isSelected = loadedIndex === selectedAngleIndex && isLoaded;
+                      const isSelected = selectedAngleId === angleDef.id && isLoaded;
                       
                       return (
                         <TouchableOpacity
@@ -523,8 +530,8 @@ export default function PhaseThree({
                             !isLoaded && styles.angleSelectorButtonPending
                           ]}
                           onPress={() => {
-                            if (isLoaded && loadedIndex >= 0) {
-                              setSelectedAngleIndex(loadedIndex);
+                            if (isLoaded) {
+                              setSelectedAngleId(angleDef.id);
                             }
                           }}
                           disabled={!isLoaded}
@@ -571,21 +578,29 @@ export default function PhaseThree({
                 {availableAngles.length > 1 && (
                   <View style={styles.angleNavigation}>
                     <TouchableOpacity 
-                      style={[styles.angleNavButton, selectedAngleIndex === 0 && styles.angleNavButtonDisabled]}
-                      onPress={() => setSelectedAngleIndex(Math.max(0, selectedAngleIndex - 1))}
-                      disabled={selectedAngleIndex === 0}
+                      style={[styles.angleNavButton, currentAngleIndex === 0 && styles.angleNavButtonDisabled]}
+                      onPress={() => {
+                        if (currentAngleIndex > 0) {
+                          setSelectedAngleId(availableAngles[currentAngleIndex - 1].id);
+                        }
+                      }}
+                      disabled={currentAngleIndex === 0}
                     >
-                      <Ionicons name="chevron-back" size={20} color={selectedAngleIndex === 0 ? Colors.gray[600] : Colors.accent} />
+                      <Ionicons name="chevron-back" size={20} color={currentAngleIndex === 0 ? Colors.gray[600] : Colors.accent} />
                     </TouchableOpacity>
                     <Text style={styles.angleIndicator}>
-                      {selectedAngleIndex + 1} / {availableAngles.length}
+                      {currentAngleIndex + 1} / {availableAngles.length}
                     </Text>
                     <TouchableOpacity 
-                      style={[styles.angleNavButton, selectedAngleIndex === availableAngles.length - 1 && styles.angleNavButtonDisabled]}
-                      onPress={() => setSelectedAngleIndex(Math.min(availableAngles.length - 1, selectedAngleIndex + 1))}
-                      disabled={selectedAngleIndex === availableAngles.length - 1}
+                      style={[styles.angleNavButton, currentAngleIndex === availableAngles.length - 1 && styles.angleNavButtonDisabled]}
+                      onPress={() => {
+                        if (currentAngleIndex < availableAngles.length - 1) {
+                          setSelectedAngleId(availableAngles[currentAngleIndex + 1].id);
+                        }
+                      }}
+                      disabled={currentAngleIndex === availableAngles.length - 1}
                     >
-                      <Ionicons name="chevron-forward" size={20} color={selectedAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.accent} />
+                      <Ionicons name="chevron-forward" size={20} color={currentAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.accent} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -808,7 +823,7 @@ export default function PhaseThree({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
               {currentAngleImage?.label || '2D Concept Sketch'}
-              {availableAngles.length > 1 && ` (${selectedAngleIndex + 1}/${availableAngles.length})`}
+              {availableAngles.length > 1 && ` (${currentAngleIndex + 1}/${availableAngles.length})`}
             </Text>
             <TouchableOpacity 
               style={styles.modalCloseButton}
@@ -838,34 +853,38 @@ export default function PhaseThree({
           {availableAngles.length > 1 && (
             <View style={styles.modalAngleNav}>
               <TouchableOpacity 
-                style={[styles.modalAngleButton, selectedAngleIndex === 0 && styles.modalAngleButtonDisabled]}
+                style={[styles.modalAngleButton, currentAngleIndex === 0 && styles.modalAngleButtonDisabled]}
                 onPress={() => {
                   resetZoom();
-                  setSelectedAngleIndex(Math.max(0, selectedAngleIndex - 1));
+                  if (currentAngleIndex > 0) {
+                    setSelectedAngleId(availableAngles[currentAngleIndex - 1].id);
+                  }
                 }}
-                disabled={selectedAngleIndex === 0}
+                disabled={currentAngleIndex === 0}
               >
-                <Ionicons name="chevron-back" size={28} color={selectedAngleIndex === 0 ? Colors.gray[600] : Colors.white} />
+                <Ionicons name="chevron-back" size={28} color={currentAngleIndex === 0 ? Colors.gray[600] : Colors.white} />
               </TouchableOpacity>
               
               <View style={styles.modalAngleDots}>
-                {availableAngles.map((_, index) => (
+                {availableAngles.map((angle, index) => (
                   <View 
-                    key={index} 
-                    style={[styles.modalAngleDot, selectedAngleIndex === index && styles.modalAngleDotActive]} 
+                    key={angle.id} 
+                    style={[styles.modalAngleDot, currentAngleIndex === index && styles.modalAngleDotActive]} 
                   />
                 ))}
               </View>
               
               <TouchableOpacity 
-                style={[styles.modalAngleButton, selectedAngleIndex === availableAngles.length - 1 && styles.modalAngleButtonDisabled]}
+                style={[styles.modalAngleButton, currentAngleIndex === availableAngles.length - 1 && styles.modalAngleButtonDisabled]}
                 onPress={() => {
                   resetZoom();
-                  setSelectedAngleIndex(Math.min(availableAngles.length - 1, selectedAngleIndex + 1));
+                  if (currentAngleIndex < availableAngles.length - 1) {
+                    setSelectedAngleId(availableAngles[currentAngleIndex + 1].id);
+                  }
                 }}
-                disabled={selectedAngleIndex === availableAngles.length - 1}
+                disabled={currentAngleIndex === availableAngles.length - 1}
               >
-                <Ionicons name="chevron-forward" size={28} color={selectedAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.white} />
+                <Ionicons name="chevron-forward" size={28} color={currentAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.white} />
               </TouchableOpacity>
             </View>
           )}
