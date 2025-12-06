@@ -286,3 +286,41 @@ export const generate2DMultiAngleImages = async (innovation: InnovationResult, a
     return [];
   }
 };
+
+export const generate2DSingleAngle = async (innovation: InnovationResult, angleId: string): Promise<AngleImage | null> => {
+  try {
+    const response = await fetchWithRetry<AngleImage>(`${API_BASE}/api/gemini/generate-2d-single-angle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ innovation, angleId })
+    });
+    return response;
+  } catch (error) {
+    console.error(`Single angle generation error (${angleId}):`, error);
+    return null;
+  }
+};
+
+export type AngleProgressCallback = (angle: AngleImage) => void;
+
+export const generate2DAnglesProgressive = async (
+  innovation: InnovationResult,
+  angles: string[] = ['front', 'side', 'iso'],
+  onAngleComplete: AngleProgressCallback
+): Promise<void> => {
+  const promises = angles.map(async (angleId) => {
+    try {
+      const result = await generate2DSingleAngle(innovation, angleId);
+      if (result && result.imageData) {
+        onAngleComplete({
+          ...result,
+          imageData: `data:image/png;base64,${result.imageData}`,
+        });
+      }
+    } catch (error) {
+      console.error(`Progressive generation failed for ${angleId}:`, error);
+    }
+  });
+  
+  await Promise.all(promises);
+};

@@ -589,6 +589,62 @@ const ANGLES = [
   { id: 'iso', label: 'Isometric', prompt: 'isometric 3D perspective view, 45-degree angle showing depth' },
 ];
 
+// Generate single angle - for progressive loading
+app.post('/api/gemini/generate-2d-single-angle', async (req, res) => {
+  try {
+    const { innovation, angleId } = req.body;
+    
+    const angle = ANGLES.find(a => a.id === angleId);
+    if (!angle) {
+      return res.status(400).json({ error: 'Invalid angle ID' });
+    }
+    
+    const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
+
+Description: ${innovation.conceptDescription}
+Innovation Pattern: ${innovation.patternUsed || 'SIT Pattern'}
+Market Benefit: ${innovation.marketBenefit || 'Enhanced functionality'}
+
+VIEW ANGLE: ${angle.prompt}
+
+Generate a clean, professional product concept sketch with:
+- ${angle.label} showing the product clearly
+- Clean technical line drawings
+- Labels pointing to key innovative features
+- Technical/blueprint aesthetic with a modern feel
+- White or light background for clarity`;
+
+    const imageResult = await callGeminiWithRetry(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseModalities: [Modality.TEXT, Modality.IMAGE],
+        },
+      });
+
+      const candidate = response.candidates?.[0];
+      const imagePart = candidate?.content?.parts?.find((part) => part.inlineData);
+      
+      if (!imagePart?.inlineData?.data) {
+        throw new Error("No image generated");
+      }
+
+      return imagePart.inlineData.data;
+    }, null, 3);
+
+    res.json({
+      id: angle.id,
+      label: angle.label,
+      imageData: imageResult,
+    });
+  } catch (error) {
+    console.error(`Generate single angle error:`, error.message);
+    const { statusCode, body } = createErrorResponse(error, 'Failed to generate angle view');
+    res.status(statusCode).json(body);
+  }
+});
+
 app.post('/api/gemini/generate-2d-angles', async (req, res) => {
   try {
     const { innovation, angles = ['front', 'side', 'iso'] } = req.body;
