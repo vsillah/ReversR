@@ -543,9 +543,10 @@ Market Benefit: ${innovation.marketBenefit}
 
 Generate a clean, professional product concept sketch with:
 - Clear line drawings showing the product from multiple angles
-- Labels pointing to key innovative features
 - Technical/blueprint aesthetic with a modern feel
-- Annotations explaining how the innovation works`;
+- DO NOT include any text, labels, annotations, or written words in the image
+- Use visual indicators like arrows or lines instead of text labels
+- Pure visual illustration only, no typography`;
 
     // Note: Don't cache images as they can be large and vary
     const result = await callGeminiWithRetry(async (ai) => {
@@ -610,9 +611,11 @@ VIEW ANGLE: ${angle.prompt}
 Generate a clean, professional product concept sketch with:
 - ${angle.label} showing the product clearly
 - Clean technical line drawings
-- Labels pointing to key innovative features
 - Technical/blueprint aesthetic with a modern feel
-- White or light background for clarity`;
+- White or light background for clarity
+- DO NOT include any text, labels, annotations, or written words in the image
+- Use visual indicators like arrows or lines instead of text labels
+- Pure visual illustration only, no typography`;
 
     const imageResult = await callGeminiWithRetry(async (ai) => {
       const response = await ai.models.generateContent({
@@ -664,9 +667,11 @@ VIEW ANGLE: ${angle.prompt}
 Generate a clean, professional product concept sketch with:
 - ${angle.label} showing the product clearly
 - Clean technical line drawings
-- Labels pointing to key innovative features
 - Technical/blueprint aesthetic with a modern feel
-- White or light background for clarity`;
+- White or light background for clarity
+- DO NOT include any text, labels, annotations, or written words in the image
+- Use visual indicators like arrows or lines instead of text labels
+- Pure visual illustration only, no typography`;
 
       try {
         const imageResult = await callGeminiWithRetry(async (ai) => {
