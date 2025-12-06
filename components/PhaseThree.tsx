@@ -423,16 +423,6 @@ export default function PhaseThree({
             <Text style={styles.description}>Blueprint generated. Visualize your innovation.</Text>
           </View>
         </View>
-        <View style={styles.navButtons}>
-          <TouchableOpacity onPress={onBack} style={styles.navButton}>
-            <Ionicons name="arrow-back" size={14} color={Colors.gray[400]} />
-            <Text style={styles.navButtonText}>Back</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onReset} style={styles.navButton}>
-            <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
-            <Text style={styles.navButtonText}>Reset</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <View style={styles.innovationSummary}>

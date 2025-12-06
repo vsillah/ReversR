@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, FontSizes } from "../constants/theme";
@@ -83,6 +84,7 @@ export default function HomeScreen() {
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
   const [generatedMultiAngleImages, setGeneratedMultiAngleImages] = useState<AngleImage[]>([]);
   const imageGenInnovationId = useRef<string | null>(null);
+  const [phaseActionModal, setPhaseActionModal] = useState<number | null>(null);
   
   const { generate2DVisualization } = useGemini();
 
@@ -299,6 +301,44 @@ export default function HomeScreen() {
     imageGenInnovationId.current = null;
   };
 
+  const handleGoToPhase = async (targetPhase: number) => {
+    setPhaseActionModal(null);
+    if (targetPhase >= context.phase) return;
+    
+    let clearedContext = { ...context, phase: targetPhase };
+    
+    if (targetPhase === 1) {
+      clearedContext = {
+        ...clearedContext,
+        analysis: null,
+        selectedPattern: null,
+        innovation: null,
+        spec: null,
+        threeDScene: null,
+        imageUrl: null,
+        bom: null,
+      };
+      setImageGenStatus('idle');
+      setGeneratedImageBase64(null);
+      imageGenInnovationId.current = null;
+    } else if (targetPhase === 2) {
+      clearedContext = {
+        ...clearedContext,
+        innovation: null,
+        spec: null,
+        threeDScene: null,
+        imageUrl: null,
+        bom: null,
+      };
+      setImageGenStatus('idle');
+      setGeneratedImageBase64(null);
+      imageGenInnovationId.current = null;
+    }
+    
+    setContext(clearedContext);
+    await autoSave(clearedContext);
+  };
+
   const handleStartNew = () => {
     setContext(createEmptyContext());
     setShowHistory(false);
@@ -378,7 +418,16 @@ export default function HomeScreen() {
       <View style={styles.progressBar}>
         {[1, 2, 3, 4].map((step, index) => (
           <React.Fragment key={step}>
-            <View style={styles.stepContainer}>
+            <TouchableOpacity 
+              style={styles.stepContainer}
+              onPress={() => {
+                if (context.phase > step) {
+                  setPhaseActionModal(step);
+                }
+              }}
+              disabled={context.phase <= step}
+              activeOpacity={context.phase > step ? 0.7 : 1}
+            >
               <View
                 style={[
                   styles.stepCircle,
@@ -407,7 +456,7 @@ export default function HomeScreen() {
               >
                 {PHASE_LABELS[step - 1]}
               </Text>
-            </View>
+            </TouchableOpacity>
             {index < 3 && (
               <View
                 style={[
@@ -492,6 +541,67 @@ export default function HomeScreen() {
           onDismiss={handleImageNotificationDismiss}
         />
       )}
+
+      <Modal
+        visible={phaseActionModal !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPhaseActionModal(null)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setPhaseActionModal(null)}
+        >
+          <View style={styles.phaseActionModal}>
+            <Text style={styles.phaseActionTitle}>
+              {phaseActionModal ? PHASE_LABELS[phaseActionModal - 1] : ''} Phase
+            </Text>
+            <Text style={styles.phaseActionSubtitle}>
+              What would you like to do?
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.phaseActionButton}
+              onPress={() => phaseActionModal && handleGoToPhase(phaseActionModal)}
+            >
+              <Ionicons name="arrow-back" size={20} color={Colors.accent} />
+              <Text style={styles.phaseActionButtonText}>Go back to this phase</Text>
+            </TouchableOpacity>
+
+            {phaseActionModal && phaseActionModal >= 2 && (
+              <TouchableOpacity 
+                style={styles.phaseActionButton}
+                onPress={() => {
+                  setPhaseActionModal(null);
+                  handleTryAnotherPattern();
+                }}
+              >
+                <Ionicons name="shuffle" size={20} color={Colors.secondary} />
+                <Text style={styles.phaseActionButtonText}>Try another pattern</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity 
+              style={[styles.phaseActionButton, styles.phaseActionButtonDanger]}
+              onPress={() => {
+                setPhaseActionModal(null);
+                handleReset();
+              }}
+            >
+              <Ionicons name="refresh" size={20} color={Colors.red[500]} />
+              <Text style={[styles.phaseActionButtonText, { color: Colors.red[500] }]}>Reset and start over</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.phaseActionCancelButton}
+              onPress={() => setPhaseActionModal(null)}
+            >
+              <Text style={styles.phaseActionCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -598,5 +708,61 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  phaseActionModal: {
+    backgroundColor: Colors.panel,
+    borderRadius: 16,
+    padding: Spacing.xl,
+    width: '100%',
+    maxWidth: 320,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  phaseActionTitle: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.lg,
+    fontWeight: 'bold',
+    color: Colors.white,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+  },
+  phaseActionSubtitle: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  phaseActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 8,
+    backgroundColor: Colors.dark,
+    marginBottom: Spacing.sm,
+  },
+  phaseActionButtonText: {
+    fontSize: FontSizes.md,
+    color: Colors.white,
+  },
+  phaseActionButtonDanger: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  phaseActionCancelButton: {
+    paddingVertical: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  phaseActionCancelText: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[500],
+    textAlign: 'center',
   },
 });

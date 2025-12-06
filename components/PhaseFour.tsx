@@ -188,16 +188,6 @@ export default function PhaseFour({
             <Text style={styles.description}>Manufacturing readiness & Bill of Materials</Text>
           </View>
         </View>
-        <View style={styles.navButtons}>
-          <TouchableOpacity onPress={onBack} style={styles.navButton}>
-            <Ionicons name="arrow-back" size={16} color={Colors.gray[400]} />
-            <Text style={styles.navButtonText}>Back</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onReset} style={styles.navButton}>
-            <Ionicons name="refresh" size={16} color={Colors.gray[400]} />
-            <Text style={styles.navButtonText}>Reset</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <View style={styles.conceptCard}>
