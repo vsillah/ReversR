@@ -219,7 +219,7 @@ export default function PhaseTwo({
             </View>
           ) : (
             <View style={styles.buttonContent}>
-              <Text style={styles.applyButtonText}>Apply Reverse</Text>
+              <Text style={styles.applyButtonText}>Apply Reversal</Text>
               <Ionicons name="sparkles" size={18} color={Colors.white} />
             </View>
           )}
