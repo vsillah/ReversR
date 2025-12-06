@@ -581,6 +581,81 @@ Generate a clean, professional product concept sketch with:
   }
 });
 
+// Generate Multi-Angle 2D Views
+const ANGLES = [
+  { id: 'front', label: 'Front View', prompt: 'front-facing orthographic view, straight-on perspective' },
+  { id: 'side', label: 'Side View', prompt: 'side profile view, 90-degree angle from front' },
+  { id: 'top', label: 'Top View', prompt: 'top-down birds eye view, looking straight down' },
+  { id: 'iso', label: 'Isometric', prompt: 'isometric 3D perspective view, 45-degree angle showing depth' },
+];
+
+app.post('/api/gemini/generate-2d-angles', async (req, res) => {
+  try {
+    const { innovation, angles = ['front', 'side', 'iso'] } = req.body;
+    
+    const selectedAngles = ANGLES.filter(a => angles.includes(a.id));
+    const results = [];
+    
+    for (const angle of selectedAngles) {
+      const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
+
+Description: ${innovation.conceptDescription}
+Innovation Pattern: ${innovation.patternUsed || 'SIT Pattern'}
+Market Benefit: ${innovation.marketBenefit || 'Enhanced functionality'}
+
+VIEW ANGLE: ${angle.prompt}
+
+Generate a clean, professional product concept sketch with:
+- ${angle.label} showing the product clearly
+- Clean technical line drawings
+- Labels pointing to key innovative features
+- Technical/blueprint aesthetic with a modern feel
+- White or light background for clarity`;
+
+      try {
+        const imageResult = await callGeminiWithRetry(async (ai) => {
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image',
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+              responseModalities: [Modality.TEXT, Modality.IMAGE],
+            },
+          });
+
+          const candidate = response.candidates?.[0];
+          const imagePart = candidate?.content?.parts?.find((part) => part.inlineData);
+          
+          if (!imagePart?.inlineData?.data) {
+            throw new Error("No image generated");
+          }
+
+          return imagePart.inlineData.data;
+        }, null, 3);
+
+        results.push({
+          id: angle.id,
+          label: angle.label,
+          imageData: imageResult,
+        });
+      } catch (angleError) {
+        console.error(`Failed to generate ${angle.label}:`, angleError.message);
+        results.push({
+          id: angle.id,
+          label: angle.label,
+          imageData: null,
+          error: 'Failed to generate this view',
+        });
+      }
+    }
+
+    res.json({ images: results });
+  } catch (error) {
+    console.error('Generate multi-angle error:', error);
+    const { statusCode, body } = createErrorResponse(error, 'Multi-angle image generation failed');
+    res.status(statusCode).json(body);
+  }
+});
+
 // Generate Bill of Materials
 app.post('/api/gemini/generate-bom', async (req, res) => {
   try {

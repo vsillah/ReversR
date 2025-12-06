@@ -226,6 +226,13 @@ export const generateBOM = async (innovation: InnovationResult, analysis?: Analy
   });
 };
 
+export interface AngleImage {
+  id: string;
+  label: string;
+  imageData: string | null;
+  error?: string;
+}
+
 export const useGemini = () => {
   const generate2DVisualization = async (conceptName: string, conceptDescription: string): Promise<string | null> => {
     try {
@@ -246,7 +253,36 @@ export const useGemini = () => {
     }
   };
 
+  const generate2DMultiAngle = async (innovation: InnovationResult, angles: string[] = ['front', 'side', 'iso']): Promise<AngleImage[]> => {
+    try {
+      const response = await fetchWithRetry<{ images: AngleImage[] }>(`${API_BASE}/api/gemini/generate-2d-angles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ innovation, angles })
+      });
+      return response.images || [];
+    } catch (error) {
+      console.error('Multi-angle 2D generation error:', error);
+      return [];
+    }
+  };
+
   return {
     generate2DVisualization,
+    generate2DMultiAngle,
   };
+};
+
+export const generate2DMultiAngleImages = async (innovation: InnovationResult, angles: string[] = ['front', 'side', 'iso']): Promise<AngleImage[]> => {
+  try {
+    const response = await fetchWithRetry<{ images: AngleImage[] }>(`${API_BASE}/api/gemini/generate-2d-angles`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ innovation, angles })
+    });
+    return response.images || [];
+  } catch (error) {
+    console.error('Multi-angle 2D generation error:', error);
+    return [];
+  }
 };
