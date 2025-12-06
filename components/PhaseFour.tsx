@@ -17,6 +17,7 @@ import {
   InnovationResult,
   TechnicalSpec,
   BillOfMaterials,
+  ThreeDSceneDescriptor,
   generateBOM,
 } from '../hooks/useGemini';
 
@@ -24,8 +25,8 @@ interface Props {
   innovation: InnovationResult;
   spec: TechnicalSpec;
   bom: BillOfMaterials | null;
-  has2D: boolean;
-  has3D: boolean;
+  imageUrl: string | null;
+  threeDScene: ThreeDSceneDescriptor | null;
   onBOMGenerated: (bom: BillOfMaterials) => void;
   onBack: () => void;
   onReset: () => void;
@@ -74,14 +75,16 @@ export default function PhaseFour({
   innovation,
   spec,
   bom,
-  has2D,
-  has3D,
+  imageUrl,
+  threeDScene,
   onBOMGenerated,
   onBack,
   onReset,
   onTryAnotherPattern,
 }: Props) {
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
+  const has2D = !!imageUrl;
+  const has3D = !!threeDScene;
   const [status, setStatus] = useState<'idle' | 'generating' | 'complete'>(
     bom ? 'complete' : 'idle'
   );
@@ -139,12 +142,26 @@ export default function PhaseFour({
 
   const handleExportAll = async () => {
     try {
-      const exportData = {
+      const exportData: Record<string, unknown> = {
         innovation,
         specifications: spec,
         billOfMaterials: localBom,
         exportedAt: new Date().toISOString(),
       };
+
+      if (imageUrl) {
+        exportData.visualization2D = {
+          type: 'base64_png',
+          data: imageUrl,
+        };
+      }
+
+      if (threeDScene) {
+        exportData.visualization3D = {
+          type: 'scene_descriptor',
+          scene: threeDScene,
+        };
+      }
 
       const name = innovation.conceptName.replace(/\s+/g, '_');
       const fileUri = FileSystem.documentDirectory + `${name}_complete.json`;

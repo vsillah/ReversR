@@ -355,8 +355,8 @@ export default function HomeScreen() {
             innovation={context.innovation}
             spec={context.spec}
             bom={context.bom}
-            has2D={!!context.imageUrl}
-            has3D={!!context.threeDScene}
+            imageUrl={context.imageUrl}
+            threeDScene={context.threeDScene}
             onBOMGenerated={handleBOMGenerated}
             onBack={handleBack}
             onReset={handleReset}
