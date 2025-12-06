@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -61,14 +61,8 @@ export default function PhaseThree({
   onReset,
   onTryAnotherPattern,
 }: Props) {
-  const extractBase64FromUrl = (url: string | null): string | null => {
-    if (!url) return null;
-    const match = url.match(/^data:image\/[^;]+;base64,(.+)$/);
-    return match ? match[1] : null;
-  };
-
   const [spec, setSpec] = useState<TechnicalSpec | null>(existingSpec || null);
-  const [imageBase64, setImageBase64] = useState<string | null>(extractBase64FromUrl(existingImageUrl || null));
+  const [localImageBase64, setLocalImageBase64] = useState<string | null>(null);
   const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(existingThreeDScene || null);
   
   const hasExistingData = !!(existingSpec);
@@ -93,21 +87,64 @@ export default function PhaseThree({
   const availableAngles = multiAngleImages.filter(img => img.imageData);
   const [selectedAngleId, setSelectedAngleId] = useState<string | null>(null);
   
+  // Normalize image URI - handles data URLs, HTTP URLs, and raw base64
+  const normalizeImageUri = (data: string | null | undefined): string | null => {
+    if (!data) return null;
+    if (typeof data !== 'string') return null;
+    const trimmed = data.trim();
+    if (!trimmed) return null;
+    // Already a data URL
+    if (trimmed.startsWith('data:image/')) return trimmed;
+    // HTTP/HTTPS URLs - return unchanged
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+    // Raw base64 data (PNG or JPEG signatures)
+    if (trimmed.startsWith('iVBOR') || trimmed.startsWith('/9j/') || trimmed.match(/^[A-Za-z0-9+/=]{50,}$/)) {
+      return `data:image/png;base64,${trimmed}`;
+    }
+    // Fallback - assume base64 if it's a long string without URL-like characters
+    if (trimmed.length > 100 && !trimmed.includes('/') && !trimmed.includes('.')) {
+      return `data:image/png;base64,${trimmed}`;
+    }
+    // Return as-is for any other format
+    return trimmed;
+  };
+
   // Auto-select first available angle when it loads
   useEffect(() => {
     if (availableAngles.length > 0 && !selectedAngleId) {
       setSelectedAngleId(availableAngles[0].id);
     }
   }, [availableAngles, selectedAngleId]);
+
+  // Derive the best available image from props or local state
+  const derivedImageUri = useMemo(() => {
+    // Priority 1: Multi-angle images from background generation
+    if (multiAngleImages.length > 0) {
+      const firstImage = multiAngleImages.find(img => img.imageData);
+      if (firstImage?.imageData) {
+        return normalizeImageUri(firstImage.imageData);
+      }
+    }
+    // Priority 2: Existing image URL from saved innovation
+    if (existingImageUrl) {
+      return normalizeImageUri(existingImageUrl);
+    }
+    // Priority 3: Locally generated image
+    if (localImageBase64) {
+      return normalizeImageUri(localImageBase64);
+    }
+    return null;
+  }, [multiAngleImages, existingImageUrl, localImageBase64]);
+
+  // Update status when images become available
+  useEffect(() => {
+    if (derivedImageUri && (status === 'specs_ready' || status === 'generating_specs') && spec) {
+      setStatus('complete');
+    }
+  }, [derivedImageUri, status, spec]);
   
   const currentAngleImage = availableAngles.find(img => img.id === selectedAngleId) || availableAngles[0] || null;
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
-  
-  const normalizeImageUri = (data: string | null | undefined): string | null => {
-    if (!data) return null;
-    if (data.startsWith('data:image/')) return data;
-    return `data:image/png;base64,${data}`;
-  };
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
   
   const scale = useRef(new Animated.Value(1)).current;
@@ -168,7 +205,7 @@ export default function PhaseThree({
   };
 
   const handleSaveImage = async () => {
-    const imageToSave = currentAngleImage?.imageData || (imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+    const imageToSave = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
     if (!imageToSave) return;
     
     try {
@@ -178,13 +215,22 @@ export default function PhaseThree({
         return;
       }
 
-      const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
       const fileUri = FileSystem.documentDirectory + filename;
-      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      
+      // Handle HTTP URLs by downloading, base64 data URLs by extracting
+      if (imageToSave.startsWith('http://') || imageToSave.startsWith('https://')) {
+        const downloadResult = await FileSystem.downloadAsync(imageToSave, fileUri);
+        if (downloadResult.status !== 200) {
+          throw new Error('Failed to download image');
+        }
+      } else {
+        const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
+        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      }
 
       await MediaLibrary.saveToLibraryAsync(fileUri);
       Alert.alert('Saved', `${currentAngleImage?.label || 'Image'} saved to your photo library.`);
@@ -207,12 +253,23 @@ export default function PhaseThree({
       let savedCount = 0;
       for (const angle of availableAngles) {
         if (angle.imageData) {
-          const base64Data = angle.imageData.replace(/^data:image\/\w+;base64,/, '');
+          const imageUri = normalizeImageUri(angle.imageData);
+          if (!imageUri) continue;
+          
           const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angle.label.replace(/\s+/g, '_')}.png`;
           const fileUri = FileSystem.documentDirectory + filename;
-          await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
+          
+          // Handle HTTP URLs by downloading, base64 data URLs by extracting
+          if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+            const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
+            if (downloadResult.status !== 200) continue;
+          } else {
+            const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
+            await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+          }
+          
           await MediaLibrary.saveToLibraryAsync(fileUri);
           savedCount++;
         }
@@ -226,17 +283,26 @@ export default function PhaseThree({
   };
 
   const handleShareImage = async () => {
-    const imageToShare = currentAngleImage?.imageData || (imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+    const imageToShare = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
     if (!imageToShare) return;
 
     try {
-      const base64Data = imageToShare.replace(/^data:image\/\w+;base64,/, '');
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
       const fileUri = FileSystem.documentDirectory + filename;
-      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      
+      // Handle HTTP URLs by downloading, base64 data URLs by extracting
+      if (imageToShare.startsWith('http://') || imageToShare.startsWith('https://')) {
+        const downloadResult = await FileSystem.downloadAsync(imageToShare, fileUri);
+        if (downloadResult.status !== 200) {
+          throw new Error('Failed to download image');
+        }
+      } else {
+        const base64Data = imageToShare.replace(/^data:image\/\w+;base64,/, '');
+        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      }
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
@@ -282,17 +348,6 @@ export default function PhaseThree({
     fetchSpecs();
   }, []);
 
-  useEffect(() => {
-    if (existingImageUrl && !imageBase64) {
-      const base64 = extractBase64FromUrl(existingImageUrl);
-      if (base64) {
-        setImageBase64(base64);
-        if (status === 'specs_ready' || status === 'generating_visual') {
-          setStatus('complete');
-        }
-      }
-    }
-  }, [existingImageUrl]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -312,7 +367,7 @@ export default function PhaseThree({
 
     try {
       const base64 = await generate2DImage(innovation);
-      setImageBase64(base64);
+      setLocalImageBase64(base64);
       setStatus('complete');
       onComplete(spec, threeDScene, `data:image/png;base64,${base64}`);
     } catch (err: unknown) {
@@ -331,7 +386,7 @@ export default function PhaseThree({
       const scene = await generate3DScene(innovation);
       setThreeDScene(scene);
       setStatus('complete');
-      onComplete(spec, scene, imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+      onComplete(spec, scene, derivedImageUri);
       Alert.alert(
         '3D Scene Generated',
         `Created ${scene.objects.length} objects. Export to view in desktop apps.`
@@ -510,7 +565,7 @@ export default function PhaseThree({
               </TouchableOpacity>
             </View>
           ) : activeTab === '2d' ? (
-            (availableAngles.length > 0 || imageBase64) ? (
+            (availableAngles.length > 0 || derivedImageUri) ? (
               <View style={styles.generatedImageContainer}>
                 {(availableAngles.length > 0 || imageGenerating) && (
                   <View style={styles.angleSelector}>
@@ -556,7 +611,7 @@ export default function PhaseThree({
                 )}
                 
                 {(() => {
-                  const imageUri = normalizeImageUri(currentAngleImage?.imageData) || (imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+                  const imageUri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
                   if (!imageUri) {
                     return (
                       <View style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}>
@@ -852,7 +907,7 @@ export default function PhaseThree({
           
           <View style={styles.modalImageContainer} {...panResponder.panHandlers}>
             <Animated.Image
-              source={{ uri: normalizeImageUri(currentAngleImage?.imageData) || `data:image/png;base64,${imageBase64}` }}
+              source={{ uri: normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri || '' }}
               style={[
                 styles.modalImage,
                 {
