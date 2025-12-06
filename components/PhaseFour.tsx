@@ -339,6 +339,15 @@ export default function PhaseFour({
               <Text style={styles.exportButtonText}>Export All (JSON)</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.exportInfo}>
+            <Text style={styles.exportInfoLabel}>Export All includes:</Text>
+            <Text style={styles.exportInfoItem}>• Innovation concept & analysis</Text>
+            <Text style={styles.exportInfoItem}>• Technical specifications</Text>
+            <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
+            <Text style={styles.exportInfoItem}>• 2D sketches (PNG)</Text>
+            <Text style={styles.exportInfoItem}>• 3D scene descriptor</Text>
+            <Text style={styles.exportInfoItem}>• Export timestamp</Text>
+          </View>
         </View>
       )}
 
@@ -768,6 +777,26 @@ const styles = StyleSheet.create({
   exportButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.accent,
+  },
+  exportInfo: {
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.purple[500],
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: 6,
+    marginTop: Spacing.md,
+  },
+  exportInfoLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.purple[400],
+    fontWeight: 'bold',
+    marginBottom: Spacing.sm,
+  },
+  exportInfoItem: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+    marginBottom: Spacing.xs,
   },
   manufacturerPanel: {
     backgroundColor: Colors.panel,
