@@ -485,7 +485,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       
-      {context.phase >= 3 && (
+      {context.phase >= 3 && context.spec && (
         <ImageGenerationNotification
           status={imageGenStatus}
           onPress={handleImageNotificationPress}

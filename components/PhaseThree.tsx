@@ -563,23 +563,36 @@ export default function PhaseThree({
                   </View>
                 )}
                 
-                <TouchableOpacity 
-                  activeOpacity={0.9}
-                  onPress={() => {
-                    resetZoom();
-                    setImageModalVisible(true);
-                  }}
-                >
-                  <Image
-                    source={{ uri: normalizeImageUri(currentAngleImage?.imageData) || `data:image/png;base64,${imageBase64}` }}
-                    style={styles.generatedImage}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.expandHint}>
-                    <Ionicons name="expand" size={14} color={Colors.white} />
-                    <Text style={styles.expandHintText}>Tap to expand</Text>
-                  </View>
-                </TouchableOpacity>
+                {(() => {
+                  const imageUri = normalizeImageUri(currentAngleImage?.imageData) || (imageBase64 ? `data:image/png;base64,${imageBase64}` : null);
+                  if (!imageUri) {
+                    return (
+                      <View style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}>
+                        <ActivityIndicator size="large" color={Colors.accent} />
+                        <Text style={{ color: Colors.gray[400], marginTop: 12, fontSize: 14 }}>Loading image...</Text>
+                      </View>
+                    );
+                  }
+                  return (
+                    <TouchableOpacity 
+                      activeOpacity={0.9}
+                      onPress={() => {
+                        resetZoom();
+                        setImageModalVisible(true);
+                      }}
+                    >
+                      <Image
+                        source={{ uri: imageUri }}
+                        style={styles.generatedImage}
+                        resizeMode="contain"
+                      />
+                      <View style={styles.expandHint}>
+                        <Ionicons name="expand" size={14} color={Colors.white} />
+                        <Text style={styles.expandHintText}>Tap to expand</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })()}
                 
                 {availableAngles.length > 1 && (
                   <View style={styles.angleNavigation}>
