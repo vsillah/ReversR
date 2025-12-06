@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,14 @@ import {
   ActivityIndicator,
   Image,
   Alert,
+  Modal,
+  Dimensions,
+  Animated,
+  PanResponder,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import {
@@ -73,6 +78,109 @@ export default function PhaseThree({
   const [activeTab, setActiveTab] = useState<VisualTab>('2d');
   const [specsExpanded, setSpecsExpanded] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  
+  const scale = useRef(new Animated.Value(1)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const lastScale = useRef(1);
+  const lastTranslateX = useRef(0);
+  const lastTranslateY = useRef(0);
+
+  const resetZoom = () => {
+    scale.setValue(1);
+    translateX.setValue(0);
+    translateY.setValue(0);
+    lastScale.current = 1;
+    lastTranslateX.current = 0;
+    lastTranslateY.current = 0;
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        translateX.setOffset(lastTranslateX.current);
+        translateY.setOffset(lastTranslateY.current);
+        translateX.setValue(0);
+        translateY.setValue(0);
+      },
+      onPanResponderMove: (_, gestureState) => {
+        translateX.setValue(gestureState.dx);
+        translateY.setValue(gestureState.dy);
+      },
+      onPanResponderRelease: () => {
+        translateX.flattenOffset();
+        translateY.flattenOffset();
+        lastTranslateX.current = (translateX as any)._value || 0;
+        lastTranslateY.current = (translateY as any)._value || 0;
+      },
+    })
+  ).current;
+
+  const handleZoomIn = () => {
+    const newScale = Math.min(lastScale.current * 1.5, 5);
+    Animated.spring(scale, { toValue: newScale, useNativeDriver: true }).start();
+    lastScale.current = newScale;
+  };
+
+  const handleZoomOut = () => {
+    const newScale = Math.max(lastScale.current / 1.5, 1);
+    Animated.spring(scale, { toValue: newScale, useNativeDriver: true }).start();
+    lastScale.current = newScale;
+    if (newScale === 1) {
+      Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start();
+      Animated.spring(translateY, { toValue: 0, useNativeDriver: true }).start();
+      lastTranslateX.current = 0;
+      lastTranslateY.current = 0;
+    }
+  };
+
+  const handleSaveImage = async () => {
+    if (!imageBase64) return;
+    
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please allow access to save images.');
+        return;
+      }
+
+      const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_2D.png`;
+      const fileUri = FileSystem.documentDirectory + filename;
+      await FileSystem.writeAsStringAsync(fileUri, imageBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      await MediaLibrary.saveToLibraryAsync(fileUri);
+      Alert.alert('Saved', 'Image saved to your photo library.');
+    } catch (e) {
+      console.error('Save image error:', e);
+      Alert.alert('Error', 'Failed to save image.');
+    }
+  };
+
+  const handleShareImage = async () => {
+    if (!imageBase64) return;
+
+    try {
+      const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_2D.png`;
+      const fileUri = FileSystem.documentDirectory + filename;
+      await FileSystem.writeAsStringAsync(fileUri, imageBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        Alert.alert('Error', 'Sharing is not available on this device.');
+      }
+    } catch (e) {
+      console.error('Share image error:', e);
+      Alert.alert('Error', 'Failed to share image.');
+    }
+  };
 
   const formatError = (e: unknown) => {
     const err = e as { message?: string };
@@ -333,18 +441,56 @@ export default function PhaseThree({
           ) : activeTab === '2d' ? (
             imageBase64 ? (
               <View style={styles.generatedImageContainer}>
-                <Image
-                  source={{ uri: `data:image/png;base64,${imageBase64}` }}
-                  style={styles.generatedImage}
-                  resizeMode="contain"
-                />
                 <TouchableOpacity 
-                  style={styles.regenerateButton}
-                  onPress={handleGenerate2D}
+                  activeOpacity={0.9}
+                  onPress={() => {
+                    resetZoom();
+                    setImageModalVisible(true);
+                  }}
                 >
-                  <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
-                  <Text style={styles.regenerateText}>Regenerate</Text>
+                  <Image
+                    source={{ uri: `data:image/png;base64,${imageBase64}` }}
+                    style={styles.generatedImage}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.expandHint}>
+                    <Ionicons name="expand" size={14} color={Colors.white} />
+                    <Text style={styles.expandHintText}>Tap to expand</Text>
+                  </View>
                 </TouchableOpacity>
+                <View style={styles.imageActions}>
+                  <TouchableOpacity 
+                    style={styles.imageActionButton}
+                    onPress={() => {
+                      resetZoom();
+                      setImageModalVisible(true);
+                    }}
+                  >
+                    <Ionicons name="expand-outline" size={18} color={Colors.accent} />
+                    <Text style={styles.imageActionText}>Expand</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.imageActionButton}
+                    onPress={handleSaveImage}
+                  >
+                    <Ionicons name="download-outline" size={18} color={Colors.accent} />
+                    <Text style={styles.imageActionText}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.imageActionButton}
+                    onPress={handleShareImage}
+                  >
+                    <Ionicons name="share-outline" size={18} color={Colors.accent} />
+                    <Text style={styles.imageActionText}>Share</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.imageActionButton}
+                    onPress={handleGenerate2D}
+                  >
+                    <Ionicons name="refresh" size={18} color={Colors.gray[400]} />
+                    <Text style={[styles.imageActionText, { color: Colors.gray[400] }]}>Regen</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             ) : (
               <View style={styles.generatePrompt}>
@@ -470,9 +616,69 @@ export default function PhaseThree({
       </TouchableOpacity>
 
       <View style={{ height: 50 }} />
+
+      {/* Fullscreen Image Modal */}
+      <Modal
+        visible={imageModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setImageModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>2D Concept Sketch</Text>
+            <TouchableOpacity 
+              style={styles.modalCloseButton}
+              onPress={() => setImageModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.modalImageContainer} {...panResponder.panHandlers}>
+            <Animated.Image
+              source={{ uri: `data:image/png;base64,${imageBase64}` }}
+              style={[
+                styles.modalImage,
+                {
+                  transform: [
+                    { scale },
+                    { translateX },
+                    { translateY },
+                  ],
+                },
+              ]}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View style={styles.modalControls}>
+            <TouchableOpacity style={styles.zoomButton} onPress={handleZoomOut}>
+              <Ionicons name="remove" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.zoomButton} onPress={resetZoom}>
+              <Ionicons name="scan-outline" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.zoomButton} onPress={handleZoomIn}>
+              <Ionicons name="add" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            <View style={styles.modalSpacer} />
+            <TouchableOpacity style={styles.modalActionButton} onPress={handleSaveImage}>
+              <Ionicons name="download-outline" size={20} color={Colors.accent} />
+              <Text style={styles.modalActionText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalActionButton} onPress={handleShareImage}>
+              <Ionicons name="share-outline" size={20} color={Colors.accent} />
+              <Text style={styles.modalActionText}>Share</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -902,5 +1108,109 @@ const styles = StyleSheet.create({
   tryAnotherText: {
     fontSize: FontSizes.sm,
     color: Colors.secondary,
+  },
+  expandHint: {
+    position: 'absolute',
+    bottom: Spacing.sm,
+    right: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  expandHintText: {
+    fontSize: FontSizes.xs,
+    color: Colors.white,
+  },
+  imageActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.md,
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  imageActionButton: {
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+  },
+  imageActionText: {
+    fontSize: FontSizes.xs,
+    color: Colors.accent,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 50,
+    paddingBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontSize: FontSizes.lg,
+    fontWeight: 'bold',
+    color: Colors.white,
+    fontFamily: 'monospace',
+  },
+  modalCloseButton: {
+    padding: Spacing.sm,
+  },
+  modalImageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  modalImage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.6,
+  },
+  modalControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    paddingBottom: 40,
+    backgroundColor: Colors.panel,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  zoomButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.gray[800],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  modalSpacer: {
+    flex: 1,
+  },
+  modalActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 6,
+    marginLeft: Spacing.sm,
+  },
+  modalActionText: {
+    fontSize: FontSizes.sm,
+    color: Colors.accent,
+    fontWeight: '600',
   },
 });
