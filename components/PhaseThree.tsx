@@ -533,25 +533,58 @@ export default function PhaseThree({
             )
           ) : (
             threeDScene ? (
-              <View style={styles.scene3dInfo}>
-                <Ionicons name="cube" size={48} color={Colors.accent} />
-                <Text style={styles.scene3dText}>
-                  3D Scene: {threeDScene.objects.length} objects
-                </Text>
-                <View style={styles.exportButtons}>
-                  <TouchableOpacity
-                    style={styles.exportButton}
-                    onPress={() => handleExport3D('obj')}
-                  >
-                    <Text style={styles.exportButtonText}>.OBJ</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.exportButton}
-                    onPress={() => handleExport3D('stl')}
-                  >
-                    <Text style={styles.exportButtonText}>.STL</Text>
-                  </TouchableOpacity>
+              <View style={styles.scene3dContainer}>
+                <View style={styles.scene3dHeader}>
+                  <Ionicons name="cube" size={32} color={Colors.accent} />
+                  <View style={styles.scene3dHeaderText}>
+                    <Text style={styles.scene3dTitle}>3D Scene Generated</Text>
+                    <Text style={styles.scene3dSubtitle}>{threeDScene.objects.length} objects ready for export</Text>
+                  </View>
                 </View>
+
+                <View style={styles.exportSection}>
+                  <Text style={styles.exportSectionTitle}>Export Format</Text>
+                  <View style={styles.exportButtons}>
+                    <TouchableOpacity
+                      style={styles.exportButton}
+                      onPress={() => handleExport3D('obj')}
+                    >
+                      <Ionicons name="document-outline" size={16} color={Colors.accent} />
+                      <Text style={styles.exportButtonText}>.OBJ</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.exportButton}
+                      onPress={() => handleExport3D('stl')}
+                    >
+                      <Ionicons name="cube-outline" size={16} color={Colors.accent} />
+                      <Text style={styles.exportButtonText}>.STL</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.viewerSection}>
+                  <Text style={styles.viewerTitle}>View Your 3D Model</Text>
+                  <Text style={styles.viewerDesc}>Open the exported file in any of these apps:</Text>
+                  <View style={styles.viewerList}>
+                    <View style={styles.viewerItem}>
+                      <Ionicons name="desktop-outline" size={14} color={Colors.blue[500]} />
+                      <Text style={styles.viewerName}>Windows: 3D Viewer (built-in)</Text>
+                    </View>
+                    <View style={styles.viewerItem}>
+                      <Ionicons name="logo-apple" size={14} color={Colors.gray[400]} />
+                      <Text style={styles.viewerName}>Mac: Preview or QuickLook</Text>
+                    </View>
+                    <View style={styles.viewerItem}>
+                      <Ionicons name="globe-outline" size={14} color={Colors.green[400]} />
+                      <Text style={styles.viewerName}>Web: Autodesk Viewer (free)</Text>
+                    </View>
+                    <View style={styles.viewerItem}>
+                      <Ionicons name="color-palette-outline" size={14} color={Colors.orange[300]} />
+                      <Text style={styles.viewerName}>Pro: Blender, Fusion 360</Text>
+                    </View>
+                  </View>
+                </View>
+
                 <TouchableOpacity 
                   style={styles.regenerateButton}
                   onPress={handleGenerate3D}
@@ -996,14 +1029,68 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.gray[400],
   },
-  scene3dInfo: {
-    alignItems: 'center',
-    paddingVertical: Spacing.lg,
+  scene3dContainer: {
+    padding: Spacing.md,
   },
-  scene3dText: {
-    marginTop: Spacing.md,
-    fontSize: FontSizes.sm,
+  scene3dHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  scene3dHeaderText: {
+    flex: 1,
+  },
+  scene3dTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    color: Colors.accent,
+    fontFamily: 'monospace',
+  },
+  scene3dSubtitle: {
+    fontSize: FontSizes.xs,
     color: Colors.gray[400],
+    marginTop: 2,
+  },
+  exportSection: {
+    marginBottom: Spacing.lg,
+  },
+  exportSectionTitle: {
+    fontSize: FontSizes.xs,
+    fontWeight: '600',
+    color: Colors.gray[500],
+    marginBottom: Spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  viewerSection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  viewerTitle: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+    color: Colors.white,
+    marginBottom: 4,
+  },
+  viewerDesc: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+    marginBottom: Spacing.sm,
+  },
+  viewerList: {
+    gap: Spacing.xs,
+  },
+  viewerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  viewerName: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[300],
   },
   exportButtons: {
     flexDirection: 'row',
