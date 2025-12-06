@@ -452,18 +452,32 @@ export default function HomeScreen() {
             onTryAnotherPattern={handleTryAnotherPattern}
           />
         )}
-        {context.phase === 4 && context.innovation && context.spec && (
-          <PhaseFour
-            innovation={context.innovation}
-            spec={context.spec}
-            bom={context.bom}
-            imageUrl={context.imageUrl}
-            threeDScene={context.threeDScene}
-            onBOMGenerated={handleBOMGenerated}
-            onBack={handleBack}
-            onReset={handleReset}
-            onTryAnotherPattern={handleTryAnotherPattern}
-          />
+        {context.phase === 4 && context.innovation && (
+          context.spec ? (
+            <PhaseFour
+              innovation={context.innovation}
+              spec={context.spec}
+              bom={context.bom}
+              imageUrl={context.imageUrl}
+              threeDScene={context.threeDScene}
+              onBOMGenerated={handleBOMGenerated}
+              onBack={handleBack}
+              onReset={handleReset}
+              onTryAnotherPattern={handleTryAnotherPattern}
+            />
+          ) : (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+              <Text style={{ color: '#9CA3AF', fontSize: 16, textAlign: 'center', marginBottom: 16 }}>
+                Technical specifications are required for the Build phase.
+              </Text>
+              <TouchableOpacity 
+                onPress={handleBack}
+                style={{ backgroundColor: '#22D3EE', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 }}
+              >
+                <Text style={{ color: '#000', fontWeight: 'bold' }}>Go Back to Architect</Text>
+              </TouchableOpacity>
+            </View>
+          )
         )}
       </ScrollView>
       
