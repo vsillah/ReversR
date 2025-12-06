@@ -62,7 +62,7 @@ const createEmptyContext = (): MutationContext => {
   };
 };
 
-const PHASE_LABELS = ['SCAN', 'MUTATE', 'ARCHITECT', 'BUILD'];
+const PHASE_LABELS = ['SCAN', 'REVERSE', 'ARCHITECT', 'BUILD'];
 const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   1: 'layers-outline',
   2: 'flash-outline',

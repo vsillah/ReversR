@@ -23,7 +23,7 @@ const phases = [
   },
   {
     number: 2,
-    title: 'MUTATE',
+    title: 'REVERSE',
     icon: 'flash-outline' as const,
     description: 'Apply patterns like Subtraction and Task Unification to force novel utility.',
   },

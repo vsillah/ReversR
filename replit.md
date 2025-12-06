@@ -34,7 +34,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 ## Key Features
 1. **Four-Phase SIT Workflow**
    - Phase 1 (Scan): Analyze product via text or camera
-   - Phase 2 (Mutate): Apply SIT patterns with Back/Reset navigation
+   - Phase 2 (Reverse): Apply SIT patterns with Back/Reset navigation
    - Phase 3 (Architect): Generate specs and visualizations with tabbed 2D/3D viewer
    - Phase 4 (Build): Bill of Materials generation with export options
 
