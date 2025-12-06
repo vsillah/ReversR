@@ -113,8 +113,8 @@ export default function HomeScreen() {
     setGeneratedImageBase64(null);
     setGeneratedMultiAngleImages([]);
     
-    let completedCount = 0;
-    const totalAngles = 3;
+    let successCount = 0;
+    let hasShownComplete = false;
     
     try {
       await generate2DAnglesProgressive(
@@ -125,7 +125,7 @@ export default function HomeScreen() {
             return;
           }
           
-          completedCount++;
+          successCount++;
           
           setGeneratedMultiAngleImages(prev => {
             const existing = prev.filter(img => img.id !== completedAngle.id);
@@ -137,7 +137,7 @@ export default function HomeScreen() {
           
           setGeneratedImageBase64(prev => prev || completedAngle.imageData);
           
-          if (completedCount === 1) {
+          if (successCount === 1) {
             setContext(prev => {
               if (prev.id === innovationId) {
                 const updated = { ...prev, imageUrl: completedAngle.imageData };
@@ -146,20 +146,21 @@ export default function HomeScreen() {
               }
               return prev;
             });
-          }
-          
-          if (completedCount >= totalAngles) {
-            setImageGenStatus('complete');
+            
+            if (!hasShownComplete) {
+              hasShownComplete = true;
+              setImageGenStatus('complete');
+            }
           }
         }
       );
       
-      if (imageGenInnovationId.current === generationToken && completedCount === 0) {
+      if (imageGenInnovationId.current === generationToken && successCount === 0) {
         setImageGenStatus('error');
       }
     } catch (error) {
       console.error('Background image generation error:', error);
-      if (imageGenInnovationId.current === generationToken) {
+      if (imageGenInnovationId.current === generationToken && successCount === 0) {
         setImageGenStatus('error');
       }
     }
