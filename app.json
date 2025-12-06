@@ -24,7 +24,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.vsillah.reversr",
-      "versionCode": 12
+      "versionCode": 13
     },
     "web": {
       "favicon": "./assets/favicon.png",

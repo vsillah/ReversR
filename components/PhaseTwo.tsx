@@ -215,11 +215,11 @@ export default function PhaseTwo({
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={Colors.white} />
-              <Text style={styles.applyButtonText}>Mutating...</Text>
+              <Text style={styles.applyButtonText}>Reversing...</Text>
             </View>
           ) : (
             <View style={styles.buttonContent}>
-              <Text style={styles.applyButtonText}>Apply Mutation</Text>
+              <Text style={styles.applyButtonText}>Apply Reverse</Text>
               <Ionicons name="sparkles" size={18} color={Colors.white} />
             </View>
           )}
