@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, FontSizes } from "../constants/theme";
@@ -277,17 +278,54 @@ export default function HomeScreen() {
     }
   };
 
-  const handleReset = () => {
+  const executeReset = () => {
     setContext(createEmptyContext());
     setImageGenStatus('idle');
     setGeneratedImageBase64(null);
     imageGenInnovationId.current = null;
   };
 
-  const handleTryAnotherPattern = async () => {
-    const newContext = {
-      ...context,
+  const handleReset = () => {
+    setPhaseActionModal(null);
+    const hasProgress = context.innovation || context.spec || context.bom;
+    
+    if (hasProgress) {
+      Alert.alert(
+        'Save Innovation?',
+        'Resetting will start a new innovation. Would you like to save your current progress first?',
+        [
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: () => executeReset(),
+          },
+          {
+            text: 'Save & Reset',
+            onPress: async () => {
+              await autoSave(context);
+              executeReset();
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } else {
+      executeReset();
+    }
+  };
+
+  const executeTryAnotherPattern = async () => {
+    const newInnovation = createNewInnovation();
+    const newContext: MutationContext = {
+      id: newInnovation.id,
+      createdAt: newInnovation.createdAt,
       phase: 2,
+      input: context.input,
+      analysis: context.analysis,
+      selectedPattern: null,
       innovation: null,
       spec: null,
       threeDScene: null,
@@ -295,16 +333,44 @@ export default function HomeScreen() {
       bom: null,
     };
     setContext(newContext);
-    await autoSave(newContext);
     setImageGenStatus('idle');
     setGeneratedImageBase64(null);
     imageGenInnovationId.current = null;
   };
 
-  const handleGoToPhase = async (targetPhase: number) => {
+  const handleTryAnotherPattern = async () => {
     setPhaseActionModal(null);
-    if (targetPhase >= context.phase) return;
+    const hasProgress = context.innovation || context.spec || context.bom;
     
+    if (hasProgress) {
+      Alert.alert(
+        'Save Innovation?',
+        'Trying another pattern will start a new innovation. Would you like to save your current progress first?',
+        [
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: () => executeTryAnotherPattern(),
+          },
+          {
+            text: 'Save & Continue',
+            onPress: async () => {
+              await autoSave(context);
+              executeTryAnotherPattern();
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } else {
+      executeTryAnotherPattern();
+    }
+  };
+
+  const executePhaseNavigation = async (targetPhase: number) => {
     let clearedContext = { ...context, phase: targetPhase };
     
     if (targetPhase === 1) {
@@ -337,6 +403,77 @@ export default function HomeScreen() {
     
     setContext(clearedContext);
     await autoSave(clearedContext);
+  };
+
+  const handleGoToPhase = async (targetPhase: number) => {
+    setPhaseActionModal(null);
+    if (targetPhase >= context.phase) return;
+    
+    const hasProgress = context.innovation || context.spec || context.bom;
+    const isDestructive = targetPhase <= 2 && hasProgress;
+    
+    if (isDestructive) {
+      Alert.alert(
+        'Save Innovation?',
+        'Going back will start a new innovation. Would you like to save your current progress first?',
+        [
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: async () => {
+              const newInnovation = createNewInnovation();
+              const freshContext: MutationContext = {
+                id: newInnovation.id,
+                createdAt: newInnovation.createdAt,
+                phase: targetPhase,
+                input: targetPhase === 1 ? '' : context.input,
+                analysis: targetPhase === 1 ? null : context.analysis,
+                selectedPattern: null,
+                innovation: null,
+                spec: null,
+                threeDScene: null,
+                imageUrl: null,
+                bom: null,
+              };
+              setContext(freshContext);
+              setImageGenStatus('idle');
+              setGeneratedImageBase64(null);
+              imageGenInnovationId.current = null;
+            },
+          },
+          {
+            text: 'Save & Continue',
+            onPress: async () => {
+              await autoSave(context);
+              const newInnovation = createNewInnovation();
+              const freshContext: MutationContext = {
+                id: newInnovation.id,
+                createdAt: newInnovation.createdAt,
+                phase: targetPhase,
+                input: targetPhase === 1 ? '' : context.input,
+                analysis: targetPhase === 1 ? null : context.analysis,
+                selectedPattern: null,
+                innovation: null,
+                spec: null,
+                threeDScene: null,
+                imageUrl: null,
+                bom: null,
+              };
+              setContext(freshContext);
+              setImageGenStatus('idle');
+              setGeneratedImageBase64(null);
+              imageGenInnovationId.current = null;
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } else {
+      await executePhaseNavigation(targetPhase);
+    }
   };
 
   const handleStartNew = () => {

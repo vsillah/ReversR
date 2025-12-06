@@ -63,7 +63,12 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Send to Manufacturer section with links to Xometry, Shapeways, Protolabs, JLCPCB
    - Export options for BOM (CSV) and complete package (JSON)
 
-8. **Global Navigation**: Back + Reset buttons on all phases (2, 3, 4)
+8. **Interactive Phase Navigation**: 
+   - Tap any completed phase indicator to open action modal
+   - Options: Go to that phase, Try Another Pattern, or Reset
+   - Save confirmation prompts before destructive navigation (Phase 1/2)
+   - Users can save current progress before starting fresh
+   - Each new path creates a separate innovation in history
 
 9. **Background Image Generation**:
    - 2D sketches generate lazily in the background after Phase 2 completes
