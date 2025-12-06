@@ -72,10 +72,12 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Notification auto-dismisses after 5 seconds when complete
    - Tapping notification navigates directly to Phase 3 to view the sketch
 
-10. **Multi-Angle 2D Image Generation**:
+10. **Multi-Angle 2D Image Generation (Progressive Loading)**:
     - Generates 3 views automatically: Front, Side, and Isometric
-    - Angle selector buttons to toggle between views
-    - Navigation arrows with page indicator (1/3, 2/3, etc.)
+    - Progressive loading: Each angle generates in parallel with independent API calls
+    - Images appear as they complete (~15-20s for first, all 3 within ~45-60s)
+    - Angle selector shows loading indicators for pending angles with progress counter (1/3, 2/3)
+    - Navigation arrows with page indicator
     - "Save All" button to download all angles at once
     - Each angle saved with descriptive filename
 
@@ -95,6 +97,7 @@ Base URL: `https://reversr-vsillah.replit.app`
 | `/api/gemini/apply-pattern` | POST | Apply SIT pattern |
 | `/api/gemini/technical-spec` | POST | Generate technical spec |
 | `/api/gemini/generate-2d` | POST | Generate 2D visualization |
+| `/api/gemini/generate-2d-single-angle` | POST | Generate single angle for progressive loading |
 | `/api/gemini/generate-2d-angles` | POST | Generate multi-angle 2D views |
 | `/api/gemini/generate-3d` | POST | Generate 3D scene descriptor |
 | `/api/gemini/generate-bom` | POST | Generate Bill of Materials |
