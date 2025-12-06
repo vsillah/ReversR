@@ -86,8 +86,15 @@ export default function PhaseThree({
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedAngleIndex, setSelectedAngleIndex] = useState(0);
   
+  const ALL_ANGLES = [
+    { id: 'front', label: 'Front View' },
+    { id: 'side', label: 'Side View' },
+    { id: 'iso', label: 'Isometric' },
+  ];
+  
   const availableAngles = multiAngleImages.filter(img => img.imageData);
   const currentAngleImage = availableAngles[selectedAngleIndex] || null;
+  const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
   
   const scale = useRef(new Animated.Value(1)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -499,25 +506,47 @@ export default function PhaseThree({
           ) : activeTab === '2d' ? (
             (availableAngles.length > 0 || imageBase64) ? (
               <View style={styles.generatedImageContainer}>
-                {availableAngles.length > 1 && (
+                {(availableAngles.length > 0 || imageGenerating) && (
                   <View style={styles.angleSelector}>
-                    {availableAngles.map((angle, index) => (
-                      <TouchableOpacity
-                        key={angle.id}
-                        style={[
-                          styles.angleSelectorButton,
-                          selectedAngleIndex === index && styles.angleSelectorButtonActive
-                        ]}
-                        onPress={() => setSelectedAngleIndex(index)}
-                      >
-                        <Text style={[
-                          styles.angleSelectorText,
-                          selectedAngleIndex === index && styles.angleSelectorTextActive
-                        ]}>
-                          {angle.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
+                    {ALL_ANGLES.map((angleDef, index) => {
+                      const loadedAngle = multiAngleImages.find(img => img.id === angleDef.id);
+                      const isLoaded = loadedAngle?.imageData;
+                      const loadedIndex = availableAngles.findIndex(img => img.id === angleDef.id);
+                      const isSelected = loadedIndex === selectedAngleIndex && isLoaded;
+                      
+                      return (
+                        <TouchableOpacity
+                          key={angleDef.id}
+                          style={[
+                            styles.angleSelectorButton,
+                            isSelected && styles.angleSelectorButtonActive,
+                            !isLoaded && styles.angleSelectorButtonPending
+                          ]}
+                          onPress={() => {
+                            if (isLoaded && loadedIndex >= 0) {
+                              setSelectedAngleIndex(loadedIndex);
+                            }
+                          }}
+                          disabled={!isLoaded}
+                        >
+                          {!isLoaded && imageGenerating ? (
+                            <ActivityIndicator size={10} color={Colors.gray[500]} />
+                          ) : null}
+                          <Text style={[
+                            styles.angleSelectorText,
+                            isSelected && styles.angleSelectorTextActive,
+                            !isLoaded && styles.angleSelectorTextPending
+                          ]}>
+                            {angleDef.label.replace(' View', '')}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    {pendingAnglesCount > 0 && (
+                      <Text style={styles.pendingCountText}>
+                        {availableAngles.length}/3
+                      </Text>
+                    )}
                   </View>
                 )}
                 
@@ -1194,6 +1223,19 @@ const styles = StyleSheet.create({
   angleSelectorTextActive: {
     color: Colors.black,
     fontWeight: 'bold',
+  },
+  angleSelectorButtonPending: {
+    opacity: 0.5,
+    borderStyle: 'dashed',
+  },
+  angleSelectorTextPending: {
+    color: Colors.gray[600],
+  },
+  pendingCountText: {
+    fontSize: FontSizes.xs,
+    fontFamily: 'monospace',
+    color: Colors.accent,
+    marginLeft: Spacing.sm,
   },
   angleNavigation: {
     flexDirection: 'row',
