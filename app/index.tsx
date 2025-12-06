@@ -25,7 +25,7 @@ import {
   BillOfMaterials,
   useGemini,
   AngleImage,
-  generate2DMultiAngleImages,
+  generate2DAnglesProgressive,
 } from "../hooks/useGemini";
 import {
   SavedInnovation,
@@ -113,36 +113,48 @@ export default function HomeScreen() {
     setGeneratedImageBase64(null);
     setGeneratedMultiAngleImages([]);
     
+    let completedCount = 0;
+    const totalAngles = 3;
+    
     try {
-      const result = await generate2DMultiAngleImages(innovation, ['front', 'side', 'iso']);
-      
-      if (imageGenInnovationId.current !== generationToken) {
-        console.log('Image generation result discarded (token mismatch)');
-        return;
-      }
-      
-      const successfulImages = result.filter(img => img.imageData);
-      
-      if (successfulImages.length > 0) {
-        const formattedImages = result.map(img => ({
-          ...img,
-          imageData: img.imageData ? `data:image/png;base64,${img.imageData}` : null,
-        }));
-        
-        setGeneratedMultiAngleImages(formattedImages);
-        const primaryImage = formattedImages.find(img => img.imageData)?.imageData || null;
-        setGeneratedImageBase64(primaryImage);
-        setImageGenStatus('complete');
-        
-        setContext(prev => {
-          if (prev.id === innovationId) {
-            const updated = { ...prev, imageUrl: primaryImage };
-            autoSave(updated);
-            return updated;
+      await generate2DAnglesProgressive(
+        innovation,
+        ['front', 'side', 'iso'],
+        (completedAngle: AngleImage) => {
+          if (imageGenInnovationId.current !== generationToken) {
+            return;
           }
-          return prev;
-        });
-      } else {
+          
+          completedCount++;
+          
+          setGeneratedMultiAngleImages(prev => {
+            const existing = prev.filter(img => img.id !== completedAngle.id);
+            return [...existing, completedAngle].sort((a, b) => {
+              const order = ['front', 'side', 'iso'];
+              return order.indexOf(a.id) - order.indexOf(b.id);
+            });
+          });
+          
+          setGeneratedImageBase64(prev => prev || completedAngle.imageData);
+          
+          if (completedCount === 1) {
+            setContext(prev => {
+              if (prev.id === innovationId) {
+                const updated = { ...prev, imageUrl: completedAngle.imageData };
+                autoSave(updated);
+                return updated;
+              }
+              return prev;
+            });
+          }
+          
+          if (completedCount >= totalAngles) {
+            setImageGenStatus('complete');
+          }
+        }
+      );
+      
+      if (imageGenInnovationId.current === generationToken && completedCount === 0) {
         setImageGenStatus('error');
       }
     } catch (error) {
