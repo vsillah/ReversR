@@ -175,12 +175,8 @@ export default function HomeScreen() {
           imageUrl: null,
           bom: null,
         };
-      } else if (newPhase === 3) {
-        clearedContext = {
-          ...clearedContext,
-          bom: null,
-        };
       }
+      // Phase 3 (from Build): Keep all data (spec, 2D, 3D, BOM) for persistence
       
       setContext(clearedContext);
       await autoSave(clearedContext);
@@ -344,6 +340,9 @@ export default function HomeScreen() {
         {context.phase === 3 && context.innovation && (
           <PhaseThree
             innovation={context.innovation}
+            existingSpec={context.spec}
+            existingImageUrl={context.imageUrl}
+            existingThreeDScene={context.threeDScene}
             onComplete={handlePhaseThreeComplete}
             onContinueToBuild={handleContinueToBuild}
             onBack={handleBack}

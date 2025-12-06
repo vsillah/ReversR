@@ -24,6 +24,9 @@ import {
 
 interface Props {
   innovation: InnovationResult;
+  existingSpec?: TechnicalSpec | null;
+  existingImageUrl?: string | null;
+  existingThreeDScene?: ThreeDSceneDescriptor | null;
   onComplete: (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
@@ -39,18 +42,33 @@ type VisualTab = '2d' | '3d';
 
 export default function PhaseThree({
   innovation,
+  existingSpec,
+  existingImageUrl,
+  existingThreeDScene,
   onComplete,
   onContinueToBuild,
   onBack,
   onReset,
   onTryAnotherPattern,
 }: Props) {
-  const [spec, setSpec] = useState<TechnicalSpec | null>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(null);
+  const extractBase64FromUrl = (url: string | null): string | null => {
+    if (!url) return null;
+    const match = url.match(/^data:image\/[^;]+;base64,(.+)$/);
+    return match ? match[1] : null;
+  };
+
+  const [spec, setSpec] = useState<TechnicalSpec | null>(existingSpec || null);
+  const [imageBase64, setImageBase64] = useState<string | null>(extractBase64FromUrl(existingImageUrl || null));
+  const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(existingThreeDScene || null);
+  
+  const hasExistingData = !!(existingSpec);
+  const initialStatus = hasExistingData 
+    ? (existingImageUrl || existingThreeDScene ? 'complete' : 'specs_ready')
+    : 'generating_specs';
+  
   const [status, setStatus] = useState<
     'generating_specs' | 'specs_ready' | 'generating_visual' | 'complete'
-  >('generating_specs');
+  >(initialStatus);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<VisualTab>('2d');
   const [specsExpanded, setSpecsExpanded] = useState(false);
@@ -66,6 +84,11 @@ export default function PhaseThree({
   };
 
   const fetchSpecs = useCallback(async () => {
+    if (existingSpec) {
+      setSpec(existingSpec);
+      setStatus(existingImageUrl || existingThreeDScene ? 'complete' : 'specs_ready');
+      return;
+    }
     setError(null);
     setStatus('generating_specs');
     try {
@@ -76,11 +99,11 @@ export default function PhaseThree({
       console.error('Error generating specs:', err);
       setError(formatError(err));
     }
-  }, [innovation]);
+  }, [innovation, existingSpec, existingImageUrl, existingThreeDScene]);
 
   useEffect(() => {
     fetchSpecs();
-  }, [fetchSpecs]);
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
