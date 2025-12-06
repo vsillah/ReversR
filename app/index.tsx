@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import PhaseTwo from "../components/PhaseTwo";
 import PhaseThree from "../components/PhaseThree";
 import PhaseFour from "../components/PhaseFour";
 import HistoryScreen from "../components/HistoryScreen";
+import ImageGenerationNotification, { ImageGenStatus } from "../components/ImageGenerationNotification";
 import {
   AnalysisResult,
   InnovationResult,
@@ -22,6 +23,7 @@ import {
   ThreeDSceneDescriptor,
   SITPattern,
   BillOfMaterials,
+  useGemini,
 } from "../hooks/useGemini";
 import {
   SavedInnovation,
@@ -74,6 +76,12 @@ export default function HomeScreen() {
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [context, setContext] = useState<MutationContext>(createEmptyContext());
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [imageGenStatus, setImageGenStatus] = useState<ImageGenStatus>('idle');
+  const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
+  const imageGenInnovationId = useRef<string | null>(null);
+  
+  const { generate2DVisualization } = useGemini();
 
   const autoSave = useCallback(async (ctx: MutationContext) => {
     if (ctx.phase > 1 || ctx.input) {
@@ -93,6 +101,58 @@ export default function HomeScreen() {
       };
       await saveInnovation(toSave);
     }
+  }, []);
+
+  const startBackgroundImageGeneration = useCallback(async (innovation: InnovationResult, innovationId: string) => {
+    const generationToken = `${innovationId}-${Date.now()}`;
+    imageGenInnovationId.current = generationToken;
+    setImageGenStatus('generating');
+    setGeneratedImageBase64(null);
+    
+    try {
+      const result = await generate2DVisualization(
+        innovation.conceptName,
+        innovation.conceptDescription
+      );
+      
+      if (imageGenInnovationId.current !== generationToken) {
+        return;
+      }
+      
+      if (result) {
+        setGeneratedImageBase64(result);
+        setImageGenStatus('complete');
+        
+        setContext(prev => {
+          if (prev.id === innovationId) {
+            const updated = { ...prev, imageUrl: result };
+            autoSave(updated);
+            return updated;
+          }
+          return prev;
+        });
+      } else {
+        setImageGenStatus('error');
+      }
+    } catch (error) {
+      console.error('Background image generation error:', error);
+      if (imageGenInnovationId.current === generationToken) {
+        setImageGenStatus('error');
+      }
+    }
+  }, [generate2DVisualization, autoSave]);
+
+  const handleImageNotificationPress = useCallback(() => {
+    if (imageGenStatus === 'complete' && context.phase !== 3) {
+      setContext(prev => ({ ...prev, phase: 3 }));
+    }
+    if (imageGenStatus === 'complete' || imageGenStatus === 'error') {
+      setImageGenStatus('idle');
+    }
+  }, [imageGenStatus, context.phase]);
+
+  const handleImageNotificationDismiss = useCallback(() => {
+    setImageGenStatus('idle');
   }, []);
 
   const handlePhaseOneComplete = async (input: string, analysis: AnalysisResult) => {
@@ -115,6 +175,8 @@ export default function HomeScreen() {
     };
     setContext(newContext);
     await autoSave(newContext);
+    
+    startBackgroundImageGeneration(innovation, context.id);
   };
 
   const handlePhaseThreeComplete = async (
@@ -166,6 +228,9 @@ export default function HomeScreen() {
           imageUrl: null,
           bom: null,
         };
+        setImageGenStatus('idle');
+        setGeneratedImageBase64(null);
+        imageGenInnovationId.current = null;
       } else if (newPhase === 2) {
         clearedContext = {
           ...clearedContext,
@@ -175,6 +240,9 @@ export default function HomeScreen() {
           imageUrl: null,
           bom: null,
         };
+        setImageGenStatus('idle');
+        setGeneratedImageBase64(null);
+        imageGenInnovationId.current = null;
       }
       // Phase 3 (from Build): Keep all data (spec, 2D, 3D, BOM) for persistence
       
@@ -185,6 +253,9 @@ export default function HomeScreen() {
 
   const handleReset = () => {
     setContext(createEmptyContext());
+    setImageGenStatus('idle');
+    setGeneratedImageBase64(null);
+    imageGenInnovationId.current = null;
   };
 
   const handleTryAnotherPattern = async () => {
@@ -199,12 +270,18 @@ export default function HomeScreen() {
     };
     setContext(newContext);
     await autoSave(newContext);
+    setImageGenStatus('idle');
+    setGeneratedImageBase64(null);
+    imageGenInnovationId.current = null;
   };
 
   const handleStartNew = () => {
     setContext(createEmptyContext());
     setShowHistory(false);
     setStarted(true);
+    setImageGenStatus('idle');
+    setGeneratedImageBase64(null);
+    imageGenInnovationId.current = null;
   };
 
   const handleResume = (saved: SavedInnovation) => {
@@ -343,6 +420,7 @@ export default function HomeScreen() {
             existingSpec={context.spec}
             existingImageUrl={context.imageUrl}
             existingThreeDScene={context.threeDScene}
+            imageGenerating={imageGenStatus === 'generating'}
             onComplete={handlePhaseThreeComplete}
             onContinueToBuild={handleContinueToBuild}
             onBack={handleBack}
@@ -364,6 +442,12 @@ export default function HomeScreen() {
           />
         )}
       </ScrollView>
+      
+      <ImageGenerationNotification
+        status={imageGenStatus}
+        onPress={handleImageNotificationPress}
+        onDismiss={handleImageNotificationDismiss}
+      />
     </View>
   );
 }

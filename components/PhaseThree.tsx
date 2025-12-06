@@ -32,6 +32,7 @@ interface Props {
   existingSpec?: TechnicalSpec | null;
   existingImageUrl?: string | null;
   existingThreeDScene?: ThreeDSceneDescriptor | null;
+  imageGenerating?: boolean;
   onComplete: (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
@@ -50,6 +51,7 @@ export default function PhaseThree({
   existingSpec,
   existingImageUrl,
   existingThreeDScene,
+  imageGenerating = false,
   onComplete,
   onContinueToBuild,
   onBack,
@@ -212,6 +214,18 @@ export default function PhaseThree({
   useEffect(() => {
     fetchSpecs();
   }, []);
+
+  useEffect(() => {
+    if (existingImageUrl && !imageBase64) {
+      const base64 = extractBase64FromUrl(existingImageUrl);
+      if (base64) {
+        setImageBase64(base64);
+        if (status === 'specs_ready' || status === 'generating_visual') {
+          setStatus('complete');
+        }
+      }
+    }
+  }, [existingImageUrl]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -490,6 +504,19 @@ export default function PhaseThree({
                     <Ionicons name="refresh" size={18} color={Colors.gray[400]} />
                     <Text style={[styles.imageActionText, { color: Colors.gray[400] }]}>Regen</Text>
                   </TouchableOpacity>
+                </View>
+              </View>
+            ) : imageGenerating ? (
+              <View style={styles.backgroundGenerating}>
+                <View style={styles.bgGenIconContainer}>
+                  <ActivityIndicator size="small" color={Colors.accent} />
+                </View>
+                <Text style={styles.bgGenTitle}>Generating in background...</Text>
+                <Text style={styles.bgGenDesc}>
+                  Continue exploring — we'll notify you when it's ready
+                </Text>
+                <View style={styles.bgGenProgress}>
+                  <View style={styles.bgGenProgressBar} />
                 </View>
               </View>
             ) : (
@@ -1212,5 +1239,46 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.accent,
     fontWeight: '600',
+  },
+  backgroundGenerating: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+  },
+  bgGenIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  bgGenTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: '600',
+    color: Colors.accent,
+    marginBottom: Spacing.xs,
+    fontFamily: 'monospace',
+  },
+  bgGenDesc: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  bgGenProgress: {
+    width: '80%',
+    height: 3,
+    backgroundColor: Colors.gray[800],
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  bgGenProgressBar: {
+    width: '60%',
+    height: '100%',
+    backgroundColor: Colors.accent,
+    borderRadius: 2,
   },
 });

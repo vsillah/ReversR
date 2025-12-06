@@ -225,3 +225,28 @@ export const generateBOM = async (innovation: InnovationResult, analysis?: Analy
     body: JSON.stringify({ innovation, analysis })
   });
 };
+
+export const useGemini = () => {
+  const generate2DVisualization = async (conceptName: string, conceptDescription: string): Promise<string | null> => {
+    try {
+      const response = await fetchWithRetry<{ imageData: string }>(`${API_BASE}/api/gemini/generate-2d`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          innovation: {
+            conceptName,
+            conceptDescription,
+          }
+        })
+      });
+      return response.imageData ? `data:image/png;base64,${response.imageData}` : null;
+    } catch (error) {
+      console.error('Background 2D generation error:', error);
+      return null;
+    }
+  };
+
+  return {
+    generate2DVisualization,
+  };
+};
