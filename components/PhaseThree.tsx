@@ -89,7 +89,14 @@ export default function PhaseThree({
     { id: 'iso', label: 'Isometric' },
   ];
   
-  const availableAngles = multiAngleImages.filter(img => img.imageData);
+  // Sort available angles by defined order (front, side, iso) so first image is always "front" when available
+  const availableAngles = multiAngleImages
+    .filter(img => img.imageData)
+    .sort((a, b) => {
+      const orderA = ALL_ANGLES.findIndex(angle => angle.id === a.id);
+      const orderB = ALL_ANGLES.findIndex(angle => angle.id === b.id);
+      return orderA - orderB;
+    });
   const [selectedAngleId, setSelectedAngleId] = useState<string | null>(null);
   
   // Normalize image URI - handles file URIs, data URLs, HTTP URLs, and raw base64
