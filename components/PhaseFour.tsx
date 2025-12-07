@@ -91,12 +91,9 @@ export default function PhaseFour({
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
 
   useEffect(() => {
-    // Add small delay to ensure layout is measured before scrolling
-    const timer = setTimeout(() => {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [innovation.conceptName]);
+    // Scroll to top on mount
+    scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+  }, []);
 
   const formatError = (e: unknown) => {
     const err = e as { message?: string };
