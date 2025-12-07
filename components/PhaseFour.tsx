@@ -188,7 +188,7 @@ export default function PhaseFour({
     <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="construct" size={28} color={Colors.orange[300]} />
+          <Ionicons name="hammer-outline" size={28} color={Colors.orange[300]} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 4: Build</Text>
             <Text style={styles.description}>Manufacturing readiness & Bill of Materials</Text>

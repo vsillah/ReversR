@@ -18,19 +18,19 @@ const phases = [
   {
     number: 1,
     title: 'SCAN',
-    icon: 'layers-outline' as const,
+    icon: 'search' as const,
     description: 'Analyze existing products to define the Closed World boundary and essential components.',
   },
   {
     number: 2,
     title: 'REVERSE',
-    icon: 'flash-outline' as const,
+    icon: 'repeat-sharp' as const,
     description: 'Apply patterns like Subtraction and Task Unification to force novel utility.',
   },
   {
     number: 3,
     title: 'ARCHITECT',
-    icon: 'grid-outline' as const,
+    icon: 'pencil' as const,
     description: 'Generate technical specifications, sketches, and interactive 3D prototypes.',
   },
 ];

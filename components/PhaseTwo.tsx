@@ -104,7 +104,7 @@ export default function PhaseTwo({
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="options-outline" size={28} color={Colors.secondary} />
+          <Ionicons name="repeat-sharp" size={28} color={Colors.secondary} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 2: Reverse</Text>
             <Text style={styles.description}>

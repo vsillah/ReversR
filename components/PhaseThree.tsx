@@ -639,7 +639,7 @@ export default function PhaseThree({
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="code-slash" size={28} color={Colors.accent} />
+          <Ionicons name="pencil" size={28} color={Colors.accent} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 3: The Architect</Text>
             <Text style={styles.description}>Blueprint generated. Visualize your innovation.</Text>
