@@ -78,6 +78,8 @@ export default function PhaseThree({
   const [specsExpanded, setSpecsExpanded] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [cachedFileUris, setCachedFileUris] = useState<Record<string, string>>({});
   const ALL_ANGLES = [
     { id: 'front', label: 'Front View' },
     { id: 'side', label: 'Side View' },
@@ -106,25 +108,49 @@ export default function PhaseThree({
   
   // Normalize image URI - handles file URIs, data URLs, HTTP URLs, and raw base64
   const normalizeImageUri = (data: string | null | undefined): string | null => {
-    if (!data) return null;
-    if (typeof data !== 'string') return null;
+    if (!data) {
+      console.log('[DEBUG] normalizeImageUri: null/undefined input');
+      return null;
+    }
+    if (typeof data !== 'string') {
+      console.log('[DEBUG] normalizeImageUri: non-string input', typeof data);
+      return null;
+    }
     const trimmed = data.trim();
-    if (!trimmed) return null;
+    if (!trimmed) {
+      console.log('[DEBUG] normalizeImageUri: empty after trim');
+      return null;
+    }
+    
+    console.log('[DEBUG] normalizeImageUri: input length:', trimmed.length, 'first 60 chars:', trimmed.substring(0, 60));
+    
     // File URIs - return unchanged (from expo-file-system)
-    if (trimmed.startsWith('file://')) return trimmed;
-    // Already a data URL
-    if (trimmed.startsWith('data:image/')) return trimmed;
+    if (trimmed.startsWith('file://')) {
+      console.log('[DEBUG] normalizeImageUri: detected file:// URI');
+      return trimmed;
+    }
+    // Already a data URL - return unchanged
+    if (trimmed.startsWith('data:image/')) {
+      console.log('[DEBUG] normalizeImageUri: detected data:image URL, returning unchanged');
+      return trimmed;
+    }
     // HTTP/HTTPS URLs - return unchanged
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      console.log('[DEBUG] normalizeImageUri: detected HTTP URL');
+      return trimmed;
+    }
     // Raw base64 data (PNG or JPEG signatures)
     if (trimmed.startsWith('iVBOR') || trimmed.startsWith('/9j/') || trimmed.match(/^[A-Za-z0-9+/=]{50,}$/)) {
+      console.log('[DEBUG] normalizeImageUri: detected raw base64, adding prefix');
       return `data:image/png;base64,${trimmed}`;
     }
     // Fallback - assume base64 if it's a long string without URL-like characters
     if (trimmed.length > 100 && !trimmed.includes('/') && !trimmed.includes('.')) {
+      console.log('[DEBUG] normalizeImageUri: fallback base64 detection, adding prefix');
       return `data:image/png;base64,${trimmed}`;
     }
     // Return as-is for any other format
+    console.log('[DEBUG] normalizeImageUri: returning as-is');
     return trimmed;
   };
 
@@ -134,6 +160,71 @@ export default function PhaseThree({
       setSelectedAngleId(availableAngles[0].id);
     }
   }, [availableAngles, selectedAngleId]);
+
+  // Reset image load error when images change
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [multiAngleImages, existingImageUrl, selectedAngleId]);
+
+  // Convert base64 data URLs to file URIs for Android compatibility
+  // Large base64 strings (>64KB) don't render properly in React Native Image on Android
+  const cacheBase64ToFile = useCallback(async (dataUrl: string, angleId: string): Promise<string | null> => {
+    if (!dataUrl) return null;
+    
+    // If it's already a file URI, return as-is
+    if (dataUrl.startsWith('file://')) {
+      return dataUrl;
+    }
+    
+    // If it's an HTTP URL, return as-is (they work fine)
+    if (dataUrl.startsWith('http://') || dataUrl.startsWith('https://')) {
+      return dataUrl;
+    }
+    
+    // Extract base64 data from data URL
+    const base64Match = dataUrl.match(/^data:image\/\w+;base64,(.+)$/);
+    if (!base64Match) {
+      console.log('[DEBUG] cacheBase64ToFile: Not a data URL, returning as-is');
+      return dataUrl;
+    }
+    
+    const base64Data = base64Match[1];
+    
+    // Create a cache key that includes image content signature (length + first/last chars)
+    // This ensures we regenerate the file when image data changes
+    const contentSignature = `${base64Data.length}_${base64Data.substring(0, 8)}_${base64Data.substring(base64Data.length - 8)}`;
+    const fullCacheKey = `${angleId}_${contentSignature}`;
+    
+    // Check if we already cached this exact image content
+    if (cachedFileUris[fullCacheKey]) {
+      console.log('[DEBUG] cacheBase64ToFile: Using cached file URI for', fullCacheKey);
+      return cachedFileUris[fullCacheKey];
+    }
+    
+    console.log('[DEBUG] cacheBase64ToFile: Converting to file, base64 length:', base64Data.length, 'key:', fullCacheKey);
+    
+    try {
+      const filename = `reversr_image_${angleId}_${Date.now()}.png`;
+      const fileUri = FileSystem.cacheDirectory + filename;
+      
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      console.log('[DEBUG] cacheBase64ToFile: Saved to file:', fileUri);
+      
+      // Cache the file URI with content-aware key
+      setCachedFileUris(prev => ({ ...prev, [fullCacheKey]: fileUri }));
+      
+      return fileUri;
+    } catch (error) {
+      console.error('[DEBUG] cacheBase64ToFile error:', error);
+      return null;
+    }
+  }, [cachedFileUris]);
+
+  // State for displayable file URIs
+  const [displayableImageUri, setDisplayableImageUri] = useState<string | null>(null);
 
   // Derive the best available image from props or local state
   const derivedImageUri = useMemo(() => {
@@ -177,6 +268,29 @@ export default function PhaseThree({
   const currentAngleImage = availableAngles.find(img => img.id === selectedAngleId) || availableAngles[0] || null;
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
+
+  // Convert current image to file URI when it changes (for Android compatibility with large base64 strings)
+  useEffect(() => {
+    const convertToFileUri = async () => {
+      const imageUri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
+      if (!imageUri) {
+        setDisplayableImageUri(null);
+        return;
+      }
+      
+      // If it's already a file URI or HTTP URL, use directly
+      if (imageUri.startsWith('file://') || imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+        setDisplayableImageUri(imageUri);
+        return;
+      }
+      
+      const cacheKey = currentAngleImage?.id || 'main';
+      const fileUri = await cacheBase64ToFile(imageUri, cacheKey);
+      setDisplayableImageUri(fileUri);
+    };
+    
+    convertToFileUri();
+  }, [currentAngleImage, derivedImageUri, cacheBase64ToFile]);
   
   const scale = useRef(new Animated.Value(1)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -666,13 +780,29 @@ export default function PhaseThree({
                 )}
                 
                 {(() => {
-                  const imageUri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-                  if (!imageUri) {
+                  // Use displayableImageUri (file URI) for Android compatibility with large base64 images
+                  if (!displayableImageUri || imageLoadError) {
+                    const hasSourceImage = !!(normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri);
                     return (
-                      <View style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}>
-                        <ActivityIndicator size="large" color={Colors.accent} />
-                        <Text style={{ color: Colors.gray[400], marginTop: 12, fontSize: 14 }}>Loading image...</Text>
-                      </View>
+                      <TouchableOpacity 
+                        style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}
+                        onPress={() => {
+                          if (hasSourceImage) {
+                            resetZoom();
+                            setImageModalVisible(true);
+                          }
+                        }}
+                      >
+                        <Ionicons name="image-outline" size={48} color={Colors.gray[500]} />
+                        <Text style={{ color: Colors.gray[400], marginTop: 12, fontSize: 14, textAlign: 'center', paddingHorizontal: 20 }}>
+                          {imageLoadError ? 'Image failed to load' : hasSourceImage ? 'Preparing image...' : 'Generating image...'}
+                        </Text>
+                        {hasSourceImage && (
+                          <Text style={{ color: Colors.accent, marginTop: 8, fontSize: 13 }}>
+                            Tap Expand below to view
+                          </Text>
+                        )}
+                      </TouchableOpacity>
                     );
                   }
                   return (
@@ -684,9 +814,17 @@ export default function PhaseThree({
                       }}
                     >
                       <Image
-                        source={{ uri: imageUri }}
+                        source={{ uri: displayableImageUri }}
                         style={styles.generatedImage}
                         resizeMode="contain"
+                        onError={(e) => {
+                          console.log('[DEBUG] Image load error:', e.nativeEvent.error);
+                          setImageLoadError(true);
+                        }}
+                        onLoad={() => {
+                          console.log('[DEBUG] Image loaded successfully');
+                          setImageLoadError(false);
+                        }}
                       />
                       <View style={styles.expandHint}>
                         <Ionicons name="expand" size={14} color={Colors.white} />
@@ -919,18 +1057,13 @@ export default function PhaseThree({
         </View>
       )}
 
-      {/* Continue to Build button - shows generating status or active button */}
-      {status === 'generating_specs' ? (
-        <View style={[styles.continueButton, styles.continueButtonDisabled]}>
-          <ActivityIndicator size="small" color={Colors.gray[500]} style={{ marginRight: 8 }} />
-          <Text style={styles.continueButtonTextDisabled}>Generating specifications...</Text>
-        </View>
-      ) : spec ? (
+      {/* Continue to Build button */}
+      {spec && (
         <TouchableOpacity style={styles.continueButton} onPress={onContinueToBuild}>
           <Text style={styles.continueButtonText}>Continue to Build</Text>
           <Ionicons name="arrow-forward" size={20} color={Colors.black} />
         </TouchableOpacity>
-      ) : null}
+      )}
 
       <TouchableOpacity style={styles.tryAnotherButton} onPress={onTryAnotherPattern}>
         <Ionicons name="shuffle" size={18} color={Colors.secondary} />
@@ -962,7 +1095,7 @@ export default function PhaseThree({
           
           <View style={styles.modalImageContainer} {...panResponder.panHandlers}>
             <Animated.Image
-              source={{ uri: normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri || '' }}
+              source={{ uri: displayableImageUri || '' }}
               style={[
                 styles.modalImage,
                 {
