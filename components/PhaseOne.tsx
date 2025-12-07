@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontFamily: 'monospace',
     fontSize: FontSizes.sm,
-    minHeight: 100,
+    minHeight: 200,
     textAlignVertical: 'top',
   },
   imagePreview: {
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-    minHeight: 400,
+    minHeight: 500,
   },
   cameraOverlay: {
     position: 'absolute',
