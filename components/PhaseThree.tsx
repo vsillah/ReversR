@@ -783,36 +783,39 @@ export default function PhaseThree({
                       </View>
                     );
                   }
-                  console.log('[DEBUG] RENDER: Showing image with data URI length:', displayImageUri.length);
+                  console.log('[DEBUG] RENDER v2: Showing RNImage with test URL');
                   
-                  // Use React Native's built-in Image instead of expo-image
-                  // Test with a known-working external image first
+                  // Using React Native's built-in Image with test URL
                   const testImageUrl = 'https://picsum.photos/400/250';
-                  const useTestImage = true;
-                  const imageSource = useTestImage ? { uri: testImageUrl } : { uri: displayImageUri };
                   
                   return (
-                    <TouchableOpacity 
-                      activeOpacity={0.9}
-                      onPress={() => {
-                        resetZoom();
-                        setImageModalVisible(true);
-                      }}
-                    >
-                      <RNImage
-                        source={imageSource}
-                        style={{ width: '100%', height: 250, borderRadius: 8, backgroundColor: '#333' }}
-                        resizeMode="contain"
-                        onError={(e) => {
-                          console.log('[DEBUG] RNImage onError triggered:', e.nativeEvent.error);
-                          setImageLoadError(true);
+                    <View style={{ width: '100%' }}>
+                      {/* Debug indicator - bright red text to confirm new code is running */}
+                      <Text style={{ color: 'red', fontSize: 12, textAlign: 'center', marginBottom: 4 }}>
+                        [v2] Testing RNImage...
+                      </Text>
+                      <TouchableOpacity 
+                        activeOpacity={0.9}
+                        onPress={() => {
+                          resetZoom();
+                          setImageModalVisible(true);
                         }}
-                        onLoad={() => {
-                          console.log('[DEBUG] RNImage onLoad triggered - SUCCESS');
-                          setImageLoadError(false);
-                        }}
-                      />
-                    </TouchableOpacity>
+                      >
+                        <RNImage
+                          source={{ uri: testImageUrl }}
+                          style={{ width: 350, height: 250, borderRadius: 8, backgroundColor: '#444', alignSelf: 'center' }}
+                          resizeMode="contain"
+                          onError={(e) => {
+                            console.log('[DEBUG] RNImage onError:', e.nativeEvent.error);
+                            setImageLoadError(true);
+                          }}
+                          onLoad={() => {
+                            console.log('[DEBUG] RNImage onLoad SUCCESS');
+                            setImageLoadError(false);
+                          }}
+                        />
+                      </TouchableOpacity>
+                    </View>
                   );
                 })()}
                 
