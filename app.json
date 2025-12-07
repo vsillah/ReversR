@@ -36,7 +36,8 @@
         {
           "cameraPermission": "Allow ReversR to access your camera to scan products."
         }
-      ]
+      ],
+      "expo-router"
     ],
     "scheme": "reversr",
     "extra": {

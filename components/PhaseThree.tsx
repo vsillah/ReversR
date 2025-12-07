@@ -237,10 +237,16 @@ export default function PhaseThree({
 
   const handleSaveImage = async () => {
     const imageToSave = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-    if (!imageToSave) return;
+    console.log('[DEBUG] handleSaveImage called, imageToSave:', imageToSave ? `${imageToSave.substring(0, 50)}...` : 'null');
+    if (!imageToSave) {
+      console.log('[DEBUG] handleSaveImage: No image to save');
+      Alert.alert('No Image', 'No image available to save.');
+      return;
+    }
     
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
+      console.log('[DEBUG] handleSaveImage: Permission status:', status);
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Please allow access to save images.');
         return;
@@ -249,33 +255,44 @@ export default function PhaseThree({
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
       const fileUri = FileSystem.documentDirectory + filename;
+      console.log('[DEBUG] handleSaveImage: Saving to:', fileUri);
       
       // Handle HTTP URLs by downloading, base64 data URLs by extracting
       if (imageToSave.startsWith('http://') || imageToSave.startsWith('https://')) {
+        console.log('[DEBUG] handleSaveImage: Downloading from URL');
         const downloadResult = await FileSystem.downloadAsync(imageToSave, fileUri);
         if (downloadResult.status !== 200) {
           throw new Error('Failed to download image');
         }
       } else {
+        console.log('[DEBUG] handleSaveImage: Writing base64 data, length:', imageToSave.length);
         const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
+        console.log('[DEBUG] handleSaveImage: Base64 data length after strip:', base64Data.length);
         await FileSystem.writeAsStringAsync(fileUri, base64Data, {
           encoding: FileSystem.EncodingType.Base64,
         });
+        console.log('[DEBUG] handleSaveImage: File written successfully');
       }
 
       await MediaLibrary.saveToLibraryAsync(fileUri);
+      console.log('[DEBUG] handleSaveImage: Saved to library');
       Alert.alert('Saved', `${currentAngleImage?.label || 'Image'} saved to your photo library.`);
-    } catch (e) {
-      console.error('Save image error:', e);
-      Alert.alert('Error', 'Failed to save image.');
+    } catch (e: any) {
+      console.error('[DEBUG] handleSaveImage error:', e?.message || e);
+      Alert.alert('Error', `Failed to save image: ${e?.message || 'Unknown error'}`);
     }
   };
 
   const handleSaveAllAngles = async () => {
-    if (availableAngles.length === 0) return;
+    console.log('[DEBUG] handleSaveAllAngles called, availableAngles:', availableAngles.length);
+    if (availableAngles.length === 0) {
+      Alert.alert('No Images', 'No images available to save.');
+      return;
+    }
     
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
+      console.log('[DEBUG] handleSaveAllAngles: Permission status:', status);
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Please allow access to save images.');
         return;
@@ -285,31 +302,38 @@ export default function PhaseThree({
       for (const angle of availableAngles) {
         if (angle.imageData) {
           const imageUri = normalizeImageUri(angle.imageData);
+          console.log('[DEBUG] handleSaveAllAngles: Processing angle:', angle.id, 'imageUri:', imageUri ? 'present' : 'null');
           if (!imageUri) continue;
           
           const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angle.label.replace(/\s+/g, '_')}.png`;
           const fileUri = FileSystem.documentDirectory + filename;
           
-          // Handle HTTP URLs by downloading, base64 data URLs by extracting
-          if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
-            const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
-            if (downloadResult.status !== 200) continue;
-          } else {
-            const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
-            await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-              encoding: FileSystem.EncodingType.Base64,
-            });
+          try {
+            // Handle HTTP URLs by downloading, base64 data URLs by extracting
+            if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+              const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
+              if (downloadResult.status !== 200) continue;
+            } else {
+              const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
+              await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+            }
+            
+            await MediaLibrary.saveToLibraryAsync(fileUri);
+            savedCount++;
+            console.log('[DEBUG] handleSaveAllAngles: Saved angle:', angle.id);
+          } catch (angleError: any) {
+            console.error('[DEBUG] handleSaveAllAngles: Error saving angle:', angle.id, angleError?.message);
           }
-          
-          await MediaLibrary.saveToLibraryAsync(fileUri);
-          savedCount++;
         }
       }
       
+      console.log('[DEBUG] handleSaveAllAngles: Total saved:', savedCount);
       Alert.alert('Saved', `${savedCount} images saved to your photo library.`);
-    } catch (e) {
-      console.error('Save all images error:', e);
-      Alert.alert('Error', 'Failed to save images.');
+    } catch (e: any) {
+      console.error('[DEBUG] handleSaveAllAngles error:', e?.message || e);
+      Alert.alert('Error', `Failed to save images: ${e?.message || 'Unknown error'}`);
     }
   };
 
