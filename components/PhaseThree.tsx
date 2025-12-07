@@ -793,10 +793,9 @@ export default function PhaseThree({
                       }}
                     >
                       <Image
-                        source={{ uri: displayImageUri }}
+                        source={displayImageUri}
                         style={styles.generatedImage}
                         contentFit="contain"
-                        cachePolicy="memory-disk"
                         onError={(e) => {
                           console.log('[DEBUG] Image onError triggered:', e.error);
                           setImageLoadError(true);
