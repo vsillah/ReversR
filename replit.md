@@ -60,7 +60,10 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Continue to Build button to advance to Phase 4
 
 7. **Enhanced Phase 4 UI**:
-   - Manufacturing Readiness tracker with percentage badge (Specs, BOM, 2D, 3D)
+   - Interactive Manufacturing Readiness tracker with percentage badge (Specs, BOM, 2D, 3D)
+   - Tap missing artifacts to navigate to Design phase (2D, 3D, Specs) or generate directly (BOM)
+   - Visual affordance: dashed borders on incomplete items, action icons indicating navigation or generation
+   - Loading indicator on BOM tile during generation with duplicate-request prevention
    - Send to Manufacturer section with links to Xometry, Shapeways, Protolabs, JLCPCB
    - Export options for BOM (CSV) and complete package (JSON)
 
