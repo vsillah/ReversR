@@ -87,12 +87,31 @@ export default function PhaseThree({
   const availableAngles = multiAngleImages.filter(img => img.imageData);
   const [selectedAngleId, setSelectedAngleId] = useState<string | null>(null);
   
-  // Normalize image URI - handles data URLs, HTTP URLs, and raw base64
+  // Debug logging for image data flow
+  console.log('[DEBUG] PhaseThree render:', {
+    multiAngleImagesCount: multiAngleImages.length,
+    availableAnglesCount: availableAngles.length,
+    selectedAngleId,
+    existingImageUrl: existingImageUrl ? `${existingImageUrl.substring(0, 50)}...` : 'null',
+    imageGenerating,
+  });
+  if (multiAngleImages.length > 0) {
+    console.log('[DEBUG] PhaseThree multiAngleImages details:', multiAngleImages.map(img => ({
+      id: img.id,
+      hasImageData: !!img.imageData,
+      imageDataLength: img.imageData?.length || 0,
+      imageDataPrefix: img.imageData?.substring(0, 30) || 'null',
+    })));
+  }
+  
+  // Normalize image URI - handles file URIs, data URLs, HTTP URLs, and raw base64
   const normalizeImageUri = (data: string | null | undefined): string | null => {
     if (!data) return null;
     if (typeof data !== 'string') return null;
     const trimmed = data.trim();
     if (!trimmed) return null;
+    // File URIs - return unchanged (from expo-file-system)
+    if (trimmed.startsWith('file://')) return trimmed;
     // Already a data URL
     if (trimmed.startsWith('data:image/')) return trimmed;
     // HTTP/HTTPS URLs - return unchanged
