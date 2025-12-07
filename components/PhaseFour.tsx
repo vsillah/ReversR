@@ -779,13 +779,13 @@ const styles = StyleSheet.create({
   },
   exportInfoLabel: {
     fontSize: FontSizes.xs,
-    color: Colors.purple[400],
+    color: Colors.white,
     fontWeight: 'bold',
     marginBottom: Spacing.sm,
   },
   exportInfoItem: {
     fontSize: FontSizes.xs,
-    color: Colors.gray[400],
+    color: Colors.gray[100],
     marginBottom: Spacing.xs,
   },
   manufacturerPanel: {
