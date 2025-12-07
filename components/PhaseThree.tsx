@@ -894,7 +894,7 @@ export default function PhaseThree({
                 <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
                 <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
               </View>
-              <Text style={styles.specFileName}>specifications.json</Text>
+              <Text style={styles.specFileName}>Specifications</Text>
             </View>
             <View style={styles.specToggle}>
               <Text style={styles.specToggleText}>
