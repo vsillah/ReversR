@@ -204,10 +204,10 @@ export default function PhaseFour({
       {/* Manufacturing Readiness Tracker */}
       {(() => {
         const artifacts: ArtifactStatus[] = [
+          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
+          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
           { id: 'specs', name: 'Specs', icon: 'document-text-outline', ready: !!spec },
           { id: 'bom', name: 'BOM', icon: 'list-outline', ready: !!localBom },
-          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
-          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
         ];
         const readyCount = artifacts.filter(a => a.ready).length;
         const percentage = Math.round((readyCount / artifacts.length) * 100);
