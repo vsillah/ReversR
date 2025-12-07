@@ -782,25 +782,14 @@ export default function PhaseThree({
                   if (!displayableImageUri || imageLoadError) {
                     const hasSourceImage = !!(normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri);
                     return (
-                      <TouchableOpacity 
+                      <View 
                         style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}
-                        onPress={() => {
-                          if (hasSourceImage) {
-                            resetZoom();
-                            setImageModalVisible(true);
-                          }
-                        }}
                       >
                         <Ionicons name="image-outline" size={48} color={Colors.gray[500]} />
                         <Text style={{ color: Colors.gray[400], marginTop: 12, fontSize: 14, textAlign: 'center', paddingHorizontal: 20 }}>
-                          {imageLoadError ? 'Image failed to load' : hasSourceImage ? 'Preparing image...' : 'Generating image...'}
+                          {imageLoadError ? 'Image failed to load' : hasSourceImage ? 'Preparing image...' : 'Click Expand to view sketches'}
                         </Text>
-                        {hasSourceImage && (
-                          <Text style={{ color: Colors.accent, marginTop: 8, fontSize: 13 }}>
-                            Tap Expand below to view
-                          </Text>
-                        )}
-                      </TouchableOpacity>
+                      </View>
                     );
                   }
                   return (
