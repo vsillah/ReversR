@@ -7,12 +7,12 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import { analyzeProduct, AnalysisResult } from '../hooks/useGemini';
+import AlertModal from './AlertModal';
 
 interface Props {
   onComplete: (input: string, analysis: AnalysisResult, capturedImage?: string | null) => void;
@@ -41,6 +41,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
+  const [alert, setAlert] = useState<{visible: boolean, title: string, message: string} | null>(null);
 
   const handleAnalyze = async () => {
     if (!input.trim() && !capturedImage) return;
@@ -73,7 +74,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     if (!permission?.granted) {
       const result = await requestPermission();
       if (!result.granted) {
-        Alert.alert('Permission needed', 'Camera access is required to scan objects.');
+        setAlert({visible: true, title: 'Permission needed', message: 'Camera access is required to scan objects.'});
         return;
       }
     }
@@ -95,7 +96,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
         setIsCameraOpen(false);
       } catch (e) {
         console.error('Failed to capture:', e);
-        Alert.alert('Camera Error', 'Failed to capture image. Please try again.');
+        setAlert({visible: true, title: 'Camera Error', message: 'Failed to capture image. Please try again.'});
       }
     }
   };
