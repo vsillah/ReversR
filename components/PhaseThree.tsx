@@ -226,7 +226,6 @@ export default function PhaseThree({
   }, [cachedFileUris]);
 
   // State for displayable file URIs
-  const [displayableImageUri, setDisplayableImageUri] = useState<string | null>(null);
 
   // Derive the best available image from props or local state
   const derivedImageUri = useMemo(() => {
@@ -271,65 +270,14 @@ export default function PhaseThree({
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
 
-  // Convert current image to file URI when it changes (for Android compatibility with large base64 strings)
-  // Use a ref to track the current conversion operation and prevent stale updates
-  const conversionIdRef = useRef(0);
-  
-  useEffect(() => {
-    const currentConversionId = ++conversionIdRef.current;
-    
-    const convertToFileUri = async () => {
-      const imageUri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-      console.log('[DEBUG] convertToFileUri: Starting conversion #' + currentConversionId + ' with imageUri length:', imageUri?.length || 0, 'angleId:', currentAngleImage?.id);
-      
-      if (!imageUri) {
-        console.log('[DEBUG] convertToFileUri: No imageUri, keeping previous displayableImageUri (not setting to null)');
-        // DON'T set to null - keep showing the previous image while waiting
-        return;
-      }
-      
-      let newUri: string | null = null;
-      
-      // If it's already a file URI or HTTP URL, use directly
-      if (imageUri.startsWith('file://') || imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
-        console.log('[DEBUG] convertToFileUri: Already a URL:', imageUri.substring(0, 80));
-        // Verify file exists for file:// URIs
-        if (imageUri.startsWith('file://')) {
-          const fileInfo = await FileSystem.getInfoAsync(imageUri);
-          console.log('[DEBUG] convertToFileUri: File exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
-          if (!fileInfo.exists) {
-            console.log('[DEBUG] convertToFileUri: File does not exist, skipping update');
-            return;
-          }
-        }
-        newUri = imageUri;
-      } else {
-        // Convert base64 to file
-        const cacheKey = currentAngleImage?.id || 'main';
-        const fileUri = await cacheBase64ToFile(imageUri, cacheKey);
-        console.log('[DEBUG] convertToFileUri: cacheBase64ToFile returned:', fileUri?.substring(0, 80) || 'null');
-        
-        // Verify file exists
-        if (fileUri) {
-          const fileInfo = await FileSystem.getInfoAsync(fileUri);
-          console.log('[DEBUG] convertToFileUri: Cached file exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
-          if (fileInfo.exists) {
-            newUri = fileUri;
-          }
-        }
-      }
-      
-      // Only update state if this is still the latest conversion (prevent race conditions)
-      if (currentConversionId === conversionIdRef.current && newUri) {
-        console.log('[DEBUG] convertToFileUri: Setting displayableImageUri (conversion #' + currentConversionId + ')');
-        setDisplayableImageUri(newUri);
-      } else {
-        console.log('[DEBUG] convertToFileUri: Skipping stale update (conversion #' + currentConversionId + ', current is #' + conversionIdRef.current + ')');
-      }
-    };
-    
-    convertToFileUri();
-  }, [currentAngleImage, derivedImageUri, cacheBase64ToFile]);
+  // Get the display URI directly from the current angle image or derived image
+  // expo-image handles large base64 data URIs natively (no file conversion needed for display)
+  // File conversion is only used for Save/Share operations
+  const displayImageUri = useMemo(() => {
+    const uri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
+    console.log('[DEBUG] displayImageUri computed:', uri ? uri.substring(0, 60) + '...' : 'null', 'angleId:', currentAngleImage?.id);
+    return uri;
+  }, [currentAngleImage, derivedImageUri]);
   
   const scale = useRef(new Animated.Value(1)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -817,25 +765,25 @@ export default function PhaseThree({
                 
                 {(() => {
                   // DIAGNOSTIC: Log render-time state
-                  console.log('[DEBUG] RENDER: displayableImageUri:', displayableImageUri ? displayableImageUri.substring(0, 60) + '...' : 'null');
+                  console.log('[DEBUG] RENDER: displayImageUri:', displayImageUri ? displayImageUri.substring(0, 60) + '...' : 'null');
                   console.log('[DEBUG] RENDER: imageLoadError:', imageLoadError, 'selectedAngleId:', selectedAngleId);
                   
-                  // Use displayableImageUri (file URI) for Android compatibility with large base64 images
-                  if (!displayableImageUri || imageLoadError) {
-                    const hasSourceImage = !!(normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri);
-                    console.log('[DEBUG] RENDER: Showing placeholder. hasSourceImage:', hasSourceImage, 'reason:', !displayableImageUri ? 'no displayableImageUri' : 'imageLoadError');
+                  // Use displayImageUri directly - expo-image handles large base64 data URIs natively
+                  if (!displayImageUri || imageLoadError) {
+                    const hasSourceImage = !!displayImageUri;
+                    console.log('[DEBUG] RENDER: Showing placeholder. hasSourceImage:', hasSourceImage, 'reason:', !displayImageUri ? 'no displayImageUri' : 'imageLoadError');
                     return (
                       <View 
                         style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}
                       >
                         <Ionicons name="image-outline" size={48} color={Colors.gray[500]} />
                         <Text style={{ color: Colors.gray[400], marginTop: 12, fontSize: 14, textAlign: 'center', paddingHorizontal: 20 }}>
-                          {imageLoadError ? 'Image failed to load' : hasSourceImage ? 'Preparing image...' : 'Click Expand to view sketches'}
+                          {imageLoadError ? 'Image failed to load' : 'Click Expand to view sketches'}
                         </Text>
                       </View>
                     );
                   }
-                  console.log('[DEBUG] RENDER: Showing Image component with URI:', displayableImageUri.substring(0, 80));
+                  console.log('[DEBUG] RENDER: Showing expo-image with data URI length:', displayImageUri.length);
                   return (
                     <TouchableOpacity 
                       activeOpacity={0.9}
@@ -845,9 +793,10 @@ export default function PhaseThree({
                       }}
                     >
                       <Image
-                        source={{ uri: displayableImageUri }}
+                        source={{ uri: displayImageUri }}
                         style={styles.generatedImage}
                         contentFit="contain"
+                        cachePolicy="memory-disk"
                         onError={(e) => {
                           console.log('[DEBUG] Image onError triggered:', e.error);
                           setImageLoadError(true);
@@ -1122,7 +1071,7 @@ export default function PhaseThree({
           
           <View style={styles.modalImageContainer} {...panResponder.panHandlers}>
             <Animated.Image
-              source={{ uri: displayableImageUri || '' }}
+              source={{ uri: displayImageUri || '' }}
               style={[
                 styles.modalImage,
                 {
