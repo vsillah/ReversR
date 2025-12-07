@@ -223,6 +223,14 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           )}
         </TouchableOpacity>
       </View>
+
+      <AlertModal
+        visible={alert?.visible || false}
+        title={alert?.title || ''}
+        message={alert?.message || ''}
+        type="error"
+        onClose={() => setAlert(null)}
+      />
     </View>
   );
 }

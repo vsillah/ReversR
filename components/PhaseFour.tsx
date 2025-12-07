@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
   Linking,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -20,6 +19,7 @@ import {
   ThreeDSceneDescriptor,
   generateBOM,
 } from '../hooks/useGemini';
+import AlertModal from './AlertModal';
 
 interface Props {
   innovation: InnovationResult;
@@ -89,6 +89,7 @@ export default function PhaseFour({
     bom ? 'complete' : 'idle'
   );
   const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
 
   const formatError = (e: unknown) => {
     const err = e as { message?: string };
@@ -132,11 +133,11 @@ export default function PhaseFour({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
       } else {
-        Alert.alert('Saved', 'Bill of Materials saved to device.');
+        setAlert({visible: true, title: 'Saved', message: 'Bill of Materials saved to device.', type: 'success'});
       }
     } catch (e) {
       console.error('BOM Export error:', e);
-      Alert.alert('Error', 'Failed to export Bill of Materials.');
+      setAlert({visible: true, title: 'Error', message: 'Failed to export Bill of Materials.', type: 'error'});
     }
   };
 
@@ -170,11 +171,11 @@ export default function PhaseFour({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
       } else {
-        Alert.alert('Saved', 'Complete innovation package saved to device.');
+        setAlert({visible: true, title: 'Saved', message: 'Complete innovation package saved to device.', type: 'success'});
       }
     } catch (e) {
       console.error('Export error:', e);
-      Alert.alert('Error', 'Failed to export package.');
+      setAlert({visible: true, title: 'Error', message: 'Failed to export package.', type: 'error'});
     }
   };
 
@@ -385,6 +386,14 @@ export default function PhaseFour({
       </View>
 
       <View style={{ height: 50 }} />
+
+      <AlertModal
+        visible={alert?.visible || false}
+        title={alert?.title || ''}
+        message={alert?.message || ''}
+        type={alert?.type || 'info'}
+        onClose={() => setAlert(null)}
+      />
     </ScrollView>
   );
 }

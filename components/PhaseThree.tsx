@@ -7,7 +7,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
-  Alert,
   Modal,
   Dimensions,
   Animated,
@@ -27,6 +26,7 @@ import {
   generate3DScene,
   AngleImage,
 } from '../hooks/useGemini';
+import AlertModal from './AlertModal';
 
 interface Props {
   innovation: InnovationResult;
@@ -80,6 +80,7 @@ export default function PhaseThree({
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
   const [cachedFileUris, setCachedFileUris] = useState<Record<string, string>>({});
+  const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
   const ALL_ANGLES = [
     { id: 'front', label: 'Front View' },
     { id: 'side', label: 'Side View' },
@@ -354,7 +355,7 @@ export default function PhaseThree({
     console.log('[DEBUG] handleSaveImage called, imageToSave:', imageToSave ? `${imageToSave.substring(0, 50)}...` : 'null');
     if (!imageToSave) {
       console.log('[DEBUG] handleSaveImage: No image to save');
-      Alert.alert('No Image', 'No image available to save.');
+      setAlert({visible: true, title: 'No Image', message: 'No image available to save.', type: 'info'});
       return;
     }
     
@@ -362,7 +363,7 @@ export default function PhaseThree({
       const { status } = await MediaLibrary.requestPermissionsAsync();
       console.log('[DEBUG] handleSaveImage: Permission status:', status);
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please allow access to save images.');
+        setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
         return;
       }
 
@@ -390,17 +391,17 @@ export default function PhaseThree({
 
       await MediaLibrary.saveToLibraryAsync(fileUri);
       console.log('[DEBUG] handleSaveImage: Saved to library');
-      Alert.alert('Saved', `${currentAngleImage?.label || 'Image'} saved to your photo library.`);
+      setAlert({visible: true, title: 'Saved', message: `${currentAngleImage?.label || 'Image'} saved to your photo library.`, type: 'success'});
     } catch (e: any) {
       console.error('[DEBUG] handleSaveImage error:', e?.message || e);
-      Alert.alert('Error', `Failed to save image: ${e?.message || 'Unknown error'}`);
+      setAlert({visible: true, title: 'Error', message: `Failed to save image: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
   const handleSaveAllAngles = async () => {
     console.log('[DEBUG] handleSaveAllAngles called, availableAngles:', availableAngles.length);
     if (availableAngles.length === 0) {
-      Alert.alert('No Images', 'No images available to save.');
+      setAlert({visible: true, title: 'No Images', message: 'No images available to save.', type: 'info'});
       return;
     }
     
@@ -408,7 +409,7 @@ export default function PhaseThree({
       const { status } = await MediaLibrary.requestPermissionsAsync();
       console.log('[DEBUG] handleSaveAllAngles: Permission status:', status);
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please allow access to save images.');
+        setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
         return;
       }
 
@@ -444,10 +445,10 @@ export default function PhaseThree({
       }
       
       console.log('[DEBUG] handleSaveAllAngles: Total saved:', savedCount);
-      Alert.alert('Saved', `${savedCount} images saved to your photo library.`);
+      setAlert({visible: true, title: 'Saved', message: `${savedCount} images saved to your photo library.`, type: 'success'});
     } catch (e: any) {
       console.error('[DEBUG] handleSaveAllAngles error:', e?.message || e);
-      Alert.alert('Error', `Failed to save images: ${e?.message || 'Unknown error'}`);
+      setAlert({visible: true, title: 'Error', message: `Failed to save images: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
@@ -476,11 +477,11 @@ export default function PhaseThree({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
       } else {
-        Alert.alert('Error', 'Sharing is not available on this device.');
+        setAlert({visible: true, title: 'Error', message: 'Sharing is not available on this device.', type: 'error'});
       }
     } catch (e) {
       console.error('Share image error:', e);
-      Alert.alert('Error', 'Failed to share image.');
+      setAlert({visible: true, title: 'Error', message: 'Failed to share image.', type: 'error'});
     }
   };
 
@@ -556,10 +557,7 @@ export default function PhaseThree({
       setThreeDScene(scene);
       setStatus('complete');
       onComplete(spec, scene, derivedImageUri);
-      Alert.alert(
-        '3D Scene Generated',
-        `Created ${scene.objects.length} objects. Export to view in desktop apps.`
-      );
+      setAlert({visible: true, title: '3D Scene Generated', message: `Created ${scene.objects.length} objects. Export to view in desktop apps.`, type: 'success'});
     } catch (err: unknown) {
       console.error('Error generating 3D:', err);
       setError(formatError(err));
@@ -578,11 +576,11 @@ export default function PhaseThree({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
       } else {
-        Alert.alert('Saved', 'Specifications saved to device.');
+        setAlert({visible: true, title: 'Saved', message: 'Specifications saved to device.', type: 'success'});
       }
     } catch (e) {
       console.error('Export error:', e);
-      Alert.alert('Error', 'Failed to export specifications.');
+      setAlert({visible: true, title: 'Error', message: 'Failed to export specifications.', type: 'error'});
     }
   };
 
@@ -611,7 +609,7 @@ export default function PhaseThree({
       }
     } catch (e) {
       console.error('3D Export error:', e);
-      Alert.alert('Error', 'Failed to export 3D model.');
+      setAlert({visible: true, title: 'Error', message: 'Failed to export 3D model.', type: 'error'});
     }
   };
 
@@ -1177,6 +1175,14 @@ export default function PhaseThree({
           </View>
         </View>
       </Modal>
+
+      <AlertModal
+        visible={alert?.visible || false}
+        title={alert?.title || ''}
+        message={alert?.message || ''}
+        type={alert?.type || 'info'}
+        onClose={() => setAlert(null)}
+      />
     </ScrollView>
   );
 }

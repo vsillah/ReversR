@@ -7,10 +7,10 @@ import {
   Image,
   TouchableOpacity,
   Modal,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, FontSizes } from "../constants/theme";
+import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
 import PhaseTwo from "../components/PhaseTwo";
@@ -88,6 +88,12 @@ export default function HomeScreen() {
   const [generatedMultiAngleImages, setGeneratedMultiAngleImages] = useState<AngleImage[]>([]);
   const imageGenInnovationId = useRef<string | null>(null);
   const [phaseActionModal, setPhaseActionModal] = useState<number | null>(null);
+  const [confirmAlert, setConfirmAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    buttons: Array<{ text: string; onPress: () => void; style?: 'default' | 'destructive' | 'cancel' }>;
+  } | null>(null);
   
   const { generate2DVisualization } = useGemini();
 
@@ -302,18 +308,23 @@ export default function HomeScreen() {
     const hasProgress = context.innovation || context.spec || context.bom;
     
     if (hasProgress) {
-      Alert.alert(
-        'Save Innovation?',
-        'Resetting will start a new innovation. Would you like to save your current progress first?',
-        [
+      setConfirmAlert({
+        visible: true,
+        title: 'Save Innovation?',
+        message: 'Resetting will start a new innovation. Would you like to save your current progress first?',
+        buttons: [
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => executeReset(),
+            onPress: () => {
+              setConfirmAlert(null);
+              executeReset();
+            },
           },
           {
             text: 'Save & Reset',
             onPress: async () => {
+              setConfirmAlert(null);
               await autoSave(context);
               executeReset();
             },
@@ -321,9 +332,10 @@ export default function HomeScreen() {
           {
             text: 'Cancel',
             style: 'cancel',
+            onPress: () => setConfirmAlert(null),
           },
-        ]
-      );
+        ],
+      });
     } else {
       executeReset();
     }
@@ -356,18 +368,23 @@ export default function HomeScreen() {
     const hasProgress = context.innovation || context.spec || context.bom;
     
     if (hasProgress) {
-      Alert.alert(
-        'Save Innovation?',
-        'Trying another pattern will start a new innovation. Would you like to save your current progress first?',
-        [
+      setConfirmAlert({
+        visible: true,
+        title: 'Save Innovation?',
+        message: 'Trying another pattern will start a new innovation. Would you like to save your current progress first?',
+        buttons: [
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => executeTryAnotherPattern(),
+            onPress: () => {
+              setConfirmAlert(null);
+              executeTryAnotherPattern();
+            },
           },
           {
             text: 'Save & Continue',
             onPress: async () => {
+              setConfirmAlert(null);
               await autoSave(context);
               executeTryAnotherPattern();
             },
@@ -375,9 +392,10 @@ export default function HomeScreen() {
           {
             text: 'Cancel',
             style: 'cancel',
+            onPress: () => setConfirmAlert(null),
           },
-        ]
-      );
+        ],
+      });
     } else {
       executeTryAnotherPattern();
     }
@@ -426,14 +444,16 @@ export default function HomeScreen() {
     const isDestructive = targetPhase <= 2 && hasProgress;
     
     if (isDestructive) {
-      Alert.alert(
-        'Save Innovation?',
-        'Going back will start a new innovation. Would you like to save your current progress first?',
-        [
+      setConfirmAlert({
+        visible: true,
+        title: 'Save Innovation?',
+        message: 'Going back will start a new innovation. Would you like to save your current progress first?',
+        buttons: [
           {
             text: 'Discard',
             style: 'destructive',
             onPress: async () => {
+              setConfirmAlert(null);
               const newInnovation = createNewInnovation();
               const freshContext: MutationContext = {
                 id: newInnovation.id,
@@ -458,6 +478,7 @@ export default function HomeScreen() {
           {
             text: 'Save & Continue',
             onPress: async () => {
+              setConfirmAlert(null);
               await autoSave(context);
               const newInnovation = createNewInnovation();
               const freshContext: MutationContext = {
@@ -483,9 +504,10 @@ export default function HomeScreen() {
           {
             text: 'Cancel',
             style: 'cancel',
+            onPress: () => setConfirmAlert(null),
           },
-        ]
-      );
+        ],
+      });
     } else {
       await executePhaseNavigation(targetPhase);
     }
@@ -757,6 +779,15 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <AlertModal
+        visible={confirmAlert?.visible || false}
+        title={confirmAlert?.title || ''}
+        message={confirmAlert?.message || ''}
+        type="info"
+        buttons={confirmAlert?.buttons || []}
+        onClose={() => setConfirmAlert(null)}
+      />
     </View>
   );
 }

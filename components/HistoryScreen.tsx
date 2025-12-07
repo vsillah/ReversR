@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/useStorage';
 import { SIT_PATTERN_LABELS, SITPattern } from '../hooks/useGemini';
+import AlertModal from './AlertModal';
 
 interface Props {
   onBack: () => void;
@@ -21,6 +21,12 @@ interface Props {
 export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   const [innovations, setInnovations] = useState<SavedInnovation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteAlert, setDeleteAlert] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   useEffect(() => {
     loadInnovations();
@@ -34,21 +40,16 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   };
 
   const handleDelete = (id: string, name: string) => {
-    Alert.alert(
-      'Delete Innovation',
-      `Are you sure you want to delete "${name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteInnovation(id);
-            loadInnovations();
-          },
-        },
-      ]
-    );
+    setDeleteAlert({
+      visible: true,
+      title: 'Delete Innovation',
+      message: `Are you sure you want to delete "${name}"?`,
+      onConfirm: async () => {
+        setDeleteAlert(null);
+        await deleteInnovation(id);
+        loadInnovations();
+      },
+    });
   };
 
   const PHASE_LABELS = ['Scan', 'Reverse', 'Architect', 'Build'];
@@ -210,6 +211,26 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
           ))
         )}
       </ScrollView>
+
+      <AlertModal
+        visible={deleteAlert?.visible || false}
+        title={deleteAlert?.title || ''}
+        message={deleteAlert?.message || ''}
+        type="error"
+        buttons={[
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => setDeleteAlert(null),
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => deleteAlert?.onConfirm(),
+          },
+        ]}
+        onClose={() => setDeleteAlert(null)}
+      />
     </View>
   );
 }
