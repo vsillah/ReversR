@@ -289,10 +289,18 @@ export const generate2DMultiAngleImages = async (innovation: InnovationResult, a
 
 export const generate2DSingleAngle = async (innovation: InnovationResult, angleId: string): Promise<AngleImage | null> => {
   try {
+    console.log(`[DEBUG] generate2DSingleAngle: Starting for ${angleId}`);
     const response = await fetchWithRetry<AngleImage>(`${API_BASE}/api/gemini/generate-2d-single-angle`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ innovation, angleId })
+    });
+    console.log(`[DEBUG] generate2DSingleAngle: Response for ${angleId}:`, {
+      id: response?.id,
+      label: response?.label,
+      hasImageData: !!response?.imageData,
+      imageDataLength: response?.imageData?.length || 0,
+      imageDataPrefix: response?.imageData?.substring(0, 50) || 'null'
     });
     return response;
   } catch (error) {
@@ -308,14 +316,23 @@ export const generate2DAnglesProgressive = async (
   angles: string[] = ['front', 'side', 'iso'],
   onAngleComplete: AngleProgressCallback
 ): Promise<void> => {
+  console.log('[DEBUG] generate2DAnglesProgressive: Starting for angles:', angles);
   const promises = angles.map(async (angleId) => {
     try {
       const result = await generate2DSingleAngle(innovation, angleId);
+      console.log(`[DEBUG] generate2DAnglesProgressive: Got result for ${angleId}:`, {
+        hasResult: !!result,
+        hasImageData: !!result?.imageData,
+      });
       if (result && result.imageData) {
+        const transformedData = `data:image/png;base64,${result.imageData}`;
+        console.log(`[DEBUG] generate2DAnglesProgressive: Calling onAngleComplete for ${angleId}, imageData length:`, transformedData.length);
         onAngleComplete({
           ...result,
-          imageData: `data:image/png;base64,${result.imageData}`,
+          imageData: transformedData,
         });
+      } else {
+        console.log(`[DEBUG] generate2DAnglesProgressive: No imageData for ${angleId}, skipping callback`);
       }
     } catch (error) {
       console.error(`Progressive generation failed for ${angleId}:`, error);
@@ -323,4 +340,5 @@ export const generate2DAnglesProgressive = async (
   });
   
   await Promise.all(promises);
+  console.log('[DEBUG] generate2DAnglesProgressive: All promises completed');
 };

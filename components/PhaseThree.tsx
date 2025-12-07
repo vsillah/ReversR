@@ -118,11 +118,23 @@ export default function PhaseThree({
 
   // Derive the best available image from props or local state
   const derivedImageUri = useMemo(() => {
+    console.log('[DEBUG] PhaseThree derivedImageUri useMemo:', {
+      multiAngleImagesLength: multiAngleImages.length,
+      existingImageUrl: existingImageUrl ? 'present' : 'null',
+      localImageBase64: localImageBase64 ? 'present' : 'null',
+    });
     // Priority 1: Multi-angle images from background generation
     if (multiAngleImages.length > 0) {
       const firstImage = multiAngleImages.find(img => img.imageData);
+      console.log('[DEBUG] PhaseThree: Found firstImage:', {
+        id: firstImage?.id,
+        hasImageData: !!firstImage?.imageData,
+        imageDataLength: firstImage?.imageData?.length || 0,
+      });
       if (firstImage?.imageData) {
-        return normalizeImageUri(firstImage.imageData);
+        const normalized = normalizeImageUri(firstImage.imageData);
+        console.log('[DEBUG] PhaseThree: Normalized URI length:', normalized?.length || 0);
+        return normalized;
       }
     }
     // Priority 2: Existing image URL from saved innovation

@@ -130,12 +130,20 @@ export default function HomeScreen() {
           
           successCount++;
           
+          console.log('[DEBUG] startBackgroundImageGeneration: Received completedAngle:', {
+            id: completedAngle.id,
+            label: completedAngle.label,
+            hasImageData: !!completedAngle.imageData,
+            imageDataLength: completedAngle.imageData?.length || 0,
+          });
           setGeneratedMultiAngleImages(prev => {
             const existing = prev.filter(img => img.id !== completedAngle.id);
-            return [...existing, completedAngle].sort((a, b) => {
+            const newState = [...existing, completedAngle].sort((a, b) => {
               const order = ['front', 'side', 'iso'];
               return order.indexOf(a.id) - order.indexOf(b.id);
             });
+            console.log('[DEBUG] setGeneratedMultiAngleImages: New state length:', newState.length);
+            return newState;
           });
           
           setGeneratedImageBase64(prev => prev || completedAngle.imageData);
