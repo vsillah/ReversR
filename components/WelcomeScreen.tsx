@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
@@ -43,7 +44,11 @@ const phases = [
 
 export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps) {
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.content}>
         <View style={styles.logoSection}>
           <Image
@@ -91,7 +96,7 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
           )}
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -99,8 +104,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark,
-    justifyContent: 'center',
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xl,
   },
   content: {
     alignItems: 'center',
