@@ -30,7 +30,6 @@ interface Props {
   onBOMGenerated: (bom: BillOfMaterials) => void;
   onBack: () => void;
   onReset: () => void;
-  onTryAnotherPattern: () => void;
 }
 
 type ArtifactStatus = {
@@ -80,7 +79,6 @@ export default function PhaseFour({
   onBOMGenerated,
   onBack,
   onReset,
-  onTryAnotherPattern,
 }: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
@@ -378,13 +376,6 @@ export default function PhaseFour({
 
       <View style={styles.actionsPanel}>
         <Text style={styles.actionsTitle}>What's Next?</Text>
-        <TouchableOpacity style={styles.actionButton} onPress={onTryAnotherPattern}>
-          <Ionicons name="shuffle" size={20} color={Colors.secondary} />
-          <View style={styles.actionContent}>
-            <Text style={styles.actionButtonText}>Try Another Pattern</Text>
-            <Text style={styles.actionButtonSubtext}>Keep analysis, apply different SIT pattern</Text>
-          </View>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton} onPress={onReset}>
           <Ionicons name="add-circle" size={20} color={Colors.accent} />
           <View style={styles.actionContent}>
