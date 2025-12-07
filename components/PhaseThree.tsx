@@ -274,20 +274,39 @@ export default function PhaseThree({
   useEffect(() => {
     const convertToFileUri = async () => {
       const imageUri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
+      console.log('[DEBUG] convertToFileUri: Starting with imageUri length:', imageUri?.length || 0, 'angleId:', currentAngleImage?.id);
+      
       if (!imageUri) {
+        console.log('[DEBUG] convertToFileUri: No imageUri, setting displayableImageUri to null');
         setDisplayableImageUri(null);
         return;
       }
       
       // If it's already a file URI or HTTP URL, use directly
       if (imageUri.startsWith('file://') || imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+        console.log('[DEBUG] convertToFileUri: Already a URL, setting directly:', imageUri.substring(0, 80));
+        // Verify file exists for file:// URIs
+        if (imageUri.startsWith('file://')) {
+          const fileInfo = await FileSystem.getInfoAsync(imageUri);
+          console.log('[DEBUG] convertToFileUri: File exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
+        }
         setDisplayableImageUri(imageUri);
+        console.log('[DEBUG] convertToFileUri: setDisplayableImageUri CALLED with URL');
         return;
       }
       
       const cacheKey = currentAngleImage?.id || 'main';
       const fileUri = await cacheBase64ToFile(imageUri, cacheKey);
+      console.log('[DEBUG] convertToFileUri: cacheBase64ToFile returned:', fileUri?.substring(0, 80) || 'null');
+      
+      // Verify file exists
+      if (fileUri) {
+        const fileInfo = await FileSystem.getInfoAsync(fileUri);
+        console.log('[DEBUG] convertToFileUri: Cached file exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
+      }
+      
       setDisplayableImageUri(fileUri);
+      console.log('[DEBUG] convertToFileUri: setDisplayableImageUri CALLED with:', fileUri ? 'valid fileUri' : 'null');
     };
     
     convertToFileUri();
@@ -778,9 +797,14 @@ export default function PhaseThree({
                 )}
                 
                 {(() => {
+                  // DIAGNOSTIC: Log render-time state
+                  console.log('[DEBUG] RENDER: displayableImageUri:', displayableImageUri ? displayableImageUri.substring(0, 60) + '...' : 'null');
+                  console.log('[DEBUG] RENDER: imageLoadError:', imageLoadError, 'selectedAngleId:', selectedAngleId);
+                  
                   // Use displayableImageUri (file URI) for Android compatibility with large base64 images
                   if (!displayableImageUri || imageLoadError) {
                     const hasSourceImage = !!(normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri);
+                    console.log('[DEBUG] RENDER: Showing placeholder. hasSourceImage:', hasSourceImage, 'reason:', !displayableImageUri ? 'no displayableImageUri' : 'imageLoadError');
                     return (
                       <View 
                         style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}
@@ -792,6 +816,7 @@ export default function PhaseThree({
                       </View>
                     );
                   }
+                  console.log('[DEBUG] RENDER: Showing Image component with URI:', displayableImageUri.substring(0, 80));
                   return (
                     <TouchableOpacity 
                       activeOpacity={0.9}
@@ -805,11 +830,11 @@ export default function PhaseThree({
                         style={styles.generatedImage}
                         resizeMode="contain"
                         onError={(e) => {
-                          console.log('[DEBUG] Image load error:', e.nativeEvent.error);
+                          console.log('[DEBUG] Image onError triggered:', e.nativeEvent.error);
                           setImageLoadError(true);
                         }}
                         onLoad={() => {
-                          console.log('[DEBUG] Image loaded successfully');
+                          console.log('[DEBUG] Image onLoad triggered - SUCCESS');
                           setImageLoadError(false);
                         }}
                       />
