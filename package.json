@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "api": "node server/index.js",
-    "expo": "npx expo start --tunnel --clear",
+    "expo": "npx expo start --tunnel --clear --port 8081",
     "dev": "npx concurrently \"npm:api\" \"npm:expo\""
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.10",
     "expo-file-system": "~19.0.19",
+    "expo-image": "^3.0.11",
     "expo-linking": "~8.0.10",
     "expo-media-library": "~18.2.1",
     "expo-router": "~6.0.17",

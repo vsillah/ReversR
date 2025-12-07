@@ -6,12 +6,13 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Image,
   Modal,
   Dimensions,
   Animated,
   PanResponder,
+  Image as RNImage,
 } from 'react-native';
+import { Image } from 'expo-image';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
@@ -846,9 +847,9 @@ export default function PhaseThree({
                       <Image
                         source={{ uri: displayableImageUri }}
                         style={styles.generatedImage}
-                        resizeMode="contain"
+                        contentFit="contain"
                         onError={(e) => {
-                          console.log('[DEBUG] Image onError triggered:', e.nativeEvent.error);
+                          console.log('[DEBUG] Image onError triggered:', e.error);
                           setImageLoadError(true);
                         }}
                         onLoad={() => {
