@@ -15,9 +15,11 @@ import { Colors, Spacing, FontSizes } from '../constants/theme';
 import { analyzeProduct, AnalysisResult } from '../hooks/useGemini';
 
 interface Props {
-  onComplete: (input: string, analysis: AnalysisResult) => void;
+  onComplete: (input: string, analysis: AnalysisResult, capturedImage?: string | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  initialInput?: string;
+  initialImage?: string | null;
 }
 
 const PRODUCT_PRESETS = [
@@ -31,11 +33,11 @@ const PRODUCT_PRESETS = [
   "A consumer drone with propellers, camera, battery, remote controller, and GPS module.",
 ];
 
-export default function PhaseOne({ onComplete, isLoading, setIsLoading }: Props) {
-  const [input, setInput] = useState('');
+export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialInput, initialImage }: Props) {
+  const [input, setInput] = useState(initialInput || '');
   const [error, setError] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(initialImage || null);
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
@@ -46,7 +48,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading }: Props)
     setError(null);
     try {
       const result = await analyzeProduct(input, capturedImage || undefined);
-      onComplete(input, result);
+      onComplete(input, result, capturedImage);
     } catch (e: any) {
       const errorMsg = e?.message || 'Unknown error';
       if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {

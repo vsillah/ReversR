@@ -10,6 +10,7 @@ export interface SavedInnovation {
   updatedAt: string;
   phase: number;
   input: string;
+  capturedImage?: string | null;
   analysis: AnalysisResult | null;
   selectedPattern: SITPattern | null;
   innovation: InnovationResult | null;

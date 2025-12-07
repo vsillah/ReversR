@@ -69,6 +69,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Save confirmation prompts before destructive navigation (Phase 1/2)
    - Users can save current progress before starting fresh
    - Each new path creates a separate innovation in history
+   - Phase 1 input (text and captured image) persists when navigating back
 
 9. **Background Image Generation**:
    - 2D sketches generate lazily in the background after Phase 2 completes

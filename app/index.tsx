@@ -40,6 +40,7 @@ interface MutationContext {
   createdAt: string;
   phase: number;
   input: string;
+  capturedImage: string | null;
   analysis: AnalysisResult | null;
   selectedPattern: SITPattern | null;
   innovation: InnovationResult | null;
@@ -56,6 +57,7 @@ const createEmptyContext = (): MutationContext => {
     createdAt: newInnovation.createdAt,
     phase: 1,
     input: "",
+    capturedImage: null,
     analysis: null,
     selectedPattern: null,
     innovation: null,
@@ -97,6 +99,7 @@ export default function HomeScreen() {
         updatedAt: new Date().toISOString(),
         phase: ctx.phase,
         input: ctx.input,
+        capturedImage: ctx.capturedImage,
         analysis: ctx.analysis,
         selectedPattern: ctx.selectedPattern,
         innovation: ctx.innovation,
@@ -190,10 +193,11 @@ export default function HomeScreen() {
     setImageGenStatus('idle');
   }, []);
 
-  const handlePhaseOneComplete = async (input: string, analysis: AnalysisResult) => {
+  const handlePhaseOneComplete = async (input: string, analysis: AnalysisResult, capturedImage?: string | null) => {
     const newContext = {
       ...context,
       input,
+      capturedImage: capturedImage || null,
       analysis,
       phase: 2,
     };
@@ -332,6 +336,7 @@ export default function HomeScreen() {
       createdAt: newInnovation.createdAt,
       phase: 2,
       input: context.input,
+      capturedImage: context.capturedImage,
       analysis: context.analysis,
       selectedPattern: null,
       innovation: null,
@@ -434,7 +439,8 @@ export default function HomeScreen() {
                 id: newInnovation.id,
                 createdAt: newInnovation.createdAt,
                 phase: targetPhase,
-                input: targetPhase === 1 ? '' : context.input,
+                input: context.input,
+                capturedImage: context.capturedImage,
                 analysis: targetPhase === 1 ? null : context.analysis,
                 selectedPattern: null,
                 innovation: null,
@@ -458,7 +464,8 @@ export default function HomeScreen() {
                 id: newInnovation.id,
                 createdAt: newInnovation.createdAt,
                 phase: targetPhase,
-                input: targetPhase === 1 ? '' : context.input,
+                input: context.input,
+                capturedImage: context.capturedImage,
                 analysis: targetPhase === 1 ? null : context.analysis,
                 selectedPattern: null,
                 innovation: null,
@@ -499,6 +506,7 @@ export default function HomeScreen() {
       createdAt: saved.createdAt,
       phase: saved.phase,
       input: saved.input,
+      capturedImage: saved.capturedImage || null,
       analysis: saved.analysis,
       selectedPattern: saved.selectedPattern,
       innovation: saved.innovation,
@@ -620,6 +628,8 @@ export default function HomeScreen() {
             onComplete={handlePhaseOneComplete}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
+            initialInput={context.input}
+            initialImage={context.capturedImage}
           />
         )}
         {context.phase === 2 && context.analysis && (
