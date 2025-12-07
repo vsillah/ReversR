@@ -784,6 +784,12 @@ export default function PhaseThree({
                     );
                   }
                   console.log('[DEBUG] RENDER: Showing expo-image with data URI length:', displayImageUri.length);
+                  
+                  // TEST: Use a known-working public image to verify expo-image works
+                  const testImageUrl = 'https://picsum.photos/400/300';
+                  const useTestImage = true; // Set to true to test with external image
+                  const imageSource = useTestImage ? testImageUrl : displayImageUri;
+                  
                   return (
                     <TouchableOpacity 
                       activeOpacity={0.9}
@@ -793,7 +799,7 @@ export default function PhaseThree({
                       }}
                     >
                       <Image
-                        source={displayImageUri}
+                        source={imageSource}
                         style={styles.generatedImage}
                         contentFit="contain"
                         onError={(e) => {
