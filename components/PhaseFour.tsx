@@ -278,7 +278,7 @@ export default function PhaseFour({
                   <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
                   <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
                   <View style={styles.bomItemMeta}>
-                    <Text style={styles.bomItemMetaText}>{item.material}</Text>
+                    <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
                     <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
                   </View>
                   <View style={styles.bomItemFooter}>
@@ -634,6 +634,8 @@ const styles = StyleSheet.create({
   bomItemMetaText: {
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
+    flex: 1,
+    marginRight: Spacing.sm,
   },
   bomItemCost: {
     fontFamily: 'monospace',
@@ -785,7 +787,7 @@ const styles = StyleSheet.create({
   },
   exportInfoItem: {
     fontSize: FontSizes.xs,
-    color: Colors.gray[100],
+    color: Colors.gray[300],
     marginBottom: Spacing.xs,
   },
   manufacturerPanel: {
