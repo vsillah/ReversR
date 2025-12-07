@@ -93,7 +93,11 @@ export default function PhaseFour({
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
 
   useEffect(() => {
-    scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    // Add small delay to ensure layout is measured before scrolling
+    const timer = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, 50);
+    return () => clearTimeout(timer);
   }, [innovation.conceptName]);
 
   const formatError = (e: unknown) => {
