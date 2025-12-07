@@ -824,10 +824,6 @@ export default function PhaseThree({
                           setImageLoadError(false);
                         }}
                       />
-                      <View style={styles.expandHint}>
-                        <Ionicons name="expand" size={14} color={Colors.white} />
-                        <Text style={styles.expandHintText}>Tap to expand</Text>
-                      </View>
                     </TouchableOpacity>
                   );
                 })()}

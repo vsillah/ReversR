@@ -711,13 +711,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       
-      {context.phase >= 3 && context.spec && (
-        <ImageGenerationNotification
-          status={imageGenStatus}
-          onPress={handleImageNotificationPress}
-          onDismiss={handleImageNotificationDismiss}
-        />
-      )}
+      {/* Notification suppressed - users found it confusing when navigating to Phase 3 */}
 
       <Modal
         visible={phaseActionModal !== null}
