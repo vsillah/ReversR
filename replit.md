@@ -14,6 +14,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 │   ├── _layout.tsx      # Root layout with dark theme
 │   └── index.tsx        # Main screen with phase navigation
 ├── components/
+│   ├── AlertModal.tsx   # Custom styled alert modal (replaces native Alert.alert)
 │   ├── WelcomeScreen.tsx # Welcome/splash screen
 │   ├── PhaseOne.tsx     # Closed World Scan - product analysis + camera
 │   ├── PhaseTwo.tsx     # Pattern Application - SIT mutation
