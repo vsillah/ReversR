@@ -210,7 +210,7 @@ export default function PhaseFour({
             <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
             <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
           </View>
-          <Text style={styles.panelTitle}>bill_of_materials.csv</Text>
+          <Text style={styles.panelTitle}>Bill of Materials (BOM)</Text>
         </View>
 
         {status === 'generating' ? (
