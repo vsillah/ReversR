@@ -257,6 +257,15 @@ export default function HomeScreen() {
     await autoSave(newContext);
   };
 
+  const handleGoToDesign = async () => {
+    const newContext = {
+      ...context,
+      phase: 3,
+    };
+    setContext(newContext);
+    await autoSave(newContext);
+  };
+
   const handleBack = async () => {
     if (context.phase > 1) {
       const newPhase = context.phase - 1;
@@ -689,6 +698,7 @@ export default function HomeScreen() {
               multiAngleImages={generatedMultiAngleImages}
               threeDScene={context.threeDScene}
               onBOMGenerated={handleBOMGenerated}
+              onGoToDesign={handleGoToDesign}
               onBack={handleBack}
               onReset={handleReset}
             />

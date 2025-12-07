@@ -30,6 +30,7 @@ interface Props {
   multiAngleImages?: AngleImage[];
   threeDScene: ThreeDSceneDescriptor | null;
   onBOMGenerated: (bom: BillOfMaterials) => void;
+  onGoToDesign: () => void;
   onBack: () => void;
   onReset: () => void;
 }
@@ -80,6 +81,7 @@ export default function PhaseFour({
   multiAngleImages = [],
   threeDScene,
   onBOMGenerated,
+  onGoToDesign,
   onBack,
   onReset,
 }: Props) {
@@ -310,6 +312,25 @@ export default function PhaseFour({
         const readyCount = artifacts.filter(a => a.ready).length;
         const percentage = Math.round((readyCount / artifacts.length) * 100);
         
+        const handleArtifactPress = (artifactId: string, isReady: boolean) => {
+          if (isReady) {
+            const readyMessages: Record<string, string> = {
+              '2d': '2D visualization is complete.',
+              '3d': '3D scene is complete.',
+              'specs': 'Specifications are complete.',
+              'bom': 'Bill of Materials is complete.',
+            };
+            setAlert({visible: true, title: 'Already Generated', message: readyMessages[artifactId] || 'This artifact is ready.', type: 'success'});
+            return;
+          }
+          
+          if (artifactId === 'bom') {
+            handleGenerateBOM();
+          } else {
+            onGoToDesign();
+          }
+        };
+        
         return (
           <View style={styles.readinessPanel}>
             <View style={styles.readinessHeader}>
@@ -317,7 +338,7 @@ export default function PhaseFour({
                 <Ionicons name="rocket-outline" size={18} color={Colors.gray[400]} />
                 <View>
                   <Text style={styles.readinessTitle}>Manufacturing Readiness</Text>
-                  <Text style={styles.readinessSubtitle}>Generate artifacts for prototype manufacturing</Text>
+                  <Text style={styles.readinessSubtitle}>Tap missing artifacts to generate them</Text>
                 </View>
               </View>
               <View style={styles.readinessBadge}>
@@ -326,12 +347,15 @@ export default function PhaseFour({
             </View>
             <View style={styles.artifactGrid}>
               {artifacts.map((artifact) => (
-                <View 
+                <TouchableOpacity 
                   key={artifact.id} 
                   style={[
                     styles.artifactItem,
                     artifact.ready && styles.artifactItemReady,
+                    !artifact.ready && styles.artifactItemTappable,
                   ]}
+                  onPress={() => handleArtifactPress(artifact.id, artifact.ready)}
+                  activeOpacity={0.7}
                 >
                   <Ionicons 
                     name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
@@ -342,7 +366,15 @@ export default function PhaseFour({
                     styles.artifactName,
                     artifact.ready && styles.artifactNameReady,
                   ]}>{artifact.name}</Text>
-                </View>
+                  {!artifact.ready && (
+                    <Ionicons 
+                      name={artifact.id === 'bom' ? 'add-circle-outline' : 'arrow-back-circle-outline'} 
+                      size={14} 
+                      color={Colors.gray[500]} 
+                      style={styles.artifactAction}
+                    />
+                  )}
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -524,6 +556,12 @@ const styles = StyleSheet.create({
   artifactItemReady: {
     backgroundColor: 'rgba(0, 255, 136, 0.1)',
     borderColor: Colors.accent,
+  },
+  artifactItemTappable: {
+    borderStyle: 'dashed',
+  },
+  artifactAction: {
+    marginTop: 2,
   },
   artifactName: {
     fontFamily: 'monospace',
