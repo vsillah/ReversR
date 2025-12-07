@@ -271,42 +271,60 @@ export default function PhaseThree({
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
 
   // Convert current image to file URI when it changes (for Android compatibility with large base64 strings)
+  // Use a ref to track the current conversion operation and prevent stale updates
+  const conversionIdRef = useRef(0);
+  
   useEffect(() => {
+    const currentConversionId = ++conversionIdRef.current;
+    
     const convertToFileUri = async () => {
       const imageUri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-      console.log('[DEBUG] convertToFileUri: Starting with imageUri length:', imageUri?.length || 0, 'angleId:', currentAngleImage?.id);
+      console.log('[DEBUG] convertToFileUri: Starting conversion #' + currentConversionId + ' with imageUri length:', imageUri?.length || 0, 'angleId:', currentAngleImage?.id);
       
       if (!imageUri) {
-        console.log('[DEBUG] convertToFileUri: No imageUri, setting displayableImageUri to null');
-        setDisplayableImageUri(null);
+        console.log('[DEBUG] convertToFileUri: No imageUri, keeping previous displayableImageUri (not setting to null)');
+        // DON'T set to null - keep showing the previous image while waiting
         return;
       }
       
+      let newUri: string | null = null;
+      
       // If it's already a file URI or HTTP URL, use directly
       if (imageUri.startsWith('file://') || imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
-        console.log('[DEBUG] convertToFileUri: Already a URL, setting directly:', imageUri.substring(0, 80));
+        console.log('[DEBUG] convertToFileUri: Already a URL:', imageUri.substring(0, 80));
         // Verify file exists for file:// URIs
         if (imageUri.startsWith('file://')) {
           const fileInfo = await FileSystem.getInfoAsync(imageUri);
           console.log('[DEBUG] convertToFileUri: File exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
+          if (!fileInfo.exists) {
+            console.log('[DEBUG] convertToFileUri: File does not exist, skipping update');
+            return;
+          }
         }
-        setDisplayableImageUri(imageUri);
-        console.log('[DEBUG] convertToFileUri: setDisplayableImageUri CALLED with URL');
-        return;
+        newUri = imageUri;
+      } else {
+        // Convert base64 to file
+        const cacheKey = currentAngleImage?.id || 'main';
+        const fileUri = await cacheBase64ToFile(imageUri, cacheKey);
+        console.log('[DEBUG] convertToFileUri: cacheBase64ToFile returned:', fileUri?.substring(0, 80) || 'null');
+        
+        // Verify file exists
+        if (fileUri) {
+          const fileInfo = await FileSystem.getInfoAsync(fileUri);
+          console.log('[DEBUG] convertToFileUri: Cached file exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
+          if (fileInfo.exists) {
+            newUri = fileUri;
+          }
+        }
       }
       
-      const cacheKey = currentAngleImage?.id || 'main';
-      const fileUri = await cacheBase64ToFile(imageUri, cacheKey);
-      console.log('[DEBUG] convertToFileUri: cacheBase64ToFile returned:', fileUri?.substring(0, 80) || 'null');
-      
-      // Verify file exists
-      if (fileUri) {
-        const fileInfo = await FileSystem.getInfoAsync(fileUri);
-        console.log('[DEBUG] convertToFileUri: Cached file exists check:', fileInfo.exists, 'size:', fileInfo.exists ? (fileInfo as any).size : 0);
+      // Only update state if this is still the latest conversion (prevent race conditions)
+      if (currentConversionId === conversionIdRef.current && newUri) {
+        console.log('[DEBUG] convertToFileUri: Setting displayableImageUri (conversion #' + currentConversionId + ')');
+        setDisplayableImageUri(newUri);
+      } else {
+        console.log('[DEBUG] convertToFileUri: Skipping stale update (conversion #' + currentConversionId + ', current is #' + conversionIdRef.current + ')');
       }
-      
-      setDisplayableImageUri(fileUri);
-      console.log('[DEBUG] convertToFileUri: setDisplayableImageUri CALLED with:', fileUri ? 'valid fileUri' : 'null');
     };
     
     convertToFileUri();
