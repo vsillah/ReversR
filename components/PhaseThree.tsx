@@ -783,39 +783,31 @@ export default function PhaseThree({
                       </View>
                     );
                   }
-                  console.log('[DEBUG] RENDER v2: Showing RNImage with test URL');
-                  
-                  // Using React Native's built-in Image with test URL
-                  const testImageUrl = 'https://picsum.photos/400/250';
-                  
+                  // Use React Native's Image with the data URI directly
+                  // RNImage can handle base64 data URIs on Android
                   return (
-                    <View style={{ width: '100%' }}>
-                      {/* Debug indicator - bright red text to confirm new code is running */}
-                      <Text style={{ color: 'red', fontSize: 12, textAlign: 'center', marginBottom: 4 }}>
-                        [v2] Testing RNImage...
-                      </Text>
-                      <TouchableOpacity 
-                        activeOpacity={0.9}
-                        onPress={() => {
-                          resetZoom();
-                          setImageModalVisible(true);
+                    <TouchableOpacity 
+                      activeOpacity={0.9}
+                      onPress={() => {
+                        resetZoom();
+                        setImageModalVisible(true);
+                      }}
+                      style={{ width: '100%', alignItems: 'center' }}
+                    >
+                      <RNImage
+                        source={{ uri: displayImageUri }}
+                        style={{ width: 350, height: 250, borderRadius: 8, backgroundColor: '#333' }}
+                        resizeMode="contain"
+                        onError={(e) => {
+                          console.log('[DEBUG] RNImage onError:', e.nativeEvent?.error);
+                          setImageLoadError(true);
                         }}
-                      >
-                        <RNImage
-                          source={{ uri: testImageUrl }}
-                          style={{ width: 350, height: 250, borderRadius: 8, backgroundColor: '#444', alignSelf: 'center' }}
-                          resizeMode="contain"
-                          onError={(e) => {
-                            console.log('[DEBUG] RNImage onError:', e.nativeEvent.error);
-                            setImageLoadError(true);
-                          }}
-                          onLoad={() => {
-                            console.log('[DEBUG] RNImage onLoad SUCCESS');
-                            setImageLoadError(false);
-                          }}
-                        />
-                      </TouchableOpacity>
-                    </View>
+                        onLoad={() => {
+                          console.log('[DEBUG] RNImage onLoad SUCCESS');
+                          setImageLoadError(false);
+                        }}
+                      />
+                    </TouchableOpacity>
                   );
                 })()}
                 
