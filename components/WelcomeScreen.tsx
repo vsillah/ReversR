@@ -33,6 +33,12 @@ const phases = [
     icon: 'pencil' as const,
     description: 'Generate technical specifications, sketches, and interactive 3D prototypes.',
   },
+  {
+    number: 4,
+    title: 'BUILD',
+    icon: 'hammer-outline' as const,
+    description: 'Generate Bill of Materials and prepare for manufacturing.',
+  },
 ];
 
 export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps) {
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
   phasesContainer: {
     width: '100%',
     gap: Spacing.md,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   phaseCard: {
     backgroundColor: 'rgba(26, 26, 26, 0.5)',
@@ -174,7 +180,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.accent,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
     borderRadius: 8,
   },
   buttonText: {
