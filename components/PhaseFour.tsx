@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -82,6 +82,7 @@ export default function PhaseFour({
   onReset,
   onTryAnotherPattern,
 }: Props) {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl;
   const has3D = !!threeDScene;
@@ -90,6 +91,10 @@ export default function PhaseFour({
   );
   const [error, setError] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
+
+  useEffect(() => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+  }, [innovation.conceptName]);
 
   const formatError = (e: unknown) => {
     const err = e as { message?: string };
@@ -180,7 +185,7 @@ export default function PhaseFour({
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Ionicons name="construct" size={28} color={Colors.orange[300]} />
