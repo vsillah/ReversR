@@ -17,6 +17,7 @@ import {
   TechnicalSpec,
   BillOfMaterials,
   ThreeDSceneDescriptor,
+  AngleImage,
   generateBOM,
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
@@ -26,6 +27,7 @@ interface Props {
   spec: TechnicalSpec;
   bom: BillOfMaterials | null;
   imageUrl: string | null;
+  multiAngleImages?: AngleImage[];
   threeDScene: ThreeDSceneDescriptor | null;
   onBOMGenerated: (bom: BillOfMaterials) => void;
   onBack: () => void;
@@ -75,6 +77,7 @@ export default function PhaseFour({
   spec,
   bom,
   imageUrl,
+  multiAngleImages = [],
   threeDScene,
   onBOMGenerated,
   onBack,
@@ -82,7 +85,7 @@ export default function PhaseFour({
 }: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
-  const has2D = !!imageUrl;
+  const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
   const [status, setStatus] = useState<'idle' | 'generating' | 'complete'>(
     bom ? 'complete' : 'idle'

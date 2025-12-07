@@ -686,6 +686,7 @@ export default function HomeScreen() {
               spec={context.spec}
               bom={context.bom}
               imageUrl={context.imageUrl}
+              multiAngleImages={generatedMultiAngleImages}
               threeDScene={context.threeDScene}
               onBOMGenerated={handleBOMGenerated}
               onBack={handleBack}
