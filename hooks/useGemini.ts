@@ -1,27 +1,4 @@
-import * as FileSystem from 'expo-file-system';
-
 const API_BASE = 'https://reversr-vsillah.replit.app';
-
-// Directory for generated images - use documentDirectory for persistence
-const IMAGE_CACHE_DIR = `${FileSystem.documentDirectory}reversr-images/`;
-
-// Ensure the image cache directory exists
-const ensureImageDir = async () => {
-  const dirInfo = await FileSystem.getInfoAsync(IMAGE_CACHE_DIR);
-  if (!dirInfo.exists) {
-    await FileSystem.makeDirectoryAsync(IMAGE_CACHE_DIR, { intermediates: true });
-  }
-};
-
-// Save base64 image to file and return file URI
-const saveBase64ToFile = async (base64Data: string, filename: string): Promise<string> => {
-  await ensureImageDir();
-  const fileUri = `${IMAGE_CACHE_DIR}${filename}`;
-  await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-  return fileUri;
-};
 
 export interface Component {
   name: string;
@@ -341,9 +318,6 @@ export const generate2DAnglesProgressive = async (
 ): Promise<void> => {
   console.log('[DEBUG] generate2DAnglesProgressive: Starting for angles:', angles);
   
-  // Generate a unique session ID for this batch
-  const sessionId = Date.now().toString(36);
-  
   const promises = angles.map(async (angleId) => {
     try {
       const result = await generate2DSingleAngle(innovation, angleId);
@@ -354,28 +328,12 @@ export const generate2DAnglesProgressive = async (
       });
       
       if (result && result.imageData) {
-        // Save base64 to file instead of using data URL (React Native has issues with large base64)
-        const filename = `${sessionId}_${angleId}.png`;
-        console.log(`[DEBUG] generate2DAnglesProgressive: Saving image to file: ${filename}`);
-        
-        try {
-          const fileUri = await saveBase64ToFile(result.imageData, filename);
-          console.log(`[DEBUG] generate2DAnglesProgressive: Saved to ${fileUri}, calling onAngleComplete`);
-          
-          onAngleComplete({
-            ...result,
-            imageData: fileUri, // Use file URI instead of data URL
-          });
-        } catch (saveError) {
-          console.error(`[DEBUG] generate2DAnglesProgressive: Failed to save file for ${angleId}:`, saveError);
-          // Fallback to data URL if file save fails
-          const dataUrl = `data:image/png;base64,${result.imageData}`;
-          console.log(`[DEBUG] generate2DAnglesProgressive: Falling back to data URL for ${angleId}`);
-          onAngleComplete({
-            ...result,
-            imageData: dataUrl,
-          });
-        }
+        const dataUrl = `data:image/png;base64,${result.imageData}`;
+        console.log(`[DEBUG] generate2DAnglesProgressive: Created data URL for ${angleId}, length:`, dataUrl.length);
+        onAngleComplete({
+          ...result,
+          imageData: dataUrl,
+        });
       } else {
         console.log(`[DEBUG] generate2DAnglesProgressive: No imageData for ${angleId}, skipping callback`);
       }

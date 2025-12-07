@@ -123,14 +123,7 @@ The server includes built-in protection against API rate limits:
 - **Navigation**: Expo Router
 - **AI**: Google Gemini via production server
 - **Camera**: expo-camera
-- **File System**: expo-file-system (images saved to documentDirectory for reliability)
-
-## Image Storage Architecture
-Generated 2D images are saved to the device's file system (`documentDirectory/reversr-images/`) instead of being passed as base64 data URLs. This approach:
-- Avoids React Native's ~2MB base64 data URL limitation
-- Provides faster image loading and lower memory usage
-- Persists images across app sessions
-- Uses file URIs (file://) which are more efficient for the Image component
+- **File System**: expo-file-system, expo-sharing
 
 ## Building for Release
 - **APK (testing)**: `npx eas-cli build --platform android --profile preview`

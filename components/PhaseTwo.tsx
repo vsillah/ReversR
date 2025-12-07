@@ -281,7 +281,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   componentsList: {
-    maxHeight: 200,
+    flexGrow: 0,
+    flexShrink: 1,
   },
   componentItem: {
     flexDirection: 'row',
@@ -306,6 +307,8 @@ const styles = StyleSheet.create({
   componentDesc: {
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
+    lineHeight: FontSizes.xs * 1.4,
+    flexWrap: 'wrap',
   },
   essentialBadge: {
     backgroundColor: 'rgba(30, 58, 138, 0.3)',
