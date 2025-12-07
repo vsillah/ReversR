@@ -53,9 +53,12 @@ export const saveInnovation = async (innovation: SavedInnovation): Promise<void>
     const innovations = await getAllInnovations();
     const existingIndex = innovations.findIndex(i => i.id === innovation.id);
     
+    // Strip large image data to avoid AsyncStorage size limits on Android
     const updatedInnovation = {
       ...innovation,
       updatedAt: new Date().toISOString(),
+      capturedImage: null, // Don't store large base64 images
+      imageUrl: null, // Don't store 2D sketch base64 (can be 2MB+)
     };
 
     if (existingIndex >= 0) {
