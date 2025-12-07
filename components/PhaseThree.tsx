@@ -12,7 +12,8 @@ import {
   PanResponder,
   Image as RNImage,
 } from 'react-native';
-import { Image } from 'expo-image';
+// Note: expo-image doesn't work with base64 data URIs in Expo Go SDK 54
+// Using RNImage from react-native instead (imported above)
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
@@ -91,68 +92,26 @@ export default function PhaseThree({
   const availableAngles = multiAngleImages.filter(img => img.imageData);
   const [selectedAngleId, setSelectedAngleId] = useState<string | null>(null);
   
-  // Debug logging for image data flow
-  console.log('[DEBUG] PhaseThree render:', {
-    multiAngleImagesCount: multiAngleImages.length,
-    availableAnglesCount: availableAngles.length,
-    selectedAngleId,
-    existingImageUrl: existingImageUrl ? `${existingImageUrl.substring(0, 50)}...` : 'null',
-    imageGenerating,
-  });
-  if (multiAngleImages.length > 0) {
-    console.log('[DEBUG] PhaseThree multiAngleImages details:', multiAngleImages.map(img => ({
-      id: img.id,
-      hasImageData: !!img.imageData,
-      imageDataLength: img.imageData?.length || 0,
-      imageDataPrefix: img.imageData?.substring(0, 30) || 'null',
-    })));
-  }
-  
   // Normalize image URI - handles file URIs, data URLs, HTTP URLs, and raw base64
   const normalizeImageUri = (data: string | null | undefined): string | null => {
-    if (!data) {
-      console.log('[DEBUG] normalizeImageUri: null/undefined input');
-      return null;
-    }
-    if (typeof data !== 'string') {
-      console.log('[DEBUG] normalizeImageUri: non-string input', typeof data);
-      return null;
-    }
+    if (!data || typeof data !== 'string') return null;
     const trimmed = data.trim();
-    if (!trimmed) {
-      console.log('[DEBUG] normalizeImageUri: empty after trim');
-      return null;
-    }
-    
-    console.log('[DEBUG] normalizeImageUri: input length:', trimmed.length, 'first 60 chars:', trimmed.substring(0, 60));
+    if (!trimmed) return null;
     
     // File URIs - return unchanged (from expo-file-system)
-    if (trimmed.startsWith('file://')) {
-      console.log('[DEBUG] normalizeImageUri: detected file:// URI');
-      return trimmed;
-    }
+    if (trimmed.startsWith('file://')) return trimmed;
     // Already a data URL - return unchanged
-    if (trimmed.startsWith('data:image/')) {
-      console.log('[DEBUG] normalizeImageUri: detected data:image URL, returning unchanged');
-      return trimmed;
-    }
+    if (trimmed.startsWith('data:image/')) return trimmed;
     // HTTP/HTTPS URLs - return unchanged
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      console.log('[DEBUG] normalizeImageUri: detected HTTP URL');
-      return trimmed;
-    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
     // Raw base64 data (PNG or JPEG signatures)
     if (trimmed.startsWith('iVBOR') || trimmed.startsWith('/9j/') || trimmed.match(/^[A-Za-z0-9+/=]{50,}$/)) {
-      console.log('[DEBUG] normalizeImageUri: detected raw base64, adding prefix');
       return `data:image/png;base64,${trimmed}`;
     }
     // Fallback - assume base64 if it's a long string without URL-like characters
     if (trimmed.length > 100 && !trimmed.includes('/') && !trimmed.includes('.')) {
-      console.log('[DEBUG] normalizeImageUri: fallback base64 detection, adding prefix');
       return `data:image/png;base64,${trimmed}`;
     }
-    // Return as-is for any other format
-    console.log('[DEBUG] normalizeImageUri: returning as-is');
     return trimmed;
   };
 
@@ -185,25 +144,16 @@ export default function PhaseThree({
     
     // Extract base64 data from data URL
     const base64Match = dataUrl.match(/^data:image\/\w+;base64,(.+)$/);
-    if (!base64Match) {
-      console.log('[DEBUG] cacheBase64ToFile: Not a data URL, returning as-is');
-      return dataUrl;
-    }
+    if (!base64Match) return dataUrl;
     
     const base64Data = base64Match[1];
     
-    // Create a cache key that includes image content signature (length + first/last chars)
-    // This ensures we regenerate the file when image data changes
+    // Create a cache key that includes image content signature
     const contentSignature = `${base64Data.length}_${base64Data.substring(0, 8)}_${base64Data.substring(base64Data.length - 8)}`;
     const fullCacheKey = `${angleId}_${contentSignature}`;
     
     // Check if we already cached this exact image content
-    if (cachedFileUris[fullCacheKey]) {
-      console.log('[DEBUG] cacheBase64ToFile: Using cached file URI for', fullCacheKey);
-      return cachedFileUris[fullCacheKey];
-    }
-    
-    console.log('[DEBUG] cacheBase64ToFile: Converting to file, base64 length:', base64Data.length, 'key:', fullCacheKey);
+    if (cachedFileUris[fullCacheKey]) return cachedFileUris[fullCacheKey];
     
     try {
       const filename = `reversr_image_${angleId}_${Date.now()}.png`;
@@ -213,14 +163,10 @@ export default function PhaseThree({
         encoding: FileSystem.EncodingType.Base64,
       });
       
-      console.log('[DEBUG] cacheBase64ToFile: Saved to file:', fileUri);
-      
-      // Cache the file URI with content-aware key
       setCachedFileUris(prev => ({ ...prev, [fullCacheKey]: fileUri }));
-      
       return fileUri;
     } catch (error) {
-      console.error('[DEBUG] cacheBase64ToFile error:', error);
+      console.error('cacheBase64ToFile error:', error);
       return null;
     }
   }, [cachedFileUris]);
@@ -229,23 +175,11 @@ export default function PhaseThree({
 
   // Derive the best available image from props or local state
   const derivedImageUri = useMemo(() => {
-    console.log('[DEBUG] PhaseThree derivedImageUri useMemo:', {
-      multiAngleImagesLength: multiAngleImages.length,
-      existingImageUrl: existingImageUrl ? 'present' : 'null',
-      localImageBase64: localImageBase64 ? 'present' : 'null',
-    });
     // Priority 1: Multi-angle images from background generation
     if (multiAngleImages.length > 0) {
       const firstImage = multiAngleImages.find(img => img.imageData);
-      console.log('[DEBUG] PhaseThree: Found firstImage:', {
-        id: firstImage?.id,
-        hasImageData: !!firstImage?.imageData,
-        imageDataLength: firstImage?.imageData?.length || 0,
-      });
       if (firstImage?.imageData) {
-        const normalized = normalizeImageUri(firstImage.imageData);
-        console.log('[DEBUG] PhaseThree: Normalized URI length:', normalized?.length || 0);
-        return normalized;
+        return normalizeImageUri(firstImage.imageData);
       }
     }
     // Priority 2: Existing image URL from saved innovation
@@ -271,12 +205,9 @@ export default function PhaseThree({
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
 
   // Get the display URI directly from the current angle image or derived image
-  // expo-image handles large base64 data URIs natively (no file conversion needed for display)
-  // File conversion is only used for Save/Share operations
+  // RNImage handles base64 data URIs natively (expo-image doesn't work in Expo Go)
   const displayImageUri = useMemo(() => {
-    const uri = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-    console.log('[DEBUG] displayImageUri computed:', uri ? uri.substring(0, 60) + '...' : 'null', 'angleId:', currentAngleImage?.id);
-    return uri;
+    return normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
   }, [currentAngleImage, derivedImageUri]);
   
   const scale = useRef(new Animated.Value(1)).current;
@@ -338,16 +269,13 @@ export default function PhaseThree({
 
   const handleSaveImage = async () => {
     const imageToSave = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-    console.log('[DEBUG] handleSaveImage called, imageToSave:', imageToSave ? `${imageToSave.substring(0, 50)}...` : 'null');
     if (!imageToSave) {
-      console.log('[DEBUG] handleSaveImage: No image to save');
       setAlert({visible: true, title: 'No Image', message: 'No image available to save.', type: 'info'});
       return;
     }
     
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      console.log('[DEBUG] handleSaveImage: Permission status:', status);
       if (status !== 'granted') {
         setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
         return;
@@ -356,36 +284,26 @@ export default function PhaseThree({
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
       const fileUri = FileSystem.documentDirectory + filename;
-      console.log('[DEBUG] handleSaveImage: Saving to:', fileUri);
       
-      // Handle HTTP URLs by downloading, base64 data URLs by extracting
       if (imageToSave.startsWith('http://') || imageToSave.startsWith('https://')) {
-        console.log('[DEBUG] handleSaveImage: Downloading from URL');
         const downloadResult = await FileSystem.downloadAsync(imageToSave, fileUri);
-        if (downloadResult.status !== 200) {
-          throw new Error('Failed to download image');
-        }
+        if (downloadResult.status !== 200) throw new Error('Failed to download image');
       } else {
-        console.log('[DEBUG] handleSaveImage: Writing base64 data, length:', imageToSave.length);
         const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
-        console.log('[DEBUG] handleSaveImage: Base64 data length after strip:', base64Data.length);
         await FileSystem.writeAsStringAsync(fileUri, base64Data, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        console.log('[DEBUG] handleSaveImage: File written successfully');
       }
 
       await MediaLibrary.saveToLibraryAsync(fileUri);
-      console.log('[DEBUG] handleSaveImage: Saved to library');
       setAlert({visible: true, title: 'Saved', message: `${currentAngleImage?.label || 'Image'} saved to your photo library.`, type: 'success'});
     } catch (e: any) {
-      console.error('[DEBUG] handleSaveImage error:', e?.message || e);
+      console.error('Save image error:', e?.message || e);
       setAlert({visible: true, title: 'Error', message: `Failed to save image: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
   const handleSaveAllAngles = async () => {
-    console.log('[DEBUG] handleSaveAllAngles called, availableAngles:', availableAngles.length);
     if (availableAngles.length === 0) {
       setAlert({visible: true, title: 'No Images', message: 'No images available to save.', type: 'info'});
       return;
@@ -393,7 +311,6 @@ export default function PhaseThree({
     
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      console.log('[DEBUG] handleSaveAllAngles: Permission status:', status);
       if (status !== 'granted') {
         setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
         return;
@@ -403,14 +320,12 @@ export default function PhaseThree({
       for (const angle of availableAngles) {
         if (angle.imageData) {
           const imageUri = normalizeImageUri(angle.imageData);
-          console.log('[DEBUG] handleSaveAllAngles: Processing angle:', angle.id, 'imageUri:', imageUri ? 'present' : 'null');
           if (!imageUri) continue;
           
           const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angle.label.replace(/\s+/g, '_')}.png`;
           const fileUri = FileSystem.documentDirectory + filename;
           
           try {
-            // Handle HTTP URLs by downloading, base64 data URLs by extracting
             if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
               const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
               if (downloadResult.status !== 200) continue;
@@ -423,17 +338,15 @@ export default function PhaseThree({
             
             await MediaLibrary.saveToLibraryAsync(fileUri);
             savedCount++;
-            console.log('[DEBUG] handleSaveAllAngles: Saved angle:', angle.id);
           } catch (angleError: any) {
-            console.error('[DEBUG] handleSaveAllAngles: Error saving angle:', angle.id, angleError?.message);
+            console.error('Error saving angle:', angle.id, angleError?.message);
           }
         }
       }
       
-      console.log('[DEBUG] handleSaveAllAngles: Total saved:', savedCount);
       setAlert({visible: true, title: 'Saved', message: `${savedCount} images saved to your photo library.`, type: 'success'});
     } catch (e: any) {
-      console.error('[DEBUG] handleSaveAllAngles error:', e?.message || e);
+      console.error('Save all angles error:', e?.message || e);
       setAlert({visible: true, title: 'Error', message: `Failed to save images: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
@@ -764,14 +677,9 @@ export default function PhaseThree({
                 )}
                 
                 {(() => {
-                  // DIAGNOSTIC: Log render-time state
-                  console.log('[DEBUG] RENDER: displayImageUri:', displayImageUri ? displayImageUri.substring(0, 60) + '...' : 'null');
-                  console.log('[DEBUG] RENDER: imageLoadError:', imageLoadError, 'selectedAngleId:', selectedAngleId);
-                  
-                  // Use displayImageUri directly - expo-image handles large base64 data URIs natively
+                  // Use RNImage (React Native's built-in Image) for base64 data URIs
+                  // expo-image doesn't work with data URIs in Expo Go SDK 54
                   if (!displayImageUri || imageLoadError) {
-                    const hasSourceImage = !!displayImageUri;
-                    console.log('[DEBUG] RENDER: Showing placeholder. hasSourceImage:', hasSourceImage, 'reason:', !displayImageUri ? 'no displayImageUri' : 'imageLoadError');
                     return (
                       <View 
                         style={[styles.generatedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.panel }]}
@@ -783,8 +691,6 @@ export default function PhaseThree({
                       </View>
                     );
                   }
-                  // Use React Native's Image with the data URI directly
-                  // RNImage can handle base64 data URIs on Android
                   return (
                     <TouchableOpacity 
                       activeOpacity={0.9}
@@ -798,14 +704,8 @@ export default function PhaseThree({
                         source={{ uri: displayImageUri }}
                         style={{ width: 350, height: 250, borderRadius: 8, backgroundColor: '#333' }}
                         resizeMode="contain"
-                        onError={(e) => {
-                          console.log('[DEBUG] RNImage onError:', e.nativeEvent?.error);
-                          setImageLoadError(true);
-                        }}
-                        onLoad={() => {
-                          console.log('[DEBUG] RNImage onLoad SUCCESS');
-                          setImageLoadError(false);
-                        }}
+                        onError={() => setImageLoadError(true)}
+                        onLoad={() => setImageLoadError(false)}
                       />
                     </TouchableOpacity>
                   );

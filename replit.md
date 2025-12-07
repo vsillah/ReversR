@@ -123,6 +123,14 @@ The server includes built-in protection against API rate limits:
 ## Technology Stack
 - **Framework**: Expo SDK 54 + React Native
 - **Navigation**: Expo Router
+
+## Important Technical Notes
+
+### Image Rendering in Expo Go
+- **expo-image package does NOT work** with base64 data URIs in Expo Go (SDK 54). Neither onLoad nor onError callbacks fire.
+- **Solution**: Use React Native's built-in `Image` component (imported as `RNImage`) for displaying base64 data URIs.
+- This works correctly with both external URLs and inline data URIs.
+- The modal fullscreen viewer uses `Animated.Image` from React Native which also works correctly.
 - **AI**: Google Gemini via production server
 - **Camera**: expo-camera
 - **File System**: expo-file-system, expo-sharing
