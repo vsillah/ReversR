@@ -783,12 +783,13 @@ export default function PhaseThree({
                       </View>
                     );
                   }
-                  console.log('[DEBUG] RENDER: Showing expo-image with data URI length:', displayImageUri.length);
+                  console.log('[DEBUG] RENDER: Showing image with data URI length:', displayImageUri.length);
                   
-                  // TEST: Use a known-working public image to verify expo-image works
-                  const testImageUrl = 'https://picsum.photos/400/300';
-                  const useTestImage = true; // Set to true to test with external image
-                  const imageSource = useTestImage ? testImageUrl : displayImageUri;
+                  // Use React Native's built-in Image instead of expo-image
+                  // Test with a known-working external image first
+                  const testImageUrl = 'https://picsum.photos/400/250';
+                  const useTestImage = true;
+                  const imageSource = useTestImage ? { uri: testImageUrl } : { uri: displayImageUri };
                   
                   return (
                     <TouchableOpacity 
@@ -798,16 +799,16 @@ export default function PhaseThree({
                         setImageModalVisible(true);
                       }}
                     >
-                      <Image
+                      <RNImage
                         source={imageSource}
-                        style={styles.generatedImage}
-                        contentFit="contain"
+                        style={{ width: '100%', height: 250, borderRadius: 8, backgroundColor: '#333' }}
+                        resizeMode="contain"
                         onError={(e) => {
-                          console.log('[DEBUG] Image onError triggered:', e.error);
+                          console.log('[DEBUG] RNImage onError triggered:', e.nativeEvent.error);
                           setImageLoadError(true);
                         }}
                         onLoad={() => {
-                          console.log('[DEBUG] Image onLoad triggered - SUCCESS');
+                          console.log('[DEBUG] RNImage onLoad triggered - SUCCESS');
                           setImageLoadError(false);
                         }}
                       />
