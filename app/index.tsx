@@ -311,7 +311,7 @@ export default function HomeScreen() {
       setConfirmAlert({
         visible: true,
         title: 'Save Innovation?',
-        message: 'Resetting will start a new innovation. Would you like to save your current progress first?',
+        message: 'Starting a new innovation. Save progress first?',
         buttons: [
           {
             text: 'Discard',
@@ -371,7 +371,7 @@ export default function HomeScreen() {
       setConfirmAlert({
         visible: true,
         title: 'Save Innovation?',
-        message: 'Trying another pattern will start a new innovation. Would you like to save your current progress first?',
+        message: 'Starting a new innovation. Save progress first?',
         buttons: [
           {
             text: 'Discard',
@@ -447,7 +447,7 @@ export default function HomeScreen() {
       setConfirmAlert({
         visible: true,
         title: 'Save Innovation?',
-        message: 'Going back will start a new innovation. Would you like to save your current progress first?',
+        message: 'Starting a new innovation. Save progress first?',
         buttons: [
           {
             text: 'Discard',
