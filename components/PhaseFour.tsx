@@ -205,56 +205,6 @@ export default function PhaseFour({
         <Text style={styles.conceptDesc}>{innovation.conceptDescription}</Text>
       </View>
 
-      {/* Manufacturing Readiness Tracker */}
-      {(() => {
-        const artifacts: ArtifactStatus[] = [
-          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
-          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
-          { id: 'specs', name: 'Specs', icon: 'document-text-outline', ready: !!spec },
-          { id: 'bom', name: 'BOM', icon: 'list-outline', ready: !!localBom },
-        ];
-        const readyCount = artifacts.filter(a => a.ready).length;
-        const percentage = Math.round((readyCount / artifacts.length) * 100);
-        
-        return (
-          <View style={styles.readinessPanel}>
-            <View style={styles.readinessHeader}>
-              <View style={styles.readinessLeft}>
-                <Ionicons name="rocket-outline" size={18} color={Colors.gray[400]} />
-                <View>
-                  <Text style={styles.readinessTitle}>Manufacturing Readiness</Text>
-                  <Text style={styles.readinessSubtitle}>Generate artifacts for prototype manufacturing</Text>
-                </View>
-              </View>
-              <View style={styles.readinessBadge}>
-                <Text style={styles.readinessPercent}>{percentage}% Ready</Text>
-              </View>
-            </View>
-            <View style={styles.artifactGrid}>
-              {artifacts.map((artifact) => (
-                <View 
-                  key={artifact.id} 
-                  style={[
-                    styles.artifactItem,
-                    artifact.ready && styles.artifactItemReady,
-                  ]}
-                >
-                  <Ionicons 
-                    name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
-                    size={24} 
-                    color={artifact.ready ? Colors.accent : Colors.gray[600]} 
-                  />
-                  <Text style={[
-                    styles.artifactName,
-                    artifact.ready && styles.artifactNameReady,
-                  ]}>{artifact.name}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        );
-      })()}
-
       <View style={styles.bomPanel}>
         <View style={styles.panelHeader}>
           <View style={styles.terminalDots}>
@@ -350,6 +300,56 @@ export default function PhaseFour({
           </View>
         </View>
       )}
+
+      {/* Manufacturing Readiness Tracker */}
+      {(() => {
+        const artifacts: ArtifactStatus[] = [
+          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
+          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
+          { id: 'specs', name: 'Specs', icon: 'document-text-outline', ready: !!spec },
+          { id: 'bom', name: 'BOM', icon: 'list-outline', ready: !!localBom },
+        ];
+        const readyCount = artifacts.filter(a => a.ready).length;
+        const percentage = Math.round((readyCount / artifacts.length) * 100);
+        
+        return (
+          <View style={styles.readinessPanel}>
+            <View style={styles.readinessHeader}>
+              <View style={styles.readinessLeft}>
+                <Ionicons name="rocket-outline" size={18} color={Colors.gray[400]} />
+                <View>
+                  <Text style={styles.readinessTitle}>Manufacturing Readiness</Text>
+                  <Text style={styles.readinessSubtitle}>Generate artifacts for prototype manufacturing</Text>
+                </View>
+              </View>
+              <View style={styles.readinessBadge}>
+                <Text style={styles.readinessPercent}>{percentage}% Ready</Text>
+              </View>
+            </View>
+            <View style={styles.artifactGrid}>
+              {artifacts.map((artifact) => (
+                <View 
+                  key={artifact.id} 
+                  style={[
+                    styles.artifactItem,
+                    artifact.ready && styles.artifactItemReady,
+                  ]}
+                >
+                  <Ionicons 
+                    name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
+                    size={24} 
+                    color={artifact.ready ? Colors.accent : Colors.gray[600]} 
+                  />
+                  <Text style={[
+                    styles.artifactName,
+                    artifact.ready && styles.artifactNameReady,
+                  ]}>{artifact.name}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      })()}
 
       {/* Send to Manufacturer Section */}
       <View style={styles.manufacturerPanel}>
