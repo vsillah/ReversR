@@ -52,7 +52,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     });
   };
 
-  const PHASE_LABELS = ['Scan', 'Reverse', 'Architect', 'Build'];
+  const PHASE_LABELS = ['Scan', 'Reverse', 'Design', 'Build'];
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);

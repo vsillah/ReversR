@@ -68,7 +68,7 @@ const createEmptyContext = (): MutationContext => {
   };
 };
 
-const PHASE_LABELS = ['SCAN', 'REVERSE', 'ARCHITECT', 'BUILD'];
+const PHASE_LABELS = ['SCAN', 'REVERSE', 'DESIGN', 'BUILD'];
 const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   1: 'search',
   2: 'repeat-sharp',
@@ -690,7 +690,6 @@ export default function HomeScreen() {
               onBOMGenerated={handleBOMGenerated}
               onBack={handleBack}
               onReset={handleReset}
-              onTryAnotherPattern={handleTryAnotherPattern}
             />
           ) : (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
@@ -698,13 +697,13 @@ export default function HomeScreen() {
                 Specifications not found
               </Text>
               <Text style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', marginBottom: 20 }}>
-                Go back to the Architect phase to generate the technical specs for your innovation.
+                Go back to the Design phase to generate the technical specs for your innovation.
               </Text>
               <TouchableOpacity 
                 onPress={handleBack}
                 style={{ backgroundColor: '#22D3EE', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 }}
               >
-                <Text style={{ color: '#000', fontWeight: 'bold' }}>Go to Architect</Text>
+                <Text style={{ color: '#000', fontWeight: 'bold' }}>Go to Design</Text>
               </TouchableOpacity>
             </View>
           )

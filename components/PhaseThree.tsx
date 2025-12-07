@@ -516,7 +516,7 @@ export default function PhaseThree({
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.accent} />
-        <Text style={styles.loadingText}>Consulting The Architect...</Text>
+        <Text style={styles.loadingText}>Designing your innovation...</Text>
       </View>
     );
   }
@@ -540,7 +540,7 @@ export default function PhaseThree({
         <View style={styles.headerLeft}>
           <Ionicons name="pencil" size={28} color={Colors.accent} />
           <View style={styles.headerText}>
-            <Text style={styles.title}>Phase 3: The Architect</Text>
+            <Text style={styles.title}>Phase 3: Design</Text>
             <Text style={styles.description}>Blueprint generated. Visualize your innovation.</Text>
           </View>
         </View>

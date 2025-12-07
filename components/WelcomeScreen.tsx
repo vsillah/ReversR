@@ -29,7 +29,7 @@ const phases = [
   },
   {
     number: 3,
-    title: 'ARCHITECT',
+    title: 'DESIGN',
     icon: 'pencil' as const,
     description: 'Generate technical specifications, sketches, and interactive 3D prototypes.',
   },
@@ -52,7 +52,7 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
         </View>
 
         <Text style={styles.description}>
-          Deconstruct reality. Apply rigorous mutation patterns. Architect the impossible.
+          Deconstruct reality. Apply rigorous mutation patterns. Design the impossible.
           {'\n\n'}
           An AI-powered tool for generating high-fidelity product innovations within a Closed World.
         </Text>

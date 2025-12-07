@@ -18,7 +18,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 │   ├── WelcomeScreen.tsx # Welcome/splash screen
 │   ├── PhaseOne.tsx     # Closed World Scan - product analysis + camera
 │   ├── PhaseTwo.tsx     # Pattern Application - SIT mutation
-│   ├── PhaseThree.tsx   # Architect - specs & visualization
+│   ├── PhaseThree.tsx   # Design - specs & visualization
 │   └── PhaseFour.tsx    # Build - BOM generation & exports
 ├── constants/
 │   └── theme.ts         # Colors, spacing, font sizes
@@ -36,7 +36,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 1. **Four-Phase SIT Workflow**
    - Phase 1 (Scan): Analyze product via text or camera
    - Phase 2 (Reverse): Apply SIT patterns with Back/Reset navigation
-   - Phase 3 (Architect): Generate specs and visualizations with tabbed 2D/3D viewer
+   - Phase 3 (Design): Generate specs and visualizations with tabbed 2D/3D viewer
    - Phase 4 (Build): Bill of Materials generation with export options
 
 2. **Camera Support**: Use device camera to scan physical objects
@@ -123,6 +123,12 @@ The server includes built-in protection against API rate limits:
 ## Technology Stack
 - **Framework**: Expo SDK 54 + React Native
 - **Navigation**: Expo Router
+
+## Recent Changes (December 7, 2025)
+1. Fixed Phase 3 image rendering: Replaced expo-image with React Native's built-in Image component for base64 data URIs
+2. Reordered Phase 4 widgets: Manufacturing Readiness now appears after BOM/Export, before Send to Manufacturer
+3. Removed redundant "Try Another Pattern" button from Phase 4 (navigation available at top)
+4. Renamed Phase 3 from "Architect" to "Design" to match verb-based naming convention (Scan, Reverse, Design, Build)
 
 ## Important Technical Notes
 
