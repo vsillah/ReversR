@@ -325,6 +325,10 @@ export default function PhaseFour({
           }
           
           if (artifactId === 'bom') {
+            if (status === 'generating') {
+              setAlert({visible: true, title: 'Please Wait', message: 'BOM generation is already in progress.', type: 'info'});
+              return;
+            }
             handleGenerateBOM();
           } else {
             onGoToDesign();
@@ -346,36 +350,46 @@ export default function PhaseFour({
               </View>
             </View>
             <View style={styles.artifactGrid}>
-              {artifacts.map((artifact) => (
-                <TouchableOpacity 
-                  key={artifact.id} 
-                  style={[
-                    styles.artifactItem,
-                    artifact.ready && styles.artifactItemReady,
-                    !artifact.ready && styles.artifactItemTappable,
-                  ]}
-                  onPress={() => handleArtifactPress(artifact.id, artifact.ready)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons 
-                    name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
-                    size={24} 
-                    color={artifact.ready ? Colors.accent : Colors.gray[600]} 
-                  />
-                  <Text style={[
-                    styles.artifactName,
-                    artifact.ready && styles.artifactNameReady,
-                  ]}>{artifact.name}</Text>
-                  {!artifact.ready && (
-                    <Ionicons 
-                      name={artifact.id === 'bom' ? 'add-circle-outline' : 'arrow-back-circle-outline'} 
-                      size={14} 
-                      color={Colors.gray[500]} 
-                      style={styles.artifactAction}
-                    />
-                  )}
-                </TouchableOpacity>
-              ))}
+              {artifacts.map((artifact) => {
+                const isBomGenerating = artifact.id === 'bom' && status === 'generating';
+                return (
+                  <TouchableOpacity 
+                    key={artifact.id} 
+                    style={[
+                      styles.artifactItem,
+                      artifact.ready && styles.artifactItemReady,
+                      !artifact.ready && !isBomGenerating && styles.artifactItemTappable,
+                      isBomGenerating && styles.artifactItemGenerating,
+                    ]}
+                    onPress={() => handleArtifactPress(artifact.id, artifact.ready)}
+                    activeOpacity={0.7}
+                    disabled={isBomGenerating}
+                  >
+                    {isBomGenerating ? (
+                      <ActivityIndicator size="small" color={Colors.secondary} />
+                    ) : (
+                      <Ionicons 
+                        name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
+                        size={24} 
+                        color={artifact.ready ? Colors.accent : Colors.gray[600]} 
+                      />
+                    )}
+                    <Text style={[
+                      styles.artifactName,
+                      artifact.ready && styles.artifactNameReady,
+                      isBomGenerating && styles.artifactNameGenerating,
+                    ]}>{isBomGenerating ? 'Generating...' : artifact.name}</Text>
+                    {!artifact.ready && !isBomGenerating && (
+                      <Ionicons 
+                        name={artifact.id === 'bom' ? 'add-circle-outline' : 'arrow-back-circle-outline'} 
+                        size={14} 
+                        color={Colors.gray[500]} 
+                        style={styles.artifactAction}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         );
@@ -560,8 +574,16 @@ const styles = StyleSheet.create({
   artifactItemTappable: {
     borderStyle: 'dashed',
   },
+  artifactItemGenerating: {
+    backgroundColor: 'rgba(251, 191, 36, 0.1)',
+    borderColor: Colors.secondary,
+    borderStyle: 'solid',
+  },
   artifactAction: {
     marginTop: 2,
+  },
+  artifactNameGenerating: {
+    color: Colors.secondary,
   },
   artifactName: {
     fontFamily: 'monospace',
