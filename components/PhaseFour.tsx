@@ -94,6 +94,7 @@ export default function PhaseFour({
   );
   const [error, setError] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
+  const [bomExpanded, setBomExpanded] = useState(true);
 
   useEffect(() => {
     // Scroll to top on mount
@@ -206,14 +207,28 @@ export default function PhaseFour({
       </View>
 
       <View style={styles.bomPanel}>
-        <View style={styles.panelHeader}>
+        <TouchableOpacity 
+          style={styles.panelHeader} 
+          onPress={() => localBom && setBomExpanded(!bomExpanded)}
+          activeOpacity={localBom ? 0.7 : 1}
+        >
           <View style={styles.terminalDots}>
             <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
             <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
             <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
           </View>
           <Text style={styles.panelTitle}>Bill of Materials (BOM)</Text>
-        </View>
+          {localBom && (
+            <View style={styles.bomToggleContainer}>
+              <Text style={styles.bomItemCount}>{localBom.items.length} items</Text>
+              <Ionicons 
+                name={bomExpanded ? 'chevron-up' : 'chevron-down'} 
+                size={20} 
+                color={Colors.gray[400]} 
+              />
+            </View>
+          )}
+        </TouchableOpacity>
 
         {status === 'generating' ? (
           <View style={styles.loadingContainer}>
@@ -222,43 +237,55 @@ export default function PhaseFour({
             <Text style={styles.loadingSubtext}>Calculating parts, costs & suppliers</Text>
           </View>
         ) : localBom ? (
-          <View style={styles.bomContent}>
-            <View style={styles.bomHeader}>
-              <Text style={styles.bomProjectName}>{localBom.projectName}</Text>
-              <Text style={styles.bomMeta}>v{localBom.version} | {localBom.dateGenerated}</Text>
-            </View>
+          bomExpanded ? (
+            <View style={styles.bomContent}>
+              <View style={styles.bomHeader}>
+                <Text style={styles.bomProjectName}>{localBom.projectName}</Text>
+                <Text style={styles.bomMeta}>v{localBom.version} | {localBom.dateGenerated}</Text>
+              </View>
 
-            <View style={styles.bomItemsContainer}>
-              {localBom.items.map((item, index) => (
-                <View key={index} style={styles.bomItem}>
-                  <View style={styles.bomItemHeader}>
-                    <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
-                    <Text style={styles.bomQuantity}>x{item.quantity}</Text>
+              <View style={styles.bomItemsContainer}>
+                {localBom.items.map((item, index) => (
+                  <View key={index} style={styles.bomItem}>
+                    <View style={styles.bomItemHeader}>
+                      <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
+                      <Text style={styles.bomQuantity}>x{item.quantity}</Text>
+                    </View>
+                    <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
+                    <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
+                    <View style={styles.bomItemMeta}>
+                      <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
+                      <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
+                    </View>
+                    <View style={styles.bomItemFooter}>
+                      <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
+                      <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
-                  <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
-                  <View style={styles.bomItemMeta}>
-                    <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
-                    <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
-                  </View>
-                  <View style={styles.bomItemFooter}>
-                    <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
-                    <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+                ))}
+              </View>
 
-            <View style={styles.bomTotalSection}>
-              <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
-              <Text style={styles.bomTotalValue}>{localBom.totalEstimatedCost}</Text>
-            </View>
+              <View style={styles.bomTotalSection}>
+                <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
+                <Text style={styles.bomTotalValue}>{localBom.totalEstimatedCost}</Text>
+              </View>
 
-            <View style={styles.bomNotesSection}>
-              <Text style={styles.bomNotesLabel}>Manufacturing Notes</Text>
-              <Text style={styles.bomNotes}>{localBom.manufacturingNotes}</Text>
+              <View style={styles.bomNotesSection}>
+                <Text style={styles.bomNotesLabel}>Manufacturing Notes</Text>
+                <Text style={styles.bomNotes}>{localBom.manufacturingNotes}</Text>
+              </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.bomCollapsed}>
+              <View style={styles.bomCollapsedRow}>
+                <Ionicons name="checkmark-circle" size={18} color={Colors.accent} />
+                <Text style={styles.bomCollapsedText}>{localBom.items.length} parts</Text>
+                <Text style={styles.bomCollapsedDivider}>|</Text>
+                <Text style={styles.bomCollapsedCost}>{localBom.totalEstimatedCost}</Text>
+              </View>
+              <Text style={styles.bomCollapsedHint}>Tap header to expand</Text>
+            </View>
+          )
         ) : (
           <View style={styles.generateContainer}>
             <Ionicons name="list-outline" size={48} color={Colors.gray[600]} />
@@ -623,6 +650,45 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
+    flex: 1,
+  },
+  bomToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  bomItemCount: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+  },
+  bomCollapsed: {
+    padding: Spacing.lg,
+    alignItems: 'center',
+  },
+  bomCollapsedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  bomCollapsedText: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.sm,
+    color: Colors.white,
+  },
+  bomCollapsedDivider: {
+    color: Colors.gray[600],
+  },
+  bomCollapsedCost: {
+    fontFamily: 'monospace',
+    fontSize: FontSizes.sm,
+    color: Colors.orange[300],
+    fontWeight: 'bold',
+  },
+  bomCollapsedHint: {
+    marginTop: Spacing.xs,
+    fontSize: FontSizes.xs,
+    color: Colors.gray[600],
   },
   loadingContainer: {
     alignItems: 'center',
