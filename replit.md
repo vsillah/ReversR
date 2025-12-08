@@ -132,6 +132,7 @@ The server includes built-in protection against API rate limits:
 2. Interactive Manufacturing Readiness tiles: Tap incomplete artifacts to navigate to Design phase or generate BOM directly
 3. BOM generation safeguards: Prevents duplicate requests, shows loading indicator during generation
 4. Collapsible BOM panel: Tap the header to minimize/maximize the Bill of Materials; collapsed view shows parts count and total cost summary
+5. History screen search, sort, and filter: Search by name/description, sort by date or progress, filter by phase and pattern
 
 ## Recent Changes (December 7, 2025)
 1. Fixed Phase 3 image rendering: Replaced expo-image with React Native's built-in Image component for base64 data URIs

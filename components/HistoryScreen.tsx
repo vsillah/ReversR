@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
@@ -12,7 +13,6 @@ import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/u
 import { SIT_PATTERN_LABELS, SITPattern } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 
-// Reverse lookup: maps human-readable labels to pattern keys for legacy data
 const LABEL_TO_PATTERN: Record<string, SITPattern> = {
   'Subtraction': 'subtraction',
   'Task Unification': 'task_unification',
@@ -21,35 +21,61 @@ const LABEL_TO_PATTERN: Record<string, SITPattern> = {
   'Attribute Dependency': 'attribute_dependency',
 };
 
-// Get display label for a pattern, handling both key format and legacy label format
 const getPatternLabel = (pattern: string | null | undefined): string | null => {
   if (!pattern) return null;
-  
-  // First try direct lookup (pattern is a key like 'subtraction')
   if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
     return SIT_PATTERN_LABELS[pattern as SITPattern];
   }
-  
-  // Try reverse lookup (pattern is a label like 'Subtraction')
   if (LABEL_TO_PATTERN[pattern]) {
-    return pattern; // It's already a valid label
+    return pattern;
   }
-  
-  return null; // Unknown format, don't display
+  return null;
 };
 
-// Get pattern from an innovation item, checking both selectedPattern and innovation.patternUsed
 const getItemPattern = (item: SavedInnovation): string | null => {
-  // Prefer selectedPattern (normalized key format)
   if (item.selectedPattern) {
     return item.selectedPattern;
   }
-  // Fallback to innovation.patternUsed for legacy data
   if (item.innovation?.patternUsed) {
     return item.innovation.patternUsed;
   }
   return null;
 };
+
+const normalizePatternKey = (pattern: string | null): SITPattern | null => {
+  if (!pattern) return null;
+  if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
+    return pattern as SITPattern;
+  }
+  if (LABEL_TO_PATTERN[pattern]) {
+    return LABEL_TO_PATTERN[pattern];
+  }
+  return null;
+};
+
+type SortOption = 'newest' | 'oldest' | 'phase_asc' | 'phase_desc';
+
+const SORT_OPTIONS: { key: SortOption; label: string; icon: string }[] = [
+  { key: 'newest', label: 'Newest', icon: 'arrow-down' },
+  { key: 'oldest', label: 'Oldest', icon: 'arrow-up' },
+  { key: 'phase_desc', label: 'Most Progress', icon: 'trending-up' },
+  { key: 'phase_asc', label: 'Least Progress', icon: 'trending-down' },
+];
+
+const PHASE_FILTERS = [
+  { key: 1, label: 'Scan' },
+  { key: 2, label: 'Reverse' },
+  { key: 3, label: 'Design' },
+  { key: 4, label: 'Build' },
+];
+
+const PATTERN_FILTERS: { key: SITPattern; label: string }[] = [
+  { key: 'subtraction', label: 'Subtraction' },
+  { key: 'task_unification', label: 'Task Unification' },
+  { key: 'multiplication', label: 'Multiplication' },
+  { key: 'division', label: 'Division' },
+  { key: 'attribute_dependency', label: 'Attribute Dep.' },
+];
 
 interface Props {
   onBack: () => void;
@@ -66,6 +92,12 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     message: string;
     onConfirm: () => void;
   } | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedPhases, setSelectedPhases] = useState<number[]>([]);
+  const [selectedPatterns, setSelectedPatterns] = useState<SITPattern[]>([]);
 
   useEffect(() => {
     loadInnovations();
@@ -121,6 +153,79 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     return 'Untitled Innovation';
   };
 
+  const getSearchableText = (item: SavedInnovation): string => {
+    const parts: string[] = [];
+    if (item.innovation?.conceptName) parts.push(item.innovation.conceptName);
+    if (item.innovation?.conceptDescription) parts.push(item.innovation.conceptDescription);
+    if (item.analysis?.productName) parts.push(item.analysis.productName);
+    if (item.input) parts.push(item.input);
+    return parts.join(' ').toLowerCase();
+  };
+
+  const togglePhaseFilter = (phase: number) => {
+    setSelectedPhases(prev => 
+      prev.includes(phase) 
+        ? prev.filter(p => p !== phase)
+        : [...prev, phase]
+    );
+  };
+
+  const togglePatternFilter = (pattern: SITPattern) => {
+    setSelectedPatterns(prev =>
+      prev.includes(pattern)
+        ? prev.filter(p => p !== pattern)
+        : [...prev, pattern]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSelectedPhases([]);
+    setSelectedPatterns([]);
+    setSortBy('newest');
+  };
+
+  const hasActiveFilters = searchQuery.length > 0 || selectedPhases.length > 0 || selectedPatterns.length > 0;
+
+  const filteredAndSortedInnovations = useMemo(() => {
+    let result = [...innovations];
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(item => getSearchableText(item).includes(query));
+    }
+
+    if (selectedPhases.length > 0) {
+      result = result.filter(item => selectedPhases.includes(item.phase));
+    }
+
+    if (selectedPatterns.length > 0) {
+      result = result.filter(item => {
+        const patternKey = normalizePatternKey(getItemPattern(item));
+        return patternKey && selectedPatterns.includes(patternKey);
+      });
+    }
+
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        case 'oldest':
+          return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        case 'phase_desc':
+          return b.phase - a.phase;
+        case 'phase_asc':
+          return a.phase - b.phase;
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [innovations, searchQuery, selectedPhases, selectedPatterns, sortBy]);
+
+  const activeFilterCount = selectedPhases.length + selectedPatterns.length;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -129,9 +234,128 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
         </TouchableOpacity>
         <View style={styles.headerText}>
           <Text style={styles.title}>Innovation History</Text>
-          <Text style={styles.subtitle}>{innovations.length} saved innovations</Text>
+          <Text style={styles.subtitle}>
+            {filteredAndSortedInnovations.length === innovations.length 
+              ? `${innovations.length} saved innovations`
+              : `${filteredAndSortedInnovations.length} of ${innovations.length} innovations`
+            }
+          </Text>
         </View>
       </View>
+
+      {innovations.length > 0 && (
+        <View style={styles.searchSection}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={18} color={Colors.gray[500]} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search innovations..."
+              placeholderTextColor={Colors.gray[600]}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={18} color={Colors.gray[500]} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.controlsRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sortScroll}>
+              {SORT_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[styles.sortChip, sortBy === option.key && styles.sortChipActive]}
+                  onPress={() => setSortBy(option.key)}
+                >
+                  <Ionicons 
+                    name={option.icon as any} 
+                    size={12} 
+                    color={sortBy === option.key ? Colors.black : Colors.gray[400]} 
+                  />
+                  <Text style={[styles.sortChipText, sortBy === option.key && styles.sortChipTextActive]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={[styles.filterButton, showFilters && styles.filterButtonActive]}
+              onPress={() => setShowFilters(!showFilters)}
+            >
+              <Ionicons 
+                name="options" 
+                size={16} 
+                color={showFilters || activeFilterCount > 0 ? Colors.accent : Colors.gray[400]} 
+              />
+              {activeFilterCount > 0 && (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {showFilters && (
+            <View style={styles.filtersPanel}>
+              <View style={styles.filterGroup}>
+                <Text style={styles.filterGroupLabel}>Phase</Text>
+                <View style={styles.filterChips}>
+                  {PHASE_FILTERS.map((phase) => (
+                    <TouchableOpacity
+                      key={phase.key}
+                      style={[
+                        styles.filterChip,
+                        selectedPhases.includes(phase.key) && styles.filterChipActive
+                      ]}
+                      onPress={() => togglePhaseFilter(phase.key)}
+                    >
+                      <Text style={[
+                        styles.filterChipText,
+                        selectedPhases.includes(phase.key) && styles.filterChipTextActive
+                      ]}>
+                        {phase.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.filterGroup}>
+                <Text style={styles.filterGroupLabel}>Pattern</Text>
+                <View style={styles.filterChips}>
+                  {PATTERN_FILTERS.map((pattern) => (
+                    <TouchableOpacity
+                      key={pattern.key}
+                      style={[
+                        styles.filterChip,
+                        selectedPatterns.includes(pattern.key) && styles.filterChipActive
+                      ]}
+                      onPress={() => togglePatternFilter(pattern.key)}
+                    >
+                      <Text style={[
+                        styles.filterChipText,
+                        selectedPatterns.includes(pattern.key) && styles.filterChipTextActive
+                      ]}>
+                        {pattern.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {hasActiveFilters && (
+                <TouchableOpacity style={styles.clearFiltersButton} onPress={clearAllFilters}>
+                  <Ionicons name="refresh" size={14} color={Colors.orange[300]} />
+                  <Text style={styles.clearFiltersText}>Clear all filters</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+      )}
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {loading ? (
@@ -149,10 +373,20 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
               <Text style={styles.startButtonText}>Start Innovating</Text>
             </TouchableOpacity>
           </View>
+        ) : filteredAndSortedInnovations.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="search-outline" size={64} color={Colors.gray[700]} />
+            <Text style={styles.emptyTitle}>No matches found</Text>
+            <Text style={styles.emptyText}>
+              Try adjusting your search or filters
+            </Text>
+            <TouchableOpacity style={styles.clearButton} onPress={clearAllFilters}>
+              <Text style={styles.clearButtonText}>Clear Filters</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
-          innovations.map((item) => (
+          filteredAndSortedInnovations.map((item) => (
             <View key={item.id} style={styles.card}>
-              {/* Header: Title + Pattern Badge + Delete */}
               <View style={styles.cardHeader}>
                 <View style={styles.cardTitleRow}>
                   <Text style={styles.cardTitle} numberOfLines={1}>
@@ -179,7 +413,6 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
                 </View>
               </View>
 
-              {/* Description */}
               {item.innovation && (
                 <View style={styles.cardBody}>
                   <Text style={styles.conceptDesc} numberOfLines={3}>
@@ -188,7 +421,6 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
                 </View>
               )}
 
-              {/* Phase Progress Indicator */}
               <View style={styles.progressSection}>
                 <View style={styles.progressRow}>
                   {PHASE_LABELS.map((label, index) => {
@@ -228,7 +460,6 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
                 </View>
               </View>
 
-              {/* Footer: Artifacts + Continue Button */}
               <View style={styles.cardFooter}>
                 <View style={styles.artifactsRow}>
                   {getArtifacts(item).map((artifact) => (
@@ -305,6 +536,145 @@ const styles = StyleSheet.create({
     color: Colors.dim,
     marginTop: 2,
   },
+  searchSection: {
+    backgroundColor: Colors.panel,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.dark,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    fontSize: FontSizes.sm,
+    color: Colors.white,
+    fontFamily: 'monospace',
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  sortScroll: {
+    flex: 1,
+  },
+  sortChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: Colors.dark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginRight: Spacing.xs,
+  },
+  sortChipActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  sortChipText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+  },
+  sortChipTextActive: {
+    color: Colors.black,
+    fontWeight: '600',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.sm,
+    borderRadius: 8,
+    backgroundColor: Colors.dark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  filterButtonActive: {
+    borderColor: Colors.accent,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: Colors.accent,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBadgeText: {
+    fontSize: 10,
+    color: Colors.black,
+    fontWeight: 'bold',
+  },
+  filtersPanel: {
+    marginTop: Spacing.md,
+    padding: Spacing.md,
+    backgroundColor: Colors.dark,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  filterGroup: {
+    marginBottom: Spacing.md,
+  },
+  filterGroupLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    marginBottom: Spacing.xs,
+    fontFamily: 'monospace',
+    textTransform: 'uppercase',
+  },
+  filterChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+  },
+  filterChip: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+  },
+  filterChipActive: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    borderColor: Colors.accent,
+  },
+  filterChipText: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+  },
+  filterChipTextActive: {
+    color: Colors.accent,
+    fontWeight: '600',
+  },
+  clearFiltersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.sm,
+  },
+  clearFiltersText: {
+    fontSize: FontSizes.xs,
+    color: Colors.orange[300],
+  },
   content: {
     flex: 1,
     padding: Spacing.lg,
@@ -337,6 +707,20 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     color: Colors.black,
+    fontWeight: '600',
+    fontSize: FontSizes.md,
+  },
+  clearButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: 8,
+    marginTop: Spacing.xl,
+  },
+  clearButtonText: {
+    color: Colors.accent,
     fontWeight: '600',
     fontSize: FontSizes.md,
   },
