@@ -12,6 +12,45 @@ import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/u
 import { SIT_PATTERN_LABELS, SITPattern } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 
+// Reverse lookup: maps human-readable labels to pattern keys for legacy data
+const LABEL_TO_PATTERN: Record<string, SITPattern> = {
+  'Subtraction': 'subtraction',
+  'Task Unification': 'task_unification',
+  'Multiplication': 'multiplication',
+  'Division': 'division',
+  'Attribute Dependency': 'attribute_dependency',
+};
+
+// Get display label for a pattern, handling both key format and legacy label format
+const getPatternLabel = (pattern: string | null | undefined): string | null => {
+  if (!pattern) return null;
+  
+  // First try direct lookup (pattern is a key like 'subtraction')
+  if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
+    return SIT_PATTERN_LABELS[pattern as SITPattern];
+  }
+  
+  // Try reverse lookup (pattern is a label like 'Subtraction')
+  if (LABEL_TO_PATTERN[pattern]) {
+    return pattern; // It's already a valid label
+  }
+  
+  return null; // Unknown format, don't display
+};
+
+// Get pattern from an innovation item, checking both selectedPattern and innovation.patternUsed
+const getItemPattern = (item: SavedInnovation): string | null => {
+  // Prefer selectedPattern (normalized key format)
+  if (item.selectedPattern) {
+    return item.selectedPattern;
+  }
+  // Fallback to innovation.patternUsed for legacy data
+  if (item.innovation?.patternUsed) {
+    return item.innovation.patternUsed;
+  }
+  return null;
+};
+
 interface Props {
   onBack: () => void;
   onResume: (innovation: SavedInnovation) => void;
@@ -119,10 +158,10 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
                   <Text style={styles.cardTitle} numberOfLines={1}>
                     {getInnovationTitle(item)}
                   </Text>
-                  {item.selectedPattern && (
+                  {getPatternLabel(getItemPattern(item)) && (
                     <View style={styles.patternBadge}>
                       <Text style={styles.patternBadgeText}>
-                        {SIT_PATTERN_LABELS[item.selectedPattern]}
+                        {getPatternLabel(getItemPattern(item))}
                       </Text>
                     </View>
                   )}

@@ -11,6 +11,46 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 // ============================================
+// SIT PATTERN NORMALIZATION
+// ============================================
+
+// Valid pattern keys
+const VALID_PATTERN_KEYS = ['subtraction', 'task_unification', 'multiplication', 'division', 'attribute_dependency'];
+
+// Map labels to keys for legacy data
+const LABEL_TO_KEY = {
+  'Subtraction': 'subtraction',
+  'Task Unification': 'task_unification',
+  'Multiplication': 'multiplication',
+  'Division': 'division',
+  'Attribute Dependency': 'attribute_dependency',
+};
+
+// Normalize pattern to key format, returns null if invalid
+const normalizePattern = (pattern) => {
+  if (!pattern) return null;
+  
+  // Already a valid key
+  if (VALID_PATTERN_KEYS.includes(pattern)) {
+    return pattern;
+  }
+  
+  // Try label lookup
+  if (LABEL_TO_KEY[pattern]) {
+    return LABEL_TO_KEY[pattern];
+  }
+  
+  // Try case-insensitive match
+  const lower = pattern.toLowerCase().replace(/\s+/g, '_');
+  if (VALID_PATTERN_KEYS.includes(lower)) {
+    return lower;
+  }
+  
+  console.warn(`Unknown pattern format: ${pattern}, defaulting to subtraction`);
+  return 'subtraction';
+};
+
+// ============================================
 // API KEY POOL & RATE LIMIT HANDLING
 // ============================================
 
@@ -407,6 +447,10 @@ app.post('/api/gemini/apply-pattern', async (req, res) => {
       return JSON.parse(text);
     }, cacheKey);
 
+    // Override patternUsed with normalized pattern key
+    // This ensures consistent format (e.g., 'subtraction' not 'Subtraction')
+    result.patternUsed = normalizePattern(pattern);
+    
     res.json(result);
   } catch (error) {
     console.error('Apply pattern error:', error);
