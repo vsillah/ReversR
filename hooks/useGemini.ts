@@ -1,4 +1,8 @@
-const API_BASE = 'https://reversr-vsillah.replit.app';
+import { Platform } from 'react-native';
+
+const API_BASE = Platform.OS === 'web' 
+  ? (window.location.origin.includes('localhost') ? 'http://localhost:3001' : 'https://reversr-vsillah.replit.app')
+  : 'https://reversr-vsillah.replit.app';
 
 export interface Component {
   name: string;

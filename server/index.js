@@ -887,7 +887,7 @@ app.get('/health', (req, res) => {
 // START SERVER
 // ============================================
 
-const PORT = 5000;
+const PORT = process.env.API_PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API server running on port ${PORT}`);
   console.log(`API keys configured: ${apiKeyPool.length}`);
