@@ -15,6 +15,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 │   └── index.tsx        # Main screen with phase navigation
 ├── components/
 │   ├── AlertModal.tsx   # Custom styled alert modal (replaces native Alert.alert)
+│   ├── LoadingOverlay.tsx # Universal loading overlay with step progress
 │   ├── WelcomeScreen.tsx # Welcome/splash screen
 │   ├── PhaseOne.tsx     # Closed World Scan - product analysis + camera
 │   ├── PhaseTwo.tsx     # Pattern Application - SIT mutation
@@ -135,6 +136,7 @@ The server includes built-in protection against API rate limits:
 
 ## Recent Changes (December 14, 2025)
 1. Added Manual Component/Resource Selection to Phase 2 (Reverse): Users can toggle between Auto and Manual modes to select specific components and neighborhood resources to focus on during pattern application
+2. Added Universal Loading Overlay: New LoadingOverlay component with transparent backdrop, phase-specific animated icons, and step-by-step progress display across all phases (Scan, Reverse, Design, Build)
 
 ## Recent Changes (December 8, 2025)
 1. Fixed SIT pattern badge not displaying in History screen: Server now normalizes pattern keys before returning; HistoryScreen handles both key and label formats with fallback to innovation.patternUsed
