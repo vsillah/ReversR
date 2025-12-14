@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  ActivityIndicator,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import { analyzeProduct, AnalysisResult } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
+import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+
+const SCAN_STEPS: LoadingStep[] = [
+  { id: 'capture', label: 'Capturing input...' },
+  { id: 'identify', label: 'Identifying components...' },
+  { id: 'map', label: 'Mapping closed world...' },
+];
 
 interface Props {
   onComplete: (input: string, analysis: AnalysisResult, capturedImage?: string | null) => void;
@@ -42,10 +48,24 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string} | null>(null);
+  const [loadingStep, setLoadingStep] = useState<string>('capture');
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoadingStep('capture');
+      const timer1 = setTimeout(() => setLoadingStep('identify'), 1500);
+      const timer2 = setTimeout(() => setLoadingStep('map'), 4000);
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
+    }
+  }, [isLoading]);
 
   const handleAnalyze = async () => {
     if (!input.trim() && !capturedImage) return;
     setIsLoading(true);
+    setLoadingStep('capture');
     setError(null);
     try {
       const result = await analyzeProduct(input, capturedImage || undefined);
@@ -230,6 +250,13 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
         message={alert?.message || ''}
         type="error"
         onClose={() => setAlert(null)}
+      />
+
+      <LoadingOverlay
+        visible={isLoading}
+        phase="scan"
+        currentStep={SCAN_STEPS.find(s => s.id === loadingStep)?.label || 'Scanning...'}
+        steps={SCAN_STEPS}
       />
     </View>
   );

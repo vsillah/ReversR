@@ -21,6 +21,13 @@ import {
   generateBOM,
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
+import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+
+const BUILD_STEPS: LoadingStep[] = [
+  { id: 'analyzing', label: 'Analyzing specifications' },
+  { id: 'calculating', label: 'Calculating parts & materials' },
+  { id: 'sourcing', label: 'Finding suppliers & costs' },
+];
 
 interface Props {
   innovation: InnovationResult;
@@ -95,11 +102,27 @@ export default function PhaseFour({
   const [error, setError] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
   const [bomExpanded, setBomExpanded] = useState(true);
+  const [loadingStep, setLoadingStep] = useState<string>('analyzing');
 
   useEffect(() => {
     // Scroll to top on mount
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
   }, []);
+
+  // Step progression for loading overlay
+  useEffect(() => {
+    if (status === 'generating') {
+      setLoadingStep(BUILD_STEPS[0].id);
+      let stepIndex = 0;
+      const interval = setInterval(() => {
+        stepIndex++;
+        if (stepIndex < BUILD_STEPS.length) {
+          setLoadingStep(BUILD_STEPS[stepIndex].id);
+        }
+      }, 2500);
+      return () => clearInterval(interval);
+    }
+  }, [status]);
 
   const formatError = (e: unknown) => {
     const err = e as { message?: string };
@@ -466,6 +489,13 @@ export default function PhaseFour({
         message={alert?.message || ''}
         type={alert?.type || 'info'}
         onClose={() => setAlert(null)}
+      />
+
+      <LoadingOverlay
+        visible={status === 'generating'}
+        phase="build"
+        currentStep={BUILD_STEPS.find(s => s.id === loadingStep)?.label || 'Generating BOM...'}
+        steps={BUILD_STEPS}
       />
     </ScrollView>
   );

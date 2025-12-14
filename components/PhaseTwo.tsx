@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
@@ -17,6 +16,13 @@ import {
   SIT_PATTERN_LABELS,
   applySITPattern,
 } from '../hooks/useGemini';
+import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+
+const REVERSE_STEPS: LoadingStep[] = [
+  { id: 'pattern', label: 'Selecting pattern...' },
+  { id: 'transform', label: 'Applying transformation...' },
+  { id: 'generate', label: 'Generating innovation...' },
+];
 
 interface Props {
   analysis: AnalysisResult;
@@ -87,6 +93,19 @@ export default function PhaseTwo({
   const [error, setError] = useState<string | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<number[]>([]);
   const [selectedResources, setSelectedResources] = useState<number[]>([]);
+  const [loadingStep, setLoadingStep] = useState<string>('pattern');
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoadingStep('pattern');
+      const timer1 = setTimeout(() => setLoadingStep('transform'), 1200);
+      const timer2 = setTimeout(() => setLoadingStep('generate'), 3500);
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
+    }
+  }, [isLoading]);
 
   const toggleComponent = (index: number) => {
     setSelectedComponents(prev => 
@@ -106,6 +125,7 @@ export default function PhaseTwo({
 
   const handleApply = async () => {
     setIsLoading(true);
+    setLoadingStep('pattern');
     setError(null);
     try {
       const result = await applySITPattern(
@@ -283,19 +303,19 @@ export default function PhaseTwo({
           onPress={handleApply}
           disabled={isLoading}
         >
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={Colors.white} />
-              <Text style={styles.applyButtonText}>Reversing...</Text>
-            </View>
-          ) : (
-            <View style={styles.buttonContent}>
-              <Text style={styles.applyButtonText}>Apply Reversal</Text>
-              <Ionicons name="sparkles" size={18} color={Colors.white} />
-            </View>
-          )}
+          <View style={styles.buttonContent}>
+            <Text style={styles.applyButtonText}>Apply Reversal</Text>
+            <Ionicons name="sparkles" size={18} color={Colors.white} />
+          </View>
         </TouchableOpacity>
       </View>
+
+      <LoadingOverlay
+        visible={isLoading}
+        phase="reverse"
+        currentStep={REVERSE_STEPS.find(s => s.id === loadingStep)?.label || 'Reversing...'}
+        steps={REVERSE_STEPS}
+      />
     </View>
   );
 }

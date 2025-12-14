@@ -29,6 +29,19 @@ import {
   AngleImage,
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
+import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+
+const DESIGN_STEPS: LoadingStep[] = [
+  { id: 'analyzing', label: 'Analyzing innovation concept' },
+  { id: 'specifications', label: 'Generating technical specifications' },
+  { id: 'finalizing', label: 'Finalizing blueprint details' },
+];
+
+const VISUAL_STEPS: LoadingStep[] = [
+  { id: 'preparing', label: 'Preparing visualization parameters' },
+  { id: 'generating', label: 'Generating visual representation' },
+  { id: 'rendering', label: 'Rendering final output' },
+];
 
 interface Props {
   innovation: InnovationResult;
@@ -83,6 +96,7 @@ export default function PhaseThree({
   const [imageLoadError, setImageLoadError] = useState(false);
   const [cachedFileUris, setCachedFileUris] = useState<Record<string, string>>({});
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
+  const [loadingStep, setLoadingStep] = useState<string>('analyzing');
   const ALL_ANGLES = [
     { id: 'front', label: 'Front View' },
     { id: 'side', label: 'Side View' },
@@ -133,6 +147,22 @@ export default function PhaseThree({
   useEffect(() => {
     setImageLoadError(false);
   }, [multiAngleImages, existingImageUrl, selectedAngleId]);
+
+  // Step progression for loading overlay
+  useEffect(() => {
+    if (status === 'generating_specs' || status === 'generating_visual') {
+      const steps = status === 'generating_specs' ? DESIGN_STEPS : VISUAL_STEPS;
+      setLoadingStep(steps[0].id);
+      let stepIndex = 0;
+      const interval = setInterval(() => {
+        stepIndex++;
+        if (stepIndex < steps.length) {
+          setLoadingStep(steps[stepIndex].id);
+        }
+      }, 2500);
+      return () => clearInterval(interval);
+    }
+  }, [status]);
 
   // Convert base64 data URLs to file URIs for Android compatibility
   // Large base64 strings (>64KB) don't render properly in React Native Image on Android
@@ -521,10 +551,12 @@ export default function PhaseThree({
 
   if (status === 'generating_specs') {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.accent} />
-        <Text style={styles.loadingText}>Designing your innovation...</Text>
-      </View>
+      <LoadingOverlay
+        visible={true}
+        phase="design"
+        currentStep={DESIGN_STEPS.find(s => s.id === loadingStep)?.label || 'Designing...'}
+        steps={DESIGN_STEPS}
+      />
     );
   }
 
@@ -1068,6 +1100,13 @@ export default function PhaseThree({
         message={alert?.message || ''}
         type={alert?.type || 'info'}
         onClose={() => setAlert(null)}
+      />
+
+      <LoadingOverlay
+        visible={status === 'generating_visual'}
+        phase="design"
+        currentStep={VISUAL_STEPS.find(s => s.id === loadingStep)?.label || 'Generating visualization...'}
+        steps={VISUAL_STEPS}
       />
     </ScrollView>
   );
