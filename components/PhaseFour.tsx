@@ -494,7 +494,7 @@ export default function PhaseFour({
       <LoadingOverlay
         visible={status === 'generating'}
         phase="build"
-        currentStep={BUILD_STEPS.find(s => s.id === loadingStep)?.label || 'Generating BOM...'}
+        currentStep={loadingStep}
         steps={BUILD_STEPS}
       />
     </ScrollView>

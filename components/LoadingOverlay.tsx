@@ -88,6 +88,7 @@ export default function LoadingOverlay({ visible, phase, currentStep, steps }: P
 
   const config = PHASE_CONFIG[phase];
   const currentStepIndex = steps?.findIndex(s => s.id === currentStep) ?? -1;
+  const currentStepLabel = steps?.[currentStepIndex]?.label || currentStep;
 
   if (!visible) return null;
 
@@ -111,7 +112,7 @@ export default function LoadingOverlay({ visible, phase, currentStep, steps }: P
           </Animated.View>
 
           <Text style={[styles.stepText, { color: config.color }]}>
-            {currentStep}
+            {currentStepLabel}
           </Text>
 
           {steps && steps.length > 0 && (

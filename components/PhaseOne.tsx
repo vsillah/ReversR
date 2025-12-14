@@ -256,7 +256,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
       <LoadingOverlay
         visible={isLoading}
         phase="scan"
-        currentStep={SCAN_STEPS.find(s => s.id === loadingStep)?.label || 'Scanning...'}
+        currentStep={loadingStep}
         steps={SCAN_STEPS}
       />
     </View>

@@ -554,7 +554,7 @@ export default function PhaseThree({
       <LoadingOverlay
         visible={true}
         phase="design"
-        currentStep={DESIGN_STEPS.find(s => s.id === loadingStep)?.label || 'Designing...'}
+        currentStep={loadingStep}
         steps={DESIGN_STEPS}
       />
     );
@@ -1105,7 +1105,7 @@ export default function PhaseThree({
       <LoadingOverlay
         visible={status === 'generating_visual'}
         phase="design"
-        currentStep={VISUAL_STEPS.find(s => s.id === loadingStep)?.label || 'Generating visualization...'}
+        currentStep={loadingStep}
         steps={VISUAL_STEPS}
       />
     </ScrollView>

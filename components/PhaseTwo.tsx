@@ -313,7 +313,7 @@ export default function PhaseTwo({
       <LoadingOverlay
         visible={isLoading}
         phase="reverse"
-        currentStep={REVERSE_STEPS.find(s => s.id === loadingStep)?.label || 'Reversing...'}
+        currentStep={loadingStep}
         steps={REVERSE_STEPS}
       />
     </View>
