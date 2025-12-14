@@ -399,22 +399,35 @@ app.post('/api/gemini/analyze', async (req, res) => {
 // Apply SIT pattern
 app.post('/api/gemini/apply-pattern', async (req, res) => {
   try {
-    const { analysis, pattern } = req.body;
+    const { analysis, pattern, selectedComponents, selectedResources } = req.body;
+    
+    // Filter components and resources based on selection (if provided)
+    const componentsToUse = selectedComponents && selectedComponents.length > 0
+      ? selectedComponents.map(idx => analysis.components[idx]).filter(Boolean)
+      : analysis.components;
+    
+    const resourcesToUse = selectedResources && selectedResources.length > 0
+      ? selectedResources.map(idx => analysis.neighborhoodResources[idx]).filter(Boolean)
+      : analysis.neighborhoodResources;
+    
+    const selectionNote = (selectedComponents && selectedComponents.length > 0) || (selectedResources && selectedResources.length > 0)
+      ? `\n\nNote: The user has specifically selected the following items to focus on for this reversal. Prioritize these elements in your innovation.`
+      : '';
     
     const prompt = `
       PHASE 2: PATTERN APPLICATION (${pattern})
       Apply the "${pattern}" SIT pattern to generate an innovative product concept.
       
       Product: ${analysis.productName}
-      Components: ${JSON.stringify(analysis.components)}
-      Neighborhood Resources: ${JSON.stringify(analysis.neighborhoodResources)}
-      Closed World: ${analysis.closedWorldBoundary}
+      Components: ${JSON.stringify(componentsToUse)}
+      Neighborhood Resources: ${JSON.stringify(resourcesToUse)}
+      Closed World: ${analysis.closedWorldBoundary}${selectionNote}
       
       Generate ONE innovative concept. Include marketGap (unmet need), noveltyScore (1-10), and viabilityScore (1-10).
       Return JSON with: patternUsed, conceptName, conceptDescription, marketGap, constraint, noveltyScore, viabilityScore, marketBenefit.
     `;
 
-    const cacheKey = { type: 'apply-pattern', productName: analysis.productName, pattern };
+    const cacheKey = { type: 'apply-pattern', productName: analysis.productName, pattern, selectedComponents, selectedResources };
 
     const result = await callGeminiWithRetry(async (ai) => {
       const schema = {

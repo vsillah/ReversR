@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
@@ -85,12 +86,44 @@ export default function PhaseTwo({
 }: Props) {
   const [selectedPattern, setSelectedPattern] = useState<SITPattern>('subtraction');
   const [error, setError] = useState<string | null>(null);
+  const [manualSelection, setManualSelection] = useState(false);
+  const [selectedComponents, setSelectedComponents] = useState<number[]>([]);
+  const [selectedResources, setSelectedResources] = useState<number[]>([]);
+
+  const toggleComponent = (index: number) => {
+    setSelectedComponents(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const toggleResource = (index: number) => {
+    setSelectedResources(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const handleSelectionModeChange = (isManual: boolean) => {
+    setManualSelection(isManual);
+    if (!isManual) {
+      setSelectedComponents([]);
+      setSelectedResources([]);
+    }
+  };
 
   const handleApply = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await applySITPattern(analysis, selectedPattern);
+      const result = await applySITPattern(
+        analysis, 
+        selectedPattern,
+        manualSelection && selectedComponents.length > 0 ? selectedComponents : undefined,
+        manualSelection && selectedResources.length > 0 ? selectedResources : undefined
+      );
       onComplete(result);
     } catch (e) {
       setError("Pattern application failed. Please try again.");
@@ -115,24 +148,66 @@ export default function PhaseTwo({
       </View>
 
       <View style={styles.panel}>
-        <Text style={styles.sectionTitle}>Closed World Components</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Closed World Components</Text>
+          <View style={styles.selectionToggle}>
+            <Text style={[styles.toggleLabel, !manualSelection && styles.toggleLabelActive]}>Auto</Text>
+            <Switch
+              value={manualSelection}
+              onValueChange={handleSelectionModeChange}
+              trackColor={{ false: Colors.gray[700], true: 'rgba(157,0,255,0.4)' }}
+              thumbColor={manualSelection ? Colors.secondary : Colors.gray[400]}
+            />
+            <Text style={[styles.toggleLabel, manualSelection && styles.toggleLabelActive]}>Manual</Text>
+          </View>
+        </View>
+        
+        {manualSelection && (
+          <Text style={styles.selectionHint}>
+            Tap to select components and resources to focus on
+          </Text>
+        )}
+        
         <ScrollView
           style={styles.componentsList}
           showsVerticalScrollIndicator={false}
         >
-          {analysis.components.map((c, i) => (
-            <View key={i} style={styles.componentItem}>
-              <View style={styles.componentInfo}>
-                <Text style={styles.componentName}>{c.name}</Text>
-                <Text style={styles.componentDesc}>{c.description}</Text>
-              </View>
-              {c.isEssential && (
-                <View style={styles.essentialBadge}>
-                  <Text style={styles.essentialText}>Essential</Text>
+          {analysis.components.map((c, i) => {
+            const isSelected = selectedComponents.includes(i);
+            return (
+              <TouchableOpacity
+                key={i}
+                style={[
+                  styles.componentItem,
+                  manualSelection && styles.componentItemSelectable,
+                  manualSelection && isSelected && styles.componentItemSelected,
+                  manualSelection && !isSelected && styles.componentItemDimmed,
+                ]}
+                onPress={() => manualSelection && toggleComponent(i)}
+                disabled={!manualSelection}
+                activeOpacity={manualSelection ? 0.7 : 1}
+              >
+                {manualSelection && (
+                  <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                    {isSelected && <Ionicons name="checkmark" size={14} color={Colors.white} />}
+                  </View>
+                )}
+                <View style={styles.componentInfo}>
+                  <Text style={[styles.componentName, manualSelection && !isSelected && styles.textDimmed]}>
+                    {c.name}
+                  </Text>
+                  <Text style={[styles.componentDesc, manualSelection && !isSelected && styles.textDimmed]}>
+                    {c.description}
+                  </Text>
                 </View>
-              )}
-            </View>
-          ))}
+                {c.isEssential && (
+                  <View style={styles.essentialBadge}>
+                    <Text style={styles.essentialText}>Essential</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
         {analysis.neighborhoodResources && analysis.neighborhoodResources.length > 0 && (
@@ -142,12 +217,43 @@ export default function PhaseTwo({
               <Text style={styles.resourcesTitle}>Neighborhood Resources</Text>
             </View>
             <View style={styles.resourcesTags}>
-              {analysis.neighborhoodResources.map((nr, i) => (
-                <View key={i} style={styles.resourceTag}>
-                  <Text style={styles.resourceTagText}>{nr}</Text>
-                </View>
-              ))}
+              {analysis.neighborhoodResources.map((nr, i) => {
+                const isSelected = selectedResources.includes(i);
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    style={[
+                      styles.resourceTag,
+                      manualSelection && isSelected && styles.resourceTagSelected,
+                      manualSelection && !isSelected && styles.resourceTagDimmed,
+                    ]}
+                    onPress={() => manualSelection && toggleResource(i)}
+                    disabled={!manualSelection}
+                    activeOpacity={manualSelection ? 0.7 : 1}
+                  >
+                    {manualSelection && (
+                      <View style={[styles.checkboxSmall, isSelected && styles.checkboxSelected]}>
+                        {isSelected && <Ionicons name="checkmark" size={10} color={Colors.white} />}
+                      </View>
+                    )}
+                    <Text style={[
+                      styles.resourceTagText,
+                      manualSelection && !isSelected && styles.textDimmed
+                    ]}>
+                      {nr}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
+          </View>
+        )}
+        
+        {manualSelection && (selectedComponents.length > 0 || selectedResources.length > 0) && (
+          <View style={styles.selectionSummary}>
+            <Text style={styles.selectionSummaryText}>
+              Selected: {selectedComponents.length} component{selectedComponents.length !== 1 ? 's' : ''}, {selectedResources.length} resource{selectedResources.length !== 1 ? 's' : ''}
+            </Text>
           </View>
         )}
       </View>
@@ -272,6 +378,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     padding: Spacing.lg,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
   sectionTitle: {
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
@@ -279,6 +391,25 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 2,
     marginBottom: Spacing.md,
+  },
+  selectionToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  toggleLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  toggleLabelActive: {
+    color: Colors.secondary,
+    fontWeight: '600',
+  },
+  selectionHint: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[400],
+    fontStyle: 'italic',
+    marginBottom: Spacing.sm,
   },
   componentsList: {
     flexGrow: 0,
@@ -295,6 +426,41 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray[800],
     marginBottom: Spacing.sm,
   },
+  componentItemSelectable: {
+    borderStyle: 'dashed',
+  },
+  componentItemSelected: {
+    borderColor: Colors.secondary,
+    borderStyle: 'solid',
+    backgroundColor: 'rgba(157,0,255,0.1)',
+  },
+  componentItemDimmed: {
+    opacity: 0.5,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: Colors.gray[600],
+    marginRight: Spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxSmall: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    borderWidth: 2,
+    borderColor: Colors.gray[600],
+    marginRight: Spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: Colors.secondary,
+    borderColor: Colors.secondary,
+  },
   componentInfo: {
     flex: 1,
   },
@@ -309,6 +475,9 @@ const styles = StyleSheet.create({
     color: Colors.gray[500],
     lineHeight: FontSizes.xs * 1.4,
     flexWrap: 'wrap',
+  },
+  textDimmed: {
+    color: Colors.gray[600],
   },
   essentialBadge: {
     backgroundColor: 'rgba(30, 58, 138, 0.3)',
@@ -346,6 +515,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   resourceTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.dark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -353,10 +524,30 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderRadius: 4,
   },
+  resourceTagSelected: {
+    borderColor: Colors.secondary,
+    backgroundColor: 'rgba(157,0,255,0.1)',
+  },
+  resourceTagDimmed: {
+    opacity: 0.5,
+  },
   resourceTagText: {
     fontFamily: 'monospace',
     fontSize: FontSizes.xs,
     color: Colors.gray[400],
+  },
+  selectionSummary: {
+    marginTop: Spacing.md,
+    padding: Spacing.sm,
+    backgroundColor: 'rgba(157,0,255,0.15)',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+  },
+  selectionSummaryText: {
+    fontSize: FontSizes.xs,
+    color: Colors.secondary,
+    textAlign: 'center',
   },
   patternGrid: {
     flexDirection: 'row',

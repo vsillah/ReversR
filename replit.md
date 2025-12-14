@@ -52,6 +52,12 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Detailed 4-step pattern breakdown for each SIT pattern
    - Numbered steps with arrow indicators showing methodology
    - Italic quote block with pattern description
+   - **Manual Component/Resource Selection**: Toggle between Auto and Manual mode
+     - Auto mode: System considers all components and resources (default)
+     - Manual mode: Tap to select specific components and resources to focus on
+     - Selected items are highlighted with purple border, unselected items are dimmed
+     - Selection summary shows count of selected components and resources
+     - API focuses innovation on user-selected items when in manual mode
 
 6. **Enhanced Phase 3 UI**:
    - Streamlined Innovation Summary with SIT Pattern, Key Benefit (green), Constraint (purple)
@@ -126,6 +132,9 @@ The server includes built-in protection against API rate limits:
 ## Technology Stack
 - **Framework**: Expo SDK 54 + React Native
 - **Navigation**: Expo Router
+
+## Recent Changes (December 14, 2025)
+1. Added Manual Component/Resource Selection to Phase 2 (Reverse): Users can toggle between Auto and Manual modes to select specific components and neighborhood resources to focus on during pattern application
 
 ## Recent Changes (December 8, 2025)
 1. Fixed SIT pattern badge not displaying in History screen: Server now normalizes pattern keys before returning; HistoryScreen handles both key and label formats with fallback to innovation.patternUsed

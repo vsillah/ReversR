@@ -189,11 +189,21 @@ export const analyzeProduct = async (input: string, imageBase64?: string): Promi
   });
 };
 
-export const applySITPattern = async (analysis: AnalysisResult, pattern: SITPattern): Promise<InnovationResult> => {
+export const applySITPattern = async (
+  analysis: AnalysisResult, 
+  pattern: SITPattern,
+  selectedComponents?: number[],
+  selectedResources?: number[]
+): Promise<InnovationResult> => {
   return fetchWithRetry(`${API_BASE}/api/gemini/apply-pattern`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ analysis, pattern })
+    body: JSON.stringify({ 
+      analysis, 
+      pattern,
+      selectedComponents,
+      selectedResources
+    })
   });
 };
 
