@@ -52,12 +52,12 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Detailed 4-step pattern breakdown for each SIT pattern
    - Numbered steps with arrow indicators showing methodology
    - Italic quote block with pattern description
-   - **Manual Component/Resource Selection**: Toggle between Auto and Manual mode
-     - Auto mode: System considers all components and resources (default)
-     - Manual mode: Tap to select specific components and resources to focus on
-     - Selected items are highlighted with purple border, unselected items are dimmed
-     - Selection summary shows count of selected components and resources
-     - API focuses innovation on user-selected items when in manual mode
+   - **Component/Resource Selection**: Tap to focus on specific items
+     - All components and resources are tappable with checkboxes
+     - If nothing selected: system considers all items automatically
+     - If items selected: only selected items are sent to AI for focused innovation
+     - Selected items highlighted with purple border, unselected items dimmed
+     - Selection summary shows count when items are selected
 
 6. **Enhanced Phase 3 UI**:
    - Streamlined Innovation Summary with SIT Pattern, Key Benefit (green), Constraint (purple)

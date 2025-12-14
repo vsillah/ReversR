@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
@@ -86,7 +85,6 @@ export default function PhaseTwo({
 }: Props) {
   const [selectedPattern, setSelectedPattern] = useState<SITPattern>('subtraction');
   const [error, setError] = useState<string | null>(null);
-  const [manualSelection, setManualSelection] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<number[]>([]);
   const [selectedResources, setSelectedResources] = useState<number[]>([]);
 
@@ -106,14 +104,6 @@ export default function PhaseTwo({
     );
   };
 
-  const handleSelectionModeChange = (isManual: boolean) => {
-    setManualSelection(isManual);
-    if (!isManual) {
-      setSelectedComponents([]);
-      setSelectedResources([]);
-    }
-  };
-
   const handleApply = async () => {
     setIsLoading(true);
     setError(null);
@@ -121,8 +111,8 @@ export default function PhaseTwo({
       const result = await applySITPattern(
         analysis, 
         selectedPattern,
-        manualSelection && selectedComponents.length > 0 ? selectedComponents : undefined,
-        manualSelection && selectedResources.length > 0 ? selectedResources : undefined
+        selectedComponents.length > 0 ? selectedComponents : undefined,
+        selectedResources.length > 0 ? selectedResources : undefined
       );
       onComplete(result);
     } catch (e) {
@@ -132,6 +122,8 @@ export default function PhaseTwo({
       setIsLoading(false);
     }
   };
+
+  const hasSelections = selectedComponents.length > 0 || selectedResources.length > 0;
 
   return (
     <View style={styles.container}>
@@ -150,23 +142,11 @@ export default function PhaseTwo({
       <View style={styles.panel}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Closed World Components</Text>
-          <View style={styles.selectionToggle}>
-            <Text style={[styles.toggleLabel, !manualSelection && styles.toggleLabelActive]}>Auto</Text>
-            <Switch
-              value={manualSelection}
-              onValueChange={handleSelectionModeChange}
-              trackColor={{ false: Colors.gray[700], true: 'rgba(157,0,255,0.4)' }}
-              thumbColor={manualSelection ? Colors.secondary : Colors.gray[400]}
-            />
-            <Text style={[styles.toggleLabel, manualSelection && styles.toggleLabelActive]}>Manual</Text>
-          </View>
         </View>
         
-        {manualSelection && (
-          <Text style={styles.selectionHint}>
-            Tap to select components and resources to focus on
-          </Text>
-        )}
+        <Text style={styles.selectionHint}>
+          Tap to focus on specific items, or leave unselected to consider all
+        </Text>
         
         <ScrollView
           style={styles.componentsList}
@@ -174,29 +154,26 @@ export default function PhaseTwo({
         >
           {analysis.components.map((c, i) => {
             const isSelected = selectedComponents.includes(i);
+            const isDimmed = hasSelections && !isSelected;
             return (
               <TouchableOpacity
                 key={i}
                 style={[
                   styles.componentItem,
-                  manualSelection && styles.componentItemSelectable,
-                  manualSelection && isSelected && styles.componentItemSelected,
-                  manualSelection && !isSelected && styles.componentItemDimmed,
+                  isSelected && styles.componentItemSelected,
+                  isDimmed && styles.componentItemDimmed,
                 ]}
-                onPress={() => manualSelection && toggleComponent(i)}
-                disabled={!manualSelection}
-                activeOpacity={manualSelection ? 0.7 : 1}
+                onPress={() => toggleComponent(i)}
+                activeOpacity={0.7}
               >
-                {manualSelection && (
-                  <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                    {isSelected && <Ionicons name="checkmark" size={14} color={Colors.white} />}
-                  </View>
-                )}
+                <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                  {isSelected && <Ionicons name="checkmark" size={14} color={Colors.white} />}
+                </View>
                 <View style={styles.componentInfo}>
-                  <Text style={[styles.componentName, manualSelection && !isSelected && styles.textDimmed]}>
+                  <Text style={[styles.componentName, isDimmed && styles.textDimmed]}>
                     {c.name}
                   </Text>
-                  <Text style={[styles.componentDesc, manualSelection && !isSelected && styles.textDimmed]}>
+                  <Text style={[styles.componentDesc, isDimmed && styles.textDimmed]}>
                     {c.description}
                   </Text>
                 </View>
@@ -219,26 +196,24 @@ export default function PhaseTwo({
             <View style={styles.resourcesTags}>
               {analysis.neighborhoodResources.map((nr, i) => {
                 const isSelected = selectedResources.includes(i);
+                const isDimmed = hasSelections && !isSelected;
                 return (
                   <TouchableOpacity
                     key={i}
                     style={[
                       styles.resourceTag,
-                      manualSelection && isSelected && styles.resourceTagSelected,
-                      manualSelection && !isSelected && styles.resourceTagDimmed,
+                      isSelected && styles.resourceTagSelected,
+                      isDimmed && styles.resourceTagDimmed,
                     ]}
-                    onPress={() => manualSelection && toggleResource(i)}
-                    disabled={!manualSelection}
-                    activeOpacity={manualSelection ? 0.7 : 1}
+                    onPress={() => toggleResource(i)}
+                    activeOpacity={0.7}
                   >
-                    {manualSelection && (
-                      <View style={[styles.checkboxSmall, isSelected && styles.checkboxSelected]}>
-                        {isSelected && <Ionicons name="checkmark" size={10} color={Colors.white} />}
-                      </View>
-                    )}
+                    <View style={[styles.checkboxSmall, isSelected && styles.checkboxSelected]}>
+                      {isSelected && <Ionicons name="checkmark" size={10} color={Colors.white} />}
+                    </View>
                     <Text style={[
                       styles.resourceTagText,
-                      manualSelection && !isSelected && styles.textDimmed
+                      isDimmed && styles.textDimmed
                     ]}>
                       {nr}
                     </Text>
@@ -249,10 +224,10 @@ export default function PhaseTwo({
           </View>
         )}
         
-        {manualSelection && (selectedComponents.length > 0 || selectedResources.length > 0) && (
+        {hasSelections && (
           <View style={styles.selectionSummary}>
             <Text style={styles.selectionSummaryText}>
-              Selected: {selectedComponents.length} component{selectedComponents.length !== 1 ? 's' : ''}, {selectedResources.length} resource{selectedResources.length !== 1 ? 's' : ''}
+              Focusing on: {selectedComponents.length} component{selectedComponents.length !== 1 ? 's' : ''}, {selectedResources.length} resource{selectedResources.length !== 1 ? 's' : ''}
             </Text>
           </View>
         )}
@@ -382,7 +357,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   sectionTitle: {
     fontSize: FontSizes.sm,
@@ -392,24 +367,11 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginBottom: Spacing.md,
   },
-  selectionToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  toggleLabel: {
-    fontSize: FontSizes.xs,
-    color: Colors.gray[500],
-  },
-  toggleLabelActive: {
-    color: Colors.secondary,
-    fontWeight: '600',
-  },
   selectionHint: {
     fontSize: FontSizes.xs,
-    color: Colors.gray[400],
+    color: Colors.gray[500],
     fontStyle: 'italic',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   componentsList: {
     flexGrow: 0,
@@ -417,7 +379,6 @@ const styles = StyleSheet.create({
   },
   componentItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
     backgroundColor: 'rgba(0,0,0,0.3)',
     padding: Spacing.md,
@@ -426,12 +387,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray[800],
     marginBottom: Spacing.sm,
   },
-  componentItemSelectable: {
-    borderStyle: 'dashed',
-  },
   componentItemSelected: {
     borderColor: Colors.secondary,
-    borderStyle: 'solid',
     backgroundColor: 'rgba(157,0,255,0.1)',
   },
   componentItemDimmed: {
