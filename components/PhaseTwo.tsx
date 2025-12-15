@@ -174,14 +174,12 @@ export default function PhaseTwo({
         >
           {analysis.components.map((c, i) => {
             const isSelected = selectedComponents.includes(i);
-            const isDimmed = hasSelections && !isSelected;
             return (
               <TouchableOpacity
                 key={i}
                 style={[
                   styles.componentItem,
                   isSelected && styles.componentItemSelected,
-                  isDimmed && styles.componentItemDimmed,
                 ]}
                 onPress={() => toggleComponent(i)}
                 activeOpacity={0.7}
@@ -190,10 +188,10 @@ export default function PhaseTwo({
                   {isSelected && <Ionicons name="checkmark" size={14} color={Colors.white} />}
                 </View>
                 <View style={styles.componentInfo}>
-                  <Text style={[styles.componentName, isDimmed && styles.textDimmed]}>
+                  <Text style={styles.componentName}>
                     {c.name}
                   </Text>
-                  <Text style={[styles.componentDesc, isDimmed && styles.textDimmed]}>
+                  <Text style={styles.componentDesc}>
                     {c.description}
                   </Text>
                 </View>
@@ -216,14 +214,12 @@ export default function PhaseTwo({
             <View style={styles.resourcesTags}>
               {analysis.neighborhoodResources.map((nr, i) => {
                 const isSelected = selectedResources.includes(i);
-                const isDimmed = hasSelections && !isSelected;
                 return (
                   <TouchableOpacity
                     key={i}
                     style={[
                       styles.resourceTag,
                       isSelected && styles.resourceTagSelected,
-                      isDimmed && styles.resourceTagDimmed,
                     ]}
                     onPress={() => toggleResource(i)}
                     activeOpacity={0.7}
@@ -231,10 +227,7 @@ export default function PhaseTwo({
                     <View style={[styles.checkboxSmall, isSelected && styles.checkboxSelected]}>
                       {isSelected && <Ionicons name="checkmark" size={10} color={Colors.white} />}
                     </View>
-                    <Text style={[
-                      styles.resourceTagText,
-                      isDimmed && styles.textDimmed
-                    ]}>
+                    <Text style={styles.resourceTagText}>
                       {nr}
                     </Text>
                   </TouchableOpacity>
@@ -411,15 +404,13 @@ const styles = StyleSheet.create({
     borderColor: Colors.secondary,
     backgroundColor: 'rgba(157,0,255,0.1)',
   },
-  componentItemDimmed: {
-    opacity: 0.5,
-  },
   checkbox: {
     width: 22,
     height: 22,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: Colors.gray[600],
+    borderColor: Colors.gray[400],
+    backgroundColor: 'rgba(255,255,255,0.05)',
     marginRight: Spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -429,7 +420,8 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 3,
     borderWidth: 2,
-    borderColor: Colors.gray[600],
+    borderColor: Colors.gray[400],
+    backgroundColor: 'rgba(255,255,255,0.05)',
     marginRight: Spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
@@ -452,9 +444,6 @@ const styles = StyleSheet.create({
     color: Colors.gray[500],
     lineHeight: FontSizes.xs * 1.4,
     flexWrap: 'wrap',
-  },
-  textDimmed: {
-    color: Colors.gray[600],
   },
   essentialBadge: {
     backgroundColor: 'rgba(30, 58, 138, 0.3)',
@@ -504,9 +493,6 @@ const styles = StyleSheet.create({
   resourceTagSelected: {
     borderColor: Colors.secondary,
     backgroundColor: 'rgba(157,0,255,0.1)',
-  },
-  resourceTagDimmed: {
-    opacity: 0.5,
   },
   resourceTagText: {
     fontFamily: 'monospace',
