@@ -1,0 +1,14 @@
+{
+  "pinecone": {
+    "apiKey": "pcsk_6aRUee_AapDrFkN7nz6Fi56bbXdTZGphub9L9uEV1k8x87VG3M1LMCpqRS9mMqpW4vzMkB",
+    "indexName": "reversr-innovations",
+    "environment": "us-east-1",
+    "dimension": 768,
+    "metric": "cosine"
+  },
+  "integration": {
+    "enabled": true,
+    "autoSave": true,
+    "ragEnabled": true
+  }
+}
