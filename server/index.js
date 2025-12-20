@@ -1,6 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
+const {
+  initializePinecone,
+  storeInnovation,
+  searchSimilarInnovations,
+  getInnovationContext,
+  deleteInnovation,
+  getIndexStats,
+} = require('./pinecone');
 
 const app = express();
 app.use(cors({
@@ -877,12 +885,214 @@ app.post('/api/generate-2d', (req, res) => {
 });
 
 // ============================================
+// PINECONE INTEGRATION ENDPOINTS
+// ============================================
+
+// Store innovation in Pinecone
+app.post('/api/pinecone/store', async (req, res) => {
+  try {
+    const { innovation } = req.body;
+    
+    if (!innovation || !innovation.conceptName) {
+      return res.status(400).json({ error: 'Innovation data required' });
+    }
+
+    const keyInfo = getAvailableKey();
+    const ai = createClient(keyInfo);
+    
+    const success = await storeInnovation(innovation, ai);
+    
+    if (success) {
+      res.json({ success: true, message: 'Innovation stored in Pinecone' });
+    } else {
+      res.status(500).json({ success: false, error: 'Failed to store innovation' });
+    }
+  } catch (error) {
+    console.error('Store innovation error:', error);
+    res.status(500).json({ error: 'Failed to store innovation', details: error.message });
+  }
+});
+
+// Search similar innovations
+app.post('/api/pinecone/search', async (req, res) => {
+  try {
+    const { query, topK = 5 } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query required' });
+    }
+
+    const keyInfo = getAvailableKey();
+    const ai = createClient(keyInfo);
+    
+    const results = await searchSimilarInnovations(query, ai, topK);
+    
+    res.json({ results });
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ error: 'Search failed', details: error.message });
+  }
+});
+
+// Delete innovation from Pinecone
+app.delete('/api/pinecone/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const success = await deleteInnovation(id);
+    
+    if (success) {
+      res.json({ success: true, message: 'Innovation deleted' });
+    } else {
+      res.status(500).json({ success: false, error: 'Failed to delete innovation' });
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ error: 'Delete failed', details: error.message });
+  }
+});
+
+// Get Pinecone index statistics
+app.get('/api/pinecone/stats', async (req, res) => {
+  try {
+    const stats = await getIndexStats();
+    
+    if (stats) {
+      res.json({ stats });
+    } else {
+      res.status(500).json({ error: 'Failed to get stats' });
+    }
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to get stats', details: error.message });
+  }
+});
+
+// Enhanced analyze endpoint with RAG (Retrieval-Augmented Generation)
+app.post('/api/gemini/analyze-with-context', async (req, res) => {
+  try {
+    const { input, image, useContext = true } = req.body;
+    const imageBase64 = image;
+    
+    // Get relevant context from Pinecone
+    let contextString = '';
+    if (useContext) {
+      const keyInfo = getAvailableKey();
+      const ai = createClient(keyInfo);
+      contextString = await getInnovationContext(input, ai, 3);
+    }
+    
+    const textPrompt = `
+      PHASE 1: THE CLOSED WORLD SCAN
+      ${imageBase64 ? "Analyze the product shown in the image and the following description:" : "Analyze the following input:"} 
+      "${input}"
+      ${contextString}
+      
+      1. **Deconstruct** the product into its physical parts.
+      2. **Filter** for Essential Components (parts without which the product loses its primary function).
+      3. **Identify Neighborhood Resources**: List elements immediately available in the product's environment.
+      4. List relevant **Attributes** for the components.
+      5. Define the **Closed World Boundary** strictly.
+      
+      Return the result in valid JSON.
+    `;
+    
+    const cacheKey = { type: 'analyze', input, hasImage: !!imageBase64, useContext };
+    
+    const result = await callGeminiWithRetry(async (ai) => {
+      let contents;
+      if (imageBase64) {
+        const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+        contents = [
+          { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
+          { text: textPrompt }
+        ];
+      } else {
+        contents = textPrompt;
+      }
+
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          productName: { type: Type.STRING },
+          components: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                description: { type: Type.STRING },
+                isEssential: { type: Type.BOOLEAN }
+              },
+              required: ["name", "description", "isEssential"]
+            }
+          },
+          neighborhoodResources: { type: Type.ARRAY, items: { type: Type.STRING } },
+          attributes: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                value: { type: Type.STRING },
+                type: { type: Type.STRING, enum: ["Quantitative", "Qualitative"] }
+              },
+              required: ["name", "value", "type"]
+            }
+          },
+          closedWorldBoundary: { type: Type.STRING },
+          rawAnalysis: { type: Type.STRING }
+        },
+        required: ["productName", "components", "neighborhoodResources", "attributes", "closedWorldBoundary", "rawAnalysis"]
+      };
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents,
+        config: {
+          systemInstruction: SIT_SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: schema
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error("No response from Gemini");
+      return JSON.parse(text);
+    }, imageBase64 ? null : cacheKey);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Analyze with context error:', error);
+    const { statusCode, body } = createErrorResponse(error, 'Failed to analyze product');
+    res.status(statusCode).json(body);
+  }
+});
+
+// ============================================
 // HEALTH & STATUS
 // ============================================
 
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
   const now = Date.now();
   const availableKeys = apiKeyPool.filter(k => k.cooldownUntil <= now).length;
+  
+  let pineconeStatus = 'not_configured';
+  let pineconeStats = null;
+  
+  try {
+    const stats = await getIndexStats();
+    if (stats) {
+      pineconeStatus = 'connected';
+      pineconeStats = {
+        totalVectorCount: stats.totalRecordCount || 0,
+        dimension: stats.dimension || 768,
+      };
+    }
+  } catch (error) {
+    pineconeStatus = 'error';
+  }
+  
   res.json({ 
     status: 'ok',
     apiKeys: {
@@ -892,6 +1102,10 @@ app.get('/health', (req, res) => {
     },
     cache: {
       size: responseCache.cache.size,
+    },
+    pinecone: {
+      status: pineconeStatus,
+      stats: pineconeStats,
     }
   });
 });
@@ -901,7 +1115,10 @@ app.get('/health', (req, res) => {
 // ============================================
 
 const PORT = process.env.API_PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`API server running on port ${PORT}`);
   console.log(`API keys configured: ${apiKeyPool.length}`);
+  
+  // Initialize Pinecone on startup
+  await initializePinecone();
 });
