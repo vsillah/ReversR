@@ -35,38 +35,47 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
 
 ## Key Features
 1. **Four-Phase SIT Workflow**
-   - Phase 1 (Scan): Analyze product via text or camera
+   - Phase 1 (Scan): Analyze product via text, camera, or random selection
    - Phase 2 (Reverse): Apply SIT patterns with Back/Reset navigation
    - Phase 3 (Design): Generate specs and visualizations with tabbed 2D/3D viewer
    - Phase 4 (Build): Bill of Materials generation with export options
 
-2. **Camera Support**: Use device camera to scan physical objects
+2. **Phase 1 Unified Input Selector**:
+   - Segmented control with three input modes: Type, Scan, Lucky
+   - **Type**: Manual text input for product description
+   - **Scan**: Camera prompt card with optional text; tap to open camera
+   - **Lucky**: Random product from preset list with shuffle button
+   - Submit button validates based on active tab's input
+   - Consistent styling matching Phase 2 pattern buttons
 
-3. **5 SIT Patterns**: Subtraction, Task Unification, Multiplication, Division, Attribute Dependency
+3. **Camera Support**: Use device camera to scan physical objects
 
-4. **Innovation History**: Auto-saves progress after each phase, allows resume and review
+4. **5 SIT Patterns**: Subtraction, Task Unification, Multiplication, Division, Attribute Dependency
+
+5. **Innovation History**: Auto-saves progress after each phase, allows resume and review
    - Stored locally on device using AsyncStorage
    - View past innovations from History screen
    - Resume any saved innovation at any phase
 
-5. **Enhanced Phase 2 UI**:
+6. **Enhanced Phase 2 UI**:
    - Detailed 4-step pattern breakdown for each SIT pattern
    - Numbered steps with arrow indicators showing methodology
    - Italic quote block with pattern description
    - **Component/Resource Selection**: Tap to focus on specific items
-     - All components and resources are tappable with checkboxes
+     - All components and resources are tappable with visible checkboxes
      - If nothing selected: system considers all items automatically
      - If items selected: only selected items are sent to AI for focused innovation
-     - Selected items highlighted with purple border, unselected items dimmed
+     - Selected items highlighted with purple border and filled checkbox
+     - All items remain at full opacity (additive selection styling)
      - Selection summary shows count when items are selected
 
-6. **Enhanced Phase 3 UI**:
+7. **Enhanced Phase 3 UI**:
    - Streamlined Innovation Summary with SIT Pattern, Key Benefit (green), Constraint (purple)
    - Tabbed 2D/3D visualization panel with generation timer
    - Collapsible specifications with color-coded sections
    - Continue to Build button to advance to Phase 4
 
-7. **Enhanced Phase 4 UI**:
+8. **Enhanced Phase 4 UI**:
    - Interactive Manufacturing Readiness tracker with percentage badge (Specs, BOM, 2D, 3D)
    - Tap missing artifacts to navigate to Design phase (2D, 3D, Specs) or generate directly (BOM)
    - Visual affordance: dashed borders on incomplete items, action icons indicating navigation or generation
@@ -74,7 +83,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Send to Manufacturer section with links to Xometry, Shapeways, Protolabs, JLCPCB
    - Export options for BOM (CSV) and complete package (JSON)
 
-8. **Interactive Phase Navigation**: 
+9. **Interactive Phase Navigation**: 
    - Tap any completed phase indicator to open action modal
    - Options: Go to that phase, Try Another Pattern, or Reset
    - Save confirmation prompts before destructive navigation (Phase 1/2)
@@ -82,14 +91,14 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
    - Each new path creates a separate innovation in history
    - Phase 1 input (text and captured image) persists when navigating back
 
-9. **Background Image Generation**:
-   - 2D sketches generate lazily in the background after Phase 2 completes
-   - Notification only appears once user reaches Phase 3 (to avoid confusion)
-   - Users can navigate freely while generation continues
-   - Notification auto-dismisses after 5 seconds when complete
-   - Tapping notification navigates directly to Phase 3 to view the sketch
+10. **Background Image Generation**:
+    - 2D sketches generate lazily in the background after Phase 2 completes
+    - Notification only appears once user reaches Phase 3 (to avoid confusion)
+    - Users can navigate freely while generation continues
+    - Notification auto-dismisses after 5 seconds when complete
+    - Tapping notification navigates directly to Phase 3 to view the sketch
 
-10. **Multi-Angle 2D Image Generation (Progressive Loading)**:
+11. **Multi-Angle 2D Image Generation (Progressive Loading)**:
     - Generates 3 views automatically: Front, Side, and Isometric
     - Progressive loading: Each angle generates in parallel with independent API calls
     - Images appear as they complete (~15-20s for first, all 3 within ~45-60s)
@@ -98,7 +107,7 @@ ReversR is a React Native mobile application that uses Google's Gemini AI and Sy
     - "Save All" button to download all angles at once
     - Each angle saved with descriptive filename
 
-11. **Interactive 2D Image Viewer**:
+12. **Interactive 2D Image Viewer**:
     - Fullscreen modal with dark background
     - Pinch-to-zoom and pan controls
     - Angle navigation in fullscreen mode with dot indicators
