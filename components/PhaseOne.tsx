@@ -40,8 +40,12 @@ const PRODUCT_PRESETS = [
   "A consumer drone with propellers, camera, battery, remote controller, and GPS module.",
 ];
 
+type InputMode = 'type' | 'scan' | 'lucky';
+
 export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialInput, initialImage }: Props) {
+  const [inputMode, setInputMode] = useState<InputMode>(initialImage ? 'scan' : 'type');
   const [input, setInput] = useState(initialInput || '');
+  const [luckyProduct, setLuckyProduct] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(initialImage || null);
@@ -63,14 +67,28 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     }
   }, [isLoading]);
 
+  const getActiveInput = () => {
+    if (inputMode === 'lucky') return luckyProduct;
+    if (inputMode === 'scan') return input;
+    return input;
+  };
+
+  const hasValidInput = () => {
+    if (inputMode === 'scan') return !!capturedImage || input.trim().length > 0;
+    if (inputMode === 'lucky') return luckyProduct.trim().length > 0;
+    return input.trim().length > 0;
+  };
+
   const handleAnalyze = async () => {
-    if (!input.trim() && !capturedImage) return;
+    const activeInput = getActiveInput();
+    if (!activeInput.trim() && !capturedImage) return;
     setIsLoading(true);
     setLoadingStep('capture');
     setError(null);
     try {
-      const result = await analyzeProduct(input, capturedImage || undefined);
-      onComplete(input, result, capturedImage);
+      const imageToUse = inputMode === 'scan' ? capturedImage : undefined;
+      const result = await analyzeProduct(activeInput, imageToUse || undefined);
+      onComplete(activeInput, result, imageToUse);
     } catch (e: any) {
       const errorMsg = e?.message || 'Unknown error';
       if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {
@@ -86,10 +104,16 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     }
   };
 
-  const handleLoadPreset = () => {
+  const handleShuffle = () => {
     const randomIndex = Math.floor(Math.random() * PRODUCT_PRESETS.length);
-    setInput(PRODUCT_PRESETS[randomIndex]);
+    setLuckyProduct(PRODUCT_PRESETS[randomIndex]);
   };
+
+  useEffect(() => {
+    if (inputMode === 'lucky' && !luckyProduct) {
+      handleShuffle();
+    }
+  }, [inputMode]);
 
   const openCamera = async () => {
     if (!permission?.granted) {
@@ -165,71 +189,136 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
       </View>
 
       <View style={styles.panel}>
-        <View style={styles.inputHeader}>
-          <Text style={styles.inputLabel}>System Input</Text>
-          <View style={styles.inputActions}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleLoadPreset}
-              disabled={isLoading || !!capturedImage}
-            >
-              <Ionicons name="sparkles" size={14} color={Colors.blue[500]} />
-              <Text style={styles.actionButtonText}>Feel Lucky</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={openCamera}
-              disabled={isLoading || !!capturedImage}
-            >
-              <Ionicons name="camera" size={14} color={Colors.green[500]} />
-              <Text style={[styles.actionButtonText, { color: Colors.green[500] }]}>
-                Scan Object
-              </Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.modeSelector}>
+          <TouchableOpacity
+            style={[styles.modeTab, inputMode === 'type' && styles.modeTabActive]}
+            onPress={() => setInputMode('type')}
+          >
+            <Ionicons 
+              name="create-outline" 
+              size={18} 
+              color={inputMode === 'type' ? Colors.white : Colors.gray[400]} 
+            />
+            <Text style={[styles.modeTabText, inputMode === 'type' && styles.modeTabTextActive]}>
+              Type
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.modeTab, inputMode === 'scan' && styles.modeTabActive]}
+            onPress={() => setInputMode('scan')}
+          >
+            <Ionicons 
+              name="camera-outline" 
+              size={18} 
+              color={inputMode === 'scan' ? Colors.white : Colors.gray[400]} 
+            />
+            <Text style={[styles.modeTabText, inputMode === 'scan' && styles.modeTabTextActive]}>
+              Scan
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.modeTab, inputMode === 'lucky' && styles.modeTabActive]}
+            onPress={() => setInputMode('lucky')}
+          >
+            <Ionicons 
+              name="dice-outline" 
+              size={18} 
+              color={inputMode === 'lucky' ? Colors.white : Colors.gray[400]} 
+            />
+            <Text style={[styles.modeTabText, inputMode === 'lucky' && styles.modeTabTextActive]}>
+              Lucky
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {capturedImage ? (
-          <View style={styles.imagePreview}>
-            <Image source={{ uri: capturedImage }} style={styles.previewImage} />
-            <View style={styles.imageInfo}>
-              <View style={styles.capturedBadge}>
-                <Ionicons name="checkmark-circle" size={14} color={Colors.green[400]} />
-                <Text style={styles.capturedText}>Image Captured</Text>
-              </View>
-              <Text style={styles.imageHint}>
-                The image will be analyzed along with any text you provide.
-              </Text>
+        <View style={styles.contentArea}>
+          {inputMode === 'type' && (
+            <View style={styles.typeContent}>
+              <Text style={styles.contentLabel}>Describe your product</Text>
+              <TextInput
+                style={styles.textInput}
+                value={input}
+                onChangeText={setInput}
+                placeholder="e.g., A standard kitchen blender with motor, blades, pitcher, and control panel..."
+                placeholderTextColor={Colors.gray[600]}
+                multiline
+                numberOfLines={4}
+                editable={!isLoading}
+              />
             </View>
-            <TouchableOpacity
-              style={styles.removeImageButton}
-              onPress={() => setCapturedImage(null)}
-            >
-              <Ionicons name="close" size={18} color={Colors.gray[400]} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TextInput
-            style={styles.textInput}
-            value={input}
-            onChangeText={setInput}
-            placeholder="e.g., A standard kitchen blender..."
-            placeholderTextColor={Colors.gray[600]}
-            multiline
-            numberOfLines={4}
-            editable={!isLoading}
-          />
-        )}
+          )}
+
+          {inputMode === 'scan' && (
+            <View style={styles.scanContent}>
+              {capturedImage ? (
+                <View style={styles.imagePreview}>
+                  <Image source={{ uri: capturedImage }} style={styles.previewImage} />
+                  <View style={styles.imageInfo}>
+                    <View style={styles.capturedBadge}>
+                      <Ionicons name="checkmark-circle" size={14} color={Colors.green[400]} />
+                      <Text style={styles.capturedText}>Image Captured</Text>
+                    </View>
+                    <Text style={styles.imageHint}>
+                      Add optional text below to guide the analysis.
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => setCapturedImage(null)}
+                  >
+                    <Ionicons name="close" size={18} color={Colors.gray[400]} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.cameraPrompt} onPress={openCamera}>
+                  <View style={styles.cameraIconCircle}>
+                    <Ionicons name="camera" size={32} color={Colors.green[400]} />
+                  </View>
+                  <Text style={styles.cameraPromptTitle}>Tap to Open Camera</Text>
+                  <Text style={styles.cameraPromptHint}>
+                    Point at any physical object to scan
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <TextInput
+                style={[styles.textInput, styles.scanTextInput]}
+                value={input}
+                onChangeText={setInput}
+                placeholder="Optional: Add details about the object..."
+                placeholderTextColor={Colors.gray[600]}
+                multiline
+                numberOfLines={2}
+                editable={!isLoading}
+              />
+            </View>
+          )}
+
+          {inputMode === 'lucky' && (
+            <View style={styles.luckyContent}>
+              <View style={styles.luckyHeader}>
+                <Text style={styles.contentLabel}>Random Product</Text>
+                <TouchableOpacity style={styles.shuffleButton} onPress={handleShuffle}>
+                  <Ionicons name="shuffle" size={16} color={Colors.secondary} />
+                  <Text style={styles.shuffleText}>Shuffle</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.luckyCard}>
+                <Ionicons name="dice" size={24} color={Colors.secondary} style={styles.luckyIcon} />
+                <Text style={styles.luckyProductText}>{luckyProduct}</Text>
+              </View>
+            </View>
+          )}
+        </View>
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (!input.trim() && !capturedImage) && styles.submitButtonDisabled,
+            !hasValidInput() && styles.submitButtonDisabled,
           ]}
           onPress={handleAnalyze}
-          disabled={isLoading || (!input.trim() && !capturedImage)}
+          disabled={isLoading || !hasValidInput()}
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -292,29 +381,120 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     padding: Spacing.lg,
   },
-  inputHeader: {
+  modeSelector: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
-  inputLabel: {
+  modeTab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 8,
+  },
+  modeTabActive: {
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    borderColor: Colors.blue[500],
+  },
+  modeTabText: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
+    fontWeight: '500',
+  },
+  modeTabTextActive: {
+    color: Colors.white,
+  },
+  contentArea: {
+    minHeight: 180,
+  },
+  contentLabel: {
     fontSize: FontSizes.sm,
     fontWeight: '500',
     color: Colors.gray[400],
+    marginBottom: Spacing.sm,
   },
-  inputActions: {
-    flexDirection: 'row',
+  typeContent: {},
+  scanContent: {
     gap: Spacing.md,
   },
-  actionButton: {
+  luckyContent: {},
+  luckyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  shuffleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
   },
-  actionButtonText: {
+  shuffleText: {
     fontSize: FontSizes.xs,
-    color: Colors.blue[500],
+    color: Colors.secondary,
+    fontWeight: '500',
+  },
+  luckyCard: {
+    backgroundColor: 'rgba(157,0,255,0.1)',
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    borderRadius: 8,
+    padding: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+  },
+  luckyIcon: {
+    marginTop: 2,
+  },
+  luckyProductText: {
+    flex: 1,
+    fontSize: FontSizes.md,
+    color: Colors.white,
+    lineHeight: FontSizes.md * 1.5,
+  },
+  cameraPrompt: {
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: Colors.green[600],
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  cameraIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  cameraPromptTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: '600',
+    color: Colors.green[400],
+  },
+  cameraPromptHint: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[500],
+  },
+  scanTextInput: {
+    minHeight: 60,
   },
   textInput: {
     backgroundColor: 'rgba(0,0,0,0.5)',
