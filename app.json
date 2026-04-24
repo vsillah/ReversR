@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "ReversR",
+    "slug": "reversr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a0a"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a0a"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.vsillah.reversr",
+      "versionCode": 15
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow ReversR to access your camera to scan products."
+        }
+      ],
+      "expo-router"
+    ],
+    "scheme": "reversr",
+    "extra": {
+      "eas": {
+        "projectId": "9e2de870-06ee-4cb4-ad47-60efbb533baa"
+      }
+    }
+  }
+}

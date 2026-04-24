@@ -1,0 +1,7 @@
+{
+  "name": "ReversR",
+  "description": "An AI-powered Product Innovation Engine using Systematic Inventive Thinking (SIT) to generate viable, novel product concepts.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

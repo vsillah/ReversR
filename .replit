@@ -1,0 +1,97 @@
+entrypoint = "README.md"
+modules = ["nodejs-22"]
+
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 3000
+externalPort = 3001
+
+[[ports]]
+localPort = 3001
+externalPort = 3002
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 8082
+externalPort = 8081
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Dev Server"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "EXPO_PACKAGER_PROXY_URL=https://$REPLIT_DEV_DOMAIN REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN npx expo start"
+
+[[workflows.workflow]]
+name = "EAS Init"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx eas init"
+
+[[workflows.workflow]]
+name = "EAS Update"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx eas update --auto"
+
+[[workflows.workflow]]
+name = "EAS Publish Preview iOS"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx eas build --platform ios --profile preview"
+
+[[workflows.workflow]]
+name = "EAS Publish Preview Android"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx eas build --platform android --profile preview"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run web-preview"
+waitForPort = 5000
+
+[agent]
+expertMode = true
+integrations = ["javascript_gemini_ai_integrations:1.0.0"]
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "server/index.js"]

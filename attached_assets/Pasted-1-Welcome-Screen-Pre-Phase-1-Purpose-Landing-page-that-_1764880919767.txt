@@ -1,0 +1,189 @@
+1. Welcome Screen (Pre-Phase 1)
+Purpose: Landing page that introduces the app before starting a session
+
+Structure:
+
+┌─────────────────────────────────────┐
+│         [ReversR Logo]              │  ← Logo with glow effect
+│          REVERSR                    │  ← Title (white + green 'R')
+│   "Systematic Inventive Thinking"   │  ← Subtitle (gray)
+│                                     │
+│   [Description paragraph]           │
+│                                     │
+│  ┌─────┐ ┌──────┐ ┌──────────┐     │
+│  │SCAN │ │MUTATE│ │ARCHITECT │     │  ← Phase cards (stack vertically on mobile)
+│  └─────┘ └──────┘ └──────────┘     │
+│                                     │
+│    [ Initialize System  → ]         │  ← Outline button (green border)
+└─────────────────────────────────────┘
+
+Mobile Adaptation:
+
+Stack phase cards vertically
+Button triggers onStart() → sets started: true
+Logo glow effect optional on mobile
+2. Global Navigation (Back + Reset)
+Purpose: Allow users to navigate between phases
+
+Location: Top-right of each phase screen (Phases 2, 3, 4)
+
+Structure:
+
+┌──────────────────────────────────────────┐
+│ Phase Title                [← Back] [↻ Reset] │
+│ Subtitle                                       │
+└──────────────────────────────────────────┘
+
+Callbacks:
+
+// Back: Go to previous phase
+onBack = () => setPhase(Math.max(1, currentPhase - 1))
+// Reset: Clear all state, return to Phase 1
+onReset = () => {
+  clearAllState()
+  setPhase(1)
+}
+// Try Another Pattern: Keep analysis, return to Phase 2
+onTryAnotherPattern = () => {
+  clearInnovation()
+  setPhase(2)
+}
+
+Mobile Adaptation:
+
+Small text buttons with icons (ArrowLeft, RefreshCw)
+Consider bottom navigation bar or header placement
+3. Phase 3: Streamlined Innovation Summary
+Purpose: Display innovation results in a clean, scannable format
+
+Structure:
+
+┌─────────────────────────────────────────────────┐
+│ [Concept Name]                                  │
+├───────────────────────┬─────────────────────────┤
+│ 💡 SIT Pattern        │ ⚡ Key Benefit           │
+│ Applied               │                         │
+│ ─────────────────     │ Green text showing      │
+│ [Pattern Name]        │ the market benefit      │
+│ [Pattern description] ├─────────────────────────┤
+│                       │ 🟣 Innovation           │
+│ How It Was Applied:   │ Constraint              │
+│ [conceptDescription]  │ Purple text showing     │
+│                       │ the constraint used     │
+└───────────────────────┴─────────────────────────┘
+
+Data Fields:
+
+innovation.patternUsed       // "Subtraction", "Task Unification", etc.
+innovation.conceptName       // The innovation name
+innovation.conceptDescription // How the pattern was applied
+innovation.marketBenefit     // Key benefit (green)
+innovation.constraint        // Innovation constraint (purple)
+
+Mobile Adaptation:
+
+Stack the two columns vertically on narrow screens
+Use colored backgrounds: green tint for benefit, purple tint for constraint
+4. Embedded "Generate Sketch" Button
+Purpose: Let users generate a 2D concept sketch directly in the viewer area
+
+Location: Inside the 2D/3D viewer panel when no image exists yet
+
+Structure:
+
+┌─────────────────────────────────────────┐
+│  [2D Sketch] [3D Wireframe]  ← Tabs     │
+├─────────────────────────────────────────┤
+│                                         │
+│         [Image Icon]                    │
+│  "Generate a high-speed 2D concept"     │
+│                                         │
+│      [ Generate Sketch ]  ← CTA button  │
+│                                         │
+└─────────────────────────────────────────┘
+
+Button Action:
+
+handleGenerate2D = async () => {
+  const result = await fetch('/api/gemini/generate-2d', {
+    method: 'POST',
+    body: JSON.stringify({ innovation })
+  })
+  const { imageData } = await result.json()
+  setImageUrl(`data:image/png;base64,${imageData}`)
+}
+
+Mobile Adaptation:
+
+Full-width button with accent color (green)
+Show loading spinner with elapsed time during generation (30-90 seconds)
+Include "Skip" option to continue without visual
+5. Collapsible Specifications
+Purpose: Hide detailed specs by default, reveal on demand
+
+Structure:
+
+┌─────────────────────────────────────────┐
+│ 🔴🟡🟢  specifications.json   [Show Details ▸] │  ← Collapsed (default)
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ 🔴🟡🟢  specifications.json   [Hide Details ▾] │  ← Expanded
+├─────────────────────────────────────────┤
+│ PROMPT LOGIC                            │
+│ [blue background - spec.promptLogic]    │
+│                                         │
+│ COMPONENT STRUCTURE                     │
+│ [purple background - spec.componentStructure] │
+│                                         │
+│ IMPLEMENTATION NOTES                    │
+│ [orange background - spec.implementationNotes] │
+└─────────────────────────────────────────┘
+
+State:
+
+const [specsExpanded, setSpecsExpanded] = useState(false)
+
+Mobile Adaptation:
+
+Use React Native's Pressable with Animated or accordion library
+Chevron icon rotates on expand
+Consider using a bottom sheet for the expanded content
+6. Phase 4 as Separate High-Level Step
+Purpose: Build/manufacturing phase is now its own distinct step (not part of Phase 3)
+
+Step Indicator:
+
+  ①────②────③────④
+ SCAN  MUTATE  ARCHITECT  BUILD
+                          ↑ Phase 4 is now visible
+
+Transition: "Continue to Build" button in Phase 3 advances to Phase 4
+
+Phase 4 Content:
+
+Bill of Materials (BOM) generation
+Manufacturing readiness checklist
+Export options (ZIP, context.md, specs.json)
+Manufacturer links (Xometry, Shapeways, etc.)
+Navigation in Phase 4:
+
+props = {
+  onBack,           // Return to Phase 3
+  onReset,          // Start completely over
+  onTryAnotherPattern  // Keep analysis, try different pattern
+}
+
+Mobile Adaptation:
+
+The step indicator should show all 4 steps horizontally
+Progress bar fills as user advances
+Phase 4 focuses on exports/sharing (may simplify BOM display for mobile)
+Summary: Mobile Adaptation Priorities
+Feature	Priority	Notes
+Welcome Screen	High	First impression, brand identity
+Back/Reset Nav	High	Essential for navigation
+Streamlined Phase 3	High	Core UX improvement
+Collapsible Specs	Medium	Reduces visual clutter
+Embedded Sketch Button	Medium	Cleaner than separate panel
+Phase 4 Separation	Medium	Logical workflow improvement
+Need me to clarify any of these or provide more detail on a specific component?
