@@ -25,6 +25,8 @@ npx expo-doctor
 
 `native:preflight:local` allows placeholder URLs, missing EAS CLI, and missing EAS project linkage so the local repo can still be checked before account-level setup is complete.
 
+On success, `native:preflight:local` writes `docs/native-release-config-evidence.json`. This is local config proof for app identity, camera permissions, EAS profile shape, submit profile shape, CLI availability, and remaining external gates. It is not a substitute for EAS project linkage, hosted URLs, or preview-build QA.
+
 Run the local web happy-path smoke before screenshot capture or preview binaries:
 
 ```bash

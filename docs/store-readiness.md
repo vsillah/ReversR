@@ -45,6 +45,7 @@ The app now has:
 - API runtime config health reporting for CORS mode, body limit, admin route state, registry-write state, and private-network connector state
 - Machine inventory source validation before hosting: `npm run inventory:source:validate`
 - Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
+- Native release config evidence: `docs/native-release-config-evidence.json`
 - EAS submit configuration notes for Google Play Internal Testing and TestFlight upload
 - Native QA evidence template and `npm run native:qa:preflight` gate for Android/iOS preview-build testing, including five required native screenshots per platform
 - Server-side credential references for authenticated inventory connectors
@@ -117,7 +118,7 @@ Open gates:
 - Web happy-path QA: `npm run web:flow-smoke` verifies the local scan, demo inventory, machine match, BOM, quote packet, and vendor draft path against a running web preview, then records `docs/web-flow-smoke-evidence.json`; native device QA is still required before store submission.
 - Privacy policy, terms, and support: web routes, static export, local policy evidence, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
-- EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
+- EAS linkage: local native release config evidence exists, but `eas init` still needs to create the clone project ID before strict native release preflight can pass.
 - EAS submit profile: Android is configured for Google Play Internal Testing, but iOS still needs the App Store Connect `ascAppId` after the app record exists.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
@@ -141,7 +142,7 @@ Open gates:
 10. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
 11. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then copy the packet into App Store Connect and Play Console drafts.
 12. Copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, then run `npm run store:console:preflight`.
-13. Link the clone with `eas init`, then run `npm run native:preflight`.
+13. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
 14. Run EAS preview builds.
 15. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
 16. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.

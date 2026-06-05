@@ -344,6 +344,7 @@ const requiredArtifacts = [
   'docs/policy-hosting-smoke-evidence.json',
   'docs/release-action-plan.md',
   'docs/native-release-runbook.md',
+  'docs/native-release-config-evidence.json',
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/README.md',
   'docs/store-screenshots/native/README.md',
@@ -443,6 +444,34 @@ addGate(
 );
 
 const easProjectId = appConfig.extra?.eas?.projectId;
+const nativeReleaseConfigEvidence = readOptionalJson('docs/native-release-config-evidence.json');
+const nativeReleaseConfigOk = (
+  nativeReleaseConfigEvidence?.status === 'pass' &&
+  nativeReleaseConfigEvidence?.appIdentity?.name === appConfig.name &&
+  nativeReleaseConfigEvidence?.appIdentity?.iosBundleId === appConfig.ios?.bundleIdentifier &&
+  nativeReleaseConfigEvidence?.appIdentity?.androidPackage === appConfig.android?.package &&
+  nativeReleaseConfigEvidence?.permissions?.androidPermissions?.length === 1 &&
+  nativeReleaseConfigEvidence?.permissions?.androidPermissions?.includes('android.permission.CAMERA') &&
+  nativeReleaseConfigEvidence?.permissions?.cameraPluginConfigured === true &&
+  nativeReleaseConfigEvidence?.eas?.buildProfiles?.preview?.distribution === 'internal' &&
+  nativeReleaseConfigEvidence?.eas?.buildProfiles?.preview?.androidBuildType === 'apk' &&
+  nativeReleaseConfigEvidence?.eas?.buildProfiles?.production?.androidBuildType === 'app-bundle' &&
+  nativeReleaseConfigEvidence?.eas?.buildProfiles?.production?.autoIncrement === true &&
+  nativeReleaseConfigEvidence?.eas?.submitProfile?.androidTrack === 'internal' &&
+  nativeReleaseConfigEvidence?.externalGatesStillRequired?.easProjectLinkage === true &&
+  nativeReleaseConfigEvidence?.externalGatesStillRequired?.iosAscAppId === true
+);
+addGate(
+  'native',
+  'native-release-config-evidence',
+  'Native release config evidence is recorded before EAS account setup',
+  nativeReleaseConfigOk ? 'pass' : 'pending',
+  nativeReleaseConfigOk
+    ? `docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at ${nativeReleaseConfigEvidence.generatedAt}.`
+    : 'docs/native-release-config-evidence.json is missing or incomplete.',
+  nativeReleaseConfigOk ? '' : 'Run npm run native:preflight:local before EAS project linkage.'
+);
+
 addGate(
   'native',
   'eas-project-linkage',

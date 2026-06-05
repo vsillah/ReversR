@@ -78,6 +78,7 @@ const actionPlan = {
     phase: 'EAS project setup',
     action: 'Log in to EAS and link the clone identity to its own EAS project.',
     steps: [
+      'Run npm run native:preflight:local and confirm docs/native-release-config-evidence.json is updated.',
       'Run npx eas-cli@20.0.0 login.',
       'Run npx eas-cli@20.0.0 whoami --non-interactive to confirm the account.',
       'Run npx eas-cli@20.0.0 init for ReversR Rebuild.',
@@ -85,6 +86,7 @@ const actionPlan = {
       'Run npm run native:preflight:local, then strict npm run native:preflight after hosted URLs are configured.',
     ],
     evidence: [
+      'docs/native-release-config-evidence.json records native identity, camera permissions, EAS profile shape, submit profile shape, CLI availability, and remaining external gates.',
       'EAS whoami returns the intended account.',
       'app.json has the clone projectId.',
       'Native preflight no longer reports missing EAS project linkage.',

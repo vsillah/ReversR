@@ -63,13 +63,19 @@ npm run connector:smoke
 4. Link EAS for the clone identity.
 
 ```bash
+npm run native:preflight:local
+```
+
+Then authenticate and link the clone project:
+
+```bash
 npx eas-cli@20.0.0 login
 npx eas-cli@20.0.0 whoami --non-interactive
 npx eas-cli@20.0.0 init
 npm run native:preflight:local
 ```
 
-Confirm `app.json` contains `expo.extra.eas.projectId` for the clone. Do not reuse the original ReversR project ID if this app is shipping as a separate product.
+Confirm `docs/native-release-config-evidence.json` is updated before account setup, then confirm `app.json` contains `expo.extra.eas.projectId` for the clone after `eas init`. Do not reuse the original ReversR project ID if this app is shipping as a separate product.
 
 5. Create store records.
    - App Store Connect: create `com.vsillah.reversrrebuild`, SKU `reversr-rebuild-001`.

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { spawnSync } = require('child_process');
 
 const args = new Set(process.argv.slice(2));
@@ -6,6 +7,7 @@ const allowPlaceholder = args.has('--allow-placeholder');
 const allowMissingCli = args.has('--allow-missing-cli');
 const allowUnlinkedEas = args.has('--allow-unlinked-eas');
 const allowNotLoggedIn = args.has('--allow-not-logged-in');
+const evidenceFile = process.env.NATIVE_RELEASE_CONFIG_EVIDENCE_FILE || 'docs/native-release-config-evidence.json';
 
 const failures = [];
 const warnings = [];
@@ -15,9 +17,17 @@ const warn = (message) => warnings.push(message);
 const exists = (path) => fs.existsSync(path);
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
 const outputText = (result) => `${result.stdout || ''}${result.stderr || ''}`.trim();
+const writeEvidence = (evidence) => {
+  const target = path.resolve(evidenceFile);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, `${JSON.stringify(evidence, null, 2)}\n`);
+  return target;
+};
 
 const appConfig = readJson('app.json').expo;
 const easConfig = readJson('eas.json');
+let detectedEasCli = null;
+let detectedWhoami = null;
 
 const isPlaceholderUrl = (value) => (
   !value ||
@@ -140,10 +150,18 @@ if (!easCli) {
   );
 } else {
   const output = outputText(easCli.version);
+  detectedEasCli = {
+    label: easCli.label,
+    version: output,
+  };
   if (output) console.log(`EAS CLI (${easCli.label}): ${output}`);
   else warn('EAS CLI returned an empty version string.');
 
   const whoami = spawnSync(easCli.command, [...easCli.baseArgs, 'whoami', '--non-interactive'], { encoding: 'utf8' });
+  detectedWhoami = {
+    status: whoami.status,
+    output: outputText(whoami),
+  };
   requireOrWarn(
     whoami.status === 0,
     `EAS CLI is not logged in for non-interactive release work through ${easCli.label}: ${outputText(whoami)}`,
@@ -162,4 +180,76 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
+const evidencePath = writeEvidence({
+  schemaVersion: 1,
+  status: 'pass',
+  generatedAt: new Date().toISOString(),
+  mode: {
+    allowPlaceholder,
+    allowMissingCli,
+    allowUnlinkedEas,
+    allowNotLoggedIn,
+  },
+  warnings,
+  appIdentity: {
+    name: appConfig.name,
+    slug: appConfig.slug,
+    version: appConfig.version,
+    iosBundleId: appConfig.ios?.bundleIdentifier,
+    iosBuildNumber: appConfig.ios?.buildNumber,
+    androidPackage: appConfig.android?.package,
+    androidVersionCode: appConfig.android?.versionCode,
+    easProjectLinked: Boolean(appConfig.extra?.eas?.projectId),
+  },
+  permissions: {
+    androidPermissions: appConfig.android?.permissions || [],
+    androidBlockedPermissions: appConfig.android?.blockedPermissions || [],
+    iosCameraUsageDescription: appConfig.ios?.infoPlist?.NSCameraUsageDescription || '',
+    cameraPluginConfigured: Boolean(appConfig.plugins?.some(plugin => Array.isArray(plugin) && plugin[0] === 'expo-camera')),
+  },
+  eas: {
+    cli: detectedEasCli,
+    whoami: detectedWhoami,
+    buildProfiles: {
+      development: {
+        environment: profiles.development?.environment,
+        distribution: profiles.development?.distribution,
+        developmentClient: profiles.development?.developmentClient,
+      },
+      preview: {
+        environment: profiles.preview?.environment,
+        distribution: profiles.preview?.distribution,
+        androidBuildType: profiles.preview?.android?.buildType,
+      },
+      production: {
+        environment: profiles.production?.environment,
+        androidBuildType: profiles.production?.android?.buildType,
+        autoIncrement: profiles.production?.autoIncrement,
+      },
+    },
+    submitProfile: {
+      androidTrack: productionSubmit.android?.track || '',
+      iosAscAppIdConfigured: Boolean(productionSubmit.ios?.ascAppId),
+    },
+  },
+  urls: {
+    apiBaseUrl,
+    privacyPolicyUrl: process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL || appConfig.extra?.privacyPolicyUrl,
+    termsUrl: process.env.EXPO_PUBLIC_TERMS_URL || appConfig.extra?.termsUrl,
+    supportUrl: process.env.EXPO_PUBLIC_SUPPORT_URL || appConfig.extra?.supportUrl,
+  },
+  externalGatesStillRequired: {
+    easProjectLinkage: !appConfig.extra?.eas?.projectId,
+    easLogin: detectedWhoami?.status !== 0,
+    hostedApiUrl: isPlaceholderUrl(apiBaseUrl) || !isHttpsUrl(apiBaseUrl),
+    hostedPolicyUrls: [
+      process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL || appConfig.extra?.privacyPolicyUrl,
+      process.env.EXPO_PUBLIC_TERMS_URL || appConfig.extra?.termsUrl,
+      process.env.EXPO_PUBLIC_SUPPORT_URL || appConfig.extra?.supportUrl,
+    ].some(value => isPlaceholderUrl(value) || !isHttpsUrl(value)),
+    iosAscAppId: !productionSubmit.ios?.ascAppId,
+  },
+});
+
 console.log('Native release preflight passed.');
+console.log(`Evidence: ${evidencePath}`);
