@@ -23,6 +23,16 @@ npm run release:status
 
 `release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `release:evidence` packages the local proof files and pending external gates into `docs/release-evidence-bundle.json`.
 
+After the PR preview deploys, record deployed-preview evidence:
+
+```bash
+PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke
+npm run release:evidence
+npm run release:status
+```
+
+This proves the PR preview renders the app and `/privacy`, `/terms`, and `/support`. It does not replace the production hosted API, hosted policy URLs, native QA, or store-console gates.
+
 ## Current Critical Path
 
 1. Deploy the API behind HTTPS.
@@ -143,5 +153,6 @@ Use Google Play Internal Testing and Apple TestFlight before production submissi
 - The real inventory source must pass `inventory:source:validate` before it is used in hosted connector smoke.
 - Raw connector secrets must stay server-side. Mobile evidence should show only `credentialRef`.
 - Web smoke evidence is useful, but it is not a substitute for native Android/iOS QA.
+- Preview host smoke evidence is useful, but it is not a substitute for production hosted URLs.
 - Final store screenshots must come from native preview builds, not the web preview.
 - Manufacturer quote packets and vendor request drafts remain human-reviewed handoff artifacts. The app should not auto-submit vendor requests, purchase parts, or place fabrication orders.

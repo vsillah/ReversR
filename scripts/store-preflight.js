@@ -226,6 +226,7 @@ const requiredDocs = [
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
   'scripts/policy-hosting-preflight.js',
+  'scripts/preview-host-smoke.js',
   'scripts/store-submission-preflight.js',
   'scripts/generate-store-console-copy.js',
   'scripts/store-console-preflight.js',

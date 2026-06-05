@@ -73,6 +73,7 @@ const localProofGateIds = [
   'store-console-copy-packet',
 ];
 const externalGateIds = [
+  'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
@@ -99,6 +100,7 @@ const pendingExternalGates = externalGateIds
 const evidenceFiles = {
   apiDeploymentSmoke: readOptionalJson('docs/api-deployment-smoke-evidence.json'),
   policyHostingSmoke: readOptionalJson('docs/policy-hosting-smoke-evidence.json'),
+  previewHostSmoke: readOptionalJson('docs/preview-host-smoke-evidence.json'),
   storeSubmissionSmoke: readOptionalJson('docs/store-submission-smoke-evidence.json'),
   screenshotPlanning: readOptionalJson('docs/store-screenshots/planning-evidence.json'),
   webFlowSmoke: readOptionalJson('docs/web-flow-smoke-evidence.json'),
@@ -169,6 +171,7 @@ const bundle = {
     releaseNextActions: 'npm run release:next-actions',
     releaseLocalCi: 'npm run release:local-ci',
     storeConsoleCopy: 'npm run store:console:copy',
+    previewHostSmoke: 'PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke',
     storePreflightLocal: 'npm run store:preflight:local',
     storeConsolePreflightLocal: 'npm run store:console:preflight:local',
     nativePreflightLocal: 'npm run native:preflight:local',

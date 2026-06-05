@@ -13,6 +13,7 @@
     "web-preview": "npx cross-env API_PORT=3001 concurrently \"node server/index.js\" \"npx expo start --web --port 5001\"",
     "web:export": "expo export --platform web --output-dir dist",
     "web:flow-smoke": "node scripts/web-flow-smoke.js",
+    "preview:smoke": "node scripts/preview-host-smoke.js",
     "policy:preflight": "node scripts/policy-hosting-preflight.js",
     "policy:preflight:local": "node scripts/policy-hosting-preflight.js --allow-placeholder",
     "store:assets:generate": "node scripts/generate-store-assets.js",

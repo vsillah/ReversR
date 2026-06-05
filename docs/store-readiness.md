@@ -43,6 +43,7 @@ The app now has:
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
 - Web-preview store screenshot capture script: `npm run screenshots:store`
 - Web-preview happy-path smoke script and evidence file: `npm run web:flow-smoke` writes `docs/web-flow-smoke-evidence.json`
+- Vercel preview host smoke script and evidence file: `PREVIEW_SMOKE_URL=<preview-url> npm run preview:smoke` writes `docs/preview-host-smoke-evidence.json`
 - Web routes for `/privacy`, `/terms`, and `/support`
 - Static web export and policy hosting preflight for the store privacy, terms, and support URLs
 - Policy/support static export evidence: `docs/policy-hosting-smoke-evidence.json`
@@ -125,7 +126,7 @@ Open gates:
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Protected connector QA: `npm run inventory:source:validate` validates the machine export shape before hosting, `npm run inventory:preflight` validates the local credentialRef path, and `npm run connector:smoke` now defines the hosted real-inventory gate. The hosted smoke still needs a deployed API and authorized production inventory source.
 - Web happy-path QA: `npm run web:flow-smoke` verifies the local scan, demo inventory, machine match, BOM, quote packet, and vendor draft path against a running web preview, then records `docs/web-flow-smoke-evidence.json`; native device QA is still required before store submission.
-- Privacy policy, terms, and support: web routes, static export, local policy evidence, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
+- Privacy policy, terms, and support: web routes, static export, local policy evidence, deployed PR preview smoke evidence, and hosting preflight exist, but the routes must still be deployed to production hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: local native release config evidence exists, but `eas init` still needs to create the clone project ID before strict native release preflight can pass.
 - EAS submit profile: Android is configured for Google Play Internal Testing, but iOS still needs the App Store Connect `ascAppId` after the app record exists.
@@ -148,17 +149,18 @@ Open gates:
 6. Run `npm run inventory:preflight` to confirm the protected connector, match, and BOM path locally.
 7. Run `npm run store:assets:preflight` to verify the Google Play feature graphic before console setup.
 8. Start `npm run web-preview`, then run `WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke` to prove the web happy path and write `docs/web-flow-smoke-evidence.json` before screenshot or native preview work.
-9. Fill a production API env from `docs/production-api-env.example`, run `npm run api:env:preflight`, run `npm run api:deployment-smoke`, deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
-10. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
-11. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
-12. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
-13. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy` and copy `docs/store-console-copy.md` into App Store Connect and Play Console drafts.
-14. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
-15. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
-16. Run EAS preview builds.
-17. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
-18. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
-19. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
-20. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
-21. Submit to TestFlight and Google Play Internal Testing.
-22. Resolve review feedback, then submit production releases.
+9. After the PR preview deploys, run `PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke` to prove the deployed preview app and policy/support routes render before production hosting work.
+10. Fill a production API env from `docs/production-api-env.example`, run `npm run api:env:preflight`, run `npm run api:deployment-smoke`, deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
+11. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
+12. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
+13. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
+14. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy` and copy `docs/store-console-copy.md` into App Store Connect and Play Console drafts.
+15. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
+16. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
+17. Run EAS preview builds.
+18. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
+19. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
+20. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
+21. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+22. Submit to TestFlight and Google Play Internal Testing.
+23. Resolve review feedback, then submit production releases.

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "status": "pending",
+  "generatedAt": "2026-06-05T06:03:48.421Z",
+  "previewUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app",
+  "routeCount": 4,
+  "routes": [
+    {
+      "id": "app-root",
+      "path": "/",
+      "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/",
+      "finalUrl": "https://vercel.com/login",
+      "status": "fail",
+      "httpStatus": 401,
+      "expectedTextFound": {
+        "Machine Reconstruction Engine": false,
+        "New Reconstruction": false,
+        "Start with a scan or description": false
+      },
+      "checkedAt": "2026-06-05T06:03:39.524Z",
+      "error": ""
+    },
+    {
+      "id": "privacy",
+      "path": "/privacy",
+      "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/privacy",
+      "finalUrl": "https://vercel.com/login",
+      "status": "fail",
+      "httpStatus": 401,
+      "expectedTextFound": {
+        "Privacy Policy": true,
+        "Camera access is used only to capture machine images": false,
+        "Manufacturer quote packets and email drafts require explicit user action": false
+      },
+      "checkedAt": "2026-06-05T06:03:41.946Z",
+      "error": ""
+    },
+    {
+      "id": "terms",
+      "path": "/terms",
+      "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/terms",
+      "finalUrl": "https://vercel.com/login",
+      "status": "fail",
+      "httpStatus": 401,
+      "expectedTextFound": {
+        "Terms of Service": false,
+        "No Automatic Vendor Submission": false,
+        "it does not automatically submit orders": false
+      },
+      "checkedAt": "2026-06-05T06:03:44.091Z",
+      "error": ""
+    },
+    {
+      "id": "support",
+      "path": "/support",
+      "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/support",
+      "finalUrl": "https://vercel.com/login",
+      "status": "fail",
+      "httpStatus": 401,
+      "expectedTextFound": {
+        "Support": false,
+        "vsillah@gmail.com": false,
+        "Do not send raw API keys or OAuth tokens": false
+      },
+      "checkedAt": "2026-06-05T06:03:46.199Z",
+      "error": ""
+    }
+  ],
+  "finalProductionHostedUrlsStillRequired": true,
+  "deploymentProtectionLikely": true,
+  "notes": [
+    "This records the current PR preview route result for release gating.",
+    "It does not replace hosted production API, hosted production policy URLs, EAS native QA, App Store Connect, or Google Play Console evidence.",
+    "The preview appears to be protected by Vercel authentication; rerun with a public preview URL or approved bypass."
+  ]
+}

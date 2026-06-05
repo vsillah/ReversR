@@ -42,6 +42,15 @@ Confirm the expected local state:
 - Hosted API, hosted policies, real inventory connector, EAS linkage, App Store Connect, Google Play Console, preview builds, native QA, and final screenshots remain pending until external evidence exists.
 - `docs/store-console-pending-evidence.json` exists and says both App Store Connect and Google Play setup are still pending.
 
+If a Vercel PR preview exists, record deployed-preview route evidence before production hosting work:
+
+```bash
+PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke
+npm run release:evidence
+```
+
+The preview smoke should pass for `/`, `/privacy`, `/terms`, and `/support`, while production hosted API, hosted policy URLs, native QA, and store-console gates remain pending until their external evidence exists.
+
 ## 2. App Store Connect Record
 
 Required Apple role: Account Holder, Admin, or App Manager.

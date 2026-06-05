@@ -366,6 +366,7 @@ const requiredArtifacts = [
   'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
+  'scripts/preview-host-smoke.js',
   'scripts/native-release-preflight.js',
   'scripts/native-qa-preflight.js',
   'scripts/store-preflight.js',
@@ -431,6 +432,7 @@ const requiredBundleProofs = [
   'local-release-ci-evidence',
 ];
 const requiredBundlePending = [
+  'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
@@ -578,6 +580,33 @@ addGate(
       ? 'Smoke script is available, but docs/web-flow-smoke-evidence.json does not yet prove the full happy path.'
       : 'scripts/web-flow-smoke.js is missing.',
   webFlowEvidenceOk ? '' : 'Run npm run web-preview, then in another shell run WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke.'
+);
+
+const previewHostSmoke = readOptionalJson('docs/preview-host-smoke-evidence.json');
+const expectedPreviewRouteIds = ['app-root', 'privacy', 'terms', 'support'];
+const previewHostSmokeOk = (
+  previewHostSmoke?.status === 'pass' &&
+  previewHostSmoke?.schemaVersion === 1 &&
+  isHttpsUrl(previewHostSmoke?.previewUrl) &&
+  previewHostSmoke?.finalProductionHostedUrlsStillRequired === true &&
+  expectedPreviewRouteIds.every(id => previewHostSmoke?.routes?.some(route => (
+    route.id === id &&
+    route.status === 'pass' &&
+    route.httpStatus >= 200 &&
+    route.httpStatus < 400
+  )))
+);
+addGate(
+  'hosted',
+  'preview-host-smoke',
+  'Vercel preview host renders app and policy/support routes before production hosting',
+  previewHostSmokeOk ? 'pass' : 'pending',
+  previewHostSmokeOk
+    ? `docs/preview-host-smoke-evidence.json proves ${expectedPreviewRouteIds.length} deployed preview routes at ${previewHostSmoke.generatedAt}.`
+    : previewHostSmoke?.deploymentProtectionLikely === true
+      ? `docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at ${previewHostSmoke.generatedAt}.`
+      : 'Preview host evidence is missing, incomplete, or blocked by deployment protection.',
+  previewHostSmokeOk ? '' : 'Run PREVIEW_SMOKE_URL=<vercel-preview-url> npm run preview:smoke after the PR preview deploys; if Vercel returns 401, disable preview protection or provide a bypass for this smoke.'
 );
 
 addGate(
