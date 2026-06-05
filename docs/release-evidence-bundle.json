@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T06:12:41.536Z",
+  "generatedAt": "2026-06-05T06:19:13.076Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,9 +16,9 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T06:12:41.517Z",
+    "generatedAt": "2026-06-05T06:19:13.064Z",
     "summaryWithoutBundle": {
-      "pass": 23,
+      "pass": 24,
       "pending": 9
     },
     "missingLocalProofs": [],
@@ -34,6 +34,7 @@
       "store-submission-packet-smoke",
       "store-screenshot-planning",
       "external-release-runbook",
+      "objective-readiness-audit",
       "web-flow-smoke",
       "native-release-config-evidence",
       "store-console-pending-evidence",
@@ -218,7 +219,7 @@
     "policyHostingSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:12:31.717Z",
+      "generatedAt": "2026-06-05T06:19:11.126Z",
       "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
       "urls": {
         "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
@@ -335,10 +336,347 @@
         "The preview appears to be protected by Vercel authentication; rerun with a public preview URL or approved bypass."
       ]
     },
+    "objectiveReadinessAudit": {
+      "schemaVersion": 1,
+      "status": "pending",
+      "generatedAt": "2026-06-05T06:19:12.455Z",
+      "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
+      "completionClaim": {
+        "fullObjectiveComplete": false,
+        "storeReady": false,
+        "productionSubmissionReady": false,
+        "reason": "Implementation and local release packet are advanced, but external hosted, EAS, store-console, native QA, and screenshot evidence remain pending."
+      },
+      "summary": {
+        "requirementCount": 8,
+        "passedCount": 6,
+        "pendingCount": 2,
+        "blockedCount": 0,
+        "pendingRequirementIds": [
+          "photo-to-inventory-machine-match",
+          "apple-google-store-publication"
+        ],
+        "blockedRequirementIds": []
+      },
+      "releaseStatus": {
+        "generatedAt": "2026-06-05T06:19:12.436Z",
+        "summary": {
+          "pass": 25,
+          "pending": 9
+        }
+      },
+      "requirements": [
+        {
+          "id": "original-codebase-cloned",
+          "requirement": "Use the original ReversR codebase from GitHub as the starting point.",
+          "status": "pass",
+          "evidence": [
+            "git.remote.origin=https://github.com/vsillah/ReversR.git",
+            "git.branch=codex/inventory-reconstruction-clone"
+          ],
+          "gates": [],
+          "nextStep": ""
+        },
+        {
+          "id": "distinct-clone-identity",
+          "requirement": "Create a clone version with distinct app identity for store submission.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "clone-identity",
+              "status": "pass",
+              "title": "Clone app identity is distinct from the original ReversR app",
+              "evidence": "name=ReversR Rebuild; slug=reversr-rebuild; ios=com.vsillah.reversrrebuild; android=com.vsillah.reversrrebuild",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "clone-identity"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "remove-systematic-inventive-thinking",
+          "requirement": "Remove the Systematic Inventive Thinking step from the active app and server flow.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "retired-sit-step",
+              "status": "pass",
+              "title": "Original Systematic Inventive Thinking step is removed from the active app/server flow",
+              "evidence": "No active SIT route or label found in server/components.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "retired-sit-step"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "admin-machine-inventory-connector",
+          "requirement": "Replace that step with an admin-entered link or connector to a machine inventory.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "inventory-admin-connector",
+              "status": "pass",
+              "title": "Admin inventory connector form supports URL, auth mode, credentialRef, and validation",
+              "evidence": "components/PhaseTwo.tsx exposes connector URL, credentialRef, and validation controls.",
+              "nextStep": ""
+            },
+            {
+              "id": "inventory-source-validator",
+              "status": "pass",
+              "title": "Machine inventory exports can be validated before connector smoke",
+              "evidence": "scripts/validate-machine-inventory.js and docs/inventory-connector-spec.md define source validation.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "inventory-admin-connector",
+            "inventory-source-validator"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "photo-to-inventory-machine-match",
+          "requirement": "When a picture or scan is supplied, identify the matching machine from the approved inventory.",
+          "status": "pending",
+          "evidence": [
+            {
+              "id": "machine-scan-examples",
+              "status": "pass",
+              "title": "Default scan examples and camera guidance are machine-specific",
+              "evidence": "Phase 1 presets and camera prompt are aligned to machine reconstruction.",
+              "nextStep": ""
+            },
+            {
+              "id": "web-flow-smoke",
+              "status": "pass",
+              "title": "Local web preview can complete the machine reconstruction happy path",
+              "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "native-qa-evidence",
+              "status": "pending",
+              "title": "Android and iOS preview-build QA evidence is recorded",
+              "evidence": "docs/native-qa-evidence.json is missing.",
+              "nextStep": "Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight."
+            },
+            {
+              "id": "real-connector-smoke",
+              "status": "pending",
+              "title": "Hosted API can validate and match against a real authorized machine inventory",
+              "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
+              "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+            }
+          ],
+          "gates": [
+            "machine-scan-examples",
+            "web-flow-smoke",
+            "native-qa-evidence",
+            "real-connector-smoke"
+          ],
+          "nextStep": "Run native preview-build QA and hosted real connector smoke to prove real camera-to-inventory matching beyond local prototype evidence."
+        },
+        {
+          "id": "bom-assembly-pricing-vendor-handoff",
+          "requirement": "Build a bill of materials, assembly steps, pricing, and 3D modeling/fabrication handoff package.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "reconstruction-package",
+              "status": "pass",
+              "title": "Machine match produces BOM, assembly, pricing, quote packet, and vendor request surfaces",
+              "evidence": "Server and Phase 4 UI include match, BOM, assembly, pricing, quote packet, and vendor draft paths.",
+              "nextStep": ""
+            },
+            {
+              "id": "web-flow-smoke",
+              "status": "pass",
+              "title": "Local web preview can complete the machine reconstruction happy path",
+              "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "reconstruction-package",
+            "web-flow-smoke"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "store-readiness-packet",
+          "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "store-submission-packet-smoke",
+              "status": "pass",
+              "title": "Store submission metadata and privacy packet evidence is recorded",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T06:19:06.248Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-screenshot-planning",
+              "status": "pass",
+              "title": "Web-preview screenshot planning evidence is recorded before native screenshot capture",
+              "evidence": "docs/store-screenshots/planning-evidence.json proves web planning captures and native screenshot filename mapping at 2026-06-05T05:19:54.138Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "external-release-runbook",
+              "status": "pass",
+              "title": "External Apple, Google, EAS, hosted API, and connector setup runbook is present",
+              "evidence": "docs/external-release-setup-runbook.md covers account setup, exact clone IDs, evidence files, preflight commands, and official source links.",
+              "nextStep": ""
+            },
+            {
+              "id": "release-evidence-bundle",
+              "status": "pass",
+              "title": "Consolidated release evidence bundle is generated for external operators",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 9 external gates at 2026-06-05T06:19:11.828Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "local-release-ci-evidence",
+              "status": "pass",
+              "title": "Local release CI evidence records repeatable pre-store validation",
+              "evidence": "docs/local-release-ci-evidence.json records 12/12 passing local checks at 2026-06-05T06:19:11.160Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "release-local-ci-workflow",
+              "status": "pass",
+              "title": "GitHub Actions workflow runs local release evidence checks on pull requests",
+              "evidence": ".github/workflows/release-local-ci.yml runs local release CI, refreshes the release evidence bundle, verifies release status, and uploads evidence artifacts.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-console-copy-packet",
+              "status": "pass",
+              "title": "Store console copy/paste packet is generated from submission metadata",
+              "evidence": "docs/store-console-copy.md contains App Store, Google Play, privacy, data-safety, screenshot, release-note, and safety copy.",
+              "nextStep": ""
+            },
+            {
+              "id": "native-release-config-evidence",
+              "status": "pass",
+              "title": "Native release config evidence is recorded before EAS account setup",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T06:19:06.023Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-console-pending-evidence",
+              "status": "pass",
+              "title": "Store console pending evidence records account-side setup requirements",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T06:19:04.793Z.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "store-submission-packet-smoke",
+            "store-screenshot-planning",
+            "external-release-runbook",
+            "release-evidence-bundle",
+            "local-release-ci-evidence",
+            "release-local-ci-workflow",
+            "store-console-copy-packet",
+            "native-release-config-evidence",
+            "store-console-pending-evidence"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "apple-google-store-publication",
+          "requirement": "Get as close as possible to release on Google Play and Apple App Store, without falsely claiming external approvals.",
+          "status": "pending",
+          "evidence": [
+            {
+              "id": "preview-host-smoke",
+              "status": "pending",
+              "title": "Vercel preview host renders app and policy/support routes before production hosting",
+              "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:08:09.501Z.",
+              "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
+            },
+            {
+              "id": "hosted-api",
+              "status": "pending",
+              "title": "Hosted HTTPS API URL is configured for native builds",
+              "evidence": "No proven hosted API URL in environment or store packet.",
+              "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+            },
+            {
+              "id": "hosted-policy-urls",
+              "status": "pending",
+              "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+              "evidence": "Hosted policy/support URLs are still placeholders or missing.",
+              "nextStep": "Deploy /privacy, /terms, and /support, then set the hosted URL env vars."
+            },
+            {
+              "id": "real-connector-smoke",
+              "status": "pending",
+              "title": "Hosted API can validate and match against a real authorized machine inventory",
+              "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
+              "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+            },
+            {
+              "id": "eas-project-linkage",
+              "status": "pending",
+              "title": "EAS project is linked for the clone identity",
+              "evidence": "expo.extra.eas.projectId is not set.",
+              "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
+            },
+            {
+              "id": "eas-submit-config",
+              "status": "pending",
+              "title": "EAS submit profile is configured for Google Play Internal Testing and TestFlight upload",
+              "evidence": "android.track=internal; ios.ascAppId=(missing).",
+              "nextStep": "After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight."
+            },
+            {
+              "id": "native-qa-evidence",
+              "status": "pending",
+              "title": "Android and iOS preview-build QA evidence is recorded",
+              "evidence": "docs/native-qa-evidence.json is missing.",
+              "nextStep": "Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight."
+            },
+            {
+              "id": "store-console-records",
+              "status": "pending",
+              "title": "App Store Connect and Google Play Console app records exist",
+              "evidence": "Expected iOS bundle com.vsillah.reversrrebuild; expected Android package com.vsillah.reversrrebuild; docs/store-console-evidence.json is missing.",
+              "nextStep": "Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight."
+            },
+            {
+              "id": "native-screenshots",
+              "status": "pending",
+              "title": "Final native screenshots are captured from Android/iOS preview builds",
+              "evidence": "Web-preview screenshots are planning artifacts only; native screenshots are not represented in repo evidence yet.",
+              "nextStep": "Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json."
+            }
+          ],
+          "gates": [
+            "preview-host-smoke",
+            "hosted-api",
+            "hosted-policy-urls",
+            "real-connector-smoke",
+            "eas-project-linkage",
+            "eas-submit-config",
+            "native-qa-evidence",
+            "store-console-records",
+            "native-screenshots"
+          ],
+          "nextStep": "Clear the listed external gates with real hosted, EAS, App Store Connect, Google Play Console, preview-build, and native screenshot evidence."
+        }
+      ]
+    },
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:12:26.905Z",
+      "generatedAt": "2026-06-05T06:19:06.248Z",
       "urlMode": "placeholder-allowed",
       "warnings": [
         "privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy",
@@ -618,7 +956,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:12:26.635Z",
+      "generatedAt": "2026-06-05T06:19:06.023Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -706,7 +1044,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T06:12:24.961Z",
+      "generatedAt": "2026-06-05T06:19:04.793Z",
       "source": "docs/store-console-evidence.template.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -800,10 +1138,10 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-05T06:12:17.497Z",
-      "completedAt": "2026-06-05T06:12:31.751Z",
-      "commandCount": 11,
-      "passedCount": 11,
+      "startedAt": "2026-06-05T06:18:57.434Z",
+      "completedAt": "2026-06-05T06:19:11.160Z",
+      "commandCount": 12,
+      "passedCount": 12,
       "failedCount": 0,
       "notRun": [],
       "results": [
@@ -812,7 +1150,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1318,
+          "durationMs": 958,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -822,7 +1160,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 141,
+          "durationMs": 100,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -832,7 +1170,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 102,
+          "durationMs": 95,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -842,7 +1180,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 457,
+          "durationMs": 411,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -852,7 +1190,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 5111,
+          "durationMs": 4865,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nWarnings:\n- privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy\n- termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms\n- supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -862,7 +1200,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 107,
+          "durationMs": 104,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nWarnings:\n- privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy\n- termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms\n- supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support\n- apiBaseUrl is placeholder or non-production: https://reversr-rebuild-api.example.com\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -878,11 +1216,21 @@
           "stderrTail": ""
         },
         {
+          "id": "objective-readiness-audit",
+          "proves": "Original user objective is mapped to proven local work and pending external release gates.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 636,
+          "command": "npm run release:objective",
+          "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 5/8\nPending requirements: photo-to-inventory-machine-match, store-readiness-packet, apple-google-store-publication",
+          "stderrTail": ""
+        },
+        {
           "id": "store-console-preflight-local",
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 137,
+          "durationMs": 97,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- Store asset evidenceFolder is missing.\n- Review gate hostedApiPreflightPassed is not marked true.\n- Review gate hostedPolicyPreflightPassed is not marked true.\n- Review gate hostedConnectorSmokePassed is not marked true.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -892,7 +1240,7 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1676,
+          "durationMs": 1230,
           "command": "npm run native:preflight:local",
           "stdoutTail": "\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nWarnings:\n- EAS project is not linked. Run `npx eas-cli@20.0.0 init` or set `expo.extra.eas.projectId` before native release builds.\n- Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.\n- Set EXPO_PUBLIC_API_BASE_URL to the hosted HTTPS API before native release builds.\n- Set EXPO_PUBLIC_PRIVACY_POLICY_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_TERMS_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_SUPPORT_URL to a hosted HTTPS URL before native release builds.\n- EAS CLI is not logged in for non-interactive release work through pinned npx eas-cli@20.0.0: Not logged in\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
@@ -902,7 +1250,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 123,
+          "durationMs": 94,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot build-handoff is missing android device evidence.\n- Native screenshot build-handoff is missing android capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -912,13 +1260,14 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 4983,
+          "durationMs": 5038,
           "command": "npm run store:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nWarnings:\n- Using placeholder API URL because --allow-placeholder was provided.\n- Using placeholder or non-production privacyPolicyUrl because --allow-placeholder was provided.\n- Using placeholder or non-production termsUrl because --allow-placeholder was provided.\n- Using placeholder or non-production supportUrl because --allow-placeholder was provided.\nStore preflight passed.",
           "stderrTail": ""
         }
       ],
       "externalGatesStillRequired": [
+        "preview-host-smoke",
         "hosted-api",
         "hosted-policy-urls",
         "real-connector-smoke",
@@ -937,6 +1286,7 @@
   "scripts": {
     "releaseStatus": "npm run release:status",
     "releaseNextActions": "npm run release:next-actions",
+    "releaseObjective": "npm run release:objective",
     "releaseLocalCi": "npm run release:local-ci",
     "storeConsoleCopy": "npm run store:console:copy",
     "previewHostSmoke": "PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
@@ -956,6 +1306,7 @@
     "docs/store-console-evidence.template.json",
     "docs/native-qa-evidence.template.json",
     "docs/local-release-ci-evidence.json",
+    "docs/objective-readiness-audit.json",
     "docs/external-release-setup-runbook.md",
     ".github/workflows/release-local-ci.yml",
     "docs/release-action-plan.md",
@@ -971,6 +1322,7 @@
     "store:assets:preflight",
     "release:status",
     "release:next-actions",
+    "release:objective",
     "release:evidence",
     "release:local-ci",
     "api:preflight",

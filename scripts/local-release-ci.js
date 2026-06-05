@@ -19,6 +19,7 @@ const commands = [
   ['policy-preflight-local', ['run', 'policy:preflight:local'], 'Privacy, terms, and support web export content is ready before hosted deployment.'],
   ['store-submission-preflight-local', ['run', 'store:submission:preflight:local'], 'App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.'],
   ['store-console-copy', ['run', 'store:console:copy'], 'App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.'],
+  ['objective-readiness-audit', ['run', 'release:objective'], 'Original user objective is mapped to proven local work and pending external release gates.'],
   ['store-console-preflight-local', ['run', 'store:console:preflight:local'], 'Store-console pending evidence records account-side requirements without claiming final console proof.'],
   ['native-preflight-local', ['run', 'native:preflight:local'], 'Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.'],
   ['native-qa-preflight-local', ['run', 'native:qa:preflight:local'], 'Native QA evidence template is structurally valid while preview-build evidence remains pending.'],
@@ -83,6 +84,7 @@ const evidence = {
   notRun,
   results,
   externalGatesStillRequired: [
+    'preview-host-smoke',
     'hosted-api',
     'hosted-policy-urls',
     'real-connector-smoke',

@@ -21,6 +21,7 @@ The app now has:
 - Vendor request draft flow for preparing a user-reviewed quote email after the quote packet is exported
 - Consolidated release status audit: `npm run release:status`
 - Generated external-gate action plan: `npm run release:next-actions`
+- Objective readiness audit: `npm run release:objective` writes `docs/objective-readiness-audit.json` and maps the original user objective to proven work and pending store/native gates
 - Consolidated release evidence bundle: `npm run release:evidence`
 - Repeatable local release CI evidence: `npm run release:local-ci`
 - GitHub Actions local release CI workflow: `.github/workflows/release-local-ci.yml`

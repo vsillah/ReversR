@@ -342,6 +342,7 @@ const requiredArtifacts = [
   'docs/production-api-env.example',
   'docs/policy-hosting-deployment.md',
   'docs/policy-hosting-smoke-evidence.json',
+  'docs/objective-readiness-audit.json',
   'docs/release-action-plan.md',
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
@@ -361,6 +362,7 @@ const requiredArtifacts = [
   'scripts/api-preflight.js',
   'scripts/api-env-preflight.js',
   'scripts/api-deployment-smoke.js',
+  'scripts/objective-readiness-audit.js',
   'scripts/release-next-actions.js',
   'scripts/local-release-ci.js',
   'scripts/validate-machine-inventory.js',
@@ -415,6 +417,37 @@ addGate(
   externalRunbookOk ? '' : 'Restore the external release setup runbook before account-side release work.'
 );
 
+const objectiveReadinessAudit = readOptionalJson('docs/objective-readiness-audit.json');
+const expectedObjectiveRequirementIds = [
+  'original-codebase-cloned',
+  'distinct-clone-identity',
+  'remove-systematic-inventive-thinking',
+  'admin-machine-inventory-connector',
+  'photo-to-inventory-machine-match',
+  'bom-assembly-pricing-vendor-handoff',
+  'store-readiness-packet',
+  'apple-google-store-publication',
+];
+const objectiveReadinessAuditOk = (
+  objectiveReadinessAudit?.schemaVersion === 1 &&
+  ['pending', 'pass'].includes(objectiveReadinessAudit?.status) &&
+  objectiveReadinessAudit?.completionClaim?.fullObjectiveComplete === false &&
+  objectiveReadinessAudit?.completionClaim?.productionSubmissionReady === false &&
+  expectedObjectiveRequirementIds.every(id => objectiveReadinessAudit?.requirements?.some(requirement => requirement.id === id)) &&
+  objectiveReadinessAudit?.summary?.pendingRequirementIds?.includes('apple-google-store-publication') &&
+  objectiveReadinessAudit?.summary?.pendingRequirementIds?.includes('photo-to-inventory-machine-match')
+);
+addGate(
+  'store-local',
+  'objective-readiness-audit',
+  'Original objective readiness audit is generated without falsely claiming store completion',
+  objectiveReadinessAuditOk ? 'pass' : 'pending',
+  objectiveReadinessAuditOk
+    ? `docs/objective-readiness-audit.json maps ${objectiveReadinessAudit.summary.requirementCount} objective requirements and keeps full completion pending at ${objectiveReadinessAudit.generatedAt}.`
+    : 'docs/objective-readiness-audit.json is missing or does not preserve the pending store/native completion boundary.',
+  objectiveReadinessAuditOk ? '' : 'Run npm run release:objective, then npm run release:evidence and npm run release:status.'
+);
+
 const releaseEvidenceBundle = readOptionalJson('docs/release-evidence-bundle.json');
 const requiredBundleProofs = [
   'clone-identity',
@@ -426,6 +459,7 @@ const requiredBundleProofs = [
   'store-submission-packet-smoke',
   'store-screenshot-planning',
   'external-release-runbook',
+  'objective-readiness-audit',
   'web-flow-smoke',
   'native-release-config-evidence',
   'store-console-pending-evidence',
@@ -475,6 +509,7 @@ const expectedLocalCiCommands = [
   'policy-preflight-local',
   'store-submission-preflight-local',
   'store-console-copy',
+  'objective-readiness-audit',
   'store-console-preflight-local',
   'native-preflight-local',
   'native-qa-preflight-local',
@@ -486,6 +521,7 @@ const localReleaseCiOk = (
   localReleaseCiEvidence?.passedCount === expectedLocalCiCommands.length &&
   expectedLocalCiCommands.every(id => localReleaseCiEvidence?.results?.some(result => result.id === id && result.status === 'pass')) &&
   Array.isArray(localReleaseCiEvidence?.externalGatesStillRequired) &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('preview-host-smoke') &&
   localReleaseCiEvidence.externalGatesStillRequired.includes('hosted-api') &&
   localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots')
 );
