@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T23:32:14.774Z",
-  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play service-account permission/key setup, 1Password credential persistence, Android EAS internal-track submission scheduling, native/device checks, and store-console inspection.",
+  "generatedAt": "2026-06-05T23:44:05.000Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play service-account permission/key setup, 1Password credential persistence, Google Play Android Developer API enablement, Android EAS internal-track submission completion, native/device checks, and store-console inspection.",
   "pr": {
     "number": 2,
     "branch": "codex/inventory-reconstruction-clone",
@@ -10,7 +10,7 @@
   },
   "localState": {
     "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
-    "releaseStatus": "Pending after Android EAS internal-track submission reached Google Play but errored because Google Play Android Developer API is disabled for Google Cloud project number 165345817438; Google API enablement, iOS/TestFlight credentials, iOS screenshots/QA, and final store signoff remain pending.",
+    "releaseStatus": "Pending after Android EAS internal-track submission finished successfully; iOS/TestFlight credentials, iOS screenshots/QA, Play Console internal-testing visibility/tester setup, and final store signoff remain pending.",
     "pendingGateIds": [
       "eas-submit-config",
       "native-qa-evidence",
@@ -46,26 +46,26 @@
     ]
   },
   "easSubmitConfig": {
-    "status": "android-google-api-disabled-ios-credential-gated",
+    "status": "android-internal-submit-finished-ios-credential-gated",
     "android": {
       "submitProfile": "production",
       "track": "internal",
       "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
       "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
       "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
-      "currentGate": "Enable Google Play Android Developer API for Google Cloud project number 165345817438, then rerun the Android internal-track EAS submit command.",
+      "currentGate": "EAS Android internal-track submission finished; verify the release is visible in Google Play Console Internal testing and configure testers only when ready.",
       "submission": {
-        "status": "errored-google-api-disabled",
-        "scheduledAt": "2026-06-05T23:30:45.635Z",
-        "submissionId": "f2b72ede-9f72-4505-b88f-eda2fbe11a1b",
-        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/f2b72ede-9f72-4505-b88f-eda2fbe11a1b",
+        "status": "finished",
+        "scheduledAt": "2026-06-05T23:44:05.000Z",
+        "submissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
         "track": "internal",
         "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
         "productionRolloutStarted": false,
         "publicReviewSubmissionStarted": false,
-        "checkedAt": "2026-06-05T23:32:14.774Z",
-        "errorSummary": "Google Play Android Developer API is disabled for project number 165345817438.",
-        "apiEnableUrl": "https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com?project=165345817438"
+        "checkedAt": "2026-06-05T23:44:05.000Z",
+        "errorSummary": null,
+        "googleCloudApiStatus": "enabled-before-rerun"
       },
       "serviceAccount": {
         "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
@@ -93,8 +93,8 @@
   },
   "computerUseState": {
     "googlePlay": {
-      "currentScreen": "Google Cloud Console > IAM & Admin > Service account AppScreens > Keys, with the new key visible. Next target is the Google Play Android Developer API enablement screen.",
-      "url": "https://console.cloud.google.com/iam-admin/serviceaccounts/details/103396245814489689911/keys?project=kinflo-project",
+      "currentScreen": "Google Cloud Console > APIs & Services > Google Play Android Developer API details for Kinflo Project, with Status: Enabled and Disable API visible.",
+      "url": "https://console.cloud.google.com/apis/api/androidpublisher.googleapis.com/metrics?project=kinflo-project",
       "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
       "serviceAccountStatus": "Active; access never expires",
       "reversrRebuildPermissionPresent": true,
@@ -106,7 +106,7 @@
         "StackRay",
         "The Visioneer"
       ],
-      "nextActionRequiringApproval": "Enable Google Play Android Developer API for project number 165345817438, then rerun the Android EAS submit command to the internal track. Do not click Google Play Send for review or start production rollout.",
+      "nextActionRequiringApproval": "Open Google Play Console Internal testing and verify the uploaded version code 17 release is visible. Configure testers only when ready. Do not click Send for review or start production rollout without explicit approval.",
       "googleCloudKeyPresent": true,
       "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
       "onePasswordItem": {
@@ -195,11 +195,12 @@
       "closedTestingMinimumDays": 14,
       "sendForReviewClicked": false,
       "internalTestingSubmissionScheduled": true,
-      "internalTestingSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/f2b72ede-9f72-4505-b88f-eda2fbe11a1b"
+      "internalTestingSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+      "internalTestingSubmissionStatus": "finished-eas-internal-track-play-console-verification-pending"
     }
   },
   "humanInTheLoopResumeInstructions": [
-    "For Google Play internal testing upload: EAS submission f2b72ede-9f72-4505-b88f-eda2fbe11a1b errored because Google Play Android Developer API is disabled for Google Cloud project number 165345817438. Enable androidpublisher.googleapis.com for that project, wait a few minutes if needed, then rerun the internal-track EAS submit. Do not click Send for review or start production rollout.",
+    "For Google Play internal testing: EAS submission 805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b finished on the internal track. Next, open Google Play Console Internal testing to verify version code 17 is visible and configure testers only when ready. Do not click Send for review or start production rollout without explicit final approval.",
     "For Apple TestFlight upload: Chrome still has an App Store Connect login tab for vsillah@mac.com. Complete Apple login/2FA, then enable App Store Connect API access and create or authorize an EAS submit key, or tell Codex when you are logged in so it can navigate to the API access screen.",
     "For Android live QA: further checks can continue if the Pixel remains reachable, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
