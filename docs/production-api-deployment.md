@@ -11,6 +11,8 @@ The container is a production-host bootstrap. It is suitable for review, demos, 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `API_PORT` | Yes | Port the API listens on. The Docker image defaults to `3001`. |
+| `API_CORS_ORIGINS` | Yes for production | Comma-separated HTTPS origins allowed to call the API from browser contexts. Leave open only for local prototype checks. |
+| `API_REQUEST_BODY_LIMIT` | Recommended | Express JSON body limit for scan/image payloads. Defaults to `50mb`. |
 | `AI_INTEGRATIONS_GEMINI_API_KEY` | Recommended | Primary Gemini key for AI-backed analysis, matching, design generation, and BOM generation. |
 | `GEMINI_API_KEYS` | Optional | Comma-separated backup Gemini keys for rate-limit rotation. |
 | `AI_INTEGRATIONS_GEMINI_BASE_URL` | Optional | Alternate Gemini-compatible base URL. Leave empty for the default provider. |
@@ -34,6 +36,8 @@ For a local smoke without real connector secrets, `.env.production` can start wi
 
 ```text
 API_PORT=3001
+API_CORS_ORIGINS=https://reversr-rebuild.example.com
+API_REQUEST_BODY_LIMIT=50mb
 AI_INTEGRATIONS_GEMINI_API_KEY=
 GEMINI_API_KEYS=
 ADMIN_API_TOKEN=replace-with-long-random-token
@@ -58,6 +62,7 @@ Expected response fields include:
 - inventory source support
 - credential registry status
 - authenticated connector status
+- runtime config summary, including CORS mode and request body limit
 
 ## Hosted API Preflight
 
@@ -78,8 +83,15 @@ npm run api:preflight
 The preflight checks:
 
 - `GET /api/health`
+- hardened runtime config from `/api/health`
 - demo inventory validation through `POST /api/inventory/validate`
 - admin credential registry listing when `ADMIN_API_TOKEN` is present
+
+For a hosted production API, `npm run api:preflight` fails if `/api/health` reports open CORS. Set `API_CORS_ORIGINS` to the hosted web origins before store builds. For controlled prototype checks only, use:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight -- --allow-open-cors
+```
 
 ## Store Build Binding
 
@@ -120,6 +132,8 @@ For production:
 The production API gate is not complete until:
 
 - the API is hosted behind HTTPS,
+- `API_CORS_ORIGINS` is restricted to approved hosted origins,
+- `API_REQUEST_BODY_LIMIT` is set intentionally for scan/image payloads,
 - `/api/health` passes from an external network,
 - `npm run api:preflight` passes against the hosted URL,
 - EAS production has the same `EXPO_PUBLIC_API_BASE_URL`,

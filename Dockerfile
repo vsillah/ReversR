@@ -4,6 +4,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV API_PORT=3001
+ENV API_REQUEST_BODY_LIMIT=50mb
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev

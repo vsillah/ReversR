@@ -1,4 +1,7 @@
+const args = new Set(process.argv.slice(2));
+const allowOpenCors = args.has('--allow-open-cors');
 const apiBase = (process.env.EXPO_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || '').replace(/\/$/, '');
+const isLocalApi = /:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::|\/|$)/.test(apiBase);
 
 if (!apiBase || apiBase.includes('example.com')) {
   console.error('Set EXPO_PUBLIC_API_BASE_URL or API_BASE_URL to the hosted API URL before running API preflight.');
@@ -30,6 +33,15 @@ const run = async () => {
   if (health.status !== 'ok') {
     throw new Error(`/api/health returned non-ok status: ${JSON.stringify(health)}`);
   }
+  if (!health.runtimeConfig) {
+    throw new Error('/api/health is missing runtimeConfig; deploy the hardened API server before store builds.');
+  }
+  if (health.runtimeConfig.corsMode === 'open' && !isLocalApi && !allowOpenCors) {
+    throw new Error('Hosted API reports open CORS. Set API_CORS_ORIGINS to the hosted app origins or pass --allow-open-cors only for controlled prototype checks.');
+  }
+  if (!health.runtimeConfig.requestBodyLimit) {
+    throw new Error('/api/health runtimeConfig is missing requestBodyLimit.');
+  }
 
   const { response, parsed } = await postJson(`${apiBase}/api/inventory/validate`, {
     connector: {
@@ -49,6 +61,7 @@ const run = async () => {
 
   console.log(`API preflight passed for ${apiBase}`);
   console.log(`Service: ${health.service || 'unknown'} | authenticated connectors: ${health.authenticatedConnectorsEnabled ? 'configured' : 'not configured'}`);
+  console.log(`Runtime: CORS ${health.runtimeConfig.corsMode} | body limit ${health.runtimeConfig.requestBodyLimit} | admin routes ${health.runtimeConfig.adminRoutesEnabled ? 'enabled' : 'disabled'}`);
 
   const adminToken = process.env.ADMIN_API_TOKEN;
   if (adminToken) {

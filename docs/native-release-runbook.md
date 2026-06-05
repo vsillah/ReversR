@@ -77,7 +77,7 @@ npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_TERMS_
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_SUPPORT_URL --value https://your-domain.example/support --visibility plaintext --non-interactive
 ```
 
-Server-side secrets such as `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, and inventory connector credentials belong on the API host, not in the mobile EAS environment.
+Server-side API settings and secrets such as `API_CORS_ORIGINS`, `API_REQUEST_BODY_LIMIT`, `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, and inventory connector credentials belong on the API host, not in the mobile EAS environment.
 
 ## 5. Configure Store Credentials
 

@@ -7,12 +7,26 @@ const { Ollama } = require('ollama');
 
 const ollama = new Ollama({ host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434' });
 const app = express();
+const parseListEnv = (value = '') => String(value)
+  .split(',')
+  .map(item => item.trim())
+  .filter(Boolean);
+const configuredCorsOrigins = parseListEnv(process.env.API_CORS_ORIGINS);
+const corsAllowsAllOrigins = configuredCorsOrigins.length === 0 || configuredCorsOrigins.includes('*');
+const apiRequestBodyLimit = process.env.API_REQUEST_BODY_LIMIT || '50mb';
+
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    if (corsAllowsAllOrigins || !origin || configuredCorsOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`Origin ${origin} is not allowed by API_CORS_ORIGINS.`));
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Token'],
 }));
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: apiRequestBodyLimit }));
 
 // API KEY POOL & RATE LIMIT HANDLING
 // ============================================
@@ -1866,6 +1880,14 @@ const getHealthPayload = async () => {
     credentialRegistryEnabled: Boolean(getCredentialRegistryPath()),
     credentialCount: credentialSummaries.length,
     privateNetworkConnectorsEnabled: process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
+    runtimeConfig: {
+      corsMode: corsAllowsAllOrigins ? 'open' : 'restricted',
+      allowedCorsOriginCount: corsAllowsAllOrigins ? 0 : configuredCorsOrigins.length,
+      requestBodyLimit: apiRequestBodyLimit,
+      adminRoutesEnabled: Boolean(process.env.ADMIN_API_TOKEN),
+      registryWritesEnabled: Boolean(getCredentialRegistryPath()),
+      privateNetworkConnectorsEnabled: process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
+    },
   };
 };
 

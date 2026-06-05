@@ -30,6 +30,7 @@ The app now has:
 - Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
 - API Dockerfile and production deployment runbook for hosted backend readiness
+- API runtime config health reporting for CORS mode, body limit, admin route state, registry-write state, and private-network connector state
 - Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
 - Native QA evidence template and `npm run native:qa:preflight` gate for Android/iOS preview-build testing
 - Server-side credential references for authenticated inventory connectors
@@ -93,7 +94,7 @@ Open gates:
 
 ## Technical Gaps Before Store Review
 
-- Production API host: a Dockerfile and deployment runbook exist, but the API still needs to be deployed behind HTTPS and verified with `npm run api:preflight` before native store builds.
+- Production API host: a Dockerfile, deployment runbook, and runtime config health checks exist, but the API still needs to be deployed behind HTTPS with restricted `API_CORS_ORIGINS` and verified with `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Privacy policy, terms, and support: web routes, static export, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
@@ -107,7 +108,7 @@ Open gates:
 
 ## Recommended Next Sequence
 
-1. Deploy the API container behind HTTPS, then run `npm run api:preflight` against the hosted URL.
+1. Deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
 2. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
 3. Deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
