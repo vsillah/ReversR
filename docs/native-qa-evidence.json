@@ -36,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires completion of Apple Developer/App Store Connect setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, and automation prepared the Apple Developer App ID registration review screen for com.vsillah.reversrrebuild. App Store Connect app record creation is gated by final human authorization to click Register for that App ID."
+      "notes": "iOS EAS preview build requires completion of App Store Connect setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, and Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. Automation staged the App Store Connect New App form with the registered Bundle ID and stopped before the final Create action. App Store Connect app record creation and ascAppId collection remain pending."
     }
   },
   "checks": [
@@ -252,7 +252,7 @@
   ],
   "blockers": [
     "Android preview APK exists, but no Android device or emulator was available locally for install QA.",
-    "iOS preview build requires Apple Developer App ID registration for com.vsillah.reversrrebuild, App Store Connect app record creation, and ascAppId collection.",
+    "iOS preview build requires App Store Connect app record creation for com.vsillah.reversrrebuild and ascAppId collection.",
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
     "Final Android and iOS native screenshots require installed preview builds."
   ],

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:07:47Z",
+  "generatedAt": "2026-06-05T13:17:01Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -9,10 +9,10 @@
     "sku": "reversr-rebuild-001"
   },
   "appStoreConnect": {
-    "browserState": "Chrome is open at the Apple Developer Certificates, Identifiers & Profiles review screen for registering the ReversR Rebuild App ID.",
-    "url": "https://developer.apple.com/account/resources/identifiers/bundleId/add/bundle",
-    "accountGate": "Apple Developer Program activation has cleared enough for App Store Connect to open. App Store Connect showed no apps and the New App form showed no registered Bundle ID. The Apple Developer App ID registration review screen is filled for com.vsillah.reversrrebuild and is waiting at the final Register button.",
-    "nextHumanAction": "Click Register in Apple Developer only if Vambah authorizes creation of the persistent App ID for com.vsillah.reversrrebuild. Then return to App Store Connect, create the app record for the iOS bundle ID, and copy the App Store Connect Apple ID.",
+    "browserState": "Chrome is open in App Store Connect at the New App modal. The form is staged for iOS with ReversR Rebuild, English (U.S.), Bundle ID ReversR Rebuild - com.vsillah.reversrrebuild, SKU reversr-rebuild-001, and Full Access. The Create button is active and has not been clicked.",
+    "url": "https://appstoreconnect.apple.com/apps",
+    "accountGate": "Apple Developer Program activation has cleared enough for App Store Connect to open. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and App Store Connect now exposes the registered Bundle ID in the New App form.",
+    "nextHumanAction": "Authorize the final Create action in App Store Connect, or click Create manually, to create the persistent iOS app record. After creation, copy the App Store Connect Apple ID into eas.json at submit.production.ios.ascAppId.",
     "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
   },
   "googlePlayConsole": {
@@ -35,6 +35,6 @@
   "notes": [
     "Google Play app record exists; production access and store listing are not complete.",
     "No public store submission was started.",
-    "Apple Developer Agreement was accepted by Vambah. Apple Developer Program activation cleared enough for App Store Connect to open. The next human-in-the-loop gate is clicking Register on the prepared Apple Developer App ID review screen for com.vsillah.reversrrebuild; App Store Connect app record creation and ascAppId collection are still required afterward."
+    "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. The next human-in-the-loop gate is the final Create action in the prepared App Store Connect New App form; App Store Connect app record creation and ascAppId collection are still required afterward."
   ]
 }

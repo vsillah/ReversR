@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:07:47Z",
+  "generatedAt": "2026-06-05T13:17:01Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -30,12 +30,12 @@
   },
   "browserHandoff": {
     "googlePlayConsole": {
-      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/create-new-app",
-      "state": "Create app form is filled; Developer Program Policies and US export laws declarations are unchecked; Create app has not been clicked."
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+      "state": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Store listing, data safety, app content, internal testing, and native screenshot upload tasks remain pending."
     },
     "appStoreConnect": {
-      "url": "https://developer.apple.com/account/resources/identifiers/bundleId/add/bundle",
-      "state": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program activation cleared enough for App Store Connect to open. App Store Connect showed no apps and no registered Bundle ID. Chrome is now at the Apple Developer App ID review screen, filled for com.vsillah.reversrrebuild and waiting for the final Register action."
+      "url": "https://appstoreconnect.apple.com/apps",
+      "state": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program activation cleared enough for App Store Connect to open. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. Chrome is now at the App Store Connect New App modal, staged with iOS, ReversR Rebuild, English (U.S.), Bundle ID ReversR Rebuild - com.vsillah.reversrrebuild, SKU reversr-rebuild-001, and Full Access. The final Create action has not been clicked."
     }
   },
   "nextNativeQaActions": [
@@ -44,14 +44,14 @@
     "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-    "Authorize and click Register on the prepared Apple Developer App ID review screen for com.vsillah.reversrrebuild, then return to App Store Connect and create the iOS app record to unblock iOS preview/TestFlight work.",
+    "Authorize and click Create on the prepared App Store Connect New App modal, or create the iOS app record manually, then copy the App Store Connect Apple ID into eas.json at submit.production.ios.ascAppId to unblock iOS preview/TestFlight work.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
-    "Apple Developer Program activation cleared enough for App Store Connect to open, but App Store Connect app record creation is still gated by final Apple Developer App ID registration for com.vsillah.reversrrebuild.",
+    "Apple Developer App ID registration is complete for com.vsillah.reversrrebuild, but App Store Connect app record creation is still gated by the final Create action in the New App modal.",
     "No Apple App Store Connect app record was created."
   ]
 }

@@ -12,7 +12,7 @@
     "status": "pending",
     "recordUrl": "",
     "appleId": "",
-    "bundleIdStatus": "pending",
+    "bundleIdStatus": "pass",
     "sku": "reversr-rebuild-001",
     "primaryCategory": "Productivity",
     "secondaryCategory": "Business",
@@ -21,7 +21,7 @@
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false,
-    "notes": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program membership activation has cleared enough for App Store Connect to open. App Store Connect had no apps and no registered Bundle ID available. Automation filled the Apple Developer App ID review screen for com.vsillah.reversrrebuild and stopped before the final Register button because it creates a persistent Apple Developer identifier. App Store Connect app record creation remains pending until that Bundle ID is registered."
+    "notes": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program membership activation cleared enough for App Store Connect to open. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and App Store Connect now exposes the Bundle ID as ReversR Rebuild - com.vsillah.reversrrebuild. Automation staged the App Store Connect New App form with iOS, ReversR Rebuild, English (U.S.), the registered Bundle ID, SKU reversr-rebuild-001, and Full Access, then stopped before the final Create button because it creates the persistent App Store Connect app record. App Store Connect Apple ID collection remains pending until that record is created."
   },
   "googlePlay": {
     "status": "pass",
