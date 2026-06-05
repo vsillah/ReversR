@@ -110,6 +110,22 @@ npx eas-cli@20.0.0 credentials --platform ios
 
 Create or attach the Apple distribution certificate and provisioning profile for `com.vsillah.reversrrebuild`. Confirm the bundle ID exists in Apple Developer and App Store Connect before production submission.
 
+After the App Store Connect app record exists, copy its Apple ID into the EAS submit profile:
+
+```json
+{
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "replace-with-app-store-connect-apple-id"
+      }
+    }
+  }
+}
+```
+
+The Android submit profile is already pointed at the Google Play `internal` track. See `docs/eas-submit-configuration.md` for the repeatable submit configuration gate.
+
 ## 6. Run Strict Preflight
 
 After project linkage and hosted URLs are configured:

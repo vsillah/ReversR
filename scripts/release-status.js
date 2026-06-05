@@ -239,6 +239,24 @@ addGate(
   easProjectId ? '' : 'Run npx eas-cli@20.0.0 init for the clone identity.'
 );
 
+const productionSubmit = easConfig.submit?.production || {};
+const easSubmitReady = (
+  productionSubmit.android?.track === 'internal' &&
+  Boolean(productionSubmit.ios?.ascAppId)
+);
+addGate(
+  'native',
+  'eas-submit-config',
+  'EAS submit profile is configured for Google Play Internal Testing and TestFlight upload',
+  easSubmitReady ? 'pass' : 'pending',
+  easSubmitReady
+    ? `android.track=${productionSubmit.android.track}; ios.ascAppId configured.`
+    : `android.track=${productionSubmit.android?.track || '(missing)'}; ios.ascAppId=${productionSubmit.ios?.ascAppId ? 'configured' : '(missing)'}.`,
+  easSubmitReady
+    ? ''
+    : 'After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight.'
+);
+
 const easVersion = spawnSync('npx', ['--yes', 'eas-cli@20.0.0', '--version'], { encoding: 'utf8' });
 addGate(
   'native',

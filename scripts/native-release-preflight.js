@@ -61,6 +61,7 @@ requireOrWarn(
 
 const profiles = easConfig.build || {};
 const submit = easConfig.submit || {};
+const productionSubmit = submit.production || {};
 
 for (const [profile, environment] of [['development', 'development'], ['preview', 'preview'], ['production', 'production']]) {
   if (profiles[profile]?.environment !== environment) {
@@ -73,6 +74,17 @@ if (profiles.preview?.android?.buildType !== 'apk') fail('EAS preview Android bu
 if (profiles.production?.android?.buildType !== 'app-bundle') fail('EAS production Android build must use app-bundle for Google Play.');
 if (!profiles.production?.autoIncrement) fail('EAS production profile should autoIncrement native build numbers.');
 if (!submit.production || typeof submit.production !== 'object') fail('EAS submit.production profile is required before store submission.');
+if (productionSubmit.android?.track !== 'internal') {
+  fail('EAS submit.production.android.track must be "internal" for the first Google Play release lane.');
+}
+if (!productionSubmit.ios || typeof productionSubmit.ios !== 'object') {
+  fail('EAS submit.production.ios profile is required before TestFlight submission.');
+}
+requireOrWarn(
+  Boolean(productionSubmit.ios?.ascAppId),
+  'Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.',
+  allowPlaceholder
+);
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || appConfig.extra?.apiBaseUrl;
 requireOrWarn(

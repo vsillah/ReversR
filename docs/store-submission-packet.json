@@ -110,6 +110,7 @@
     "Deploy hosted privacy, terms, and support routes.",
     "Set EAS production environment URLs.",
     "Run eas init for the clone identity.",
+    "Set eas.json submit.production.ios.ascAppId after the App Store Connect record exists.",
     "Configure App Store Connect and Play Console records.",
     "Run native Android and iOS preview builds.",
     "Capture final native screenshots.",

@@ -190,6 +190,7 @@ const requiredDocs = [
   'docs/policy-hosting-deployment.md',
   'docs/production-api-deployment.md',
   'docs/native-release-runbook.md',
+  'docs/eas-submit-configuration.md',
   'docs/native-qa-evidence.template.json',
   'docs/store-screenshots/README.md',
   'Dockerfile',

@@ -37,6 +37,7 @@ The app now has:
 - API Dockerfile and production deployment runbook for hosted backend readiness
 - API runtime config health reporting for CORS mode, body limit, admin route state, registry-write state, and private-network connector state
 - Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
+- EAS submit configuration notes for Google Play Internal Testing and TestFlight upload
 - Native QA evidence template and `npm run native:qa:preflight` gate for Android/iOS preview-build testing
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
@@ -109,6 +110,7 @@ Open gates:
 - Privacy policy, terms, and support: web routes, static export, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
+- EAS submit profile: Android is configured for Google Play Internal Testing, but iOS still needs the App Store Connect `ascAppId` after the app record exists.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: critical-path labels are covered by `npm run accessibility:preflight`, but native screen-reader and tap-target QA still need device validation before submission.
