@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
+  TextInput,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -116,6 +117,12 @@ type ManufacturerQuotePacket = {
     expectedFileTypes: string[];
   };
   vendorTargets: QuoteVendor[];
+  quoteRouting: {
+    selectedVendor?: QuoteVendor;
+    recipientEmail?: string;
+    adminNotes?: string;
+    submissionMode: 'user_reviewed_email_draft';
+  };
   quoteRequestMessage: string;
 };
 
@@ -142,6 +149,9 @@ export default function PhaseFour({
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
   const [bomExpanded, setBomExpanded] = useState(true);
   const [loadingStep, setLoadingStep] = useState<string>('analyzing');
+  const [selectedVendorName, setSelectedVendorName] = useState('');
+  const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('');
+  const [quoteAdminNotes, setQuoteAdminNotes] = useState('');
 
   useEffect(() => {
     // Scroll to top on mount
@@ -185,8 +195,23 @@ export default function PhaseFour({
     }));
   };
 
+  const getSelectedVendor = () => {
+    const vendorTargets = getVendorTargets();
+    return vendorTargets.find(vendor => vendor.vendorName === selectedVendorName) || vendorTargets[0];
+  };
+
+  const getQuoteRequestMessage = (selectedVendor?: QuoteVendor) => [
+    `Please review the attached reconstruction package for ${innovation.machineName || innovation.conceptName}.`,
+    `Requested service: ${selectedVendor?.serviceType || '3D modeling, fabrication feasibility, and quote review'}.`,
+    `We need a quote for 3D modeling, fabrication feasibility, expected lead time, and any missing source files required before production.`,
+    `Use the BOM, assembly sequence, technical spec, pricing envelope, and inventory match evidence as review inputs.`,
+    quoteAdminNotes.trim() ? `Additional notes from the admin:\n${quoteAdminNotes.trim()}` : '',
+    `Do not fabricate or order parts until a qualified reviewer confirms machine identity, tolerances, safety constraints, and revision compatibility.`,
+  ].filter(Boolean).join('\n\n');
+
   const buildQuotePacket = (bomForPacket: BillOfMaterials): ManufacturerQuotePacket => {
     const vendorTargets = getVendorTargets();
+    const selectedVendor = getSelectedVendor();
     const angleLabels = multiAngleImages
       .filter(image => !!image.imageData)
       .map(image => image.label);
@@ -220,12 +245,13 @@ export default function PhaseFour({
         expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'OBJ/STL if generated', 'PNG visual references if generated'],
       },
       vendorTargets,
-      quoteRequestMessage: [
-        `Please review the attached reconstruction package for ${innovation.machineName || innovation.conceptName}.`,
-        `We need a quote for 3D modeling, fabrication feasibility, expected lead time, and any missing source files required before production.`,
-        `Use the BOM, assembly sequence, technical spec, pricing envelope, and inventory match evidence as review inputs.`,
-        `Do not fabricate or order parts until a qualified reviewer confirms machine identity, tolerances, safety constraints, and revision compatibility.`,
-      ].join('\n\n'),
+      quoteRouting: {
+        selectedVendor,
+        recipientEmail: quoteRecipientEmail.trim() || undefined,
+        adminNotes: quoteAdminNotes.trim() || undefined,
+        submissionMode: 'user_reviewed_email_draft',
+      },
+      quoteRequestMessage: getQuoteRequestMessage(selectedVendor),
     };
   };
 
@@ -330,6 +356,57 @@ export default function PhaseFour({
     } catch (e) {
       console.error('Quote packet export error:', e);
       setAlert({visible: true, title: 'Error', message: 'Failed to export manufacturer quote packet.', type: 'error'});
+    }
+  };
+
+  const handlePrepareQuoteEmail = async () => {
+    if (!localBom) {
+      setAlert({visible: true, title: 'BOM Required', message: 'Generate the Bill of Materials before preparing a vendor quote request.', type: 'info'});
+      return;
+    }
+
+    const selectedVendor = getSelectedVendor();
+    const subject = `Quote request: ${innovation.machineName || innovation.conceptName}`;
+    const body = [
+      getQuoteRequestMessage(selectedVendor),
+      '',
+      'Package checklist:',
+      '- Manufacturer quote packet JSON',
+      '- BOM CSV',
+      '- Assembly sequence',
+      '- Technical specifications',
+      has2D ? '- 2D visual references' : '- 2D visual references: pending',
+      has3D ? '- OBJ/STL or 3D scene reference' : '- OBJ/STL or 3D scene reference: pending',
+      '',
+      'Inventory match:',
+      `- Machine: ${innovation.machineName || innovation.conceptName}`,
+      innovation.machineId ? `- Machine ID: ${innovation.machineId}` : '',
+      innovation.inventorySource ? `- Inventory source: ${innovation.inventorySource}` : '',
+      innovation.confidenceScore != null ? `- Match confidence: ${Math.round(innovation.confidenceScore * 100)}%` : '',
+      innovation.evidence ? `- Evidence: ${innovation.evidence}` : '',
+      '',
+      'Pricing envelope:',
+      innovation.pricing ? `- Parts: ${innovation.pricing.partsSubtotal}` : '',
+      innovation.pricing ? `- 3D modeling: ${innovation.pricing.modelingEstimate}` : '',
+      innovation.pricing ? `- Fabrication: ${innovation.pricing.fabricationEstimate}` : '',
+      innovation.pricing ? `- Total estimate: ${innovation.pricing.totalEstimate}` : '',
+      '',
+      'Please confirm required source files, manufacturability concerns, lead time, and quote assumptions before any fabrication begins.',
+    ].filter(Boolean).join('\n');
+
+    const recipient = quoteRecipientEmail.trim();
+    const mailtoUrl = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    try {
+      const supported = await Linking.canOpenURL(mailtoUrl);
+      if (!supported) {
+        setAlert({visible: true, title: 'Email App Unavailable', message: 'Export the quote packet and paste the request message into your email or vendor portal.', type: 'info'});
+        return;
+      }
+      await Linking.openURL(mailtoUrl);
+    } catch (e) {
+      console.error('Quote email error:', e);
+      setAlert({visible: true, title: 'Email Draft Failed', message: 'Export the quote packet and paste the request message into your email or vendor portal.', type: 'error'});
     }
   };
 
@@ -630,6 +707,60 @@ export default function PhaseFour({
           >
             <Text style={styles.quotePacketButtonText}>
               {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.quoteRequestCard}>
+          <View style={styles.quotePacketHeader}>
+            <Ionicons name="mail-outline" size={20} color={Colors.accent} />
+            <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
+          </View>
+          <Text style={styles.quotePacketText}>
+            Select a vendor target and prepare a reviewable email draft. Attach the exported packet and files before sending.
+          </Text>
+          <Text style={styles.quoteFieldLabel}>Vendor target</Text>
+          <View style={styles.vendorChoiceGrid}>
+            {getVendorTargets().map(vendor => {
+              const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
+              return (
+                <TouchableOpacity
+                  key={`${vendor.vendorName}-${vendor.url}`}
+                  style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
+                  onPress={() => setSelectedVendorName(vendor.vendorName)}
+                >
+                  <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
+                    {vendor.vendorName}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={styles.quoteFieldLabel}>Recipient email</Text>
+          <TextInput
+            style={styles.quoteInput}
+            value={quoteRecipientEmail}
+            onChangeText={setQuoteRecipientEmail}
+            placeholder="quotes@vendor.com"
+            placeholderTextColor={Colors.gray[600]}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
+          <TextInput
+            style={[styles.quoteInput, styles.quoteNotesInput]}
+            value={quoteAdminNotes}
+            onChangeText={setQuoteAdminNotes}
+            placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
+            placeholderTextColor={Colors.gray[600]}
+            multiline
+          />
+          <TouchableOpacity
+            style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
+            onPress={handlePrepareQuoteEmail}
+            disabled={!localBom}
+          >
+            <Text style={styles.quotePacketButtonText}>
+              {localBom ? 'Prepare Request Email' : 'Generate BOM First'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1255,6 +1386,14 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
   },
+  quoteRequestCard: {
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
   quotePacketHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1265,6 +1404,56 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
+  },
+  quoteFieldLabel: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    marginBottom: Spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  vendorChoiceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  vendorChoiceButton: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    maxWidth: '48%',
+  },
+  vendorChoiceButtonActive: {
+    borderColor: Colors.accent,
+    backgroundColor: 'rgba(0, 255, 157, 0.12)',
+  },
+  vendorChoiceText: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+  },
+  vendorChoiceTextActive: {
+    color: Colors.accent,
+  },
+  quoteInput: {
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  quoteNotesInput: {
+    minHeight: 76,
+    textAlignVertical: 'top',
   },
   quotePacketText: {
     color: Colors.gray[300],

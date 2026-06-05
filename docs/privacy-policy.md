@@ -43,7 +43,7 @@ We use information to:
 
 The app may use AI providers such as Google Gemini or local models such as Ollama to analyze machine input and generate reconstruction outputs. If a cloud AI provider is configured, machine descriptions and images may be sent to that provider for processing.
 
-Manufacturer links such as Xometry, Protolabs, Shapeways, or JLCPCB are provided as handoff destinations. The app can export a quote packet for user-reviewed handoff, but it does not automatically submit files or orders to those vendors.
+Manufacturer links such as Xometry, Protolabs, Shapeways, or JLCPCB are provided as handoff destinations. The app can export a quote packet and prepare a user-reviewed email draft for handoff, but it does not automatically submit files or orders to those vendors.
 
 ## Data Sharing
 

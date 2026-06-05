@@ -53,7 +53,7 @@ Your use of third-party services is subject to their own terms and privacy polic
 
 ## No Automatic Vendor Submission
 
-The current App may open vendor websites or export handoff files, including manufacturer quote packets, but it does not automatically submit orders, transmit files, or purchase services without user action.
+The current App may open vendor websites, prepare user-reviewed quote request drafts, or export handoff files, including manufacturer quote packets, but it does not automatically submit orders, transmit files, or purchase services without user action.
 
 ## Intellectual Property
 

@@ -18,6 +18,7 @@ The app now has:
 - Machine matching against demo, CSV, JSON, HTTP(S), and local file fixtures
 - Reconstruction package generation with assembly steps, pricing, BOM, and manufacturer handoff surfaces
 - Manufacturer quote packet export for human-reviewed 3D modeling and fabrication requests
+- Vendor request draft flow for preparing a user-reviewed quote email after the quote packet is exported
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - Expo Doctor passes all project health checks
@@ -84,7 +85,7 @@ Open gates:
 - Privacy policy, terms, and support: Settings links and app config keys exist, but placeholder URLs must be replaced with hosted public URLs and legal review.
 - Native QA: camera flow needs real iOS and Android device testing.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
-- Vendor handoff: quote packet export is available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
+- Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: needs screen-reader and tap-target QA before submission.
 - Store assets: metadata draft and required 1024x1024 PNG assets exist, but native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
 - Dependency audit: `npm audit fix` removed the high-severity findings; remaining moderate transitive Expo-tooling findings require a breaking Expo SDK 56 upgrade path and should be handled as a separate native upgrade gate.
