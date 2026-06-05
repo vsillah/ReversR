@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T11:45:29.259Z",
-  "releaseStatusGeneratedAt": "2026-06-05T11:45:29.253Z",
+  "generatedAt": "2026-06-05T12:04:45.521Z",
+  "releaseStatusGeneratedAt": "2026-06-05T12:04:45.516Z",
   "summary": {
     "pass": 5,
     "pending": 4
@@ -64,8 +64,8 @@
       "id": "store-console-records",
       "title": "App Store Connect and Google Play Console app records exist",
       "status": "pending",
-      "evidence": "Expected iOS bundle com.vsillah.reversrrebuild; expected Android package com.vsillah.reversrrebuild; docs/store-console-evidence.json is missing.",
-      "nextStep": "Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight.",
+      "evidence": "docs/store-console-evidence.json exists; run npm run store:console:preflight for proof.",
+      "nextStep": "Run npm run store:console:preflight and resolve any failures.",
       "action": {
         "owner": "Store release operator",
         "phase": "Store console setup",

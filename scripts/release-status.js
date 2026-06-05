@@ -1021,10 +1021,12 @@ const storeConsolePendingOk = (
   storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.iosBundleId === true &&
   storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.androidPackage === true &&
   storeConsolePendingEvidence?.appStoreConnect?.status === 'pending' &&
-  storeConsolePendingEvidence?.googlePlay?.status === 'pending' &&
+  ['pending', 'pass'].includes(storeConsolePendingEvidence?.googlePlay?.status) &&
   storeConsolePendingEvidence?.googlePlay?.packageNameMatches === true &&
   storeConsolePendingEvidence?.requiredAssets?.featureGraphicPathReady === true &&
-  storeConsolePendingEvidence?.reviewGates?.hostedApiPreflightPassed === false &&
+  typeof storeConsolePendingEvidence?.reviewGates?.hostedApiPreflightPassed === 'boolean' &&
+  typeof storeConsolePendingEvidence?.reviewGates?.hostedPolicyPreflightPassed === 'boolean' &&
+  typeof storeConsolePendingEvidence?.reviewGates?.hostedConnectorSmokePassed === 'boolean' &&
   storeConsolePendingEvidence?.reviewGates?.nativeQaPreflightPassed === false
 );
 addGate(

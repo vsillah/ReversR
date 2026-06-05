@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T11:35:32Z",
+  "generatedAt": "2026-06-05T12:03:04Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -9,17 +9,18 @@
     "sku": "reversr-rebuild-001"
   },
   "appStoreConnect": {
-    "browserState": "Chrome is open at an App Store Connect account-entitlement error after login.",
-    "url": "https://appstoreconnect.apple.com/m/INVALIDITCUSER?errorKey=ITC.signin.error.invalidUser.asc",
-    "accountGate": "The signed-in Apple Account is not enabled for App Store Connect.",
-    "nextHumanAction": "Use an Apple Developer account that is enabled for App Store Connect, or enable this Apple Account for App Store Connect, then create the app record for the iOS bundle ID.",
+    "browserState": "Chrome is open at Apple Account email verification after Apple Developer redirected from the App Store Connect account-entitlement path.",
+    "url": "https://account.apple.com/sign-in",
+    "accountGate": "Apple Developer reports the Apple Account cannot be used until the email address vsillah@mac.com is verified.",
+    "nextHumanAction": "Enter the six-digit verification code sent to vsillah@mac.com, continue the Apple Developer agreement/enrollment flow, then create the App Store Connect app record for the iOS bundle ID.",
     "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
   },
   "googlePlayConsole": {
-    "browserState": "Chrome is open at Google Play Console Create app with factual fields filled.",
+    "browserState": "Chrome is open at the Google Play Console dashboard for ReversR Rebuild.",
     "developerAccount": "Vambah Sillah",
     "developerAccountId": "8864864114913698241",
-    "url": "https://play.google.com/console/u/0/developers/8864864114913698241/create-new-app",
+    "appId": "4972956671966100551",
+    "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
     "fieldsPrepared": {
       "appName": "ReversR Rebuild",
       "packageName": "com.vsillah.reversrrebuild",
@@ -28,15 +29,12 @@
       "appOrGame": "App",
       "freeOrPaid": "Free"
     },
-    "legalDeclarationsPending": [
-      "Developer Program Policies",
-      "US export laws"
-    ],
-    "nextHumanAction": "Review and accept the Developer Program Policies and US export laws declarations, then click Create app if appropriate."
+    "legalDeclarationsPending": [],
+    "nextHumanAction": "Complete app information/store listing, data safety, app content, internal testing, and native screenshot upload tasks."
   },
   "notes": [
-    "No legal declarations were accepted by automation.",
+    "Google Play app record exists; production access and store listing are not complete.",
     "No public store submission was started.",
-    "This evidence is a handoff record only; docs/store-console-evidence.json is still required after real console records exist."
+    "Apple email verification, Apple Developer enrollment or invitation, App Store Connect app record creation, and ascAppId collection are still required."
   ]
 }
