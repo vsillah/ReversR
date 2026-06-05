@@ -76,6 +76,7 @@ const localProofGateIds = [
   'release-next-actions-packet',
   'preview-host-target-discovery',
   'store-operator-packet',
+  'hosted-operator-packet',
 ];
 const externalGateIds = [
   'preview-host-smoke',
@@ -115,6 +116,7 @@ const evidenceFiles = {
   nativeReleaseConfig: readOptionalJson('docs/native-release-config-evidence.json'),
   storeConsolePending: readOptionalJson('docs/store-console-pending-evidence.json'),
   storeOperatorPacket: readOptionalJson('docs/store-operator-packet/manifest.json'),
+  hostedOperatorPacket: readOptionalJson('docs/hosted-operator-packet/manifest.json'),
   localReleaseCi: readOptionalJson('docs/local-release-ci-evidence.json'),
   releaseNextActions: readOptionalJson('docs/release-next-actions.json'),
 };
@@ -186,6 +188,7 @@ const bundle = {
     storeReviewSafety: 'npm run store:review-safety',
     storeConsoleCopy: 'npm run store:console:copy',
     storeOperatorPacket: 'npm run store:operator-packet',
+    hostedOperatorPacket: 'npm run hosted:operator-packet',
     previewHostSmoke: 'PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke',
     storePreflightLocal: 'npm run store:preflight:local',
     storeConsolePreflightLocal: 'npm run store:console:preflight:local',
@@ -203,6 +206,8 @@ const bundle = {
     'docs/store-console-copy.md',
     'docs/store-operator-packet/manifest.json',
     'docs/store-operator-packet/README.md',
+    'docs/hosted-operator-packet/manifest.json',
+    'docs/hosted-operator-packet/README.md',
     'docs/store-console-pending-evidence.json',
     'docs/store-console-evidence.template.json',
     'docs/native-qa-evidence.template.json',

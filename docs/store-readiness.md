@@ -58,6 +58,7 @@ The app now has:
 - API Dockerfile and production deployment runbook for hosted backend readiness
 - Production API environment template and preflight: `npm run api:env:preflight`
 - Production-style local API deployment smoke evidence: `npm run api:deployment-smoke`
+- Hosted operator packet: `npm run hosted:operator-packet` writes `docs/hosted-operator-packet/manifest.json` and `docs/hosted-operator-packet/README.md`
 - API runtime config health reporting for CORS mode, body limit, admin route state, registry-write state, and private-network connector state
 - Machine inventory source validation before hosting: `npm run inventory:source:validate`
 - Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
@@ -157,18 +158,19 @@ Open gates:
 8. Run `npm run store:assets:preflight` to verify the Google Play feature graphic before console setup.
 9. Start `npm run web-preview`, then run `WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke` to prove the web happy path and write `docs/web-flow-smoke-evidence.json` before screenshot or native preview work.
 10. After the PR preview deploys, run `npm run preview:discover -- --pr <number>`, copy the discovered `previewUrl`, then run `PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke` to prove the deployed preview app and policy/support routes render before production hosting work. If Vercel preview protection is enabled, add `PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret>`.
-11. Fill a production API env from `docs/production-api-env.example`, run `npm run api:env:preflight`, run `npm run api:deployment-smoke`, deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
-12. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
-13. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
-14. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
-15. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy`.
-16. Run `npm run store:operator-packet` and use `docs/store-operator-packet/README.md` as the App Store Connect and Google Play setup handoff.
-17. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
-18. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
-19. Run EAS preview builds.
-20. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
-21. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
-22. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
-23. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
-24. Submit to TestFlight and Google Play Internal Testing.
-25. Resolve review feedback, then submit production releases.
+11. Run `npm run hosted:operator-packet` and use `docs/hosted-operator-packet/README.md` as the API, policy URL, preview, and connector handoff.
+12. Fill a production API env from `docs/production-api-env.example`, run `npm run api:env:preflight`, run `npm run api:deployment-smoke`, deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
+13. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
+14. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
+15. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
+16. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy`.
+17. Run `npm run store:operator-packet` and use `docs/store-operator-packet/README.md` as the App Store Connect and Google Play setup handoff.
+18. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
+19. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
+20. Run EAS preview builds.
+21. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
+22. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
+23. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
+24. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+25. Submit to TestFlight and Google Play Internal Testing.
+26. Resolve review feedback, then submit production releases.

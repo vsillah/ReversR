@@ -369,6 +369,8 @@ const requiredArtifacts = [
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
   'docs/preview-host-target.json',
+  'docs/hosted-operator-packet/manifest.json',
+  'docs/hosted-operator-packet/README.md',
   'docs/external-release-setup-runbook.md',
   '.github/workflows/release-local-ci.yml',
   'docs/native-release-runbook.md',
@@ -390,6 +392,7 @@ const requiredArtifacts = [
   'scripts/objective-readiness-audit.js',
   'scripts/release-next-actions.js',
   'scripts/discover-preview-host.js',
+  'scripts/generate-hosted-operator-packet.js',
   'scripts/local-release-ci.js',
   'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
@@ -556,6 +559,7 @@ const requiredBundleProofs = [
   'release-next-actions-packet',
   'preview-host-target-discovery',
   'store-operator-packet',
+  'hosted-operator-packet',
 ];
 const requiredBundlePending = [
   'preview-host-smoke',
@@ -582,6 +586,7 @@ const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.schemaVersion === 1 &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostTarget?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeOperatorPacket?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.hostedOperatorPacket?.status === 'pass' &&
   Number(releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.pendingGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.localReleaseCi?.status === 'pass'
 );
@@ -607,6 +612,7 @@ const expectedLocalCiCommands = [
   'store-review-safety',
   'store-console-copy',
   'store-operator-packet',
+  'hosted-operator-packet',
   'release-next-actions-write',
   'objective-readiness-audit',
   'store-console-preflight-local',
@@ -669,6 +675,47 @@ addGate(
     ? `docs/store-operator-packet/manifest.json packages ${storeOperatorPacket.sourceArtifacts.length} source artifacts at ${storeOperatorPacket.generatedAt}.`
     : 'docs/store-operator-packet/manifest.json or README.md is missing or incomplete.',
   storeOperatorPacketOk ? '' : 'Run npm run store:operator-packet before store-console setup.'
+);
+
+const hostedOperatorPacket = readOptionalJson('docs/hosted-operator-packet/manifest.json');
+const hostedOperatorReadme = readText('docs/hosted-operator-packet/README.md');
+const requiredHostedOperatorSources = [
+  'docs/production-api-deployment.md',
+  'docs/production-api-env.example',
+  'docs/policy-hosting-deployment.md',
+  'docs/external-release-setup-runbook.md',
+  'Dockerfile',
+  'vercel.json',
+  'scripts/api-preflight.js',
+  'scripts/hosted-connector-smoke.js',
+  'scripts/policy-hosting-preflight.js',
+];
+const hostedOperatorPacketOk = (
+  hostedOperatorPacket?.schemaVersion === 1 &&
+  hostedOperatorPacket?.status === 'pass' &&
+  hostedOperatorPacket?.appIdentity?.iosBundleId === appConfig.ios?.bundleIdentifier &&
+  hostedOperatorPacket?.appIdentity?.androidPackage === appConfig.android?.package &&
+  ['preview-host-smoke', 'hosted-api', 'hosted-policy-urls', 'real-connector-smoke'].every(id => (
+    hostedOperatorPacket?.hostedGates?.some(gate => gate.id === id)
+  )) &&
+  hostedOperatorPacket?.commandSequence?.some(item => item.id === 'api-hosted-preflight') &&
+  hostedOperatorPacket?.commandSequence?.some(item => item.id === 'hosted-connector-smoke') &&
+  hostedOperatorPacket?.requiredEnv?.includes('API_CORS_ORIGINS') &&
+  hostedOperatorPacket?.safetyBoundary?.some(item => item.includes('credentialRef only')) &&
+  requiredHostedOperatorSources.every(source => hostedOperatorPacket?.sourceArtifacts?.some(artifact => artifact.path === source && artifact.exists === true)) &&
+  hostedOperatorReadme.includes('ReversR Rebuild Hosted Operator Packet') &&
+  hostedOperatorReadme.includes('Command Sequence') &&
+  hostedOperatorReadme.includes('Hosted Gates')
+);
+addGate(
+  'store-local',
+  'hosted-operator-packet',
+  'Hosted API, policy, preview, and connector handoff packet is generated',
+  hostedOperatorPacketOk ? 'pass' : 'pending',
+  hostedOperatorPacketOk
+    ? `docs/hosted-operator-packet/manifest.json packages ${hostedOperatorPacket.hostedGates.length} hosted gates at ${hostedOperatorPacket.generatedAt}.`
+    : 'docs/hosted-operator-packet/manifest.json or README.md is missing or incomplete.',
+  hostedOperatorPacketOk ? '' : 'Run npm run hosted:operator-packet before hosted API/policy/connector work.'
 );
 
 const releaseWorkflowChecks = [

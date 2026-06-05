@@ -19,12 +19,13 @@ Before starting external account or hosted-environment work, refresh the local v
 
 ```bash
 npm run release:local-ci
+npm run hosted:operator-packet
 npm run store:operator-packet
 npm run release:evidence
 npm run release:status
 ```
 
-`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `store:operator-packet` refreshes the App Store Connect and Google Play handoff folder at `docs/store-operator-packet/`. `release:evidence` packages the local proof files, durable next-action packet, store operator packet, and pending external gates into `docs/release-evidence-bundle.json`.
+`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `hosted:operator-packet` refreshes the API, policy URL, preview, and connector handoff folder at `docs/hosted-operator-packet/`. `store:operator-packet` refreshes the App Store Connect and Google Play handoff folder at `docs/store-operator-packet/`. `release:evidence` packages the local proof files, durable next-action packet, hosted operator packet, store operator packet, and pending external gates into `docs/release-evidence-bundle.json`.
 
 After the PR preview deploys, record deployed-preview evidence:
 
@@ -50,6 +51,7 @@ The smoke uses the `x-vercel-protection-bypass` header and records only that a b
 ## Current Critical Path
 
 1. Deploy the API behind HTTPS.
+   - Run `npm run hosted:operator-packet` and keep `docs/hosted-operator-packet/README.md` open as the hosted-lane command sheet.
    - Follow `docs/external-release-setup-runbook.md` section 5 for hosted API and policy URL sequencing.
    - Copy `docs/production-api-env.example` into the host provider's environment settings.
    - Set `API_CORS_ORIGINS` to hosted app origins, not `*`.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T06:41:21.630Z",
+  "generatedAt": "2026-06-05T06:45:42.001Z",
   "source": "docs/store-console-evidence.template.json",
   "finalEvidenceFile": "docs/store-console-evidence.json",
   "warnings": [

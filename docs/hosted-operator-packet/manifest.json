@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T06:46:00.972Z",
+  "releaseStatus": {
+    "generatedAt": "2026-06-05T06:46:00.969Z",
+    "summary": {
+      "pass": 30,
+      "pending": 9
+    }
+  },
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild"
+  },
+  "hostedGates": [
+    {
+      "id": "preview-host-smoke",
+      "group": "hosted",
+      "status": "pending",
+      "title": "Vercel preview host renders app and policy/support routes before production hosting",
+      "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
+      "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
+    },
+    {
+      "id": "hosted-api",
+      "group": "hosted",
+      "status": "pending",
+      "title": "Hosted HTTPS API URL is configured for native builds",
+      "evidence": "No proven hosted API URL in environment or store packet.",
+      "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+    },
+    {
+      "id": "hosted-policy-urls",
+      "group": "hosted",
+      "status": "pending",
+      "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+      "evidence": "Hosted policy/support URLs are still placeholders or missing.",
+      "nextStep": "Deploy /privacy, /terms, and /support, then set the hosted URL env vars."
+    },
+    {
+      "id": "real-connector-smoke",
+      "group": "hosted",
+      "status": "pending",
+      "title": "Hosted API can validate and match against a real authorized machine inventory",
+      "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
+      "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+    }
+  ],
+  "sourceArtifacts": [
+    {
+      "path": "docs/production-api-deployment.md",
+      "exists": true
+    },
+    {
+      "path": "docs/production-api-env.example",
+      "exists": true
+    },
+    {
+      "path": "docs/policy-hosting-deployment.md",
+      "exists": true
+    },
+    {
+      "path": "docs/external-release-setup-runbook.md",
+      "exists": true
+    },
+    {
+      "path": "docs/api-deployment-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/policy-hosting-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/preview-host-target.json",
+      "exists": true
+    },
+    {
+      "path": "docs/preview-host-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/sample-machine-inventory.csv",
+      "exists": true
+    },
+    {
+      "path": "Dockerfile",
+      "exists": true
+    },
+    {
+      "path": "vercel.json",
+      "exists": true
+    },
+    {
+      "path": "scripts/api-env-preflight.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/api-preflight.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/api-deployment-smoke.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/policy-hosting-preflight.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/hosted-connector-smoke.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/preview-host-smoke.js",
+      "exists": true
+    }
+  ],
+  "commandSequence": [
+    {
+      "id": "api-env-preflight",
+      "command": "API_ENV_FILE=/path/to/provider-env-export npm run api:env:preflight",
+      "purpose": "Validate hosted API CORS, body limit, AI key, admin token, connector-secret, and private-network settings before deploy."
+    },
+    {
+      "id": "api-deployment-smoke",
+      "command": "npm run api:deployment-smoke",
+      "purpose": "Refresh local production-style API smoke evidence before deploying the container."
+    },
+    {
+      "id": "api-hosted-preflight",
+      "command": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight",
+      "purpose": "Prove the deployed API health, restricted CORS, demo inventory validation, and optional admin registry access."
+    },
+    {
+      "id": "policy-hosted-preflight",
+      "command": "EXPO_PUBLIC_PRIVACY_POLICY_URL=https://your-domain.example/privacy EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support npm run policy:preflight -- --check-hosted",
+      "purpose": "Prove hosted privacy, terms, and support URLs are reachable over public HTTPS."
+    },
+    {
+      "id": "inventory-source-validate",
+      "command": "npm run inventory:source:validate -- <inventory.csv-or-json>",
+      "purpose": "Validate the real machine inventory export before connecting it to the hosted API."
+    },
+    {
+      "id": "hosted-connector-smoke",
+      "command": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example CONNECTOR_SMOKE_SOURCE_URL=https://inventory.your-domain.example/machines.json CONNECTOR_SMOKE_AUTH_MODE=api_key CONNECTOR_SMOKE_CREDENTIAL_REF=partsledger-prod npm run connector:smoke",
+      "purpose": "Prove hosted machine inventory validation, machine matching, BOM generation, and server-side credentialRef handling."
+    },
+    {
+      "id": "preview-smoke",
+      "command": "PREVIEW_SMOKE_URL=<preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
+      "purpose": "Prove the PR preview renders the app and policy/support routes before production hosting decisions."
+    }
+  ],
+  "requiredEnv": [
+    "API_CORS_ORIGINS",
+    "API_REQUEST_BODY_LIMIT",
+    "AI_INTEGRATIONS_GEMINI_API_KEY",
+    "ADMIN_API_TOKEN",
+    "INVENTORY_CONNECTOR_SECRETS_JSON or INVENTORY_CONNECTOR_SECRETS_FILE",
+    "EXPO_PUBLIC_API_BASE_URL",
+    "EXPO_PUBLIC_PRIVACY_POLICY_URL",
+    "EXPO_PUBLIC_TERMS_URL",
+    "EXPO_PUBLIC_SUPPORT_URL"
+  ],
+  "outputsToUpdateAfterHostedWork": [
+    "docs/preview-host-smoke-evidence.json",
+    "docs/api-deployment-smoke-evidence.json",
+    "docs/policy-hosting-smoke-evidence.json",
+    "docs/store-submission-packet.json hosted URLs, if it remains the console copy source",
+    "docs/native-release-config-evidence.json after EAS hosted env binding",
+    "docs/release-evidence-bundle.json"
+  ],
+  "safetyBoundary": [
+    "Do not put Gemini keys, admin tokens, connector API keys, or OAuth tokens in mobile app config or committed files.",
+    "Restrict API_CORS_ORIGINS to hosted app origins before native release builds.",
+    "Keep INVENTORY_PRIVATE_NETWORK_ENABLED=false unless the API host has approved network controls.",
+    "Connector smoke should send credentialRef only; raw connector secrets must remain server-side.",
+    "Hosted preview and policy evidence does not replace native Android/iOS QA evidence."
+  ]
+}

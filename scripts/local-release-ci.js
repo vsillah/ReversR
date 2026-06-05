@@ -21,6 +21,7 @@ const commands = [
   ['store-review-safety', ['run', 'store:review-safety'], 'Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.'],
   ['store-console-copy', ['run', 'store:console:copy'], 'App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.'],
   ['store-operator-packet', ['run', 'store:operator-packet'], 'Store-console operator handoff packet is generated from release evidence and submission metadata.'],
+  ['hosted-operator-packet', ['run', 'hosted:operator-packet'], 'Hosted API, policy URL, preview, and connector operator packet is generated.'],
   ['release-next-actions-write', ['run', 'release:next-actions:write'], 'External release next actions are generated as durable JSON and Markdown artifacts.'],
   ['objective-readiness-audit', ['run', 'release:objective'], 'Original user objective is mapped to proven local work and pending external release gates.'],
   ['store-console-preflight-local', ['run', 'store:console:preflight:local'], 'Store-console pending evidence records account-side requirements without claiming final console proof.'],
