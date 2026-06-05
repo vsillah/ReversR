@@ -70,6 +70,7 @@ const localProofGateIds = [
   'store-console-pending-evidence',
   'local-release-ci-evidence',
   'release-local-ci-workflow',
+  'store-console-copy-packet',
 ];
 const externalGateIds = [
   'hosted-api',
@@ -167,6 +168,7 @@ const bundle = {
     releaseStatus: 'npm run release:status',
     releaseNextActions: 'npm run release:next-actions',
     releaseLocalCi: 'npm run release:local-ci',
+    storeConsoleCopy: 'npm run store:console:copy',
     storePreflightLocal: 'npm run store:preflight:local',
     storeConsolePreflightLocal: 'npm run store:console:preflight:local',
     nativePreflightLocal: 'npm run native:preflight:local',
@@ -178,6 +180,7 @@ const bundle = {
   },
   sourceArtifacts: [
     'docs/store-submission-packet.json',
+    'docs/store-console-copy.md',
     'docs/store-console-pending-evidence.json',
     'docs/store-console-evidence.template.json',
     'docs/native-qa-evidence.template.json',

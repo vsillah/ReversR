@@ -354,6 +354,7 @@ const requiredArtifacts = [
   'docs/store-screenshots/native/README.md',
   'docs/store-screenshots/planning-evidence.json',
   'docs/store-submission-packet.json',
+  'docs/store-console-copy.md',
   'docs/store-submission-smoke-evidence.json',
   'docs/store-console-evidence.template.json',
   'docs/store-console-pending-evidence.json',
@@ -369,6 +370,7 @@ const requiredArtifacts = [
   'scripts/native-qa-preflight.js',
   'scripts/store-preflight.js',
   'scripts/store-submission-preflight.js',
+  'scripts/generate-store-console-copy.js',
   'scripts/store-console-preflight.js',
   'scripts/store-assets-preflight.js',
   'scripts/generate-store-assets.js',
@@ -470,6 +472,7 @@ const expectedLocalCiCommands = [
   'inventory-preflight',
   'policy-preflight-local',
   'store-submission-preflight-local',
+  'store-console-copy',
   'store-console-preflight-local',
   'native-preflight-local',
   'native-qa-preflight-local',
@@ -518,6 +521,31 @@ addGate(
     ? '.github/workflows/release-local-ci.yml runs local release CI, refreshes the release evidence bundle, verifies release status, and uploads evidence artifacts.'
     : '.github/workflows/release-local-ci.yml is missing required local release CI coverage.',
   releaseWorkflowOk ? '' : 'Restore the release-local-ci GitHub Actions workflow before PR review.'
+);
+
+const storeConsoleCopyChecks = [
+  'ReversR Rebuild Store Console Copy Packet',
+  'App Store Connect',
+  'Google Play Console',
+  'Machine rebuild packages',
+  'Scan machines and create BOM, assembly, pricing, and fabrication packets.',
+  'Camera access is used only to capture machine images',
+  'android.permission.CAMERA',
+  'docs/store-assets/google-play-feature-graphic.png',
+  'Quote packets and vendor request drafts require explicit human review',
+  'credentialRef',
+];
+const storeConsoleCopyText = readText('docs/store-console-copy.md');
+const storeConsoleCopyOk = storeConsoleCopyChecks.every(text => storeConsoleCopyText.includes(text));
+addGate(
+  'store-local',
+  'store-console-copy-packet',
+  'Store console copy/paste packet is generated from submission metadata',
+  storeConsoleCopyOk ? 'pass' : 'pending',
+  storeConsoleCopyOk
+    ? 'docs/store-console-copy.md contains App Store, Google Play, privacy, data-safety, screenshot, release-note, and safety copy.'
+    : 'docs/store-console-copy.md is missing or incomplete.',
+  storeConsoleCopyOk ? '' : 'Run npm run store:console:copy before App Store Connect or Play Console entry.'
 );
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;

@@ -27,6 +27,7 @@ The app now has:
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - Store submission packet: `docs/store-submission-packet.json`
+- Store console copy/paste packet: `docs/store-console-copy.md`
 - Store submission packet evidence: `docs/store-submission-smoke-evidence.json`
 - Store submission packet preflight for App Store Connect and Google Play metadata limits, hosted URLs, privacy/data-safety answers, and native screenshot requirements
 - Store console evidence template and preflight: `npm run store:console:preflight`
@@ -151,7 +152,7 @@ Open gates:
 10. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
 11. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 12. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
-13. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then copy the packet into App Store Connect and Play Console drafts.
+13. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy` and copy `docs/store-console-copy.md` into App Store Connect and Play Console drafts.
 14. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
 15. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
 16. Run EAS preview builds.
