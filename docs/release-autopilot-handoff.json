@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T15:54:31.264Z",
+  "generatedAt": "2026-06-05T16:02:16.516Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -22,7 +22,7 @@
     "appStoreConnect": {
       "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
       "screen": "iOS App Version 1.0 Prepare for Submission",
-      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json. Chrome automation verified product metadata from docs/store-console-copy.md is present on the iOS version page, Sign-in required is unchecked, manual release is selected, Save is disabled, and Add for Review is visible. No public review submission was started.",
+      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json. Chrome automation verified product metadata from docs/store-console-copy.md is present on the iOS version page, Sign-in required is unchecked, manual release is selected, Save is disabled, and Add for Review is visible. The App Store Connect tab is left open at the iOS App Version 1.0 Prepare for Submission page. No public review submission was started.",
       "fields": {
         "appleId": "6777091538",
         "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
@@ -55,8 +55,10 @@
       "profileSelected": "preview",
       "nextPrompt": "Press any key if you've already finished device registration.",
       "lastCheckedAt": "2026-06-05T14:37:12Z",
-      "state": "Apple login/2FA succeeded, bundle identifier linkage succeeded, and an Apple distribution certificate was created. EAS generated a device-registration QR/link for internal distribution, but Vambah confirmed no iOS device is available.",
-      "nextHumanAction": "Abort the internal device-registration prompt and use the production/TestFlight iOS credentials path, or install full Xcode later and use an iOS Simulator for screenshots."
+      "lastProductionAttemptAt": "2026-06-05T16:01:31.192Z",
+      "productionAttemptCommand": "npx eas-cli@20.0.0 build --platform ios --profile production --non-interactive --no-wait --json",
+      "state": "Apple login/2FA succeeded earlier, bundle identifier linkage succeeded, and an Apple distribution certificate was created during the preview credentials flow. No iOS device is available for internal distribution. A later non-interactive iOS production/TestFlight build attempt detected remote iOS credentials but failed because EAS will not validate the distribution certificate non-interactively. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started.",
+      "nextHumanAction": "Run the interactive iOS production/TestFlight EAS build command so EAS can validate or repair Apple credentials. If prompted, complete Apple login and 2FA, then copy back the Expo build URL once the build starts. Stop before any App Store public submission or Add for Review action."
     }
   },
   "lastStrictFailures": {
@@ -68,7 +70,7 @@
     "nativeQaPreflight": [
       "No Android tested device or tester evidence.",
       "No iOS preview build URL, tested device, tester, or completedAt evidence.",
-      "Native QA checks and native screenshots remain pending."
+      "Android preview QA and Android native screenshots are recorded; remaining native QA and screenshot blockers are iOS build/screenshot evidence, unverified Android edge checks, and final QA signoff."
     ],
     "storeConsolePreflight": [
       "Google Play privacy policy URL, metadata, data safety, app content, internal testing, and signoff remain incomplete.",
@@ -87,9 +89,9 @@
   },
   "resumeInstructionsForVambah": [
     "For Android USB: unlock the phone, enable Developer options, turn on USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex to retry Android QA.",
-    "For Android wireless later: open Settings > System > Developer options > Wireless debugging > Pair device with pairing code, then send the IP:port and 6-digit pairing code. Codex can run adb pair and adb connect if another live Android QA pass is needed.",
+    "For Android wireless later: reconnect only if another live Android QA pass or visual regression check is needed. The current Android Pixel screenshot evidence is already recorded.",
     "For Google Play: Chrome is authenticated on the ReversR Rebuild dashboard. Privacy policy, sign-in details, ads, government apps, financial features, and health are draft-saved. Remaining HITL tasks are content rating, target audience, data safety, category/contact details, store listing asset upload, and testing/release setup.",
-    "For iOS: use the production/TestFlight credentials path next; Apple login/2FA remains HITL."
+    "For iOS: from /Users/vambahsillah/Documents/ReversR/original-ReversR run EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait. Complete Apple credential validation/login/2FA if prompted, then send the Expo build URL back to Codex."
   ],
   "preparedAutomation": [
     {

@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T15:56:07.563Z
-Release status generated at: 2026-06-05T15:56:07.556Z
+Generated at: 2026-06-05T16:03:06.301Z
+Release status generated at: 2026-06-05T16:03:06.296Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -34,8 +34,8 @@ Steps:
 
 1. Use the recorded Android preview build already in docs/native-qa-evidence.json.
 2. Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.
-3. Use the Android phone for Android preview QA and screenshots now; make sure adb devices lists exactly one device.
-4. Abort the active EAS iOS internal device-registration prompt because no iOS device is available.
+3. Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.
+4. Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.
 5. Configure iOS production/TestFlight credentials instead of internal preview credentials.
 6. After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.
 7. Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.
@@ -92,7 +92,7 @@ Evidence required:
 - Status: pending
 - Owner: QA/release operator
 - Phase: Native store screenshots
-- Next action: Capture final screenshots from Android and iOS preview builds.
+- Next action: Use the recorded Android screenshots and capture the remaining iOS screenshot set.
 
 Current gate evidence:
 
@@ -105,16 +105,18 @@ Capture final screenshots from EAS preview builds and record them in docs/native
 Steps:
 
 1. Run npm run screenshots:store against the local web preview and confirm docs/store-screenshots/planning-evidence.json is updated.
-2. Install the latest Android preview build and capture the five required Android screenshots.
-3. Install the latest iOS preview build and capture the five required iOS screenshots.
-4. Save PNGs under docs/store-screenshots/native/ using the documented filenames.
-5. Reference each PNG in docs/native-qa-evidence.json with device and capturedAt metadata.
-6. Run npm run native:qa:preflight.
+2. Use the five recorded Android Pixel screenshots already saved under docs/store-screenshots/native/.
+3. Install the latest iOS preview/TestFlight build on an iPhone/iPad, or install full Xcode and use an iOS Simulator.
+4. Capture the five required iOS screenshots.
+5. Save PNGs under docs/store-screenshots/native/ using the documented filenames.
+6. Reference each PNG in docs/native-qa-evidence.json with device and capturedAt metadata.
+7. Run npm run native:qa:preflight.
 
 Evidence required:
 
 - docs/store-screenshots/planning-evidence.json maps the web planning captures to the required native screenshot filenames.
-- All ten native screenshot PNGs exist.
+- Five Android native screenshot PNGs exist and are referenced in docs/native-qa-evidence.json.
+- Five iOS native screenshot PNGs exist.
 - docs/native-qa-evidence.json marks each screenshot pass on Android and iOS.
 - npm run native:qa:preflight passes.
 

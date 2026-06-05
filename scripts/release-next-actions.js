@@ -113,8 +113,25 @@ const readOptionalJson = (filePath) => {
 const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
 const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
 const nativeDeviceHandoff = readOptionalJson('docs/native-device-handoff.json');
+const requiredScreenshotIds = [
+  'welcome',
+  'scan',
+  'inventory-validation',
+  'design-match',
+  'build-handoff',
+];
+const screenshotStatus = (platform) => {
+  const screenshots = nativeQaEvidence?.screenshots || [];
+  const byId = new Map(screenshots.map((screenshot) => [screenshot.id, screenshot]));
+  return requiredScreenshotIds.every((id) => {
+    const platformEvidence = byId.get(id)?.[platform];
+    return platformEvidence?.status === 'pass' && Boolean(platformEvidence.file);
+  });
+};
 const androidPreviewRecorded = nativeQaEvidence?.builds?.androidPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.androidPreview?.buildUrl);
 const iosPreviewRecorded = nativeQaEvidence?.builds?.iosPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.iosPreview?.buildUrl);
+const androidScreenshotsRecorded = screenshotStatus('android');
+const iosScreenshotsRecorded = screenshotStatus('ios');
 const appStoreRecordRecorded = storeConsoleEvidence?.appStoreConnect?.status === 'pass' && Boolean(storeConsoleEvidence?.appStoreConnect?.appleId);
 const googlePlayRecordRecorded = storeConsoleEvidence?.googlePlay?.status === 'pass' && Boolean(storeConsoleEvidence?.googlePlay?.recordUrl);
 const iosDeviceRegistrationPending = [
@@ -252,8 +269,10 @@ const actionPlan = {
       ...(iosPreviewRecorded
         ? ['Use the recorded iOS preview build already in docs/native-qa-evidence.json.']
         : iosInternalDeviceUnavailable ? [
-            'Use the Android phone for Android preview QA and screenshots now; make sure adb devices lists exactly one device.',
-            'Abort the active EAS iOS internal device-registration prompt because no iOS device is available.',
+            ...(androidScreenshotsRecorded
+              ? ['Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.']
+              : ['Reconnect the Android phone and finish Android preview QA/screenshots; make sure adb devices lists exactly one device.']),
+            'Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.',
             'Configure iOS production/TestFlight credentials instead of internal preview credentials.',
             'After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.',
             'Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.',
@@ -311,18 +330,30 @@ const actionPlan = {
   'native-screenshots': {
     owner: 'QA/release operator',
     phase: 'Native store screenshots',
-    action: 'Capture final screenshots from Android and iOS preview builds.',
+    action: androidScreenshotsRecorded && !iosScreenshotsRecorded
+      ? 'Use the recorded Android screenshots and capture the remaining iOS screenshot set.'
+      : 'Capture final screenshots from Android and iOS preview builds.',
     steps: [
       'Run npm run screenshots:store against the local web preview and confirm docs/store-screenshots/planning-evidence.json is updated.',
-      'Install the latest Android preview build and capture the five required Android screenshots.',
-      'Install the latest iOS preview build and capture the five required iOS screenshots.',
+      ...(androidScreenshotsRecorded
+        ? ['Use the five recorded Android Pixel screenshots already saved under docs/store-screenshots/native/.']
+        : ['Install the latest Android preview build and capture the five required Android screenshots.']),
+      ...(iosScreenshotsRecorded
+        ? ['Use the five recorded iOS screenshots already saved under docs/store-screenshots/native/.']
+        : [
+            'Install the latest iOS preview/TestFlight build on an iPhone/iPad, or install full Xcode and use an iOS Simulator.',
+            'Capture the five required iOS screenshots.',
+          ]),
       'Save PNGs under docs/store-screenshots/native/ using the documented filenames.',
       'Reference each PNG in docs/native-qa-evidence.json with device and capturedAt metadata.',
       'Run npm run native:qa:preflight.',
     ],
     evidence: [
       'docs/store-screenshots/planning-evidence.json maps the web planning captures to the required native screenshot filenames.',
-      'All ten native screenshot PNGs exist.',
+      ...(androidScreenshotsRecorded
+        ? ['Five Android native screenshot PNGs exist and are referenced in docs/native-qa-evidence.json.']
+        : ['Five Android native screenshot PNGs exist.']),
+      'Five iOS native screenshot PNGs exist.',
       'docs/native-qa-evidence.json marks each screenshot pass on Android and iOS.',
       'npm run native:qa:preflight passes.',
     ],

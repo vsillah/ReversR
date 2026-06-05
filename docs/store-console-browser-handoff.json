@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T15:54:31.264Z",
+  "generatedAt": "2026-06-05T16:02:16.516Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -12,11 +12,11 @@
     "browserState": "Chrome is open at the App Store Connect iOS App Version 1.0 Prepare for Submission page for ReversR Rebuild. Product metadata from docs/store-console-copy.md is present on the page, Sign-in required is unchecked, manual release is selected, Save is disabled, Add for Review is visible, and no public review submission was started.",
     "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
     "accountGate": "App Store Connect app record creation and metadata draft gates are cleared. App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload remain pending.",
-    "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete.",
+    "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete. For the iOS build gate, run the interactive EAS production build command recorded in docs/eas-ios-production-build-attempt-evidence.json and copy back the Expo build URL once it starts.",
     "neededValueAfterCreation": ""
   },
   "googlePlayConsole": {
-    "browserState": "Chrome Play Console dashboard is authenticated for ReversR Rebuild and shows 6 of 11 setup tasks complete. Draft-saved tasks: privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but the task remains incomplete because required graphics/screenshots/contact gates remain. No Send for review action was clicked.",
+    "browserState": "Chrome Play Console dashboard is authenticated for ReversR Rebuild and shows 6 of 11 setup tasks complete. Draft-saved tasks: privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but the task remains incomplete because required graphics/screenshots/contact gates remain. The Google Play dashboard tab is left open for HITL continuation. No Send for review action was clicked.",
     "developerAccount": "Vambah Sillah",
     "developerAccountId": "8864864114913698241",
     "appId": "4972956671966100551",
@@ -62,7 +62,8 @@
     "App Store Connect Apple ID 6777091538 recorded at 2026-06-05T13:53:00.252Z; eas.json submit.production.ios.ascAppId is configured.",
     "Chrome automation verified at 2026-06-05T15:54:31.264Z that App Store Connect is on the iOS App Version 1.0 Prepare for Submission page with metadata values present, Save disabled, and Add for Review visible but untouched.",
     "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
-    "The Android phone is no longer required for current cloud build, store-console, Vercel, or GitHub evidence work. Future live Android QA would require reconnecting a device."
+    "The Android phone is no longer required for current cloud build, store-console, Vercel, or GitHub evidence work. Future live Android QA would require reconnecting a device.",
+    "A non-interactive iOS production/TestFlight EAS build attempt at 2026-06-05T16:01:31.192Z detected remote iOS credentials but failed because EAS requires interactive Apple credential validation before using the distribution certificate. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started."
   ],
   "androidWirelessAdb": {
     "status": "paired-connected",
