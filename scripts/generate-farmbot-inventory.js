@@ -153,6 +153,10 @@ const moneyNumber = (value) => {
   const match = String(value || '').match(/-?\d+(?:\.\d+)?/);
   return match ? Number(match[0]) : 0;
 };
+const quantityNumber = (value) => {
+  const parsed = moneyNumber(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 const titleCaseFromSlug = (slug = '') => slug
   .split(/[-_]/)
@@ -176,8 +180,8 @@ const loadParts = async () => {
     const category = itemPath.split('/')[2];
     const slug = path.basename(itemPath, '.md');
     const name = meta.title || titleCaseFromSlug(slug);
-    const standardQuantity = Number(meta.quantity?.standard || meta.quantity?.genesis || 0);
-    const xlQuantity = Number(meta.quantity?.xl || 0);
+    const standardQuantity = quantityNumber(meta.quantity?.standard || meta.quantity?.genesis || 0);
+    const xlQuantity = quantityNumber(meta.quantity?.xl || 0);
     const price = moneyNumber(meta.price);
     const cost = moneyNumber(meta['internal-specs']?.cost);
 
@@ -221,6 +225,9 @@ const run = async () => {
   const uniqueSelectedParts = Array.from(new Map(selectedParts.map(part => [part.name, part])).values());
   const partsSubtotal = sum(sourceParts, part => part.price * part.quantity);
   const internalCostSubtotal = sum(sourceParts, part => part.cost * part.quantity);
+  if (!Number.isFinite(partsSubtotal) || !Number.isFinite(internalCostSubtotal)) {
+    throw new Error('FarmBot pricing totals must be finite numbers.');
+  }
 
   const machine = {
     machineId: 'FARMBOT-GENESIS-V1-8',
