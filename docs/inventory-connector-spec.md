@@ -174,6 +174,28 @@ Validation returns `credentialStatus: "configured"` when the server can resolve 
 
 ## Automated Connector Preflight
 
+Validate an exported machine inventory before hosting it:
+
+```bash
+npm run inventory:source:validate -- docs/sample-machine-inventory.csv
+```
+
+Strict validation requires every record to include:
+
+- stable `machineId`,
+- human-readable `machineName`,
+- at least three parts/components,
+- machine aliases for stronger matching,
+- `assemblySteps`,
+- `pricing`,
+- and modeling/fabrication vendor options.
+
+Pass `-- --allow-fallbacks` only for prototype data where server-generated fallback assembly steps and pricing are acceptable:
+
+```bash
+npm run inventory:source:validate -- docs/sample-machine-inventory.csv --allow-fallbacks
+```
+
 Run the protected inventory connector smoke before moving a connector flow toward store builds:
 
 ```bash

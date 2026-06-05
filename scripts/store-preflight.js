@@ -207,6 +207,7 @@ const requiredDocs = [
   'scripts/native-qa-preflight.js',
   'scripts/api-env-preflight.js',
   'scripts/release-status.js',
+  'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
   'scripts/policy-hosting-preflight.js',

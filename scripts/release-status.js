@@ -89,6 +89,19 @@ addGate(
   inventoryUi ? '' : 'Restore the Phase 2 connector controls before release testing.'
 );
 
+const inventorySourceValidator = allFilesContain([
+  ['scripts/validate-machine-inventory.js', 'Machine inventory validation passed'],
+  ['docs/inventory-connector-spec.md', 'npm run inventory:source:validate'],
+]);
+addGate(
+  'clone',
+  'inventory-source-validator',
+  'Machine inventory exports can be validated before connector smoke',
+  inventorySourceValidator ? 'pass' : 'blocked',
+  inventorySourceValidator ? 'scripts/validate-machine-inventory.js and docs/inventory-connector-spec.md define source validation.' : 'Machine inventory source validator is missing.',
+  inventorySourceValidator ? '' : 'Restore npm run inventory:source:validate and the connector spec instructions.'
+);
+
 const machineScanExamples = allFilesContain([
   ['components/PhaseOne.tsx', 'desktop FDM 3D printer'],
   ['components/PhaseOne.tsx', 'desktop CNC router'],
@@ -200,6 +213,7 @@ const requiredArtifacts = [
   'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',
   'scripts/api-env-preflight.js',
+  'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
   'scripts/native-release-preflight.js',
