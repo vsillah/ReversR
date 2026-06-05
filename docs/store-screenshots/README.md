@@ -20,6 +20,14 @@ docs/store-screenshots/generated/
 
 The generated screenshots are intentionally ignored by git. They are review artifacts, not source files.
 
+The capture also writes committed planning evidence:
+
+```text
+docs/store-screenshots/planning-evidence.json
+```
+
+`npm run release:status` uses this file to confirm that web-preview composition planning happened and that the final native screenshot filenames are mapped before preview-build capture.
+
 Captured web-preview screens:
 
 1. Welcome screen with the four phases.

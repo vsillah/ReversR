@@ -4,11 +4,32 @@ const { chromium } = require('playwright');
 
 const APP_URL = process.env.STORE_SCREENSHOT_URL || 'http://localhost:5001';
 const OUT_DIR = process.env.STORE_SCREENSHOT_DIR || path.join('docs', 'store-screenshots', 'generated');
+const EVIDENCE_FILE = process.env.STORE_SCREENSHOT_EVIDENCE_FILE || path.join('docs', 'store-screenshots', 'planning-evidence.json');
 const MACHINE_DESCRIPTION = 'A desktop FDM 3D printer with aluminum frame, heated bed, extruder, belts, rails, control board, power supply, and display.';
 
 const viewports = [
   { name: 'phone', width: 390, height: 844 },
   { name: 'tablet', width: 1024, height: 1366 },
+];
+const expectedScreenIds = [
+  'welcome',
+  'scan',
+  'inventory-validation',
+  'design-match',
+  'build-handoff',
+  'privacy',
+];
+const finalNativeFilenames = [
+  'android-01-welcome.png',
+  'android-02-scan.png',
+  'android-03-inventory-validation.png',
+  'android-04-design-match.png',
+  'android-05-build-handoff.png',
+  'ios-01-welcome.png',
+  'ios-02-scan.png',
+  'ios-03-inventory-validation.png',
+  'ios-04-design-match.png',
+  'ios-05-build-handoff.png',
 ];
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -38,6 +59,31 @@ const screenshot = async (page, fileName) => {
   return filePath;
 };
 
+const readPngSize = (filePath) => {
+  const buffer = fs.readFileSync(filePath);
+  if (buffer.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') {
+    throw new Error(`${filePath} is not a PNG file.`);
+  }
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+};
+
+const buildCaptureEvidence = (files) => files.map(filePath => {
+  const fileName = path.basename(filePath);
+  const match = fileName.match(/^(phone|tablet)-(\d+)-(.+)\.png$/);
+  const size = readPngSize(filePath);
+  return {
+    file: filePath,
+    viewport: match?.[1] || 'unknown',
+    sequence: match ? Number(match[2]) : null,
+    screenId: match?.[3] || 'unknown',
+    width: size.width,
+    height: size.height,
+  };
+});
+
 const captureViewport = async (browser, viewport) => {
   const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height } });
   const files = [];
@@ -49,7 +95,7 @@ const captureViewport = async (browser, viewport) => {
   await fillFirstTextarea(page, MACHINE_DESCRIPTION);
   files.push(await screenshot(page, `${viewport.name}-02-scan.png`));
 
-  await clickText(page, 'Initiate Scan');
+  await clickText(page, 'Start Machine Scan');
   await wait(2500);
   await clickText(page, 'Validate Connector');
   await wait(1200);
@@ -95,8 +141,36 @@ const captureViewport = async (browser, viewport) => {
   };
   const manifestPath = path.join(OUT_DIR, 'manifest.json');
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+  const captures = buildCaptureEvidence(captured);
+  const capturedByViewport = Object.fromEntries(viewports.map(viewport => [
+    viewport.name,
+    expectedScreenIds.every(screenId => captures.some(capture => capture.viewport === viewport.name && capture.screenId === screenId)),
+  ]));
+  const evidence = {
+    schemaVersion: 1,
+    status: 'pass',
+    generatedAt: manifest.generatedAt,
+    appUrl: APP_URL,
+    outputDir: OUT_DIR,
+    note: manifest.note,
+    viewports,
+    expectedScreenIds,
+    capturedByViewport,
+    captures,
+    nativeRequirement: {
+      finalNativeScreenshotsStillRequired: true,
+      directory: 'docs/store-screenshots/native/',
+      filenames: finalNativeFilenames,
+    },
+  };
+  const evidencePath = path.resolve(EVIDENCE_FILE);
+  fs.mkdirSync(path.dirname(evidencePath), { recursive: true });
+  fs.writeFileSync(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+
   console.log(`Captured ${captured.length} screenshots.`);
   console.log(`Manifest: ${manifestPath}`);
+  console.log(`Evidence: ${evidencePath}`);
 })().catch(error => {
   console.error(error);
   process.exit(1);

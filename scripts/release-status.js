@@ -294,6 +294,46 @@ addGate(
   storeListingAssetsOk ? '' : 'Run npm run store:assets:generate, then npm run store:assets:preflight.'
 );
 
+const screenshotPlanningEvidence = readOptionalJson('docs/store-screenshots/planning-evidence.json');
+const expectedScreenshotIds = [
+  'welcome',
+  'scan',
+  'inventory-validation',
+  'design-match',
+  'build-handoff',
+  'privacy',
+];
+const expectedNativeScreenshotFiles = [
+  'android-01-welcome.png',
+  'android-02-scan.png',
+  'android-03-inventory-validation.png',
+  'android-04-design-match.png',
+  'android-05-build-handoff.png',
+  'ios-01-welcome.png',
+  'ios-02-scan.png',
+  'ios-03-inventory-validation.png',
+  'ios-04-design-match.png',
+  'ios-05-build-handoff.png',
+];
+const screenshotPlanningOk = (
+  screenshotPlanningEvidence?.status === 'pass' &&
+  screenshotPlanningEvidence?.nativeRequirement?.finalNativeScreenshotsStillRequired === true &&
+  expectedScreenshotIds.every(id => screenshotPlanningEvidence?.expectedScreenIds?.includes(id)) &&
+  ['phone', 'tablet'].every(viewport => screenshotPlanningEvidence?.capturedByViewport?.[viewport] === true) &&
+  expectedNativeScreenshotFiles.every(file => screenshotPlanningEvidence?.nativeRequirement?.filenames?.includes(file)) &&
+  Number(screenshotPlanningEvidence?.captures?.length || 0) >= 12
+);
+addGate(
+  'store-local',
+  'store-screenshot-planning',
+  'Web-preview screenshot planning evidence is recorded before native screenshot capture',
+  screenshotPlanningOk ? 'pass' : 'pending',
+  screenshotPlanningOk
+    ? `docs/store-screenshots/planning-evidence.json proves web planning captures and native screenshot filename mapping at ${screenshotPlanningEvidence.generatedAt}.`
+    : 'docs/store-screenshots/planning-evidence.json is missing or incomplete.',
+  screenshotPlanningOk ? '' : 'Run npm run screenshots:store against a running web preview before native screenshot capture.'
+);
+
 const requiredArtifacts = [
   'Dockerfile',
   '.dockerignore',
@@ -307,6 +347,7 @@ const requiredArtifacts = [
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/README.md',
   'docs/store-screenshots/native/README.md',
+  'docs/store-screenshots/planning-evidence.json',
   'docs/store-submission-packet.json',
   'docs/store-submission-smoke-evidence.json',
   'docs/store-console-evidence.template.json',

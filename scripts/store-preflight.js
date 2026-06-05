@@ -200,6 +200,7 @@ const requiredDocs = [
   'docs/store-assets/README.md',
   'docs/store-screenshots/README.md',
   'docs/store-screenshots/native/README.md',
+  'docs/store-screenshots/planning-evidence.json',
   'Dockerfile',
   '.dockerignore',
   'vercel.json',

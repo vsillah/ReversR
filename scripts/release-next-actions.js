@@ -147,6 +147,7 @@ const actionPlan = {
     phase: 'Native store screenshots',
     action: 'Capture final screenshots from Android and iOS preview builds.',
     steps: [
+      'Run npm run screenshots:store against the local web preview and confirm docs/store-screenshots/planning-evidence.json is updated.',
       'Install the latest Android preview build and capture the five required Android screenshots.',
       'Install the latest iOS preview build and capture the five required iOS screenshots.',
       'Save PNGs under docs/store-screenshots/native/ using the documented filenames.',
@@ -154,6 +155,7 @@ const actionPlan = {
       'Run npm run native:qa:preflight.',
     ],
     evidence: [
+      'docs/store-screenshots/planning-evidence.json maps the web planning captures to the required native screenshot filenames.',
       'All ten native screenshot PNGs exist.',
       'docs/native-qa-evidence.json marks each screenshot pass on Android and iOS.',
       'npm run native:qa:preflight passes.',

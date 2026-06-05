@@ -93,6 +93,14 @@ cp docs/native-qa-evidence.template.json docs/native-qa-evidence.json
 
 Fill `docs/native-qa-evidence.json` with build URLs, devices, testers, timestamps, Android/iOS check statuses, screenshot metadata, and signoff.
 
+Before final native screenshot capture, run the web-preview planning pass:
+
+```bash
+npm run screenshots:store
+```
+
+Confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture the final Android and iOS screenshots from preview builds.
+
 ```bash
 npm run native:qa:preflight
 ```

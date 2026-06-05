@@ -28,6 +28,7 @@ The app now has:
 - Store submission packet preflight for App Store Connect and Google Play metadata limits, hosted URLs, privacy/data-safety answers, and native screenshot requirements
 - Store console evidence template and preflight: `npm run store:console:preflight`
 - Google Play feature graphic generation and validation: `npm run store:assets:generate` and `npm run store:assets:preflight`
+- Web-preview screenshot planning evidence: `docs/store-screenshots/planning-evidence.json`
 - Protected inventory connector preflight: `npm run inventory:preflight`
 - Hosted connector smoke gate: `npm run connector:smoke`
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
@@ -121,7 +122,7 @@ Open gates:
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: critical-path labels are covered by `npm run accessibility:preflight`, but native screen-reader and tap-target QA still need device validation before submission.
-- Store assets: metadata draft, required 1024x1024 PNG assets, Google Play feature graphic, web-preview screenshot capture, and web policy/support routes exist, but final native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
+- Store assets: metadata draft, required 1024x1024 PNG assets, Google Play feature graphic, web-preview screenshot planning evidence, and web policy/support routes exist, but final native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
 - Store console packet: copy/paste metadata, review notes, privacy answers, and data-safety draft are structured in JSON and backed by `docs/store-submission-smoke-evidence.json`, but still need final hosted URLs and console-side review.
 - Store console evidence: a template and preflight now exist, but `docs/store-console-evidence.json` still needs to be filled after App Store Connect and Play Console records exist.
 - Dependency audit: `npm audit fix` removed the high-severity findings; remaining moderate transitive Expo-tooling findings require a breaking Expo SDK 56 upgrade path and should be handled as a separate native upgrade gate.
@@ -143,7 +144,7 @@ Open gates:
 13. Link the clone with `eas init`, then run `npm run native:preflight`.
 14. Run EAS preview builds.
 15. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
-16. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
+16. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
 17. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
 18. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
 19. Submit to TestFlight and Google Play Internal Testing.
