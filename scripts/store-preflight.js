@@ -102,6 +102,11 @@ if (!allDependencies['expo-sharing']) fail('expo-sharing must stay installed for
 if (!allDependencies['expo-file-system']) fail('expo-file-system must stay installed for local package export.');
 
 runCheck('Accessibility preflight', process.execPath, ['scripts/accessibility-preflight.js']);
+runCheck(
+  'Store submission packet preflight',
+  process.execPath,
+  ['scripts/store-submission-preflight.js', ...(allowPlaceholder ? ['--allow-placeholder'] : [])]
+);
 
 const requiredPngAssets = [
   ['expo.icon', appConfig.icon, 1024, 1024],
@@ -175,6 +180,7 @@ const requiredDocs = [
   'docs/inventory-connector-spec.md',
   'docs/store-readiness.md',
   'docs/store-metadata.md',
+  'docs/store-submission-packet.json',
   'docs/production-api-deployment.md',
   'docs/native-release-runbook.md',
   'docs/store-screenshots/README.md',
@@ -184,6 +190,7 @@ const requiredDocs = [
   'app/terms.tsx',
   'app/support.tsx',
   'scripts/native-release-preflight.js',
+  'scripts/store-submission-preflight.js',
   'scripts/capture-store-screenshots.js',
 ];
 for (const doc of requiredDocs) {

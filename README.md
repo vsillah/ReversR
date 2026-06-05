@@ -60,6 +60,12 @@ The native App Store and Google Play release path is captured in [docs/native-re
 npm run native:preflight:local
 ```
 
+The store console copy/paste packet is in [docs/store-submission-packet.json](docs/store-submission-packet.json). Validate it locally with:
+
+```bash
+npm run store:submission:preflight:local
+```
+
 Run the local readiness check with the placeholder API allowed:
 
 ```bash

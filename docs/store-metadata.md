@@ -96,6 +96,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 
 ## Pre-Submission Checklist
 
+- Validate the copy/paste console packet with `npm run store:submission:preflight`.
 - Host privacy policy, terms, and support pages from the built-in web routes.
 - Set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in the EAS production environment.
 - Deploy the production API container and run `npm run api:preflight` against the hosted URL.
