@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T14:24:58.004Z
-Release status generated at: 2026-06-05T14:24:57.996Z
+Generated at: 2026-06-05T14:33:05.583Z
+Release status generated at: 2026-06-05T14:33:05.576Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -34,9 +34,9 @@ Steps:
 
 1. Use the recorded Android preview build already in docs/native-qa-evidence.json.
 2. Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.
-3. If the Apple account uses passkey-only login, create or connect an App Store Connect API key in the browser instead of retrying the EAS Apple password prompt.
-4. Run npm run native:ios:preview-build -- --dry-run to record the exact iOS preview build command and any missing local App Store Connect API env.
-5. After the Apple credential/API-key gate is complete, run npm run native:ios:preview-build and record the build URL after it starts.
+3. Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.
+4. After the device registration profile is installed, return to the EAS credentials terminal and press any key so provisioning profile creation can continue.
+5. After EAS finishes creating the iOS provisioning profile, run npm run native:ios:preview-build and record the build URL after it starts.
 6. Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.
 7. Update docs/native-qa-evidence.json with device QA results.
 8. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.

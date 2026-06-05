@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T14:28:15.240Z",
+  "generatedAt": "2026-06-05T14:33:06.683Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T14:28:15.213Z",
+    "generatedAt": "2026-06-05T14:33:06.656Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -1155,7 +1155,7 @@
     "nativeDeviceHandoff": {
       "schemaVersion": 1,
       "status": "pending-hitl",
-      "generatedAt": "2026-06-05T13:59:04Z",
+      "generatedAt": "2026-06-05T14:31:34Z",
       "releaseCandidate": {
         "appName": "ReversR Rebuild",
         "version": "1.0.0",
@@ -1189,7 +1189,7 @@
         },
         "appStoreConnect": {
           "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
-          "state": "App Store Connect app record exists and Apple ID 6777091538 is recorded in eas.json submit.production.ios.ascAppId. EAS iOS credential login/2FA and iOS preview build remain pending."
+          "state": "App Store Connect app record exists and Apple ID 6777091538 is recorded in eas.json submit.production.ios.ascAppId. EAS Apple login/2FA succeeded and an Apple distribution certificate was created. EAS generated an iOS device-registration URL and is waiting for a test device to finish registration before provisioning profile creation can continue."
         }
       },
       "nextNativeQaActions": [
@@ -1200,18 +1200,18 @@
         "Use npm run native:android:qa -- --launch and npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff> to capture Android native screenshots into docs/store-screenshots/native/.",
         "Run the native QA checklist in docs/native-qa-evidence.json.",
         "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-        "Run npx eas-cli@20.0.0 credentials --platform ios, select the preview profile, and complete the Apple account login/2FA prompt so EAS can create or validate internal-distribution iOS credentials.",
+        "Open the EAS-generated device-registration URL on the target iPhone/iPad, install the Apple profile, and return to the terminal.",
+        "After device registration is complete, press any key in the EAS credentials terminal so it can continue creating the provisioning profile.",
         "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools.",
-        "Run npm run native:preflight, then run npx eas-cli@20.0.0 credentials --platform ios and complete Apple login/2FA for the preview profile.",
-        "After EAS iOS credentials are available, run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL in docs/native-qa-evidence.json."
+        "After EAS iOS credentials are available, run npm run native:ios:preview-build and npm run native:eas:sync-builds to record the iOS build URL in docs/native-qa-evidence.json."
       ],
       "notCompletedByAutomation": [
         "No Android device or emulator was available for APK install.",
         "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
         "No Google legal declarations were accepted.",
-        "EAS iOS preview credential setup reaches an Apple account login prompt and cannot proceed unattended.",
-        "App Store Connect app record exists, but EAS iOS preview credential setup still requires Apple login/2FA.",
-        "npx eas-cli@20.0.0 credentials --platform ios reached the preview-profile Apple account login prompt at 2026-06-05T13:59:04Z."
+        "EAS Apple login/2FA succeeded and an Apple distribution certificate was created.",
+        "EAS generated an iOS device-registration URL at 2026-06-05T14:31:34Z. The URL is intentionally not committed. Device profile installation remains a human-in-the-loop action.",
+        "iOS provisioning profile creation and iOS preview build remain pending until a test device is registered."
       ]
     },
     "easPreviewBuildSync": {
@@ -1241,7 +1241,7 @@
     },
     "easIosPreviewBuildStart": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:28:13.712Z",
+      "generatedAt": "2026-06-05T14:31:34Z",
       "command": "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait --json",
       "evidenceFile": "docs/eas-ios-preview-build-start-evidence.json",
       "releaseGate": "native-qa-evidence",
@@ -1268,9 +1268,9 @@
         "secretHandling": "Do not commit .p8 files, Apple passwords, App Store Connect API keys, or team secrets. This repo ignores *.p8 and related native credential files."
       },
       "nextActions": [
-        "If using passkey-only Apple login, create an App Store Connect API key in the browser and keep the downloaded .p8 file outside git.",
-        "Export EXPO_ASC_API_KEY_PATH, EXPO_ASC_KEY_ID, EXPO_ASC_ISSUER_ID, EXPO_APPLE_TEAM_ID, and EXPO_APPLE_TEAM_TYPE in the local terminal session.",
-        "Run npm run native:ios:preview-build after the API key/team variables are available, then run npm run native:eas:sync-builds.",
+        "Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.",
+        "After device registration completes, press any key in the EAS credentials terminal so provisioning profile creation can continue.",
+        "Run npm run native:ios:preview-build after the provisioning profile is created, then run npm run native:eas:sync-builds.",
         "After Android and iOS preview builds are recorded, install them on devices and complete docs/native-qa-evidence.json plus final native screenshots."
       ],
       "status": "dry-run",
@@ -1958,7 +1958,7 @@
     },
     "releaseAutopilotHandoff": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T13:59:04Z",
+      "generatedAt": "2026-06-05T14:31:34Z",
       "status": "pending-hitl",
       "currentPr": {
         "number": 2,
@@ -2014,14 +2014,16 @@
         "easCredentials": {
           "command": "npx eas-cli@20.0.0 credentials --platform ios",
           "profileSelected": "preview",
-          "nextPrompt": "Do you want to log in to your Apple account?",
-          "lastCheckedAt": "2026-06-05T13:59:04Z",
-          "nextHumanAction": "Complete Apple login/2FA in the EAS credentials flow so Expo can generate or validate internal-distribution iOS credentials."
+          "nextPrompt": "Press any key if you've already finished device registration.",
+          "lastCheckedAt": "2026-06-05T14:31:34Z",
+          "state": "Apple login/2FA succeeded, bundle identifier linkage succeeded, and an Apple distribution certificate was created. EAS generated a device-registration QR/link and is waiting for the target iPhone/iPad to install the registration profile.",
+          "nextHumanAction": "Open the EAS-generated registration link on the target iPhone/iPad, install the profile, return to the terminal, then press any key so EAS can continue creating the provisioning profile."
         }
       },
       "lastStrictFailures": {
         "iosPreviewBuild": [
-          "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode."
+          "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode.",
+          "EAS iOS preview credential setup advanced through Apple login/2FA and certificate creation, then paused at device registration."
         ],
         "nativeQaPreflight": [
           "No Android tested device or tester evidence.",
@@ -2042,9 +2044,9 @@
         "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
       },
       "resumeInstructionsForVambah": [
-        "When ready for iOS credentials, run or allow Codex to run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA.",
+        "Open the EAS-generated device-registration URL on the target iPhone/iPad and install the registration profile.",
+        "Return to the EAS credentials terminal and press any key after device registration completes.",
         "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured.",
-        "Complete Apple login/2FA in the EAS iOS preview credentials flow when prompted.",
         "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
       ],
       "preparedAutomation": [
@@ -2634,8 +2636,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:24:58.004Z",
-      "releaseStatusGeneratedAt": "2026-06-05T14:24:57.996Z",
+      "generatedAt": "2026-06-05T14:33:05.583Z",
+      "releaseStatusGeneratedAt": "2026-06-05T14:33:05.576Z",
       "summary": {
         "pass": 6,
         "pending": 3
@@ -2656,9 +2658,9 @@
             "steps": [
               "Use the recorded Android preview build already in docs/native-qa-evidence.json.",
               "Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.",
-              "If the Apple account uses passkey-only login, create or connect an App Store Connect API key in the browser instead of retrying the EAS Apple password prompt.",
-              "Run npm run native:ios:preview-build -- --dry-run to record the exact iOS preview build command and any missing local App Store Connect API env.",
-              "After the Apple credential/API-key gate is complete, run npm run native:ios:preview-build and record the build URL after it starts.",
+              "Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.",
+              "After the device registration profile is installed, return to the EAS credentials terminal and press any key so provisioning profile creation can continue.",
+              "After EAS finishes creating the iOS provisioning profile, run npm run native:ios:preview-build and record the build URL after it starts.",
               "Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.",
               "Update docs/native-qa-evidence.json with device QA results.",
               "Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T13:59:04Z",
+  "generatedAt": "2026-06-05T14:31:34Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -56,14 +56,16 @@
     "easCredentials": {
       "command": "npx eas-cli@20.0.0 credentials --platform ios",
       "profileSelected": "preview",
-      "nextPrompt": "Do you want to log in to your Apple account?",
-      "lastCheckedAt": "2026-06-05T13:59:04Z",
-      "nextHumanAction": "Complete Apple login/2FA in the EAS credentials flow so Expo can generate or validate internal-distribution iOS credentials."
+      "nextPrompt": "Press any key if you've already finished device registration.",
+      "lastCheckedAt": "2026-06-05T14:31:34Z",
+      "state": "Apple login/2FA succeeded, bundle identifier linkage succeeded, and an Apple distribution certificate was created. EAS generated a device-registration QR/link and is waiting for the target iPhone/iPad to install the registration profile.",
+      "nextHumanAction": "Open the EAS-generated registration link on the target iPhone/iPad, install the profile, return to the terminal, then press any key so EAS can continue creating the provisioning profile."
     }
   },
   "lastStrictFailures": {
     "iosPreviewBuild": [
-      "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode."
+      "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode.",
+      "EAS iOS preview credential setup advanced through Apple login/2FA and certificate creation, then paused at device registration."
     ],
     "nativeQaPreflight": [
       "No Android tested device or tester evidence.",
@@ -84,9 +86,9 @@
     "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
   },
   "resumeInstructionsForVambah": [
-    "When ready for iOS credentials, run or allow Codex to run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA.",
+    "Open the EAS-generated device-registration URL on the target iPhone/iPad and install the registration profile.",
+    "Return to the EAS credentials terminal and press any key after device registration completes.",
     "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured.",
-    "Complete Apple login/2FA in the EAS iOS preview credentials flow when prompted.",
     "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
   ],
   "preparedAutomation": [

@@ -112,10 +112,15 @@ const readOptionalJson = (filePath) => {
 };
 const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
 const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
+const nativeDeviceHandoff = readOptionalJson('docs/native-device-handoff.json');
 const androidPreviewRecorded = nativeQaEvidence?.builds?.androidPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.androidPreview?.buildUrl);
 const iosPreviewRecorded = nativeQaEvidence?.builds?.iosPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.iosPreview?.buildUrl);
 const appStoreRecordRecorded = storeConsoleEvidence?.appStoreConnect?.status === 'pass' && Boolean(storeConsoleEvidence?.appStoreConnect?.appleId);
 const googlePlayRecordRecorded = storeConsoleEvidence?.googlePlay?.status === 'pass' && Boolean(storeConsoleEvidence?.googlePlay?.recordUrl);
+const iosDeviceRegistrationPending = [
+  ...(nativeDeviceHandoff?.nextNativeQaActions || []),
+  ...(nativeDeviceHandoff?.notCompletedByAutomation || []),
+].some(item => /device-registration|register.*device|registration profile/i.test(item));
 
 const actionPlan = {
   'preview-host-smoke': {
@@ -242,7 +247,12 @@ const actionPlan = {
       'Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.',
       ...(iosPreviewRecorded
         ? ['Use the recorded iOS preview build already in docs/native-qa-evidence.json.']
-        : [
+        : iosDeviceRegistrationPending ? [
+            'Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.',
+            'After the device registration profile is installed, return to the EAS credentials terminal and press any key so provisioning profile creation can continue.',
+            'After EAS finishes creating the iOS provisioning profile, run npm run native:ios:preview-build and record the build URL after it starts.',
+            'Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.',
+          ] : [
             'If the Apple account uses passkey-only login, create or connect an App Store Connect API key in the browser instead of retrying the EAS Apple password prompt.',
             'Run npm run native:ios:preview-build -- --dry-run to record the exact iOS preview build command and any missing local App Store Connect API env.',
             'After the Apple credential/API-key gate is complete, run npm run native:ios:preview-build and record the build URL after it starts.',
