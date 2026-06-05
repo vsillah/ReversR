@@ -58,6 +58,8 @@ Capture native screenshots after Android and iOS preview builds:
 4. Design screen with machine match evidence.
 5. Build screen with assembly steps, pricing, BOM, and manufacturer handoff.
 
+Use `npm run screenshots:store` against the local web preview to generate planning screenshots before final native capture. Generated web screenshots are saved under `docs/store-screenshots/generated/` and ignored by git.
+
 ## Apple App Privacy Draft
 
 Apple App Store Connect requires privacy details for data collected by the app and third-party partners. Current expected answers:
@@ -101,6 +103,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 - Run `npm run accessibility:preflight`.
 - Confirm final app icon, adaptive icon, splash image, and favicon pass the release asset checks.
 - Run native Android and iOS camera smoke tests.
-- Capture native screenshots for both stores.
+- Run `npm run screenshots:store` for web-preview screenshot planning.
+- Capture final native screenshots for both stores.
 - Build Android AAB and iOS IPA through EAS.
 - Submit to Google Play Internal Testing and TestFlight before production review.

@@ -22,6 +22,7 @@ The app now has:
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
+- Web-preview store screenshot capture script: `npm run screenshots:store`
 - Web routes for `/privacy`, `/terms`, and `/support`
 - Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
@@ -89,7 +90,7 @@ Open gates:
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: critical-path labels are covered by `npm run accessibility:preflight`, but native screen-reader and tap-target QA still need device validation before submission.
-- Store assets: metadata draft, required 1024x1024 PNG assets, and web policy/support routes exist, but native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
+- Store assets: metadata draft, required 1024x1024 PNG assets, web-preview screenshot capture, and web policy/support routes exist, but final native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
 - Dependency audit: `npm audit fix` removed the high-severity findings; remaining moderate transitive Expo-tooling findings require a breaking Expo SDK 56 upgrade path and should be handled as a separate native upgrade gate.
 
 ## Recommended Next Sequence
@@ -100,7 +101,7 @@ Open gates:
 4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run api:preflight` and `npm run store:preflight`.
 5. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader, tap-target, and camera QA.
 6. Run EAS preview builds.
-7. Capture native screenshots and finalize store metadata.
+7. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
 8. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
 9. Submit to TestFlight and Google Play Internal Testing.
 10. Resolve review feedback, then submit production releases.

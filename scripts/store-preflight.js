@@ -175,9 +175,11 @@ const requiredDocs = [
   'docs/inventory-connector-spec.md',
   'docs/store-readiness.md',
   'docs/store-metadata.md',
+  'docs/store-screenshots/README.md',
   'app/privacy.tsx',
   'app/terms.tsx',
   'app/support.tsx',
+  'scripts/capture-store-screenshots.js',
 ];
 for (const doc of requiredDocs) {
   if (!exists(doc)) fail(`Missing required store/readiness document: ${doc}`);

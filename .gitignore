@@ -34,5 +34,8 @@ yarn-error.*
 # Local connector credential registry
 .reversr-connector-secrets.json
 
+# Generated store review screenshots
+docs/store-screenshots/generated/
+
 # TypeScript
 *.tsbuildinfo

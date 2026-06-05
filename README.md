@@ -59,6 +59,7 @@ Before real store builds, set `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_PRIVACY_P
 ```bash
 npm run api:preflight
 npm run accessibility:preflight
+npm run screenshots:store
 npm run store:preflight
 ```
 
