@@ -21,7 +21,7 @@
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false,
-    "notes": "Apple Developer Agreement was accepted by Vambah. Apple Developer Program membership order confirmation was reached in Chrome. Apple Account passkey authentication was attempted for App Store Connect, but App Store Connect redirected to an INVALIDITCUSER error, so app record creation is still pending until Apple enables the account or membership activation propagates."
+    "notes": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program membership activation has cleared enough for App Store Connect to open. App Store Connect had no apps and no registered Bundle ID available. Automation filled the Apple Developer App ID review screen for com.vsillah.reversrrebuild and stopped before the final Register button because it creates a persistent Apple Developer identifier. App Store Connect app record creation remains pending until that Bundle ID is registered."
   },
   "googlePlay": {
     "status": "pass",
