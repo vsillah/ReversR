@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T22:29:04.067Z",
-  "releaseStatusGeneratedAt": "2026-06-05T22:29:04.060Z",
+  "generatedAt": "2026-06-05T22:35:00.586Z",
+  "releaseStatusGeneratedAt": "2026-06-05T22:35:00.581Z",
   "summary": {
     "pass": 6,
     "pending": 3
@@ -18,21 +18,20 @@
       "action": {
         "owner": "QA/release operator",
         "phase": "Native preview QA",
-        "action": "Complete iOS preview credentials/build, then record Android and iOS device QA evidence.",
+        "action": "Use the finished iOS store build for the TestFlight path, then record remaining device/simulator QA evidence.",
         "steps": [
           "Use the recorded Android preview build already in docs/native-qa-evidence.json.",
           "Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.",
           "Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.",
           "Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.",
-          "Configure iOS production/TestFlight credentials instead of internal preview credentials.",
-          "After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.",
+          "Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.",
           "Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.",
           "Update docs/native-qa-evidence.json with device QA results.",
           "Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.",
           "Run npm run native:qa:preflight."
         ],
         "evidence": [
-          "docs/native-qa-evidence.json exists and references both preview builds.",
+          "docs/eas-production-build-sync-evidence.json records a finished iOS production/store build for the TestFlight path.",
           "All required Android and iOS checks pass.",
           "npm run native:qa:preflight passes."
         ]

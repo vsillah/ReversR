@@ -1,7 +1,15 @@
 {
   "schemaVersion": 1,
-  "status": "pending-hitl",
+  "status": "superseded-by-finished-build",
   "generatedAt": "2026-06-05T16:01:31.192Z",
+  "supersededAt": "2026-06-05T22:32:11.814Z",
+  "supersededBy": {
+    "evidenceFile": "docs/eas-production-build-sync-evidence.json",
+    "buildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+    "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+    "artifactType": "ipa",
+    "completedAt": "2026-06-05T18:47:24.731Z"
+  },
   "command": "npx eas-cli@20.0.0 build --platform ios --profile production --non-interactive --no-wait --json",
   "result": {
     "exitCode": 1,
@@ -16,20 +24,18 @@
       "to": 5
     },
     "stdoutTail": "No environment variables with visibility \"Plain text\" and \"Sensitive\" found for the \"production\" environment on EAS.\n\n- Incrementing buildNumber from 4 to 5.\n✔ Incremented buildNumber from 4 to 5.\n\n✔ Using remote iOS credentials (Expo server)\n\nDistribution Certificate is not validated for non-interactive builds.\nFailed to set up credentials.\nCredentials are not set up. Run this command again in interactive mode.",
-    "note": "The non-interactive iOS production/TestFlight build did not start. EAS detected remote iOS credentials but refused to validate/set them up for a non-interactive build. No Apple login, 2FA, password, API key, App Store upload, or review submission occurred. EAS remotely incremented the iOS build number from 4 to 5 before failing."
+    "note": "This earlier non-interactive iOS production/TestFlight build did not start. It is superseded by the later finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json. No App Store upload or public review submission is implied by this earlier attempt evidence."
   },
   "humanInTheLoopGate": {
-    "type": "Apple account credential validation",
-    "whyRequired": "EAS needs an interactive Apple credential validation step before it will use the remote iOS distribution certificate for a production/TestFlight build. Without that interactive validation, the iOS production build cannot be started from non-interactive autopilot.",
+    "type": "iOS QA/screenshot access",
+    "whyRequired": "Superseded. The iOS production/store build was later completed. Remaining HITL is now iOS device/TestFlight or full Xcode Simulator access for QA screenshots, not EAS build startup.",
     "nextHumanAction": [
-      "Resume this command from the repo root.",
-      "Run the interactive iOS production build command below.",
-      "If EAS asks to validate or repair Apple credentials, allow it to continue.",
-      "Enter the Apple ID and password/passkey flow when prompted.",
-      "Complete Apple 2FA if requested.",
-      "When the build starts and prints an Expo build URL, copy that URL back into chat.",
+      "Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.",
+      "Either install full Xcode on this Mac so Codex can use an iOS Simulator, or provide an iOS device/TestFlight path.",
+      "Capture the five required iOS screenshots under docs/store-screenshots/native/.",
+      "Update docs/native-qa-evidence.json with iOS device/simulator, timestamps, screenshot records, and QA results.",
       "Stop before any App Store public submission or irreversible review action."
     ],
-    "resumeCommand": "EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait"
+    "resumeCommand": ""
   }
 }

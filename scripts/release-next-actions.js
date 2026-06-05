@@ -113,6 +113,7 @@ const readOptionalJson = (filePath) => {
 const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
 const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
 const nativeDeviceHandoff = readOptionalJson('docs/native-device-handoff.json');
+const easProductionBuildSync = readOptionalJson('docs/eas-production-build-sync-evidence.json');
 const requiredScreenshotIds = [
   'welcome',
   'scan',
@@ -130,6 +131,10 @@ const screenshotStatus = (platform) => {
 };
 const androidPreviewRecorded = nativeQaEvidence?.builds?.androidPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.androidPreview?.buildUrl);
 const iosPreviewRecorded = nativeQaEvidence?.builds?.iosPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.iosPreview?.buildUrl);
+const iosProductionStoreBuildRecorded = (
+  easProductionBuildSync?.latestProductionBuilds?.ios?.readinessStatus === 'pass' &&
+  Boolean(easProductionBuildSync?.latestProductionBuilds?.ios?.buildUrl)
+);
 const androidScreenshotsRecorded = screenshotStatus('android');
 const iosScreenshotsRecorded = screenshotStatus('ios');
 const appStoreRecordRecorded = storeConsoleEvidence?.appStoreConnect?.status === 'pass' && Boolean(storeConsoleEvidence?.appStoreConnect?.appleId);
@@ -259,7 +264,9 @@ const actionPlan = {
     owner: 'QA/release operator',
     phase: 'Native preview QA',
     action: androidPreviewRecorded && !iosPreviewRecorded
-      ? 'Complete iOS preview credentials/build, then record Android and iOS device QA evidence.'
+      ? iosProductionStoreBuildRecorded
+        ? 'Use the finished iOS store build for the TestFlight path, then record remaining device/simulator QA evidence.'
+        : 'Complete iOS preview credentials/build, then record Android and iOS device QA evidence.'
       : 'Build Android/iOS preview binaries and record device QA evidence.',
     steps: [
       ...(androidPreviewRecorded
@@ -273,8 +280,12 @@ const actionPlan = {
               ? ['Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.']
               : ['Reconnect the Android phone and finish Android preview QA/screenshots; make sure adb devices lists exactly one device.']),
             'Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.',
-            'Configure iOS production/TestFlight credentials instead of internal preview credentials.',
-            'After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.',
+            ...(iosProductionStoreBuildRecorded
+              ? ['Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.']
+              : [
+                  'Configure iOS production/TestFlight credentials instead of internal preview credentials.',
+                  'After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.',
+                ]),
             'Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.',
           ] : iosDeviceRegistrationPending ? [
             'Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.',
@@ -294,7 +305,9 @@ const actionPlan = {
       'Run npm run native:qa:preflight.',
     ],
     evidence: [
-      'docs/native-qa-evidence.json exists and references both preview builds.',
+      iosProductionStoreBuildRecorded
+        ? 'docs/eas-production-build-sync-evidence.json records a finished iOS production/store build for the TestFlight path.'
+        : 'docs/native-qa-evidence.json exists and references both preview builds.',
       'All required Android and iOS checks pass.',
       'npm run native:qa:preflight passes.',
     ],

@@ -51,7 +51,31 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. EAS Apple login/2FA succeeded and an Apple distribution certificate was created for the preview credentials flow. EAS then reached iOS test-device registration for internal distribution, but Vambah confirmed no iOS device is available. The recommended iOS route is now App Store/TestFlight distribution credentials instead of internal preview device registration. No iOS device is available for internal preview registration; use TestFlight/App Store distribution credentials for iOS release builds."
+      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and docs/eas-production-build-sync-evidence.json; QA and screenshots still need an iOS device, TestFlight install, or full Xcode Simulator path before this native QA gate can pass."
+    }
+  },
+  "productionBuilds": {
+    "android": {
+      "status": "pass",
+      "profile": "production",
+      "distribution": "store",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/11c47edd-6dfc-4d81-8aee-3be563006d49",
+      "artifactUrl": "https://expo.dev/artifacts/eas/3cfEuq2oZkZKhkEzGHEHhD.aab",
+      "artifactType": "aab",
+      "versionCode": 17,
+      "completedAt": "2026-06-05T16:42:53.309Z",
+      "notes": "Android production/store AAB exists for Google Play upload but is not approved for production submission."
+    },
+    "ios": {
+      "status": "pass",
+      "profile": "production",
+      "distribution": "store",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "artifactUrl": "https://expo.dev/artifacts/eas/gYrv6C7dKH9CufRX2aXitF.ipa",
+      "artifactType": "ipa",
+      "buildNumber": "6",
+      "completedAt": "2026-06-05T18:47:24.731Z",
+      "notes": "iOS production/store IPA exists for the TestFlight/App Store path. It has not been installed, tested, uploaded to App Store Connect, selected for review, or submitted for App Review."
     }
   },
   "checks": [
@@ -323,9 +347,9 @@
     }
   ],
   "blockers": [
-    "iOS preview build requires interactive Apple login for EAS iOS preview credentials.",
+    "iOS internal preview build remains blocked because no iOS test device is available for device registration.",
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
-    "iOS native build/screenshot evidence remains pending because no iOS device is available and full Xcode/simctl is not installed.",
+    "An iOS production/store IPA exists, but iOS native QA and screenshot evidence remain pending because no iOS device is available and full Xcode/simctl is not installed.",
     "Camera permission, policy-link, offline API error, connector-auth error, and vendor draft send paths remain unverified on native Android.",
     "iOS native screenshots remain pending because no iOS device is available and full Xcode/simctl is not installed."
   ],
@@ -340,7 +364,7 @@
   "generatedAt": "2026-06-05T15:03:28.217Z",
   "nextActions": [
     "Complete remaining native Android checks for camera permission, policy links, offline API error, connector-auth error, and vendor draft without sending externally.",
-    "Complete iOS production/TestFlight credentials or install full Xcode for iOS Simulator screenshot path.",
+    "Use the recorded iOS production/store build for the TestFlight path, or install full Xcode for an iOS Simulator screenshot path.",
     "Continue Google Play setup tasks; privacy policy URL is saved as a draft change, not sent for review.",
     "Only mark production submission signoff after all native QA and store-console tasks are complete."
   ],

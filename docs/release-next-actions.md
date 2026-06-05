@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T22:29:04.067Z
-Release status generated at: 2026-06-05T22:29:04.060Z
+Generated at: 2026-06-05T22:35:00.586Z
+Release status generated at: 2026-06-05T22:35:00.581Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -20,7 +20,7 @@ This generated packet is the external-operator action list for the clone release
 - Status: pending
 - Owner: QA/release operator
 - Phase: Native preview QA
-- Next action: Complete iOS preview credentials/build, then record Android and iOS device QA evidence.
+- Next action: Use the finished iOS store build for the TestFlight path, then record remaining device/simulator QA evidence.
 
 Current gate evidence:
 
@@ -36,16 +36,15 @@ Steps:
 2. Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.
 3. Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.
 4. Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.
-5. Configure iOS production/TestFlight credentials instead of internal preview credentials.
-6. After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.
-7. Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.
-8. Update docs/native-qa-evidence.json with device QA results.
-9. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
-10. Run npm run native:qa:preflight.
+5. Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.
+6. Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.
+7. Update docs/native-qa-evidence.json with device QA results.
+8. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
+9. Run npm run native:qa:preflight.
 
 Evidence required:
 
-- docs/native-qa-evidence.json exists and references both preview builds.
+- docs/eas-production-build-sync-evidence.json records a finished iOS production/store build for the TestFlight path.
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
