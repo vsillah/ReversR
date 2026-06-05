@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T23:44:05.000Z",
-  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play service-account permission/key setup, 1Password credential persistence, Google Play Android Developer API enablement, Android EAS internal-track submission completion, native/device checks, and store-console inspection.",
+  "generatedAt": "2026-06-05T23:52:35.000Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play service-account permission/key setup, 1Password credential persistence, Google Play Android Developer API enablement, Android EAS internal-track submission completion, Google Play Internal testing visibility verification, native/device checks, and store-console inspection.",
   "pr": {
     "number": 2,
     "branch": "codex/inventory-reconstruction-clone",
@@ -10,7 +10,7 @@
   },
   "localState": {
     "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
-    "releaseStatus": "Pending after Android EAS internal-track submission finished successfully; iOS/TestFlight credentials, iOS screenshots/QA, Play Console internal-testing visibility/tester setup, and final store signoff remain pending.",
+    "releaseStatus": "Pending after Android EAS internal-track submission finished and is visible in Google Play Console Internal testing; tester access changes, iOS/TestFlight credentials, iOS screenshots/QA, closed testing/production access, and final store signoff remain pending.",
     "pendingGateIds": [
       "eas-submit-config",
       "native-qa-evidence",
@@ -53,9 +53,9 @@
       "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
       "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
       "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
-      "currentGate": "EAS Android internal-track submission finished; verify the release is visible in Google Play Console Internal testing and configure testers only when ready.",
+      "currentGate": "EAS Android internal-track submission finished and the release is visible in Google Play Console Internal testing; assigning tester access or transmitting the join link remains a gated action.",
       "submission": {
-        "status": "finished",
+        "status": "finished-visible-in-play-console",
         "scheduledAt": "2026-06-05T23:44:05.000Z",
         "submissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
         "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
@@ -63,9 +63,18 @@
         "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
         "productionRolloutStarted": false,
         "publicReviewSubmissionStarted": false,
-        "checkedAt": "2026-06-05T23:44:05.000Z",
+        "checkedAt": "2026-06-05T23:52:35.000Z",
         "errorSummary": null,
-        "googleCloudApiStatus": "enabled-before-rerun"
+        "googleCloudApiStatus": "enabled-before-rerun",
+        "playConsoleVisibility": {
+          "status": "visible",
+          "releaseName": "1.0.0",
+          "versionCodeCount": 1,
+          "releaseAvailability": "Available to internal testers",
+          "releasedAtLabel": "Jun 5 7:42 PM",
+          "reviewStatus": "Not reviewed",
+          "checkedAt": "2026-06-05T23:52:35.000Z"
+        }
       },
       "serviceAccount": {
         "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
@@ -93,8 +102,8 @@
   },
   "computerUseState": {
     "googlePlay": {
-      "currentScreen": "Google Cloud Console > APIs & Services > Google Play Android Developer API details for Kinflo Project, with Status: Enabled and Disable API visible.",
-      "url": "https://console.cloud.google.com/apis/api/androidpublisher.googleapis.com/metrics?project=kinflo-project",
+      "currentScreen": "Google Play Console > ReversR Rebuild > Internal testing > Testers tab, showing existing ReversR App Testers email list with 13 users and a Join on the web link.",
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
       "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
       "serviceAccountStatus": "Active; access never expires",
       "reversrRebuildPermissionPresent": true,
@@ -106,7 +115,7 @@
         "StackRay",
         "The Visioneer"
       ],
-      "nextActionRequiringApproval": "Open Google Play Console Internal testing and verify the uploaded version code 17 release is visible. Configure testers only when ready. Do not click Send for review or start production rollout without explicit approval.",
+      "nextActionRequiringApproval": "Authorize assigning/changing tester access for the visible ReversR App Testers list with 13 users, or provide the tester access decision. Codex did not click Save, copy/send the join link, Send for review, or production rollout.",
       "googleCloudKeyPresent": true,
       "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
       "onePasswordItem": {
@@ -196,11 +205,14 @@
       "sendForReviewClicked": false,
       "internalTestingSubmissionScheduled": true,
       "internalTestingSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
-      "internalTestingSubmissionStatus": "finished-eas-internal-track-play-console-verification-pending"
+      "internalTestingSubmissionStatus": "finished-visible-in-play-console-tester-assignment-gated",
+      "internalTestingReleaseVisible": true,
+      "internalTestingTesterListVisible": true,
+      "internalTestingTesterListUserCount": 13
     }
   },
   "humanInTheLoopResumeInstructions": [
-    "For Google Play internal testing: EAS submission 805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b finished on the internal track. Next, open Google Play Console Internal testing to verify version code 17 is visible and configure testers only when ready. Do not click Send for review or start production rollout without explicit final approval.",
+    "For Google Play internal testing: release 1.0.0 is visible in Play Console as Available to internal testers with 1 version code and Not reviewed. The Testers tab shows an existing ReversR App Testers email list with 13 users and a Join on the web link. To continue, explicitly authorize assigning/changing tester access or provide the tester decision. Do not click Save, copy/send the join link, Send for review, closed testing, production access, or production rollout without explicit final approval.",
     "For Apple TestFlight upload: Chrome still has an App Store Connect login tab for vsillah@mac.com. Complete Apple login/2FA, then enable App Store Connect API access and create or authorize an EAS submit key, or tell Codex when you are logged in so it can navigate to the API access screen.",
     "For Android live QA: further checks can continue if the Pixel remains reachable, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",

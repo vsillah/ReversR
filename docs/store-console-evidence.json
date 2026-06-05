@@ -108,7 +108,7 @@
     "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
     "publicSupportEmail": "vambah@amadutown.com",
     "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
-    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. EAS Android internal-track submission finished after the Google Play Android Developer API was enabled. Internal testing Play Console release visibility/tester setup, closed testing, production access, native QA signoff, and final Send for review remain pending. No Send for review, testing release review, production access application, or public submission was started.",
+    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. EAS Android internal-track submission finished after the Google Play Android Developer API was enabled, and Play Console Internal testing shows release 1.0.0 available to internal testers. Tester access changes, closed testing, production access, native QA signoff, and final Send for review remain pending. No tester-list change, join-link transmission, Send for review, testing release review submission, production access application, or public submission was started.",
     "completedSetupTaskCount": 11,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
@@ -142,7 +142,7 @@
     "storeListingAssetUploadNote": "Computer Use uploaded and saved the required Google Play default store listing assets: app icon, feature graphic, five phone screenshots, five 7-inch tablet screenshots, and five 10-inch tablet screenshots. The tablet slots reuse the available native Android/Google Play phone screenshot assets as placeholders because true native tablet captures are not present in the repo. Console displayed Change saved. Send for review in Publishing overview.",
     "publishingOverviewStatus": "dashboard-required-steps-blocking-review",
     "publishingOverviewVerification": "After saving the default store listing, Computer Use opened Publishing overview. The page listed Store listings, App content, Content Rating, Target audience and content, Privacy policy, Ads declaration, Data safety, and App category as changes not yet sent for review. Google quick checks finished, then the page showed Send app for review disabled with the message: To send changes for review, complete the required steps in the app dashboard.",
-    "dashboardReviewBlocker": "Dashboard shows Internal testing requires Select testers, Create a new release, and Preview and confirm the release. Closed testing requires Select countries and regions, Select testers, Create a new release, Preview and confirm the release, and Send the release to Google for review. Production access is disabled until a closed test is published with at least 12 testers opted in for at least 14 continuous days.",
+    "dashboardReviewBlocker": "Internal testing release 1.0.0 is visible and available to internal testers, and an existing ReversR App Testers list with 13 users is visible. Assigning/changing tester access, copying/sending the join link, closed testing, production access, and Send for review remain gated. Production access remains disabled until Google Play closed-test requirements are satisfied or account eligibility changes.",
     "closedTestingRequiredForProduction": true,
     "closedTestingMinimumTesterCount": 12,
     "closedTestingMinimumDays": 14,
@@ -196,10 +196,10 @@
     "targetAudienceCompleted": true,
     "targetAudienceVerifiedAt": "2026-06-05T20:43:48.099Z",
     "targetAudienceVerification": "Computer Use verified the Google Play Dashboard shows Target audience as a completed setup task and App content Need attention is caught up. Send for review was not clicked.",
-    "internalTestingUploadStatus": "finished-eas-internal-track-play-console-verification-pending",
-    "internalTestingUploadVerificationPending": "EAS submission 805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b finished successfully for Google Play track internal. Play Console internal testing release visibility, tester setup, and final review readiness have not been independently confirmed in console automation.",
+    "internalTestingUploadStatus": "finished-visible-in-play-console-tester-assignment-gated",
+    "internalTestingUploadVerificationPending": null,
     "internalTestingSubmission": {
-      "status": "finished",
+      "status": "finished-visible-in-play-console",
       "scheduledAt": "2026-06-05T23:44:05.000Z",
       "submissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
       "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
@@ -209,10 +209,19 @@
       "versionCode": 17,
       "productionRolloutStarted": false,
       "publicReviewSubmissionStarted": false,
-      "checkedAt": "2026-06-05T23:44:05.000Z",
+      "checkedAt": "2026-06-05T23:52:35.000Z",
       "errorCode": null,
       "errorSummary": null,
-      "googleCloudApiStatus": "enabled-before-rerun"
+      "googleCloudApiStatus": "enabled-before-rerun",
+      "playConsoleVisibility": {
+        "status": "visible",
+        "releaseName": "1.0.0",
+        "versionCodeCount": 1,
+        "releaseAvailability": "Available to internal testers",
+        "releasedAtLabel": "Jun 5 7:42 PM",
+        "reviewStatus": "Not reviewed",
+        "checkedAt": "2026-06-05T23:52:35.000Z"
+      }
     },
     "googlePlayServiceAccount": {
       "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
@@ -235,6 +244,21 @@
       "enabled": true,
       "enabledAt": "2026-06-05T23:44:05.000Z",
       "verifiedInGoogleCloudConsole": true
+    },
+    "internalTestingReleaseVisible": true,
+    "internalTestingReleaseVerifiedAt": "2026-06-05T23:52:35.000Z",
+    "internalTestingReleaseVerification": "Computer Use opened Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing. The Releases tab showed release 1.0.0, Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, and Not reviewed.",
+    "internalTestingTesterSetup": {
+      "status": "tester-access-change-gated",
+      "checkedAt": "2026-06-05T23:52:35.000Z",
+      "tabUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
+      "existingEmailListVisible": true,
+      "existingEmailListName": "ReversR App Testers",
+      "existingEmailListUserCount": 13,
+      "joinOnWebLinkVisible": true,
+      "joinOnWebLink": "[visible-in-console-not-committed]",
+      "saveButtonEnabled": false,
+      "note": "Codex inspected the Testers tab but did not select email lists, edit tester lists, copy/send the join link, or save changes because changing tester access is a human-in-the-loop permission/release action."
     }
   },
   "requiredAssets": {

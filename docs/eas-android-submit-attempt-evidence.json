@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "finished",
-  "generatedAt": "2026-06-05T23:44:05.000Z",
+  "generatedAt": "2026-06-05T23:52:35.000Z",
   "intent": "Upload the finished Android production AAB to Google Play internal testing without starting a production rollout.",
   "command": "npx eas-cli@20.0.0 submit --platform android --profile production --id 11c47edd-6dfc-4d81-8aee-3be563006d49 --non-interactive --no-wait",
   "submitProfile": {
@@ -53,7 +53,7 @@
     "versionCode": 17,
     "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
     "googleServiceAccountEmail": "appscreens@kinflo-project.iam.gserviceaccount.com",
-    "playInternalReleaseVerified": false,
+    "playInternalReleaseVerified": true,
     "productionRolloutStarted": false,
     "publicReviewSubmissionStarted": false,
     "stdoutTailSanitized": "EAS scheduled Android submission 805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b to Google Play track internal using production build 11c47edd-6dfc-4d81-8aee-3be563006d49, app version 1.0.0, version code 17. The submit job later reported FINISHED with no EAS error. The service account key path was used only locally and removed from eas.json before evidence generation.",
@@ -63,13 +63,15 @@
     "playUploadAttemptedByEas": true,
     "playUploadFinishedByEas": true,
     "errorCode": null,
-    "errorMessage": null
+    "errorMessage": null,
+    "playInternalReleaseVerifiedAt": "2026-06-05T23:52:35.000Z",
+    "playInternalReleaseVerification": "Google Play Console Internal testing Releases tab shows release 1.0.0 available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed."
   },
   "remainingVerificationGate": {
-    "type": "Google Play Console internal testing visibility and final review readiness",
-    "whyStillPending": "The EAS hosted Android submission finished successfully on the internal track, but the release has not been independently verified in the Google Play Console and no testers/review submission action was started. Closed testing and production access requirements also remain pending.",
-    "nextAction": "Open Google Play Console Internal testing for ReversR Rebuild, verify the uploaded version code 17 release is visible, configure testers only when ready, and keep Send for review/production rollout gated behind explicit final approval.",
-    "playConsoleInternalTestingUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing"
+    "type": "Google Play tester access, closed testing, and final review readiness",
+    "whyStillPending": "The EAS hosted Android submission finished successfully and the release is visible in Google Play Console Internal testing, but Codex did not assign/change tester access, copy or transmit the join link, click Send for review, start closed testing, or request production access. Those actions remain gated behind explicit final approval and tester readiness.",
+    "nextAction": "If ready, explicitly authorize assigning the visible ReversR App Testers list with 13 users or provide the tester access decision. Keep Send for review, closed testing, and production rollout gated behind explicit final approval.",
+    "playConsoleInternalTestingUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers"
   },
   "googleCloudApi": {
     "serviceName": "androidpublisher.googleapis.com",
