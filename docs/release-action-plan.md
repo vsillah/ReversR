@@ -9,9 +9,10 @@ Use the generated gate view first:
 ```bash
 npm run release:status
 npm run release:next-actions
+npm run release:next-actions:write
 ```
 
-`release:status` shows what is proven from repo evidence. `release:next-actions` expands each pending gate into owner, action, steps, and evidence required.
+`release:status` shows what is proven from repo evidence. `release:next-actions` expands each pending gate into owner, action, steps, and evidence required. `release:next-actions:write` saves the generated operator packet to `docs/release-next-actions.json` and `docs/release-next-actions.md`.
 
 Before starting external account or hosted-environment work, refresh the local validation packet:
 
@@ -21,7 +22,7 @@ npm run release:evidence
 npm run release:status
 ```
 
-`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `release:evidence` packages the local proof files and pending external gates into `docs/release-evidence-bundle.json`.
+`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `release:evidence` packages the local proof files, durable next-action packet, and pending external gates into `docs/release-evidence-bundle.json`.
 
 After the PR preview deploys, record deployed-preview evidence:
 

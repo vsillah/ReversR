@@ -1,7 +1,89 @@
+const fs = require('fs');
+const path = require('path');
 const { spawnSync } = require('child_process');
 
 const args = new Set(process.argv.slice(2));
 const asJson = args.has('--json');
+const shouldWrite = args.has('--write');
+const jsonOutputFile = process.env.RELEASE_NEXT_ACTIONS_JSON_FILE || 'docs/release-next-actions.json';
+const markdownOutputFile = process.env.RELEASE_NEXT_ACTIONS_MD_FILE || 'docs/release-next-actions.md';
+
+const summarizeGates = (gates) => gates.reduce((counts, gate) => {
+  counts[gate.status] = (counts[gate.status] || 0) + 1;
+  return counts;
+}, {});
+
+const writeText = (filePath, value) => {
+  const target = path.resolve(filePath);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, value);
+  return target;
+};
+
+const writeJson = (filePath, value) => writeText(filePath, `${JSON.stringify(value, null, 2)}\n`);
+
+const renderList = (items, prefix = '-') => (
+  items && items.length > 0
+    ? items.map((item, index) => `${prefix === '1.' ? `${index + 1}.` : prefix} ${item}`).join('\n')
+    : '- None recorded.'
+);
+
+const renderMarkdown = (result) => {
+  const lines = [
+    '# ReversR Rebuild Release Next Actions',
+    '',
+    `Generated at: ${result.generatedAt}`,
+    `Release status generated at: ${result.releaseStatusGeneratedAt}`,
+    '',
+    'This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, connector, EAS, native QA, screenshot, and store-console gates.',
+    '',
+    '## Summary',
+    '',
+    `- Pass: ${result.summary.pass || 0}`,
+    `- Pending: ${result.summary.pending || 0}`,
+    `- Blocked: ${result.summary.blocked || 0}`,
+    `- Warn: ${result.summary.warn || 0}`,
+    `- Next recommended gate: ${result.nextRecommendedGate || 'none'}`,
+    '',
+  ];
+
+  if (result.pendingGates.length === 0) {
+    lines.push('No pending gates remain.', '');
+    return `${lines.join('\n')}\n`;
+  }
+
+  result.pendingGates.forEach((gate, index) => {
+    lines.push(
+      `## ${index + 1}. ${gate.title}`,
+      '',
+      `- Gate ID: ${gate.id}`,
+      `- Group: ${gate.group}`,
+      `- Status: ${gate.status}`,
+      `- Owner: ${gate.action.owner}`,
+      `- Phase: ${gate.action.phase}`,
+      `- Next action: ${gate.action.action}`,
+      '',
+      'Current gate evidence:',
+      '',
+      gate.evidence || 'No current evidence recorded.',
+      '',
+      'Current gate next step:',
+      '',
+      gate.nextStep || 'No gate-specific next step recorded.',
+      '',
+      'Steps:',
+      '',
+      renderList(gate.action.steps, '1.'),
+      '',
+      'Evidence required:',
+      '',
+      renderList(gate.action.evidence),
+      ''
+    );
+  });
+
+  return `${lines.join('\n')}\n`;
+};
 
 const statusResult = spawnSync(process.execPath, ['scripts/release-status.js', '--json'], {
   encoding: 'utf8',
@@ -224,7 +306,19 @@ const actionPlan = {
   },
 };
 
-const pendingGates = releaseStatus.gates
+const externalActionGateIds = [
+  'preview-host-smoke',
+  'hosted-api',
+  'hosted-policy-urls',
+  'real-connector-smoke',
+  'eas-project-linkage',
+  'eas-submit-config',
+  'native-qa-evidence',
+  'store-console-records',
+  'native-screenshots',
+];
+const gatesForActions = releaseStatus.gates.filter(gate => externalActionGateIds.includes(gate.id));
+const pendingGates = gatesForActions
   .filter(gate => gate.status !== 'pass')
   .map(gate => ({
     ...gate,
@@ -238,17 +332,30 @@ const pendingGates = releaseStatus.gates
   }));
 
 const result = {
-  generatedAt: releaseStatus.generatedAt,
-  summary: releaseStatus.summary,
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  releaseStatusGeneratedAt: releaseStatus.generatedAt,
+  summary: summarizeGates(gatesForActions),
   nextRecommendedGate: pendingGates[0]?.id || null,
   pendingGates,
 };
 
+if (shouldWrite) {
+  const jsonPath = writeJson(jsonOutputFile, result);
+  const markdownPath = writeText(markdownOutputFile, renderMarkdown(result));
+  if (!asJson) {
+    console.log(`Release next actions JSON written: ${jsonPath}`);
+    console.log(`Release next actions Markdown written: ${markdownPath}`);
+    console.log(`Pending gates: ${pendingGates.length}`);
+    console.log(`Next recommended gate: ${result.nextRecommendedGate || '(none)'}`);
+  }
+}
+
 if (asJson) {
   console.log(JSON.stringify(result, null, 2));
-} else {
+} else if (!shouldWrite) {
   console.log('ReversR Rebuild next release actions');
-  console.log(`Pass: ${releaseStatus.summary.pass || 0} | Pending: ${releaseStatus.summary.pending || 0} | Blocked: ${releaseStatus.summary.blocked || 0} | Warn: ${releaseStatus.summary.warn || 0}`);
+  console.log(`Pass: ${result.summary.pass || 0} | Pending: ${result.summary.pending || 0} | Blocked: ${result.summary.blocked || 0} | Warn: ${result.summary.warn || 0}`);
   console.log('');
 
   if (pendingGates.length === 0) {

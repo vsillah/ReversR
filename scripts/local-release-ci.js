@@ -20,6 +20,7 @@ const commands = [
   ['store-submission-preflight-local', ['run', 'store:submission:preflight:local'], 'App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.'],
   ['store-review-safety', ['run', 'store:review-safety'], 'Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.'],
   ['store-console-copy', ['run', 'store:console:copy'], 'App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.'],
+  ['release-next-actions-write', ['run', 'release:next-actions:write'], 'External release next actions are generated as durable JSON and Markdown artifacts.'],
   ['objective-readiness-audit', ['run', 'release:objective'], 'Original user objective is mapped to proven local work and pending external release gates.'],
   ['store-console-preflight-local', ['run', 'store:console:preflight:local'], 'Store-console pending evidence records account-side requirements without claiming final console proof.'],
   ['native-preflight-local', ['run', 'native:preflight:local'], 'Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.'],

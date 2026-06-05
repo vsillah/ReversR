@@ -21,6 +21,7 @@
     "screenshots:store": "node scripts/capture-store-screenshots.js",
     "release:status": "node scripts/release-status.js",
     "release:next-actions": "node scripts/release-next-actions.js",
+    "release:next-actions:write": "node scripts/release-next-actions.js --write",
     "release:objective": "node scripts/objective-readiness-audit.js",
     "release:evidence": "node scripts/generate-release-evidence-bundle.js",
     "release:local-ci": "node scripts/local-release-ci.js",

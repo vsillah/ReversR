@@ -199,6 +199,8 @@ const requiredDocs = [
   'docs/production-api-deployment.md',
   'docs/production-api-env.example',
   'docs/release-action-plan.md',
+  'docs/release-next-actions.json',
+  'docs/release-next-actions.md',
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
   'docs/external-release-setup-runbook.md',

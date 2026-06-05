@@ -364,6 +364,8 @@ const requiredArtifacts = [
   'docs/policy-hosting-smoke-evidence.json',
   'docs/objective-readiness-audit.json',
   'docs/release-action-plan.md',
+  'docs/release-next-actions.json',
+  'docs/release-next-actions.md',
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
   'docs/external-release-setup-runbook.md',
@@ -407,6 +409,46 @@ addGate(
   artifactsOk ? 'pass' : 'blocked',
   artifactsOk ? `${requiredArtifacts.length} required release artifacts found.` : 'Required release artifact missing.',
   artifactsOk ? '' : 'Run npm run store:preflight:local to identify missing release artifacts.'
+);
+
+const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
+const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
+const requiredNextActionGateIds = [
+  'preview-host-smoke',
+  'hosted-api',
+  'hosted-policy-urls',
+  'real-connector-smoke',
+  'eas-project-linkage',
+  'eas-submit-config',
+  'native-qa-evidence',
+  'store-console-records',
+  'native-screenshots',
+];
+const releaseNextActionsOk = (
+  releaseNextActions?.schemaVersion === 1 &&
+  releaseNextActions?.nextRecommendedGate === 'preview-host-smoke' &&
+  releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
+  Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
+  requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
+  releaseNextActions.pendingGates.every(gate => (
+    gate.action?.owner &&
+    gate.action?.phase &&
+    gate.action?.steps?.length > 0 &&
+    gate.action?.evidence?.length > 0
+  )) &&
+  releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
+  releaseNextActionsMarkdown.includes('Next recommended gate: preview-host-smoke') &&
+  releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
+);
+addGate(
+  'store-local',
+  'release-next-actions-packet',
+  'Durable external-gate next action packet is generated',
+  releaseNextActionsOk ? 'pass' : 'pending',
+  releaseNextActionsOk
+    ? `docs/release-next-actions.json and docs/release-next-actions.md list ${releaseNextActions.pendingGates.length} external gates at ${releaseNextActions.generatedAt}.`
+    : 'docs/release-next-actions.json or docs/release-next-actions.md is missing or incomplete.',
+  releaseNextActionsOk ? '' : 'Run npm run release:next-actions:write before external account-side release work.'
 );
 
 const externalRunbookChecks = [
@@ -485,6 +527,7 @@ const requiredBundleProofs = [
   'native-release-config-evidence',
   'store-console-pending-evidence',
   'local-release-ci-evidence',
+  'release-next-actions-packet',
 ];
 const requiredBundlePending = [
   'preview-host-smoke',
@@ -508,6 +551,8 @@ const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
+  releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.schemaVersion === 1 &&
+  Number(releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.pendingGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.localReleaseCi?.status === 'pass'
 );
 addGate(
@@ -531,6 +576,7 @@ const expectedLocalCiCommands = [
   'store-submission-preflight-local',
   'store-review-safety',
   'store-console-copy',
+  'release-next-actions-write',
   'objective-readiness-audit',
   'store-console-preflight-local',
   'native-preflight-local',

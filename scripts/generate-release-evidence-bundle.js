@@ -73,6 +73,7 @@ const localProofGateIds = [
   'local-release-ci-evidence',
   'release-local-ci-workflow',
   'store-console-copy-packet',
+  'release-next-actions-packet',
 ];
 const externalGateIds = [
   'preview-host-smoke',
@@ -111,6 +112,7 @@ const evidenceFiles = {
   nativeReleaseConfig: readOptionalJson('docs/native-release-config-evidence.json'),
   storeConsolePending: readOptionalJson('docs/store-console-pending-evidence.json'),
   localReleaseCi: readOptionalJson('docs/local-release-ci-evidence.json'),
+  releaseNextActions: readOptionalJson('docs/release-next-actions.json'),
 };
 
 const gitBranch = run('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
@@ -173,6 +175,7 @@ const bundle = {
   scripts: {
     releaseStatus: 'npm run release:status',
     releaseNextActions: 'npm run release:next-actions',
+    releaseNextActionsWrite: 'npm run release:next-actions:write',
     releaseObjective: 'npm run release:objective',
     releaseLocalCi: 'npm run release:local-ci',
     storeReviewSafety: 'npm run store:review-safety',
@@ -200,6 +203,8 @@ const bundle = {
     'docs/external-release-setup-runbook.md',
     '.github/workflows/release-local-ci.yml',
     'docs/release-action-plan.md',
+    'docs/release-next-actions.json',
+    'docs/release-next-actions.md',
     'docs/store-readiness.md',
   ],
   notes: [
