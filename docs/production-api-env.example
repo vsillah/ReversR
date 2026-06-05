@@ -1,0 +1,23 @@
+# ReversR Rebuild production API environment template.
+# Copy values into the hosting provider's secret/environment manager.
+# Do not commit a filled .env.production file.
+
+API_PORT=3001
+API_CORS_ORIGINS=https://reversr-rebuild.your-domain.example
+API_REQUEST_BODY_LIMIT=50mb
+
+# At least one Gemini key is required for production photo analysis and AI-backed reconstruction.
+AI_INTEGRATIONS_GEMINI_API_KEY=replace-with-managed-secret
+GEMINI_API_KEYS=
+AI_INTEGRATIONS_GEMINI_BASE_URL=
+
+# Optional non-production local model endpoint. Do not use localhost Ollama for store builds.
+OLLAMA_HOST=
+
+# Required when enabling admin credential registry endpoints.
+ADMIN_API_TOKEN=replace-with-long-random-token
+
+# Connector secrets stay server-side. Prefer managed secret storage over registry files.
+INVENTORY_CONNECTOR_SECRETS_JSON={}
+INVENTORY_CONNECTOR_SECRETS_FILE=
+INVENTORY_PRIVATE_NETWORK_ENABLED=false

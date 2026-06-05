@@ -122,6 +122,22 @@ addGate(
   reconstructionFlow ? '' : 'Restore match/BOM/vendor handoff implementation before release testing.'
 );
 
+const apiEnvTemplateOk = allFilesContain([
+  ['docs/production-api-env.example', 'API_CORS_ORIGINS='],
+  ['docs/production-api-env.example', 'AI_INTEGRATIONS_GEMINI_API_KEY='],
+  ['docs/production-api-env.example', 'ADMIN_API_TOKEN='],
+  ['scripts/api-env-preflight.js', 'API_CORS_ORIGINS'],
+  ['scripts/api-env-preflight.js', 'AI_INTEGRATIONS_GEMINI_API_KEY'],
+]);
+addGate(
+  'store-local',
+  'api-env-template',
+  'Production API environment template and preflight are present',
+  apiEnvTemplateOk ? 'pass' : 'blocked',
+  apiEnvTemplateOk ? 'docs/production-api-env.example and scripts/api-env-preflight.js cover CORS, AI key, admin token, and connector-secret settings.' : 'Production API env template or preflight coverage is missing.',
+  apiEnvTemplateOk ? '' : 'Restore docs/production-api-env.example and scripts/api-env-preflight.js.'
+);
+
 const androidPermissions = appConfig.android?.permissions || [];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
 const permissionOk = (
@@ -174,6 +190,7 @@ const requiredArtifacts = [
   '.dockerignore',
   'vercel.json',
   'docs/production-api-deployment.md',
+  'docs/production-api-env.example',
   'docs/policy-hosting-deployment.md',
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',
@@ -182,6 +199,7 @@ const requiredArtifacts = [
   'docs/store-submission-packet.json',
   'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',
+  'scripts/api-env-preflight.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
   'scripts/native-release-preflight.js',

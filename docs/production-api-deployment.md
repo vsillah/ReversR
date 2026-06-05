@@ -8,6 +8,8 @@ The container is a production-host bootstrap. It is suitable for review, demos, 
 
 ## Required Environment
 
+Use `docs/production-api-env.example` as the non-secret template. Copy the values into the hosting provider's environment manager and keep filled secrets out of git.
+
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `API_PORT` | Yes | Port the API listens on. The Docker image defaults to `3001`. |
@@ -35,15 +37,17 @@ docker run --rm \
 For a local smoke without real connector secrets, `.env.production` can start with:
 
 ```text
-API_PORT=3001
-API_CORS_ORIGINS=https://reversr-rebuild.example.com
-API_REQUEST_BODY_LIMIT=50mb
-AI_INTEGRATIONS_GEMINI_API_KEY=
-GEMINI_API_KEYS=
-ADMIN_API_TOKEN=replace-with-long-random-token
-INVENTORY_CONNECTOR_SECRETS_JSON={}
-INVENTORY_PRIVATE_NETWORK_ENABLED=false
+See docs/production-api-env.example
 ```
+
+Validate the template or a provider-exported env file before treating the API as production-bound:
+
+```bash
+npm run api:env:preflight:local
+API_ENV_FILE=/path/to/provider-env-export npm run api:env:preflight
+```
+
+The strict preflight expects restricted HTTPS CORS origins, an intentional body limit, at least one Gemini key for production photo analysis, a non-placeholder admin token, valid connector-secret JSON, and private-network connectors disabled unless explicitly approved.
 
 ## Health Checks
 
@@ -125,6 +129,7 @@ Then run:
 
 ```bash
 npm run release:status
+npm run api:env:preflight
 npm run inventory:preflight
 npm run api:preflight
 npm run connector:smoke
