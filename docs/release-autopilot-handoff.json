@@ -107,6 +107,16 @@
       "currentValidation": "Generated 11 Google Play task groups and 5 App Store Connect task groups."
     },
     {
+      "name": "App Store Connect record helper",
+      "script": "scripts/record-app-store-connect.js",
+      "npmScript": "npm run store:appstore:record",
+      "purpose": "After the App Store Connect app record is created, record the Apple ID and app URL into eas.json, store evidence, and handoff files.",
+      "commands": [
+        "npm run store:appstore:record -- --apple-id 1234567890 --record-url https://appstoreconnect.apple.com/apps/1234567890/appstore"
+      ],
+      "currentValidation": "Pending validation with placeholder values only; requires a real App Store Connect Apple ID after HITL creation."
+    },
+    {
       "name": "Native Android QA helper",
       "script": "scripts/native-android-qa-helper.js",
       "npmScript": "npm run native:android:qa",

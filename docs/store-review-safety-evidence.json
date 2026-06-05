@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T13:37:34.872Z",
+  "generatedAt": "2026-06-05T13:41:45.551Z",
   "outputFile": "docs/store-review-safety-packet.md",
   "sources": [
     "docs/store-submission-packet.json",

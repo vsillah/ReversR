@@ -50,6 +50,7 @@
     "store:review-safety": "node scripts/generate-store-review-safety-packet.js",
     "store:console:copy": "node scripts/generate-store-console-copy.js",
     "store:console:tasks": "node scripts/generate-store-console-task-answers.js",
+    "store:appstore:record": "node scripts/record-app-store-connect.js",
     "store:operator-packet": "node scripts/generate-store-operator-packet.js",
     "store:console:preflight": "node scripts/store-console-preflight.js",
     "store:console:preflight:local": "node scripts/store-console-preflight.js --allow-pending",

@@ -215,6 +215,7 @@ const bundle = {
     'docs/store-console-copy.md',
     'docs/store-console-task-answers.json',
     'docs/store-console-task-answers.md',
+    'scripts/record-app-store-connect.js',
     'docs/store-operator-packet/manifest.json',
     'docs/store-operator-packet/README.md',
     'docs/hosted-operator-packet/manifest.json',
