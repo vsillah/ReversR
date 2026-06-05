@@ -22,6 +22,8 @@ Authenticated connectors are supported through backend credential references. Th
 
 Private-network connectors remain disabled unless the API host is explicitly configured with `INVENTORY_PRIVATE_NETWORK_ENABLED=true` after network controls are in place.
 
+The prototype Settings screen includes an admin credential registry panel. It lets an admin enter the API admin token for the current session, list redacted backend credential references, save an API-key/OAuth credential reference, and delete registry-file references. Raw credential values are sent to the backend only for the save request and are not persisted by the app.
+
 ## CSV Columns
 
 Required:
@@ -222,6 +224,8 @@ curl -X DELETE \
 ```
 
 Responses never return raw `value`, `apiKey`, `token`, or `accessToken` fields. They return only redacted summaries such as `credentialRef`, configured auth modes, header names, source, and timestamps.
+
+The same registry endpoints are available in the app under Settings -> Admin Connector Credentials. Use the API token from `ADMIN_API_TOKEN`; do not paste raw ERP/API keys into the Phase 2 connector form.
 
 ## Matching Logic
 

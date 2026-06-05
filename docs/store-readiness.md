@@ -24,6 +24,7 @@ The app now has:
 - API health endpoint: `GET /api/health`
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
+- Settings-based admin credential reference manager for listing, saving, and deleting backend registry credentials
 - In-app Settings links for privacy policy, terms, support, and camera/data-use explanation
 
 ## Store Submission Requirements
@@ -79,7 +80,7 @@ Open gates:
 ## Technical Gaps Before Store Review
 
 - Production API host: mobile builds currently point non-web requests to a placeholder backend URL in `hooks/useGemini.ts` and `app.json`.
-- Authenticated connectors: API key and OAuth sources are supported through backend credential references and admin-token registry endpoints, but production should move registry-file secrets into a managed secret store and add user/admin roles.
+- Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Privacy policy, terms, and support: Settings links and app config keys exist, but placeholder URLs must be replaced with hosted public URLs and legal review.
 - Native QA: camera flow needs real iOS and Android device testing.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.

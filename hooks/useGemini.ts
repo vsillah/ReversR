@@ -7,6 +7,8 @@ const API_BASE = Platform.OS === 'web' && window.location.origin.includes('local
   ? 'http://localhost:3001'
   : configuredApiBase || 'https://reversr-rebuild-api.example.com';
 
+export const getApiBase = () => API_BASE;
+
 export const getAiConfig = async () => {
   try {
     const provider = await AsyncStorage.getItem('ai_provider') || 'gemini';
@@ -72,6 +74,22 @@ export interface InventoryValidationResult {
     partCount: number;
   }>;
   error?: string;
+}
+
+export interface AdminCredentialSummary {
+  credentialRef: string;
+  authModes: string[];
+  headerNames: string[];
+  hasSecret: boolean;
+  source?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdminCredentialListResponse {
+  status: 'ok';
+  registryEnabled: boolean;
+  credentials: AdminCredentialSummary[];
 }
 
 export interface AssemblyStep {
@@ -279,6 +297,47 @@ export const validateInventoryConnector = async (
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ connector })
+  });
+};
+
+const adminHeaders = (adminToken: string) => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${adminToken}`,
+});
+
+export const listInventoryCredentials = async (
+  adminToken: string
+): Promise<AdminCredentialListResponse> => {
+  return fetchWithRetry(`${API_BASE}/api/admin/inventory/credentials`, {
+    method: 'GET',
+    headers: adminHeaders(adminToken),
+  });
+};
+
+export const saveInventoryCredential = async (
+  adminToken: string,
+  payload: {
+    credentialRef: string;
+    headerName?: string;
+    value?: string;
+    accessToken?: string;
+    scheme?: string;
+  }
+): Promise<{ status: 'ok'; credential: AdminCredentialSummary }> => {
+  return fetchWithRetry(`${API_BASE}/api/admin/inventory/credentials`, {
+    method: 'POST',
+    headers: adminHeaders(adminToken),
+    body: JSON.stringify(payload),
+  });
+};
+
+export const deleteInventoryCredential = async (
+  adminToken: string,
+  credentialRef: string
+): Promise<{ status: 'ok'; credentialRef: string; deleted: boolean }> => {
+  return fetchWithRetry(`${API_BASE}/api/admin/inventory/credentials/${encodeURIComponent(credentialRef)}`, {
+    method: 'DELETE',
+    headers: adminHeaders(adminToken),
   });
 };
 
