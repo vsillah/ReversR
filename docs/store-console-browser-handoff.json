@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:17:01Z",
+  "generatedAt": "2026-06-05T13:25:04Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -16,7 +16,7 @@
     "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
   },
   "googlePlayConsole": {
-    "browserState": "Chrome is open at the Google Play Console dashboard for ReversR Rebuild.",
+    "browserState": "Chrome is open at the Google Play Console dashboard for ReversR Rebuild with the app information/store listing task list expanded.",
     "developerAccount": "Vambah Sillah",
     "developerAccountId": "8864864114913698241",
     "appId": "4972956671966100551",
@@ -30,11 +30,13 @@
       "freeOrPaid": "Free"
     },
     "legalDeclarationsPending": [],
-    "nextHumanAction": "Complete app information/store listing, data safety, app content, internal testing, and native screenshot upload tasks."
+    "nextHumanAction": "Complete or authorize saved edits for the 11 Google Play setup tasks: Set privacy policy, Sign in details, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health, Select an app category and provide contact details, and Set up your store listing. Use docs/store-console-copy.md as the copy source."
   },
   "notes": [
     "Google Play app record exists; production access and store listing are not complete.",
+    "Google Play dashboard task list shows 0 of 11 app information/store listing tasks complete.",
     "No public store submission was started.",
-    "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. The next human-in-the-loop gate is the final Create action in the prepared App Store Connect New App form; App Store Connect app record creation and ascAppId collection are still required afterward."
+    "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. The next human-in-the-loop gate is the final Create action in the prepared App Store Connect New App form; App Store Connect app record creation and ascAppId collection are still required afterward.",
+    "EAS iOS preview credentials were checked with npx eas-cli@20.0.0 credentials --platform ios. Selecting the preview profile reached the Apple account login prompt, so iOS credential setup remains a human-in-the-loop Apple login gate."
   ]
 }

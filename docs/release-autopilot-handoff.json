@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-05T13:25:04Z",
+  "status": "pending-hitl",
+  "currentPr": {
+    "number": 2,
+    "branch": "codex/inventory-reconstruction-clone",
+    "url": "https://github.com/vsillah/ReversR/pull/2"
+  },
+  "releaseStatus": {
+    "pass": 35,
+    "pending": 4,
+    "blocked": 0,
+    "warn": 0,
+    "pendingGates": [
+      "eas-submit-config",
+      "native-qa-evidence",
+      "store-console-records",
+      "native-screenshots"
+    ]
+  },
+  "activeBrowserState": {
+    "appStoreConnect": {
+      "url": "https://appstoreconnect.apple.com/apps",
+      "screen": "New App modal",
+      "state": "Prepared and waiting at the active Create button.",
+      "fields": {
+        "platform": "iOS",
+        "name": "ReversR Rebuild",
+        "primaryLanguage": "English (U.S.)",
+        "bundleId": "ReversR Rebuild - com.vsillah.reversrrebuild",
+        "sku": "reversr-rebuild-001",
+        "userAccess": "Full Access"
+      },
+      "nextHumanAction": "Click Create or authorize Codex to click Create for this exact prepared App Store Connect record.",
+      "copyBackAfterSuccess": "App Store Connect Apple ID from the created app record for eas.json submit.production.ios.ascAppId"
+    },
+    "googlePlayConsole": {
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+      "screen": "Dashboard task list",
+      "state": "Google Play app record exists. The Provide app information and create your store listing task list shows 0 of 11 tasks complete.",
+      "openTasks": [
+        "Set privacy policy",
+        "Sign in details",
+        "Ads",
+        "Content rating",
+        "Target audience",
+        "Data safety",
+        "Government apps",
+        "Financial features",
+        "Health",
+        "Select an app category and provide contact details",
+        "Set up your store listing"
+      ],
+      "copySource": "docs/store-console-copy.md"
+    },
+    "easCredentials": {
+      "command": "npx eas-cli@20.0.0 credentials --platform ios",
+      "profileSelected": "preview",
+      "nextPrompt": "Do you want to log in to your Apple account?",
+      "nextHumanAction": "Complete Apple login/2FA in the EAS credentials flow so Expo can generate or validate internal-distribution iOS credentials."
+    }
+  },
+  "lastStrictFailures": {
+    "nativePreflight": [
+      "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists."
+    ],
+    "iosPreviewBuild": [
+      "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode."
+    ],
+    "nativeQaPreflight": [
+      "No Android tested device or tester evidence.",
+      "No iOS preview build URL, tested device, tester, or completedAt evidence.",
+      "Native QA checks and native screenshots remain pending."
+    ],
+    "storeConsolePreflight": [
+      "App Store Connect app record, record URL, and Apple ID are missing.",
+      "Google Play privacy policy URL, metadata, data safety, app content, internal testing, and signoff remain incomplete.",
+      "Final native screenshots and native QA signoff remain incomplete."
+    ]
+  },
+  "verifiedLocalConstraints": {
+    "easWhoami": "vsillah / vsillah@gmail.com",
+    "androidPreviewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+    "adbDevices": "No attached Android devices.",
+    "androidEmulator": "emulator command not found.",
+    "sdkmanager": "sdkmanager not found.",
+    "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
+  },
+  "resumeInstructionsForVambah": [
+    "In the open App Store Connect tab, click Create on the prepared New App modal.",
+    "After the app opens, copy the Apple ID from App Information and send it back.",
+    "When ready for iOS credentials, run or allow Codex to run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA.",
+    "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured."
+  ]
+}

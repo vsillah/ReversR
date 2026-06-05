@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:17:01Z",
+  "generatedAt": "2026-06-05T13:25:04Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -45,6 +45,7 @@
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
     "Authorize and click Create on the prepared App Store Connect New App modal, or create the iOS app record manually, then copy the App Store Connect Apple ID into eas.json at submit.production.ios.ascAppId to unblock iOS preview/TestFlight work.",
+    "Run npx eas-cli@20.0.0 credentials --platform ios, select the preview profile, and complete the Apple account login/2FA prompt so EAS can create or validate internal-distribution iOS credentials.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
   ],
   "notCompletedByAutomation": [
@@ -52,6 +53,7 @@
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
     "Apple Developer App ID registration is complete for com.vsillah.reversrrebuild, but App Store Connect app record creation is still gated by the final Create action in the New App modal.",
+    "EAS iOS preview credential setup reaches an Apple account login prompt and cannot proceed unattended.",
     "No Apple App Store Connect app record was created."
   ]
 }
