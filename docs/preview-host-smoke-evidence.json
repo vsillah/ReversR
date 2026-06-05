@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T06:08:09.501Z",
+  "generatedAt": "2026-06-05T06:33:26.024Z",
   "previewUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app",
   "routeCount": 4,
   "routes": [
@@ -17,7 +17,7 @@
         "New Reconstruction": false,
         "Start with a scan or description": false
       },
-      "checkedAt": "2026-06-05T06:07:58.966Z",
+      "checkedAt": "2026-06-05T06:33:15.421Z",
       "error": ""
     },
     {
@@ -32,7 +32,7 @@
         "Camera access is used only to capture machine images": false,
         "Manufacturer quote packets and email drafts require explicit user action": false
       },
-      "checkedAt": "2026-06-05T06:08:02.077Z",
+      "checkedAt": "2026-06-05T06:33:18.565Z",
       "error": ""
     },
     {
@@ -47,7 +47,7 @@
         "No Automatic Vendor Submission": false,
         "it does not automatically submit orders": false
       },
-      "checkedAt": "2026-06-05T06:08:04.486Z",
+      "checkedAt": "2026-06-05T06:33:21.134Z",
       "error": ""
     },
     {
@@ -62,7 +62,7 @@
         "vsillah@gmail.com": false,
         "Do not send raw API keys or OAuth tokens": false
       },
-      "checkedAt": "2026-06-05T06:08:06.937Z",
+      "checkedAt": "2026-06-05T06:33:23.641Z",
       "error": ""
     }
   ],

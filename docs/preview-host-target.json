@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T06:34:26.226Z",
+  "source": "github-pr-comments",
+  "pr": {
+    "number": 2,
+    "url": "https://github.com/vsillah/ReversR/pull/2",
+    "headRefName": "codex/inventory-reconstruction-clone"
+  },
+  "previewUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app",
+  "inspectorUrl": "https://vercel.com/static/status/ready.svg",
+  "vercelCommentCount": 1,
+  "command": "gh pr view 2 --json number,url,headRefName,comments",
+  "nextSmokeCommand": "PREVIEW_SMOKE_URL=https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
+  "previewSmokeStillRequired": true,
+  "notes": [
+    "This discovers the current Vercel PR preview URL; it does not prove the preview renders.",
+    "Run preview:smoke with the discovered URL and an approved bypass secret when deployment protection is enabled."
+  ]
+}

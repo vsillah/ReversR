@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T06:30:17.246Z",
-  "releaseStatusGeneratedAt": "2026-06-05T06:30:17.243Z",
+  "generatedAt": "2026-06-05T06:35:28.288Z",
+  "releaseStatusGeneratedAt": "2026-06-05T06:35:28.285Z",
   "summary": {
     "pending": 9
   },
@@ -12,13 +12,15 @@
       "id": "preview-host-smoke",
       "title": "Vercel preview host renders app and policy/support routes before production hosting",
       "status": "pending",
-      "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:08:09.501Z.",
+      "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
       "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation.",
       "action": {
         "owner": "Release operator",
         "phase": "Vercel preview access",
         "action": "Create or use a Vercel Protection Bypass for Automation secret and rerun the deployed preview smoke.",
         "steps": [
+          "Run npm run preview:discover -- --pr <pull-request-number> to refresh docs/preview-host-target.json.",
+          "Copy the previewUrl or nextSmokeCommand from docs/preview-host-target.json.",
           "Open the Vercel project for the PR preview deployment.",
           "Go to Deployment Protection or Protection Bypass for Automation settings.",
           "Create or copy the automation bypass secret for the project.",
@@ -27,6 +29,7 @@
           "Run npm run release:evidence, then npm run release:status."
         ],
         "evidence": [
+          "docs/preview-host-target.json records the current Vercel PR preview URL.",
           "docs/preview-host-smoke-evidence.json proves /, /privacy, /terms, and /support render on the deployed preview.",
           "The evidence records that a bypass was configured but does not contain the bypass secret.",
           "npm run release:status passes the preview-host-smoke gate."

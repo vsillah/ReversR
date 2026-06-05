@@ -8,11 +8,12 @@ Use the generated gate view first:
 
 ```bash
 npm run release:status
+npm run preview:discover -- --pr 2
 npm run release:next-actions
 npm run release:next-actions:write
 ```
 
-`release:status` shows what is proven from repo evidence. `release:next-actions` expands each pending gate into owner, action, steps, and evidence required. `release:next-actions:write` saves the generated operator packet to `docs/release-next-actions.json` and `docs/release-next-actions.md`.
+`release:status` shows what is proven from repo evidence. `preview:discover` records the current Vercel PR preview target in `docs/preview-host-target.json`. `release:next-actions` expands each pending gate into owner, action, steps, and evidence required. `release:next-actions:write` saves the generated operator packet to `docs/release-next-actions.json` and `docs/release-next-actions.md`.
 
 Before starting external account or hosted-environment work, refresh the local validation packet:
 
@@ -27,12 +28,13 @@ npm run release:status
 After the PR preview deploys, record deployed-preview evidence:
 
 ```bash
+npm run preview:discover -- --pr 2
 PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke
 npm run release:evidence
 npm run release:status
 ```
 
-This proves the PR preview renders the app and `/privacy`, `/terms`, and `/support`. It does not replace the production hosted API, hosted policy URLs, native QA, or store-console gates.
+Use the `previewUrl` from `docs/preview-host-target.json` as `PREVIEW_SMOKE_URL`. The smoke proves the PR preview renders the app and `/privacy`, `/terms`, and `/support`. It does not replace the production hosted API, hosted policy URLs, native QA, or store-console gates.
 
 If the PR preview is protected, create or use a Vercel Protection Bypass for Automation secret and rerun:
 

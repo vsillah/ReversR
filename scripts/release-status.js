@@ -368,6 +368,7 @@ const requiredArtifacts = [
   'docs/release-next-actions.md',
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
+  'docs/preview-host-target.json',
   'docs/external-release-setup-runbook.md',
   '.github/workflows/release-local-ci.yml',
   'docs/native-release-runbook.md',
@@ -386,6 +387,7 @@ const requiredArtifacts = [
   'scripts/api-deployment-smoke.js',
   'scripts/objective-readiness-audit.js',
   'scripts/release-next-actions.js',
+  'scripts/discover-preview-host.js',
   'scripts/local-release-ci.js',
   'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
@@ -449,6 +451,27 @@ addGate(
     ? `docs/release-next-actions.json and docs/release-next-actions.md list ${releaseNextActions.pendingGates.length} external gates at ${releaseNextActions.generatedAt}.`
     : 'docs/release-next-actions.json or docs/release-next-actions.md is missing or incomplete.',
   releaseNextActionsOk ? '' : 'Run npm run release:next-actions:write before external account-side release work.'
+);
+
+const previewHostTarget = readOptionalJson('docs/preview-host-target.json');
+const previewHostTargetOk = (
+  previewHostTarget?.schemaVersion === 1 &&
+  previewHostTarget?.status === 'pass' &&
+  previewHostTarget?.source === 'github-pr-comments' &&
+  isHttpsUrl(previewHostTarget?.previewUrl) &&
+  previewHostTarget?.previewUrl?.includes('.vercel.app') &&
+  previewHostTarget?.nextSmokeCommand?.includes('PREVIEW_SMOKE_URL=') &&
+  previewHostTarget?.previewSmokeStillRequired === true
+);
+addGate(
+  'store-local',
+  'preview-host-target-discovery',
+  'Current Vercel PR preview target is discovered for preview smoke',
+  previewHostTargetOk ? 'pass' : 'pending',
+  previewHostTargetOk
+    ? `docs/preview-host-target.json records ${previewHostTarget.previewUrl} at ${previewHostTarget.generatedAt}.`
+    : 'docs/preview-host-target.json is missing or incomplete.',
+  previewHostTargetOk ? '' : 'Run npm run preview:discover -- --pr <number>, then rerun npm run release:status.'
 );
 
 const externalRunbookChecks = [
@@ -528,6 +551,7 @@ const requiredBundleProofs = [
   'store-console-pending-evidence',
   'local-release-ci-evidence',
   'release-next-actions-packet',
+  'preview-host-target-discovery',
 ];
 const requiredBundlePending = [
   'preview-host-smoke',
@@ -552,6 +576,7 @@ const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
   releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.schemaVersion === 1 &&
+  releaseEvidenceBundle?.evidenceFiles?.previewHostTarget?.status === 'pass' &&
   Number(releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.pendingGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.localReleaseCi?.status === 'pass'
 );

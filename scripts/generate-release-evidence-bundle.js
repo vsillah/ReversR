@@ -74,6 +74,7 @@ const localProofGateIds = [
   'release-local-ci-workflow',
   'store-console-copy-packet',
   'release-next-actions-packet',
+  'preview-host-target-discovery',
 ];
 const externalGateIds = [
   'preview-host-smoke',
@@ -104,6 +105,7 @@ const evidenceFiles = {
   apiDeploymentSmoke: readOptionalJson('docs/api-deployment-smoke-evidence.json'),
   policyHostingSmoke: readOptionalJson('docs/policy-hosting-smoke-evidence.json'),
   previewHostSmoke: readOptionalJson('docs/preview-host-smoke-evidence.json'),
+  previewHostTarget: readOptionalJson('docs/preview-host-target.json'),
   objectiveReadinessAudit: readOptionalJson('docs/objective-readiness-audit.json'),
   storeSubmissionSmoke: readOptionalJson('docs/store-submission-smoke-evidence.json'),
   storeReviewSafety: readOptionalJson('docs/store-review-safety-evidence.json'),
@@ -176,6 +178,7 @@ const bundle = {
     releaseStatus: 'npm run release:status',
     releaseNextActions: 'npm run release:next-actions',
     releaseNextActionsWrite: 'npm run release:next-actions:write',
+    previewHostDiscover: 'npm run preview:discover -- --pr <pull-request-number>',
     releaseObjective: 'npm run release:objective',
     releaseLocalCi: 'npm run release:local-ci',
     storeReviewSafety: 'npm run store:review-safety',
@@ -199,6 +202,7 @@ const bundle = {
     'docs/store-console-evidence.template.json',
     'docs/native-qa-evidence.template.json',
     'docs/local-release-ci-evidence.json',
+    'docs/preview-host-target.json',
     'docs/objective-readiness-audit.json',
     'docs/external-release-setup-runbook.md',
     '.github/workflows/release-local-ci.yml',

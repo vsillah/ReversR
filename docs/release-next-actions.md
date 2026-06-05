@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T06:30:17.246Z
-Release status generated at: 2026-06-05T06:30:17.243Z
+Generated at: 2026-06-05T06:35:28.288Z
+Release status generated at: 2026-06-05T06:35:28.285Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, connector, EAS, native QA, screenshot, and store-console gates.
 
@@ -24,7 +24,7 @@ This generated packet is the external-operator action list for the clone release
 
 Current gate evidence:
 
-docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:08:09.501Z.
+docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.
 
 Current gate next step:
 
@@ -32,15 +32,18 @@ Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<s
 
 Steps:
 
-1. Open the Vercel project for the PR preview deployment.
-2. Go to Deployment Protection or Protection Bypass for Automation settings.
-3. Create or copy the automation bypass secret for the project.
-4. Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke.
-5. Confirm docs/preview-host-smoke-evidence.json has status pass and automationBypass.vercelBypassConfigured true.
-6. Run npm run release:evidence, then npm run release:status.
+1. Run npm run preview:discover -- --pr <pull-request-number> to refresh docs/preview-host-target.json.
+2. Copy the previewUrl or nextSmokeCommand from docs/preview-host-target.json.
+3. Open the Vercel project for the PR preview deployment.
+4. Go to Deployment Protection or Protection Bypass for Automation settings.
+5. Create or copy the automation bypass secret for the project.
+6. Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke.
+7. Confirm docs/preview-host-smoke-evidence.json has status pass and automationBypass.vercelBypassConfigured true.
+8. Run npm run release:evidence, then npm run release:status.
 
 Evidence required:
 
+- docs/preview-host-target.json records the current Vercel PR preview URL.
 - docs/preview-host-smoke-evidence.json proves /, /privacy, /terms, and /support render on the deployed preview.
 - The evidence records that a bypass was configured but does not contain the bypass secret.
 - npm run release:status passes the preview-host-smoke gate.

@@ -109,6 +109,8 @@ const actionPlan = {
     phase: 'Vercel preview access',
     action: 'Create or use a Vercel Protection Bypass for Automation secret and rerun the deployed preview smoke.',
     steps: [
+      'Run npm run preview:discover -- --pr <pull-request-number> to refresh docs/preview-host-target.json.',
+      'Copy the previewUrl or nextSmokeCommand from docs/preview-host-target.json.',
       'Open the Vercel project for the PR preview deployment.',
       'Go to Deployment Protection or Protection Bypass for Automation settings.',
       'Create or copy the automation bypass secret for the project.',
@@ -117,6 +119,7 @@ const actionPlan = {
       'Run npm run release:evidence, then npm run release:status.',
     ],
     evidence: [
+      'docs/preview-host-target.json records the current Vercel PR preview URL.',
       'docs/preview-host-smoke-evidence.json proves /, /privacy, /terms, and /support render on the deployed preview.',
       'The evidence records that a bypass was configured but does not contain the bypass secret.',
       'npm run release:status passes the preview-host-smoke gate.',
