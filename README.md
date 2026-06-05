@@ -54,12 +54,14 @@ Run the local readiness check with the placeholder API allowed:
 npm run store:preflight:local
 ```
 
-Before real store builds, set `EXPO_PUBLIC_API_BASE_URL` to the hosted production API and run:
+Before real store builds, set `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` to hosted HTTPS URLs and run:
 
 ```bash
 npm run api:preflight
 npm run store:preflight
 ```
 
-`store:preflight` also requires hosted HTTPS privacy policy, terms, and support URLs in `app.json`.
+`store:preflight` also requires hosted HTTPS privacy policy, terms, and support URLs from EAS environment variables or `app.json`.
 It also checks native build numbers, required release asset files, and 1024x1024 PNG dimensions for the icon, adaptive icon, splash image, and favicon.
+
+The web app includes deployable `/privacy`, `/terms`, and `/support` routes for store metadata URLs.

@@ -21,6 +21,7 @@ The app now has:
 - Vendor request draft flow for preparing a user-reviewed quote email after the quote packet is exported
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
+- Web routes for `/privacy`, `/terms`, and `/support`
 - Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
 - Server-side credential references for authenticated inventory connectors
@@ -82,19 +83,19 @@ Open gates:
 
 - Production API host: mobile builds currently point non-web requests to a placeholder backend URL in `hooks/useGemini.ts` and `app.json`.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
-- Privacy policy, terms, and support: Settings links and app config keys exist, but placeholder URLs must be replaced with hosted public URLs and legal review.
+- Privacy policy, terms, and support: web routes and env-driven app config exist, but the routes must be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: camera flow needs real iOS and Android device testing.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: needs screen-reader and tap-target QA before submission.
-- Store assets: metadata draft and required 1024x1024 PNG assets exist, but native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
+- Store assets: metadata draft, required 1024x1024 PNG assets, and web policy/support routes exist, but native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
 - Dependency audit: `npm audit fix` removed the high-severity findings; remaining moderate transitive Expo-tooling findings require a breaking Expo SDK 56 upgrade path and should be handled as a separate native upgrade gate.
 
 ## Recommended Next Sequence
 
 1. Host the API and update `hooks/useGemini.ts` to use the production backend for native builds.
 2. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
-3. Host privacy policy, terms, and support pages, then replace placeholder URLs in `app.json`.
+3. Deploy the web `/privacy`, `/terms`, and `/support` routes, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run api:preflight` and `npm run store:preflight`.
 5. Run native Android/iOS camera QA.
 6. Run EAS preview builds.

@@ -127,7 +127,13 @@ if (profiles.production?.android?.buildType !== 'app-bundle') {
   fail('Production Android EAS build must use app-bundle for Google Play.');
 }
 
-const isPlaceholderUrl = (value) => !value || value.includes('example.com') || value.includes('example.org') || value.includes('localhost');
+const isPlaceholderUrl = (value) => (
+  !value ||
+  value.includes('example.com') ||
+  value.includes('example.net') ||
+  value.includes('example.org') ||
+  value.includes('localhost')
+);
 const isHttpsUrl = (value) => /^https:\/\/[^/]+\.[^/]+/i.test(value || '');
 
 const configuredApiBase = process.env.EXPO_PUBLIC_API_BASE_URL || appConfig.extra?.apiBaseUrl || '';
@@ -140,9 +146,9 @@ if (placeholderApi && allowPlaceholder) {
 }
 
 const requiredHostedUrls = [
-  ['privacyPolicyUrl', appConfig.extra?.privacyPolicyUrl],
-  ['termsUrl', appConfig.extra?.termsUrl],
-  ['supportUrl', appConfig.extra?.supportUrl],
+  ['privacyPolicyUrl', process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL || appConfig.extra?.privacyPolicyUrl],
+  ['termsUrl', process.env.EXPO_PUBLIC_TERMS_URL || appConfig.extra?.termsUrl],
+  ['supportUrl', process.env.EXPO_PUBLIC_SUPPORT_URL || appConfig.extra?.supportUrl],
 ];
 for (const [key, value] of requiredHostedUrls) {
   if ((isPlaceholderUrl(value) || !isHttpsUrl(value)) && !allowPlaceholder) {
@@ -159,9 +165,16 @@ const requiredDocs = [
   'docs/inventory-connector-spec.md',
   'docs/store-readiness.md',
   'docs/store-metadata.md',
+  'app/privacy.tsx',
+  'app/terms.tsx',
+  'app/support.tsx',
 ];
 for (const doc of requiredDocs) {
   if (!exists(doc)) fail(`Missing required store/readiness document: ${doc}`);
+}
+
+if (!exists('app.config.js')) {
+  fail('Missing app.config.js; production builds need environment-driven API and policy/support URL binding.');
 }
 
 if (!appConfig.ios?.infoPlist?.NSCameraUsageDescription) {

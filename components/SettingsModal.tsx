@@ -32,9 +32,21 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const appExtra = (Constants.expoConfig?.extra || {}) as Record<string, string | undefined>;
 
   const policyLinks = [
-    { label: 'Privacy Policy', url: appExtra.privacyPolicyUrl, icon: 'shield-checkmark-outline' as const },
-    { label: 'Terms of Service', url: appExtra.termsUrl, icon: 'document-text-outline' as const },
-    { label: 'Support', url: appExtra.supportUrl, icon: 'help-circle-outline' as const },
+    {
+      label: 'Privacy Policy',
+      url: process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL || appExtra.privacyPolicyUrl,
+      icon: 'shield-checkmark-outline' as const,
+    },
+    {
+      label: 'Terms of Service',
+      url: process.env.EXPO_PUBLIC_TERMS_URL || appExtra.termsUrl,
+      icon: 'document-text-outline' as const,
+    },
+    {
+      label: 'Support',
+      url: process.env.EXPO_PUBLIC_SUPPORT_URL || appExtra.supportUrl,
+      icon: 'help-circle-outline' as const,
+    },
   ];
 
   useEffect(() => {
