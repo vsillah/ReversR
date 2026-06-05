@@ -47,10 +47,10 @@
     "packageName": "com.vsillah.reversrrebuild",
     "appCategory": "Productivity",
     "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
-    "metadataCopiedFromPacket": false,
+    "metadataCopiedFromPacket": true,
     "dataSafetyCompleted": true,
-    "dataSafetyDraftSavedAt": "2026-06-05T20:12:58.000Z",
-    "dataSafetyVerification": "Computer Use completed Google Play Data safety through Step 5 Preview and verified the console displayed Change saved. Send for review in Publishing overview. Send for review was not clicked.",
+    "dataSafetyDraftSavedAt": "2026-06-05T20:40:28.785Z",
+    "dataSafetyVerification": "Computer Use re-opened Google Play Data safety after app-content policy cleanup, verified retained answers through Step 5 Preview, and saved the declaration. Console displayed Change saved. Send for review in Publishing overview. Send for review was not clicked.",
     "dataSafetyAnswers": {
       "collectsOrSharesRequiredUserDataTypes": true,
       "encryptedInTransit": true,
@@ -80,7 +80,7 @@
         }
       }
     },
-    "appContentCompleted": false,
+    "appContentCompleted": true,
     "internalTestingReady": false,
     "categoryDraftSaved": true,
     "categoryDraftSavedAt": "2026-06-05T16:11:30.815Z",
@@ -88,8 +88,8 @@
     "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
     "publicSupportEmail": "vambah@amadutown.com",
     "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
-    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. App category was later saved as Productivity in Store settings, public support contact details were saved after Vambah confirmed vambah@amadutown.com as the public support email, and Data safety was completed through Step 5 Preview with Change saved. Content rating, target audience, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
-    "completedSetupTaskCount": 8,
+    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Full store listing asset upload, internal testing, production access, native QA/screenshots, and final Send for review remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "completedSetupTaskCount": 10,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
       "Set privacy policy",
@@ -99,11 +99,11 @@
       "Financial features",
       "Health",
       "Select an app category and provide contact details",
-      "Data safety"
+      "Data safety",
+      "Content rating",
+      "Target audience"
     ],
     "remainingSetupTasks": [
-      "Content rating",
-      "Target audience",
       "Set up your store listing"
     ],
     "storeListingTextEntered": true,
@@ -112,7 +112,46 @@
     "storeListingAssetUploadAttempted": true,
     "storeListingAssetUploadStatus": "not-uploaded",
     "storeListingAssetUploadNote": "Chrome automation opened the Google Play asset-library drawer from the default store listing and attempted the Upload/file-input path, but no file chooser completed and no prepared asset was attached. App icon, feature graphic, and phone screenshots remain prepared locally only.",
-    "appContentDraftsSaved": true
+    "appContentDraftsSaved": true,
+    "contentRatingCompleted": true,
+    "contentRatingSubmittedAt": "2026-06-05T20:32:00.000Z",
+    "contentRatingVerification": "Computer Use completed the IARC Content ratings questionnaire as All Other App Types with online/generated content marked yes and no rating flags for user sharing, violence, sexuality, language, controlled substances, age-restricted sales, location sharing, purchases, rewards, browser/search, or news/education. Console displayed IARC status Completed with ESRB Everyone, PEGI 3, USK All ages, IARC Rated for 3+, and Brazil All ages. Send for review was not clicked.",
+    "contentRatingAnswers": {
+      "contactEmail": "vambah@amadutown.com",
+      "category": "All Other App Types",
+      "onlineContent": true,
+      "downloadedRatingsRelevantContent": false,
+      "userContentSharing": false,
+      "violence": false,
+      "sexuality": false,
+      "language": false,
+      "controlledSubstances": false,
+      "ageRestrictedProductsOrActivities": false,
+      "sharesPreciseLocationWithUsers": false,
+      "digitalGoodsPurchases": false,
+      "rewardsCryptoOrTransferableDigitalAssets": false,
+      "webBrowserOrSearchEngine": false,
+      "newsOrEducationalProduct": false,
+      "ratings": [
+        "Brazil: All ages",
+        "North America ESRB: Everyone",
+        "Europe PEGI: PEGI 3",
+        "Germany USK: All ages",
+        "Rest of world IARC: Rated for 3+",
+        "Russia Google Play: Rated for 3+",
+        "South Korea Google Play: Rated for 3+"
+      ]
+    },
+    "advertisingIdCompleted": true,
+    "advertisingIdSavedAt": "2026-06-05T20:40:28.785Z",
+    "advertisingIdAnswer": false,
+    "advertisingIdVerification": "Computer Use selected No for Does your app use advertising ID? and saved the declaration. Console displayed Change saved. Send for review in Publishing overview. Send for review was not clicked.",
+    "appContentCompletedAt": "2026-06-05T20:40:28.785Z",
+    "appContentVerification": "Computer Use verified Google Play App content Need attention tab displayed You are all caught up after Content ratings, Advertising ID, and Data safety were saved. Send for review was not clicked.",
+    "appContentCaughtUp": true,
+    "targetAudienceCompleted": true,
+    "targetAudienceVerifiedAt": "2026-06-05T20:43:48.099Z",
+    "targetAudienceVerification": "Computer Use verified the Google Play Dashboard shows Target audience as a completed setup task and App content Need attention is caught up. Send for review was not clicked."
   },
   "requiredAssets": {
     "nativeScreenshotsCaptured": false,
@@ -148,7 +187,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T16:11:30.815Z",
+  "generatedAt": "2026-06-05T20:43:48.099Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -227,8 +266,8 @@
       "task": "Data safety",
       "status": "draft-saved",
       "value": "Collected/shared required user data types disclosed as Photos and Other user-generated content; both use app functionality only. Encrypted in transit is yes, no account creation, no external-account login, and deletion requests use https://reversr.vercel.app/support.",
-      "completedAt": "2026-06-05T20:12:58.000Z",
-      "note": "Computer Use completed Data safety through Step 5 Preview and verified Change saved. Send for review in Publishing overview. Send for review was not clicked."
+      "completedAt": "2026-06-05T20:40:28.785Z",
+      "note": "Computer Use re-opened Data safety, verified the retained Step 5 Preview, saved the declaration, and verified Change saved. Send for review in Publishing overview. Send for review was not clicked."
     },
     {
       "platform": "googlePlay",
@@ -245,6 +284,38 @@
       "value": "512x512 icon, 1024x500 feature graphic, and five 1080x1920 Play phone screenshots are prepared locally.",
       "completedAt": "2026-06-05T15:40:00.082Z",
       "note": "Generated docs/store-assets/google-play-icon.png and docs/store-screenshots/google-play-phone/*.png. No Google Play file upload was performed."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Content rating",
+      "status": "draft-saved",
+      "value": "IARC questionnaire submitted for All Other App Types. Result: ESRB Everyone, PEGI 3, USK All ages, IARC Rated for 3+, Brazil All ages.",
+      "completedAt": "2026-06-05T20:32:00.000Z",
+      "note": "Computer Use completed the questionnaire and verified IARC status Completed. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Advertising ID",
+      "status": "draft-saved",
+      "value": "No, app does not use advertising ID.",
+      "completedAt": "2026-06-05T20:40:28.785Z",
+      "note": "Computer Use selected No and saved the declaration. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "App content declarations",
+      "status": "draft-saved-complete",
+      "value": "Google Play App content Need attention tab is caught up after Data safety, Content ratings, and Advertising ID were saved.",
+      "completedAt": "2026-06-05T20:40:28.785Z",
+      "note": "Computer Use verified the App content overview displayed You are all caught up. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Target audience",
+      "status": "draft-saved",
+      "value": "Adults / workplace users; not designed for children under 13.",
+      "completedAt": "2026-06-05T20:43:48.099Z",
+      "note": "Computer Use verified the Google Play Dashboard lists Target audience as a completed setup task. Send for review was not clicked."
     }
   ]
 }

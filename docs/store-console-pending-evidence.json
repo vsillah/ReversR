@@ -1,15 +1,13 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T20:13:59.317Z",
+  "generatedAt": "2026-06-05T20:44:04.306Z",
   "source": "docs/store-console-evidence.json",
   "finalEvidenceFile": "docs/store-console-evidence.json",
   "warnings": [
     "App Store Connect App Privacy details are not marked complete.",
     "App Store Connect age rating is not marked complete.",
     "App Store Connect TestFlight readiness is not marked complete.",
-    "Google Play metadata is not marked copied from the submission packet.",
-    "Google Play App content form is not marked complete.",
     "Google Play Internal Testing readiness is not marked complete.",
     "Final native screenshots are not marked captured.",
     "Final app icon review is not marked complete.",
@@ -50,9 +48,9 @@
     "recordUrlPresent": true,
     "packageNameMatches": true,
     "privacyPolicyUrlReady": true,
-    "metadataCopiedFromPacket": false,
+    "metadataCopiedFromPacket": true,
     "dataSafetyCompleted": true,
-    "appContentCompleted": false,
+    "appContentCompleted": true,
     "internalTestingReady": false
   },
   "requiredAssets": {
