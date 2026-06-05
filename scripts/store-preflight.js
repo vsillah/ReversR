@@ -5,6 +5,17 @@ const allowPlaceholder = args.has('--allow-placeholder');
 
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
 const exists = (path) => fs.existsSync(path);
+const readPngSize = (path) => {
+  const buffer = fs.readFileSync(path);
+  const signature = buffer.subarray(0, 8).toString('hex');
+  if (signature !== '89504e470d0a1a0a') {
+    throw new Error(`${path} is not a PNG file.`);
+  }
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+};
 
 const failures = [];
 const warnings = [];
@@ -30,6 +41,14 @@ if (appConfig.ios?.bundleIdentifier !== expected.iosBundleId) {
 }
 if (appConfig.android?.package !== expected.androidPackage) {
   fail(`Expected Android package "${expected.androidPackage}".`);
+}
+
+if (!/^[1-9]\d*$/.test(String(appConfig.android?.versionCode || ''))) {
+  fail('Android versionCode must be a positive integer for Google Play builds.');
+}
+
+if (!/^[1-9]\d*(\.\d+)*$/.test(String(appConfig.ios?.buildNumber || ''))) {
+  fail('iOS buildNumber must be set to a positive build number for App Store builds.');
 }
 
 const androidPermissions = appConfig.android?.permissions || [];
@@ -73,6 +92,29 @@ if (allDependencies['expo-media-library']) {
 if (!allDependencies['expo-camera']) fail('expo-camera must stay installed for machine scanning.');
 if (!allDependencies['expo-sharing']) fail('expo-sharing must stay installed for reconstruction package export.');
 if (!allDependencies['expo-file-system']) fail('expo-file-system must stay installed for local package export.');
+
+const requiredPngAssets = [
+  ['expo.icon', appConfig.icon, 1024, 1024],
+  ['android.adaptiveIcon.foregroundImage', appConfig.android?.adaptiveIcon?.foregroundImage, 1024, 1024],
+  ['splash.image', appConfig.splash?.image, 1024, 1024],
+  ['web.favicon', appConfig.web?.favicon, 1024, 1024],
+];
+
+for (const [label, path, expectedWidth, expectedHeight] of requiredPngAssets) {
+  if (!path || !exists(path)) {
+    fail(`Missing required release asset ${label}: ${path || '(not configured)'}`);
+    continue;
+  }
+
+  try {
+    const { width, height } = readPngSize(path);
+    if (width !== expectedWidth || height !== expectedHeight) {
+      fail(`Release asset ${label} must be ${expectedWidth}x${expectedHeight}; found ${width}x${height} at ${path}.`);
+    }
+  } catch (error) {
+    fail(error.message);
+  }
+}
 
 const profiles = easConfig.build || {};
 for (const [profile, environment] of [['development', 'development'], ['preview', 'preview'], ['production', 'production']]) {

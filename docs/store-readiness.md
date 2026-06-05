@@ -11,6 +11,7 @@ The app now has:
 - Distinct app identity: `ReversR Rebuild`
 - Android package: `com.vsillah.reversrrebuild`
 - iOS bundle identifier: `com.vsillah.reversrrebuild`
+- Explicit Android `versionCode` and iOS `buildNumber`
 - Camera-only Android permission
 - Explicit Android permission blocks for microphone and broad photo/media access
 - Inventory connector validation
@@ -18,6 +19,7 @@ The app now has:
 - Reconstruction package generation with assembly steps, pricing, BOM, and manufacturer handoff surfaces
 - Manufacturer quote packet export for human-reviewed 3D modeling and fabrication requests
 - Store preflight script: `npm run store:preflight`
+- Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - API health endpoint: `GET /api/health`
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
@@ -64,7 +66,7 @@ Open gates:
 - Run `eas init` for the new clone identity.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run api:preflight` against the hosted API.
-- Run `npm run store:preflight` before production builds.
+- Run `npm run store:preflight` before production builds to confirm package IDs, build numbers, release assets, permissions, hosted URLs, and EAS profile shape.
 - Configure Android credentials and iOS credentials.
 - Build:
   - `eas build --platform android --profile production`
@@ -82,7 +84,7 @@ Open gates:
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export is available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: needs screen-reader and tap-target QA before submission.
-- Store assets: metadata draft exists in [store-metadata.md](./store-metadata.md), but native screenshots, support URL, hosted privacy URL, and final icon review are not complete.
+- Store assets: metadata draft and required 1024x1024 PNG assets exist, but native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
 
 ## Recommended Next Sequence
 

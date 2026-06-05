@@ -61,3 +61,4 @@ npm run store:preflight
 ```
 
 `store:preflight` also requires hosted HTTPS privacy policy, terms, and support URLs in `app.json`.
+It also checks native build numbers, required release asset files, and 1024x1024 PNG dimensions for the icon, adaptive icon, splash image, and favicon.

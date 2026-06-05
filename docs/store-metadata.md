@@ -8,6 +8,8 @@ Last updated: June 5, 2026
 - Subtitle: Machine inventory to reconstruction package
 - Android package: `com.vsillah.reversrrebuild`
 - iOS bundle ID: `com.vsillah.reversrrebuild`
+- Android versionCode: `15`
+- iOS buildNumber: `1`
 - Category recommendation: Productivity or Business
 - Age rating target: 4+ / Everyone, pending final review of generated content and vendor links
 
@@ -95,6 +97,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 - Replace placeholder policy/support URLs in `app.json`.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run store:preflight`.
+- Confirm final app icon, adaptive icon, splash image, and favicon pass the release asset checks.
 - Run native Android and iOS camera smoke tests.
 - Capture native screenshots for both stores.
 - Build Android AAB and iOS IPA through EAS.

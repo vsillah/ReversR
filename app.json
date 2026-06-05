@@ -14,6 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vsillah.reversrrebuild",
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning."
       }
