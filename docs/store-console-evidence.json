@@ -88,8 +88,8 @@
     "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
     "publicSupportEmail": "vambah@amadutown.com",
     "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
-    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Full store listing asset upload, internal testing, production access, native QA/screenshots, and final Send for review remain pending. No Send for review, testing release, production access application, or public submission was started.",
-    "completedSetupTaskCount": 10,
+    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. Google Play quick checks completed, but Publishing overview still blocks Send app for review until required dashboard release/testing steps are completed. Internal testing, closed testing, production access, native QA signoff, and final Send for review remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "completedSetupTaskCount": 11,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
       "Set privacy policy",
@@ -101,17 +101,38 @@
       "Select an app category and provide contact details",
       "Data safety",
       "Content rating",
-      "Target audience"
-    ],
-    "remainingSetupTasks": [
+      "Target audience",
       "Set up your store listing"
     ],
+    "remainingSetupTasks": [],
     "storeListingTextEntered": true,
-    "storeListingTextSaved": false,
-    "storeListingTextSaveNote": "App name, short description, and full description were entered from docs/store-console-copy.md, but the dashboard still showed Set up your store listing incomplete because required graphics/screenshots/contact gates remain.",
+    "storeListingTextSaved": true,
+    "storeListingTextSavedAt": "2026-06-05T21:50:16Z",
+    "storeListingTextSaveNote": "App name, short description, and full description were entered from docs/store-console-copy.md and saved in the Google Play default store listing.",
     "storeListingAssetUploadAttempted": true,
-    "storeListingAssetUploadStatus": "not-uploaded",
-    "storeListingAssetUploadNote": "Chrome automation opened the Google Play asset-library drawer from the default store listing and attempted the Upload/file-input path, but no file chooser completed and no prepared asset was attached. App icon, feature graphic, and phone screenshots remain prepared locally only.",
+    "storeListingAssetUploadStatus": "uploaded-and-saved",
+    "storeListingAssetsSavedAt": "2026-06-05T21:50:16Z",
+    "storeListingAssetCounts": {
+      "appIcon": "1/1",
+      "featureGraphic": "1/1",
+      "phoneScreenshots": "5/8",
+      "sevenInchTabletScreenshots": "5/8",
+      "tenInchTabletScreenshots": "5/8"
+    },
+    "storeListingAssetUploadNote": "Computer Use uploaded and saved the required Google Play default store listing assets: app icon, feature graphic, five phone screenshots, five 7-inch tablet screenshots, and five 10-inch tablet screenshots. The tablet slots reuse the available native Android/Google Play phone screenshot assets as placeholders because true native tablet captures are not present in the repo. Console displayed Change saved. Send for review in Publishing overview.",
+    "publishingOverviewStatus": "dashboard-required-steps-blocking-review",
+    "publishingOverviewVerification": "After saving the default store listing, Computer Use opened Publishing overview. The page listed Store listings, App content, Content Rating, Target audience and content, Privacy policy, Ads declaration, Data safety, and App category as changes not yet sent for review. Google quick checks finished, then the page showed Send app for review disabled with the message: To send changes for review, complete the required steps in the app dashboard.",
+    "dashboardReviewBlocker": "Dashboard shows Internal testing requires Select testers, Create a new release, and Preview and confirm the release. Closed testing requires Select countries and regions, Select testers, Create a new release, Preview and confirm the release, and Send the release to Google for review. Production access is disabled until a closed test is published with at least 12 testers opted in for at least 14 continuous days.",
+    "closedTestingRequiredForProduction": true,
+    "closedTestingMinimumTesterCount": 12,
+    "closedTestingMinimumDays": 14,
+    "androidProductionAab": {
+      "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
+      "sha256": "be1198d26085905b5f12b28d9ecb37df05b7ff164c9dc3dcf9bf4976ac776e16",
+      "sourceArtifactUrl": "https://expo.dev/artifacts/eas/3cfEuq2oZkZKhkEzGHEHhD.aab",
+      "easBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+      "downloadedAt": "2026-06-05T21:53:00Z"
+    },
     "appContentDraftsSaved": true,
     "contentRatingCompleted": true,
     "contentRatingSubmittedAt": "2026-06-05T20:32:00.000Z",
@@ -172,7 +193,10 @@
     "googlePlayPhoneScreenshotManifest": "docs/store-screenshots/google-play-phone/manifest.json",
     "storeAssetsPreflightPassed": true,
     "storeAssetsPreflightCommand": "npm run store:assets:preflight",
-    "uploadBoundary": "Google Play asset upload remains pending. Assets are prepared locally, but Chrome automation could not complete Play Console's file picker path and no asset upload was verified."
+    "googlePlayStoreAssetsUploaded": true,
+    "googlePlayStoreAssetsSavedAt": "2026-06-05T21:50:16Z",
+    "googlePlayTabletScreenshotCaveat": "The 7-inch and 10-inch tablet slots reuse the available 1080x1920 native Android/Google Play phone screenshot assets as placeholders. Replace them with true tablet-native screenshots before final submission if a stricter tablet review posture is desired.",
+    "uploadBoundary": "Google Play default store listing assets were uploaded and saved in Publishing overview. The Play Console Send app for review action has not been clicked."
   },
   "reviewGates": {
     "hostedApiPreflightPassed": true,
@@ -187,7 +211,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T20:43:48.099Z",
+  "generatedAt": "2026-06-05T21:53:00Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -248,10 +272,10 @@
     {
       "platform": "googlePlay",
       "task": "Set up store listing text",
-      "status": "draft-entered-not-complete",
-      "value": "App name, short description, and full description entered from docs/store-console-copy.md",
-      "completedAt": "2026-06-05T15:34:01.337Z",
-      "note": "Dashboard still showed store listing incomplete because required graphics/screenshots/contact gates remain. No asset upload or review submission was performed."
+      "status": "draft-saved",
+      "value": "App name, short description, and full description entered from docs/store-console-copy.md and saved with the default store listing.",
+      "completedAt": "2026-06-05T21:50:16Z",
+      "note": "Google Play Console displayed Change saved. Send for review in Publishing overview. Send for review was not clicked."
     },
     {
       "platform": "googlePlay",
@@ -272,10 +296,10 @@
     {
       "platform": "googlePlay",
       "task": "Upload default store listing assets",
-      "status": "attempted-not-uploaded",
-      "value": "Prepared local icon, feature graphic, and five phone screenshots.",
-      "completedAt": "2026-06-05T16:11:30.815Z",
-      "note": "Chrome automation opened the asset-library drawer but could not complete the file chooser/file-input path. No Google Play asset upload was verified and Save/Send for review were not clicked."
+      "status": "draft-saved",
+      "value": "Uploaded/saved app icon 1/1, feature graphic 1/1, phone screenshots 5/8, 7-inch tablet screenshots 5/8, and 10-inch tablet screenshots 5/8.",
+      "completedAt": "2026-06-05T21:50:16Z",
+      "note": "Computer Use uploaded and saved required default store listing assets. Tablet screenshot slots reuse the available native Android/Google Play phone screenshot assets as placeholders because true native tablet screenshots are not present in the repo. Send for review was not clicked."
     },
     {
       "platform": "local",
