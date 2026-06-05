@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T12:38:02Z",
+  "generatedAt": "2026-06-05T12:42:09Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -9,10 +9,10 @@
     "sku": "reversr-rebuild-001"
   },
   "appStoreConnect": {
-    "browserState": "Chrome is open at Apple Developer Program Enrollment after the Apple Developer Agreement was accepted by Vambah.",
-    "url": "https://developer.apple.com/enroll/identity/edit",
-    "accountGate": "Apple Developer Program membership enrollment is required before App Store Connect is enabled. The current form asks for legal personal information and address, and the enrollment flow later requires membership purchase/payment.",
-    "nextHumanAction": "Enter legal name as shown on government-issued ID, phone number, address, and region details, then continue Apple Developer Program enrollment and complete any required verification, license, and payment steps. After membership is active, create the App Store Connect app record for the iOS bundle ID.",
+    "browserState": "Chrome is open at Apple Store secure checkout review for Apple Developer Program membership.",
+    "url": "https://secure6.store.apple.com/shop/checkout?_s=Review",
+    "accountGate": "Apple Developer Program membership purchase is required before App Store Connect is enabled. The checkout shows a one-year Apple Developer Program membership and a Place Your Order button; automation did not click it.",
+    "nextHumanAction": "Review the Apple Developer Program membership checkout and click Place Your Order only if Vambah approves the purchase. After membership is active, open App Store Connect and create the app record for the iOS bundle ID.",
     "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
   },
   "googlePlayConsole": {
@@ -35,6 +35,6 @@
   "notes": [
     "Google Play app record exists; production access and store listing are not complete.",
     "No public store submission was started.",
-    "Apple Developer Agreement was accepted by Vambah. Apple Developer Program enrollment, membership purchase/payment, App Store Connect app record creation, and ascAppId collection are still required."
+    "Apple Developer Agreement was accepted by Vambah. Apple Developer Program membership checkout is waiting for Vambah to approve Place Your Order. App Store Connect app record creation and ascAppId collection are still required after membership activation."
   ]
 }

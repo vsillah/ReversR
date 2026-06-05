@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T12:38:02Z",
+  "generatedAt": "2026-06-05T12:42:09Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -34,8 +34,8 @@
       "state": "Create app form is filled; Developer Program Policies and US export laws declarations are unchecked; Create app has not been clicked."
     },
     "appStoreConnect": {
-      "url": "https://developer.apple.com/enroll/identity/edit",
-      "state": "Apple Developer Agreement was accepted by Vambah. Chrome is now at Apple Developer Program Enrollment personal information entry; automation did not enter legal identity, address, phone, or payment data."
+      "url": "https://secure6.store.apple.com/shop/checkout?_s=Review",
+      "state": "Apple Developer Agreement was accepted by Vambah and enrollment reached Apple Store secure checkout for a one-year Developer Program membership. Automation did not click Place Your Order or complete payment."
     }
   },
   "nextNativeQaActions": [
@@ -44,14 +44,13 @@
     "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-    "Complete Apple Developer Program enrollment personal information, any required verification, and membership purchase/payment, then create the App Store Connect iOS app record and unblock iOS preview/TestFlight work.",
+    "Complete Apple Developer Program membership checkout by approving Place Your Order if Vambah accepts the purchase, then create the App Store Connect iOS app record and unblock iOS preview/TestFlight work.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
-    "No Apple Developer enrollment personal information was entered by automation.",
     "No Apple Developer Program membership purchase/payment was completed.",
     "No Apple App Store Connect app record was created."
   ]
