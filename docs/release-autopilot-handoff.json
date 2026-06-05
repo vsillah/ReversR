@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T14:37:12Z",
+  "generatedAt": "2026-06-05T14:44:55.285Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -34,8 +34,8 @@
     },
     "googlePlayConsole": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
-      "screen": "Dashboard task list",
-      "state": "Google Play app record exists. Computer Use verified the Provide app information and create your store listing task list is expanded and shows 0 of 11 tasks complete. Production access also requires a closed test with at least 12 testers opted in for at least 14 days.",
+      "screen": "Privacy Policy task",
+      "state": "Google Play is authenticated and open at the Privacy Policy task for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled until a value is entered. No live form edit or save was performed.",
       "openTasks": [
         "Set privacy policy",
         "Sign in details",
@@ -51,7 +51,8 @@
       ],
       "copySource": "docs/store-console-copy.md",
       "taskAnswerSource": "docs/store-console-task-answers.md",
-      "taskAnswerJson": "docs/store-console-task-answers.json"
+      "taskAnswerJson": "docs/store-console-task-answers.json",
+      "nextHumanAction": "Authorize typing/saving the privacy policy URL in Google Play, or type https://reversr.vercel.app/privacy into the Privacy policy URL field and click Save."
     },
     "easCredentials": {
       "command": "npx eas-cli@20.0.0 credentials --platform ios",
@@ -81,15 +82,17 @@
   "verifiedLocalConstraints": {
     "easWhoami": "vsillah / vsillah@gmail.com",
     "androidPreviewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
-    "adbDevices": "No attached Android devices.",
+    "adbDevices": "No attached Android devices after adb restart/reconnect; Android phone not visible to adb.",
     "androidEmulator": "emulator command not found.",
     "sdkmanager": "sdkmanager not found.",
-    "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
+    "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable.",
+    "androidPreviewApk": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+    "androidPreviewApkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35"
   },
   "resumeInstructionsForVambah": [
-    "Connect the Android phone with USB debugging enabled before native Android QA and screenshots can be captured.",
-    "Abort the active iOS internal device-registration prompt because no iOS device is available.",
-    "Use the iOS production/TestFlight credentials path for Apple release builds, or install full Xcode later for iOS Simulator screenshots.",
+    "For Android: enable USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex when adb devices shows one device.",
+    "For Google Play privacy policy: Chrome is already on the Privacy Policy task. The prepared value is https://reversr.vercel.app/privacy. Saving it is a live console form action and needs HITL authorization or manual completion.",
+    "For iOS: abort the active internal device-registration prompt because no iOS device is available; use the production/TestFlight credentials path next.",
     "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
   ],
   "preparedAutomation": [

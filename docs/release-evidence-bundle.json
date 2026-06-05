@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T14:38:12.862Z",
+  "generatedAt": "2026-06-05T14:45:09.420Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T14:38:12.838Z",
+    "generatedAt": "2026-06-05T14:45:09.394Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -475,7 +475,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T14:24:59.199Z",
+      "generatedAt": "2026-06-05T14:45:07.815Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -485,20 +485,19 @@
       },
       "summary": {
         "requirementCount": 8,
-        "passedCount": 6,
-        "pendingCount": 2,
+        "passedCount": 7,
+        "pendingCount": 1,
         "blockedCount": 0,
         "pendingRequirementIds": [
-          "store-readiness-packet",
           "apple-google-store-publication"
         ],
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T14:24:59.156Z",
+        "generatedAt": "2026-06-05T14:45:07.768Z",
         "summary": {
-          "pass": 35,
-          "pending": 4
+          "pass": 36,
+          "pending": 3
         }
       },
       "requirements": [
@@ -638,13 +637,13 @@
         {
           "id": "store-readiness-packet",
           "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
-          "status": "pending",
+          "status": "pass",
           "evidence": [
             {
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T14:24:54.164Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T14:25:02.599Z.",
               "nextStep": ""
             },
             {
@@ -672,15 +671,15 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:11:21.501Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:44:57.992Z.",
               "nextStep": ""
             },
             {
               "id": "local-release-ci-evidence",
-              "status": "pending",
+              "status": "pass",
               "title": "Local release CI evidence records repeatable pre-store validation",
-              "evidence": "docs/local-release-ci-evidence.json is missing or incomplete.",
-              "nextStep": "Run npm run release:local-ci before external account-side release work."
+              "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T14:25:09.052Z.",
+              "nextStep": ""
             },
             {
               "id": "release-local-ci-workflow",
@@ -714,7 +713,7 @@
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:24:58.004Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:44:56.818Z.",
               "nextStep": ""
             },
             {
@@ -728,14 +727,14 @@
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded with current EAS linkage state",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T14:24:43.409Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T14:25:02.107Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T14:24:40.551Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T14:43:57.509Z.",
               "nextStep": ""
             }
           ],
@@ -1155,7 +1154,7 @@
     "nativeDeviceHandoff": {
       "schemaVersion": 1,
       "status": "pending-hitl",
-      "generatedAt": "2026-06-05T14:37:12Z",
+      "generatedAt": "2026-06-05T14:44:55.285Z",
       "releaseCandidate": {
         "appName": "ReversR Rebuild",
         "version": "1.0.0",
@@ -1169,10 +1168,17 @@
         "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
         "artifactType": "apk",
         "versionCode": 15,
-        "completedAt": "2026-06-05T11:36:35.941Z"
+        "completedAt": "2026-06-05T11:36:35.941Z",
+        "downloadedArtifact": {
+          "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+          "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+          "size": "103M",
+          "downloadedAt": "2026-06-05T14:44:55.285Z",
+          "installCommand": "adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk"
+        }
       },
       "localDeviceProbe": {
-        "checkedAt": "2026-06-05T13:59:04Z",
+        "checkedAt": "2026-06-05T14:44:55.285Z",
         "adbPath": "/opt/homebrew/bin/adb",
         "adbDevices": "List of devices attached",
         "androidEmulatorPath": "",
@@ -1180,7 +1186,10 @@
         "xcrunPath": "/usr/bin/xcrun",
         "simctlAvailable": false,
         "simctlError": "xcrun: error: unable to find utility \"simctl\", not a developer tool or in PATH",
-        "xcodebuildError": "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance"
+        "xcodebuildError": "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance",
+        "adbState": "no devices/emulators found",
+        "macUsbEnumeration": "No Android/ADB/MTP phone device was visible in system_profiler SPUSBDataType or adb devices after adb restart/reconnect.",
+        "status": "not-visible-to-adb"
       },
       "browserHandoff": {
         "googlePlayConsole": {
@@ -1193,17 +1202,18 @@
         }
       },
       "nextNativeQaActions": [
-        "Connect the Android phone with USB debugging enabled so adb devices lists exactly one device.",
-        "After an Android device is connected, run npm run native:android:qa -- --probe to write docs/native-android-device-probe.json and update Android device evidence.",
-        "Install the APK with: adb install -r path/to/ReversR-Rebuild-preview.apk",
-        "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
-        "Use npm run native:android:qa -- --launch and npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff> to capture Android native screenshots into docs/store-screenshots/native/.",
-        "Run the native QA checklist in docs/native-qa-evidence.json.",
-        "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
+        "On the Android phone, enable Developer options by tapping Settings > About phone > Build number seven times if needed.",
+        "Open Settings > System > Developer options and turn on USB debugging.",
+        "After plugging in USB, change the USB mode notification from Charge only to File transfer / Android Auto if available.",
+        "Accept the Allow USB debugging RSA prompt on the phone and choose Always allow from this computer if offered.",
+        "If adb devices still stays empty, try a known data-capable USB cable or a different USB-C port/hub.",
+        "When adb devices lists exactly one device in the device state, run npm run native:android:qa -- --probe.",
+        "Install the downloaded APK with: adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk.",
+        "Launch the app with: npm run native:android:qa -- --launch.",
+        "Navigate the app to each target screen and run npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff>.",
+        "Run npm run native:qa:preflight after all screenshots and QA checks are recorded.",
         "Abort the active EAS iOS internal device-registration prompt because no iOS test device is available.",
-        "Run the iOS credentials flow for the production profile instead of preview, then complete Apple login/authorization if prompted so EAS can create App Store/TestFlight distribution credentials.",
-        "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools.",
-        "After EAS iOS App Store/TestFlight credentials are available, run an iOS production build or create a dedicated store-distribution build helper and record the build URL in docs/native-qa-evidence.json."
+        "Use the iOS production/TestFlight credentials path for Apple release builds; this may require Apple login/2FA HITL."
       ],
       "notCompletedByAutomation": [
         "No Android device or emulator was available for APK install.",
@@ -1212,7 +1222,9 @@
         "EAS Apple login/2FA succeeded and an Apple distribution certificate was created.",
         "EAS generated an iOS device-registration URL at 2026-06-05T14:31:34Z. The URL is intentionally not committed.",
         "Vambah confirmed no iOS device is available at 2026-06-05T14:37:12Z, so iOS internal preview device registration cannot be completed.",
-        "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path."
+        "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path.",
+        "Android phone was reported connected, but adb devices and macOS USB enumeration still did not expose a debuggable Android device at 2026-06-05T14:44:55.285Z.",
+        "Android preview APK artifact was downloaded and checksummed locally, but installation and screenshots require adb device visibility."
       ]
     },
     "easPreviewBuildSync": {
@@ -1420,7 +1432,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T14:24:59.425Z",
+      "generatedAt": "2026-06-05T14:45:08.035Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1501,7 +1513,7 @@
     "storeConsoleBrowserHandoff": {
       "schemaVersion": 1,
       "status": "pending-hitl",
-      "generatedAt": "2026-06-05T13:59:04Z",
+      "generatedAt": "2026-06-05T14:44:55.285Z",
       "appIdentity": {
         "appName": "ReversR Rebuild",
         "iosBundleId": "com.vsillah.reversrrebuild",
@@ -1516,7 +1528,7 @@
         "neededValueAfterCreation": ""
       },
       "googlePlayConsole": {
-        "browserState": "Chrome is open at the Google Play Console dashboard for ReversR Rebuild. The Provide app information and create your store listing task list is expanded and shows 0 of 11 tasks complete.",
+        "browserState": "Chrome is open at the Google Play Console Privacy Policy task screen for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled. No live console field was typed or saved.",
         "developerAccount": "Vambah Sillah",
         "developerAccountId": "8864864114913698241",
         "appId": "4972956671966100551",
@@ -1530,7 +1542,15 @@
           "freeOrPaid": "Free"
         },
         "legalDeclarationsPending": [],
-        "nextHumanAction": "Authorize live Google Play field entry/saves or complete the 11 Google Play setup tasks manually: Set privacy policy, Sign in details, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health, Select an app category and provide contact details, and Set up your store listing. Use docs/store-console-copy.md as the copy source."
+        "nextHumanAction": "Authorize live Google Play field entry/saves or complete the 11 Google Play setup tasks manually: Set privacy policy, Sign in details, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health, Select an app category and provide contact details, and Set up your store listing. Use docs/store-console-copy.md as the copy source.",
+        "currentScreen": {
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-content/privacy-policy?source=dashboard",
+          "title": "Privacy Policy | ReversR Rebuild",
+          "fieldReady": "Privacy policy URL",
+          "preparedValue": "https://reversr.vercel.app/privacy",
+          "saveState": "disabled until value is entered",
+          "actionBoundary": "Typing/saving live Google Play form fields remains HITL confirmation territory."
+        }
       },
       "notes": [
         "Google Play app record exists; production access and store listing are not complete.",
@@ -1540,7 +1560,8 @@
         "EAS iOS preview credentials were checked with npx eas-cli@20.0.0 credentials --platform ios. Selecting the preview profile reached the Apple account login prompt, so iOS credential setup remains a human-in-the-loop Apple login gate.",
         "App Store Connect Apple ID 6777091538 recorded at 2026-06-05T13:53:00.252Z; eas.json submit.production.ios.ascAppId is configured.",
         "Computer Use verified at 2026-06-05T13:59:04Z that App Store Connect is on the iOS App Version 1.0 Prepare for Submission page and Google Play is on the ReversR Rebuild dashboard with 0 of 11 setup tasks complete.",
-        "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions."
+        "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
+        "Computer Use navigated Google Play Console to the Privacy Policy task at 2026-06-05T14:44:55.285Z; no value was typed and no save was attempted."
       ]
     },
     "storeConsoleTaskAnswers": {
@@ -1959,7 +1980,7 @@
     },
     "releaseAutopilotHandoff": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:37:12Z",
+      "generatedAt": "2026-06-05T14:44:55.285Z",
       "status": "pending-hitl",
       "currentPr": {
         "number": 2,
@@ -1993,8 +2014,8 @@
         },
         "googlePlayConsole": {
           "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
-          "screen": "Dashboard task list",
-          "state": "Google Play app record exists. Computer Use verified the Provide app information and create your store listing task list is expanded and shows 0 of 11 tasks complete. Production access also requires a closed test with at least 12 testers opted in for at least 14 days.",
+          "screen": "Privacy Policy task",
+          "state": "Google Play is authenticated and open at the Privacy Policy task for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled until a value is entered. No live form edit or save was performed.",
           "openTasks": [
             "Set privacy policy",
             "Sign in details",
@@ -2010,7 +2031,8 @@
           ],
           "copySource": "docs/store-console-copy.md",
           "taskAnswerSource": "docs/store-console-task-answers.md",
-          "taskAnswerJson": "docs/store-console-task-answers.json"
+          "taskAnswerJson": "docs/store-console-task-answers.json",
+          "nextHumanAction": "Authorize typing/saving the privacy policy URL in Google Play, or type https://reversr.vercel.app/privacy into the Privacy policy URL field and click Save."
         },
         "easCredentials": {
           "command": "npx eas-cli@20.0.0 credentials --platform ios",
@@ -2040,15 +2062,17 @@
       "verifiedLocalConstraints": {
         "easWhoami": "vsillah / vsillah@gmail.com",
         "androidPreviewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
-        "adbDevices": "No attached Android devices.",
+        "adbDevices": "No attached Android devices after adb restart/reconnect; Android phone not visible to adb.",
         "androidEmulator": "emulator command not found.",
         "sdkmanager": "sdkmanager not found.",
-        "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
+        "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable.",
+        "androidPreviewApk": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "androidPreviewApkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35"
       },
       "resumeInstructionsForVambah": [
-        "Connect the Android phone with USB debugging enabled before native Android QA and screenshots can be captured.",
-        "Abort the active iOS internal device-registration prompt because no iOS device is available.",
-        "Use the iOS production/TestFlight credentials path for Apple release builds, or install full Xcode later for iOS Simulator screenshots.",
+        "For Android: enable USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex when adb devices shows one device.",
+        "For Google Play privacy policy: Chrome is already on the Privacy Policy task. The prepared value is https://reversr.vercel.app/privacy. Saving it is a live console form action and needs HITL authorization or manual completion.",
+        "For iOS: abort the active internal device-registration prompt because no iOS device is available; use the production/TestFlight credentials path next.",
         "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
       ],
       "preparedAutomation": [
@@ -2638,8 +2662,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:38:11.869Z",
-      "releaseStatusGeneratedAt": "2026-06-05T14:38:11.862Z",
+      "generatedAt": "2026-06-05T14:44:56.818Z",
+      "releaseStatusGeneratedAt": "2026-06-05T14:44:56.811Z",
       "summary": {
         "pass": 6,
         "pending": 3

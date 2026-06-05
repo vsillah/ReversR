@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T14:37:12Z",
+  "generatedAt": "2026-06-05T14:44:55.285Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -15,10 +15,17 @@
     "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
     "artifactType": "apk",
     "versionCode": 15,
-    "completedAt": "2026-06-05T11:36:35.941Z"
+    "completedAt": "2026-06-05T11:36:35.941Z",
+    "downloadedArtifact": {
+      "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+      "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+      "size": "103M",
+      "downloadedAt": "2026-06-05T14:44:55.285Z",
+      "installCommand": "adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk"
+    }
   },
   "localDeviceProbe": {
-    "checkedAt": "2026-06-05T13:59:04Z",
+    "checkedAt": "2026-06-05T14:44:55.285Z",
     "adbPath": "/opt/homebrew/bin/adb",
     "adbDevices": "List of devices attached",
     "androidEmulatorPath": "",
@@ -26,7 +33,10 @@
     "xcrunPath": "/usr/bin/xcrun",
     "simctlAvailable": false,
     "simctlError": "xcrun: error: unable to find utility \"simctl\", not a developer tool or in PATH",
-    "xcodebuildError": "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance"
+    "xcodebuildError": "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance",
+    "adbState": "no devices/emulators found",
+    "macUsbEnumeration": "No Android/ADB/MTP phone device was visible in system_profiler SPUSBDataType or adb devices after adb restart/reconnect.",
+    "status": "not-visible-to-adb"
   },
   "browserHandoff": {
     "googlePlayConsole": {
@@ -39,17 +49,18 @@
     }
   },
   "nextNativeQaActions": [
-    "Connect the Android phone with USB debugging enabled so adb devices lists exactly one device.",
-    "After an Android device is connected, run npm run native:android:qa -- --probe to write docs/native-android-device-probe.json and update Android device evidence.",
-    "Install the APK with: adb install -r path/to/ReversR-Rebuild-preview.apk",
-    "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
-    "Use npm run native:android:qa -- --launch and npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff> to capture Android native screenshots into docs/store-screenshots/native/.",
-    "Run the native QA checklist in docs/native-qa-evidence.json.",
-    "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
+    "On the Android phone, enable Developer options by tapping Settings > About phone > Build number seven times if needed.",
+    "Open Settings > System > Developer options and turn on USB debugging.",
+    "After plugging in USB, change the USB mode notification from Charge only to File transfer / Android Auto if available.",
+    "Accept the Allow USB debugging RSA prompt on the phone and choose Always allow from this computer if offered.",
+    "If adb devices still stays empty, try a known data-capable USB cable or a different USB-C port/hub.",
+    "When adb devices lists exactly one device in the device state, run npm run native:android:qa -- --probe.",
+    "Install the downloaded APK with: adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk.",
+    "Launch the app with: npm run native:android:qa -- --launch.",
+    "Navigate the app to each target screen and run npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff>.",
+    "Run npm run native:qa:preflight after all screenshots and QA checks are recorded.",
     "Abort the active EAS iOS internal device-registration prompt because no iOS test device is available.",
-    "Run the iOS credentials flow for the production profile instead of preview, then complete Apple login/authorization if prompted so EAS can create App Store/TestFlight distribution credentials.",
-    "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools.",
-    "After EAS iOS App Store/TestFlight credentials are available, run an iOS production build or create a dedicated store-distribution build helper and record the build URL in docs/native-qa-evidence.json."
+    "Use the iOS production/TestFlight credentials path for Apple release builds; this may require Apple login/2FA HITL."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
@@ -58,6 +69,8 @@
     "EAS Apple login/2FA succeeded and an Apple distribution certificate was created.",
     "EAS generated an iOS device-registration URL at 2026-06-05T14:31:34Z. The URL is intentionally not committed.",
     "Vambah confirmed no iOS device is available at 2026-06-05T14:37:12Z, so iOS internal preview device registration cannot be completed.",
-    "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path."
+    "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path.",
+    "Android phone was reported connected, but adb devices and macOS USB enumeration still did not expose a debuggable Android device at 2026-06-05T14:44:55.285Z.",
+    "Android preview APK artifact was downloaded and checksummed locally, but installation and screenshots require adb device visibility."
   ]
 }

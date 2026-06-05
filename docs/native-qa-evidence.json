@@ -24,7 +24,22 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "2026-06-05T11:36:35.941Z",
-      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA, native functional checks, and final screenshots are still pending."
+      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA, native functional checks, and final screenshots are still pending. APK artifact downloaded and SHA-256 verified at 2026-06-05T14:44:55.285Z; install remains pending because no Android device is visible to adb.",
+      "localArtifact": {
+        "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "size": "103M",
+        "downloadedAt": "2026-06-05T14:44:55.285Z",
+        "installCommand": "adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk"
+      },
+      "installStatus": "pending-adb-device",
+      "adbProbe": {
+        "checkedAt": "2026-06-05T14:44:55.285Z",
+        "adbDevices": "List of devices attached",
+        "adbState": "no devices/emulators found",
+        "macUsbEnumeration": "No Android/ADB/MTP phone device was visible in system_profiler SPUSBDataType or adb devices after adb restart/reconnect.",
+        "status": "not-visible-to-adb"
+      }
     },
     "iosPreview": {
       "status": "blocked",
@@ -36,7 +51,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. EAS Apple login/2FA succeeded and an Apple distribution certificate was created for the preview credentials flow. EAS then reached iOS test-device registration for internal distribution, but Vambah confirmed no iOS device is available. The recommended iOS route is now App Store/TestFlight distribution credentials instead of internal preview device registration."
+      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. EAS Apple login/2FA succeeded and an Apple distribution certificate was created for the preview credentials flow. EAS then reached iOS test-device registration for internal distribution, but Vambah confirmed no iOS device is available. The recommended iOS route is now App Store/TestFlight distribution credentials instead of internal preview device registration. No iOS device is available for internal preview registration; use TestFlight/App Store distribution credentials for iOS release builds."
     }
   },
   "checks": [
@@ -311,7 +326,9 @@
     "Android preview APK exists, but no Android device or emulator was available locally for install QA.",
     "iOS preview build requires interactive Apple login for EAS iOS preview credentials.",
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
-    "Final Android and iOS native screenshots require installed preview builds."
+    "Final Android and iOS native screenshots require installed preview builds.",
+    "Android phone was reported connected, but adb and macOS USB enumeration do not show a debuggable Android device yet.",
+    "Android APK artifact is downloaded at /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk and ready to install after USB debugging is visible."
   ],
   "signoff": {
     "releaseOwner": "",
@@ -320,5 +337,13 @@
     "approvedForPlayInternalTesting": false,
     "approvedForProductionSubmission": false,
     "signedAt": ""
-  }
+  },
+  "generatedAt": "2026-06-05T14:44:55.285Z",
+  "nextActions": [
+    "Make the Android phone visible to adb, then run npm run native:android:qa -- --probe.",
+    "Install /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk with adb install -r after adb sees the phone.",
+    "Launch and capture the five Android native screenshots with npm run native:android:qa.",
+    "Complete App Store/TestFlight iOS credentials or install full Xcode for iOS Simulator screenshot path.",
+    "Only mark native QA and production submission signoff after real device/simulator evidence exists."
+  ]
 }

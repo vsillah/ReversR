@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T14:24:59.199Z",
+  "generatedAt": "2026-06-05T14:45:07.815Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -11,20 +11,19 @@
   },
   "summary": {
     "requirementCount": 8,
-    "passedCount": 6,
-    "pendingCount": 2,
+    "passedCount": 7,
+    "pendingCount": 1,
     "blockedCount": 0,
     "pendingRequirementIds": [
-      "store-readiness-packet",
       "apple-google-store-publication"
     ],
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T14:24:59.156Z",
+    "generatedAt": "2026-06-05T14:45:07.768Z",
     "summary": {
-      "pass": 35,
-      "pending": 4
+      "pass": 36,
+      "pending": 3
     }
   },
   "requirements": [
@@ -164,13 +163,13 @@
     {
       "id": "store-readiness-packet",
       "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
-      "status": "pending",
+      "status": "pass",
       "evidence": [
         {
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T14:24:54.164Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T14:25:02.599Z.",
           "nextStep": ""
         },
         {
@@ -198,15 +197,15 @@
           "id": "release-evidence-bundle",
           "status": "pass",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:11:21.501Z.",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:44:57.992Z.",
           "nextStep": ""
         },
         {
           "id": "local-release-ci-evidence",
-          "status": "pending",
+          "status": "pass",
           "title": "Local release CI evidence records repeatable pre-store validation",
-          "evidence": "docs/local-release-ci-evidence.json is missing or incomplete.",
-          "nextStep": "Run npm run release:local-ci before external account-side release work."
+          "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T14:25:09.052Z.",
+          "nextStep": ""
         },
         {
           "id": "release-local-ci-workflow",
@@ -240,7 +239,7 @@
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:24:58.004Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:44:56.818Z.",
           "nextStep": ""
         },
         {
@@ -254,14 +253,14 @@
           "id": "native-release-config-evidence",
           "status": "pass",
           "title": "Native release config evidence is recorded with current EAS linkage state",
-          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T14:24:43.409Z.",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T14:25:02.107Z.",
           "nextStep": ""
         },
         {
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T14:24:40.551Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T14:43:57.509Z.",
           "nextStep": ""
         }
       ],
