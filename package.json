@@ -24,6 +24,7 @@
     "api:preflight": "node scripts/api-preflight.js",
     "api:env:preflight": "node scripts/api-env-preflight.js",
     "api:env:preflight:local": "node scripts/api-env-preflight.js --allow-placeholder",
+    "api:deployment-smoke": "node scripts/api-deployment-smoke.js",
     "inventory:source:validate": "node scripts/validate-machine-inventory.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
     "connector:smoke": "node scripts/hosted-connector-smoke.js",

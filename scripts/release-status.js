@@ -158,6 +158,27 @@ addGate(
   apiEnvTemplateOk ? '' : 'Restore docs/production-api-env.example and scripts/api-env-preflight.js.'
 );
 
+const apiDeploymentSmoke = readOptionalJson('docs/api-deployment-smoke-evidence.json');
+const apiDeploymentSmokeOk = (
+  apiDeploymentSmoke?.status === 'pass' &&
+  apiDeploymentSmoke?.health?.runtimeConfig?.corsMode === 'restricted' &&
+  apiDeploymentSmoke?.health?.runtimeConfig?.requestBodyLimit &&
+  apiDeploymentSmoke?.checks?.allowedOriginAccepted === true &&
+  apiDeploymentSmoke?.checks?.deniedOriginRejected === true &&
+  apiDeploymentSmoke?.checks?.retiredSitRouteStatus === 404 &&
+  apiDeploymentSmoke?.checks?.demoInventoryValidation?.status === 'ok'
+);
+addGate(
+  'store-local',
+  'api-deployment-smoke',
+  'Production-style API smoke evidence is recorded before hosted deployment',
+  apiDeploymentSmokeOk ? 'pass' : 'pending',
+  apiDeploymentSmokeOk
+    ? `docs/api-deployment-smoke-evidence.json proves restricted CORS, body limit, retired SIT route, and demo inventory validation at ${apiDeploymentSmoke.generatedAt}.`
+    : 'docs/api-deployment-smoke-evidence.json is missing or incomplete.',
+  apiDeploymentSmokeOk ? '' : 'Run npm run api:deployment-smoke before deploying the API container.'
+);
+
 const androidPermissions = appConfig.android?.permissions || [];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
 const permissionOk = (
@@ -221,6 +242,7 @@ const requiredArtifacts = [
   'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',
   'scripts/api-env-preflight.js',
+  'scripts/api-deployment-smoke.js',
   'scripts/release-next-actions.js',
   'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',

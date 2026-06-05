@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T05:09:17.896Z",
+  "apiBase": "http://127.0.0.1:3021",
+  "allowedOrigin": "https://reversr-rebuild.local",
+  "health": {
+    "status": "ok",
+    "service": "reversr-rebuild-api",
+    "version": "0.1.0",
+    "apiKeys": {
+      "total": 0,
+      "available": 0,
+      "allInCooldown": true
+    },
+    "cache": {
+      "size": 0
+    },
+    "inventorySources": [
+      "demo",
+      "file",
+      "http",
+      "https"
+    ],
+    "authenticatedConnectorsEnabled": false,
+    "credentialRegistryEnabled": false,
+    "credentialCount": 0,
+    "privateNetworkConnectorsEnabled": false,
+    "runtimeConfig": {
+      "corsMode": "restricted",
+      "allowedCorsOriginCount": 1,
+      "requestBodyLimit": "25mb",
+      "adminRoutesEnabled": true,
+      "registryWritesEnabled": false,
+      "privateNetworkConnectorsEnabled": false
+    }
+  },
+  "checks": {
+    "healthOk": true,
+    "restrictedCors": true,
+    "allowedOriginAccepted": true,
+    "deniedOriginRejected": true,
+    "requestBodyLimit": "25mb",
+    "retiredSitRouteStatus": 404,
+    "demoInventoryValidation": {
+      "status": "ok",
+      "recordCount": 2
+    },
+    "adminRegistry": {
+      "reachable": true,
+      "registryEnabled": false,
+      "credentialCount": 0
+    }
+  }
+}

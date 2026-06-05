@@ -19,6 +19,7 @@ npm run release:next-actions
    - Copy `docs/production-api-env.example` into the host provider's environment settings.
    - Set `API_CORS_ORIGINS` to hosted app origins, not `*`.
    - Set `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, `API_REQUEST_BODY_LIMIT`, and connector-secret settings on the API host.
+   - Run `npm run api:deployment-smoke` locally and confirm `docs/api-deployment-smoke-evidence.json` is updated.
    - Deploy the Dockerfile.
    - Confirm success with:
 

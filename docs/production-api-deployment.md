@@ -49,6 +49,14 @@ API_ENV_FILE=/path/to/provider-env-export npm run api:env:preflight
 
 The strict preflight expects restricted HTTPS CORS origins, an intentional body limit, at least one Gemini key for production photo analysis, a non-placeholder admin token, valid connector-secret JSON, and private-network connectors disabled unless explicitly approved.
 
+Before deploying, run the local production-style smoke:
+
+```bash
+npm run api:deployment-smoke
+```
+
+This starts the API with restricted CORS, a configured request body limit, admin-token protected routes, private-network connectors disabled, and demo inventory enabled. On success it writes `docs/api-deployment-smoke-evidence.json`, which `npm run release:status` uses as local proof before hosted deployment.
+
 ## Health Checks
 
 The API exposes two health endpoints:
@@ -129,6 +137,7 @@ Then run:
 
 ```bash
 npm run release:status
+npm run api:deployment-smoke
 npm run api:env:preflight
 npm run inventory:preflight
 npm run api:preflight

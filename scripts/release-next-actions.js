@@ -30,10 +30,12 @@ const actionPlan = {
       'Create a production API env file from docs/production-api-env.example.',
       'Set API_CORS_ORIGINS to the hosted app origins, not *.',
       'Set AI_INTEGRATIONS_GEMINI_API_KEY, ADMIN_API_TOKEN, API_REQUEST_BODY_LIMIT, and connector secret settings on the API host.',
+      'Run npm run api:deployment-smoke and confirm docs/api-deployment-smoke-evidence.json is updated.',
       'Deploy the Dockerfile to the chosen host.',
       'Run EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight.',
     ],
     evidence: [
+      'docs/api-deployment-smoke-evidence.json records restricted CORS, body limit, and demo inventory validation.',
       'Hosted /api/health returns status ok.',
       'Runtime config reports restricted CORS.',
       'npm run api:preflight passes against the hosted URL.',
