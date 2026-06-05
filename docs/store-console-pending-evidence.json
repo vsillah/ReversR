@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "status": "pending",
+  "generatedAt": "2026-06-05T05:26:32.772Z",
+  "source": "docs/store-console-evidence.template.json",
+  "finalEvidenceFile": "docs/store-console-evidence.json",
+  "warnings": [
+    "Store console evidence file is missing. Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json after App Store Connect and Play Console records exist.",
+    "App Store Connect record is not marked pass.",
+    "App Store Connect recordUrl is missing or not HTTPS.",
+    "App Store Connect Apple ID is missing.",
+    "App Store Connect bundle ID status is not pass.",
+    "App Store Connect privacyPolicyUrl must be the hosted production policy URL.",
+    "App Store Connect metadata is not marked copied from the submission packet.",
+    "App Store Connect App Privacy details are not marked complete.",
+    "App Store Connect age rating is not marked complete.",
+    "App Store Connect TestFlight readiness is not marked complete.",
+    "Google Play Console record is not marked pass.",
+    "Google Play Console recordUrl is missing or not HTTPS.",
+    "Google Play privacyPolicyUrl must be the hosted production policy URL.",
+    "Google Play metadata is not marked copied from the submission packet.",
+    "Google Play Data safety form is not marked complete.",
+    "Google Play App content form is not marked complete.",
+    "Google Play Internal Testing readiness is not marked complete.",
+    "Final native screenshots are not marked captured.",
+    "Final app icon review is not marked complete.",
+    "Google Play feature graphic is not marked captured/upload-ready.",
+    "Store asset evidenceFolder is missing.",
+    "Review gate hostedApiPreflightPassed is not marked true.",
+    "Review gate hostedPolicyPreflightPassed is not marked true.",
+    "Review gate hostedConnectorSmokePassed is not marked true.",
+    "Review gate nativeQaPreflightPassed is not marked true.",
+    "Review gate productionSubmissionApproved is not marked true.",
+    "Production submission is not approved.",
+    "Store console signoff is missing releaseOwner.",
+    "Store console signoff is missing storeReviewer.",
+    "Store console signoff is missing signedAt."
+  ],
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001",
+    "matchesAppConfig": {
+      "appName": true,
+      "version": true,
+      "iosBundleId": true,
+      "androidPackage": true,
+      "sku": true
+    }
+  },
+  "appStoreConnect": {
+    "status": "pending",
+    "recordUrlPresent": false,
+    "appleIdPresent": false,
+    "bundleIdStatus": "pending",
+    "privacyPolicyUrlReady": false,
+    "metadataCopiedFromPacket": false,
+    "appPrivacyCompleted": false,
+    "ageRatingCompleted": false,
+    "testFlightReady": false
+  },
+  "googlePlay": {
+    "status": "pending",
+    "recordUrlPresent": false,
+    "packageNameMatches": true,
+    "privacyPolicyUrlReady": false,
+    "metadataCopiedFromPacket": false,
+    "dataSafetyCompleted": false,
+    "appContentCompleted": false,
+    "internalTestingReady": false
+  },
+  "requiredAssets": {
+    "nativeScreenshotsCaptured": false,
+    "appIconReviewed": false,
+    "featureGraphicCaptured": false,
+    "featureGraphicPathReady": true,
+    "evidenceFolderPresent": false
+  },
+  "reviewGates": {
+    "hostedApiPreflightPassed": false,
+    "hostedPolicyPreflightPassed": false,
+    "hostedConnectorSmokePassed": false,
+    "nativeQaPreflightPassed": false,
+    "productionSubmissionApproved": false
+  },
+  "signoff": {
+    "productionSubmissionApproved": false,
+    "releaseOwnerPresent": false,
+    "storeReviewerPresent": false,
+    "signedAtPresent": false
+  }
+}

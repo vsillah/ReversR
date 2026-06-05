@@ -81,6 +81,7 @@ Confirm `docs/native-release-config-evidence.json` is updated before account set
    - App Store Connect: create `com.vsillah.reversrrebuild`, SKU `reversr-rebuild-001`.
    - Google Play Console: create `com.vsillah.reversrrebuild`.
    - Run `npm run store:submission:preflight:local` and confirm `docs/store-submission-smoke-evidence.json` is updated.
+   - Run `npm run store:console:preflight:local` and confirm `docs/store-console-pending-evidence.json` is updated.
    - Copy the App Store Connect Apple ID into `eas.json` at `submit.production.ios.ascAppId`.
    - Copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`.
    - Fill record URLs, Apple ID, hosted privacy URL, metadata status, data/privacy forms, assets, review gates, and signoff.

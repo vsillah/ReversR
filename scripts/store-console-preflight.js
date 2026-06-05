@@ -1,8 +1,10 @@
 const fs = require('fs');
+const path = require('path');
 
 const args = new Set(process.argv.slice(2));
 const allowPending = args.has('--allow-pending');
 const evidencePath = process.env.STORE_CONSOLE_EVIDENCE_FILE || 'docs/store-console-evidence.json';
+const pendingEvidenceFile = process.env.STORE_CONSOLE_PENDING_EVIDENCE_FILE || 'docs/store-console-pending-evidence.json';
 const templatePath = 'docs/store-console-evidence.template.json';
 
 const failures = [];
@@ -12,6 +14,12 @@ const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
 const exists = (path) => fs.existsSync(path);
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
+const writeJson = (filePath, value) => {
+  const target = path.resolve(filePath);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
+  return target;
+};
 const isHttpsUrl = (value) => /^https:\/\/[^/]+\.[^/]+/i.test(value || '');
 const isPlaceholderUrl = (value) => (
   !value ||
@@ -97,6 +105,67 @@ if (failures.length > 0) {
   console.error('Store console preflight failed:');
   for (const message of failures) console.error(`- ${message}`);
   process.exit(1);
+}
+
+if (allowPending) {
+  const pendingEvidencePath = writeJson(pendingEvidenceFile, {
+    schemaVersion: 1,
+    status: 'pending',
+    generatedAt: new Date().toISOString(),
+    source: usingTemplate ? templatePath : evidencePath,
+    finalEvidenceFile: evidencePath,
+    warnings,
+    releaseCandidate: {
+      appName: release.appName,
+      version: release.version,
+      iosBundleId: release.iosBundleId,
+      androidPackage: release.androidPackage,
+      sku: release.sku,
+      matchesAppConfig: {
+        appName: release.appName === appConfig.name,
+        version: release.version === appConfig.version,
+        iosBundleId: release.iosBundleId === appConfig.ios?.bundleIdentifier,
+        androidPackage: release.androidPackage === appConfig.android?.package,
+        sku: release.sku === packet.appIdentity?.sku,
+      },
+    },
+    appStoreConnect: {
+      status: appStore.status,
+      recordUrlPresent: Boolean(appStore.recordUrl) && isHttpsUrl(appStore.recordUrl),
+      appleIdPresent: Boolean(appStore.appleId),
+      bundleIdStatus: appStore.bundleIdStatus,
+      privacyPolicyUrlReady: Boolean(appStore.privacyPolicyUrl) && !isPlaceholderUrl(appStore.privacyPolicyUrl),
+      metadataCopiedFromPacket: appStore.metadataCopiedFromPacket === true,
+      appPrivacyCompleted: appStore.appPrivacyCompleted === true,
+      ageRatingCompleted: appStore.ageRatingCompleted === true,
+      testFlightReady: appStore.testFlightReady === true,
+    },
+    googlePlay: {
+      status: googlePlay.status,
+      recordUrlPresent: Boolean(googlePlay.recordUrl) && isHttpsUrl(googlePlay.recordUrl),
+      packageNameMatches: googlePlay.packageName === appConfig.android?.package,
+      privacyPolicyUrlReady: Boolean(googlePlay.privacyPolicyUrl) && !isPlaceholderUrl(googlePlay.privacyPolicyUrl),
+      metadataCopiedFromPacket: googlePlay.metadataCopiedFromPacket === true,
+      dataSafetyCompleted: googlePlay.dataSafetyCompleted === true,
+      appContentCompleted: googlePlay.appContentCompleted === true,
+      internalTestingReady: googlePlay.internalTestingReady === true,
+    },
+    requiredAssets: {
+      nativeScreenshotsCaptured: assets.nativeScreenshotsCaptured === true,
+      appIconReviewed: assets.appIconReviewed === true,
+      featureGraphicCaptured: assets.featureGraphicCaptured === true,
+      featureGraphicPathReady: assets.featureGraphicPath === 'docs/store-assets/google-play-feature-graphic.png',
+      evidenceFolderPresent: Boolean(assets.evidenceFolder),
+    },
+    reviewGates: Object.fromEntries(Object.entries(reviewGates).map(([key, value]) => [key, value === true])),
+    signoff: {
+      productionSubmissionApproved: signoff.productionSubmissionApproved === true || reviewGates.productionSubmissionApproved === true,
+      releaseOwnerPresent: Boolean(signoff.releaseOwner),
+      storeReviewerPresent: Boolean(signoff.storeReviewer),
+      signedAtPresent: Boolean(signoff.signedAt),
+    },
+  });
+  console.log(`Pending evidence: ${pendingEvidencePath}`);
 }
 
 console.log('Store console preflight passed.');

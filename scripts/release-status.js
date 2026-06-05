@@ -352,6 +352,7 @@ const requiredArtifacts = [
   'docs/store-submission-packet.json',
   'docs/store-submission-smoke-evidence.json',
   'docs/store-console-evidence.template.json',
+  'docs/store-console-pending-evidence.json',
   'scripts/api-preflight.js',
   'scripts/api-env-preflight.js',
   'scripts/api-deployment-smoke.js',
@@ -517,6 +518,30 @@ addGate(
   nativeQaEvidenceExists ? 'pending' : 'pending',
   nativeQaEvidenceExists ? 'docs/native-qa-evidence.json exists; run npm run native:qa:preflight for proof.' : 'docs/native-qa-evidence.json is missing.',
   nativeQaEvidenceExists ? 'Run npm run native:qa:preflight and resolve any failures.' : 'Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight.'
+);
+
+const storeConsolePendingEvidence = readOptionalJson('docs/store-console-pending-evidence.json');
+const storeConsolePendingOk = (
+  storeConsolePendingEvidence?.status === 'pending' &&
+  storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.appName === true &&
+  storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.iosBundleId === true &&
+  storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.androidPackage === true &&
+  storeConsolePendingEvidence?.appStoreConnect?.status === 'pending' &&
+  storeConsolePendingEvidence?.googlePlay?.status === 'pending' &&
+  storeConsolePendingEvidence?.googlePlay?.packageNameMatches === true &&
+  storeConsolePendingEvidence?.requiredAssets?.featureGraphicPathReady === true &&
+  storeConsolePendingEvidence?.reviewGates?.hostedApiPreflightPassed === false &&
+  storeConsolePendingEvidence?.reviewGates?.nativeQaPreflightPassed === false
+);
+addGate(
+  'store-console',
+  'store-console-pending-evidence',
+  'Store console pending evidence records account-side setup requirements',
+  storeConsolePendingOk ? 'pass' : 'pending',
+  storeConsolePendingOk
+    ? `docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at ${storeConsolePendingEvidence.generatedAt}.`
+    : 'docs/store-console-pending-evidence.json is missing or incomplete.',
+  storeConsolePendingOk ? '' : 'Run npm run store:console:preflight:local before creating console records.'
 );
 
 const storeConsoleEvidenceExists = exists('docs/store-console-evidence.json');

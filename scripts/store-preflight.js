@@ -189,6 +189,7 @@ const requiredDocs = [
   'docs/store-submission-packet.json',
   'docs/store-submission-smoke-evidence.json',
   'docs/store-console-evidence.template.json',
+  'docs/store-console-pending-evidence.json',
   'docs/policy-hosting-deployment.md',
   'docs/policy-hosting-smoke-evidence.json',
   'docs/production-api-deployment.md',
