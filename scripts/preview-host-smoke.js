@@ -34,7 +34,7 @@ const routeChecks = [
     expectedTexts: [
       'Machine Reconstruction Engine',
       'New Reconstruction',
-      'Start with a scan or description',
+      'Scan a machine. Match it to inventory.',
     ],
   },
   {

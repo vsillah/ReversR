@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T06:46:00.972Z",
+  "generatedAt": "2026-06-05T08:58:41.375Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T06:46:00.969Z",
+    "generatedAt": "2026-06-05T08:58:41.368Z",
     "summary": {
-      "pass": 30,
-      "pending": 9
+      "pass": 31,
+      "pending": 8
     }
   },
   "appIdentity": {
@@ -19,10 +19,10 @@
     {
       "id": "preview-host-smoke",
       "group": "hosted",
-      "status": "pending",
+      "status": "pass",
       "title": "Vercel preview host renders app and policy/support routes before production hosting",
-      "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
-      "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
+      "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+      "nextStep": ""
     },
     {
       "id": "hosted-api",

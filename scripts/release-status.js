@@ -422,7 +422,6 @@ addGate(
 const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
 const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
 const requiredNextActionGateIds = [
-  'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
@@ -434,7 +433,7 @@ const requiredNextActionGateIds = [
 ];
 const releaseNextActionsOk = (
   releaseNextActions?.schemaVersion === 1 &&
-  releaseNextActions?.nextRecommendedGate === 'preview-host-smoke' &&
+  releaseNextActions?.nextRecommendedGate === 'hosted-api' &&
   releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
   Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
   requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
@@ -445,7 +444,7 @@ const releaseNextActionsOk = (
     gate.action?.evidence?.length > 0
   )) &&
   releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
-  releaseNextActionsMarkdown.includes('Next recommended gate: preview-host-smoke') &&
+  releaseNextActionsMarkdown.includes('Next recommended gate: hosted-api') &&
   releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
 );
 addGate(
@@ -558,11 +557,11 @@ const requiredBundleProofs = [
   'local-release-ci-evidence',
   'release-next-actions-packet',
   'preview-host-target-discovery',
+  'preview-host-smoke',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const requiredBundlePending = [
-  'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
@@ -582,6 +581,7 @@ const releaseEvidenceBundleOk = (
   Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.previewHostSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
   releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.schemaVersion === 1 &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostTarget?.status === 'pass' &&

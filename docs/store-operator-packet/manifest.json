@@ -1,15 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T06:46:01.588Z",
+  "generatedAt": "2026-06-05T08:58:41.270Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T06:46:01.585Z",
+    "generatedAt": "2026-06-05T08:58:41.263Z",
     "summary": {
-      "pass": 30,
-      "pending": 9
+      "pass": 31,
+      "pending": 8
     },
     "pendingGateIds": [
-      "preview-host-smoke",
       "hosted-api",
       "hosted-policy-urls",
       "real-connector-smoke",
@@ -117,12 +116,6 @@
     "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
   ],
   "pendingGates": [
-    {
-      "id": "preview-host-smoke",
-      "group": "hosted",
-      "title": "Vercel preview host renders app and policy/support routes before production hosting",
-      "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
-    },
     {
       "id": "hosted-api",
       "group": "hosted",

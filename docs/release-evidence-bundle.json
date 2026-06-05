@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T06:46:02.853Z",
+  "generatedAt": "2026-06-05T08:58:53.674Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,10 +16,10 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T06:46:02.839Z",
+    "generatedAt": "2026-06-05T08:58:53.647Z",
     "summaryWithoutBundle": {
-      "pass": 29,
-      "pending": 9
+      "pass": 30,
+      "pending": 8
     },
     "missingLocalProofs": [],
     "localProofGateIds": [
@@ -44,11 +44,11 @@
       "store-console-copy-packet",
       "release-next-actions-packet",
       "preview-host-target-discovery",
+      "preview-host-smoke",
       "store-operator-packet",
       "hosted-operator-packet"
     ],
     "pendingExternalGateIds": [
-      "preview-host-smoke",
       "hosted-api",
       "hosted-policy-urls",
       "real-connector-smoke",
@@ -59,13 +59,6 @@
       "native-screenshots"
     ],
     "pendingExternalGates": [
-      {
-        "id": "preview-host-smoke",
-        "group": "hosted",
-        "title": "Vercel preview host renders app and policy/support routes before production hosting",
-        "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
-        "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
-      },
       {
         "id": "hosted-api",
         "group": "hosted",
@@ -224,7 +217,7 @@
     "policyHostingSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:45:48.418Z",
+      "generatedAt": "2026-06-05T08:58:33.839Z",
       "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
       "urls": {
         "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
@@ -262,8 +255,8 @@
     },
     "previewHostSmoke": {
       "schemaVersion": 1,
-      "status": "pending",
-      "generatedAt": "2026-06-05T06:33:26.024Z",
+      "status": "pass",
+      "generatedAt": "2026-06-05T08:56:45.065Z",
       "previewUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app",
       "routeCount": 4,
       "routes": [
@@ -271,80 +264,79 @@
           "id": "app-root",
           "path": "/",
           "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/",
-          "finalUrl": "https://vercel.com/login",
-          "status": "fail",
-          "httpStatus": 401,
+          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/",
+          "status": "pass",
+          "httpStatus": 200,
           "expectedTextFound": {
-            "Machine Reconstruction Engine": false,
-            "New Reconstruction": false,
-            "Start with a scan or description": false
+            "Machine Reconstruction Engine": true,
+            "New Reconstruction": true,
+            "Scan a machine. Match it to inventory.": true
           },
-          "checkedAt": "2026-06-05T06:33:15.421Z",
+          "checkedAt": "2026-06-05T08:56:38.857Z",
           "error": ""
         },
         {
           "id": "privacy",
           "path": "/privacy",
           "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/privacy",
-          "finalUrl": "https://vercel.com/login",
-          "status": "fail",
-          "httpStatus": 401,
+          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/privacy",
+          "status": "pass",
+          "httpStatus": 200,
           "expectedTextFound": {
             "Privacy Policy": true,
-            "Camera access is used only to capture machine images": false,
-            "Manufacturer quote packets and email drafts require explicit user action": false
+            "Camera access is used only to capture machine images": true,
+            "Manufacturer quote packets and email drafts require explicit user action": true
           },
-          "checkedAt": "2026-06-05T06:33:18.565Z",
+          "checkedAt": "2026-06-05T08:56:40.558Z",
           "error": ""
         },
         {
           "id": "terms",
           "path": "/terms",
           "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/terms",
-          "finalUrl": "https://vercel.com/login",
-          "status": "fail",
-          "httpStatus": 401,
+          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/terms",
+          "status": "pass",
+          "httpStatus": 200,
           "expectedTextFound": {
-            "Terms of Service": false,
-            "No Automatic Vendor Submission": false,
-            "it does not automatically submit orders": false
+            "Terms of Service": true,
+            "No Automatic Vendor Submission": true,
+            "it does not automatically submit orders": true
           },
-          "checkedAt": "2026-06-05T06:33:21.134Z",
+          "checkedAt": "2026-06-05T08:56:42.066Z",
           "error": ""
         },
         {
           "id": "support",
           "path": "/support",
           "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/support",
-          "finalUrl": "https://vercel.com/login",
-          "status": "fail",
-          "httpStatus": 401,
+          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/support",
+          "status": "pass",
+          "httpStatus": 200,
           "expectedTextFound": {
-            "Support": false,
-            "vsillah@gmail.com": false,
-            "Do not send raw API keys or OAuth tokens": false
+            "Support": true,
+            "vsillah@gmail.com": true,
+            "Do not send raw API keys or OAuth tokens": true
           },
-          "checkedAt": "2026-06-05T06:33:23.641Z",
+          "checkedAt": "2026-06-05T08:56:43.566Z",
           "error": ""
         }
       ],
       "finalProductionHostedUrlsStillRequired": true,
-      "deploymentProtectionLikely": true,
+      "deploymentProtectionLikely": false,
       "automationBypass": {
-        "vercelBypassConfigured": false,
-        "setBypassCookie": "",
+        "vercelBypassConfigured": true,
+        "setBypassCookie": "true",
         "extraHeaderNames": []
       },
       "notes": [
-        "This records the current PR preview route result for release gating.",
-        "It does not replace hosted production API, hosted production policy URLs, EAS native QA, App Store Connect, or Google Play Console evidence.",
-        "The preview appears to be protected by Vercel authentication; rerun with a public preview URL or approved bypass."
+        "This proves the current PR preview renders the app and policy/support routes.",
+        "It does not replace hosted production API, hosted production policy URLs, EAS native QA, App Store Connect, or Google Play Console evidence."
       ]
     },
     "previewHostTarget": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:34:26.226Z",
+      "generatedAt": "2026-06-05T08:55:09.709Z",
       "source": "github-pr-comments",
       "pr": {
         "number": 2,
@@ -365,7 +357,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T06:46:02.227Z",
+      "generatedAt": "2026-06-05T08:58:47.497Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -385,10 +377,10 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T06:46:02.208Z",
+        "generatedAt": "2026-06-05T08:58:47.461Z",
         "summary": {
-          "pass": 30,
-          "pending": 9
+          "pass": 31,
+          "pending": 8
         }
       },
       "requirements": [
@@ -542,14 +534,14 @@
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T06:45:43.614Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T08:58:28.626Z.",
               "nextStep": ""
             },
             {
               "id": "store-review-safety-packet",
               "status": "pass",
               "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T06:45:38.945Z.",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T08:58:22.209Z.",
               "nextStep": ""
             },
             {
@@ -570,14 +562,14 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 9 external gates at 2026-06-05T06:45:51.009Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 8 external gates at 2026-06-05T08:58:00.576Z.",
               "nextStep": ""
             },
             {
               "id": "local-release-ci-evidence",
               "status": "pass",
               "title": "Local release CI evidence records repeatable pre-store validation",
-              "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T06:45:48.453Z.",
+              "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T08:58:33.881Z.",
               "nextStep": ""
             },
             {
@@ -598,42 +590,42 @@
               "id": "store-operator-packet",
               "status": "pass",
               "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-              "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T06:46:01.588Z.",
+              "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T08:58:41.270Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-operator-packet",
               "status": "pass",
               "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T06:46:00.972Z.",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T08:58:41.375Z.",
               "nextStep": ""
             },
             {
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 9 external gates at 2026-06-05T06:45:41.227Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 8 external gates at 2026-06-05T08:58:41.594Z.",
               "nextStep": ""
             },
             {
               "id": "preview-host-target-discovery",
               "status": "pass",
               "title": "Current Vercel PR preview target is discovered for preview smoke",
-              "evidence": "docs/preview-host-target.json records https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app at 2026-06-05T06:34:26.226Z.",
+              "evidence": "docs/preview-host-target.json records https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app at 2026-06-05T08:55:09.709Z.",
               "nextStep": ""
             },
             {
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded before EAS account setup",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T06:45:43.377Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T08:58:28.291Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T06:45:42.001Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T08:58:26.410Z.",
               "nextStep": ""
             }
           ],
@@ -661,10 +653,10 @@
           "evidence": [
             {
               "id": "preview-host-smoke",
-              "status": "pending",
+              "status": "pass",
               "title": "Vercel preview host renders app and policy/support routes before production hosting",
-              "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
-              "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
+              "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+              "nextStep": ""
             },
             {
               "id": "hosted-api",
@@ -741,7 +733,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:45:43.614Z",
+      "generatedAt": "2026-06-05T08:58:52.520Z",
       "urlMode": "placeholder-allowed",
       "warnings": [
         "privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy",
@@ -816,7 +808,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:45:38.945Z",
+      "generatedAt": "2026-06-05T08:58:22.209Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -1125,7 +1117,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:45:43.377Z",
+      "generatedAt": "2026-06-05T08:58:28.291Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -1213,7 +1205,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T06:45:42.001Z",
+      "generatedAt": "2026-06-05T08:58:26.410Z",
       "source": "docs/store-console-evidence.template.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1307,15 +1299,14 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:46:01.588Z",
+      "generatedAt": "2026-06-05T08:58:41.270Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T06:46:01.585Z",
+        "generatedAt": "2026-06-05T08:58:41.263Z",
         "summary": {
-          "pass": 30,
-          "pending": 9
+          "pass": 31,
+          "pending": 8
         },
         "pendingGateIds": [
-          "preview-host-smoke",
           "hosted-api",
           "hosted-policy-urls",
           "real-connector-smoke",
@@ -1424,12 +1415,6 @@
       ],
       "pendingGates": [
         {
-          "id": "preview-host-smoke",
-          "group": "hosted",
-          "title": "Vercel preview host renders app and policy/support routes before production hosting",
-          "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
-        },
-        {
           "id": "hosted-api",
           "group": "hosted",
           "title": "Hosted HTTPS API URL is configured for native builds",
@@ -1488,12 +1473,12 @@
     "hostedOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T06:46:00.972Z",
+      "generatedAt": "2026-06-05T08:58:41.375Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T06:46:00.969Z",
+        "generatedAt": "2026-06-05T08:58:41.368Z",
         "summary": {
-          "pass": 30,
-          "pending": 9
+          "pass": 31,
+          "pending": 8
         }
       },
       "appIdentity": {
@@ -1506,10 +1491,10 @@
         {
           "id": "preview-host-smoke",
           "group": "hosted",
-          "status": "pending",
+          "status": "pass",
           "title": "Vercel preview host renders app and policy/support routes before production hosting",
-          "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
-          "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
+          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+          "nextStep": ""
         },
         {
           "id": "hosted-api",
@@ -1673,8 +1658,8 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-05T06:45:32.005Z",
-      "completedAt": "2026-06-05T06:45:48.453Z",
+      "startedAt": "2026-06-05T08:58:12.217Z",
+      "completedAt": "2026-06-05T08:58:33.881Z",
       "commandCount": 16,
       "passedCount": 16,
       "failedCount": 0,
@@ -1685,7 +1670,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 975,
+          "durationMs": 2141,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -1695,7 +1680,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 118,
+          "durationMs": 186,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -1705,7 +1690,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 119,
+          "durationMs": 166,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -1715,7 +1700,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 442,
+          "durationMs": 513,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -1725,7 +1710,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 5019,
+          "durationMs": 6647,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nWarnings:\n- privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy\n- termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms\n- supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -1735,7 +1720,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 145,
+          "durationMs": 176,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nWarnings:\n- privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy\n- termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms\n- supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support\n- apiBaseUrl is placeholder or non-production: https://reversr-rebuild-api.example.com\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -1745,7 +1730,7 @@
           "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 130,
+          "durationMs": 172,
           "command": "npm run store:review-safety",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
           "stderrTail": ""
@@ -1755,7 +1740,7 @@
           "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 126,
+          "durationMs": 162,
           "command": "npm run store:console:copy",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
           "stderrTail": ""
@@ -1765,9 +1750,9 @@
           "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 709,
+          "durationMs": 1039,
           "command": "npm run store:operator-packet",
-          "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 11",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 9",
           "stderrTail": ""
         },
         {
@@ -1775,7 +1760,7 @@
           "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 646,
+          "durationMs": 1028,
           "command": "npm run hosted:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
           "stderrTail": ""
@@ -1785,9 +1770,9 @@
           "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 800,
+          "durationMs": 919,
           "command": "npm run release:next-actions:write",
-          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 9\nNext recommended gate: preview-host-smoke",
+          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 8\nNext recommended gate: hosted-api",
           "stderrTail": ""
         },
         {
@@ -1795,7 +1780,7 @@
           "proves": "Original user objective is mapped to proven local work and pending external release gates.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 671,
+          "durationMs": 907,
           "command": "npm run release:objective",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 5/8\nPending requirements: photo-to-inventory-machine-match, store-readiness-packet, apple-google-store-publication",
           "stderrTail": ""
@@ -1805,7 +1790,7 @@
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 100,
+          "durationMs": 142,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- Store asset evidenceFolder is missing.\n- Review gate hostedApiPreflightPassed is not marked true.\n- Review gate hostedPolicyPreflightPassed is not marked true.\n- Review gate hostedConnectorSmokePassed is not marked true.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -1815,7 +1800,7 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1376,
+          "durationMs": 1883,
           "command": "npm run native:preflight:local",
           "stdoutTail": "\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nWarnings:\n- EAS project is not linked. Run `npx eas-cli@20.0.0 init` or set `expo.extra.eas.projectId` before native release builds.\n- Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.\n- Set EXPO_PUBLIC_API_BASE_URL to the hosted HTTPS API before native release builds.\n- Set EXPO_PUBLIC_PRIVACY_POLICY_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_TERMS_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_SUPPORT_URL to a hosted HTTPS URL before native release builds.\n- EAS CLI is not logged in for non-interactive release work through pinned npx eas-cli@20.0.0: Not logged in\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
@@ -1825,7 +1810,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 102,
+          "durationMs": 144,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot build-handoff is missing android device evidence.\n- Native screenshot build-handoff is missing android capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -1835,7 +1820,7 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 4969,
+          "durationMs": 5437,
           "command": "npm run store:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nWarnings:\n- Using placeholder API URL because --allow-placeholder was provided.\n- Using placeholder or non-production privacyPolicyUrl because --allow-placeholder was provided.\n- Using placeholder or non-production termsUrl because --allow-placeholder was provided.\n- Using placeholder or non-production supportUrl because --allow-placeholder was provided.\nStore preflight passed.",
           "stderrTail": ""
@@ -1859,42 +1844,14 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T06:45:41.227Z",
-      "releaseStatusGeneratedAt": "2026-06-05T06:45:41.223Z",
+      "generatedAt": "2026-06-05T08:58:41.594Z",
+      "releaseStatusGeneratedAt": "2026-06-05T08:58:41.587Z",
       "summary": {
-        "pending": 9
+        "pass": 1,
+        "pending": 8
       },
-      "nextRecommendedGate": "preview-host-smoke",
+      "nextRecommendedGate": "hosted-api",
       "pendingGates": [
-        {
-          "group": "hosted",
-          "id": "preview-host-smoke",
-          "title": "Vercel preview host renders app and policy/support routes before production hosting",
-          "status": "pending",
-          "evidence": "docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.",
-          "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation.",
-          "action": {
-            "owner": "Release operator",
-            "phase": "Vercel preview access",
-            "action": "Create or use a Vercel Protection Bypass for Automation secret and rerun the deployed preview smoke.",
-            "steps": [
-              "Run npm run preview:discover -- --pr <pull-request-number> to refresh docs/preview-host-target.json.",
-              "Copy the previewUrl or nextSmokeCommand from docs/preview-host-target.json.",
-              "Open the Vercel project for the PR preview deployment.",
-              "Go to Deployment Protection or Protection Bypass for Automation settings.",
-              "Create or copy the automation bypass secret for the project.",
-              "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke.",
-              "Confirm docs/preview-host-smoke-evidence.json has status pass and automationBypass.vercelBypassConfigured true.",
-              "Run npm run release:evidence, then npm run release:status."
-            ],
-            "evidence": [
-              "docs/preview-host-target.json records the current Vercel PR preview URL.",
-              "docs/preview-host-smoke-evidence.json proves /, /privacy, /terms, and /support render on the deployed preview.",
-              "The evidence records that a bypass was configured but does not contain the bypass secret.",
-              "npm run release:status passes the preview-host-smoke gate."
-            ]
-          }
-        },
         {
           "group": "hosted",
           "id": "hosted-api",

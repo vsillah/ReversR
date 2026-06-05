@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T06:46:01.588Z
+Generated at: 2026-06-05T08:58:41.270Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -17,14 +17,13 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 ## Current Status
 
-- Release pass gates: 30
-- Release pending gates: 9
+- Release pass gates: 31
+- Release pending gates: 8
 - Release blocked gates: 0
 - Release warnings: 0
 
 Pending gates:
 
-- preview-host-smoke: Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation.
 - hosted-api: Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight.
 - hosted-policy-urls: Deploy /privacy, /terms, and /support, then set the hosted URL env vars.
 - real-connector-smoke: Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.

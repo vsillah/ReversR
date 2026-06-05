@@ -1,54 +1,19 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T06:45:41.227Z
-Release status generated at: 2026-06-05T06:45:41.223Z
+Generated at: 2026-06-05T08:58:41.594Z
+Release status generated at: 2026-06-05T08:58:41.587Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, connector, EAS, native QA, screenshot, and store-console gates.
 
 ## Summary
 
-- Pass: 0
-- Pending: 9
+- Pass: 1
+- Pending: 8
 - Blocked: 0
 - Warn: 0
-- Next recommended gate: preview-host-smoke
+- Next recommended gate: hosted-api
 
-## 1. Vercel preview host renders app and policy/support routes before production hosting
-
-- Gate ID: preview-host-smoke
-- Group: hosted
-- Status: pending
-- Owner: Release operator
-- Phase: Vercel preview access
-- Next action: Create or use a Vercel Protection Bypass for Automation secret and rerun the deployed preview smoke.
-
-Current gate evidence:
-
-docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at 2026-06-05T06:33:26.024Z.
-
-Current gate next step:
-
-Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation.
-
-Steps:
-
-1. Run npm run preview:discover -- --pr <pull-request-number> to refresh docs/preview-host-target.json.
-2. Copy the previewUrl or nextSmokeCommand from docs/preview-host-target.json.
-3. Open the Vercel project for the PR preview deployment.
-4. Go to Deployment Protection or Protection Bypass for Automation settings.
-5. Create or copy the automation bypass secret for the project.
-6. Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke.
-7. Confirm docs/preview-host-smoke-evidence.json has status pass and automationBypass.vercelBypassConfigured true.
-8. Run npm run release:evidence, then npm run release:status.
-
-Evidence required:
-
-- docs/preview-host-target.json records the current Vercel PR preview URL.
-- docs/preview-host-smoke-evidence.json proves /, /privacy, /terms, and /support render on the deployed preview.
-- The evidence records that a bypass was configured but does not contain the bypass secret.
-- npm run release:status passes the preview-host-smoke gate.
-
-## 2. Hosted HTTPS API URL is configured for native builds
+## 1. Hosted HTTPS API URL is configured for native builds
 
 - Gate ID: hosted-api
 - Group: hosted
@@ -82,7 +47,7 @@ Evidence required:
 - Runtime config reports restricted CORS.
 - npm run api:preflight passes against the hosted URL.
 
-## 3. Privacy, terms, and support URLs are hosted and ready for store metadata
+## 2. Privacy, terms, and support URLs are hosted and ready for store metadata
 
 - Gate ID: hosted-policy-urls
 - Group: hosted
@@ -113,7 +78,7 @@ Evidence required:
 - All three policy/support URLs return reachable HTTPS pages.
 - npm run policy:preflight -- --check-hosted passes.
 
-## 4. Hosted API can validate and match against a real authorized machine inventory
+## 3. Hosted API can validate and match against a real authorized machine inventory
 
 - Gate ID: real-connector-smoke
 - Group: hosted
@@ -144,7 +109,7 @@ Evidence required:
 - Hosted connector smoke validates the source, matches a machine, and generates a BOM.
 - No raw connector secret appears in app responses or evidence.
 
-## 5. EAS project is linked for the clone identity
+## 4. EAS project is linked for the clone identity
 
 - Gate ID: eas-project-linkage
 - Group: native
@@ -178,7 +143,7 @@ Evidence required:
 - app.json has the clone projectId.
 - Native preflight no longer reports missing EAS project linkage.
 
-## 6. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
+## 5. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
 
 - Gate ID: eas-submit-config
 - Group: native
@@ -209,7 +174,7 @@ Evidence required:
 - eas.json has submit.production.ios.ascAppId.
 - Native preflight no longer reports missing iOS ascAppId.
 
-## 7. Android and iOS preview-build QA evidence is recorded
+## 6. Android and iOS preview-build QA evidence is recorded
 
 - Gate ID: native-qa-evidence
 - Group: native
@@ -241,7 +206,7 @@ Evidence required:
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
-## 8. App Store Connect and Google Play Console app records exist
+## 7. App Store Connect and Google Play Console app records exist
 
 - Gate ID: store-console-records
 - Group: store-console
@@ -277,7 +242,7 @@ Evidence required:
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
-## 9. Final native screenshots are captured from Android/iOS preview builds
+## 8. Final native screenshots are captured from Android/iOS preview builds
 
 - Gate ID: native-screenshots
 - Group: store-console

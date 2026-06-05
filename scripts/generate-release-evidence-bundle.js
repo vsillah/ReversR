@@ -75,11 +75,11 @@ const localProofGateIds = [
   'store-console-copy-packet',
   'release-next-actions-packet',
   'preview-host-target-discovery',
+  'preview-host-smoke',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const externalGateIds = [
-  'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
