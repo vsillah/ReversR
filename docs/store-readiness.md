@@ -16,6 +16,7 @@ The app now has:
 - Inventory connector validation
 - Machine matching against demo, CSV, JSON, HTTP(S), and local file fixtures
 - Reconstruction package generation with assembly steps, pricing, BOM, and manufacturer handoff surfaces
+- Manufacturer quote packet export for human-reviewed 3D modeling and fabrication requests
 - Store preflight script: `npm run store:preflight`
 - API health endpoint: `GET /api/health`
 - Server-side credential references for authenticated inventory connectors
@@ -78,7 +79,7 @@ Open gates:
 - Privacy policy and terms: updated drafts exist, but they still need a hosted public URL and legal review.
 - Native QA: camera flow needs real iOS and Android device testing.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
-- Vendor handoff: current manufacturer cards open vendor sites but do not submit files or pricing requests.
+- Vendor handoff: quote packet export is available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: needs screen-reader and tap-target QA before submission.
 - Store assets: metadata draft exists in [store-metadata.md](./store-metadata.md), but native screenshots, support URL, hosted privacy URL, and final icon review are not complete.
 

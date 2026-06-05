@@ -27,6 +27,7 @@ Capture or describe a machine, connect an approved inventory source, and match t
 - estimated parts, modeling, fabrication, and labor ranges,
 - technical specs,
 - 2D and 3D export references,
+- manufacturer quote packet,
 - manufacturer handoff notes.
 
 The app is designed for review-driven workflows. Inventory matching, procurement, fabrication, and vendor handoff should be checked by a qualified human before parts are ordered or machines are rebuilt.
@@ -84,7 +85,7 @@ Google Play Data safety answers should align with the production backend:
 
 ReversR Rebuild uses the camera to capture machine images for inventory matching and reconstruction planning. Camera data is not used for advertising or unrelated profiling.
 
-The app does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. Vendor cards and exports are handoff tools that require explicit user action.
+The app does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. Quote packets, vendor cards, and exports are handoff tools that require explicit user action.
 
 Authenticated ERP/API connectors use backend credential references so raw secrets are not stored in the app. Prototype operations can register credentials through admin-token protected API routes. Production connector secrets should be moved into a managed secret store and protected by admin roles.
 

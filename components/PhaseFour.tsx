@@ -80,6 +80,45 @@ const MANUFACTURERS = [
   },
 ];
 
+type QuoteVendor = {
+  vendorName: string;
+  serviceType: string;
+  url: string;
+  packageRequired: string[];
+};
+
+type ManufacturerQuotePacket = {
+  packetType: 'manufacturer_quote_request';
+  packetVersion: string;
+  generatedAt: string;
+  humanReviewRequired: boolean;
+  machine: {
+    machineId?: string;
+    machineName?: string;
+    inventorySource?: string;
+    confidenceScore?: number;
+    evidence?: string;
+  };
+  reconstructionPackage: {
+    conceptName: string;
+    description: string;
+    constraint: string;
+    rebuildOutcome: string;
+  };
+  pricing?: InnovationResult['pricing'];
+  billOfMaterials: BillOfMaterials;
+  assemblySteps: InnovationResult['assemblySteps'];
+  technicalSpec: TechnicalSpec;
+  visualReferences: {
+    has2D: boolean;
+    angleLabels: string[];
+    has3DScene: boolean;
+    expectedFileTypes: string[];
+  };
+  vendorTargets: QuoteVendor[];
+  quoteRequestMessage: string;
+};
+
 export default function PhaseFour({
   innovation,
   spec,
@@ -133,6 +172,63 @@ export default function PhaseFour({
     return msg;
   };
 
+  const getVendorTargets = (): QuoteVendor[] => {
+    if (innovation.fulfillmentOptions && innovation.fulfillmentOptions.length > 0) {
+      return innovation.fulfillmentOptions;
+    }
+
+    return MANUFACTURERS.map(manufacturer => ({
+      vendorName: manufacturer.name,
+      serviceType: manufacturer.subtitle,
+      url: manufacturer.url,
+      packageRequired: ['BOM CSV', 'assembly sequence', 'technical specs', '2D/3D references when available'],
+    }));
+  };
+
+  const buildQuotePacket = (bomForPacket: BillOfMaterials): ManufacturerQuotePacket => {
+    const vendorTargets = getVendorTargets();
+    const angleLabels = multiAngleImages
+      .filter(image => !!image.imageData)
+      .map(image => image.label);
+
+    return {
+      packetType: 'manufacturer_quote_request',
+      packetVersion: '0.1-review',
+      generatedAt: new Date().toISOString(),
+      humanReviewRequired: true,
+      machine: {
+        machineId: innovation.machineId,
+        machineName: innovation.machineName,
+        inventorySource: innovation.inventorySource,
+        confidenceScore: innovation.confidenceScore,
+        evidence: innovation.evidence,
+      },
+      reconstructionPackage: {
+        conceptName: innovation.conceptName,
+        description: innovation.conceptDescription,
+        constraint: innovation.constraint,
+        rebuildOutcome: innovation.marketBenefit,
+      },
+      pricing: innovation.pricing,
+      billOfMaterials: bomForPacket,
+      assemblySteps: innovation.assemblySteps || [],
+      technicalSpec: spec,
+      visualReferences: {
+        has2D,
+        angleLabels,
+        has3DScene: has3D,
+        expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'OBJ/STL if generated', 'PNG visual references if generated'],
+      },
+      vendorTargets,
+      quoteRequestMessage: [
+        `Please review the attached reconstruction package for ${innovation.machineName || innovation.conceptName}.`,
+        `We need a quote for 3D modeling, fabrication feasibility, expected lead time, and any missing source files required before production.`,
+        `Use the BOM, assembly sequence, technical spec, pricing envelope, and inventory match evidence as review inputs.`,
+        `Do not fabricate or order parts until a qualified reviewer confirms machine identity, tolerances, safety constraints, and revision compatibility.`,
+      ].join('\n\n'),
+    };
+  };
+
   const handleGenerateBOM = async () => {
     setStatus('generating');
     setError(null);
@@ -176,10 +272,12 @@ export default function PhaseFour({
 
   const handleExportAll = async () => {
     try {
+      const quotePacket = localBom ? buildQuotePacket(localBom) : null;
       const exportData: Record<string, unknown> = {
         innovation,
         specifications: spec,
         billOfMaterials: localBom,
+        manufacturerQuotePacket: quotePacket,
         exportedAt: new Date().toISOString(),
       };
 
@@ -209,6 +307,29 @@ export default function PhaseFour({
     } catch (e) {
       console.error('Export error:', e);
       setAlert({visible: true, title: 'Error', message: 'Failed to export package.', type: 'error'});
+    }
+  };
+
+  const handleExportQuotePacket = async () => {
+    if (!localBom) {
+      setAlert({visible: true, title: 'BOM Required', message: 'Generate the Bill of Materials before exporting a manufacturer quote packet.', type: 'info'});
+      return;
+    }
+
+    try {
+      const packet = buildQuotePacket(localBom);
+      const name = innovation.conceptName.replace(/\s+/g, '_');
+      const fileUri = FileSystem.documentDirectory + `${name}_manufacturer_quote_packet.json`;
+      await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(packet, null, 2));
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        setAlert({visible: true, title: 'Saved', message: 'Manufacturer quote packet saved to device.', type: 'success'});
+      }
+    } catch (e) {
+      console.error('Quote packet export error:', e);
+      setAlert({visible: true, title: 'Error', message: 'Failed to export manufacturer quote packet.', type: 'error'});
     }
   };
 
@@ -376,12 +497,17 @@ export default function PhaseFour({
               <Ionicons name="archive" size={20} color={Colors.accent} />
               <Text style={styles.exportButtonText}>Export All (JSON)</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.exportButton} onPress={handleExportQuotePacket}>
+              <Ionicons name="send" size={20} color={Colors.accent} />
+              <Text style={styles.exportButtonText}>Export Quote Packet</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.exportInfo}>
             <Text style={styles.exportInfoLabel}>Export All includes:</Text>
             <Text style={styles.exportInfoItem}>• Machine match & reconstruction analysis</Text>
             <Text style={styles.exportInfoItem}>• Technical specifications</Text>
             <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
+            <Text style={styles.exportInfoItem}>• Manufacturer quote request packet</Text>
             <Text style={styles.exportInfoItem}>• 2D sketches (PNG)</Text>
             <Text style={styles.exportInfoItem}>• 3D scene descriptor</Text>
             <Text style={styles.exportInfoItem}>• Export timestamp</Text>
@@ -487,7 +613,25 @@ export default function PhaseFour({
       <View style={styles.manufacturerPanel}>
         <View style={styles.manufacturerHeader}>
           <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
-          <Text style={styles.manufacturerTitle}>Send to Manufacturer</Text>
+          <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
+        </View>
+        <View style={styles.quotePacketCard}>
+          <View style={styles.quotePacketHeader}>
+            <Ionicons name="send-outline" size={20} color={Colors.accent} />
+            <Text style={styles.quotePacketTitle}>Quote Packet</Text>
+          </View>
+          <Text style={styles.quotePacketText}>
+            Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, required files, and a vendor request message.
+          </Text>
+          <TouchableOpacity
+            style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
+            onPress={handleExportQuotePacket}
+            disabled={!localBom}
+          >
+            <Text style={styles.quotePacketButtonText}>
+              {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
+            </Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.manufacturerGrid}>
           {MANUFACTURERS.map((mfr) => (
@@ -504,7 +648,7 @@ export default function PhaseFour({
           ))}
         </View>
         <Text style={styles.manufacturerNote}>
-          Upload your 3D files (.OBJ, .STL), BOM, and assembly sequence to request quotes from these manufacturers.
+          Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, and any generated OBJ/STL or visual references to request quotes.
         </Text>
       </View>
 
@@ -1102,6 +1246,46 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     fontWeight: 'bold',
     color: Colors.white,
+  },
+  quotePacketCard: {
+    backgroundColor: 'rgba(34, 197, 94, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  quotePacketHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  quotePacketTitle: {
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+  },
+  quotePacketText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    lineHeight: 17,
+    marginBottom: Spacing.md,
+  },
+  quotePacketButton: {
+    alignItems: 'center',
+    backgroundColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  quotePacketButtonDisabled: {
+    backgroundColor: Colors.gray[700],
+  },
+  quotePacketButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
   },
   manufacturerGrid: {
     flexDirection: 'row',

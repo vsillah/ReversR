@@ -12,6 +12,7 @@ ReversR Rebuild is a clone direction for the original ReversR app. The old ideat
    - assembly steps,
    - pricing estimate,
    - bill of materials,
+   - manufacturer quote packet,
    - 3D modeling and fabrication handoff.
 
 ## Run Locally
