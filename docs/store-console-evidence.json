@@ -21,7 +21,7 @@
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false,
-    "notes": "Apple Developer sign-in succeeded after passkey approval. Browser is at the Apple Developer Agreement page for Vambah Sillah; the legal Agree action is a human-in-the-loop gate and has not been clicked. App Store Connect app record creation remains pending until the agreement/enrollment path is completed."
+    "notes": "Apple Developer Agreement was accepted by Vambah. App Store Connect still reports the Apple Account is not enabled. Browser is now at Apple Developer Program Enrollment personal information entry, which requires legal name, phone, address, and later membership purchase/payment; automation did not enter personal data or continue."
   },
   "googlePlay": {
     "status": "pass",
