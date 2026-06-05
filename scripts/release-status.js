@@ -346,6 +346,7 @@ const requiredArtifacts = [
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
   'docs/external-release-setup-runbook.md',
+  '.github/workflows/release-local-ci.yml',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
   'docs/native-qa-evidence.template.json',
@@ -492,6 +493,31 @@ addGate(
     ? `docs/local-release-ci-evidence.json records ${localReleaseCiEvidence.passedCount}/${localReleaseCiEvidence.commandCount} passing local checks at ${localReleaseCiEvidence.completedAt}.`
     : 'docs/local-release-ci-evidence.json is missing or incomplete.',
   localReleaseCiOk ? '' : 'Run npm run release:local-ci before external account-side release work.'
+);
+
+const releaseWorkflowChecks = [
+  'pull_request',
+  'workflow_dispatch',
+  'actions/setup-node@v4',
+  'npm ci',
+  'npm run release:local-ci',
+  'npm run release:evidence',
+  'npm run release:status',
+  'actions/upload-artifact@v4',
+  'docs/local-release-ci-evidence.json',
+  'docs/release-evidence-bundle.json',
+];
+const releaseWorkflowText = readText('.github/workflows/release-local-ci.yml');
+const releaseWorkflowOk = releaseWorkflowChecks.every(text => releaseWorkflowText.includes(text));
+addGate(
+  'store-local',
+  'release-local-ci-workflow',
+  'GitHub Actions workflow runs local release evidence checks on pull requests',
+  releaseWorkflowOk ? 'pass' : 'pending',
+  releaseWorkflowOk
+    ? '.github/workflows/release-local-ci.yml runs local release CI, refreshes the release evidence bundle, verifies release status, and uploads evidence artifacts.'
+    : '.github/workflows/release-local-ci.yml is missing required local release CI coverage.',
+  releaseWorkflowOk ? '' : 'Restore the release-local-ci GitHub Actions workflow before PR review.'
 );
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;

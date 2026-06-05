@@ -69,6 +69,7 @@ const localProofGateIds = [
   'native-release-config-evidence',
   'store-console-pending-evidence',
   'local-release-ci-evidence',
+  'release-local-ci-workflow',
 ];
 const externalGateIds = [
   'hosted-api',
@@ -182,6 +183,7 @@ const bundle = {
     'docs/native-qa-evidence.template.json',
     'docs/local-release-ci-evidence.json',
     'docs/external-release-setup-runbook.md',
+    '.github/workflows/release-local-ci.yml',
     'docs/release-action-plan.md',
     'docs/store-readiness.md',
   ],

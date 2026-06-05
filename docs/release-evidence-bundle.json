@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T05:42:35.829Z",
+  "generatedAt": "2026-06-05T05:45:20.239Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,9 +16,9 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T05:42:35.816Z",
+    "generatedAt": "2026-06-05T05:45:20.227Z",
     "summaryWithoutBundle": {
-      "pass": 21,
+      "pass": 22,
       "pending": 8
     },
     "missingLocalProofs": [],
@@ -37,7 +37,8 @@
       "web-flow-smoke",
       "native-release-config-evidence",
       "store-console-pending-evidence",
-      "local-release-ci-evidence"
+      "local-release-ci-evidence",
+      "release-local-ci-workflow"
     ],
     "pendingExternalGateIds": [
       "hosted-api",
@@ -208,7 +209,7 @@
     "policyHostingSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T05:42:28.676Z",
+      "generatedAt": "2026-06-05T05:45:14.855Z",
       "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
       "urls": {
         "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
@@ -247,7 +248,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T05:42:23.507Z",
+      "generatedAt": "2026-06-05T05:45:09.752Z",
       "urlMode": "placeholder-allowed",
       "warnings": [
         "privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy",
@@ -853,6 +854,7 @@
     "docs/native-qa-evidence.template.json",
     "docs/local-release-ci-evidence.json",
     "docs/external-release-setup-runbook.md",
+    ".github/workflows/release-local-ci.yml",
     "docs/release-action-plan.md",
     "docs/store-readiness.md"
   ],

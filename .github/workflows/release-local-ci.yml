@@ -1,0 +1,52 @@
+name: ReversR Rebuild Local Release CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-release-ci:
+    name: Local release evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run local release CI
+        run: npm run release:local-ci
+
+      - name: Refresh release evidence bundle
+        run: npm run release:evidence
+
+      - name: Verify release status
+        run: npm run release:status
+
+      - name: Upload release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reversr-rebuild-local-release-evidence
+          path: |
+            docs/local-release-ci-evidence.json
+            docs/release-evidence-bundle.json
+            docs/policy-hosting-smoke-evidence.json
+            docs/store-submission-smoke-evidence.json
+            docs/store-console-pending-evidence.json
+            docs/native-release-config-evidence.json
+          if-no-files-found: warn

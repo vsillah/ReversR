@@ -23,6 +23,7 @@ The app now has:
 - Generated external-gate action plan: `npm run release:next-actions`
 - Consolidated release evidence bundle: `npm run release:evidence`
 - Repeatable local release CI evidence: `npm run release:local-ci`
+- GitHub Actions local release CI workflow: `.github/workflows/release-local-ci.yml`
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - Store submission packet: `docs/store-submission-packet.json`
@@ -32,6 +33,7 @@ The app now has:
 - Store console pending evidence: `docs/store-console-pending-evidence.json`
 - Release evidence bundle for external operators: `docs/release-evidence-bundle.json`
 - Local release CI evidence: `docs/local-release-ci-evidence.json`
+- PR release CI workflow: `.github/workflows/release-local-ci.yml`
 - External release account setup runbook: `docs/external-release-setup-runbook.md`
 - Google Play feature graphic generation and validation: `npm run store:assets:generate` and `npm run store:assets:preflight`
 - Web-preview screenshot planning evidence: `docs/store-screenshots/planning-evidence.json`

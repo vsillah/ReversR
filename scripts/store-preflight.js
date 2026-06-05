@@ -198,6 +198,7 @@ const requiredDocs = [
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
   'docs/external-release-setup-runbook.md',
+  '.github/workflows/release-local-ci.yml',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
   'docs/eas-submit-configuration.md',
