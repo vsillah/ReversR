@@ -149,7 +149,104 @@
       "requiredPlatforms": ["android", "ios"],
       "android": "pending",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "Complete the screenshots array below with final native PNG files from Android and iOS preview builds."
+    }
+  ],
+  "screenshots": [
+    {
+      "id": "welcome",
+      "label": "Welcome screen with the four reconstruction phases",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-01-welcome.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-01-welcome.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "scan",
+      "label": "Scan screen with camera or description mode",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-02-scan.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-02-scan.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "inventory-validation",
+      "label": "Inventory connector validation preview",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-03-inventory-validation.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-03-inventory-validation.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "design-match",
+      "label": "Design screen with machine match evidence",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-04-design-match.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-04-design-match.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "build-handoff",
+      "label": "Build screen with assembly steps, pricing, BOM, quote packet, and vendor draft controls",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-05-build-handoff.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-05-build-handoff.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
     }
   ],
   "blockers": [

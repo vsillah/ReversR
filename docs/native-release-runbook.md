@@ -173,6 +173,7 @@ cp docs/native-qa-evidence.template.json docs/native-qa-evidence.json
 ```
 
 Fill `docs/native-qa-evidence.json` with Android and iOS build URLs, devices, tester names, completion timestamps, check statuses, and evidence notes.
+Final native screenshot files should be placed under `docs/store-screenshots/native/` and referenced in the `screenshots` array in `docs/native-qa-evidence.json`.
 
 Required checks include:
 

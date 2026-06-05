@@ -30,3 +30,11 @@ Captured web-preview screens:
 6. Privacy route for store metadata review.
 
 Store submission still requires native screenshots captured from iOS and Android preview builds. Use these web screenshots as a composition and metadata review pass before producing final native assets.
+
+Final native screenshots belong in:
+
+```text
+docs/store-screenshots/native/
+```
+
+The required native screenshot filenames and evidence steps are documented in `docs/store-screenshots/native/README.md` and enforced by `npm run native:qa:preflight` after `docs/native-qa-evidence.json` exists.

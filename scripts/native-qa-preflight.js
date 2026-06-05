@@ -12,6 +12,16 @@ const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
 const exists = (path) => fs.existsSync(path);
+const readPngSize = (path) => {
+  const buffer = fs.readFileSync(path);
+  if (buffer.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') {
+    throw new Error(`${path} is not a PNG file.`);
+  }
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+};
 
 const appConfig = readJson('app.json').expo;
 const evidence = exists(evidencePath) ? readJson(evidencePath) : readJson(templatePath);
@@ -83,6 +93,57 @@ const requiredIds = [
 const ids = new Set(checks.map(check => check.id));
 for (const id of requiredIds) {
   if (!ids.has(id)) fail(`Native QA evidence is missing required check "${id}".`);
+}
+
+const screenshotStatuses = new Set(['pass', 'fail', 'blocked', 'pending']);
+const requiredScreenshotIds = [
+  'welcome',
+  'scan',
+  'inventory-validation',
+  'design-match',
+  'build-handoff',
+];
+const screenshots = evidence.screenshots || [];
+const screenshotIds = new Set(screenshots.map(screenshot => screenshot.id));
+if (screenshots.length < requiredScreenshotIds.length) {
+  fail('Native QA evidence must include the full native screenshot set.');
+}
+for (const id of requiredScreenshotIds) {
+  if (!screenshotIds.has(id)) fail(`Native QA evidence is missing required screenshot "${id}".`);
+}
+
+for (const screenshot of screenshots) {
+  if (!screenshot.id) fail('Every native screenshot entry needs an id.');
+  if (!screenshot.label) fail(`Native screenshot ${screenshot.id || '(missing id)'} needs a label.`);
+  if (!Array.isArray(screenshot.requiredPlatforms) || screenshot.requiredPlatforms.length === 0) {
+    fail(`Native screenshot ${screenshot.id} must list requiredPlatforms.`);
+  }
+
+  for (const platform of screenshot.requiredPlatforms || []) {
+    const platformEvidence = screenshot[platform] || {};
+    const status = platformEvidence.status;
+    if (!screenshotStatuses.has(status)) {
+      fail(`Native screenshot ${screenshot.id} has invalid ${platform} status "${status}".`);
+    }
+    requireOrWarn(status === 'pass', `Native screenshot ${screenshot.id} is ${status} on ${platform}.`);
+    requireOrWarn(Boolean(platformEvidence.file), `Native screenshot ${screenshot.id} is missing ${platform} file path.`);
+    requireOrWarn(Boolean(platformEvidence.device), `Native screenshot ${screenshot.id} is missing ${platform} device evidence.`);
+    requireOrWarn(Boolean(platformEvidence.capturedAt), `Native screenshot ${screenshot.id} is missing ${platform} capturedAt.`);
+
+    if (status === 'pass' || (!allowPending && platformEvidence.file)) {
+      requireOrWarn(exists(platformEvidence.file), `Native screenshot ${screenshot.id} file does not exist for ${platform}: ${platformEvidence.file || '(missing)'}.`);
+      if (exists(platformEvidence.file)) {
+        try {
+          const size = readPngSize(platformEvidence.file);
+          if (size.width < 320 || size.height < 568) {
+            fail(`Native screenshot ${screenshot.id} for ${platform} is too small for store review: ${size.width}x${size.height}.`);
+          }
+        } catch (error) {
+          fail(error.message);
+        }
+      }
+    }
+  }
 }
 
 const signoff = evidence.signoff || {};

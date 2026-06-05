@@ -178,6 +178,7 @@ const requiredArtifacts = [
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/README.md',
+  'docs/store-screenshots/native/README.md',
   'docs/store-submission-packet.json',
   'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',

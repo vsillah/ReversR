@@ -39,7 +39,7 @@ The app now has:
 - API runtime config health reporting for CORS mode, body limit, admin route state, registry-write state, and private-network connector state
 - Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
 - EAS submit configuration notes for Google Play Internal Testing and TestFlight upload
-- Native QA evidence template and `npm run native:qa:preflight` gate for Android/iOS preview-build testing
+- Native QA evidence template and `npm run native:qa:preflight` gate for Android/iOS preview-build testing, including five required native screenshots per platform
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
 - Settings-based admin credential reference manager for listing, saving, and deleting backend registry credentials

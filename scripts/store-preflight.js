@@ -195,6 +195,7 @@ const requiredDocs = [
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/README.md',
   'docs/store-screenshots/README.md',
+  'docs/store-screenshots/native/README.md',
   'Dockerfile',
   '.dockerignore',
   'vercel.json',
