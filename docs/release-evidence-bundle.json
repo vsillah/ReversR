@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T23:09:43.542Z",
+  "generatedAt": "2026-06-05T23:11:58.367Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T23:09:43.517Z",
+    "generatedAt": "2026-06-05T23:11:58.346Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -1860,7 +1860,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T23:09:41.632Z",
+      "generatedAt": "2026-06-05T23:11:51.682Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1868,7 +1868,6 @@
         "App Store Connect TestFlight readiness is not marked complete.",
         "Google Play Internal Testing readiness is not marked complete.",
         "Final native screenshots are not marked captured.",
-        "Final app icon review is not marked complete.",
         "Review gate nativeQaPreflightPassed is not marked true.",
         "Review gate productionSubmissionApproved is not marked true.",
         "Production submission is not approved.",
@@ -1913,7 +1912,7 @@
       },
       "requiredAssets": {
         "nativeScreenshotsCaptured": false,
-        "appIconReviewed": false,
+        "appIconReviewed": true,
         "featureGraphicCaptured": true,
         "featureGraphicPathReady": true,
         "evidenceFolderPresent": true
@@ -3180,8 +3179,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T23:09:42.558Z",
-      "releaseStatusGeneratedAt": "2026-06-05T23:09:42.551Z",
+      "generatedAt": "2026-06-05T23:11:57.457Z",
+      "releaseStatusGeneratedAt": "2026-06-05T23:11:57.451Z",
       "summary": {
         "pass": 6,
         "pending": 3

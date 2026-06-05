@@ -199,7 +199,7 @@
   },
   "requiredAssets": {
     "nativeScreenshotsCaptured": false,
-    "appIconReviewed": false,
+    "appIconReviewed": true,
     "featureGraphicCaptured": true,
     "featureGraphicPath": "docs/store-assets/google-play-feature-graphic.png",
     "evidenceFolder": "docs/store-assets",
@@ -219,7 +219,11 @@
     "googlePlayStoreAssetsUploaded": true,
     "googlePlayStoreAssetsSavedAt": "2026-06-05T21:50:16Z",
     "googlePlayTabletScreenshotCaveat": "The 7-inch and 10-inch tablet slots reuse the available 1080x1920 native Android/Google Play phone screenshot assets as placeholders. Replace them with true tablet-native screenshots before final submission if a stricter tablet review posture is desired.",
-    "uploadBoundary": "Google Play default store listing assets were uploaded and saved in Publishing overview. The Play Console Send app for review action has not been clicked."
+    "uploadBoundary": "Google Play default store listing assets were uploaded and saved in Publishing overview. The Play Console Send app for review action has not been clicked.",
+    "appIconReviewedAt": "2026-06-05T23:11:51.539Z",
+    "appIconReviewEvidence": "Codex local asset review verified assets/icon.png, assets/adaptive-icon.png, and assets/splash-icon.png are 1024x1024 PNGs, docs/store-assets/google-play-icon.png is 512x512 PNG, and the rendered icon is legible with ReversR branding. This is an asset-readiness review only, not store submission approval.",
+    "googlePlayIconDimensions": "512x512",
+    "expoIconDimensions": "1024x1024"
   },
   "reviewGates": {
     "hostedApiPreflightPassed": true,
@@ -234,7 +238,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T21:53:00Z",
+  "generatedAt": "2026-06-05T23:11:51.539Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
