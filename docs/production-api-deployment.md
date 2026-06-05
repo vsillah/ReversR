@@ -107,10 +107,13 @@ EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support
 Then run:
 
 ```bash
+npm run inventory:preflight
 npm run api:preflight
 npm run accessibility:preflight
 npm run store:preflight
 ```
+
+`npm run inventory:preflight` is local by design. It starts a protected fixture inventory and local API server to prove credential-reference validation, inventory matching, BOM generation, and no-secret response handling before the hosted API is bound into native builds.
 
 ## Connector Secret Handling
 

@@ -23,6 +23,7 @@ The app now has:
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - Store submission packet: `docs/store-submission-packet.json`
 - Store submission packet preflight for App Store Connect and Google Play metadata limits, hosted URLs, privacy/data-safety answers, and native screenshot requirements
+- Protected inventory connector preflight: `npm run inventory:preflight`
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
 - Web-preview store screenshot capture script: `npm run screenshots:store`
 - Web routes for `/privacy`, `/terms`, and `/support`
@@ -79,6 +80,7 @@ Open gates:
 - Run `eas init` for the new clone identity.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run api:preflight` against the hosted API.
+- Run `npm run inventory:preflight` locally before store builds to verify protected connector matching and BOM generation.
 - Run `npm run policy:preflight -- --check-hosted` after policy/support routes are hosted.
 - Run `npm run store:preflight` before production builds to confirm package IDs, build numbers, release assets, permissions, hosted URLs, and EAS profile shape.
 - Run `npm run store:submission:preflight` before entering copy into App Store Connect or Play Console.
@@ -96,6 +98,7 @@ Open gates:
 
 - Production API host: a Dockerfile, deployment runbook, and runtime config health checks exist, but the API still needs to be deployed behind HTTPS with restricted `API_CORS_ORIGINS` and verified with `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
+- Protected connector QA: `npm run inventory:preflight` validates the local credentialRef path, but a production connector still needs a hosted API smoke against the real inventory system.
 - Privacy policy, terms, and support: web routes, static export, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
@@ -108,16 +111,17 @@ Open gates:
 
 ## Recommended Next Sequence
 
-1. Deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
-2. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
-3. Deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
-4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
-5. Run `npm run store:submission:preflight` with hosted URLs, then copy the packet into App Store Connect and Play Console drafts.
-6. Link the clone with `eas init`, then run `npm run native:preflight`.
-7. Run EAS preview builds.
-8. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
-9. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
-10. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
-11. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
-12. Submit to TestFlight and Google Play Internal Testing.
-13. Resolve review feedback, then submit production releases.
+1. Run `npm run inventory:preflight` to confirm the protected connector, match, and BOM path locally.
+2. Deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
+3. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
+4. Deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
+5. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
+6. Run `npm run store:submission:preflight` with hosted URLs, then copy the packet into App Store Connect and Play Console drafts.
+7. Link the clone with `eas init`, then run `npm run native:preflight`.
+8. Run EAS preview builds.
+9. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
+10. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
+11. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
+12. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+13. Submit to TestFlight and Google Play Internal Testing.
+14. Resolve review feedback, then submit production releases.

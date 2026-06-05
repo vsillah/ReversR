@@ -172,6 +172,25 @@ Client connector metadata for an API-key source:
 
 Validation returns `credentialStatus: "configured"` when the server can resolve the reference. If the reference is absent or missing, validation fails before fetching the inventory source.
 
+## Automated Connector Preflight
+
+Run the protected inventory connector smoke before moving a connector flow toward store builds:
+
+```bash
+npm run inventory:preflight
+```
+
+The preflight starts a local protected JSON inventory fixture and a local API server with `INVENTORY_CONNECTOR_SECRETS_JSON`. It verifies:
+
+- missing credential references are rejected before inventory fetch,
+- `POST /api/inventory/validate` resolves the server-side `credentialRef`,
+- the protected inventory source is fetched with the configured API-key header,
+- `POST /api/gemini/match-machine` identifies the fixture machine,
+- `POST /api/gemini/generate-bom` produces BOM items from the matched reconstruction package,
+- raw credential values are not returned in validation responses.
+
+Default ports are `3917` for the fixture and `3013` for the API. Override them with `INVENTORY_PREFLIGHT_FIXTURE_PORT` and `INVENTORY_PREFLIGHT_API_PORT` if those ports are in use.
+
 ## Admin Credential Registry
 
 For runtime credential management, configure:
