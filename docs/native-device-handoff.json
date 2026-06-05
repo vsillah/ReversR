@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T11:45:54Z",
+  "generatedAt": "2026-06-05T12:31:49Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -34,8 +34,8 @@
       "state": "Create app form is filled; Developer Program Policies and US export laws declarations are unchecked; Create app has not been clicked."
     },
     "appStoreConnect": {
-      "url": "https://appstoreconnect.apple.com/m/INVALIDITCUSER?errorKey=ITC.signin.error.invalidUser.asc",
-      "state": "Signed-in Apple Account is not enabled for App Store Connect."
+      "url": "https://developer.apple.com/register/agree/?path=%2Faccount%2F",
+      "state": "Apple passkey sign-in succeeded and Chrome is at the Apple Developer Agreement page. Legal acceptance is pending and has not been clicked."
     }
   },
   "nextNativeQaActions": [
@@ -44,13 +44,14 @@
     "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-    "Use an Apple Developer/App Store Connect-enabled account to create the iOS app record and unblock iOS preview/TestFlight work.",
+    "Review and accept the Apple Developer Agreement if Vambah agrees to the legal terms, then complete any Apple Developer enrollment/App Store Connect account setup needed to create the iOS app record and unblock iOS preview/TestFlight work.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
+    "No Apple Developer legal agreement was accepted by automation.",
     "No Apple App Store Connect app record was created."
   ]
 }

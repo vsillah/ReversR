@@ -21,7 +21,7 @@
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false,
-    "notes": "Apple Developer account access is blocked until the Apple Account email address vsillah@mac.com is verified. Browser is at the Apple Account six-digit verification-code prompt."
+    "notes": "Apple Developer sign-in succeeded after passkey approval. Browser is at the Apple Developer Agreement page for Vambah Sillah; the legal Agree action is a human-in-the-loop gate and has not been clicked. App Store Connect app record creation remains pending until the agreement/enrollment path is completed."
   },
   "googlePlay": {
     "status": "pass",

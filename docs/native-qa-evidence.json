@@ -36,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires an Apple Developer/App Store Connect-enabled account. Browser verification showed the signed-in Apple Account is not enabled for App Store Connect."
+      "notes": "iOS EAS preview build requires completion of Apple Developer/App Store Connect setup. Browser automation reached the Apple Developer Agreement page after passkey sign-in; legal agreement acceptance is pending and has not been clicked."
     }
   },
   "checks": [
@@ -252,7 +252,7 @@
   ],
   "blockers": [
     "Android preview APK exists, but no Android device or emulator was available locally for install QA.",
-    "iOS preview build requires an Apple Developer/App Store Connect-enabled account.",
+    "iOS preview build requires Apple Developer Agreement acceptance and App Store Connect setup.",
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
     "Final Android and iOS native screenshots require installed preview builds."
   ],
