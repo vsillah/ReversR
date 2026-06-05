@@ -16,7 +16,8 @@
       "bundleIdentifier": "com.vsillah.reversrrebuild",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning."
+        "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

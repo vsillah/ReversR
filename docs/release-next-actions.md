@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T10:51:01.645Z
-Release status generated at: 2026-06-05T10:51:01.641Z
+Generated at: 2026-06-05T11:20:44.825Z
+Release status generated at: 2026-06-05T11:20:44.820Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -55,11 +55,11 @@ Evidence required:
 
 Current gate evidence:
 
-docs/native-qa-evidence.json is missing.
+docs/native-qa-evidence.json exists; run npm run native:qa:preflight for proof.
 
 Current gate next step:
 
-Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight.
+Run npm run native:qa:preflight and resolve any failures.
 
 Steps:
 

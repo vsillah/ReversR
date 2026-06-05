@@ -1,15 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:51:00.306Z",
+  "generatedAt": "2026-06-05T11:20:43.343Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:51:00.302Z",
+    "generatedAt": "2026-06-05T11:20:43.337Z",
     "summary": {
-      "pass": 33,
-      "pending": 6
+      "pass": 34,
+      "pending": 5
     },
     "pendingGateIds": [
-      "release-evidence-bundle",
       "local-release-ci-evidence",
       "eas-submit-config",
       "native-qa-evidence",
@@ -115,12 +114,6 @@
   ],
   "pendingGates": [
     {
-      "id": "release-evidence-bundle",
-      "group": "store-local",
-      "title": "Consolidated release evidence bundle is generated for external operators",
-      "nextStep": "Run npm run release:evidence before external account-side release work."
-    },
-    {
       "id": "local-release-ci-evidence",
       "group": "store-local",
       "title": "Local release CI evidence records repeatable pre-store validation",
@@ -136,7 +129,7 @@
       "id": "native-qa-evidence",
       "group": "native",
       "title": "Android and iOS preview-build QA evidence is recorded",
-      "nextStep": "Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight."
+      "nextStep": "Run npm run native:qa:preflight and resolve any failures."
     },
     {
       "id": "store-console-records",

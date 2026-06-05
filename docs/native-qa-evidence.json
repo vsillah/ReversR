@@ -1,0 +1,265 @@
+{
+  "schemaVersion": "2026-06-05",
+  "status": "pending",
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "easProjectId": "700c2107-2639-4a27-b374-59ed5edd54fc",
+    "apiBaseUrl": "https://reversr.vercel.app",
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support"
+  },
+  "builds": {
+    "androidPreview": {
+      "status": "pending",
+      "profile": "preview",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "artifactType": "apk",
+      "versionCode": 15,
+      "device": "",
+      "osVersion": "",
+      "tester": "",
+      "completedAt": "",
+      "notes": "Android EAS preview build was started on 2026-06-05 and was IN_PROGRESS during this autopilot pass."
+    },
+    "iosPreview": {
+      "status": "blocked",
+      "profile": "preview",
+      "buildUrl": "",
+      "artifactType": "ipa",
+      "buildNumber": "1",
+      "device": "",
+      "osVersion": "",
+      "tester": "",
+      "completedAt": "",
+      "notes": "iOS EAS preview build reached Apple credential setup. The terminal is paused at the Apple ID prompt and requires user Apple Developer login/2FA."
+    }
+  },
+  "checks": [
+    {
+      "id": "install-launch",
+      "label": "Install and launch preview build",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "camera-permission",
+      "label": "Camera permission prompt and scan screen",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "manual-description",
+      "label": "Manual machine description fallback",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "inventory-validation",
+      "label": "Admin inventory connector validation",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "machine-match",
+      "label": "Machine match evidence from inventory",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "bom-generation",
+      "label": "BOM generation with pricing ranges",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "assembly-steps",
+      "label": "Assembly steps and reconstruction plan",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "quote-packet-export",
+      "label": "Manufacturer quote packet export",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "vendor-request-draft",
+      "label": "Vendor request email draft",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "policy-links",
+      "label": "Privacy, terms, and support links",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "accessibility",
+      "label": "Screen-reader labels and tap targets",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "offline-api-error",
+      "label": "Hosted API outage/error handling",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "connector-auth-error",
+      "label": "Missing or invalid connector credential handling",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "native-screenshots",
+      "label": "Final native screenshots captured",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": "Complete the screenshots array below with final native PNG files from Android and iOS preview builds."
+    }
+  ],
+  "screenshots": [
+    {
+      "id": "welcome",
+      "label": "Welcome screen with the four reconstruction phases",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-01-welcome.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-01-welcome.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "scan",
+      "label": "Scan screen with camera or description mode",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-02-scan.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-02-scan.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "inventory-validation",
+      "label": "Inventory connector validation preview",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-03-inventory-validation.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-03-inventory-validation.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "design-match",
+      "label": "Design screen with machine match evidence",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-04-design-match.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-04-design-match.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "build-handoff",
+      "label": "Build screen with assembly steps, pricing, BOM, quote packet, and vendor draft controls",
+      "requiredPlatforms": ["android", "ios"],
+      "android": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/android-05-build-handoff.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      },
+      "ios": {
+        "status": "pending",
+        "file": "docs/store-screenshots/native/ios-05-build-handoff.png",
+        "device": "",
+        "capturedAt": "",
+        "notes": ""
+      }
+    }
+  ],
+  "blockers": [
+    "Android preview build is queued and needs completion plus device QA.",
+    "iOS preview build requires Apple Developer credentials in the interactive EAS credential flow.",
+    "Final Android and iOS native screenshots require installed preview builds."
+  ],
+  "signoff": {
+    "releaseOwner": "",
+    "qaReviewer": "",
+    "approvedForTestFlight": false,
+    "approvedForPlayInternalTesting": false,
+    "approvedForProductionSubmission": false,
+    "signedAt": ""
+  }
+}
