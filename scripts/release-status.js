@@ -173,6 +173,7 @@ const requiredArtifacts = [
   'scripts/store-preflight.js',
   'scripts/store-submission-preflight.js',
   'scripts/store-console-preflight.js',
+  'scripts/web-flow-smoke.js',
 ];
 const artifactsOk = requiredArtifacts.every(exists);
 addGate(
@@ -186,6 +187,15 @@ addGate(
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;
 const hostedApiOk = !isPlaceholder(apiBaseUrl) && isHttpsUrl(apiBaseUrl);
+addGate(
+  'hosted',
+  'web-flow-smoke',
+  'Local web preview can complete the machine reconstruction happy path',
+  'pending',
+  exists('scripts/web-flow-smoke.js') ? 'Smoke script is available; execution evidence is produced by npm run web:flow-smoke.' : 'scripts/web-flow-smoke.js is missing.',
+  'Run npm run web-preview, then in another shell run WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke.'
+);
+
 addGate(
   'hosted',
   'hosted-api',

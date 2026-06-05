@@ -23,6 +23,15 @@ npx expo-doctor
 
 `native:preflight:local` allows placeholder URLs, missing EAS CLI, and missing EAS project linkage so the local repo can still be checked before account-level setup is complete.
 
+Run the local web happy-path smoke before screenshot capture or preview binaries:
+
+```bash
+npm run web-preview
+WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke
+```
+
+The smoke verifies scan, demo inventory validation, machine matching, BOM generation, manufacturer quote packet controls, and vendor request draft controls. Keep it as local proof only; final release evidence still requires native Android and iOS preview-build QA.
+
 ## 2. Install Or Run EAS CLI
 
 Use the pinned CLI command without committing `eas-cli` into this repo:

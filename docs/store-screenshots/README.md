@@ -6,8 +6,11 @@ Run the web-preview capture after starting the API and Expo web preview:
 
 ```bash
 npm run web-preview
+WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke
 npm run screenshots:store
 ```
+
+Run the smoke first. It fails fast if the scan, inventory match, BOM, quote packet, or vendor draft path is broken, which keeps screenshot output from masking a broken flow.
 
 The script writes generated files to:
 

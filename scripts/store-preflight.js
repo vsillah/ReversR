@@ -207,6 +207,7 @@ const requiredDocs = [
   'scripts/store-submission-preflight.js',
   'scripts/store-console-preflight.js',
   'scripts/capture-store-screenshots.js',
+  'scripts/web-flow-smoke.js',
 ];
 for (const doc of requiredDocs) {
   if (!exists(doc)) fail(`Missing required store/readiness document: ${doc}`);
