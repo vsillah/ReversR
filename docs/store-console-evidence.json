@@ -36,7 +36,28 @@
     "dataSafetyCompleted": false,
     "appContentCompleted": false,
     "internalTestingReady": false,
-    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Store listing, data safety, app content, internal testing, and production access are not complete. Computer Use saved the Google Play privacy policy URL as a draft change in Publishing overview at 2026-06-05T15:01:45.812Z; no send-for-review or public submission was started."
+    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup now shows 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. Content rating, target audience, data safety, category/contact details, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "completedSetupTaskCount": 6,
+    "totalSetupTaskCount": 11,
+    "completedSetupTasks": [
+      "Set privacy policy",
+      "Sign in details",
+      "Ads",
+      "Government apps",
+      "Financial features",
+      "Health"
+    ],
+    "remainingSetupTasks": [
+      "Content rating",
+      "Target audience",
+      "Data safety",
+      "Select an app category and provide contact details",
+      "Set up your store listing"
+    ],
+    "storeListingTextEntered": true,
+    "storeListingTextSaved": false,
+    "storeListingTextSaveNote": "App name, short description, and full description were entered from docs/store-console-copy.md, but the dashboard still showed Set up your store listing incomplete because required graphics/screenshots/contact gates remain.",
+    "appContentDraftsSaved": true
   },
   "requiredAssets": {
     "nativeScreenshotsCaptured": false,
@@ -58,7 +79,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T15:01:45.812Z",
+  "generatedAt": "2026-06-05T15:34:01.337Z",
   "consoleActions": [
     {
       "platform": "googlePlay",
@@ -67,6 +88,54 @@
       "value": "https://reversr.vercel.app/privacy",
       "completedAt": "2026-06-05T15:01:45.812Z",
       "note": "Saved in Play Console as a draft change. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Sign in details",
+      "status": "draft-saved",
+      "value": "No restricted app access / no sign-in required",
+      "completedAt": "2026-06-05T15:34:01.337Z",
+      "note": "Saved in Play Console as a draft change. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Ads",
+      "status": "draft-saved",
+      "value": "No, app does not contain ads",
+      "completedAt": "2026-06-05T15:34:01.337Z",
+      "note": "Saved in Play Console as a draft change. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Government apps",
+      "status": "draft-saved",
+      "value": "No",
+      "completedAt": "2026-06-05T15:34:01.337Z",
+      "note": "Saved in Play Console as a draft change. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Financial features",
+      "status": "draft-saved",
+      "value": "My app does not provide any financial features",
+      "completedAt": "2026-06-05T15:34:01.337Z",
+      "note": "Saved in Play Console as a draft change. Console indicated no additional documentation was required. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Health",
+      "status": "draft-saved",
+      "value": "My app does not have any health features",
+      "completedAt": "2026-06-05T15:34:01.337Z",
+      "note": "Saved in Play Console as a draft change. Console indicated no regional requirements were required. Send for review was not clicked."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Set up store listing text",
+      "status": "draft-entered-not-complete",
+      "value": "App name, short description, and full description entered from docs/store-console-copy.md",
+      "completedAt": "2026-06-05T15:34:01.337Z",
+      "note": "Dashboard still showed store listing incomplete because required graphics/screenshots/contact gates remain. No asset upload or review submission was performed."
     }
   ]
 }

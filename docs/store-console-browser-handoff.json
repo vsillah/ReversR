@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T15:01:45.812Z",
+  "generatedAt": "2026-06-05T15:34:01.337Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -16,7 +16,7 @@
     "neededValueAfterCreation": ""
   },
   "googlePlayConsole": {
-    "browserState": "Chrome is open at the Google Play Console Privacy Policy task screen for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled. No live console field was typed or saved.",
+    "browserState": "Chrome Play Console dashboard is authenticated for ReversR Rebuild and shows 6 of 11 setup tasks complete. Draft-saved tasks: privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but the task remains incomplete because required graphics/screenshots/contact gates remain. No Send for review action was clicked.",
     "developerAccount": "Vambah Sillah",
     "developerAccountId": "8864864114913698241",
     "appId": "4972956671966100551",
@@ -32,11 +32,25 @@
     "legalDeclarationsPending": [],
     "nextHumanAction": "Authorize live Google Play field entry/saves or complete the 11 Google Play setup tasks manually: Set privacy policy, Sign in details, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health, Select an app category and provide contact details, and Set up your store listing. Use docs/store-console-copy.md as the copy source.",
     "currentScreen": {
-      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-content/privacy-policy?source=dashboard",
-      "title": "Privacy Policy | ReversR Rebuild",
-      "savedValue": "https://reversr.vercel.app/privacy",
-      "saveState": "Change saved. Send for review in Publishing overview.",
-      "submissionBoundary": "No Send for review action was clicked."
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+      "title": "Dashboard | ReversR Rebuild",
+      "setupProgress": "6 of 11 complete",
+      "completedTasks": [
+        "Set privacy policy",
+        "Sign in details",
+        "Ads",
+        "Government apps",
+        "Financial features",
+        "Health"
+      ],
+      "remainingTasks": [
+        "Content rating",
+        "Target audience",
+        "Data safety",
+        "Select an app category and provide contact details",
+        "Set up your store listing"
+      ],
+      "submissionBoundary": "No Send for review, testing release, production access application, or public submission action was clicked."
     }
   },
   "notes": [

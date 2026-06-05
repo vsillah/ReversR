@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T15:03:28.217Z",
+  "generatedAt": "2026-06-05T15:34:01.337Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -35,24 +35,18 @@
     "googlePlayConsole": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
       "screen": "Privacy Policy task",
-      "state": "Google Play is authenticated and open at the Privacy Policy task for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled until a value is entered. No live form edit or save was performed.",
+      "state": "Google Play is authenticated and open at the ReversR Rebuild dashboard. Setup progress is 6 of 11 complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but store listing remains incomplete because required assets/contact gates remain.",
       "openTasks": [
-        "Set privacy policy",
-        "Sign in details",
-        "Ads",
         "Content rating",
         "Target audience",
         "Data safety",
-        "Government apps",
-        "Financial features",
-        "Health",
         "Select an app category and provide contact details",
         "Set up your store listing"
       ],
       "copySource": "docs/store-console-copy.md",
       "taskAnswerSource": "docs/store-console-task-answers.md",
       "taskAnswerJson": "docs/store-console-task-answers.json",
-      "nextHumanAction": "Authorize typing/saving the privacy policy URL in Google Play, or type https://reversr.vercel.app/privacy into the Privacy policy URL field and click Save."
+      "nextHumanAction": "Complete content rating, target audience, data safety, public support contact/category, required store listing asset uploads, and internal testing setup. Do not click Send for review until all native QA/store evidence and signoff are complete."
     },
     "easCredentials": {
       "command": "npx eas-cli@20.0.0 credentials --platform ios",

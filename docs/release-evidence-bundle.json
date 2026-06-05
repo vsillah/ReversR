@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T15:17:28.848Z",
+  "generatedAt": "2026-06-05T15:34:52.293Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T15:17:28.820Z",
+    "generatedAt": "2026-06-05T15:34:52.261Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -475,7 +475,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T15:16:58.555Z",
+      "generatedAt": "2026-06-05T15:34:35.290Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -495,7 +495,7 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T15:16:58.523Z",
+        "generatedAt": "2026-06-05T15:34:35.236Z",
         "summary": {
           "pass": 34,
           "pending": 5
@@ -644,14 +644,14 @@
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T15:16:54.924Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T15:34:31.002Z.",
               "nextStep": ""
             },
             {
               "id": "store-review-safety-packet",
               "status": "pass",
               "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T15:16:55.073Z.",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T15:34:31.161Z.",
               "nextStep": ""
             },
             {
@@ -700,21 +700,21 @@
               "id": "store-operator-packet",
               "status": "pass",
               "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-              "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-05T15:16:56.160Z.",
+              "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-05T15:34:32.315Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-operator-packet",
               "status": "pass",
               "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T15:16:56.967Z.",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T15:34:33.247Z.",
               "nextStep": ""
             },
             {
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T15:16:57.767Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T15:34:34.267Z.",
               "nextStep": ""
             },
             {
@@ -728,14 +728,14 @@
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded with current EAS linkage state",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T15:11:47.193Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T15:17:00.892Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T15:11:44.199Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T15:34:09.585Z.",
               "nextStep": ""
             }
           ],
@@ -835,7 +835,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T15:17:01.260Z",
+      "generatedAt": "2026-06-05T15:34:38.519Z",
       "urlMode": "placeholder-allowed",
       "warnings": [],
       "appIdentity": {
@@ -905,7 +905,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T15:16:55.073Z",
+      "generatedAt": "2026-06-05T15:34:31.161Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -1301,7 +1301,7 @@
     "easProductionBuildSync": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T15:16:47.042Z",
+      "generatedAt": "2026-06-05T15:34:11.980Z",
       "dryRun": false,
       "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
       "buildsChecked": 2,
@@ -1460,7 +1460,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T15:17:00.892Z",
+      "generatedAt": "2026-06-05T15:34:38.110Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -1540,7 +1540,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T15:16:58.711Z",
+      "generatedAt": "2026-06-05T15:34:35.482Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1620,7 +1620,7 @@
     "storeConsoleBrowserHandoff": {
       "schemaVersion": 1,
       "status": "pending-hitl",
-      "generatedAt": "2026-06-05T15:01:45.812Z",
+      "generatedAt": "2026-06-05T15:34:01.337Z",
       "appIdentity": {
         "appName": "ReversR Rebuild",
         "iosBundleId": "com.vsillah.reversrrebuild",
@@ -1635,7 +1635,7 @@
         "neededValueAfterCreation": ""
       },
       "googlePlayConsole": {
-        "browserState": "Chrome is open at the Google Play Console Privacy Policy task screen for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled. No live console field was typed or saved.",
+        "browserState": "Chrome Play Console dashboard is authenticated for ReversR Rebuild and shows 6 of 11 setup tasks complete. Draft-saved tasks: privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but the task remains incomplete because required graphics/screenshots/contact gates remain. No Send for review action was clicked.",
         "developerAccount": "Vambah Sillah",
         "developerAccountId": "8864864114913698241",
         "appId": "4972956671966100551",
@@ -1651,11 +1651,25 @@
         "legalDeclarationsPending": [],
         "nextHumanAction": "Authorize live Google Play field entry/saves or complete the 11 Google Play setup tasks manually: Set privacy policy, Sign in details, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health, Select an app category and provide contact details, and Set up your store listing. Use docs/store-console-copy.md as the copy source.",
         "currentScreen": {
-          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-content/privacy-policy?source=dashboard",
-          "title": "Privacy Policy | ReversR Rebuild",
-          "savedValue": "https://reversr.vercel.app/privacy",
-          "saveState": "Change saved. Send for review in Publishing overview.",
-          "submissionBoundary": "No Send for review action was clicked."
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+          "title": "Dashboard | ReversR Rebuild",
+          "setupProgress": "6 of 11 complete",
+          "completedTasks": [
+            "Set privacy policy",
+            "Sign in details",
+            "Ads",
+            "Government apps",
+            "Financial features",
+            "Health"
+          ],
+          "remainingTasks": [
+            "Content rating",
+            "Target audience",
+            "Data safety",
+            "Select an app category and provide contact details",
+            "Set up your store listing"
+          ],
+          "submissionBoundary": "No Send for review, testing release, production access application, or public submission action was clicked."
         }
       },
       "notes": [
@@ -2117,7 +2131,7 @@
     },
     "releaseAutopilotHandoff": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T15:03:28.217Z",
+      "generatedAt": "2026-06-05T15:34:01.337Z",
       "status": "pending-hitl",
       "currentPr": {
         "number": 2,
@@ -2152,24 +2166,18 @@
         "googlePlayConsole": {
           "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
           "screen": "Privacy Policy task",
-          "state": "Google Play is authenticated and open at the Privacy Policy task for ReversR Rebuild. The Privacy policy URL field is empty and Save is disabled until a value is entered. No live form edit or save was performed.",
+          "state": "Google Play is authenticated and open at the ReversR Rebuild dashboard. Setup progress is 6 of 11 complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but store listing remains incomplete because required assets/contact gates remain.",
           "openTasks": [
-            "Set privacy policy",
-            "Sign in details",
-            "Ads",
             "Content rating",
             "Target audience",
             "Data safety",
-            "Government apps",
-            "Financial features",
-            "Health",
             "Select an app category and provide contact details",
             "Set up your store listing"
           ],
           "copySource": "docs/store-console-copy.md",
           "taskAnswerSource": "docs/store-console-task-answers.md",
           "taskAnswerJson": "docs/store-console-task-answers.json",
-          "nextHumanAction": "Authorize typing/saving the privacy policy URL in Google Play, or type https://reversr.vercel.app/privacy into the Privacy policy URL field and click Save."
+          "nextHumanAction": "Complete content rating, target audience, data safety, public support contact/category, required store listing asset uploads, and internal testing setup. Do not click Send for review until all native QA/store evidence and signoff are complete."
         },
         "easCredentials": {
           "command": "npx eas-cli@20.0.0 credentials --platform ios",
@@ -2304,9 +2312,9 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T15:16:56.160Z",
+      "generatedAt": "2026-06-05T15:34:32.315Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T15:16:56.154Z",
+        "generatedAt": "2026-06-05T15:34:32.309Z",
         "summary": {
           "pass": 34,
           "pending": 5
@@ -2473,9 +2481,9 @@
     "hostedOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T15:16:56.967Z",
+      "generatedAt": "2026-06-05T15:34:33.247Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T15:16:56.961Z",
+        "generatedAt": "2026-06-05T15:34:33.241Z",
         "summary": {
           "pass": 34,
           "pending": 5
@@ -2675,8 +2683,8 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-05T15:16:44.410Z",
-      "completedAt": "2026-06-05T15:17:07.361Z",
+      "startedAt": "2026-06-05T15:34:19.852Z",
+      "completedAt": "2026-06-05T15:34:44.829Z",
       "commandCount": 16,
       "passedCount": 16,
       "failedCount": 0,
@@ -2687,7 +2695,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2570,
+          "durationMs": 2922,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -2697,7 +2705,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 288,
+          "durationMs": 213,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -2707,7 +2715,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 245,
+          "durationMs": 186,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -2717,7 +2725,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 580,
+          "durationMs": 514,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -2727,7 +2735,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6689,
+          "durationMs": 7153,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-local-release-ci-policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -2737,7 +2745,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 148,
+          "durationMs": 169,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -2747,7 +2755,7 @@
           "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 155,
+          "durationMs": 159,
           "command": "npm run store:review-safety",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
           "stderrTail": ""
@@ -2757,7 +2765,7 @@
           "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 185,
+          "durationMs": 182,
           "command": "npm run store:console:copy",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
           "stderrTail": ""
@@ -2767,7 +2775,7 @@
           "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 896,
+          "durationMs": 973,
           "command": "npm run store:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 5",
           "stderrTail": ""
@@ -2777,7 +2785,7 @@
           "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 807,
+          "durationMs": 932,
           "command": "npm run hosted:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
           "stderrTail": ""
@@ -2787,7 +2795,7 @@
           "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 799,
+          "durationMs": 1022,
           "command": "npm run release:next-actions:write",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 3\nNext recommended gate: native-qa-evidence",
           "stderrTail": ""
@@ -2797,7 +2805,7 @@
           "proves": "Original user objective is mapped to proven local work and pending external release gates.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 787,
+          "durationMs": 1024,
           "command": "npm run release:objective",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 6/8\nPending requirements: store-readiness-packet, apple-google-store-publication",
           "stderrTail": ""
@@ -2807,7 +2815,7 @@
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 157,
+          "durationMs": 189,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- Google Play App content form is not marked complete.\n- Google Play Internal Testing readiness is not marked complete.\n- Final native screenshots are not marked captured.\n- Final app icon review is not marked complete.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -2817,7 +2825,7 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2180,
+          "durationMs": 2628,
           "command": "npm run native:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 native:preflight:local\n> node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in\n\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
@@ -2827,7 +2835,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 158,
+          "durationMs": 179,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot design-match is missing ios device evidence.\n- Native screenshot design-match is missing ios capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -2837,7 +2845,7 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6303,
+          "durationMs": 6530,
           "command": "npm run store:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nStore preflight passed.",
           "stderrTail": ""
@@ -2856,8 +2864,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T15:16:57.767Z",
-      "releaseStatusGeneratedAt": "2026-06-05T15:16:57.757Z",
+      "generatedAt": "2026-06-05T15:34:34.267Z",
+      "releaseStatusGeneratedAt": "2026-06-05T15:34:34.260Z",
       "summary": {
         "pass": 6,
         "pending": 3
