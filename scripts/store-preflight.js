@@ -186,6 +186,7 @@ const requiredDocs = [
   'docs/store-readiness.md',
   'docs/store-metadata.md',
   'docs/store-submission-packet.json',
+  'docs/store-console-evidence.template.json',
   'docs/policy-hosting-deployment.md',
   'docs/production-api-deployment.md',
   'docs/native-release-runbook.md',
@@ -204,6 +205,7 @@ const requiredDocs = [
   'scripts/hosted-connector-smoke.js',
   'scripts/policy-hosting-preflight.js',
   'scripts/store-submission-preflight.js',
+  'scripts/store-console-preflight.js',
   'scripts/capture-store-screenshots.js',
 ];
 for (const doc of requiredDocs) {

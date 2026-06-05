@@ -98,6 +98,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 
 - Run `npm run release:status` for a current summary of passed local gates and pending hosted/native/store-console gates.
 - Validate the copy/paste console packet with `npm run store:submission:preflight`.
+- After console records exist, copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console evidence, and run `npm run store:console:preflight`.
 - Host privacy policy, terms, and support pages from the built-in web routes.
 - Validate hosted privacy, terms, and support URLs with `npm run policy:preflight -- --check-hosted`.
 - Set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in the EAS production environment.

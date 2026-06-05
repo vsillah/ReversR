@@ -149,6 +149,7 @@ const requiredArtifacts = [
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',
   'docs/store-submission-packet.json',
+  'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
@@ -156,6 +157,7 @@ const requiredArtifacts = [
   'scripts/native-qa-preflight.js',
   'scripts/store-preflight.js',
   'scripts/store-submission-preflight.js',
+  'scripts/store-console-preflight.js',
 ];
 const artifactsOk = requiredArtifacts.every(exists);
 addGate(
@@ -232,13 +234,18 @@ addGate(
   nativeQaEvidenceExists ? 'Run npm run native:qa:preflight and resolve any failures.' : 'Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight.'
 );
 
+const storeConsoleEvidenceExists = exists('docs/store-console-evidence.json');
 addGate(
   'store-console',
   'store-console-records',
   'App Store Connect and Google Play Console app records exist',
-  'pending',
-  `Expected iOS bundle ${appConfig.ios?.bundleIdentifier}; expected Android package ${appConfig.android?.package}.`,
-  'Create the App Store Connect and Play Console app records, then use docs/store-submission-packet.json for metadata.'
+  storeConsoleEvidenceExists ? 'pending' : 'pending',
+  storeConsoleEvidenceExists
+    ? 'docs/store-console-evidence.json exists; run npm run store:console:preflight for proof.'
+    : `Expected iOS bundle ${appConfig.ios?.bundleIdentifier}; expected Android package ${appConfig.android?.package}; docs/store-console-evidence.json is missing.`,
+  storeConsoleEvidenceExists
+    ? 'Run npm run store:console:preflight and resolve any failures.'
+    : 'Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight.'
 );
 
 addGate(

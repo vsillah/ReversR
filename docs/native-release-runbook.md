@@ -170,6 +170,13 @@ Before TestFlight or Play Internal Testing submission:
 npm run native:qa:preflight
 ```
 
+After App Store Connect and Play Console records exist, record console-side evidence:
+
+```bash
+cp docs/store-console-evidence.template.json docs/store-console-evidence.json
+npm run store:console:preflight
+```
+
 ## 8. Capture Final Native Screenshots
 
 Use `npm run screenshots:store` only for web-preview composition planning. Final App Store and Google Play screenshots must come from native preview builds.

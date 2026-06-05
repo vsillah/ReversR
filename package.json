@@ -28,6 +28,8 @@
     "accessibility:preflight": "node scripts/accessibility-preflight.js",
     "store:submission:preflight": "node scripts/store-submission-preflight.js",
     "store:submission:preflight:local": "node scripts/store-submission-preflight.js --allow-placeholder",
+    "store:console:preflight": "node scripts/store-console-preflight.js",
+    "store:console:preflight:local": "node scripts/store-console-preflight.js --allow-pending",
     "store:preflight": "node scripts/store-preflight.js",
     "store:preflight:local": "node scripts/store-preflight.js --allow-placeholder"
   },

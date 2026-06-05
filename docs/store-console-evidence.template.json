@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "2026-06-05",
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001",
+    "easProjectId": ""
+  },
+  "appStoreConnect": {
+    "status": "pending",
+    "recordUrl": "",
+    "appleId": "",
+    "bundleIdStatus": "pending",
+    "sku": "reversr-rebuild-001",
+    "primaryCategory": "Productivity",
+    "secondaryCategory": "Business",
+    "privacyPolicyUrl": "",
+    "metadataCopiedFromPacket": false,
+    "appPrivacyCompleted": false,
+    "ageRatingCompleted": false,
+    "testFlightReady": false,
+    "notes": ""
+  },
+  "googlePlay": {
+    "status": "pending",
+    "recordUrl": "",
+    "packageName": "com.vsillah.reversrrebuild",
+    "appCategory": "Productivity",
+    "privacyPolicyUrl": "",
+    "metadataCopiedFromPacket": false,
+    "dataSafetyCompleted": false,
+    "appContentCompleted": false,
+    "internalTestingReady": false,
+    "notes": ""
+  },
+  "requiredAssets": {
+    "nativeScreenshotsCaptured": false,
+    "appIconReviewed": false,
+    "featureGraphicCaptured": false,
+    "evidenceFolder": ""
+  },
+  "reviewGates": {
+    "hostedApiPreflightPassed": false,
+    "hostedPolicyPreflightPassed": false,
+    "hostedConnectorSmokePassed": false,
+    "nativeQaPreflightPassed": false,
+    "productionSubmissionApproved": false
+  },
+  "signoff": {
+    "releaseOwner": "",
+    "storeReviewer": "",
+    "signedAt": "",
+    "notes": ""
+  }
+}
