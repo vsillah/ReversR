@@ -23,7 +23,8 @@ The preflight:
 - runs `expo export --platform web`,
 - verifies `index.html`, `metadata.json`, and `favicon.ico`,
 - confirms the exported bundle contains the privacy, terms, support, camera-use, vendor-handoff, and contact copy,
-- confirms `vercel.json` rewrites all routes to `index.html`.
+- confirms `vercel.json` rewrites all routes to `index.html`,
+- writes `docs/policy-hosting-smoke-evidence.json` for `npm run release:status`.
 
 ## Static Export
 

@@ -28,6 +28,7 @@ EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 ```
 
 2. Deploy policy/support pages.
+   - Run `npm run policy:preflight:local` and confirm `docs/policy-hosting-smoke-evidence.json` is updated.
    - Host `/privacy`, `/terms`, and `/support` on public HTTPS URLs.
    - Confirm success with:
 

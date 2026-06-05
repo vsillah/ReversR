@@ -179,6 +179,38 @@ addGate(
   apiDeploymentSmokeOk ? '' : 'Run npm run api:deployment-smoke before deploying the API container.'
 );
 
+const policyHostingSmoke = readOptionalJson('docs/policy-hosting-smoke-evidence.json');
+const expectedPolicyTexts = [
+  'Privacy Policy',
+  'Terms of Service',
+  'Support',
+  'Camera access is used only to capture machine images',
+  'Manufacturer quote packets and email drafts require explicit user action',
+  'vsillah@gmail.com',
+];
+const policyHostingSmokeOk = (
+  policyHostingSmoke?.status === 'pass' &&
+  policyHostingSmoke?.routeFiles?.privacy === 'app/privacy.tsx' &&
+  policyHostingSmoke?.routeFiles?.terms === 'app/terms.tsx' &&
+  policyHostingSmoke?.routeFiles?.support === 'app/support.tsx' &&
+  policyHostingSmoke?.vercelRewrite?.hasSpaRewrite === true &&
+  policyHostingSmoke?.exportFiles?.indexHtml === true &&
+  policyHostingSmoke?.exportFiles?.metadataJson === true &&
+  policyHostingSmoke?.exportFiles?.faviconIco === true &&
+  Number(policyHostingSmoke?.bundle?.bundleCount || 0) > 0 &&
+  expectedPolicyTexts.every(text => policyHostingSmoke?.bundle?.expectedTextFound?.[text] === true)
+);
+addGate(
+  'store-local',
+  'policy-hosting-smoke',
+  'Policy, terms, and support static export evidence is recorded before hosting',
+  policyHostingSmokeOk ? 'pass' : 'pending',
+  policyHostingSmokeOk
+    ? `docs/policy-hosting-smoke-evidence.json proves static export policy/support content at ${policyHostingSmoke.generatedAt}.`
+    : 'docs/policy-hosting-smoke-evidence.json is missing or incomplete.',
+  policyHostingSmokeOk ? '' : 'Run npm run policy:preflight:local before deploying policy/support pages.'
+);
+
 const androidPermissions = appConfig.android?.permissions || [];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
 const permissionOk = (
@@ -233,6 +265,7 @@ const requiredArtifacts = [
   'docs/production-api-deployment.md',
   'docs/production-api-env.example',
   'docs/policy-hosting-deployment.md',
+  'docs/policy-hosting-smoke-evidence.json',
   'docs/release-action-plan.md',
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',

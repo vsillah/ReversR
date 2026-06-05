@@ -7,6 +7,7 @@ const args = new Set(process.argv.slice(2));
 const allowPlaceholder = args.has('--allow-placeholder');
 const checkHosted = args.has('--check-hosted');
 const outputDir = process.env.POLICY_WEB_EXPORT_DIR || path.join(os.tmpdir(), 'reversr-policy-web-export');
+const evidenceFile = process.env.POLICY_HOSTING_EVIDENCE_FILE || 'docs/policy-hosting-smoke-evidence.json';
 
 const failures = [];
 const warnings = [];
@@ -15,6 +16,12 @@ const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
 const exists = (filePath) => fs.existsSync(filePath);
 const readJson = (filePath) => JSON.parse(fs.readFileSync(filePath, 'utf8'));
+const writeEvidence = (evidence) => {
+  const target = path.resolve(evidenceFile);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, `${JSON.stringify(evidence, null, 2)}\n`);
+  return target;
+};
 
 const appConfig = readJson('app.json').expo;
 const packet = readJson('docs/store-submission-packet.json');
@@ -50,9 +57,15 @@ const urls = {
 };
 for (const [label, value] of Object.entries(urls)) requireHostedUrl(label, value);
 
-if (!exists('app/privacy.tsx')) fail('Missing /privacy route file.');
-if (!exists('app/terms.tsx')) fail('Missing /terms route file.');
-if (!exists('app/support.tsx')) fail('Missing /support route file.');
+const routeFiles = {
+  privacy: 'app/privacy.tsx',
+  terms: 'app/terms.tsx',
+  support: 'app/support.tsx',
+};
+
+if (!exists(routeFiles.privacy)) fail('Missing /privacy route file.');
+if (!exists(routeFiles.terms)) fail('Missing /terms route file.');
+if (!exists(routeFiles.support)) fail('Missing /support route file.');
 
 const vercelConfig = readJson('vercel.json');
 const hasSpaRewrite = (vercelConfig.rewrites || []).some(rewrite => (
@@ -74,19 +87,28 @@ if (!exists(path.join(outputDir, 'index.html'))) fail('Web export missing index.
 if (!exists(path.join(outputDir, 'metadata.json'))) fail('Web export missing metadata.json.');
 if (!exists(path.join(outputDir, 'favicon.ico'))) fail('Web export missing favicon.ico.');
 
+const expectedBundleTexts = [
+  'Privacy Policy',
+  'Terms of Service',
+  'Support',
+  'Camera access is used only to capture machine images',
+  'Manufacturer quote packets and email drafts require explicit user action',
+  'vsillah@gmail.com',
+];
+const bundleEvidence = {
+  bundleCount: 0,
+  expectedTextFound: {},
+};
+
 if (exists(outputDir)) {
   const bundles = collectFiles(outputDir, filePath => filePath.endsWith('.js'));
+  bundleEvidence.bundleCount = bundles.length;
   if (bundles.length === 0) fail('Web export did not produce a JavaScript bundle.');
   const bundleText = bundles.map(filePath => fs.readFileSync(filePath, 'utf8')).join('\n');
-  for (const expectedText of [
-    'Privacy Policy',
-    'Terms of Service',
-    'Support',
-    'Camera access is used only to capture machine images',
-    'Manufacturer quote packets and email drafts require explicit user action',
-    'vsillah@gmail.com',
-  ]) {
-    if (!bundleText.includes(expectedText)) {
+  for (const expectedText of expectedBundleTexts) {
+    const found = bundleText.includes(expectedText);
+    bundleEvidence.expectedTextFound[expectedText] = found;
+    if (!found) {
       fail(`Web export bundle is missing expected policy/support text: ${expectedText}`);
     }
   }
@@ -109,12 +131,17 @@ const checkHostedUrl = async (label, value, expectedText) => {
 };
 
 const run = async () => {
+  const hostedChecks = {};
   if (checkHosted) {
-    await Promise.all([
-      checkHostedUrl('privacyPolicyUrl', urls.privacyPolicyUrl, 'Privacy Policy'),
-      checkHostedUrl('termsUrl', urls.termsUrl, 'Terms of Service'),
-      checkHostedUrl('supportUrl', urls.supportUrl, 'Support'),
-    ]);
+    await Promise.all(Object.entries({
+      privacyPolicyUrl: ['Privacy Policy', urls.privacyPolicyUrl],
+      termsUrl: ['Terms of Service', urls.termsUrl],
+      supportUrl: ['Support', urls.supportUrl],
+    }).map(async ([label, [expectedText, value]]) => {
+      const beforeFailureCount = failures.length;
+      await checkHostedUrl(label, value, expectedText);
+      hostedChecks[label] = failures.length === beforeFailureCount ? 'pass' : 'fail';
+    }));
   }
 
   if (warnings.length > 0) {
@@ -128,7 +155,30 @@ const run = async () => {
     process.exit(1);
   }
 
+  const evidencePath = writeEvidence({
+    schemaVersion: 1,
+    status: 'pass',
+    generatedAt: new Date().toISOString(),
+    outputDir,
+    urls,
+    urlMode: allowPlaceholder ? 'placeholder-allowed' : 'strict',
+    hostedChecksEnabled: checkHosted,
+    hostedChecks,
+    routeFiles,
+    vercelRewrite: {
+      hasSpaRewrite,
+      outputDirectory: vercelConfig.outputDirectory,
+    },
+    exportFiles: {
+      indexHtml: exists(path.join(outputDir, 'index.html')),
+      metadataJson: exists(path.join(outputDir, 'metadata.json')),
+      faviconIco: exists(path.join(outputDir, 'favicon.ico')),
+    },
+    bundle: bundleEvidence,
+  });
+
   console.log(`Policy hosting preflight passed. Web export verified at ${outputDir}`);
+  console.log(`Evidence: ${evidencePath}`);
 };
 
 run();

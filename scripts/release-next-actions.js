@@ -46,11 +46,13 @@ const actionPlan = {
     phase: 'Hosted policies',
     action: 'Deploy privacy, terms, and support pages to public HTTPS URLs.',
     steps: [
+      'Run npm run policy:preflight:local and confirm docs/policy-hosting-smoke-evidence.json is updated.',
       'Deploy the web export or route host that serves /privacy, /terms, and /support.',
       'Set EXPO_PUBLIC_PRIVACY_POLICY_URL, EXPO_PUBLIC_TERMS_URL, and EXPO_PUBLIC_SUPPORT_URL to the hosted URLs.',
       'Run npm run policy:preflight -- --check-hosted with those env vars set.',
     ],
     evidence: [
+      'docs/policy-hosting-smoke-evidence.json records static export files, SPA rewrite, and required policy/support copy.',
       'All three policy/support URLs return reachable HTTPS pages.',
       'npm run policy:preflight -- --check-hosted passes.',
     ],
