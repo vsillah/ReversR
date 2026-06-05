@@ -33,6 +33,16 @@ npm run release:status
 
 This proves the PR preview renders the app and `/privacy`, `/terms`, and `/support`. It does not replace the production hosted API, hosted policy URLs, native QA, or store-console gates.
 
+If the PR preview is protected, create or use a Vercel Protection Bypass for Automation secret and rerun:
+
+```bash
+PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app \
+PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<vercel-automation-bypass-secret> \
+npm run preview:smoke
+```
+
+The smoke uses the `x-vercel-protection-bypass` header and records only that a bypass was configured.
+
 ## Current Critical Path
 
 1. Deploy the API behind HTTPS.

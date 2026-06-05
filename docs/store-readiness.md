@@ -43,7 +43,7 @@ The app now has:
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
 - Web-preview store screenshot capture script: `npm run screenshots:store`
 - Web-preview happy-path smoke script and evidence file: `npm run web:flow-smoke` writes `docs/web-flow-smoke-evidence.json`
-- Vercel preview host smoke script and evidence file: `PREVIEW_SMOKE_URL=<preview-url> npm run preview:smoke` writes `docs/preview-host-smoke-evidence.json`
+- Vercel preview host smoke script and evidence file: `PREVIEW_SMOKE_URL=<preview-url> npm run preview:smoke` writes `docs/preview-host-smoke-evidence.json`; protected previews can use `PREVIEW_SMOKE_VERCEL_BYPASS_SECRET`
 - Web routes for `/privacy`, `/terms`, and `/support`
 - Static web export and policy hosting preflight for the store privacy, terms, and support URLs
 - Policy/support static export evidence: `docs/policy-hosting-smoke-evidence.json`
@@ -149,7 +149,7 @@ Open gates:
 6. Run `npm run inventory:preflight` to confirm the protected connector, match, and BOM path locally.
 7. Run `npm run store:assets:preflight` to verify the Google Play feature graphic before console setup.
 8. Start `npm run web-preview`, then run `WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke` to prove the web happy path and write `docs/web-flow-smoke-evidence.json` before screenshot or native preview work.
-9. After the PR preview deploys, run `PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke` to prove the deployed preview app and policy/support routes render before production hosting work.
+9. After the PR preview deploys, run `PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke` to prove the deployed preview app and policy/support routes render before production hosting work. If Vercel preview protection is enabled, add `PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret>`.
 10. Fill a production API env from `docs/production-api-env.example`, run `npm run api:env:preflight`, run `npm run api:deployment-smoke`, deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
 11. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
 12. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.

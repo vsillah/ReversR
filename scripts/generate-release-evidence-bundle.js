@@ -171,7 +171,7 @@ const bundle = {
     releaseNextActions: 'npm run release:next-actions',
     releaseLocalCi: 'npm run release:local-ci',
     storeConsoleCopy: 'npm run store:console:copy',
-    previewHostSmoke: 'PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app npm run preview:smoke',
+    previewHostSmoke: 'PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke',
     storePreflightLocal: 'npm run store:preflight:local',
     storeConsolePreflightLocal: 'npm run store:console:preflight:local',
     nativePreflightLocal: 'npm run native:preflight:local',

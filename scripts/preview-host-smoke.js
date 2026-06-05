@@ -5,6 +5,13 @@ const { chromium } = require('playwright');
 const outputFile = process.env.PREVIEW_SMOKE_EVIDENCE_FILE || 'docs/preview-host-smoke-evidence.json';
 const rawPreviewUrl = process.env.PREVIEW_SMOKE_URL || process.argv[2] || '';
 const timeoutMs = Number(process.env.PREVIEW_SMOKE_TIMEOUT_MS || 30000);
+const vercelBypassSecret = (
+  process.env.PREVIEW_SMOKE_VERCEL_BYPASS_SECRET ||
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
+  ''
+).trim();
+const vercelBypassCookieMode = process.env.PREVIEW_SMOKE_VERCEL_SET_BYPASS_COOKIE || 'true';
+const extraHeadersJson = process.env.PREVIEW_SMOKE_EXTRA_HEADERS_JSON || '';
 
 const normalizeBaseUrl = (value) => value.trim().replace(/\/+$/, '');
 const previewUrl = normalizeBaseUrl(rawPreviewUrl);
@@ -14,6 +21,11 @@ const sanitizeUrlForEvidence = (value) => (
     ? 'https://vercel.com/login'
     : value
 );
+const safeAutomationBypassEvidence = () => ({
+  vercelBypassConfigured: Boolean(vercelBypassSecret),
+  setBypassCookie: Boolean(vercelBypassSecret) ? vercelBypassCookieMode : '',
+  extraHeaderNames: Object.keys(extraHeaders),
+});
 
 const routeChecks = [
   {
@@ -69,6 +81,7 @@ const failEarly = (message) => {
     previewUrl: rawPreviewUrl,
     routes: [],
     finalProductionHostedUrlsStillRequired: true,
+    automationBypass: safeAutomationBypassEvidence(),
     error: message,
   };
   const target = writeJson(outputFile, evidence);
@@ -77,14 +90,45 @@ const failEarly = (message) => {
   process.exit(1);
 };
 
+let extraHeaders = {};
+if (extraHeadersJson) {
+  try {
+    extraHeaders = JSON.parse(extraHeadersJson);
+    if (!extraHeaders || Array.isArray(extraHeaders) || typeof extraHeaders !== 'object') {
+      failEarly('PREVIEW_SMOKE_EXTRA_HEADERS_JSON must be a JSON object.');
+    }
+  } catch (error) {
+    failEarly(`PREVIEW_SMOKE_EXTRA_HEADERS_JSON is invalid JSON: ${error.message}`);
+  }
+}
+
+const automationHeaders = {
+  ...extraHeaders,
+};
+
+if (vercelBypassSecret) {
+  automationHeaders['x-vercel-protection-bypass'] = vercelBypassSecret;
+  automationHeaders['x-vercel-set-bypass-cookie'] = vercelBypassCookieMode;
+}
+
 if (!isHttpsUrl(previewUrl)) {
   failEarly('Set PREVIEW_SMOKE_URL or pass an HTTPS preview URL argument.');
 }
 
 const run = async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({
+  const context = await browser.newContext({
     viewport: { width: 1280, height: 900 },
+    extraHTTPHeaders: automationHeaders,
+  });
+  const page = await context.newPage();
+  await page.route('**/*', async (route) => {
+    await route.continue({
+      headers: {
+        ...route.request().headers(),
+        ...automationHeaders,
+      },
+    });
   });
 
   const routes = [];
@@ -133,6 +177,7 @@ const run = async () => {
       });
     }
   } finally {
+    await context.close();
     await browser.close();
   }
 
@@ -153,6 +198,7 @@ const run = async () => {
     routes,
     finalProductionHostedUrlsStillRequired: true,
     deploymentProtectionLikely,
+    automationBypass: safeAutomationBypassEvidence(),
     notes: [
       failedRoutes.length === 0
         ? 'This proves the current PR preview renders the app and policy/support routes.'

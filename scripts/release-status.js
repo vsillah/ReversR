@@ -606,7 +606,7 @@ addGate(
     : previewHostSmoke?.deploymentProtectionLikely === true
       ? `docs/preview-host-smoke-evidence.json records Vercel 401 preview protection at ${previewHostSmoke.generatedAt}.`
       : 'Preview host evidence is missing, incomplete, or blocked by deployment protection.',
-  previewHostSmokeOk ? '' : 'Run PREVIEW_SMOKE_URL=<vercel-preview-url> npm run preview:smoke after the PR preview deploys; if Vercel returns 401, disable preview protection or provide a bypass for this smoke.'
+  previewHostSmokeOk ? '' : 'Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation.'
 );
 
 addGate(

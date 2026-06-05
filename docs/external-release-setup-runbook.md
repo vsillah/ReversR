@@ -51,6 +51,16 @@ npm run release:evidence
 
 The preview smoke should pass for `/`, `/privacy`, `/terms`, and `/support`, while production hosted API, hosted policy URLs, native QA, and store-console gates remain pending until their external evidence exists.
 
+If Vercel preview deployment protection is enabled, create or use a Protection Bypass for Automation secret in the Vercel project settings, then rerun with the bypass secret in the environment:
+
+```bash
+PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app \
+PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<vercel-automation-bypass-secret> \
+npm run preview:smoke
+```
+
+The smoke sends the secret as the `x-vercel-protection-bypass` header and requests the Vercel bypass cookie with `x-vercel-set-bypass-cookie=true`. The evidence records only whether a bypass was configured, not the secret value.
+
 ## 2. App Store Connect Record
 
 Required Apple role: Account Holder, Admin, or App Manager.
