@@ -1,10 +1,12 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
 const outputFile = process.env.LOCAL_RELEASE_CI_EVIDENCE_FILE || 'docs/local-release-ci-evidence.json';
 const startedAt = new Date().toISOString();
 const target = path.resolve(outputFile);
+const localPolicyEvidenceFile = path.join(os.tmpdir(), 'reversr-local-release-ci-policy-hosting-smoke-evidence.json');
 
 const writeEvidence = (value) => {
   fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -16,7 +18,9 @@ const commands = [
   ['accessibility-preflight', ['run', 'accessibility:preflight'], 'Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.'],
   ['store-assets-preflight', ['run', 'store:assets:preflight'], 'Google Play feature graphic exists at the required 1024x500 size.'],
   ['inventory-preflight', ['run', 'inventory:preflight'], 'Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.'],
-  ['policy-preflight-local', ['run', 'policy:preflight:local'], 'Privacy, terms, and support web export content is ready before hosted deployment.'],
+  ['policy-preflight-local', ['run', 'policy:preflight:local'], 'Privacy, terms, and support web export content is ready before hosted deployment.', {
+    POLICY_HOSTING_EVIDENCE_FILE: localPolicyEvidenceFile,
+  }],
   ['store-submission-preflight-local', ['run', 'store:submission:preflight:local'], 'App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.'],
   ['store-review-safety', ['run', 'store:review-safety'], 'Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.'],
   ['store-console-copy', ['run', 'store:console:copy'], 'App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.'],
@@ -27,14 +31,16 @@ const commands = [
   ['store-console-preflight-local', ['run', 'store:console:preflight:local'], 'Store-console pending evidence records account-side requirements without claiming final console proof.'],
   ['native-preflight-local', ['run', 'native:preflight:local'], 'Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.'],
   ['native-qa-preflight-local', ['run', 'native:qa:preflight:local'], 'Native QA evidence template is structurally valid while preview-build evidence remains pending.'],
-  ['store-preflight-local', ['run', 'store:preflight:local'], 'The full local store preflight passes with placeholder hosted URLs explicitly allowed.'],
-].map(([id, args, proves]) => ({ id, command: 'npm', args, proves }));
+  ['store-preflight-local', ['run', 'store:preflight:local'], 'The full local store preflight passes with placeholder hosted URLs explicitly allowed.', {
+    POLICY_HOSTING_EVIDENCE_FILE: localPolicyEvidenceFile,
+  }],
+].map(([id, args, proves, env = {}]) => ({ id, command: 'npm', args, proves, env }));
 
-const runCommand = ({ command, args }) => {
+const runCommand = ({ command, args, env = {} }) => {
   const started = Date.now();
   const result = spawnSync(command, args, {
     encoding: 'utf8',
-    env: process.env,
+    env: { ...process.env, ...env },
   });
   return {
     status: result.status === 0 ? 'pass' : 'fail',
@@ -88,9 +94,6 @@ const evidence = {
   notRun,
   results,
   externalGatesStillRequired: [
-    'preview-host-smoke',
-    'hosted-api',
-    'hosted-policy-urls',
     'real-connector-smoke',
     'eas-project-linkage',
     'eas-submit-config',
@@ -100,7 +103,7 @@ const evidence = {
   ],
   notes: [
     'This is a local CI pass for pre-store readiness only.',
-    'Hosted API, hosted policies, real connector smoke, EAS linkage, store records, preview builds, native QA, and final screenshots remain external gates.',
+    'Real connector smoke, EAS linkage, store records, preview builds, native QA, and final screenshots remain external gates.',
   ],
 };
 

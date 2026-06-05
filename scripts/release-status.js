@@ -426,7 +426,6 @@ addGate(
 const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
 const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
 const requiredNextActionGateIds = [
-  'hosted-policy-urls',
   'real-connector-smoke',
   'eas-project-linkage',
   'eas-submit-config',
@@ -436,7 +435,7 @@ const requiredNextActionGateIds = [
 ];
 const releaseNextActionsOk = (
   releaseNextActions?.schemaVersion === 1 &&
-  releaseNextActions?.nextRecommendedGate === 'hosted-policy-urls' &&
+  releaseNextActions?.nextRecommendedGate === 'real-connector-smoke' &&
   releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
   Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
   requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
@@ -447,7 +446,7 @@ const releaseNextActionsOk = (
     gate.action?.evidence?.length > 0
   )) &&
   releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
-  releaseNextActionsMarkdown.includes('Next recommended gate: hosted-policy-urls') &&
+  releaseNextActionsMarkdown.includes('Next recommended gate: real-connector-smoke') &&
   releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
 );
 addGate(
@@ -562,11 +561,11 @@ const requiredBundleProofs = [
   'preview-host-target-discovery',
   'preview-host-smoke',
   'hosted-api',
+  'hosted-policy-urls',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const requiredBundlePending = [
-  'hosted-policy-urls',
   'real-connector-smoke',
   'eas-project-linkage',
   'eas-submit-config',
@@ -584,6 +583,7 @@ const releaseEvidenceBundleOk = (
   Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.apiHostedPreflight?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.policyHostingSmoke?.hostedChecksEnabled === true &&
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
@@ -630,8 +630,8 @@ const localReleaseCiOk = (
   localReleaseCiEvidence?.passedCount === expectedLocalCiCommands.length &&
   expectedLocalCiCommands.every(id => localReleaseCiEvidence?.results?.some(result => result.id === id && result.status === 'pass')) &&
   Array.isArray(localReleaseCiEvidence?.externalGatesStillRequired) &&
-  localReleaseCiEvidence.externalGatesStillRequired.includes('preview-host-smoke') &&
-  localReleaseCiEvidence.externalGatesStillRequired.includes('hosted-api') &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('real-connector-smoke') &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('eas-project-linkage') &&
   localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots')
 );
 addGate(
@@ -865,13 +865,24 @@ const hostedPolicyUrls = [
   process.env.EXPO_PUBLIC_SUPPORT_URL || packet.urls?.supportUrl || appConfig.extra?.supportUrl,
 ];
 const hostedPoliciesOk = hostedPolicyUrls.every(value => !isPlaceholder(value) && isHttpsUrl(value));
+const hostedPolicyEvidenceOk = (
+  policyHostingSmokeOk &&
+  policyHostingSmoke?.hostedChecksEnabled === true &&
+  policyHostingSmoke?.urlMode === 'strict' &&
+  hostedPolicyUrls.every(value => Object.values(policyHostingSmoke?.urls || {}).includes(value)) &&
+  ['privacyPolicyUrl', 'termsUrl', 'supportUrl'].every(key => policyHostingSmoke?.hostedChecks?.[key] === 'pass')
+);
 addGate(
   'hosted',
   'hosted-policy-urls',
   'Privacy, terms, and support URLs are hosted and ready for store metadata',
-  hostedPoliciesOk ? 'pending' : 'pending',
-  hostedPoliciesOk ? `Configured URL shapes: ${hostedPolicyUrls.join(', ')}` : 'Hosted policy/support URLs are still placeholders or missing.',
-  hostedPoliciesOk ? 'Run npm run policy:preflight -- --check-hosted with the hosted URLs.' : 'Deploy /privacy, /terms, and /support, then set the hosted URL env vars.'
+  hostedPolicyEvidenceOk ? 'pass' : 'pending',
+  hostedPolicyEvidenceOk
+    ? `docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at ${policyHostingSmoke.generatedAt}.`
+    : hostedPoliciesOk
+      ? `Configured URL shapes: ${hostedPolicyUrls.join(', ')}; hosted policy preflight evidence is still required.`
+      : 'Hosted policy/support URLs are still placeholders or missing.',
+  hostedPolicyEvidenceOk ? '' : 'Deploy /privacy, /terms, and /support, then run npm run policy:preflight -- --check-hosted with the hosted URL env vars.'
 );
 
 addGate(

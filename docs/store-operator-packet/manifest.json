@@ -1,16 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T09:34:44.664Z",
+  "generatedAt": "2026-06-05T10:08:14.499Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T09:34:44.656Z",
+    "generatedAt": "2026-06-05T10:08:14.493Z",
     "summary": {
-      "pass": 31,
-      "pending": 8
+      "pass": 33,
+      "pending": 6
     },
     "pendingGateIds": [
-      "policy-hosting-smoke",
-      "hosted-policy-urls",
       "real-connector-smoke",
       "eas-project-linkage",
       "eas-submit-config",
@@ -108,7 +106,7 @@
   "consoleEntryOrder": [
     "Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.",
     "Create Google Play Console record for com.vsillah.reversrrebuild.",
-    "Replace placeholder privacy, terms, support, and API URLs after hosted preflights pass.",
+    "Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.",
     "Copy App Store and Google Play text from docs/store-console-copy.md.",
     "Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.",
     "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.",
@@ -116,18 +114,6 @@
     "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
   ],
   "pendingGates": [
-    {
-      "id": "policy-hosting-smoke",
-      "group": "store-local",
-      "title": "Policy, terms, and support static export evidence is recorded before hosting",
-      "nextStep": "Run npm run policy:preflight:local before deploying policy/support pages."
-    },
-    {
-      "id": "hosted-policy-urls",
-      "group": "hosted",
-      "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-      "nextStep": "Deploy /privacy, /terms, and /support, then set the hosted URL env vars."
-    },
     {
       "id": "real-connector-smoke",
       "group": "hosted",

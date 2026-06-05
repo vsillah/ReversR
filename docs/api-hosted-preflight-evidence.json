@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T09:32:11.092Z",
-  "startedAt": "2026-06-05T09:32:10.790Z",
-  "apiBaseUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
+  "generatedAt": "2026-06-05T10:00:07.092Z",
+  "startedAt": "2026-06-05T10:00:06.660Z",
+  "apiBaseUrl": "https://reversr.vercel.app",
   "localApi": false,
   "allowOpenCors": false,
   "automationBypass": {

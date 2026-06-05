@@ -110,7 +110,7 @@ runCheck(
 runCheck(
   'Policy hosting preflight',
   process.execPath,
-  ['scripts/policy-hosting-preflight.js', ...(allowPlaceholder ? ['--allow-placeholder'] : [])]
+  ['scripts/policy-hosting-preflight.js', ...(allowPlaceholder ? ['--allow-placeholder'] : ['--check-hosted'])]
 );
 runCheck('Store assets preflight', process.execPath, ['scripts/store-assets-preflight.js']);
 

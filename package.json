@@ -11,7 +11,7 @@
     "start:native": "npx expo start --clear --port 8081",
     "dev": "npx concurrently \"npm:api\" \"npm:start:native\"",
     "web-preview": "npx cross-env API_PORT=3001 concurrently \"node server/index.js\" \"npx expo start --web --port 5001\"",
-    "web:export": "expo export --platform web --output-dir dist",
+    "web:export": "node scripts/export-web-with-static-policies.js --output-dir dist",
     "web:flow-smoke": "node scripts/web-flow-smoke.js",
     "preview:discover": "node scripts/discover-preview-host.js",
     "preview:smoke": "node scripts/preview-host-smoke.js",

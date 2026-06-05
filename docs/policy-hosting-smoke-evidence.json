@@ -1,16 +1,20 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T09:34:35.349Z",
+  "generatedAt": "2026-06-05T10:06:32.305Z",
   "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
   "urls": {
-    "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
-    "termsUrl": "https://reversr-rebuild.example.com/terms",
-    "supportUrl": "https://reversr-rebuild.example.com/support"
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support"
   },
-  "urlMode": "placeholder-allowed",
-  "hostedChecksEnabled": false,
-  "hostedChecks": {},
+  "urlMode": "strict",
+  "hostedChecksEnabled": true,
+  "hostedChecks": {
+    "supportUrl": "pass",
+    "privacyPolicyUrl": "pass",
+    "termsUrl": "pass"
+  },
   "routeFiles": {
     "privacy": "app/privacy.tsx",
     "terms": "app/terms.tsx",
@@ -24,7 +28,12 @@
   "exportFiles": {
     "indexHtml": true,
     "metadataJson": true,
-    "faviconIco": true
+    "faviconIco": true,
+    "staticPolicyPages": {
+      "privacy": true,
+      "terms": true,
+      "support": true
+    }
   },
   "bundle": {
     "bundleCount": 1,

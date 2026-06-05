@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T09:32:44.093Z",
-  "previewUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
+  "generatedAt": "2026-06-05T10:00:13.150Z",
+  "previewUrl": "https://reversr.vercel.app",
   "routeCount": 4,
   "routes": [
     {
       "id": "app-root",
       "path": "/",
-      "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/",
-      "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/",
+      "url": "https://reversr.vercel.app/",
+      "finalUrl": "https://reversr.vercel.app/",
       "status": "pass",
       "httpStatus": 200,
       "expectedTextFound": {
@@ -17,14 +17,14 @@
         "New Reconstruction": true,
         "Scan a machine. Match it to inventory.": true
       },
-      "checkedAt": "2026-06-05T09:32:37.570Z",
+      "checkedAt": "2026-06-05T10:00:07.161Z",
       "error": ""
     },
     {
       "id": "privacy",
       "path": "/privacy",
-      "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/privacy",
-      "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/privacy",
+      "url": "https://reversr.vercel.app/privacy",
+      "finalUrl": "https://reversr.vercel.app/privacy",
       "status": "pass",
       "httpStatus": 200,
       "expectedTextFound": {
@@ -32,14 +32,14 @@
         "Camera access is used only to capture machine images": true,
         "Manufacturer quote packets and email drafts require explicit user action": true
       },
-      "checkedAt": "2026-06-05T09:32:39.591Z",
+      "checkedAt": "2026-06-05T10:00:09.135Z",
       "error": ""
     },
     {
       "id": "terms",
       "path": "/terms",
-      "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/terms",
-      "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/terms",
+      "url": "https://reversr.vercel.app/terms",
+      "finalUrl": "https://reversr.vercel.app/terms",
       "status": "pass",
       "httpStatus": 200,
       "expectedTextFound": {
@@ -47,14 +47,14 @@
         "No Automatic Vendor Submission": true,
         "it does not automatically submit orders": true
       },
-      "checkedAt": "2026-06-05T09:32:41.095Z",
+      "checkedAt": "2026-06-05T10:00:10.463Z",
       "error": ""
     },
     {
       "id": "support",
       "path": "/support",
-      "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/support",
-      "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/support",
+      "url": "https://reversr.vercel.app/support",
+      "finalUrl": "https://reversr.vercel.app/support",
       "status": "pass",
       "httpStatus": 200,
       "expectedTextFound": {
@@ -62,7 +62,7 @@
         "vsillah@gmail.com": true,
         "Do not send raw API keys or OAuth tokens": true
       },
-      "checkedAt": "2026-06-05T09:32:42.595Z",
+      "checkedAt": "2026-06-05T10:00:11.800Z",
       "error": ""
     }
   ],

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T09:34:44.507Z",
+  "generatedAt": "2026-06-05T10:08:04.905Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T09:34:44.500Z",
+    "generatedAt": "2026-06-05T10:08:04.901Z",
     "summary": {
-      "pass": 31,
-      "pending": 8
+      "pass": 32,
+      "pending": 7
     }
   },
   "appIdentity": {
@@ -21,7 +21,7 @@
       "group": "hosted",
       "status": "pass",
       "title": "Vercel preview host renders app and policy/support routes before production hosting",
-      "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T09:32:44.093Z.",
+      "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T10:00:13.150Z.",
       "nextStep": ""
     },
     {
@@ -29,16 +29,16 @@
       "group": "hosted",
       "status": "pass",
       "title": "Hosted HTTPS API URL is configured for native builds",
-      "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T09:32:11.092Z.",
+      "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
       "nextStep": ""
     },
     {
       "id": "hosted-policy-urls",
       "group": "hosted",
-      "status": "pending",
+      "status": "pass",
       "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-      "evidence": "Hosted policy/support URLs are still placeholders or missing.",
-      "nextStep": "Deploy /privacy, /terms, and /support, then set the hosted URL env vars."
+      "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-05T10:06:32.305Z.",
+      "nextStep": ""
     },
     {
       "id": "real-connector-smoke",

@@ -19,10 +19,10 @@ Use this as the copy/paste source for App Store Connect and Google Play Console 
 
 ## Hosted URLs
 
-- Privacy policy URL: https://reversr-rebuild.example.com/privacy
-- Terms URL: https://reversr-rebuild.example.com/terms
-- Support URL: https://reversr-rebuild.example.com/support
-- API base URL: https://reversr-rebuild-api.example.com
+- Privacy policy URL: https://reversr.vercel.app/privacy
+- Terms URL: https://reversr.vercel.app/terms
+- Support URL: https://reversr.vercel.app/support
+- API base URL: https://reversr.vercel.app
 
 ## App Store Connect
 

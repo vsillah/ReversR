@@ -1,38 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T09:34:44.456Z",
-  "releaseStatusGeneratedAt": "2026-06-05T09:34:44.449Z",
+  "generatedAt": "2026-06-05T10:08:05.658Z",
+  "releaseStatusGeneratedAt": "2026-06-05T10:08:05.654Z",
   "summary": {
-    "pass": 2,
-    "pending": 7
+    "pass": 3,
+    "pending": 6
   },
-  "nextRecommendedGate": "hosted-policy-urls",
+  "nextRecommendedGate": "real-connector-smoke",
   "pendingGates": [
-    {
-      "group": "hosted",
-      "id": "hosted-policy-urls",
-      "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-      "status": "pending",
-      "evidence": "Hosted policy/support URLs are still placeholders or missing.",
-      "nextStep": "Deploy /privacy, /terms, and /support, then set the hosted URL env vars.",
-      "action": {
-        "owner": "Release operator",
-        "phase": "Hosted policies",
-        "action": "Deploy privacy, terms, and support pages to public HTTPS URLs.",
-        "steps": [
-          "Run npm run policy:preflight:local and confirm docs/policy-hosting-smoke-evidence.json is updated.",
-          "Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.",
-          "Deploy the web export or route host that serves /privacy, /terms, and /support.",
-          "Set EXPO_PUBLIC_PRIVACY_POLICY_URL, EXPO_PUBLIC_TERMS_URL, and EXPO_PUBLIC_SUPPORT_URL to the hosted URLs.",
-          "Run npm run policy:preflight -- --check-hosted with those env vars set."
-        ],
-        "evidence": [
-          "docs/policy-hosting-smoke-evidence.json records static export files, SPA rewrite, and required policy/support copy.",
-          "All three policy/support URLs return reachable HTTPS pages.",
-          "npm run policy:preflight -- --check-hosted passes."
-        ]
-      }
-    },
     {
       "group": "hosted",
       "id": "real-connector-smoke",

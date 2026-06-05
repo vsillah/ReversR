@@ -77,7 +77,7 @@ const sourceArtifacts = [
 const consoleEntryOrder = [
   'Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.',
   'Create Google Play Console record for com.vsillah.reversrrebuild.',
-  'Replace placeholder privacy, terms, support, and API URLs after hosted preflights pass.',
+  'Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.',
   'Copy App Store and Google Play text from docs/store-console-copy.md.',
   'Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.',
   'Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.',

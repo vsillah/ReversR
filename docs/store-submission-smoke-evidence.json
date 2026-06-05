@@ -1,14 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T09:34:29.806Z",
+  "generatedAt": "2026-06-05T10:08:08.231Z",
   "urlMode": "placeholder-allowed",
-  "warnings": [
-    "privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy",
-    "termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms",
-    "supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support",
-    "apiBaseUrl is placeholder or non-production: https://reversr-rebuild-api.example.com"
-  ],
+  "warnings": [],
   "appIdentity": {
     "name": "ReversR Rebuild",
     "version": "1.0.0",
@@ -22,10 +17,10 @@
     }
   },
   "urls": {
-    "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
-    "termsUrl": "https://reversr-rebuild.example.com/terms",
-    "supportUrl": "https://reversr-rebuild.example.com/support",
-    "apiBaseUrl": "https://reversr-rebuild-api.example.com"
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support",
+    "apiBaseUrl": "https://reversr.vercel.app"
   },
   "appStoreConnect": {
     "nameLength": 15,

@@ -77,11 +77,11 @@ const localProofGateIds = [
   'preview-host-target-discovery',
   'preview-host-smoke',
   'hosted-api',
+  'hosted-policy-urls',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const externalGateIds = [
-  'hosted-policy-urls',
   'real-connector-smoke',
   'eas-project-linkage',
   'eas-submit-config',

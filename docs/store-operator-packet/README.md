@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T09:34:44.664Z
+Generated at: 2026-06-05T10:08:14.499Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -17,15 +17,13 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 ## Current Status
 
-- Release pass gates: 31
-- Release pending gates: 8
+- Release pass gates: 33
+- Release pending gates: 6
 - Release blocked gates: 0
 - Release warnings: 0
 
 Pending gates:
 
-- policy-hosting-smoke: Run npm run policy:preflight:local before deploying policy/support pages.
-- hosted-policy-urls: Deploy /privacy, /terms, and /support, then set the hosted URL env vars.
 - real-connector-smoke: Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.
 - eas-project-linkage: Run npx eas-cli@20.0.0 init for the clone identity.
 - eas-submit-config: After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight.
@@ -37,7 +35,7 @@ Pending gates:
 
 1. Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.
 2. Create Google Play Console record for com.vsillah.reversrrebuild.
-3. Replace placeholder privacy, terms, support, and API URLs after hosted preflights pass.
+3. Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.
 4. Copy App Store and Google Play text from docs/store-console-copy.md.
 5. Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.
 6. Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.

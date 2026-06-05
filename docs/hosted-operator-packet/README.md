@@ -1,6 +1,6 @@
 # ReversR Rebuild Hosted Operator Packet
 
-Generated at: 2026-06-05T09:34:44.507Z
+Generated at: 2026-06-05T10:08:04.905Z
 
 This folder is the hosted API, policy URL, preview smoke, and real inventory connector handoff packet. It prepares the hosted lane for native builds and store-console metadata. It does not prove that the API, policy pages, or real inventory connector are already deployed.
 
@@ -15,7 +15,7 @@ This folder is the hosted API, policy URL, preview smoke, and real inventory con
 
 - preview-host-smoke (pass): Vercel preview host renders app and policy/support routes before production hosting
 - hosted-api (pass): Hosted HTTPS API URL is configured for native builds
-- hosted-policy-urls (pending): Deploy /privacy, /terms, and /support, then set the hosted URL env vars.
+- hosted-policy-urls (pass): Privacy, terms, and support URLs are hosted and ready for store metadata
 - real-connector-smoke (pending): Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.
 
 ## Required Environment

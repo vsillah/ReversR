@@ -81,7 +81,7 @@ if (!hasSpaRewrite && !hasSpaRoute) {
 if (vercelConfig.outputDirectory !== 'dist') fail('vercel.json outputDirectory must be dist.');
 
 fs.rmSync(outputDir, { recursive: true, force: true });
-const exportResult = spawnSync('npx', ['expo', 'export', '--platform', 'web', '--output-dir', outputDir], {
+const exportResult = spawnSync('npm', ['run', 'web:export', '--', '--output-dir', outputDir], {
   encoding: 'utf8',
   stdio: 'pipe',
 });
@@ -92,6 +92,11 @@ if (exportResult.status !== 0) {
 if (!exists(path.join(outputDir, 'index.html'))) fail('Web export missing index.html.');
 if (!exists(path.join(outputDir, 'metadata.json'))) fail('Web export missing metadata.json.');
 if (!exists(path.join(outputDir, 'favicon.ico'))) fail('Web export missing favicon.ico.');
+for (const routeName of ['privacy', 'terms', 'support']) {
+  if (!exists(path.join(outputDir, routeName, 'index.html'))) {
+    fail(`Web export missing static /${routeName} policy page.`);
+  }
+}
 
 const expectedBundleTexts = [
   'Privacy Policy',
@@ -180,6 +185,11 @@ const run = async () => {
       indexHtml: exists(path.join(outputDir, 'index.html')),
       metadataJson: exists(path.join(outputDir, 'metadata.json')),
       faviconIco: exists(path.join(outputDir, 'favicon.ico')),
+      staticPolicyPages: {
+        privacy: exists(path.join(outputDir, 'privacy', 'index.html')),
+        terms: exists(path.join(outputDir, 'terms', 'index.html')),
+        support: exists(path.join(outputDir, 'support', 'index.html')),
+      },
     },
     bundle: bundleEvidence,
   });

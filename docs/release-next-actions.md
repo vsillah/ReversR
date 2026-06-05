@@ -1,50 +1,19 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T09:34:44.456Z
-Release status generated at: 2026-06-05T09:34:44.449Z
+Generated at: 2026-06-05T10:08:05.658Z
+Release status generated at: 2026-06-05T10:08:05.654Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, connector, EAS, native QA, screenshot, and store-console gates.
 
 ## Summary
 
-- Pass: 2
-- Pending: 7
+- Pass: 3
+- Pending: 6
 - Blocked: 0
 - Warn: 0
-- Next recommended gate: hosted-policy-urls
+- Next recommended gate: real-connector-smoke
 
-## 1. Privacy, terms, and support URLs are hosted and ready for store metadata
-
-- Gate ID: hosted-policy-urls
-- Group: hosted
-- Status: pending
-- Owner: Release operator
-- Phase: Hosted policies
-- Next action: Deploy privacy, terms, and support pages to public HTTPS URLs.
-
-Current gate evidence:
-
-Hosted policy/support URLs are still placeholders or missing.
-
-Current gate next step:
-
-Deploy /privacy, /terms, and /support, then set the hosted URL env vars.
-
-Steps:
-
-1. Run npm run policy:preflight:local and confirm docs/policy-hosting-smoke-evidence.json is updated.
-2. Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.
-3. Deploy the web export or route host that serves /privacy, /terms, and /support.
-4. Set EXPO_PUBLIC_PRIVACY_POLICY_URL, EXPO_PUBLIC_TERMS_URL, and EXPO_PUBLIC_SUPPORT_URL to the hosted URLs.
-5. Run npm run policy:preflight -- --check-hosted with those env vars set.
-
-Evidence required:
-
-- docs/policy-hosting-smoke-evidence.json records static export files, SPA rewrite, and required policy/support copy.
-- All three policy/support URLs return reachable HTTPS pages.
-- npm run policy:preflight -- --check-hosted passes.
-
-## 2. Hosted API can validate and match against a real authorized machine inventory
+## 1. Hosted API can validate and match against a real authorized machine inventory
 
 - Gate ID: real-connector-smoke
 - Group: hosted
@@ -75,7 +44,7 @@ Evidence required:
 - Hosted connector smoke validates the source, matches a machine, and generates a BOM.
 - No raw connector secret appears in app responses or evidence.
 
-## 3. EAS project is linked for the clone identity
+## 2. EAS project is linked for the clone identity
 
 - Gate ID: eas-project-linkage
 - Group: native
@@ -109,7 +78,7 @@ Evidence required:
 - app.json has the clone projectId.
 - Native preflight no longer reports missing EAS project linkage.
 
-## 4. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
+## 3. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
 
 - Gate ID: eas-submit-config
 - Group: native
@@ -140,7 +109,7 @@ Evidence required:
 - eas.json has submit.production.ios.ascAppId.
 - Native preflight no longer reports missing iOS ascAppId.
 
-## 5. Android and iOS preview-build QA evidence is recorded
+## 4. Android and iOS preview-build QA evidence is recorded
 
 - Gate ID: native-qa-evidence
 - Group: native
@@ -172,7 +141,7 @@ Evidence required:
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
-## 6. App Store Connect and Google Play Console app records exist
+## 5. App Store Connect and Google Play Console app records exist
 
 - Gate ID: store-console-records
 - Group: store-console
@@ -208,7 +177,7 @@ Evidence required:
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
-## 7. Final native screenshots are captured from Android/iOS preview builds
+## 6. Final native screenshots are captured from Android/iOS preview builds
 
 - Gate ID: native-screenshots
 - Group: store-console

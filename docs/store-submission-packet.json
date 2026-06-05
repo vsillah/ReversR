@@ -2,7 +2,7 @@
   "schemaVersion": "2026-06-05",
   "sourceNotes": [
     "Prepared for App Store Connect and Google Play Console copy/paste setup.",
-    "Hosted URLs are placeholders until the web policy/support routes and API are deployed.",
+    "Hosted policy, support, and API URLs are configured on the ReversR Vercel production deployment.",
     "Final screenshots must be captured from native preview builds, not web preview screenshots."
   ],
   "appIdentity": {
@@ -20,10 +20,10 @@
     "ageRatingTarget": "4+ / Everyone, pending final store questionnaire review"
   },
   "urls": {
-    "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
-    "termsUrl": "https://reversr-rebuild.example.com/terms",
-    "supportUrl": "https://reversr-rebuild.example.com/support",
-    "apiBaseUrl": "https://reversr-rebuild-api.example.com"
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support",
+    "apiBaseUrl": "https://reversr.vercel.app"
   },
   "supportContact": {
     "email": "vsillah@gmail.com",
