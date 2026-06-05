@@ -49,6 +49,18 @@ const run = async () => {
 
   console.log(`API preflight passed for ${apiBase}`);
   console.log(`Service: ${health.service || 'unknown'} | authenticated connectors: ${health.authenticatedConnectorsEnabled ? 'configured' : 'not configured'}`);
+
+  const adminToken = process.env.ADMIN_API_TOKEN;
+  if (adminToken) {
+    const adminResponse = await fetch(`${apiBase}/api/admin/inventory/credentials`, {
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    if (!adminResponse.ok) {
+      throw new Error(`/api/admin/inventory/credentials failed with ${adminResponse.status}`);
+    }
+    const adminPayload = await adminResponse.json();
+    console.log(`Admin credential registry: ${adminPayload.registryEnabled ? 'enabled' : 'disabled'} | refs: ${adminPayload.credentials?.length || 0}`);
+  }
 };
 
 run().catch(error => {

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs/promises');
+const crypto = require('crypto');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
 const { Ollama } = require('ollama');
 
@@ -568,6 +569,39 @@ const recordsFromPayload = (payload) => {
 };
 
 const normalizeCredentialRef = (value = '') => String(value).trim();
+const getCredentialRegistryPath = () => process.env.INVENTORY_CONNECTOR_SECRETS_FILE || '';
+
+const timingSafeEqual = (left = '', right = '') => {
+  const leftBuffer = Buffer.from(String(left));
+  const rightBuffer = Buffer.from(String(right));
+  if (leftBuffer.length !== rightBuffer.length) return false;
+  return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
+
+const requireAdmin = (req, res) => {
+  const configuredToken = process.env.ADMIN_API_TOKEN;
+  if (!configuredToken) {
+    res.status(503).json({
+      error: 'Admin credential registry is disabled. Set ADMIN_API_TOKEN on the API server to enable it.',
+      code: 'ADMIN_DISABLED',
+      canRetry: false,
+    });
+    return false;
+  }
+
+  const header = req.get('authorization') || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7).trim() : req.get('x-admin-token');
+  if (!token || !timingSafeEqual(token, configuredToken)) {
+    res.status(401).json({
+      error: 'Admin token is required to manage inventory connector credentials.',
+      code: 'ADMIN_UNAUTHORIZED',
+      canRetry: false,
+    });
+    return false;
+  }
+
+  return true;
+};
 
 const parseConnectorSecrets = () => {
   const raw = process.env.INVENTORY_CONNECTOR_SECRETS_JSON;
@@ -582,6 +616,50 @@ const parseConnectorSecrets = () => {
   }
 };
 
+const readConnectorSecretsFile = async () => {
+  const registryPath = getCredentialRegistryPath();
+  if (!registryPath) return {};
+  try {
+    const raw = await fs.readFile(registryPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return parsed;
+  } catch (error) {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  }
+};
+
+const writeConnectorSecretsFile = async (secrets) => {
+  const registryPath = getCredentialRegistryPath();
+  if (!registryPath) {
+    throw new Error('Set INVENTORY_CONNECTOR_SECRETS_FILE to enable runtime credential registry writes.');
+  }
+  await fs.writeFile(registryPath, `${JSON.stringify(secrets, null, 2)}\n`, { mode: 0o600 });
+};
+
+const loadConnectorSecrets = async () => ({
+  ...parseConnectorSecrets(),
+  ...(await readConnectorSecretsFile()),
+});
+
+const redactCredentialSummary = (ref, credential = {}) => ({
+  credentialRef: ref,
+  authModes: [
+    credential.value || credential.apiKey || credential.headerName ? 'api_key' : null,
+    credential.accessToken || credential.token || credential.scheme ? 'oauth' : null,
+    credential.headers ? 'custom_headers' : null,
+  ].filter(Boolean),
+  headerNames: [
+    credential.headerName,
+    ...Object.keys(credential.headers || {}),
+    credential.accessToken || credential.token ? 'Authorization' : null,
+  ].filter(Boolean),
+  hasSecret: Boolean(credential.value || credential.apiKey || credential.token || credential.accessToken || Object.keys(credential.headers || {}).length),
+  updatedAt: credential.updatedAt,
+  createdAt: credential.createdAt,
+});
+
 const getConnectorCredentialStatus = (connector = {}) => {
   const authMode = connector.authMode || 'none';
   if (authMode === 'none') return 'not_required';
@@ -590,11 +668,24 @@ const getConnectorCredentialStatus = (connector = {}) => {
   }
   const credentialRef = normalizeCredentialRef(connector.credentialRef);
   if (!credentialRef) return 'missing';
-  const credential = parseConnectorSecrets()[credentialRef];
+  const envCredential = parseConnectorSecrets()[credentialRef];
+  if (envCredential) return 'configured';
+  return 'missing';
+};
+
+const getConnectorCredentialStatusAsync = async (connector = {}) => {
+  const authMode = connector.authMode || 'none';
+  if (authMode === 'none') return 'not_required';
+  if (authMode === 'private_network' && process.env.INVENTORY_PRIVATE_NETWORK_ENABLED !== 'true') {
+    return 'disabled';
+  }
+  const credentialRef = normalizeCredentialRef(connector.credentialRef);
+  if (!credentialRef) return 'missing';
+  const credential = (await loadConnectorSecrets())[credentialRef];
   return credential ? 'configured' : 'missing';
 };
 
-const buildCredentialHeaders = (connector = {}) => {
+const buildCredentialHeaders = async (connector = {}) => {
   const authMode = connector.authMode || 'none';
   if (authMode === 'none') return {};
 
@@ -607,7 +698,7 @@ const buildCredentialHeaders = (connector = {}) => {
     throw new Error('Private-network inventory connectors are disabled on this API server. Set INVENTORY_PRIVATE_NETWORK_ENABLED=true after network controls are configured.');
   }
 
-  const credential = parseConnectorSecrets()[credentialRef];
+  const credential = (await loadConnectorSecrets())[credentialRef];
   if (!credential) {
     throw new Error(`No backend credential is configured for inventory credential reference "${credentialRef}".`);
   }
@@ -635,12 +726,12 @@ const buildCredentialHeaders = (connector = {}) => {
   return headers;
 };
 
-const sanitizeConnectorForModel = (connector = {}) => ({
+const sanitizeConnectorForModel = (connector = {}, credentialStatus = getConnectorCredentialStatus(connector)) => ({
   sourceName: connector.sourceName,
   sourceUrl: connector.sourceUrl,
   connectorType: connector.connectorType,
   authMode: connector.authMode || 'none',
-  credentialStatus: getConnectorCredentialStatus(connector),
+  credentialStatus,
   notes: connector.notes,
 });
 
@@ -660,7 +751,7 @@ const readConnectorText = async (connector = {}) => {
   }
 
   if (/^https?:\/\//i.test(sourceUrl)) {
-    const credentialHeaders = buildCredentialHeaders(connector);
+    const credentialHeaders = await buildCredentialHeaders(connector);
     const response = await fetch(sourceUrl, {
       headers: {
         Accept: connector.connectorType === 'csv' ? 'text/csv,text/plain,*/*' : 'application/json,text/csv,text/plain,*/*',
@@ -691,6 +782,16 @@ const loadInventoryRecords = async (connector = {}) => {
     : recordsFromPayload(JSON.parse(text));
 
   return rawRecords.map(normalizeMachineRecord).filter(record => record.machineName && record.machineId);
+};
+
+const listCredentialSummaries = async () => {
+  const envSecrets = parseConnectorSecrets();
+  const fileSecrets = await readConnectorSecretsFile();
+  const refs = Array.from(new Set([...Object.keys(envSecrets), ...Object.keys(fileSecrets)])).sort();
+  return refs.map(ref => ({
+    ...redactCredentialSummary(ref, fileSecrets[ref] || envSecrets[ref]),
+    source: fileSecrets[ref] ? 'registry_file' : 'environment',
+  }));
 };
 
 const scoreInventoryRecord = (analysis, record) => {
@@ -1030,12 +1131,13 @@ app.post('/api/inventory/validate', async (req, res) => {
   try {
     const { connector } = req.body;
     const records = await loadInventoryRecords(connector || {});
+    const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
     res.json({
       status: 'ok',
       sourceName: connector?.sourceName || 'Inventory',
       sourceUrl: connector?.sourceUrl || 'demo://sample-machines',
       authMode: connector?.authMode || 'none',
-      credentialStatus: getConnectorCredentialStatus(connector || {}),
+      credentialStatus,
       recordCount: records.length,
       requiredFields: ['machineId', 'machineName/name', 'parts/components'],
       sampleMachines: records.slice(0, 5).map(record => ({
@@ -1055,19 +1157,124 @@ app.post('/api/inventory/validate', async (req, res) => {
   }
 });
 
+app.get('/api/admin/inventory/credentials', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    res.json({
+      status: 'ok',
+      registryEnabled: Boolean(getCredentialRegistryPath()),
+      credentials: await listCredentialSummaries(),
+    });
+  } catch (error) {
+    console.error('Credential list error:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message || 'Failed to list connector credentials',
+      canRetry: true,
+    });
+  }
+});
+
+app.post('/api/admin/inventory/credentials', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const {
+      credentialRef,
+      headerName,
+      value,
+      apiKey,
+      token,
+      accessToken,
+      scheme,
+      headers,
+    } = req.body || {};
+
+    const ref = normalizeCredentialRef(credentialRef);
+    if (!ref || !/^[a-zA-Z0-9._:-]{3,96}$/.test(ref)) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'credentialRef must be 3-96 characters and use only letters, numbers, dot, underscore, colon, or hyphen.',
+        canRetry: false,
+      });
+    }
+
+    if (!value && !apiKey && !token && !accessToken && !headers) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Provide an API key value, OAuth token, accessToken, or fixed headers for this credential reference.',
+        canRetry: false,
+      });
+    }
+
+    const fileSecrets = await readConnectorSecretsFile();
+    const now = new Date().toISOString();
+    const existing = fileSecrets[ref] || {};
+    const credential = {
+      ...existing,
+      ...(headerName ? { headerName } : {}),
+      ...(value ? { value } : {}),
+      ...(apiKey ? { apiKey } : {}),
+      ...(token ? { token } : {}),
+      ...(accessToken ? { accessToken } : {}),
+      ...(scheme ? { scheme } : {}),
+      ...(headers && typeof headers === 'object' && !Array.isArray(headers) ? { headers } : {}),
+      createdAt: existing.createdAt || now,
+      updatedAt: now,
+    };
+
+    fileSecrets[ref] = credential;
+    await writeConnectorSecretsFile(fileSecrets);
+
+    res.json({
+      status: 'ok',
+      credential: {
+        ...redactCredentialSummary(ref, credential),
+        source: 'registry_file',
+      },
+    });
+  } catch (error) {
+    console.error('Credential upsert error:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message || 'Failed to save connector credential',
+      canRetry: true,
+    });
+  }
+});
+
+app.delete('/api/admin/inventory/credentials/:credentialRef', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const ref = normalizeCredentialRef(req.params.credentialRef);
+    const fileSecrets = await readConnectorSecretsFile();
+    const existed = Boolean(fileSecrets[ref]);
+    delete fileSecrets[ref];
+    await writeConnectorSecretsFile(fileSecrets);
+    res.json({ status: 'ok', credentialRef: ref, deleted: existed });
+  } catch (error) {
+    console.error('Credential delete error:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message || 'Failed to delete connector credential',
+      canRetry: true,
+    });
+  }
+});
+
 // Match machine against inventory connector
 app.post('/api/gemini/match-machine', async (req, res) => {
   try {
     const { analysis, connector, image, provider, ollamaModel } = req.body;
     const inventoryRecords = await loadInventoryRecords(connector || {});
     const deterministicMatch = findBestInventoryMatch(analysis, inventoryRecords);
+    const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
 
     const prompt = `
       PHASE 2: INVENTORY MATCH
 
       Use the approved inventory connector to identify the scanned machine and produce a reconstruction plan.
 
-      Inventory connector: ${JSON.stringify(sanitizeConnectorForModel(connector))}
+      Inventory connector: ${JSON.stringify(sanitizeConnectorForModel(connector, credentialStatus))}
       Inventory records: ${JSON.stringify(inventoryRecords.slice(0, 20))}
       Scan analysis: ${JSON.stringify(analysis)}
       Image provided: ${!!image}
@@ -1638,9 +1845,10 @@ app.post('/api/generate-2d', (req, res) => {
 // HEALTH & STATUS
 // ============================================
 
-const getHealthPayload = () => {
+const getHealthPayload = async () => {
   const now = Date.now();
   const availableKeys = apiKeyPool.filter(k => k.cooldownUntil <= now).length;
+  const credentialSummaries = await listCredentialSummaries();
   return {
     status: 'ok',
     service: 'reversr-rebuild-api',
@@ -1654,17 +1862,19 @@ const getHealthPayload = () => {
       size: responseCache.cache.size,
     },
     inventorySources: ['demo', 'file', 'http', 'https'],
-    authenticatedConnectorsEnabled: Object.keys(parseConnectorSecrets()).length > 0 || process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
+    authenticatedConnectorsEnabled: credentialSummaries.length > 0 || process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
+    credentialRegistryEnabled: Boolean(getCredentialRegistryPath()),
+    credentialCount: credentialSummaries.length,
     privateNetworkConnectorsEnabled: process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
   };
 };
 
-app.get('/health', (req, res) => {
-  res.json(getHealthPayload());
+app.get('/health', async (req, res) => {
+  res.json(await getHealthPayload());
 });
 
-app.get('/api/health', (req, res) => {
-  res.json(getHealthPayload());
+app.get('/api/health', async (req, res) => {
+  res.json(await getHealthPayload());
 });
 
 // ============================================

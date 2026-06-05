@@ -170,6 +170,59 @@ Client connector metadata for an API-key source:
 
 Validation returns `credentialStatus: "configured"` when the server can resolve the reference. If the reference is absent or missing, validation fails before fetching the inventory source.
 
+## Admin Credential Registry
+
+For runtime credential management, configure:
+
+```bash
+ADMIN_API_TOKEN=replace-with-long-random-token
+INVENTORY_CONNECTOR_SECRETS_FILE=.reversr-connector-secrets.json
+```
+
+The registry file is ignored by git. Admin routes require `Authorization: Bearer <ADMIN_API_TOKEN>`.
+
+List redacted credential references:
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_API_TOKEN" \
+  "$EXPO_PUBLIC_API_BASE_URL/api/admin/inventory/credentials"
+```
+
+Register or update an API-key credential:
+
+```bash
+curl -X POST "$EXPO_PUBLIC_API_BASE_URL/api/admin/inventory/credentials" \
+  -H "Authorization: Bearer $ADMIN_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "credentialRef": "partsledger-prod",
+    "headerName": "X-API-Key",
+    "value": "server-side-secret"
+  }'
+```
+
+Register or update an OAuth bearer credential:
+
+```bash
+curl -X POST "$EXPO_PUBLIC_API_BASE_URL/api/admin/inventory/credentials" \
+  -H "Authorization: Bearer $ADMIN_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "credentialRef": "maintenance-oauth",
+    "token": "server-side-token"
+  }'
+```
+
+Delete a registry-file credential:
+
+```bash
+curl -X DELETE \
+  -H "Authorization: Bearer $ADMIN_API_TOKEN" \
+  "$EXPO_PUBLIC_API_BASE_URL/api/admin/inventory/credentials/partsledger-prod"
+```
+
+Responses never return raw `value`, `apiKey`, `token`, or `accessToken` fields. They return only redacted summaries such as `credentialRef`, configured auth modes, header names, source, and timestamps.
+
 ## Matching Logic
 
 The prototype uses deterministic scoring when no Gemini key is configured:
@@ -191,7 +244,7 @@ The resulting reconstruction package includes:
 
 ## Production Gates
 
-- Move connector credentials from environment JSON to a managed secret store for production.
+- Use admin-token registry endpoints for prototype operations, then move connector credentials from the registry file to a managed secret store for production.
 - Add admin roles before allowing production users to create or edit private ERP/API connectors.
 - Keep procurement, vendor submission, and fabrication as explicit human-approved actions.
 - Log connector source, record ID, match confidence, and admin approval status for auditability.
