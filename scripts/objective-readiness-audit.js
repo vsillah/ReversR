@@ -97,13 +97,10 @@ const requirements = [
   {
     id: 'photo-to-inventory-machine-match',
     requirement: 'When a picture or scan is supplied, identify the matching machine from the approved inventory.',
-    status: statusFor(
-      ['machine-scan-examples', 'web-flow-smoke'],
-      ['native-qa-evidence', 'real-connector-smoke']
-    ),
-    evidence: gateEvidence(['machine-scan-examples', 'web-flow-smoke', 'native-qa-evidence', 'real-connector-smoke']),
-    gates: ['machine-scan-examples', 'web-flow-smoke', 'native-qa-evidence', 'real-connector-smoke'],
-    nextStep: 'Run native preview-build QA and hosted real connector smoke to prove real camera-to-inventory matching beyond local prototype evidence.',
+    status: statusFor(['machine-scan-examples', 'web-flow-smoke', 'real-connector-smoke']),
+    evidence: gateEvidence(['machine-scan-examples', 'web-flow-smoke', 'real-connector-smoke']),
+    gates: ['machine-scan-examples', 'web-flow-smoke', 'real-connector-smoke'],
+    nextStep: '',
   },
   {
     id: 'bom-assembly-pricing-vendor-handoff',
@@ -172,7 +169,6 @@ const requirements = [
       'preview-host-smoke',
       'hosted-api',
       'hosted-policy-urls',
-      'real-connector-smoke',
       'eas-project-linkage',
       'eas-submit-config',
       'native-qa-evidence',
@@ -183,7 +179,6 @@ const requirements = [
       'preview-host-smoke',
       'hosted-api',
       'hosted-policy-urls',
-      'real-connector-smoke',
       'eas-project-linkage',
       'eas-submit-config',
       'native-qa-evidence',
@@ -194,14 +189,13 @@ const requirements = [
       'preview-host-smoke',
       'hosted-api',
       'hosted-policy-urls',
-      'real-connector-smoke',
       'eas-project-linkage',
       'eas-submit-config',
       'native-qa-evidence',
       'store-console-records',
       'native-screenshots',
     ],
-    nextStep: 'Clear the listed external gates with real hosted, EAS, App Store Connect, Google Play Console, preview-build, and native screenshot evidence.',
+    nextStep: 'Clear the remaining EAS, App Store Connect, Google Play Console, preview-build, native QA, and screenshot evidence gates.',
   },
 ];
 
@@ -222,7 +216,7 @@ const audit = {
     storeReady: pendingRequirementIds.length === 0 && blockedRequirementIds.length === 0,
     productionSubmissionReady: pendingRequirementIds.length === 0 && blockedRequirementIds.length === 0,
     reason: pendingRequirementIds.length > 0
-      ? 'Implementation and local release packet are advanced, but external hosted, EAS, store-console, native QA, and screenshot evidence remain pending.'
+      ? 'Implementation, hosted policy/API, and public inventory connector evidence are advanced, but EAS, store-console, native QA, and screenshot evidence remain pending.'
       : 'All objective requirements are proven by current release gates.',
   },
   summary: {

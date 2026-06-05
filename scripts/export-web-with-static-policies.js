@@ -174,6 +174,30 @@ const pages = {
   },
 };
 
+const copyPublicAssets = () => {
+  const publicDir = path.resolve('public');
+  if (!fs.existsSync(publicDir)) return [];
+
+  const copied = [];
+  const copyEntry = (source, relativePath = '') => {
+    const stats = fs.statSync(source);
+    const target = path.join(outputDir, relativePath);
+    if (stats.isDirectory()) {
+      fs.mkdirSync(target, { recursive: true });
+      for (const entry of fs.readdirSync(source)) {
+        copyEntry(path.join(source, entry), path.join(relativePath, entry));
+      }
+      return;
+    }
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(source, target);
+    copied.push(relativePath);
+  };
+
+  copyEntry(publicDir);
+  return copied;
+};
+
 const exportResult = spawnSync('npx', ['expo', 'export', '--platform', 'web', '--output-dir', outputDir], {
   encoding: 'utf8',
   stdio: 'inherit',
@@ -189,4 +213,9 @@ for (const [slug, page] of Object.entries(pages)) {
   fs.writeFileSync(path.join(pageDir, 'index.html'), pageTemplate(page));
 }
 
+const copiedPublicAssets = copyPublicAssets();
+
 console.log(`Static policy pages written to ${outputDir}/privacy, ${outputDir}/terms, and ${outputDir}/support.`);
+if (copiedPublicAssets.length > 0) {
+  console.log(`Copied ${copiedPublicAssets.length} public asset(s) into ${outputDir}.`);
+}

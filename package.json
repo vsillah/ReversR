@@ -32,6 +32,8 @@
     "api:env:preflight:local": "node scripts/api-env-preflight.js --allow-placeholder",
     "api:deployment-smoke": "node scripts/api-deployment-smoke.js",
     "api:vercel-protected-smoke": "node scripts/vercel-protected-api-smoke.js",
+    "inventory:farmbot:generate": "node scripts/generate-farmbot-inventory.js",
+    "inventory:farmbot:validate": "npm run inventory:farmbot:generate && npm run inventory:source:validate -- public/inventory/farmbot-genesis-v1.8.json",
     "inventory:source:validate": "node scripts/validate-machine-inventory.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
     "connector:smoke": "node scripts/hosted-connector-smoke.js",

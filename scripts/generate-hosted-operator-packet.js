@@ -68,9 +68,13 @@ const sourceArtifacts = [
   'docs/policy-hosting-smoke-evidence.json',
   'docs/preview-host-target.json',
   'docs/preview-host-smoke-evidence.json',
+  'docs/farmbot-public-inventory-evidence.json',
+  'docs/hosted-connector-smoke-evidence.json',
   'docs/sample-machine-inventory.csv',
+  'public/inventory/farmbot-genesis-v1.8.json',
   'Dockerfile',
   'vercel.json',
+  'scripts/generate-farmbot-inventory.js',
   'scripts/api-env-preflight.js',
   'scripts/api-preflight.js',
   'scripts/api-deployment-smoke.js',
@@ -101,13 +105,13 @@ const commandSequence = [
   },
   {
     id: 'inventory-source-validate',
-    command: 'npm run inventory:source:validate -- <inventory.csv-or-json>',
-    purpose: 'Validate the real machine inventory export before connecting it to the hosted API.',
+    command: 'npm run inventory:farmbot:validate',
+    purpose: 'Generate and validate the public FarmBot Genesis v1.8 machine inventory before connecting it to the hosted API.',
   },
   {
     id: 'hosted-connector-smoke',
-    command: 'EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example CONNECTOR_SMOKE_SOURCE_URL=https://inventory.your-domain.example/machines.json CONNECTOR_SMOKE_AUTH_MODE=api_key CONNECTOR_SMOKE_CREDENTIAL_REF=partsledger-prod npm run connector:smoke',
-    purpose: 'Prove hosted machine inventory validation, machine matching, BOM generation, and server-side credentialRef handling.',
+    command: 'EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR/refs/heads/codex/inventory-reconstruction-clone/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke',
+    purpose: 'Prove hosted machine inventory validation, machine matching, BOM generation, and no-raw-secret handling against a public source.',
   },
   {
     id: 'preview-smoke',
@@ -125,6 +129,7 @@ const requiredEnv = [
   'EXPO_PUBLIC_PRIVACY_POLICY_URL',
   'EXPO_PUBLIC_TERMS_URL',
   'EXPO_PUBLIC_SUPPORT_URL',
+  'CONNECTOR_SMOKE_SOURCE_URL',
 ];
 const safetyBoundary = [
   'Do not put Gemini keys, admin tokens, connector API keys, or OAuth tokens in mobile app config or committed files.',

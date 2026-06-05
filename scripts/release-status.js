@@ -372,6 +372,7 @@ const requiredArtifacts = [
   'docs/release-next-actions.md',
   'docs/release-evidence-bundle.json',
   'docs/local-release-ci-evidence.json',
+  'docs/farmbot-public-inventory-evidence.json',
   'docs/preview-host-target.json',
   'docs/hosted-operator-packet/manifest.json',
   'docs/hosted-operator-packet/README.md',
@@ -398,6 +399,7 @@ const requiredArtifacts = [
   'scripts/discover-preview-host.js',
   'scripts/generate-hosted-operator-packet.js',
   'scripts/local-release-ci.js',
+  'scripts/generate-farmbot-inventory.js',
   'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
@@ -426,7 +428,6 @@ addGate(
 const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
 const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
 const requiredNextActionGateIds = [
-  'real-connector-smoke',
   'eas-project-linkage',
   'eas-submit-config',
   'native-qa-evidence',
@@ -435,8 +436,9 @@ const requiredNextActionGateIds = [
 ];
 const releaseNextActionsOk = (
   releaseNextActions?.schemaVersion === 1 &&
-  releaseNextActions?.nextRecommendedGate === 'real-connector-smoke' &&
+  releaseNextActions?.nextRecommendedGate === 'eas-project-linkage' &&
   releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
+  releaseNextActions?.summary?.pass >= 1 &&
   Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
   requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
   releaseNextActions.pendingGates.every(gate => (
@@ -446,7 +448,7 @@ const releaseNextActionsOk = (
     gate.action?.evidence?.length > 0
   )) &&
   releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
-  releaseNextActionsMarkdown.includes('Next recommended gate: real-connector-smoke') &&
+  releaseNextActionsMarkdown.includes('Next recommended gate: eas-project-linkage') &&
   releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
 );
 addGate(
@@ -527,7 +529,7 @@ const objectiveReadinessAuditOk = (
   objectiveReadinessAudit?.completionClaim?.productionSubmissionReady === false &&
   expectedObjectiveRequirementIds.every(id => objectiveReadinessAudit?.requirements?.some(requirement => requirement.id === id)) &&
   objectiveReadinessAudit?.summary?.pendingRequirementIds?.includes('apple-google-store-publication') &&
-  objectiveReadinessAudit?.summary?.pendingRequirementIds?.includes('photo-to-inventory-machine-match')
+  !objectiveReadinessAudit?.summary?.pendingRequirementIds?.includes('photo-to-inventory-machine-match')
 );
 addGate(
   'store-local',
@@ -562,11 +564,11 @@ const requiredBundleProofs = [
   'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
+  'real-connector-smoke',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const requiredBundlePending = [
-  'real-connector-smoke',
   'eas-project-linkage',
   'eas-submit-config',
   'native-qa-evidence',
@@ -586,6 +588,8 @@ const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.evidenceFiles?.policyHostingSmoke?.hostedChecksEnabled === true &&
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostSmoke?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.farmbotPublicInventory?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.hostedConnectorSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
   releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.schemaVersion === 1 &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostTarget?.status === 'pass' &&
@@ -630,7 +634,7 @@ const localReleaseCiOk = (
   localReleaseCiEvidence?.passedCount === expectedLocalCiCommands.length &&
   expectedLocalCiCommands.every(id => localReleaseCiEvidence?.results?.some(result => result.id === id && result.status === 'pass')) &&
   Array.isArray(localReleaseCiEvidence?.externalGatesStillRequired) &&
-  localReleaseCiEvidence.externalGatesStillRequired.includes('real-connector-smoke') &&
+  !localReleaseCiEvidence.externalGatesStillRequired.includes('real-connector-smoke') &&
   localReleaseCiEvidence.externalGatesStillRequired.includes('eas-project-linkage') &&
   localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots')
 );
@@ -688,8 +692,12 @@ const requiredHostedOperatorSources = [
   'docs/production-api-env.example',
   'docs/policy-hosting-deployment.md',
   'docs/external-release-setup-runbook.md',
+  'docs/farmbot-public-inventory-evidence.json',
+  'docs/hosted-connector-smoke-evidence.json',
+  'public/inventory/farmbot-genesis-v1.8.json',
   'Dockerfile',
   'vercel.json',
+  'scripts/generate-farmbot-inventory.js',
   'scripts/api-preflight.js',
   'scripts/hosted-connector-smoke.js',
   'scripts/policy-hosting-preflight.js',
@@ -885,13 +893,47 @@ addGate(
   hostedPolicyEvidenceOk ? '' : 'Deploy /privacy, /terms, and /support, then run npm run policy:preflight -- --check-hosted with the hosted URL env vars.'
 );
 
+const farmbotPublicInventory = readOptionalJson('docs/farmbot-public-inventory-evidence.json');
+const hostedConnectorSmoke = readOptionalJson('docs/hosted-connector-smoke-evidence.json');
+const farmbotPublicInventoryOk = (
+  farmbotPublicInventory?.schemaVersion === 1 &&
+  farmbotPublicInventory?.status === 'pass' &&
+  farmbotPublicInventory?.machineId === 'FARMBOT-GENESIS-V1-8' &&
+  Number(farmbotPublicInventory?.sourcePartCount || 0) >= 25 &&
+  Number(farmbotPublicInventory?.selectedPartCount || 0) >= 10 &&
+  exists('public/inventory/farmbot-genesis-v1.8.json')
+);
+const hostedConnectorSmokeOk = (
+  farmbotPublicInventoryOk &&
+  hostedConnectorSmoke?.schemaVersion === 1 &&
+  hostedConnectorSmoke?.status === 'pass' &&
+  hostedConnectorSmoke?.localApi === false &&
+  !isPlaceholder(hostedConnectorSmoke?.apiBaseUrl) &&
+  isHttpsUrl(hostedConnectorSmoke?.apiBaseUrl) &&
+  hostedConnectorSmoke?.connector?.sourceUrl?.includes('/farmbot-genesis-v1.8.json') &&
+  isHttpsUrl(hostedConnectorSmoke?.connector?.sourceUrl) &&
+  hostedConnectorSmoke?.connector?.authMode === 'none' &&
+  hostedConnectorSmoke?.connector?.credentialRefConfigured === false &&
+  Number(hostedConnectorSmoke?.validation?.recordCount || 0) >= 1 &&
+  ['not-required', ''].includes(hostedConnectorSmoke?.validation?.credentialStatus || '') &&
+  hostedConnectorSmoke?.match?.machineId === 'FARMBOT-GENESIS-V1-8' &&
+  Number(hostedConnectorSmoke?.match?.confidenceScore || 0) >= 0.2 &&
+  Number(hostedConnectorSmoke?.match?.assemblyStepCount || 0) >= 1 &&
+  Number(hostedConnectorSmoke?.match?.fulfillmentOptionCount || 0) >= 1 &&
+  Number(hostedConnectorSmoke?.bom?.itemCount || 0) >= 1 &&
+  hostedConnectorSmoke?.safety?.rawSecretsIncluded === false
+);
 addGate(
   'hosted',
   'real-connector-smoke',
-  'Hosted API can validate and match against a real authorized machine inventory',
-  'pending',
-  'This requires a deployed API plus a real connector source and server-side connector credential.',
-  'Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.'
+  'Hosted API can validate and match against a public machine inventory',
+  hostedConnectorSmokeOk ? 'pass' : 'pending',
+  hostedConnectorSmokeOk
+    ? `docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at ${hostedConnectorSmoke.generatedAt}.`
+    : farmbotPublicInventoryOk
+      ? 'FarmBot public inventory generated, but hosted connector smoke evidence is missing or incomplete.'
+      : 'FarmBot public inventory source evidence is missing or incomplete.',
+  hostedConnectorSmokeOk ? '' : 'Run npm run inventory:farmbot:validate, publish the JSON at an HTTPS URL, then run npm run connector:smoke against https://reversr.vercel.app.'
 );
 
 const easProjectId = appConfig.extra?.eas?.projectId;

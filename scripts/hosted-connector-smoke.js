@@ -1,9 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+
 const args = new Set(process.argv.slice(2));
 const allowOpenCors = args.has('--allow-open-cors');
 const allowInsecureConnector = args.has('--allow-insecure-connector');
 const allowDemoConnector = args.has('--allow-demo-connector');
 
 const apiBase = (process.env.EXPO_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || '').replace(/\/$/, '');
+const evidenceFile = process.env.CONNECTOR_SMOKE_EVIDENCE_FILE || 'docs/hosted-connector-smoke-evidence.json';
 const isLocalApi = /:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::|\/|$)/.test(apiBase);
 const isPlaceholder = (value = '') => /example\.(com|net|org)|your-domain\.example/i.test(String(value));
 const isLocalUrl = (value = '') => /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::|\/|$)/i.test(String(value));
@@ -84,6 +88,13 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
+const writeJson = (filePath, value) => {
+  const target = path.resolve(filePath);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
+  return target;
+};
+
 const run = async () => {
   if (!apiBase || isPlaceholder(apiBase)) {
     throw new Error('Set EXPO_PUBLIC_API_BASE_URL or API_BASE_URL to the hosted API URL before running connector smoke.');
@@ -151,10 +162,51 @@ const run = async () => {
   assert(Array.isArray(bom.parsed.items) && bom.parsed.items.length >= 1, 'BOM should include at least one item.');
   assert(bom.parsed.totalEstimatedCost, 'BOM should include totalEstimatedCost.');
 
+  const evidence = {
+    schemaVersion: 1,
+    status: 'pass',
+    generatedAt: new Date().toISOString(),
+    apiBaseUrl: apiBase,
+    localApi: isLocalApi,
+    connector: {
+      sourceName: connector.sourceName || '',
+      sourceUrl: connector.sourceUrl || '',
+      connectorType: connector.connectorType || '',
+      authMode: connector.authMode || 'none',
+      credentialRefConfigured: Boolean(connector.credentialRef),
+      notes: connector.notes || '',
+    },
+    validation: {
+      status: validation.parsed.status,
+      recordCount: Number(validation.parsed.recordCount || 0),
+      credentialStatus: validation.parsed.credentialStatus || (connector.authMode === 'none' ? 'not-required' : ''),
+    },
+    match: {
+      patternUsed: match.parsed.patternUsed,
+      machineId: match.parsed.machineId,
+      machineName: match.parsed.machineName || '',
+      confidenceScore: Number(match.parsed.confidenceScore || 0),
+      evidence: match.parsed.evidence || '',
+      assemblyStepCount: Array.isArray(match.parsed.assemblySteps) ? match.parsed.assemblySteps.length : 0,
+      fulfillmentOptionCount: Array.isArray(match.parsed.fulfillmentOptions) ? match.parsed.fulfillmentOptions.length : 0,
+      totalEstimate: match.parsed.pricing?.totalEstimate || '',
+    },
+    bom: {
+      itemCount: bom.parsed.items.length,
+      totalEstimatedCost: bom.parsed.totalEstimatedCost,
+    },
+    safety: {
+      rawSecretsIncluded: false,
+      secretHandling: 'Connector smoke sends credentialRef metadata only. Raw connector secrets must remain server-side.',
+    },
+  };
+  const evidencePath = writeJson(evidenceFile, evidence);
+
   console.log(`Hosted connector smoke passed for ${apiBase}`);
   console.log(`Inventory source: ${connector.sourceName || 'Inventory'} | records: ${validation.parsed.recordCount}`);
   console.log(`Matched machine: ${match.parsed.machineId} (${match.parsed.machineName || 'unnamed'}) | confidence: ${match.parsed.confidenceScore}`);
   console.log(`BOM items: ${bom.parsed.items.length} | estimated cost: ${bom.parsed.totalEstimatedCost}`);
+  console.log(`Evidence written: ${evidencePath}`);
 };
 
 run().catch(error => {

@@ -94,7 +94,6 @@ const evidence = {
   notRun,
   results,
   externalGatesStillRequired: [
-    'real-connector-smoke',
     'eas-project-linkage',
     'eas-submit-config',
     'native-qa-evidence',
@@ -103,7 +102,7 @@ const evidence = {
   ],
   notes: [
     'This is a local CI pass for pre-store readiness only.',
-    'Real connector smoke, EAS linkage, store records, preview builds, native QA, and final screenshots remain external gates.',
+    'EAS linkage, store records, preview builds, native QA, and final screenshots remain external gates.',
   ],
 };
 

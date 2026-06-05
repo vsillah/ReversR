@@ -78,11 +78,11 @@ const localProofGateIds = [
   'preview-host-smoke',
   'hosted-api',
   'hosted-policy-urls',
+  'real-connector-smoke',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const externalGateIds = [
-  'real-connector-smoke',
   'eas-project-linkage',
   'eas-submit-config',
   'native-qa-evidence',
@@ -110,6 +110,8 @@ const evidenceFiles = {
   policyHostingSmoke: readOptionalJson('docs/policy-hosting-smoke-evidence.json'),
   previewHostSmoke: readOptionalJson('docs/preview-host-smoke-evidence.json'),
   previewHostTarget: readOptionalJson('docs/preview-host-target.json'),
+  farmbotPublicInventory: readOptionalJson('docs/farmbot-public-inventory-evidence.json'),
+  hostedConnectorSmoke: readOptionalJson('docs/hosted-connector-smoke-evidence.json'),
   objectiveReadinessAudit: readOptionalJson('docs/objective-readiness-audit.json'),
   storeSubmissionSmoke: readOptionalJson('docs/store-submission-smoke-evidence.json'),
   storeReviewSafety: readOptionalJson('docs/store-review-safety-evidence.json'),
@@ -198,6 +200,7 @@ const bundle = {
     hostedApiPreflight: 'EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight',
     vercelProtectedApiSmoke: 'VERCEL_PROTECTED_API_URL=https://your-preview.vercel.app npm run api:vercel-protected-smoke',
     hostedPolicyPreflight: 'npm run policy:preflight -- --check-hosted',
+    farmbotInventoryValidate: 'npm run inventory:farmbot:validate',
     hostedConnectorSmoke: 'npm run connector:smoke',
     nativeQaPreflight: 'npm run native:qa:preflight',
     storeConsolePreflight: 'npm run store:console:preflight',
@@ -217,6 +220,9 @@ const bundle = {
     'docs/native-qa-evidence.template.json',
     'docs/local-release-ci-evidence.json',
     'docs/preview-host-target.json',
+    'docs/farmbot-public-inventory-evidence.json',
+    'docs/hosted-connector-smoke-evidence.json',
+    'public/inventory/farmbot-genesis-v1.8.json',
     'docs/objective-readiness-audit.json',
     'docs/external-release-setup-runbook.md',
     '.github/workflows/release-local-ci.yml',
@@ -227,7 +233,7 @@ const bundle = {
   ],
   notes: [
     'This bundle is local readiness evidence, not App Store Connect or Google Play approval.',
-    'Production release still requires hosted API/policy URLs, real connector smoke, EAS linkage, preview builds, native QA, final native screenshots, TestFlight, and Play Internal Testing.',
+    'Production release still requires EAS linkage, preview builds, native QA, final native screenshots, TestFlight, Play Internal Testing, and store-console approval.',
     'Raw connector secrets must remain server-side and should not appear in mobile app config or evidence files.',
   ],
   packageScriptsAvailable: Object.keys(packageJson.scripts || {}).filter(name => (
@@ -235,6 +241,7 @@ const bundle = {
     name.startsWith('store:') ||
     name.startsWith('native:') ||
     name.startsWith('api:') ||
+    name.startsWith('inventory:') ||
     name.startsWith('connector:')
   )),
 };
