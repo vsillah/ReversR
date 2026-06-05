@@ -64,7 +64,21 @@
     "appIconReviewed": false,
     "featureGraphicCaptured": true,
     "featureGraphicPath": "docs/store-assets/google-play-feature-graphic.png",
-    "evidenceFolder": "docs/store-assets"
+    "evidenceFolder": "docs/store-assets",
+    "googlePlayIconReady": true,
+    "googlePlayIconPath": "docs/store-assets/google-play-icon.png",
+    "googlePlayPhoneScreenshotsReady": true,
+    "googlePlayPhoneScreenshotPaths": [
+      "docs/store-screenshots/google-play-phone/google-play-phone-01-welcome.png",
+      "docs/store-screenshots/google-play-phone/google-play-phone-02-scan.png",
+      "docs/store-screenshots/google-play-phone/google-play-phone-03-inventory-validation.png",
+      "docs/store-screenshots/google-play-phone/google-play-phone-04-design-match.png",
+      "docs/store-screenshots/google-play-phone/google-play-phone-05-build-handoff.png"
+    ],
+    "googlePlayPhoneScreenshotManifest": "docs/store-screenshots/google-play-phone/manifest.json",
+    "storeAssetsPreflightPassed": true,
+    "storeAssetsPreflightCommand": "npm run store:assets:preflight",
+    "uploadBoundary": "Google Play asset upload remains a human-in-the-loop store-console action; assets are prepared locally but were not uploaded."
   },
   "reviewGates": {
     "hostedApiPreflightPassed": true,
@@ -79,7 +93,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T15:34:01.337Z",
+  "generatedAt": "2026-06-05T15:40:00.082Z",
   "consoleActions": [
     {
       "platform": "googlePlay",
@@ -136,6 +150,14 @@
       "value": "App name, short description, and full description entered from docs/store-console-copy.md",
       "completedAt": "2026-06-05T15:34:01.337Z",
       "note": "Dashboard still showed store listing incomplete because required graphics/screenshots/contact gates remain. No asset upload or review submission was performed."
+    },
+    {
+      "platform": "local",
+      "task": "Prepare Google Play upload assets",
+      "status": "local-pass-not-uploaded",
+      "value": "512x512 icon, 1024x500 feature graphic, and five 1080x1920 Play phone screenshots are prepared locally.",
+      "completedAt": "2026-06-05T15:40:00.082Z",
+      "note": "Generated docs/store-assets/google-play-icon.png and docs/store-screenshots/google-play-phone/*.png. No Google Play file upload was performed."
     }
   ]
 }

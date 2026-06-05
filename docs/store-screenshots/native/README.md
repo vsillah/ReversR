@@ -43,3 +43,12 @@ npm run native:android:qa -- --capture build-handoff
 The helper requires exactly one `adb devices -l` device in `device` state. It writes `docs/native-android-device-probe.json`, captures PNGs into this folder, and updates the Android screenshot entries in `docs/native-qa-evidence.json`.
 
 The web-preview screenshots in `docs/store-screenshots/generated/` are planning artifacts only.
+
+For Google Play upload, generate 9:16 phone screenshot assets from the Android native captures:
+
+```bash
+npm run store:screenshots:google-play
+npm run store:assets:preflight
+```
+
+Generated Play upload candidates are written to `docs/store-screenshots/google-play-phone/`.
