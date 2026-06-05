@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T14:44:55.285Z",
+  "generatedAt": "2026-06-05T15:01:45.812Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -34,10 +34,9 @@
     "currentScreen": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-content/privacy-policy?source=dashboard",
       "title": "Privacy Policy | ReversR Rebuild",
-      "fieldReady": "Privacy policy URL",
-      "preparedValue": "https://reversr.vercel.app/privacy",
-      "saveState": "disabled until value is entered",
-      "actionBoundary": "Typing/saving live Google Play form fields remains HITL confirmation territory."
+      "savedValue": "https://reversr.vercel.app/privacy",
+      "saveState": "Change saved. Send for review in Publishing overview.",
+      "submissionBoundary": "No Send for review action was clicked."
     }
   },
   "notes": [
@@ -50,5 +49,36 @@
     "Computer Use verified at 2026-06-05T13:59:04Z that App Store Connect is on the iOS App Version 1.0 Prepare for Submission page and Google Play is on the ReversR Rebuild dashboard with 0 of 11 setup tasks complete.",
     "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
     "Computer Use navigated Google Play Console to the Privacy Policy task at 2026-06-05T14:44:55.285Z; no value was typed and no save was attempted."
-  ]
+  ],
+  "androidWirelessAdb": {
+    "status": "paired-connected",
+    "pairedAt": "2026-06-05T15:01:45.812Z",
+    "serial": "192.168.4.96:33423",
+    "device": "Google Pixel 10 Pro Android 16",
+    "scrcpy": "started successfully with scrcpy 4.0"
+  },
+  "androidRun": {
+    "checkedAt": "2026-06-05T15:01:45.812Z",
+    "device": "Google Pixel 10 Pro Android 16",
+    "serial": "192.168.4.96:33423",
+    "appPackage": "com.vsillah.reversrrebuild",
+    "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+    "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+    "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+    "screenshots": [
+      "docs/store-screenshots/native/android-01-welcome.png",
+      "docs/store-screenshots/native/android-02-scan.png",
+      "docs/store-screenshots/native/android-03-inventory-validation.png",
+      "docs/store-screenshots/native/android-04-design-match.png",
+      "docs/store-screenshots/native/android-05-build-handoff.png"
+    ],
+    "notes": [
+      "Wireless ADB paired and connected successfully.",
+      "Preview APK installed and launched on Pixel 10 Pro.",
+      "Sample scan path advanced through inventory validation, design match, and build handoff.",
+      "BOM generation produced itemized inventory-matched parts.",
+      "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+      "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+    ]
+  }
 }

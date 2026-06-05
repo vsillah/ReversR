@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T14:47:31.414Z",
+  "generatedAt": "2026-06-05T15:03:30.481Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T14:47:31.383Z",
+    "generatedAt": "2026-06-05T15:03:30.459Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -475,7 +475,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T14:45:07.815Z",
+      "generatedAt": "2026-06-05T15:01:48.888Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -494,7 +494,7 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T14:45:07.768Z",
+        "generatedAt": "2026-06-05T15:01:48.804Z",
         "summary": {
           "pass": 36,
           "pending": 3
@@ -671,7 +671,7 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:44:57.992Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:47:31.414Z.",
               "nextStep": ""
             },
             {
@@ -713,7 +713,7 @@
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:44:56.818Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T15:01:47.450Z.",
               "nextStep": ""
             },
             {
@@ -734,7 +734,7 @@
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T14:43:57.509Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T15:01:46.001Z.",
               "nextStep": ""
             }
           ],
@@ -1154,7 +1154,7 @@
     "nativeDeviceHandoff": {
       "schemaVersion": 1,
       "status": "pending-hitl",
-      "generatedAt": "2026-06-05T14:47:28.658Z",
+      "generatedAt": "2026-06-05T15:03:28.217Z",
       "releaseCandidate": {
         "appName": "ReversR Rebuild",
         "version": "1.0.0",
@@ -1236,6 +1236,39 @@
         "nextOptions": [
           "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
           "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+        ]
+      },
+      "androidWirelessAdb": {
+        "status": "paired-connected",
+        "pairedAt": "2026-06-05T15:01:45.812Z",
+        "serial": "192.168.4.96:33423",
+        "device": "Google Pixel 10 Pro Android 16",
+        "scrcpy": "started successfully with scrcpy 4.0",
+        "disconnectedAt": "2026-06-05T15:03:28.217Z",
+        "disconnectStatus": "adb devices empty after explicit adb disconnect of host:port and mdns alias"
+      },
+      "androidRun": {
+        "checkedAt": "2026-06-05T15:01:45.812Z",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "192.168.4.96:33423",
+        "appPackage": "com.vsillah.reversrrebuild",
+        "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+        "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "screenshots": [
+          "docs/store-screenshots/native/android-01-welcome.png",
+          "docs/store-screenshots/native/android-02-scan.png",
+          "docs/store-screenshots/native/android-03-inventory-validation.png",
+          "docs/store-screenshots/native/android-04-design-match.png",
+          "docs/store-screenshots/native/android-05-build-handoff.png"
+        ],
+        "notes": [
+          "Wireless ADB paired and connected successfully.",
+          "Preview APK installed and launched on Pixel 10 Pro.",
+          "Sample scan path advanced through inventory validation, design match, and build handoff.",
+          "BOM generation produced itemized inventory-matched parts.",
+          "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+          "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
         ]
       }
     },
@@ -1444,7 +1477,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T14:45:08.035Z",
+      "generatedAt": "2026-06-05T15:03:28.396Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1452,7 +1485,6 @@
         "App Store Connect App Privacy details are not marked complete.",
         "App Store Connect age rating is not marked complete.",
         "App Store Connect TestFlight readiness is not marked complete.",
-        "Google Play privacyPolicyUrl must be the hosted production policy URL.",
         "Google Play metadata is not marked copied from the submission packet.",
         "Google Play Data safety form is not marked complete.",
         "Google Play App content form is not marked complete.",
@@ -1495,7 +1527,7 @@
         "status": "pass",
         "recordUrlPresent": true,
         "packageNameMatches": true,
-        "privacyPolicyUrlReady": false,
+        "privacyPolicyUrlReady": true,
         "metadataCopiedFromPacket": false,
         "dataSafetyCompleted": false,
         "appContentCompleted": false,
@@ -1525,7 +1557,7 @@
     "storeConsoleBrowserHandoff": {
       "schemaVersion": 1,
       "status": "pending-hitl",
-      "generatedAt": "2026-06-05T14:44:55.285Z",
+      "generatedAt": "2026-06-05T15:01:45.812Z",
       "appIdentity": {
         "appName": "ReversR Rebuild",
         "iosBundleId": "com.vsillah.reversrrebuild",
@@ -1558,10 +1590,9 @@
         "currentScreen": {
           "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-content/privacy-policy?source=dashboard",
           "title": "Privacy Policy | ReversR Rebuild",
-          "fieldReady": "Privacy policy URL",
-          "preparedValue": "https://reversr.vercel.app/privacy",
-          "saveState": "disabled until value is entered",
-          "actionBoundary": "Typing/saving live Google Play form fields remains HITL confirmation territory."
+          "savedValue": "https://reversr.vercel.app/privacy",
+          "saveState": "Change saved. Send for review in Publishing overview.",
+          "submissionBoundary": "No Send for review action was clicked."
         }
       },
       "notes": [
@@ -1574,7 +1605,38 @@
         "Computer Use verified at 2026-06-05T13:59:04Z that App Store Connect is on the iOS App Version 1.0 Prepare for Submission page and Google Play is on the ReversR Rebuild dashboard with 0 of 11 setup tasks complete.",
         "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
         "Computer Use navigated Google Play Console to the Privacy Policy task at 2026-06-05T14:44:55.285Z; no value was typed and no save was attempted."
-      ]
+      ],
+      "androidWirelessAdb": {
+        "status": "paired-connected",
+        "pairedAt": "2026-06-05T15:01:45.812Z",
+        "serial": "192.168.4.96:33423",
+        "device": "Google Pixel 10 Pro Android 16",
+        "scrcpy": "started successfully with scrcpy 4.0"
+      },
+      "androidRun": {
+        "checkedAt": "2026-06-05T15:01:45.812Z",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "192.168.4.96:33423",
+        "appPackage": "com.vsillah.reversrrebuild",
+        "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+        "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "screenshots": [
+          "docs/store-screenshots/native/android-01-welcome.png",
+          "docs/store-screenshots/native/android-02-scan.png",
+          "docs/store-screenshots/native/android-03-inventory-validation.png",
+          "docs/store-screenshots/native/android-04-design-match.png",
+          "docs/store-screenshots/native/android-05-build-handoff.png"
+        ],
+        "notes": [
+          "Wireless ADB paired and connected successfully.",
+          "Preview APK installed and launched on Pixel 10 Pro.",
+          "Sample scan path advanced through inventory validation, design match, and build handoff.",
+          "BOM generation produced itemized inventory-matched parts.",
+          "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+          "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+        ]
+      }
     },
     "storeConsoleTaskAnswers": {
       "schemaVersion": 1,
@@ -1992,7 +2054,7 @@
     },
     "releaseAutopilotHandoff": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:47:28.658Z",
+      "generatedAt": "2026-06-05T15:03:28.217Z",
       "status": "pending-hitl",
       "currentPr": {
         "number": 2,
@@ -2141,6 +2203,39 @@
         "checkedAt": "2026-06-05T14:47:28.658Z",
         "cwd": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
         "state": "shell prompt returned; previous EAS iOS internal device-registration prompt is no longer active"
+      },
+      "androidWirelessAdb": {
+        "status": "paired-connected",
+        "pairedAt": "2026-06-05T15:01:45.812Z",
+        "serial": "192.168.4.96:33423",
+        "device": "Google Pixel 10 Pro Android 16",
+        "scrcpy": "started successfully with scrcpy 4.0",
+        "disconnectedAt": "2026-06-05T15:03:28.217Z",
+        "disconnectStatus": "adb devices empty after explicit adb disconnect of host:port and mdns alias"
+      },
+      "androidRun": {
+        "checkedAt": "2026-06-05T15:01:45.812Z",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "192.168.4.96:33423",
+        "appPackage": "com.vsillah.reversrrebuild",
+        "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+        "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "screenshots": [
+          "docs/store-screenshots/native/android-01-welcome.png",
+          "docs/store-screenshots/native/android-02-scan.png",
+          "docs/store-screenshots/native/android-03-inventory-validation.png",
+          "docs/store-screenshots/native/android-04-design-match.png",
+          "docs/store-screenshots/native/android-05-build-handoff.png"
+        ],
+        "notes": [
+          "Wireless ADB paired and connected successfully.",
+          "Preview APK installed and launched on Pixel 10 Pro.",
+          "Sample scan path advanced through inventory validation, design match, and build handoff.",
+          "BOM generation produced itemized inventory-matched parts.",
+          "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+          "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+        ]
       }
     },
     "storeOperatorPacket": {
@@ -2691,8 +2786,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:47:30.173Z",
-      "releaseStatusGeneratedAt": "2026-06-05T14:47:30.163Z",
+      "generatedAt": "2026-06-05T15:03:29.574Z",
+      "releaseStatusGeneratedAt": "2026-06-05T15:03:29.567Z",
       "summary": {
         "pass": 6,
         "pending": 3

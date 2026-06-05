@@ -65,9 +65,14 @@ const parseDevices = (output) => output
 const getDevice = () => {
   const adbPath = run('which', ['adb']).trim();
   const devices = parseDevices(run(adbPath, ['devices', '-l']));
-  const readyDevices = devices.filter(device => device.state === 'device');
+  const requestedSerial = process.env.ANDROID_SERIAL;
+  const readyDevices = devices.filter(device => (
+    device.state === 'device' &&
+    (!requestedSerial || device.serial === requestedSerial)
+  ));
   if (readyDevices.length !== 1) {
-    throw new Error(`Expected exactly one adb device, found ${readyDevices.length}. adb devices: ${JSON.stringify(devices)}`);
+    const serialHint = requestedSerial ? ` for ANDROID_SERIAL=${requestedSerial}` : '';
+    throw new Error(`Expected exactly one adb device${serialHint}, found ${readyDevices.length}. adb devices: ${JSON.stringify(devices)}`);
   }
   return { adbPath, device: readyDevices[0], devices };
 };

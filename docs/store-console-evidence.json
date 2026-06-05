@@ -31,12 +31,12 @@
     "appId": "4972956671966100551",
     "packageName": "com.vsillah.reversrrebuild",
     "appCategory": "Productivity",
-    "privacyPolicyUrl": "",
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
     "metadataCopiedFromPacket": false,
     "dataSafetyCompleted": false,
     "appContentCompleted": false,
     "internalTestingReady": false,
-    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Store listing, data safety, app content, internal testing, and production access are not complete."
+    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Store listing, data safety, app content, internal testing, and production access are not complete. Computer Use saved the Google Play privacy policy URL as a draft change in Publishing overview at 2026-06-05T15:01:45.812Z; no send-for-review or public submission was started."
   },
   "requiredAssets": {
     "nativeScreenshotsCaptured": false,
@@ -57,5 +57,16 @@
     "storeReviewer": "",
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
-  }
+  },
+  "generatedAt": "2026-06-05T15:01:45.812Z",
+  "consoleActions": [
+    {
+      "platform": "googlePlay",
+      "task": "Set privacy policy",
+      "status": "draft-saved",
+      "value": "https://reversr.vercel.app/privacy",
+      "completedAt": "2026-06-05T15:01:45.812Z",
+      "note": "Saved in Play Console as a draft change. Send for review was not clicked."
+    }
+  ]
 }

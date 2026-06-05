@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T14:47:28.658Z",
+  "generatedAt": "2026-06-05T15:03:28.217Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -149,5 +149,38 @@
     "checkedAt": "2026-06-05T14:47:28.658Z",
     "cwd": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
     "state": "shell prompt returned; previous EAS iOS internal device-registration prompt is no longer active"
+  },
+  "androidWirelessAdb": {
+    "status": "paired-connected",
+    "pairedAt": "2026-06-05T15:01:45.812Z",
+    "serial": "192.168.4.96:33423",
+    "device": "Google Pixel 10 Pro Android 16",
+    "scrcpy": "started successfully with scrcpy 4.0",
+    "disconnectedAt": "2026-06-05T15:03:28.217Z",
+    "disconnectStatus": "adb devices empty after explicit adb disconnect of host:port and mdns alias"
+  },
+  "androidRun": {
+    "checkedAt": "2026-06-05T15:01:45.812Z",
+    "device": "Google Pixel 10 Pro Android 16",
+    "serial": "192.168.4.96:33423",
+    "appPackage": "com.vsillah.reversrrebuild",
+    "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+    "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+    "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+    "screenshots": [
+      "docs/store-screenshots/native/android-01-welcome.png",
+      "docs/store-screenshots/native/android-02-scan.png",
+      "docs/store-screenshots/native/android-03-inventory-validation.png",
+      "docs/store-screenshots/native/android-04-design-match.png",
+      "docs/store-screenshots/native/android-05-build-handoff.png"
+    ],
+    "notes": [
+      "Wireless ADB paired and connected successfully.",
+      "Preview APK installed and launched on Pixel 10 Pro.",
+      "Sample scan path advanced through inventory validation, design match, and build handoff.",
+      "BOM generation produced itemized inventory-matched parts.",
+      "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+      "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+    ]
   }
 }

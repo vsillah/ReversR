@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-06-05T14:59:53.783Z",
+  "adbPath": "/opt/homebrew/bin/adb",
+  "devices": [
+    {
+      "serial": "192.168.4.96:33423",
+      "state": "device",
+      "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:39"
+    },
+    {
+      "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
+      "state": "device",
+      "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:38"
+    }
+  ],
+  "selectedDevice": {
+    "serial": "192.168.4.96:33423",
+    "state": "device",
+    "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:39",
+    "manufacturer": "Google",
+    "model": "Pixel 10 Pro",
+    "osVersion": "16",
+    "label": "Google Pixel 10 Pro Android 16"
+  }
+}
