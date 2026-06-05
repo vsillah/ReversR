@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T12:42:09Z",
+  "generatedAt": "2026-06-05T12:48:38Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -9,10 +9,10 @@
     "sku": "reversr-rebuild-001"
   },
   "appStoreConnect": {
-    "browserState": "Chrome is open at Apple Store secure checkout review for Apple Developer Program membership.",
-    "url": "https://secure6.store.apple.com/shop/checkout?_s=Review",
-    "accountGate": "Apple Developer Program membership purchase is required before App Store Connect is enabled. The checkout shows a one-year Apple Developer Program membership and a Place Your Order button; automation did not click it.",
-    "nextHumanAction": "Review the Apple Developer Program membership checkout and click Place Your Order only if Vambah approves the purchase. After membership is active, open App Store Connect and create the app record for the iOS bundle ID.",
+    "browserState": "Chrome is open at the App Store Connect Apple Account passkey/password sign-in gate.",
+    "url": "https://appstoreconnect.apple.com/login?targetUrl=%2Fapps",
+    "accountGate": "Apple Developer Program membership order confirmation was reached. App Store Connect access now requires Vambah to authenticate with Apple Account passkey/password and may still require Apple membership activation propagation.",
+    "nextHumanAction": "Use Touch ID/passkey or password to sign in to App Store Connect. If the account opens, create the app record for the iOS bundle ID. If Apple still reports the account is not enabled, wait for activation details and retry.",
     "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
   },
   "googlePlayConsole": {
@@ -35,6 +35,6 @@
   "notes": [
     "Google Play app record exists; production access and store listing are not complete.",
     "No public store submission was started.",
-    "Apple Developer Agreement was accepted by Vambah. Apple Developer Program membership checkout is waiting for Vambah to approve Place Your Order. App Store Connect app record creation and ascAppId collection are still required after membership activation."
+    "Apple Developer Agreement was accepted by Vambah. Apple Developer Program membership order confirmation was reached. App Store Connect passkey/password authentication is the current human-in-the-loop gate; app record creation and ascAppId collection are still required after authentication and any activation propagation."
   ]
 }

@@ -36,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires completion of Apple Developer/App Store Connect setup. Apple Developer Agreement was accepted by Vambah, and enrollment reached Apple Store secure checkout for one-year Developer Program membership. Membership purchase/payment remains human-in-the-loop."
+      "notes": "iOS EAS preview build requires completion of Apple Developer/App Store Connect setup. Apple Developer Agreement was accepted by Vambah, and Apple Developer Program membership order confirmation was reached. App Store Connect app record creation is now gated by Apple Account passkey/password authentication and any activation propagation."
     }
   },
   "checks": [
@@ -252,7 +252,7 @@
   ],
   "blockers": [
     "Android preview APK exists, but no Android device or emulator was available locally for install QA.",
-    "iOS preview build requires Apple Developer Program membership purchase/payment completion and App Store Connect setup.",
+    "iOS preview build requires App Store Connect passkey/password authentication, app record creation, and Apple membership activation propagation if Apple has not enabled the account yet.",
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
     "Final Android and iOS native screenshots require installed preview builds."
   ],

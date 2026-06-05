@@ -21,7 +21,7 @@
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false,
-    "notes": "Apple Developer Agreement was accepted by Vambah. Apple Developer Program enrollment advanced to Apple Store secure checkout for a one-year membership. App Store Connect still is not enabled until the membership purchase is completed; automation did not click Place Your Order or complete payment."
+    "notes": "Apple Developer Agreement was accepted by Vambah. Apple Developer Program membership order confirmation was reached in Chrome. App Store Connect is now at the Apple Account passkey/password sign-in gate; app record creation is still pending until Vambah completes authentication and any activation propagation finishes."
   },
   "googlePlay": {
     "status": "pass",
