@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AnalysisResult, InnovationResult, TechnicalSpec, ThreeDSceneDescriptor, BillOfMaterials, SITPattern } from './useGemini';
+import { AnalysisResult, InnovationResult, TechnicalSpec, ThreeDSceneDescriptor, BillOfMaterials, MachineWorkflowKey } from './useGemini';
 
 const STORAGE_KEY = 'reversr_innovations';
 const MAX_HISTORY = 50;
@@ -12,7 +12,7 @@ export interface SavedInnovation {
   input: string;
   capturedImage?: string | null;
   analysis: AnalysisResult | null;
-  selectedPattern: SITPattern | null;
+  selectedPattern: MachineWorkflowKey | null;
   innovation: InnovationResult | null;
   spec: TechnicalSpec | null;
   threeDScene: ThreeDSceneDescriptor | null;

@@ -10,19 +10,19 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/useStorage';
-import { SIT_PATTERN_LABELS, SITPattern } from '../hooks/useGemini';
+import { MACHINE_WORKFLOW_LABELS, MachineWorkflowKey } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 
-const LABEL_TO_PATTERN: Record<string, SITPattern> = {
+const LABEL_TO_WORKFLOW: Record<string, MachineWorkflowKey> = {
   'Inventory Match': 'inventory_match',
 };
 
 const getPatternLabel = (pattern: string | null | undefined): string | null => {
   if (!pattern) return null;
-  if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
-    return SIT_PATTERN_LABELS[pattern as SITPattern];
+  if (MACHINE_WORKFLOW_LABELS[pattern as MachineWorkflowKey]) {
+    return MACHINE_WORKFLOW_LABELS[pattern as MachineWorkflowKey];
   }
-  if (LABEL_TO_PATTERN[pattern]) {
+  if (LABEL_TO_WORKFLOW[pattern]) {
     return pattern;
   }
   return null;
@@ -38,13 +38,13 @@ const getItemPattern = (item: SavedInnovation): string | null => {
   return null;
 };
 
-const normalizePatternKey = (pattern: string | null): SITPattern | null => {
+const normalizePatternKey = (pattern: string | null): MachineWorkflowKey | null => {
   if (!pattern) return null;
-  if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
-    return pattern as SITPattern;
+  if (MACHINE_WORKFLOW_LABELS[pattern as MachineWorkflowKey]) {
+    return pattern as MachineWorkflowKey;
   }
-  if (LABEL_TO_PATTERN[pattern]) {
-    return LABEL_TO_PATTERN[pattern];
+  if (LABEL_TO_WORKFLOW[pattern]) {
+    return LABEL_TO_WORKFLOW[pattern];
   }
   return null;
 };
@@ -65,7 +65,7 @@ const PHASE_FILTERS = [
   { key: 4, label: 'Build' },
 ];
 
-const PATTERN_FILTERS: { key: SITPattern; label: string }[] = [
+const PATTERN_FILTERS: { key: MachineWorkflowKey; label: string }[] = [
   { key: 'inventory_match', label: 'Inventory Match' },
 ];
 
@@ -89,7 +89,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPhases, setSelectedPhases] = useState<number[]>([]);
-  const [selectedPatterns, setSelectedPatterns] = useState<SITPattern[]>([]);
+  const [selectedPatterns, setSelectedPatterns] = useState<MachineWorkflowKey[]>([]);
 
   useEffect(() => {
     loadInnovations();
@@ -162,7 +162,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     );
   };
 
-  const togglePatternFilter = (pattern: SITPattern) => {
+  const togglePatternFilter = (pattern: MachineWorkflowKey) => {
     setSelectedPatterns(prev =>
       prev.includes(pattern)
         ? prev.filter(p => p !== pattern)

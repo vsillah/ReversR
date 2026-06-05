@@ -24,7 +24,7 @@ import {
   InnovationResult,
   TechnicalSpec,
   ThreeDSceneDescriptor,
-  SITPattern,
+  MachineWorkflowKey,
   BillOfMaterials,
   useGemini,
   AngleImage,
@@ -43,7 +43,7 @@ interface MutationContext {
   input: string;
   capturedImage: string | null;
   analysis: AnalysisResult | null;
-  selectedPattern: SITPattern | null;
+  selectedPattern: MachineWorkflowKey | null;
   innovation: InnovationResult | null;
   spec: TechnicalSpec | null;
   threeDScene: ThreeDSceneDescriptor | null;

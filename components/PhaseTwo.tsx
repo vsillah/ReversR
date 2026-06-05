@@ -14,7 +14,9 @@ import {
   AnalysisResult,
   InnovationResult,
   InventoryConnector,
+  InventoryValidationResult,
   identifyMachineFromInventory,
+  validateInventoryConnector,
 } from '../hooks/useGemini';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
@@ -53,6 +55,8 @@ export default function PhaseTwo({
 }: Props) {
   const [connector, setConnector] = useState<InventoryConnector>(defaultConnector);
   const [error, setError] = useState<string | null>(null);
+  const [validation, setValidation] = useState<InventoryValidationResult | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('connect');
 
   useEffect(() => {
@@ -83,10 +87,27 @@ export default function PhaseTwo({
 
   const updateConnector = (key: keyof InventoryConnector, value: string) => {
     setConnector(prev => ({ ...prev, [key]: value }));
+    setValidation(null);
   };
 
   const saveConnector = async () => {
     await AsyncStorage.setItem(CONNECTOR_STORAGE_KEY, JSON.stringify(connector));
+  };
+
+  const handleValidate = async () => {
+    setIsValidating(true);
+    setError(null);
+    try {
+      await saveConnector();
+      const result = await validateInventoryConnector(connector);
+      setValidation(result);
+    } catch (e: any) {
+      console.error('Inventory validation failed:', e);
+      setValidation(null);
+      setError(e?.message || 'Inventory validation failed. Check the connector URL and data format.');
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   const handleMatch = async () => {
@@ -204,6 +225,41 @@ export default function PhaseTwo({
           placeholderTextColor={Colors.gray[600]}
           multiline
         />
+
+        <View style={styles.validationRow}>
+          <TouchableOpacity
+            style={[styles.validateButton, isValidating && styles.disabledButton]}
+            onPress={handleValidate}
+            disabled={isValidating || isLoading}
+          >
+            <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
+            <Text style={styles.validateButtonText}>
+              {isValidating ? 'Validating...' : 'Validate Connector'}
+            </Text>
+          </TouchableOpacity>
+          {validation?.status === 'ok' && (
+            <View style={styles.validationBadge}>
+              <Ionicons name="checkmark-circle" size={14} color={Colors.green[400]} />
+              <Text style={styles.validationBadgeText}>{validation.recordCount} records</Text>
+            </View>
+          )}
+        </View>
+
+        {validation?.status === 'ok' && (
+          <View style={styles.validationPanel}>
+            <Text style={styles.validationTitle}>Inventory Preview</Text>
+            {validation.sampleMachines.map(machine => (
+              <View key={machine.machineId} style={styles.machinePreviewRow}>
+                <View style={styles.machinePreviewText}>
+                  <Text style={styles.machinePreviewName}>{machine.machineName}</Text>
+                  <Text style={styles.machinePreviewMeta}>
+                    {machine.machineId}{machine.revision ? ` | Rev ${machine.revision}` : ''} | {machine.partCount} parts
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -349,6 +405,84 @@ const styles = StyleSheet.create({
   notesInput: {
     minHeight: 72,
     textAlignVertical: 'top',
+  },
+  validationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.sm,
+    flexWrap: 'wrap',
+  },
+  validateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  validateButtonText: {
+    color: Colors.accent,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  validationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: 'rgba(34, 197, 94, 0.12)',
+    borderWidth: 1,
+    borderColor: Colors.green[600],
+    borderRadius: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  validationBadgeText: {
+    color: Colors.green[400],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  validationPanel: {
+    backgroundColor: 'rgba(0,0,0,0.28)',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  validationTitle: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: Spacing.sm,
+  },
+  machinePreviewRow: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingTop: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  machinePreviewText: {
+    flex: 1,
+  },
+  machinePreviewName: {
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+  },
+  machinePreviewMeta: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    marginTop: 2,
   },
   optionRow: {
     flexDirection: 'row',

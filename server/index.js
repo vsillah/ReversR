@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs/promises');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
 const { Ollama } = require('ollama');
 
@@ -12,47 +13,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 
-// ============================================
-// SIT PATTERN NORMALIZATION
-// ============================================
-
-// Valid pattern keys
-const VALID_PATTERN_KEYS = ['subtraction', 'task_unification', 'multiplication', 'division', 'attribute_dependency'];
-
-// Map labels to keys for legacy data
-const LABEL_TO_KEY = {
-  'Subtraction': 'subtraction',
-  'Task Unification': 'task_unification',
-  'Multiplication': 'multiplication',
-  'Division': 'division',
-  'Attribute Dependency': 'attribute_dependency',
-};
-
-// Normalize pattern to key format, returns null if invalid
-const normalizePattern = (pattern) => {
-  if (!pattern) return null;
-  
-  // Already a valid key
-  if (VALID_PATTERN_KEYS.includes(pattern)) {
-    return pattern;
-  }
-  
-  // Try label lookup
-  if (LABEL_TO_KEY[pattern]) {
-    return LABEL_TO_KEY[pattern];
-  }
-  
-  // Try case-insensitive match
-  const lower = pattern.toLowerCase().replace(/\s+/g, '_');
-  if (VALID_PATTERN_KEYS.includes(lower)) {
-    return lower;
-  }
-  
-  console.warn(`Unknown pattern format: ${pattern}, defaulting to subtraction`);
-  return 'subtraction';
-};
-
-// ============================================
 // API KEY POOL & RATE LIMIT HANDLING
 // ============================================
 
@@ -356,10 +316,337 @@ const createErrorResponse = (error, fallbackMessage = 'An error occurred') => {
 // SYSTEM INSTRUCTION
 // ============================================
 
-const SIT_SYSTEM_INSTRUCTION = `You are an expert in Systematic Inventive Thinking (SIT), a structured methodology for innovation. You strictly adhere to the "Closed World" principle: all solutions must derive from components already within or immediately adjacent to the product's defined system boundary. You are precise, analytical, and creative within constraints.`;
 const RECONSTRUCTION_SYSTEM_INSTRUCTION = `You are a manufacturing reconstruction analyst. Identify machines from approved inventory, preserve evidence, avoid inventing unsupported parts, and produce practical bills of materials, assembly steps, pricing estimates, and 3D modeling handoff notes.`;
 
 const normalizeName = (value = '') => value.trim().replace(/\s+/g, ' ');
+const normalizeToken = (value = '') => normalizeName(String(value)).toLowerCase();
+
+const splitList = (value) => {
+  if (Array.isArray(value)) return value.map(item => normalizeName(String(item))).filter(Boolean);
+  if (!value) return [];
+  return String(value)
+    .split(/[|;,]/)
+    .map(item => normalizeName(item))
+    .filter(Boolean);
+};
+
+const safeJsonParse = (value, fallback) => {
+  if (value == null || value === '') return fallback;
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+};
+
+const parseCsvLine = (line) => {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const next = line[i + 1];
+    if (char === '"' && inQuotes && next === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  result.push(current.trim());
+  return result;
+};
+
+const parseCsvRecords = (text) => {
+  const lines = String(text)
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith('#'));
+  if (lines.length < 2) return [];
+
+  const headers = parseCsvLine(lines[0]).map(header => header.trim());
+  return lines.slice(1).map(line => {
+    const cells = parseCsvLine(line);
+    return headers.reduce((record, header, index) => {
+      record[header] = cells[index] || '';
+      return record;
+    }, {});
+  });
+};
+
+const normalizeAssemblySteps = (value, fallbackParts) => {
+  const parsed = safeJsonParse(value, null);
+  if (Array.isArray(parsed)) {
+    return parsed.map((step, index) => ({
+      stepNumber: Number(step.stepNumber || index + 1),
+      title: normalizeName(step.title || `Assembly step ${index + 1}`),
+      instructions: normalizeName(step.instructions || step.description || 'Assemble and verify this stage.'),
+      parts: splitList(step.parts || fallbackParts),
+      estimatedTime: normalizeName(step.estimatedTime || step.time || 'TBD'),
+      qualityCheck: normalizeName(step.qualityCheck || step.qc || 'Admin verifies fit and function.'),
+    }));
+  }
+
+  return [
+    {
+      stepNumber: 1,
+      title: 'Verify inventory record',
+      instructions: 'Confirm machine ID, revision, and required subassemblies against the approved inventory record.',
+      parts: fallbackParts.slice(0, 3),
+      estimatedTime: '20 min',
+      qualityCheck: 'Machine ID and revision are confirmed by an admin.',
+    },
+    {
+      stepNumber: 2,
+      title: 'Stage core assemblies',
+      instructions: 'Lay out core assemblies, fasteners, and tooling before rebuild work begins.',
+      parts: fallbackParts.slice(0, 6),
+      estimatedTime: '45 min',
+      qualityCheck: 'All required parts are present and revision-compatible.',
+    },
+    {
+      stepNumber: 3,
+      title: 'Assemble and calibrate',
+      instructions: 'Follow the machine-specific sequence, torque guidance, wiring notes, and calibration routine.',
+      parts: fallbackParts,
+      estimatedTime: '2-4 hr',
+      qualityCheck: 'Functional test and calibration report are complete.',
+    },
+  ];
+};
+
+const normalizePricing = (value) => {
+  const parsed = safeJsonParse(value, null);
+  if (parsed && typeof parsed === 'object') {
+    return {
+      partsSubtotal: parsed.partsSubtotal || parsed.parts || '$TBD',
+      modelingEstimate: parsed.modelingEstimate || parsed.modeling || '$TBD',
+      fabricationEstimate: parsed.fabricationEstimate || parsed.fabrication || '$TBD',
+      assemblyLaborEstimate: parsed.assemblyLaborEstimate || parsed.assemblyLabor || '$TBD',
+      totalEstimate: parsed.totalEstimate || parsed.total || '$TBD',
+      confidence: parsed.confidence || 'medium',
+    };
+  }
+
+  return {
+    partsSubtotal: '$420-$780',
+    modelingEstimate: '$300-$900',
+    fabricationEstimate: '$500-$1,600',
+    assemblyLaborEstimate: '$240-$640',
+    totalEstimate: '$1,460-$3,920',
+    confidence: 'medium',
+  };
+};
+
+const normalizeFulfillmentOptions = (value) => {
+  const parsed = safeJsonParse(value, null);
+  if (Array.isArray(parsed)) {
+    return parsed.map(option => ({
+      vendorName: normalizeName(option.vendorName || option.name || 'Vendor'),
+      serviceType: normalizeName(option.serviceType || option.service || '3D modeling and fabrication quote'),
+      url: normalizeName(option.url || ''),
+      packageRequired: splitList(option.packageRequired || option.package || ['BOM CSV', 'STL/OBJ files', 'assembly notes']),
+    }));
+  }
+
+  return [
+    {
+      vendorName: 'Xometry',
+      serviceType: '3D modeling and fabrication quote',
+      url: 'https://www.xometry.com',
+      packageRequired: ['BOM CSV', 'STL/OBJ files', 'assembly notes'],
+    },
+    {
+      vendorName: 'Protolabs',
+      serviceType: 'rapid prototyping quote',
+      url: 'https://www.protolabs.com',
+      packageRequired: ['part drawings', 'materials', 'quantities'],
+    },
+  ];
+};
+
+const normalizeMachineRecord = (record = {}, index = 0) => {
+  const machineId = normalizeName(record.machineId || record.id || record.sku || record.assetId || `INV-${String(index + 1).padStart(4, '0')}`);
+  const machineName = normalizeName(record.machineName || record.name || record.title || record.model || 'Unnamed Machine');
+  const parts = splitList(record.parts || record.components || record.bomParts || record.requiredParts);
+  const aliases = splitList(record.aliases || record.keywords || record.tags);
+  const materials = splitList(record.materials || record.material);
+  const vendors = normalizeFulfillmentOptions(record.fulfillmentOptions || record.modelingVendors || record.vendors);
+  const assemblySteps = normalizeAssemblySteps(record.assemblySteps || record.steps, parts);
+  const pricing = normalizePricing(record.pricing || record.pricingSnapshot);
+
+  return {
+    machineId,
+    machineName,
+    revision: normalizeName(record.revision || record.version || ''),
+    aliases,
+    parts,
+    materials,
+    assemblySteps,
+    pricing,
+    fulfillmentOptions: vendors,
+    notes: normalizeName(record.notes || record.description || ''),
+    sourceRow: index + 1,
+  };
+};
+
+const DEMO_MACHINE_RECORDS = [
+  normalizeMachineRecord({
+    machineId: 'DEMO-FDM-PRINTER-001',
+    machineName: 'Desktop FDM 3D Printer',
+    revision: 'A',
+    aliases: '3d printer|fdm printer|desktop printer|filament printer',
+    parts: 'Frame|Heated Bed|Extruder|Stepper Motors|Control Board|Power Supply|Belts|Rails|Nozzle|Display',
+    materials: 'aluminum extrusion|borosilicate glass|NEMA steppers|GT2 belts|hardened steel nozzle',
+    assemblySteps: JSON.stringify([
+      {
+        stepNumber: 1,
+        title: 'Verify inventory record',
+        instructions: 'Confirm printer revision, bed size, firmware family, and required subassemblies.',
+        parts: ['Frame', 'Heated Bed', 'Extruder'],
+        estimatedTime: '20 min',
+        qualityCheck: 'Machine ID and revision match the inventory record.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Build frame and motion system',
+        instructions: 'Square the frame, install rails, belts, steppers, and bed motion hardware.',
+        parts: ['Frame', 'Rails', 'Belts', 'Stepper Motors', 'Heated Bed'],
+        estimatedTime: '1-2 hr',
+        qualityCheck: 'Axes move freely and frame is square.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Install toolhead and electronics',
+        instructions: 'Mount extruder, nozzle, power supply, control board, display, and wiring harness.',
+        parts: ['Extruder', 'Nozzle', 'Power Supply', 'Control Board', 'Display'],
+        estimatedTime: '1 hr',
+        qualityCheck: 'Continuity, polarity, and thermal protections pass before power-on.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Calibrate rebuild',
+        instructions: 'Run bed leveling, PID tuning, extrusion calibration, and a first-layer test.',
+        parts: ['Heated Bed', 'Nozzle', 'Display'],
+        estimatedTime: '45 min',
+        qualityCheck: 'Calibration report and test print are attached.',
+      },
+    ]),
+    pricing: JSON.stringify({
+      partsSubtotal: '$420-$780',
+      modelingEstimate: '$300-$900',
+      fabricationEstimate: '$500-$1,600',
+      assemblyLaborEstimate: '$240-$640',
+      totalEstimate: '$1,460-$3,920',
+      confidence: 'medium',
+    }),
+  }, 0),
+  normalizeMachineRecord({
+    machineId: 'DEMO-CNC-ROUTER-002',
+    machineName: 'Desktop CNC Router',
+    aliases: 'cnc router|desktop mill|gantry router',
+    parts: 'Frame|Spindle|Gantry|Stepper Motors|Control Board|Power Supply|Linear Rails|Lead Screws|Wasteboard',
+    materials: 'aluminum extrusion|steel rails|MDF wasteboard',
+  }, 1),
+];
+
+const recordsFromPayload = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.machines)) return payload.machines;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.records)) return payload.records;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+};
+
+const readConnectorText = async (connector = {}) => {
+  const sourceUrl = connector.sourceUrl || '';
+  if (!sourceUrl || sourceUrl.startsWith('demo://')) {
+    return { text: '', sourceKind: 'demo' };
+  }
+
+  if (sourceUrl.startsWith('file://')) {
+    const filePath = decodeURIComponent(sourceUrl.replace('file://', ''));
+    const text = await fs.readFile(filePath, 'utf8');
+    return { text, sourceKind: filePath.endsWith('.csv') ? 'csv' : 'json' };
+  }
+
+  if (/^https?:\/\//i.test(sourceUrl)) {
+    const response = await fetch(sourceUrl, {
+      headers: {
+        Accept: connector.connectorType === 'csv' ? 'text/csv,text/plain,*/*' : 'application/json,text/csv,text/plain,*/*',
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Inventory connector fetch failed (${response.status})`);
+    }
+    const text = await response.text();
+    return {
+      text,
+      sourceKind: connector.connectorType === 'csv' || sourceUrl.toLowerCase().includes('.csv') ? 'csv' : 'json',
+    };
+  }
+
+  throw new Error('Unsupported inventory connector URL. Use demo://, file://, http://, or https://.');
+};
+
+const loadInventoryRecords = async (connector = {}) => {
+  if (!connector.sourceUrl || connector.sourceUrl.startsWith('demo://')) {
+    return DEMO_MACHINE_RECORDS;
+  }
+
+  if (connector.authMode && connector.authMode !== 'none') {
+    throw new Error('Authenticated inventory connectors are planned but not enabled in this prototype. Use a read-only public URL or file:// fixture for validation.');
+  }
+
+  const { text, sourceKind } = await readConnectorText(connector);
+  const rawRecords = sourceKind === 'csv'
+    ? parseCsvRecords(text)
+    : recordsFromPayload(JSON.parse(text));
+
+  return rawRecords.map(normalizeMachineRecord).filter(record => record.machineName && record.machineId);
+};
+
+const scoreInventoryRecord = (analysis, record) => {
+  const analysisText = normalizeToken([
+    analysis?.productName,
+    analysis?.rawAnalysis,
+    ...(analysis?.components || []).map(component => component.name),
+  ].join(' '));
+  const componentTokens = new Set((analysis?.components || []).map(component => normalizeToken(component.name)));
+  const recordParts = record.parts.map(normalizeToken);
+  const recordAliases = [record.machineName, ...record.aliases].map(normalizeToken);
+
+  const partHits = recordParts.filter(part => componentTokens.has(part) || analysisText.includes(part));
+  const aliasHits = recordAliases.filter(alias => alias && analysisText.includes(alias));
+  const materialHits = record.materials.map(normalizeToken).filter(material => material && analysisText.includes(material));
+  const denominator = Math.max(recordParts.length, 1);
+  const score = Math.min(0.98, (partHits.length / denominator) * 0.7 + Math.min(aliasHits.length, 2) * 0.18 + Math.min(materialHits.length, 2) * 0.07);
+
+  return {
+    score: Number(score.toFixed(2)),
+    partHits,
+    aliasHits,
+    materialHits,
+  };
+};
+
+const findBestInventoryMatch = (analysis, records) => {
+  const scored = records.map(record => ({
+    record,
+    ...scoreInventoryRecord(analysis, record),
+  })).sort((a, b) => b.score - a.score);
+
+  return scored[0] || null;
+};
 
 const inferComponents = (input = '') => {
   const lower = input.toLowerCase();
@@ -471,6 +758,37 @@ const buildFallbackReconstruction = (analysis, connector = {}) => {
         packageRequired: ['part drawings', 'materials', 'quantities'],
       },
     ],
+  };
+};
+
+const buildInventoryReconstruction = (analysis, connector = {}, match) => {
+  if (!match?.record) return buildFallbackReconstruction(analysis, connector);
+
+  const { record, score, partHits, aliasHits, materialHits } = match;
+  const sourceName = connector.sourceName || 'Inventory';
+  const evidenceParts = [
+    partHits.length ? `parts: ${partHits.join(', ')}` : '',
+    aliasHits.length ? `aliases: ${aliasHits.join(', ')}` : '',
+    materialHits.length ? `materials: ${materialHits.join(', ')}` : '',
+  ].filter(Boolean);
+
+  return {
+    patternUsed: 'inventory_match',
+    conceptName: `${record.machineName} Reconstruction Package`,
+    conceptDescription: `Matched ${record.machineName}${record.revision ? ` revision ${record.revision}` : ''} against ${sourceName}. The package prepares verified parts, assembly sequence, pricing, and 3D modeling handoff for reconstruction.`,
+    marketGap: 'Operators need a faster way to move from machine photo to a verified rebuild package tied to inventory truth.',
+    constraint: `Inventory source: ${connector.sourceUrl || 'demo://sample-machines'}. Human review is required before procurement or fabrication.`,
+    noveltyScore: 7,
+    viabilityScore: score >= 0.7 ? 8 : 6,
+    marketBenefit: 'Creates a reviewable reconstruction package grounded in an approved machine inventory record.',
+    machineId: record.machineId,
+    machineName: record.machineName,
+    inventorySource: sourceName,
+    confidenceScore: score,
+    evidence: evidenceParts.length ? `Matched on ${evidenceParts.join('; ')}.` : 'No strong overlap found; admin review required.',
+    assemblySteps: record.assemblySteps,
+    pricing: record.pricing,
+    fulfillmentOptions: record.fulfillmentOptions,
   };
 };
 
@@ -630,10 +948,39 @@ app.post('/api/gemini/analyze', async (req, res) => {
   }
 });
 
+app.post('/api/inventory/validate', async (req, res) => {
+  try {
+    const { connector } = req.body;
+    const records = await loadInventoryRecords(connector || {});
+    res.json({
+      status: 'ok',
+      sourceName: connector?.sourceName || 'Inventory',
+      sourceUrl: connector?.sourceUrl || 'demo://sample-machines',
+      recordCount: records.length,
+      requiredFields: ['machineId', 'machineName/name', 'parts/components'],
+      sampleMachines: records.slice(0, 5).map(record => ({
+        machineId: record.machineId,
+        machineName: record.machineName,
+        revision: record.revision,
+        partCount: record.parts.length,
+      })),
+    });
+  } catch (error) {
+    console.error('Inventory validation error:', error);
+    res.status(400).json({
+      status: 'error',
+      error: error.message || 'Failed to validate inventory connector',
+      canRetry: true,
+    });
+  }
+});
+
 // Match machine against inventory connector
 app.post('/api/gemini/match-machine', async (req, res) => {
   try {
     const { analysis, connector, image, provider, ollamaModel } = req.body;
+    const inventoryRecords = await loadInventoryRecords(connector || {});
+    const deterministicMatch = findBestInventoryMatch(analysis, inventoryRecords);
 
     const prompt = `
       PHASE 2: INVENTORY MATCH
@@ -641,6 +988,7 @@ app.post('/api/gemini/match-machine', async (req, res) => {
       Use the approved inventory connector to identify the scanned machine and produce a reconstruction plan.
 
       Inventory connector: ${JSON.stringify(connector)}
+      Inventory records: ${JSON.stringify(inventoryRecords.slice(0, 20))}
       Scan analysis: ${JSON.stringify(analysis)}
       Image provided: ${!!image}
 
@@ -712,7 +1060,7 @@ app.post('/api/gemini/match-machine', async (req, res) => {
     let result;
     const connectorType = connector?.connectorType || 'demo';
     if (connectorType === 'demo' || (provider !== 'ollama' && !hasConfiguredGeminiKey())) {
-      result = buildFallbackReconstruction(analysis, connector);
+      result = buildInventoryReconstruction(analysis, connector, deterministicMatch);
     } else if (provider === 'ollama') {
       const model = ollamaModel || 'qwen3.5:0.8b';
       result = await callOllamaWithRetry(model, prompt, schema, RECONSTRUCTION_SYSTEM_INSTRUCTION, null);
@@ -745,88 +1093,6 @@ app.post('/api/gemini/match-machine', async (req, res) => {
       return res.json(buildFallbackReconstruction(req.body?.analysis, req.body?.connector));
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to match machine from inventory');
-    res.status(statusCode).json(body);
-  }
-});
-
-// Apply SIT pattern
-app.post('/api/gemini/apply-pattern', async (req, res) => {
-  try {
-    const { analysis, pattern, selectedComponents, selectedResources, provider, ollamaModel } = req.body;
-    
-    // Filter components and resources based on selection (if provided)
-    const componentsToUse = selectedComponents && selectedComponents.length > 0
-      ? selectedComponents.map(idx => analysis.components[idx]).filter(Boolean)
-      : analysis.components;
-    
-    const resourcesToUse = selectedResources && selectedResources.length > 0
-      ? selectedResources.map(idx => analysis.neighborhoodResources[idx]).filter(Boolean)
-      : analysis.neighborhoodResources;
-    
-    const selectionNote = (selectedComponents && selectedComponents.length > 0) || (selectedResources && selectedResources.length > 0)
-      ? `\n\nNote: The user has specifically selected the following items to focus on for this reversal. Prioritize these elements in your innovation.`
-      : '';
-    
-    const prompt = `
-      PHASE 2: PATTERN APPLICATION (${pattern})
-      Apply the "${pattern}" SIT pattern to generate an innovative product concept.
-      
-      Product: ${analysis.productName}
-      Components: ${JSON.stringify(componentsToUse)}
-      Neighborhood Resources: ${JSON.stringify(resourcesToUse)}
-      Closed World: ${analysis.closedWorldBoundary}${selectionNote}
-      
-      Generate ONE innovative concept. Include marketGap (unmet need), noveltyScore (1-10), and viabilityScore (1-10).
-      Return JSON with: patternUsed, conceptName, conceptDescription, marketGap, constraint, noveltyScore, viabilityScore, marketBenefit.
-    `;
-
-    const cacheKey = { type: 'apply-pattern', productName: analysis.productName, pattern, selectedComponents, selectedResources, provider, ollamaModel };
-
-    const schema = {
-      type: Type.OBJECT,
-      properties: {
-        patternUsed: { type: Type.STRING },
-        conceptName: { type: Type.STRING },
-        conceptDescription: { type: Type.STRING },
-        marketGap: { type: Type.STRING },
-        constraint: { type: Type.STRING },
-        noveltyScore: { type: Type.NUMBER },
-        viabilityScore: { type: Type.NUMBER },
-        marketBenefit: { type: Type.STRING }
-      },
-      required: ["patternUsed", "conceptName", "conceptDescription", "marketGap", "constraint", "noveltyScore", "viabilityScore", "marketBenefit"]
-    };
-
-    let result;
-    if (provider === 'ollama') {
-      const model = ollamaModel || 'qwen3.5:0.8b';
-      result = await callOllamaWithRetry(model, prompt, schema, SIT_SYSTEM_INSTRUCTION, null);
-    } else {
-      result = await callGeminiWithRetry(async (ai) => {
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt,
-          config: {
-            systemInstruction: SIT_SYSTEM_INSTRUCTION,
-            responseMimeType: "application/json",
-            responseSchema: schema
-          }
-        });
-
-        const text = response.text;
-        if (!text) throw new Error("No response from Gemini");
-        return JSON.parse(text);
-      }, cacheKey);
-    }
-
-    // Override patternUsed with normalized pattern key
-    // This ensures consistent format (e.g., 'subtraction' not 'Subtraction')
-    result.patternUsed = normalizePattern(pattern);
-    
-    res.json(result);
-  } catch (error) {
-    console.error('Apply pattern error:', error);
-    const { statusCode, body } = createErrorResponse(error, 'Failed to apply pattern');
     res.status(statusCode).json(body);
   }
 });
@@ -1270,11 +1536,6 @@ app.post('/api/gemini/generate-bom', async (req, res) => {
 
 app.post('/api/analyze', (req, res) => {
   req.url = '/api/gemini/analyze';
-  app.handle(req, res);
-});
-
-app.post('/api/apply-pattern', (req, res) => {
-  req.url = '/api/gemini/apply-pattern';
   app.handle(req, res);
 });
 

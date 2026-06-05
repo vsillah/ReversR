@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ReversR",
-    "slug": "reversr",
+    "name": "ReversR Rebuild",
+    "slug": "reversr-rebuild",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,11 @@
       "backgroundColor": "#0a0a0a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vsillah.reversrrebuild",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,10 +24,9 @@
         "backgroundColor": "#0a0a0a"
       },
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.CAMERA"
       ],
-      "package": "com.vsillah.reversr",
+      "package": "com.vsillah.reversrrebuild",
       "versionCode": 15
     },
     "web": {
@@ -34,16 +37,14 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow ReversR to access your camera to scan products."
+          "cameraPermission": "Allow ReversR Rebuild to access your camera to scan machines for inventory matching."
         }
       ],
       "expo-router"
     ],
-    "scheme": "reversr",
+    "scheme": "reversr-rebuild",
     "extra": {
-      "eas": {
-        "projectId": "9e2de870-06ee-4cb4-ad47-60efbb533baa"
-      }
+      "apiBaseUrl": "https://reversr-rebuild-api.example.com"
     }
   }
 }

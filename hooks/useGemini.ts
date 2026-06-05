@@ -1,8 +1,11 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const API_BASE = Platform.OS === 'web' 
-  ? (window.location.origin.includes('localhost') ? 'http://localhost:3001' : 'https://reversr-vsillah.replit.app')
-  : 'https://reversr-vsillah.replit.app';
+import Constants from 'expo-constants';
+
+const configuredApiBase = process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl;
+const API_BASE = Platform.OS === 'web' && window.location.origin.includes('localhost')
+  ? 'http://localhost:3001'
+  : configuredApiBase || 'https://reversr-rebuild-api.example.com';
 
 export const getAiConfig = async () => {
   try {
@@ -35,13 +38,13 @@ export interface AnalysisResult {
   rawAnalysis: string;
 }
 
-export type SITPattern = 'inventory_match';
+export type MachineWorkflowKey = 'inventory_match';
 
-export const SIT_PATTERN_LABELS: Record<SITPattern, string> = {
+export const MACHINE_WORKFLOW_LABELS: Record<MachineWorkflowKey, string> = {
   'inventory_match': 'Inventory Match',
 };
 
-export const SIT_PATTERNS: SITPattern[] = [
+export const MACHINE_WORKFLOWS: MachineWorkflowKey[] = [
   'inventory_match',
 ];
 
@@ -51,6 +54,21 @@ export interface InventoryConnector {
   connectorType: 'demo' | 'csv' | 'api' | 'erp';
   authMode: 'none' | 'api_key' | 'oauth' | 'private_network';
   notes?: string;
+}
+
+export interface InventoryValidationResult {
+  status: 'ok' | 'error';
+  sourceName: string;
+  sourceUrl: string;
+  recordCount: number;
+  requiredFields: string[];
+  sampleMachines: Array<{
+    machineId: string;
+    machineName: string;
+    revision?: string;
+    partCount: number;
+  }>;
+  error?: string;
 }
 
 export interface AssemblyStep {
@@ -79,7 +97,7 @@ export interface FulfillmentOption {
 }
 
 export interface InnovationResult {
-  patternUsed: SITPattern;
+  patternUsed: MachineWorkflowKey;
   conceptName: string;
   conceptDescription: string;
   marketGap: string;
@@ -251,7 +269,15 @@ export const identifyMachineFromInventory = async (
   });
 };
 
-export const applySITPattern = identifyMachineFromInventory;
+export const validateInventoryConnector = async (
+  connector: InventoryConnector
+): Promise<InventoryValidationResult> => {
+  return fetchWithRetry(`${API_BASE}/api/inventory/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ connector })
+  });
+};
 
 export const generateTechnicalSpec = async (innovation: InnovationResult): Promise<TechnicalSpec> => {
   const config = await getAiConfig();
