@@ -1,50 +1,19 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T10:08:05.658Z
-Release status generated at: 2026-06-05T10:08:05.654Z
+Generated at: 2026-06-05T10:40:10.413Z
+Release status generated at: 2026-06-05T10:40:10.408Z
 
-This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, connector, EAS, native QA, screenshot, and store-console gates.
+This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
 ## Summary
 
-- Pass: 3
-- Pending: 6
+- Pass: 4
+- Pending: 5
 - Blocked: 0
 - Warn: 0
-- Next recommended gate: real-connector-smoke
+- Next recommended gate: eas-project-linkage
 
-## 1. Hosted API can validate and match against a real authorized machine inventory
-
-- Gate ID: real-connector-smoke
-- Group: hosted
-- Status: pending
-- Owner: Inventory/admin operator
-- Phase: Production inventory connector
-- Next action: Validate the real machine inventory export and smoke the hosted connector path.
-
-Current gate evidence:
-
-This requires a deployed API plus a real connector source and server-side connector credential.
-
-Current gate next step:
-
-Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.
-
-Steps:
-
-1. Run npm run inventory:source:validate -- <inventory.csv-or-json> on the real export.
-2. Follow docs/external-release-setup-runbook.md section 6 before connecting real inventory credentials.
-3. Configure the connector credential on the hosted API as a server-side credentialRef.
-4. Run npm run connector:smoke with EXPO_PUBLIC_API_BASE_URL, CONNECTOR_SMOKE_SOURCE_URL, CONNECTOR_SMOKE_AUTH_MODE, and CONNECTOR_SMOKE_CREDENTIAL_REF.
-5. Set CONNECTOR_SMOKE_EXPECTED_MACHINE_ID for a known machine when possible.
-
-Evidence required:
-
-- Inventory source validation passes for the real export.
-- Hosted connector smoke validates the source, matches a machine, and generates a BOM.
-- No raw connector secret appears in app responses or evidence.
-
-## 2. EAS project is linked for the clone identity
+## 1. EAS project is linked for the clone identity
 
 - Gate ID: eas-project-linkage
 - Group: native
@@ -78,7 +47,7 @@ Evidence required:
 - app.json has the clone projectId.
 - Native preflight no longer reports missing EAS project linkage.
 
-## 3. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
+## 2. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
 
 - Gate ID: eas-submit-config
 - Group: native
@@ -109,7 +78,7 @@ Evidence required:
 - eas.json has submit.production.ios.ascAppId.
 - Native preflight no longer reports missing iOS ascAppId.
 
-## 4. Android and iOS preview-build QA evidence is recorded
+## 3. Android and iOS preview-build QA evidence is recorded
 
 - Gate ID: native-qa-evidence
 - Group: native
@@ -141,7 +110,7 @@ Evidence required:
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
-## 5. App Store Connect and Google Play Console app records exist
+## 4. App Store Connect and Google Play Console app records exist
 
 - Gate ID: store-console-records
 - Group: store-console
@@ -177,7 +146,7 @@ Evidence required:
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
-## 6. Final native screenshots are captured from Android/iOS preview builds
+## 5. Final native screenshots are captured from Android/iOS preview builds
 
 - Gate ID: native-screenshots
 - Group: store-console

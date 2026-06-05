@@ -1,15 +1,16 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:08:14.499Z",
+  "generatedAt": "2026-06-05T10:40:08.752Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:08:14.493Z",
+    "generatedAt": "2026-06-05T10:40:08.747Z",
     "summary": {
-      "pass": 33,
-      "pending": 6
+      "pass": 32,
+      "pending": 7
     },
     "pendingGateIds": [
-      "real-connector-smoke",
+      "release-evidence-bundle",
+      "local-release-ci-evidence",
       "eas-project-linkage",
       "eas-submit-config",
       "native-qa-evidence",
@@ -115,10 +116,16 @@
   ],
   "pendingGates": [
     {
-      "id": "real-connector-smoke",
-      "group": "hosted",
-      "title": "Hosted API can validate and match against a real authorized machine inventory",
-      "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+      "id": "release-evidence-bundle",
+      "group": "store-local",
+      "title": "Consolidated release evidence bundle is generated for external operators",
+      "nextStep": "Run npm run release:evidence before external account-side release work."
+    },
+    {
+      "id": "local-release-ci-evidence",
+      "group": "store-local",
+      "title": "Local release CI evidence records repeatable pre-store validation",
+      "nextStep": "Run npm run release:local-ci before external account-side release work."
     },
     {
       "id": "eas-project-linkage",

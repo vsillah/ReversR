@@ -161,6 +161,7 @@ const run = async () => {
   assert(bom.response.ok, `/api/gemini/generate-bom failed with ${bom.response.status}: ${JSON.stringify(bom.parsed)}`);
   assert(Array.isArray(bom.parsed.items) && bom.parsed.items.length >= 1, 'BOM should include at least one item.');
   assert(bom.parsed.totalEstimatedCost, 'BOM should include totalEstimatedCost.');
+  assert(!/NaN/i.test(String(bom.parsed.totalEstimatedCost)), `BOM totalEstimatedCost must be numeric, found ${bom.parsed.totalEstimatedCost}.`);
 
   const evidence = {
     schemaVersion: 1,

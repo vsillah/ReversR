@@ -1,38 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T10:08:05.658Z",
-  "releaseStatusGeneratedAt": "2026-06-05T10:08:05.654Z",
+  "generatedAt": "2026-06-05T10:40:10.413Z",
+  "releaseStatusGeneratedAt": "2026-06-05T10:40:10.408Z",
   "summary": {
-    "pass": 3,
-    "pending": 6
+    "pass": 4,
+    "pending": 5
   },
-  "nextRecommendedGate": "real-connector-smoke",
+  "nextRecommendedGate": "eas-project-linkage",
   "pendingGates": [
-    {
-      "group": "hosted",
-      "id": "real-connector-smoke",
-      "title": "Hosted API can validate and match against a real authorized machine inventory",
-      "status": "pending",
-      "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
-      "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.",
-      "action": {
-        "owner": "Inventory/admin operator",
-        "phase": "Production inventory connector",
-        "action": "Validate the real machine inventory export and smoke the hosted connector path.",
-        "steps": [
-          "Run npm run inventory:source:validate -- <inventory.csv-or-json> on the real export.",
-          "Follow docs/external-release-setup-runbook.md section 6 before connecting real inventory credentials.",
-          "Configure the connector credential on the hosted API as a server-side credentialRef.",
-          "Run npm run connector:smoke with EXPO_PUBLIC_API_BASE_URL, CONNECTOR_SMOKE_SOURCE_URL, CONNECTOR_SMOKE_AUTH_MODE, and CONNECTOR_SMOKE_CREDENTIAL_REF.",
-          "Set CONNECTOR_SMOKE_EXPECTED_MACHINE_ID for a known machine when possible."
-        ],
-        "evidence": [
-          "Inventory source validation passes for the real export.",
-          "Hosted connector smoke validates the source, matches a machine, and generates a BOM.",
-          "No raw connector secret appears in app responses or evidence."
-        ]
-      }
-    },
     {
       "group": "native",
       "id": "eas-project-linkage",

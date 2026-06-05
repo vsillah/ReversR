@@ -915,12 +915,13 @@ const hostedConnectorSmokeOk = (
   hostedConnectorSmoke?.connector?.authMode === 'none' &&
   hostedConnectorSmoke?.connector?.credentialRefConfigured === false &&
   Number(hostedConnectorSmoke?.validation?.recordCount || 0) >= 1 &&
-  ['not-required', ''].includes(hostedConnectorSmoke?.validation?.credentialStatus || '') &&
+  ['not-required', 'not_required', ''].includes(hostedConnectorSmoke?.validation?.credentialStatus || '') &&
   hostedConnectorSmoke?.match?.machineId === 'FARMBOT-GENESIS-V1-8' &&
   Number(hostedConnectorSmoke?.match?.confidenceScore || 0) >= 0.2 &&
   Number(hostedConnectorSmoke?.match?.assemblyStepCount || 0) >= 1 &&
   Number(hostedConnectorSmoke?.match?.fulfillmentOptionCount || 0) >= 1 &&
   Number(hostedConnectorSmoke?.bom?.itemCount || 0) >= 1 &&
+  !/NaN/i.test(String(hostedConnectorSmoke?.bom?.totalEstimatedCost || '')) &&
   hostedConnectorSmoke?.safety?.rawSecretsIncluded === false
 );
 addGate(

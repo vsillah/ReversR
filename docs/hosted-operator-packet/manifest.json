@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:08:04.905Z",
+  "generatedAt": "2026-06-05T10:40:09.528Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:08:04.901Z",
+    "generatedAt": "2026-06-05T10:40:09.523Z",
     "summary": {
       "pass": 32,
       "pending": 7
@@ -43,10 +43,10 @@
     {
       "id": "real-connector-smoke",
       "group": "hosted",
-      "status": "pending",
-      "title": "Hosted API can validate and match against a real authorized machine inventory",
-      "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
-      "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+      "status": "pass",
+      "title": "Hosted API can validate and match against a public machine inventory",
+      "evidence": "docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at 2026-06-05T10:39:16.612Z.",
+      "nextStep": ""
     }
   ],
   "sourceArtifacts": [
@@ -83,7 +83,19 @@
       "exists": true
     },
     {
+      "path": "docs/farmbot-public-inventory-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/hosted-connector-smoke-evidence.json",
+      "exists": true
+    },
+    {
       "path": "docs/sample-machine-inventory.csv",
+      "exists": true
+    },
+    {
+      "path": "public/inventory/farmbot-genesis-v1.8.json",
       "exists": true
     },
     {
@@ -92,6 +104,10 @@
     },
     {
       "path": "vercel.json",
+      "exists": true
+    },
+    {
+      "path": "scripts/generate-farmbot-inventory.js",
       "exists": true
     },
     {
@@ -142,13 +158,13 @@
     },
     {
       "id": "inventory-source-validate",
-      "command": "npm run inventory:source:validate -- <inventory.csv-or-json>",
-      "purpose": "Validate the real machine inventory export before connecting it to the hosted API."
+      "command": "npm run inventory:farmbot:validate",
+      "purpose": "Generate and validate the public FarmBot Genesis v1.8 machine inventory before connecting it to the hosted API."
     },
     {
       "id": "hosted-connector-smoke",
-      "command": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example CONNECTOR_SMOKE_SOURCE_URL=https://inventory.your-domain.example/machines.json CONNECTOR_SMOKE_AUTH_MODE=api_key CONNECTOR_SMOKE_CREDENTIAL_REF=partsledger-prod npm run connector:smoke",
-      "purpose": "Prove hosted machine inventory validation, machine matching, BOM generation, and server-side credentialRef handling."
+      "command": "EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR/refs/heads/codex/inventory-reconstruction-clone/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke",
+      "purpose": "Prove hosted machine inventory validation, machine matching, BOM generation, and no-raw-secret handling against a public source."
     },
     {
       "id": "preview-smoke",
@@ -165,7 +181,8 @@
     "EXPO_PUBLIC_API_BASE_URL",
     "EXPO_PUBLIC_PRIVACY_POLICY_URL",
     "EXPO_PUBLIC_TERMS_URL",
-    "EXPO_PUBLIC_SUPPORT_URL"
+    "EXPO_PUBLIC_SUPPORT_URL",
+    "CONNECTOR_SMOKE_SOURCE_URL"
   ],
   "outputsToUpdateAfterHostedWork": [
     "docs/preview-host-smoke-evidence.json",

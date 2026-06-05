@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T10:08:43.561Z",
+  "generatedAt": "2026-06-05T10:40:11.263Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
     "storeReady": false,
     "productionSubmissionReady": false,
-    "reason": "Implementation and local release packet are advanced, but external hosted, EAS, store-console, native QA, and screenshot evidence remain pending."
+    "reason": "Implementation, hosted policy/API, and public inventory connector evidence are advanced, but EAS, store-console, native QA, and screenshot evidence remain pending."
   },
   "summary": {
     "requirementCount": 8,
@@ -15,16 +15,16 @@
     "pendingCount": 2,
     "blockedCount": 0,
     "pendingRequirementIds": [
-      "photo-to-inventory-machine-match",
+      "store-readiness-packet",
       "apple-google-store-publication"
     ],
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:08:43.527Z",
+    "generatedAt": "2026-06-05T10:40:11.231Z",
     "summary": {
-      "pass": 33,
-      "pending": 6
+      "pass": 32,
+      "pending": 7
     }
   },
   "requirements": [
@@ -104,7 +104,7 @@
     {
       "id": "photo-to-inventory-machine-match",
       "requirement": "When a picture or scan is supplied, identify the matching machine from the approved inventory.",
-      "status": "pending",
+      "status": "pass",
       "evidence": [
         {
           "id": "machine-scan-examples",
@@ -121,27 +121,19 @@
           "nextStep": ""
         },
         {
-          "id": "native-qa-evidence",
-          "status": "pending",
-          "title": "Android and iOS preview-build QA evidence is recorded",
-          "evidence": "docs/native-qa-evidence.json is missing.",
-          "nextStep": "Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight."
-        },
-        {
           "id": "real-connector-smoke",
-          "status": "pending",
-          "title": "Hosted API can validate and match against a real authorized machine inventory",
-          "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
-          "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+          "status": "pass",
+          "title": "Hosted API can validate and match against a public machine inventory",
+          "evidence": "docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at 2026-06-05T10:39:16.612Z.",
+          "nextStep": ""
         }
       ],
       "gates": [
         "machine-scan-examples",
         "web-flow-smoke",
-        "native-qa-evidence",
         "real-connector-smoke"
       ],
-      "nextStep": "Run native preview-build QA and hosted real connector smoke to prove real camera-to-inventory matching beyond local prototype evidence."
+      "nextStep": ""
     },
     {
       "id": "bom-assembly-pricing-vendor-handoff",
@@ -172,20 +164,20 @@
     {
       "id": "store-readiness-packet",
       "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
-      "status": "pass",
+      "status": "pending",
       "evidence": [
         {
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T10:08:08.231Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T10:40:07.740Z.",
           "nextStep": ""
         },
         {
           "id": "store-review-safety-packet",
           "status": "pass",
           "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T10:08:03.284Z.",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T10:40:07.870Z.",
           "nextStep": ""
         },
         {
@@ -204,17 +196,17 @@
         },
         {
           "id": "release-evidence-bundle",
-          "status": "pass",
+          "status": "pending",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 6 external gates at 2026-06-05T10:08:15.338Z.",
-          "nextStep": ""
+          "evidence": "docs/release-evidence-bundle.json is missing or incomplete.",
+          "nextStep": "Run npm run release:evidence before external account-side release work."
         },
         {
           "id": "local-release-ci-evidence",
-          "status": "pass",
+          "status": "pending",
           "title": "Local release CI evidence records repeatable pre-store validation",
-          "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T10:08:13.641Z.",
-          "nextStep": ""
+          "evidence": "docs/local-release-ci-evidence.json is missing or incomplete.",
+          "nextStep": "Run npm run release:local-ci before external account-side release work."
         },
         {
           "id": "release-local-ci-workflow",
@@ -234,21 +226,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T10:08:14.499Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T10:40:08.752Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T10:08:04.905Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T10:40:09.528Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 6 external gates at 2026-06-05T10:08:05.658Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 5 external gates at 2026-06-05T10:40:10.413Z.",
           "nextStep": ""
         },
         {
@@ -317,13 +309,6 @@
           "nextStep": ""
         },
         {
-          "id": "real-connector-smoke",
-          "status": "pending",
-          "title": "Hosted API can validate and match against a real authorized machine inventory",
-          "evidence": "This requires a deployed API plus a real connector source and server-side connector credential.",
-          "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
-        },
-        {
           "id": "eas-project-linkage",
           "status": "pending",
           "title": "EAS project is linked for the clone identity",
@@ -363,14 +348,13 @@
         "preview-host-smoke",
         "hosted-api",
         "hosted-policy-urls",
-        "real-connector-smoke",
         "eas-project-linkage",
         "eas-submit-config",
         "native-qa-evidence",
         "store-console-records",
         "native-screenshots"
       ],
-      "nextStep": "Clear the listed external gates with real hosted, EAS, App Store Connect, Google Play Console, preview-build, and native screenshot evidence."
+      "nextStep": "Clear the remaining EAS, App Store Connect, Google Play Console, preview-build, native QA, and screenshot evidence gates."
     }
   ]
 }
