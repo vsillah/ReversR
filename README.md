@@ -60,6 +60,12 @@ The native App Store and Google Play release path is captured in [docs/native-re
 npm run native:preflight:local
 ```
 
+The policy/support web routes can be statically exported for hosting. See [docs/policy-hosting-deployment.md](docs/policy-hosting-deployment.md), then validate the local export with:
+
+```bash
+npm run policy:preflight:local
+```
+
 Native preview-build QA evidence is structured in [docs/native-qa-evidence.template.json](docs/native-qa-evidence.template.json). Before EAS preview builds exist, run the pending-evidence check:
 
 ```bash
@@ -82,6 +88,7 @@ Before real store builds, set `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_PRIVACY_P
 
 ```bash
 npm run api:preflight
+npm run policy:preflight
 npm run accessibility:preflight
 npm run screenshots:store
 npm run store:preflight

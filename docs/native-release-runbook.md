@@ -12,6 +12,7 @@ The app is still draft-release ready, not store-published. Do not submit product
 npm install
 npm run typecheck
 npm run accessibility:preflight
+npm run policy:preflight:local
 npm run store:preflight:local
 npm run native:preflight:local
 npm run native:qa:preflight:local
@@ -58,7 +59,16 @@ Do not reuse the original ReversR project ID if this clone is meant to ship as a
 
 ## 4. Configure Hosted Environments
 
-Deploy the API container and hosted policy/support routes first. Then set EAS production environment variables:
+Deploy the API container and hosted policy/support routes first. For policy/support pages, follow `docs/policy-hosting-deployment.md` and verify:
+
+```bash
+EXPO_PUBLIC_PRIVACY_POLICY_URL=https://your-domain.example/privacy \
+EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms \
+EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support \
+npm run policy:preflight -- --check-hosted
+```
+
+Then set EAS production environment variables:
 
 ```bash
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive

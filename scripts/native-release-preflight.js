@@ -95,11 +95,13 @@ for (const [key, value] of [
 for (const path of [
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',
+  'docs/policy-hosting-deployment.md',
   'docs/store-readiness.md',
   'docs/store-metadata.md',
   'docs/production-api-deployment.md',
   'docs/store-screenshots/README.md',
   'scripts/native-qa-preflight.js',
+  'scripts/policy-hosting-preflight.js',
 ]) {
   if (!exists(path)) fail(`Missing native release document: ${path}`);
 }

@@ -26,6 +26,7 @@ The app now has:
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
 - Web-preview store screenshot capture script: `npm run screenshots:store`
 - Web routes for `/privacy`, `/terms`, and `/support`
+- Static web export and policy hosting preflight for the store privacy, terms, and support URLs
 - Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
 - API Dockerfile and production deployment runbook for hosted backend readiness
@@ -77,6 +78,7 @@ Open gates:
 - Run `eas init` for the new clone identity.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run api:preflight` against the hosted API.
+- Run `npm run policy:preflight -- --check-hosted` after policy/support routes are hosted.
 - Run `npm run store:preflight` before production builds to confirm package IDs, build numbers, release assets, permissions, hosted URLs, and EAS profile shape.
 - Run `npm run store:submission:preflight` before entering copy into App Store Connect or Play Console.
 - Run `npm run native:preflight` after EAS project linkage and hosted URLs are configured.
@@ -93,7 +95,7 @@ Open gates:
 
 - Production API host: a Dockerfile and deployment runbook exist, but the API still needs to be deployed behind HTTPS and verified with `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
-- Privacy policy, terms, and support: web routes and env-driven app config exist, but the routes must be deployed to hosted HTTPS URLs and reviewed before submission.
+- Privacy policy, terms, and support: web routes, static export, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
@@ -107,7 +109,7 @@ Open gates:
 
 1. Deploy the API container behind HTTPS, then run `npm run api:preflight` against the hosted URL.
 2. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
-3. Deploy the web `/privacy`, `/terms`, and `/support` routes, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
+3. Deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
 5. Run `npm run store:submission:preflight` with hosted URLs, then copy the packet into App Store Connect and Play Console drafts.
 6. Link the clone with `eas init`, then run `npm run native:preflight`.

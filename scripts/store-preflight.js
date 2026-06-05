@@ -107,6 +107,11 @@ runCheck(
   process.execPath,
   ['scripts/store-submission-preflight.js', ...(allowPlaceholder ? ['--allow-placeholder'] : [])]
 );
+runCheck(
+  'Policy hosting preflight',
+  process.execPath,
+  ['scripts/policy-hosting-preflight.js', ...(allowPlaceholder ? ['--allow-placeholder'] : [])]
+);
 
 const requiredPngAssets = [
   ['expo.icon', appConfig.icon, 1024, 1024],
@@ -181,17 +186,20 @@ const requiredDocs = [
   'docs/store-readiness.md',
   'docs/store-metadata.md',
   'docs/store-submission-packet.json',
+  'docs/policy-hosting-deployment.md',
   'docs/production-api-deployment.md',
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',
   'docs/store-screenshots/README.md',
   'Dockerfile',
   '.dockerignore',
+  'vercel.json',
   'app/privacy.tsx',
   'app/terms.tsx',
   'app/support.tsx',
   'scripts/native-release-preflight.js',
   'scripts/native-qa-preflight.js',
+  'scripts/policy-hosting-preflight.js',
   'scripts/store-submission-preflight.js',
   'scripts/capture-store-screenshots.js',
 ];
