@@ -20,6 +20,7 @@ The app now has:
 - Manufacturer quote packet export for human-reviewed 3D modeling and fabrication requests
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
+- Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
@@ -85,6 +86,7 @@ Open gates:
 - Vendor handoff: quote packet export is available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: needs screen-reader and tap-target QA before submission.
 - Store assets: metadata draft and required 1024x1024 PNG assets exist, but native screenshots, hosted support/privacy/terms URLs, and final icon review are not complete.
+- Dependency audit: `npm audit fix` removed the high-severity findings; remaining moderate transitive Expo-tooling findings require a breaking Expo SDK 56 upgrade path and should be handled as a separate native upgrade gate.
 
 ## Recommended Next Sequence
 
@@ -95,5 +97,6 @@ Open gates:
 5. Run native Android/iOS camera QA.
 6. Run EAS preview builds.
 7. Capture native screenshots and finalize store metadata.
-8. Submit to TestFlight and Google Play Internal Testing.
-9. Resolve review feedback, then submit production releases.
+8. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+9. Submit to TestFlight and Google Play Internal Testing.
+10. Resolve review feedback, then submit production releases.

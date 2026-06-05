@@ -48,7 +48,8 @@
           "cameraPermission": "Allow ReversR Rebuild to access your camera to scan machines for inventory matching."
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ],
     "scheme": "reversr-rebuild",
     "extra": {
