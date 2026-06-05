@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T12:48:38Z",
+  "generatedAt": "2026-06-05T12:53:22Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -34,8 +34,8 @@
       "state": "Create app form is filled; Developer Program Policies and US export laws declarations are unchecked; Create app has not been clicked."
     },
     "appStoreConnect": {
-      "url": "https://appstoreconnect.apple.com/login?targetUrl=%2Fapps",
-      "state": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program membership order confirmation was reached. App Store Connect is now waiting for Apple Account passkey/password authentication."
+      "url": "https://appstoreconnect.apple.com/m/INVALIDITCUSER?errorKey=ITC.signin.error.invalidUser.asc",
+      "state": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program membership order confirmation was reached. Apple Account passkey authentication was attempted, but App Store Connect redirected to INVALIDITCUSER, indicating account enablement or activation propagation is still pending."
     }
   },
   "nextNativeQaActions": [
@@ -44,14 +44,14 @@
     "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-    "Complete Apple Account passkey/password authentication in App Store Connect, then create the iOS app record and unblock iOS preview/TestFlight work.",
+    "Wait for Apple membership activation or account enablement to complete, then retry App Store Connect and create the iOS app record to unblock iOS preview/TestFlight work.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
-    "Apple Developer Program membership order confirmation was reached, but App Store Connect app record creation is still gated by Apple Account authentication and any activation propagation.",
+    "Apple Developer Program membership order confirmation was reached, but App Store Connect app record creation is still gated by Apple account enablement or activation propagation.",
     "No Apple App Store Connect app record was created."
   ]
 }
