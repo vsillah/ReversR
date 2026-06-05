@@ -27,6 +27,7 @@ The app now has:
 - Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
 - API Dockerfile and production deployment runbook for hosted backend readiness
+- Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
 - Settings-based admin credential reference manager for listing, saving, and deleting backend registry credentials
@@ -74,6 +75,7 @@ Open gates:
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run api:preflight` against the hosted API.
 - Run `npm run store:preflight` before production builds to confirm package IDs, build numbers, release assets, permissions, hosted URLs, and EAS profile shape.
+- Run `npm run native:preflight` after EAS project linkage and hosted URLs are configured.
 - Configure Android credentials and iOS credentials.
 - Build:
   - `eas build --platform android --profile production`
@@ -88,6 +90,7 @@ Open gates:
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Privacy policy, terms, and support: web routes and env-driven app config exist, but the routes must be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: camera flow needs real iOS and Android device testing.
+- EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
 - Accessibility: critical-path labels are covered by `npm run accessibility:preflight`, but native screen-reader and tap-target QA still need device validation before submission.
@@ -100,9 +103,10 @@ Open gates:
 2. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
 3. Deploy the web `/privacy`, `/terms`, and `/support` routes, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
-5. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader, tap-target, and camera QA.
-6. Run EAS preview builds.
-7. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
-8. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
-9. Submit to TestFlight and Google Play Internal Testing.
-10. Resolve review feedback, then submit production releases.
+5. Link the clone with `eas init`, then run `npm run native:preflight`.
+6. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader, tap-target, and camera QA.
+7. Run EAS preview builds.
+8. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
+9. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+10. Submit to TestFlight and Google Play Internal Testing.
+11. Resolve review feedback, then submit production releases.

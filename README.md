@@ -54,6 +54,12 @@ The API now has a deployable container bootstrap for production hosting. See [do
 npm run api:docker:build
 ```
 
+The native App Store and Google Play release path is captured in [docs/native-release-runbook.md](docs/native-release-runbook.md). Run the local release-readiness check with account-level gates relaxed:
+
+```bash
+npm run native:preflight:local
+```
+
 Run the local readiness check with the placeholder API allowed:
 
 ```bash

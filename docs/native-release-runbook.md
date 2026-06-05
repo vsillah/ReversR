@@ -1,0 +1,156 @@
+# ReversR Rebuild Native Release Runbook
+
+Last updated: June 5, 2026
+
+This runbook is the operator path from the current prototype to TestFlight, Google Play Internal Testing, and then production review.
+
+The app is still draft-release ready, not store-published. Do not submit production builds until the hosted API, hosted policy URLs, native camera QA, native screenshots, and store console records are complete.
+
+## 1. Confirm Local Readiness
+
+```bash
+npm install
+npm run typecheck
+npm run accessibility:preflight
+npm run store:preflight:local
+npm run native:preflight:local
+npx expo-doctor
+```
+
+`native:preflight:local` allows placeholder URLs, missing EAS CLI, and missing EAS project linkage so the local repo can still be checked before account-level setup is complete.
+
+## 2. Install Or Run EAS CLI
+
+Use the pinned CLI command without committing `eas-cli` into this repo:
+
+```bash
+npx eas-cli@20.0.0 --version
+npx eas-cli@20.0.0 login
+npx eas-cli@20.0.0 whoami --non-interactive
+```
+
+The CLI is intentionally not a committed dev dependency because the current CLI dependency tree adds high-severity dev-only audit findings. Use the pinned `npx eas-cli@20.0.0` command or a globally installed `eas` binary for release operations.
+
+## 3. Link The Expo Project
+
+Create or link the EAS project for the clone identity:
+
+```bash
+npx eas-cli@20.0.0 init
+```
+
+Confirm that `app.json` gains:
+
+```json
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "replace-with-eas-project-id"
+      }
+    }
+  }
+}
+```
+
+Do not reuse the original ReversR project ID if this clone is meant to ship as a distinct app.
+
+## 4. Configure Hosted Environments
+
+Deploy the API container and hosted policy/support routes first. Then set EAS production environment variables:
+
+```bash
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_PRIVACY_POLICY_URL --value https://your-domain.example/privacy --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_TERMS_URL --value https://your-domain.example/terms --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_SUPPORT_URL --value https://your-domain.example/support --visibility plaintext --non-interactive
+```
+
+Server-side secrets such as `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, and inventory connector credentials belong on the API host, not in the mobile EAS environment.
+
+## 5. Configure Store Credentials
+
+Android:
+
+```bash
+npx eas-cli@20.0.0 credentials --platform android
+```
+
+Create or attach the keystore for `com.vsillah.reversrrebuild`. For Google Play submission, configure a Play Console service account with the minimum release-management permissions needed for internal testing.
+
+iOS:
+
+```bash
+npx eas-cli@20.0.0 credentials --platform ios
+```
+
+Create or attach the Apple distribution certificate and provisioning profile for `com.vsillah.reversrrebuild`. Confirm the bundle ID exists in Apple Developer and App Store Connect before production submission.
+
+## 6. Run Strict Preflight
+
+After project linkage and hosted URLs are configured:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example \
+EXPO_PUBLIC_PRIVACY_POLICY_URL=https://your-domain.example/privacy \
+EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms \
+EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support \
+npm run native:preflight
+```
+
+Then verify the hosted backend:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
+```
+
+## 7. Build Preview Binaries
+
+```bash
+npx eas-cli@20.0.0 build --platform android --profile preview
+npx eas-cli@20.0.0 build --platform ios --profile preview
+```
+
+Run device QA before store submission:
+
+- camera permission prompt and scan flow,
+- inventory connector validation,
+- machine matching,
+- BOM generation,
+- quote packet export,
+- vendor request draft,
+- policy/support links,
+- screen-reader labels and tap targets,
+- offline/error states for API and connector failures.
+
+## 8. Capture Final Native Screenshots
+
+Use `npm run screenshots:store` only for web-preview composition planning. Final App Store and Google Play screenshots must come from native preview builds.
+
+Required screenshot set:
+
+1. Welcome screen with the four reconstruction phases.
+2. Scan screen with camera or description mode.
+3. Inventory connector validation preview.
+4. Machine match evidence in Design.
+5. Build screen with assembly steps, pricing, BOM, quote packet, and vendor draft controls.
+
+## 9. Build Production Binaries
+
+```bash
+npx eas-cli@20.0.0 build --platform android --profile production
+npx eas-cli@20.0.0 build --platform ios --profile production
+```
+
+Production Android output must be an AAB. Production iOS output must target the linked App Store Connect record.
+
+## 10. Submit To Review Lanes
+
+Start with limited review lanes:
+
+```bash
+npx eas-cli@20.0.0 submit --platform android --profile production
+npx eas-cli@20.0.0 submit --platform ios --profile production
+```
+
+Use Google Play Internal Testing and Apple TestFlight first. Production release should wait until those builds pass install, camera, inventory, reconstruction, export, and policy-link QA.

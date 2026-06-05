@@ -176,12 +176,14 @@ const requiredDocs = [
   'docs/store-readiness.md',
   'docs/store-metadata.md',
   'docs/production-api-deployment.md',
+  'docs/native-release-runbook.md',
   'docs/store-screenshots/README.md',
   'Dockerfile',
   '.dockerignore',
   'app/privacy.tsx',
   'app/terms.tsx',
   'app/support.tsx',
+  'scripts/native-release-preflight.js',
   'scripts/capture-store-screenshots.js',
 ];
 for (const doc of requiredDocs) {
