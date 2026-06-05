@@ -172,6 +172,22 @@ const actionPlan = {
       'npm run native:qa:preflight passes.',
     ],
   },
+  'release-evidence-bundle': {
+    owner: 'Release operator',
+    phase: 'Release evidence bundle',
+    action: 'Generate the consolidated local proof packet before external account work resumes.',
+    steps: [
+      'Run npm run release:evidence.',
+      'Confirm docs/release-evidence-bundle.json has status pass.',
+      'Run npm run release:status and confirm the release-evidence-bundle gate passes.',
+      'Use the bundle together with docs/external-release-setup-runbook.md during hosted, EAS, and store-console setup.',
+    ],
+    evidence: [
+      'docs/release-evidence-bundle.json exists.',
+      'The bundle includes local proof gate IDs, pending external gate IDs, app identity, permission story, EAS profile summary, and evidence file statuses.',
+      'npm run release:status passes the release-evidence-bundle gate.',
+    ],
+  },
 };
 
 const pendingGates = releaseStatus.gates

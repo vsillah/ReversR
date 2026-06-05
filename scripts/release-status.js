@@ -343,6 +343,7 @@ const requiredArtifacts = [
   'docs/policy-hosting-deployment.md',
   'docs/policy-hosting-smoke-evidence.json',
   'docs/release-action-plan.md',
+  'docs/release-evidence-bundle.json',
   'docs/external-release-setup-runbook.md',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
@@ -406,6 +407,54 @@ addGate(
     ? 'docs/external-release-setup-runbook.md covers account setup, exact clone IDs, evidence files, preflight commands, and official source links.'
     : 'docs/external-release-setup-runbook.md is missing required external setup coverage.',
   externalRunbookOk ? '' : 'Restore the external release setup runbook before account-side release work.'
+);
+
+const releaseEvidenceBundle = readOptionalJson('docs/release-evidence-bundle.json');
+const requiredBundleProofs = [
+  'clone-identity',
+  'retired-sit-step',
+  'inventory-admin-connector',
+  'reconstruction-package',
+  'api-deployment-smoke',
+  'policy-hosting-smoke',
+  'store-submission-packet-smoke',
+  'store-screenshot-planning',
+  'external-release-runbook',
+  'web-flow-smoke',
+  'native-release-config-evidence',
+  'store-console-pending-evidence',
+];
+const requiredBundlePending = [
+  'hosted-api',
+  'hosted-policy-urls',
+  'real-connector-smoke',
+  'eas-project-linkage',
+  'eas-submit-config',
+  'native-qa-evidence',
+  'store-console-records',
+  'native-screenshots',
+];
+const releaseEvidenceBundleOk = (
+  releaseEvidenceBundle?.status === 'pass' &&
+  releaseEvidenceBundle?.releaseCandidate?.appName === appConfig.name &&
+  releaseEvidenceBundle?.releaseCandidate?.iosBundleId === appConfig.ios?.bundleIdentifier &&
+  releaseEvidenceBundle?.releaseCandidate?.androidPackage === appConfig.android?.package &&
+  requiredBundleProofs.every(id => releaseEvidenceBundle?.releaseStatus?.localProofGateIds?.includes(id)) &&
+  requiredBundlePending.every(id => releaseEvidenceBundle?.releaseStatus?.pendingExternalGateIds?.includes(id)) &&
+  Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === requiredBundlePending.length &&
+  releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending'
+);
+addGate(
+  'store-local',
+  'release-evidence-bundle',
+  'Consolidated release evidence bundle is generated for external operators',
+  releaseEvidenceBundleOk ? 'pass' : 'pending',
+  releaseEvidenceBundleOk
+    ? `docs/release-evidence-bundle.json packages local proofs and ${releaseEvidenceBundle.releaseStatus.pendingExternalGates.length} external gates at ${releaseEvidenceBundle.generatedAt}.`
+    : 'docs/release-evidence-bundle.json is missing or incomplete.',
+  releaseEvidenceBundleOk ? '' : 'Run npm run release:evidence before external account-side release work.'
 );
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;
