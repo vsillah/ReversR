@@ -19,6 +19,7 @@
     "store:assets:preflight": "node scripts/store-assets-preflight.js",
     "screenshots:store": "node scripts/capture-store-screenshots.js",
     "release:status": "node scripts/release-status.js",
+    "release:next-actions": "node scripts/release-next-actions.js",
     "typecheck": "tsc --noEmit",
     "api:preflight": "node scripts/api-preflight.js",
     "api:env:preflight": "node scripts/api-env-preflight.js",

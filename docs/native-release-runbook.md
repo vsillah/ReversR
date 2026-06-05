@@ -11,6 +11,7 @@ The app is still draft-release ready, not store-published. Do not submit product
 ```bash
 npm install
 npm run release:status
+npm run release:next-actions
 npm run typecheck
 npm run accessibility:preflight
 npm run inventory:preflight
