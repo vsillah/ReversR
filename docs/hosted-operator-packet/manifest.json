@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T18:43:31.057Z",
+  "generatedAt": "2026-06-05T18:49:37.719Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T18:43:31.049Z",
+    "generatedAt": "2026-06-05T18:49:37.711Z",
     "summary": {
-      "pass": 35,
-      "pending": 4
+      "pass": 34,
+      "pending": 5
     }
   },
   "appIdentity": {

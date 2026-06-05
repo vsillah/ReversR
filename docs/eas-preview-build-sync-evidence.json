@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T18:42:52.655Z",
+  "generatedAt": "2026-06-05T18:49:15.064Z",
   "dryRun": false,
   "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
   "evidenceFile": "docs/native-qa-evidence.json",
