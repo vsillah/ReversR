@@ -12,6 +12,7 @@
     "dev": "npx concurrently \"npm:api\" \"npm:expo\"",
     "web-preview": "npx cross-env API_PORT=3001 concurrently \"node server/index.js\" \"npx expo start --web --port 5001\"",
     "typecheck": "tsc --noEmit",
+    "api:preflight": "node scripts/api-preflight.js",
     "store:preflight": "node scripts/store-preflight.js",
     "store:preflight:local": "node scripts/store-preflight.js --allow-placeholder"
   },

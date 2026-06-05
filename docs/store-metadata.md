@@ -86,7 +86,7 @@ ReversR Rebuild uses the camera to capture machine images for inventory matching
 
 The app does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. Vendor cards and exports are handoff tools that require explicit user action.
 
-Authenticated ERP/API connectors are not enabled in this prototype. Production connector secrets should be stored server-side and protected by admin roles.
+Authenticated ERP/API connectors use backend credential references so raw secrets are not stored in the app. Production connector secrets should be moved into a managed secret store and protected by admin roles.
 
 ## Pre-Submission Checklist
 

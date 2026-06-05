@@ -53,6 +53,7 @@ export interface InventoryConnector {
   sourceUrl: string;
   connectorType: 'demo' | 'csv' | 'api' | 'erp';
   authMode: 'none' | 'api_key' | 'oauth' | 'private_network';
+  credentialRef?: string;
   notes?: string;
 }
 
@@ -60,6 +61,8 @@ export interface InventoryValidationResult {
   status: 'ok' | 'error';
   sourceName: string;
   sourceUrl: string;
+  authMode?: InventoryConnector['authMode'];
+  credentialStatus?: 'not_required' | 'configured' | 'missing' | 'disabled';
   recordCount: number;
   requiredFields: string[];
   sampleMachines: Array<{

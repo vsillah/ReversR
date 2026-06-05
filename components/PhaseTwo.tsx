@@ -43,6 +43,7 @@ const defaultConnector: InventoryConnector = {
   sourceUrl: 'demo://sample-machines',
   connectorType: 'demo',
   authMode: 'none',
+  credentialRef: '',
   notes: 'Use this demo source until an ERP, spreadsheet, or parts database connector is available.',
 };
 
@@ -216,6 +217,23 @@ export default function PhaseTwo({
           ))}
         </View>
 
+        {connector.authMode !== 'none' && (
+          <>
+            <Text style={styles.fieldLabel}>Backend credential reference</Text>
+            <TextInput
+              style={styles.input}
+              value={connector.credentialRef}
+              onChangeText={value => updateConnector('credentialRef', value)}
+              placeholder="e.g., partsledger-prod-api-key"
+              placeholderTextColor={Colors.gray[600]}
+              autoCapitalize="none"
+            />
+            <Text style={styles.helperText}>
+              Store only a reference here. API keys, OAuth tokens, and private-network headers must be configured on the backend.
+            </Text>
+          </>
+        )}
+
         <Text style={styles.fieldLabel}>Admin notes</Text>
         <TextInput
           style={[styles.input, styles.notesInput]}
@@ -240,7 +258,10 @@ export default function PhaseTwo({
           {validation?.status === 'ok' && (
             <View style={styles.validationBadge}>
               <Ionicons name="checkmark-circle" size={14} color={Colors.green[400]} />
-              <Text style={styles.validationBadgeText}>{validation.recordCount} records</Text>
+              <Text style={styles.validationBadgeText}>
+                {validation.recordCount} records
+                {validation.credentialStatus === 'configured' ? ' | credential configured' : ''}
+              </Text>
             </View>
           )}
         </View>
@@ -405,6 +426,13 @@ const styles = StyleSheet.create({
   notesInput: {
     minHeight: 72,
     textAlignVertical: 'top',
+  },
+  helperText: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+    marginTop: -Spacing.xs,
+    marginBottom: Spacing.sm,
   },
   validationRow: {
     flexDirection: 'row',

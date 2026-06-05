@@ -15,8 +15,12 @@ The backend owns connector parsing and matching. The mobile client only stores t
 - `file:///absolute/path/to/inventory.json`: local JSON fixture for development.
 - `https://.../inventory.csv`: unauthenticated CSV source.
 - `https://.../inventory.json`: unauthenticated JSON source.
+- `https://.../inventory.csv` or `https://.../inventory.json` with `authMode: "api_key"` and `credentialRef`.
+- `https://.../inventory.csv` or `https://.../inventory.json` with `authMode: "oauth"` and `credentialRef`.
 
-Authenticated connectors are intentionally blocked in this prototype until server-side secret storage and admin access controls are added.
+Authenticated connectors are supported through backend credential references. The mobile app stores only `credentialRef`; API keys, OAuth tokens, private-network headers, and other secrets must live in API-server environment configuration.
+
+Private-network connectors remain disabled unless the API host is explicitly configured with `INVENTORY_PRIVATE_NETWORK_ENABLED=true` after network controls are in place.
 
 ## CSV Columns
 
@@ -85,7 +89,8 @@ Request:
     "sourceName": "Demo Machine Inventory",
     "sourceUrl": "demo://sample-machines",
     "connectorType": "demo",
-    "authMode": "none"
+    "authMode": "none",
+    "credentialRef": ""
   }
 }
 ```
@@ -95,6 +100,8 @@ Response:
 ```json
 {
   "status": "ok",
+  "authMode": "none",
+  "credentialStatus": "not_required",
   "recordCount": 2,
   "sampleMachines": [
     {
@@ -106,6 +113,62 @@ Response:
   ]
 }
 ```
+
+## Authenticated Connector Credentials
+
+Backend credentials are configured with `INVENTORY_CONNECTOR_SECRETS_JSON`.
+
+API-key example:
+
+```json
+{
+  "partsledger-prod": {
+    "headerName": "X-API-Key",
+    "value": "server-side-secret"
+  }
+}
+```
+
+OAuth bearer example:
+
+```json
+{
+  "maintenance-oauth": {
+    "token": "server-side-token"
+  }
+}
+```
+
+Additional fixed headers can be included under `headers`:
+
+```json
+{
+  "erp-prod": {
+    "headerName": "X-API-Key",
+    "value": "server-side-secret",
+    "headers": {
+      "X-Tenant": "plant-42"
+    }
+  }
+}
+```
+
+Client connector metadata for an API-key source:
+
+```json
+{
+  "connector": {
+    "sourceName": "PartsLedger Production",
+    "sourceUrl": "https://inventory.example.com/machines.json",
+    "connectorType": "api",
+    "authMode": "api_key",
+    "credentialRef": "partsledger-prod",
+    "notes": "Read-only machine inventory export."
+  }
+}
+```
+
+Validation returns `credentialStatus: "configured"` when the server can resolve the reference. If the reference is absent or missing, validation fails before fetching the inventory source.
 
 ## Matching Logic
 
@@ -128,8 +191,7 @@ The resulting reconstruction package includes:
 
 ## Production Gates
 
-- Add authenticated connector support on the server, not in the mobile bundle.
-- Store connector secrets in a server-side secret manager.
-- Add admin roles before allowing private ERP/API connectors.
+- Move connector credentials from environment JSON to a managed secret store for production.
+- Add admin roles before allowing production users to create or edit private ERP/API connectors.
 - Keep procurement, vendor submission, and fabrication as explicit human-approved actions.
 - Log connector source, record ID, match confidence, and admin approval status for auditability.

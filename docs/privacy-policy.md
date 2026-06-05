@@ -71,7 +71,7 @@ You can:
 
 ## Security
 
-We use reasonable safeguards for app data and recommend using HTTPS inventory connectors. Authenticated ERP/API connectors should use server-side secret storage before production release.
+We use reasonable safeguards for app data and recommend using HTTPS inventory connectors. Authenticated ERP/API connector secrets are not stored in the mobile app; production connector credentials should be managed in a backend secret store.
 
 ## Children's Privacy
 

@@ -18,6 +18,7 @@ The app now has:
 - Reconstruction package generation with assembly steps, pricing, BOM, and manufacturer handoff surfaces
 - Store preflight script: `npm run store:preflight`
 - API health endpoint: `GET /api/health`
+- Server-side credential references for authenticated inventory connectors
 
 ## Store Submission Requirements
 
@@ -59,6 +60,7 @@ Open gates:
 
 - Run `eas init` for the new clone identity.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
+- Run `npm run api:preflight` against the hosted API.
 - Run `npm run store:preflight` before production builds.
 - Configure Android credentials and iOS credentials.
 - Build:
@@ -71,7 +73,7 @@ Open gates:
 ## Technical Gaps Before Store Review
 
 - Production API host: mobile builds currently point non-web requests to a placeholder backend URL in `hooks/useGemini.ts` and `app.json`.
-- Authenticated connectors: prototype blocks API key/OAuth/private network connectors until server-side secret storage exists.
+- Authenticated connectors: API key and OAuth sources are supported through backend credential references, but production should move env JSON secrets into a managed secret store and add admin roles.
 - Privacy policy and terms: updated drafts exist, but they still need a hosted public URL and legal review.
 - Native QA: camera flow needs real iOS and Android device testing.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
@@ -82,9 +84,9 @@ Open gates:
 ## Recommended Next Sequence
 
 1. Host the API and update `hooks/useGemini.ts` to use the production backend for native builds.
-2. Add server-side connector secret storage and admin roles.
+2. Move connector credentials into a managed secret store and add admin roles.
 3. Host privacy policy and terms.
-4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production and run `npm run store:preflight`.
+4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run api:preflight` and `npm run store:preflight`.
 5. Run native Android/iOS camera QA.
 6. Run EAS preview builds.
 7. Capture native screenshots and finalize store metadata.

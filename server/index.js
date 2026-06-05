@@ -567,6 +567,83 @@ const recordsFromPayload = (payload) => {
   return [];
 };
 
+const normalizeCredentialRef = (value = '') => String(value).trim();
+
+const parseConnectorSecrets = () => {
+  const raw = process.env.INVENTORY_CONNECTOR_SECRETS_JSON;
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return parsed;
+  } catch (error) {
+    console.warn('INVENTORY_CONNECTOR_SECRETS_JSON is not valid JSON.');
+    return {};
+  }
+};
+
+const getConnectorCredentialStatus = (connector = {}) => {
+  const authMode = connector.authMode || 'none';
+  if (authMode === 'none') return 'not_required';
+  if (authMode === 'private_network' && process.env.INVENTORY_PRIVATE_NETWORK_ENABLED !== 'true') {
+    return 'disabled';
+  }
+  const credentialRef = normalizeCredentialRef(connector.credentialRef);
+  if (!credentialRef) return 'missing';
+  const credential = parseConnectorSecrets()[credentialRef];
+  return credential ? 'configured' : 'missing';
+};
+
+const buildCredentialHeaders = (connector = {}) => {
+  const authMode = connector.authMode || 'none';
+  if (authMode === 'none') return {};
+
+  const credentialRef = normalizeCredentialRef(connector.credentialRef);
+  if (!credentialRef) {
+    throw new Error('Authenticated inventory connector requires a backend credential reference. Do not enter raw secrets in the mobile app.');
+  }
+
+  if (authMode === 'private_network' && process.env.INVENTORY_PRIVATE_NETWORK_ENABLED !== 'true') {
+    throw new Error('Private-network inventory connectors are disabled on this API server. Set INVENTORY_PRIVATE_NETWORK_ENABLED=true after network controls are configured.');
+  }
+
+  const credential = parseConnectorSecrets()[credentialRef];
+  if (!credential) {
+    throw new Error(`No backend credential is configured for inventory credential reference "${credentialRef}".`);
+  }
+
+  const headers = {};
+  if (credential.headers && typeof credential.headers === 'object' && !Array.isArray(credential.headers)) {
+    for (const [key, value] of Object.entries(credential.headers)) {
+      if (value != null) headers[key] = String(value);
+    }
+  }
+
+  if (authMode === 'api_key') {
+    const headerName = credential.headerName || 'X-API-Key';
+    const value = credential.value || credential.apiKey || credential.token;
+    if (!value) throw new Error(`Credential "${credentialRef}" is missing an API key value.`);
+    headers[headerName] = String(value);
+  }
+
+  if (authMode === 'oauth') {
+    const token = credential.accessToken || credential.token || credential.value;
+    if (!token) throw new Error(`Credential "${credentialRef}" is missing an OAuth bearer token.`);
+    headers.Authorization = `${credential.scheme || 'Bearer'} ${token}`;
+  }
+
+  return headers;
+};
+
+const sanitizeConnectorForModel = (connector = {}) => ({
+  sourceName: connector.sourceName,
+  sourceUrl: connector.sourceUrl,
+  connectorType: connector.connectorType,
+  authMode: connector.authMode || 'none',
+  credentialStatus: getConnectorCredentialStatus(connector),
+  notes: connector.notes,
+});
+
 const readConnectorText = async (connector = {}) => {
   const sourceUrl = connector.sourceUrl || '';
   if (!sourceUrl || sourceUrl.startsWith('demo://')) {
@@ -574,15 +651,20 @@ const readConnectorText = async (connector = {}) => {
   }
 
   if (sourceUrl.startsWith('file://')) {
+    if (connector.authMode && connector.authMode !== 'none') {
+      throw new Error('Authenticated inventory connectors must use http(s) sources. Use authMode "none" for file fixtures.');
+    }
     const filePath = decodeURIComponent(sourceUrl.replace('file://', ''));
     const text = await fs.readFile(filePath, 'utf8');
     return { text, sourceKind: filePath.endsWith('.csv') ? 'csv' : 'json' };
   }
 
   if (/^https?:\/\//i.test(sourceUrl)) {
+    const credentialHeaders = buildCredentialHeaders(connector);
     const response = await fetch(sourceUrl, {
       headers: {
         Accept: connector.connectorType === 'csv' ? 'text/csv,text/plain,*/*' : 'application/json,text/csv,text/plain,*/*',
+        ...credentialHeaders,
       },
     });
     if (!response.ok) {
@@ -601,10 +683,6 @@ const readConnectorText = async (connector = {}) => {
 const loadInventoryRecords = async (connector = {}) => {
   if (!connector.sourceUrl || connector.sourceUrl.startsWith('demo://')) {
     return DEMO_MACHINE_RECORDS;
-  }
-
-  if (connector.authMode && connector.authMode !== 'none') {
-    throw new Error('Authenticated inventory connectors are planned but not enabled in this prototype. Use a read-only public URL or file:// fixture for validation.');
   }
 
   const { text, sourceKind } = await readConnectorText(connector);
@@ -956,6 +1034,8 @@ app.post('/api/inventory/validate', async (req, res) => {
       status: 'ok',
       sourceName: connector?.sourceName || 'Inventory',
       sourceUrl: connector?.sourceUrl || 'demo://sample-machines',
+      authMode: connector?.authMode || 'none',
+      credentialStatus: getConnectorCredentialStatus(connector || {}),
       recordCount: records.length,
       requiredFields: ['machineId', 'machineName/name', 'parts/components'],
       sampleMachines: records.slice(0, 5).map(record => ({
@@ -987,7 +1067,7 @@ app.post('/api/gemini/match-machine', async (req, res) => {
 
       Use the approved inventory connector to identify the scanned machine and produce a reconstruction plan.
 
-      Inventory connector: ${JSON.stringify(connector)}
+      Inventory connector: ${JSON.stringify(sanitizeConnectorForModel(connector))}
       Inventory records: ${JSON.stringify(inventoryRecords.slice(0, 20))}
       Scan analysis: ${JSON.stringify(analysis)}
       Image provided: ${!!image}
@@ -1574,7 +1654,8 @@ const getHealthPayload = () => {
       size: responseCache.cache.size,
     },
     inventorySources: ['demo', 'file', 'http', 'https'],
-    authenticatedConnectorsEnabled: false,
+    authenticatedConnectorsEnabled: Object.keys(parseConnectorSecrets()).length > 0 || process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
+    privateNetworkConnectorsEnabled: process.env.INVENTORY_PRIVATE_NETWORK_ENABLED === 'true',
   };
 };
 
