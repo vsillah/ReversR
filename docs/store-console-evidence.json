@@ -51,7 +51,11 @@
     "dataSafetyCompleted": false,
     "appContentCompleted": false,
     "internalTestingReady": false,
-    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup now shows 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. Content rating, target audience, data safety, category/contact details, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "categoryDraftSaved": true,
+    "categoryDraftSavedAt": "2026-06-05T16:11:30.815Z",
+    "contactDetailsCompleted": false,
+    "contactDetailsPendingReason": "Public support email must be confirmed before saving contact details to Google Play.",
+    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. App category was later saved as Productivity in Store settings, but the category/contact task still needs public support contact details before it can be considered complete. Content rating, target audience, data safety, public contact details, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
     "completedSetupTaskCount": 6,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
@@ -72,6 +76,9 @@
     "storeListingTextEntered": true,
     "storeListingTextSaved": false,
     "storeListingTextSaveNote": "App name, short description, and full description were entered from docs/store-console-copy.md, but the dashboard still showed Set up your store listing incomplete because required graphics/screenshots/contact gates remain.",
+    "storeListingAssetUploadAttempted": true,
+    "storeListingAssetUploadStatus": "not-uploaded",
+    "storeListingAssetUploadNote": "Chrome automation opened the Google Play asset-library drawer from the default store listing and attempted the Upload/file-input path, but no file chooser completed and no prepared asset was attached. App icon, feature graphic, and phone screenshots remain prepared locally only.",
     "appContentDraftsSaved": true
   },
   "requiredAssets": {
@@ -93,7 +100,7 @@
     "googlePlayPhoneScreenshotManifest": "docs/store-screenshots/google-play-phone/manifest.json",
     "storeAssetsPreflightPassed": true,
     "storeAssetsPreflightCommand": "npm run store:assets:preflight",
-    "uploadBoundary": "Google Play asset upload remains a human-in-the-loop store-console action; assets are prepared locally but were not uploaded."
+    "uploadBoundary": "Google Play asset upload remains pending. Assets are prepared locally, but Chrome automation could not complete Play Console's file picker path and no asset upload was verified."
   },
   "reviewGates": {
     "hostedApiPreflightPassed": true,
@@ -108,7 +115,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T15:54:31.264Z",
+  "generatedAt": "2026-06-05T16:11:30.815Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -173,6 +180,22 @@
       "value": "App name, short description, and full description entered from docs/store-console-copy.md",
       "completedAt": "2026-06-05T15:34:01.337Z",
       "note": "Dashboard still showed store listing incomplete because required graphics/screenshots/contact gates remain. No asset upload or review submission was performed."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Select an app category and provide contact details",
+      "status": "partial-draft-saved",
+      "value": "App category saved as Productivity. Public support contact details were not entered.",
+      "completedAt": "2026-06-05T16:11:30.815Z",
+      "note": "Google Play Store settings displayed Change saved / Send for review in Publishing overview after saving category. Send for review was not clicked. Public support email remains HITL before contact details can be saved."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Upload default store listing assets",
+      "status": "attempted-not-uploaded",
+      "value": "Prepared local icon, feature graphic, and five phone screenshots.",
+      "completedAt": "2026-06-05T16:11:30.815Z",
+      "note": "Chrome automation opened the asset-library drawer but could not complete the file chooser/file-input path. No Google Play asset upload was verified and Save/Send for review were not clicked."
     },
     {
       "platform": "local",

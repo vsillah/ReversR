@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T16:02:16.516Z",
+  "generatedAt": "2026-06-05T16:11:30.815Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -36,19 +36,19 @@
     },
     "googlePlayConsole": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
-      "screen": "Dashboard / setup task list",
-      "state": "Google Play is authenticated and open at the ReversR Rebuild dashboard. Setup progress is 6 of 11 complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but store listing remains incomplete because required assets/contact gates remain.",
+      "screen": "Store settings / default store listing editor",
+      "state": "Google Play is authenticated for ReversR Rebuild. Setup progress last showed 6 of 11 complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store settings category was saved as Productivity, creating a draft change in Publishing overview. Store listing text was entered earlier, but store listing remains incomplete because required asset uploads/contact gates remain. Chrome automation reached the default store listing asset-library drawer but could not complete the file chooser path, so no asset upload was verified.",
       "openTasks": [
         "Content rating",
         "Target audience",
         "Data safety",
-        "Select an app category and provide contact details",
+        "Provide public support contact details",
         "Set up your store listing"
       ],
       "copySource": "docs/store-console-copy.md",
       "taskAnswerSource": "docs/store-console-task-answers.md",
       "taskAnswerJson": "docs/store-console-task-answers.json",
-      "nextHumanAction": "Complete content rating, target audience, data safety, public support contact/category, required store listing asset uploads, and internal testing setup. Do not click Send for review until all native QA/store evidence and signoff are complete."
+      "nextHumanAction": "Confirm the public support email for Google Play contact details, complete content rating, target audience, data safety, required store listing asset uploads, and internal testing setup. Do not click Send for review until all native QA/store evidence and signoff are complete."
     },
     "easCredentials": {
       "command": "npx eas-cli@20.0.0 credentials --platform ios",
@@ -74,7 +74,9 @@
     ],
     "storeConsolePreflight": [
       "Google Play privacy policy URL, metadata, data safety, app content, internal testing, and signoff remain incomplete.",
-      "Final native screenshots and native QA signoff remain incomplete."
+      "Final native screenshots and native QA signoff remain incomplete.",
+      "Google Play public support contact details remain incomplete because the public support email needs confirmation.",
+      "Google Play store listing asset upload remains incomplete because Chrome automation could not complete the file chooser/file-input path."
     ]
   },
   "verifiedLocalConstraints": {
@@ -90,7 +92,7 @@
   "resumeInstructionsForVambah": [
     "For Android USB: unlock the phone, enable Developer options, turn on USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex to retry Android QA.",
     "For Android wireless later: reconnect only if another live Android QA pass or visual regression check is needed. The current Android Pixel screenshot evidence is already recorded.",
-    "For Google Play: Chrome is authenticated on the ReversR Rebuild dashboard. Privacy policy, sign-in details, ads, government apps, financial features, and health are draft-saved. Remaining HITL tasks are content rating, target audience, data safety, category/contact details, store listing asset upload, and testing/release setup.",
+    "For Google Play: Chrome is authenticated. Privacy policy, sign-in details, ads, government apps, financial features, health, and app category Productivity are draft-saved. Remaining HITL tasks are public support contact details, content rating, target audience, data safety, store listing asset upload, and testing/release setup.",
     "For iOS: from /Users/vambahsillah/Documents/ReversR/original-ReversR run EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait. Complete Apple credential validation/login/2FA if prompted, then send the Expo build URL back to Codex."
   ],
   "preparedAutomation": [

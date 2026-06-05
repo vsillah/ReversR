@@ -1,6 +1,6 @@
 # ReversR Rebuild Hosted Operator Packet
 
-Generated at: 2026-06-05T16:03:05.652Z
+Generated at: 2026-06-05T16:13:40.778Z
 
 This folder is the hosted API, policy URL, preview smoke, and real inventory connector handoff packet. It prepares the hosted lane for native builds and store-console metadata. It does not prove that the API, policy pages, or real inventory connector are already deployed.
 

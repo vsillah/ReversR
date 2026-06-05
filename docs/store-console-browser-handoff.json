@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T16:02:16.516Z",
+  "generatedAt": "2026-06-05T16:11:30.815Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -16,7 +16,7 @@
     "neededValueAfterCreation": ""
   },
   "googlePlayConsole": {
-    "browserState": "Chrome Play Console dashboard is authenticated for ReversR Rebuild and shows 6 of 11 setup tasks complete. Draft-saved tasks: privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered but the task remains incomplete because required graphics/screenshots/contact gates remain. The Google Play dashboard tab is left open for HITL continuation. No Send for review action was clicked.",
+    "browserState": "Chrome Play Console is authenticated for ReversR Rebuild. Store settings now show App category saved as Productivity. Draft-saved tasks remain privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered earlier, but the task remains incomplete because required graphics/screenshots/contact gates remain. The default store listing editor was opened and the Play asset-library drawer was reached, but asset upload could not be completed through Chrome automation. No Send for review action was clicked.",
     "developerAccount": "Vambah Sillah",
     "developerAccountId": "8864864114913698241",
     "appId": "4972956671966100551",
@@ -30,7 +30,7 @@
       "freeOrPaid": "Free"
     },
     "legalDeclarationsPending": [],
-    "nextHumanAction": "Authorize live Google Play field entry/saves or complete the 11 Google Play setup tasks manually: Set privacy policy, Sign in details, Ads, Content rating, Target audience, Data safety, Government apps, Financial features, Health, Select an app category and provide contact details, and Set up your store listing. Use docs/store-console-copy.md as the copy source.",
+    "nextHumanAction": "Confirm the public support email before saving Google Play contact details. Then complete Content rating, Target audience, Data safety, contact details, store listing asset upload, and testing/release setup manually or with supervised browser automation. Use docs/store-console-copy.md and docs/store-console-task-answers.md as the copy source. Do not click Send for review until all native QA/store evidence and signoff are complete.",
     "currentScreen": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
       "title": "Dashboard | ReversR Rebuild",
@@ -41,7 +41,8 @@
         "Ads",
         "Government apps",
         "Financial features",
-        "Health"
+        "Health",
+        "App category saved as Productivity inside Store settings"
       ],
       "remainingTasks": [
         "Content rating",
@@ -50,12 +51,12 @@
         "Select an app category and provide contact details",
         "Set up your store listing"
       ],
-      "submissionBoundary": "No Send for review, testing release, production access application, or public submission action was clicked."
+      "submissionBoundary": "No Send for review, testing release, production access application, or public submission action was clicked. App category save created a draft change in Publishing overview."
     }
   },
   "notes": [
     "Google Play app record exists; production access and store listing are not complete.",
-    "Google Play dashboard task list shows 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health.",
+    "Google Play dashboard task list showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store settings category was later saved as Productivity, but public support contact details remain pending.",
     "No public store submission was started.",
     "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, created the App Store Connect app record, and Apple ID 6777091538 is recorded in eas.json. App Store Connect metadata is saved as a draft. App Privacy, age rating, TestFlight setup, contact information, build selection, and native screenshots remain pending.",
     "EAS iOS preview credentials were checked with npx eas-cli@20.0.0 credentials --platform ios. Selecting the preview profile reached the Apple account login prompt, so iOS credential setup remains a human-in-the-loop Apple login gate.",
@@ -63,7 +64,8 @@
     "Chrome automation verified at 2026-06-05T15:54:31.264Z that App Store Connect is on the iOS App Version 1.0 Prepare for Submission page with metadata values present, Save disabled, and Add for Review visible but untouched.",
     "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
     "The Android phone is no longer required for current cloud build, store-console, Vercel, or GitHub evidence work. Future live Android QA would require reconnecting a device.",
-    "A non-interactive iOS production/TestFlight EAS build attempt at 2026-06-05T16:01:31.192Z detected remote iOS credentials but failed because EAS requires interactive Apple credential validation before using the distribution certificate. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started."
+    "A non-interactive iOS production/TestFlight EAS build attempt at 2026-06-05T16:01:31.192Z detected remote iOS credentials but failed because EAS requires interactive Apple credential validation before using the distribution certificate. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started.",
+    "Google Play store listing asset upload was attempted at 2026-06-05T16:11:30.815Z. Chrome automation reached the asset-library drawer, but the file chooser/file-input path did not complete, so no app icon, feature graphic, or phone screenshot upload was verified."
   ],
   "androidWirelessAdb": {
     "status": "paired-connected",
