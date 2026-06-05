@@ -175,6 +175,7 @@ export default function PhaseTwo({
           style={styles.input}
           value={connector.sourceName}
           onChangeText={value => updateConnector('sourceName', value)}
+          accessibilityLabel="Inventory source name"
           placeholder="e.g., PartsLedger, Airtable, NetSuite, MaintenanceDB"
           placeholderTextColor={Colors.gray[600]}
         />
@@ -184,6 +185,7 @@ export default function PhaseTwo({
           style={styles.input}
           value={connector.sourceUrl}
           onChangeText={value => updateConnector('sourceUrl', value)}
+          accessibilityLabel="Inventory connector URL"
           placeholder="https://.../machines.csv or api://inventory/machines"
           placeholderTextColor={Colors.gray[600]}
           autoCapitalize="none"
@@ -195,6 +197,9 @@ export default function PhaseTwo({
               key={option}
               style={[styles.optionButton, connector.connectorType === option && styles.optionButtonActive]}
               onPress={() => updateConnector('connectorType', option)}
+              accessibilityRole="button"
+              accessibilityLabel={`Use ${option.toUpperCase()} inventory connector type`}
+              accessibilityState={{ selected: connector.connectorType === option }}
             >
               <Text style={[styles.optionText, connector.connectorType === option && styles.optionTextActive]}>
                 {option.toUpperCase()}
@@ -209,6 +214,9 @@ export default function PhaseTwo({
               key={option}
               style={[styles.optionButton, connector.authMode === option && styles.optionButtonActive]}
               onPress={() => updateConnector('authMode', option)}
+              accessibilityRole="button"
+              accessibilityLabel={`Use ${option.replace(/_/g, ' ')} inventory authentication`}
+              accessibilityState={{ selected: connector.authMode === option }}
             >
               <Text style={[styles.optionText, connector.authMode === option && styles.optionTextActive]}>
                 {option.replace(/_/g, ' ')}
@@ -224,6 +232,7 @@ export default function PhaseTwo({
               style={styles.input}
               value={connector.credentialRef}
               onChangeText={value => updateConnector('credentialRef', value)}
+              accessibilityLabel="Backend credential reference"
               placeholder="e.g., partsledger-prod-api-key"
               placeholderTextColor={Colors.gray[600]}
               autoCapitalize="none"
@@ -239,6 +248,7 @@ export default function PhaseTwo({
           style={[styles.input, styles.notesInput]}
           value={connector.notes}
           onChangeText={value => updateConnector('notes', value)}
+          accessibilityLabel="Inventory connector admin notes"
           placeholder="Map required columns, access notes, or connector owner."
           placeholderTextColor={Colors.gray[600]}
           multiline
@@ -249,6 +259,9 @@ export default function PhaseTwo({
             style={[styles.validateButton, isValidating && styles.disabledButton]}
             onPress={handleValidate}
             disabled={isValidating || isLoading}
+            accessibilityRole="button"
+            accessibilityLabel="Validate inventory connector"
+            accessibilityState={{ disabled: isValidating || isLoading }}
           >
             <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
             <Text style={styles.validateButtonText}>
@@ -288,6 +301,9 @@ export default function PhaseTwo({
           style={styles.applyButton}
           onPress={handleMatch}
           disabled={isLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Match machine and build reconstruction plan"
+          accessibilityState={{ disabled: isLoading }}
         >
           <View style={styles.buttonContent}>
             <Text style={styles.applyButtonText}>Match Machine & Build Plan</Text>

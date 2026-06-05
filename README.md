@@ -58,10 +58,11 @@ Before real store builds, set `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_PRIVACY_P
 
 ```bash
 npm run api:preflight
+npm run accessibility:preflight
 npm run store:preflight
 ```
 
 `store:preflight` also requires hosted HTTPS privacy policy, terms, and support URLs from EAS environment variables or `app.json`.
-It also checks native build numbers, required release asset files, and 1024x1024 PNG dimensions for the icon, adaptive icon, splash image, and favicon.
+It also checks native build numbers, required release asset files, 1024x1024 PNG dimensions for the icon, adaptive icon, splash image, favicon, and critical-path accessibility labels.
 
 The web app includes deployable `/privacy`, `/terms`, and `/support` routes for store metadata URLs.

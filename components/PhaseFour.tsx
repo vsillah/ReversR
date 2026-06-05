@@ -470,6 +470,9 @@ export default function PhaseFour({
           style={styles.panelHeader} 
           onPress={() => localBom && setBomExpanded(!bomExpanded)}
           activeOpacity={localBom ? 0.7 : 1}
+          accessibilityRole="button"
+          accessibilityLabel={localBom ? 'Toggle bill of materials details' : 'Bill of materials panel'}
+          accessibilityState={{ disabled: !localBom, expanded: localBom ? bomExpanded : undefined }}
         >
           <View style={styles.terminalDots}>
             <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
@@ -552,7 +555,12 @@ export default function PhaseFour({
             <Text style={styles.generateDesc}>
               Generate a complete parts list with quantities, materials, estimated costs, and supplier recommendations.
             </Text>
-            <TouchableOpacity style={styles.generateButton} onPress={handleGenerateBOM}>
+            <TouchableOpacity
+              style={styles.generateButton}
+              onPress={handleGenerateBOM}
+              accessibilityRole="button"
+              accessibilityLabel="Generate bill of materials"
+            >
               <Ionicons name="hammer" size={20} color={Colors.black} />
               <Text style={styles.generateButtonText}>Generate BOM</Text>
             </TouchableOpacity>
@@ -566,15 +574,30 @@ export default function PhaseFour({
         <View style={styles.exportPanel}>
           <Text style={styles.exportTitle}>Export Options</Text>
           <View style={styles.exportButtons}>
-            <TouchableOpacity style={styles.exportButton} onPress={handleExportBOM}>
+            <TouchableOpacity
+              style={styles.exportButton}
+              onPress={handleExportBOM}
+              accessibilityRole="button"
+              accessibilityLabel="Export BOM CSV"
+            >
               <Ionicons name="document-text" size={20} color={Colors.accent} />
               <Text style={styles.exportButtonText}>Export BOM (CSV)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.exportButton} onPress={handleExportAll}>
+            <TouchableOpacity
+              style={styles.exportButton}
+              onPress={handleExportAll}
+              accessibilityRole="button"
+              accessibilityLabel="Export complete reconstruction package"
+            >
               <Ionicons name="archive" size={20} color={Colors.accent} />
               <Text style={styles.exportButtonText}>Export All (JSON)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.exportButton} onPress={handleExportQuotePacket}>
+            <TouchableOpacity
+              style={styles.exportButton}
+              onPress={handleExportQuotePacket}
+              accessibilityRole="button"
+              accessibilityLabel="Export manufacturer quote packet"
+            >
               <Ionicons name="send" size={20} color={Colors.accent} />
               <Text style={styles.exportButtonText}>Export Quote Packet</Text>
             </TouchableOpacity>
@@ -655,6 +678,10 @@ export default function PhaseFour({
                     onPress={() => handleArtifactPress(artifact.id, artifact.ready)}
                     activeOpacity={0.7}
                     disabled={isBomGenerating}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${artifact.name} artifact ${artifact.ready ? 'ready' : 'missing'}`}
+                    accessibilityHint={artifact.ready ? 'Shows artifact status' : artifact.id === 'bom' ? 'Generates the bill of materials' : 'Returns to design to generate this artifact'}
+                    accessibilityState={{ disabled: isBomGenerating, selected: artifact.ready }}
                   >
                     {isBomGenerating ? (
                       <ActivityIndicator size="small" color={Colors.secondary} />
@@ -704,6 +731,9 @@ export default function PhaseFour({
             style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
             onPress={handleExportQuotePacket}
             disabled={!localBom}
+            accessibilityRole="button"
+            accessibilityLabel="Export manufacturer quote packet"
+            accessibilityState={{ disabled: !localBom }}
           >
             <Text style={styles.quotePacketButtonText}>
               {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
@@ -727,6 +757,9 @@ export default function PhaseFour({
                   key={`${vendor.vendorName}-${vendor.url}`}
                   style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
                   onPress={() => setSelectedVendorName(vendor.vendorName)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
+                  accessibilityState={{ selected: isSelected }}
                 >
                   <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
                     {vendor.vendorName}
@@ -740,6 +773,7 @@ export default function PhaseFour({
             style={styles.quoteInput}
             value={quoteRecipientEmail}
             onChangeText={setQuoteRecipientEmail}
+            accessibilityLabel="Vendor quote recipient email"
             placeholder="quotes@vendor.com"
             placeholderTextColor={Colors.gray[600]}
             autoCapitalize="none"
@@ -750,6 +784,7 @@ export default function PhaseFour({
             style={[styles.quoteInput, styles.quoteNotesInput]}
             value={quoteAdminNotes}
             onChangeText={setQuoteAdminNotes}
+            accessibilityLabel="Admin notes for vendor quote request"
             placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
             placeholderTextColor={Colors.gray[600]}
             multiline
@@ -758,6 +793,9 @@ export default function PhaseFour({
             style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
             onPress={handlePrepareQuoteEmail}
             disabled={!localBom}
+            accessibilityRole="button"
+            accessibilityLabel="Prepare vendor quote request email"
+            accessibilityState={{ disabled: !localBom }}
           >
             <Text style={styles.quotePacketButtonText}>
               {localBom ? 'Prepare Request Email' : 'Generate BOM First'}
@@ -770,6 +808,8 @@ export default function PhaseFour({
               key={mfr.id}
               style={styles.manufacturerCard}
               onPress={() => Linking.openURL(mfr.url)}
+              accessibilityRole="link"
+              accessibilityLabel={`Open ${mfr.name} vendor website`}
             >
               <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
               <Text style={styles.manufacturerName}>{mfr.name}</Text>
@@ -785,7 +825,12 @@ export default function PhaseFour({
 
       <View style={styles.actionsPanel}>
         <Text style={styles.actionsTitle}>What's Next?</Text>
-        <TouchableOpacity style={styles.actionButton} onPress={onReset}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={onReset}
+          accessibilityRole="button"
+          accessibilityLabel="Start a new reconstruction"
+        >
           <Ionicons name="add-circle" size={20} color={Colors.accent} />
           <View style={styles.actionContent}>
             <Text style={styles.actionButtonText}>New Reconstruction</Text>

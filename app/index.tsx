@@ -769,6 +769,8 @@ export default function HomeScreen() {
             <TouchableOpacity 
               style={styles.phaseActionButton}
               onPress={() => phaseActionModal && handleGoToPhase(phaseActionModal)}
+              accessibilityRole="button"
+              accessibilityLabel={`Go back to ${phaseActionModal ? PHASE_LABELS[phaseActionModal - 1] : 'selected'} phase`}
             >
               <Ionicons name="arrow-back" size={20} color={Colors.accent} />
               <Text style={styles.phaseActionButtonText}>Go back to this phase</Text>
@@ -781,6 +783,8 @@ export default function HomeScreen() {
                   setPhaseActionModal(null);
                   handleTryAnotherPattern();
                 }}
+                accessibilityRole="button"
+                accessibilityLabel="Review inventory match"
               >
                 <Ionicons name="shuffle" size={20} color={Colors.secondary} />
                 <Text style={styles.phaseActionButtonText}>Review inventory match</Text>
@@ -793,6 +797,8 @@ export default function HomeScreen() {
                 setPhaseActionModal(null);
                 handleReset();
               }}
+              accessibilityRole="button"
+              accessibilityLabel="Reset and start over"
             >
               <Ionicons name="refresh" size={20} color={Colors.red[500]} />
               <Text style={[styles.phaseActionButtonText, { color: Colors.red[500] }]}>Reset and start over</Text>
@@ -801,6 +807,8 @@ export default function HomeScreen() {
             <TouchableOpacity 
               style={styles.phaseActionCancelButton}
               onPress={() => setPhaseActionModal(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel phase action"
             >
               <Text style={styles.phaseActionCancelText}>Cancel</Text>
             </TouchableOpacity>

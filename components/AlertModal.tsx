@@ -78,6 +78,8 @@ export default function AlertModal({
                   buttons.length > 1 && index > 0 && styles.buttonMultiple,
                 ]}
                 onPress={() => handleButtonPress(button.onPress)}
+                accessibilityRole="button"
+                accessibilityLabel={button.text}
               >
                 <Text
                   style={[

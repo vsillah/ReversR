@@ -173,7 +173,11 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
         <View style={styles.modalContent}>
           <View style={styles.header}>
             <Text style={styles.title}>Settings</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close settings"
+            >
               <Ionicons name="close" size={24} color={Colors.white} />
             </TouchableOpacity>
           </View>
@@ -184,12 +188,18 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
               <TouchableOpacity
                 style={[styles.providerButton, provider === 'gemini' && styles.providerButtonActive]}
                 onPress={() => setProvider('gemini')}
+                accessibilityRole="button"
+                accessibilityLabel="Use Gemini cloud AI provider"
+                accessibilityState={{ selected: provider === 'gemini' }}
               >
                 <Text style={[styles.providerButtonText, provider === 'gemini' && styles.providerButtonTextActive]}>Gemini (Cloud)</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.providerButton, provider === 'ollama' && styles.providerButtonActive]}
                 onPress={() => setProvider('ollama')}
+                accessibilityRole="button"
+                accessibilityLabel="Use Ollama local AI provider"
+                accessibilityState={{ selected: provider === 'ollama' }}
               >
                 <Text style={[styles.providerButtonText, provider === 'ollama' && styles.providerButtonTextActive]}>Ollama (Local)</Text>
               </TouchableOpacity>
@@ -267,6 +277,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                     style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
                     onPress={() => setCredentialMode(mode)}
                     accessibilityRole="button"
+                    accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
+                    accessibilityState={{ selected: credentialMode === mode }}
                   >
                     <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
                       {mode === 'api_key' ? 'API Key' : 'OAuth'}
@@ -361,7 +373,12 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             </View>
           </ScrollView>
 
-          <TouchableOpacity style={styles.saveButton} onPress={saveSettings}>
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={saveSettings}
+            accessibilityRole="button"
+            accessibilityLabel="Save settings"
+          >
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
         </View>

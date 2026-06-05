@@ -601,6 +601,9 @@ export default function PhaseThree({
           <TouchableOpacity
             style={[styles.tab, activeTab === '2d' && styles.tabActive]}
             onPress={() => setActiveTab('2d')}
+            accessibilityRole="button"
+            accessibilityLabel="Show 2D sketch tools"
+            accessibilityState={{ selected: activeTab === '2d' }}
           >
             <Ionicons 
               name="image" 
@@ -614,6 +617,9 @@ export default function PhaseThree({
           <TouchableOpacity
             style={[styles.tab, activeTab === '3d' && styles.tabActive]}
             onPress={() => setActiveTab('3d')}
+            accessibilityRole="button"
+            accessibilityLabel="Show 3D wireframe tools"
+            accessibilityState={{ selected: activeTab === '3d' }}
           >
             <Ionicons 
               name="cube" 
@@ -635,6 +641,8 @@ export default function PhaseThree({
               <TouchableOpacity 
                 style={styles.skipButton}
                 onPress={() => setStatus(spec ? 'specs_ready' : 'generating_specs')}
+                accessibilityRole="button"
+                accessibilityLabel="Skip visual generation"
               >
                 <Text style={styles.skipButtonText}>Skip</Text>
               </TouchableOpacity>
@@ -806,7 +814,12 @@ export default function PhaseThree({
                 <Text style={styles.generatePromptDesc}>
                   AI-generated sketch visualization of the matched machine
                 </Text>
-                <TouchableOpacity style={styles.generateButton} onPress={handleGenerate2D}>
+                <TouchableOpacity
+                  style={styles.generateButton}
+                  onPress={handleGenerate2D}
+                  accessibilityRole="button"
+                  accessibilityLabel="Generate 2D reconstruction sketch"
+                >
                   <Text style={styles.generateButtonText}>Generate Sketch</Text>
                 </TouchableOpacity>
               </View>
@@ -880,7 +893,12 @@ export default function PhaseThree({
                 <Text style={styles.generatePromptDesc}>
                   Exportable 3D scene description for CAD software
                 </Text>
-                <TouchableOpacity style={styles.generateButton} onPress={handleGenerate3D}>
+                <TouchableOpacity
+                  style={styles.generateButton}
+                  onPress={handleGenerate3D}
+                  accessibilityRole="button"
+                  accessibilityLabel="Generate 3D wireframe"
+                >
                   <Text style={styles.generateButtonText}>Generate 3D</Text>
                 </TouchableOpacity>
               </View>
@@ -934,7 +952,12 @@ export default function PhaseThree({
                 <Text style={styles.specValue}>{spec.implementationNotes}</Text>
               </View>
 
-              <TouchableOpacity style={styles.downloadButton} onPress={handleExportSpecs}>
+              <TouchableOpacity
+                style={styles.downloadButton}
+                onPress={handleExportSpecs}
+                accessibilityRole="button"
+                accessibilityLabel="Export technical specifications"
+              >
                 <Ionicons name="download" size={16} color={Colors.accent} />
                 <Text style={styles.downloadButtonText}>Export Specs</Text>
               </TouchableOpacity>
@@ -945,13 +968,23 @@ export default function PhaseThree({
 
       {/* Continue to Build button */}
       {spec && (
-        <TouchableOpacity style={styles.continueButton} onPress={onContinueToBuild}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={onContinueToBuild}
+          accessibilityRole="button"
+          accessibilityLabel="Continue to build phase"
+        >
           <Text style={styles.continueButtonText}>Continue to Build</Text>
           <Ionicons name="arrow-forward" size={20} color={Colors.black} />
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={styles.tryAnotherButton} onPress={onTryAnotherPattern}>
+      <TouchableOpacity
+        style={styles.tryAnotherButton}
+        onPress={onTryAnotherPattern}
+        accessibilityRole="button"
+        accessibilityLabel="Review inventory match"
+      >
         <Ionicons name="shuffle" size={18} color={Colors.secondary} />
         <Text style={styles.tryAnotherText}>Review Inventory Match</Text>
       </TouchableOpacity>

@@ -155,7 +155,12 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
       <View style={styles.cameraContainer}>
         <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
           <View style={styles.cameraOverlay}>
-            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+            <TouchableOpacity
+              style={styles.flipButton}
+              onPress={toggleCameraFacing}
+              accessibilityRole="button"
+              accessibilityLabel="Flip camera"
+            >
               <Ionicons name="camera-reverse" size={28} color={Colors.white} />
             </TouchableOpacity>
           </View>
@@ -163,10 +168,17 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setIsCameraOpen(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel camera scan"
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.captureButton} onPress={captureImage}>
+            <TouchableOpacity
+              style={styles.captureButton}
+              onPress={captureImage}
+              accessibilityRole="button"
+              accessibilityLabel="Capture machine photo"
+            >
               <View style={styles.captureButtonInner} />
             </TouchableOpacity>
             <View style={{ width: 80 }} />
@@ -193,6 +205,9 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           <TouchableOpacity
             style={[styles.modeTab, inputMode === 'type' && styles.modeTabActive]}
             onPress={() => setInputMode('type')}
+            accessibilityRole="button"
+            accessibilityLabel="Use text description mode"
+            accessibilityState={{ selected: inputMode === 'type' }}
           >
             <Ionicons 
               name="create-outline" 
@@ -206,6 +221,9 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           <TouchableOpacity
             style={[styles.modeTab, inputMode === 'scan' && styles.modeTabActive]}
             onPress={() => setInputMode('scan')}
+            accessibilityRole="button"
+            accessibilityLabel="Use camera scan mode"
+            accessibilityState={{ selected: inputMode === 'scan' }}
           >
             <Ionicons 
               name="camera-outline" 
@@ -219,6 +237,9 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           <TouchableOpacity
             style={[styles.modeTab, inputMode === 'lucky' && styles.modeTabActive]}
             onPress={() => setInputMode('lucky')}
+            accessibilityRole="button"
+            accessibilityLabel="Use sample machine mode"
+            accessibilityState={{ selected: inputMode === 'lucky' }}
           >
             <Ionicons 
               name="dice-outline" 
@@ -239,6 +260,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
                 style={styles.textInput}
                 value={input}
                 onChangeText={setInput}
+                accessibilityLabel="Machine description"
                 placeholder="e.g., A desktop FDM 3D printer with aluminum frame, heated bed, extruder, belts, rails, and display..."
                 placeholderTextColor={Colors.gray[600]}
                 multiline
@@ -265,12 +287,19 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => setCapturedImage(null)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Remove captured machine photo"
                   >
                     <Ionicons name="close" size={18} color={Colors.gray[400]} />
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity style={styles.cameraPrompt} onPress={openCamera}>
+                <TouchableOpacity
+                  style={styles.cameraPrompt}
+                  onPress={openCamera}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open camera to scan machine"
+                >
                   <View style={styles.cameraIconCircle}>
                     <Ionicons name="camera" size={32} color={Colors.green[400]} />
                   </View>
@@ -284,6 +313,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
                 style={[styles.textInput, styles.scanTextInput]}
                 value={input}
                 onChangeText={setInput}
+                accessibilityLabel="Optional machine scan notes"
                 placeholder="Optional: Add details about the object..."
                 placeholderTextColor={Colors.gray[600]}
                 multiline
@@ -297,7 +327,12 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
             <View style={styles.luckyContent}>
               <View style={styles.luckyHeader}>
                 <Text style={styles.contentLabel}>Random Product</Text>
-                <TouchableOpacity style={styles.shuffleButton} onPress={handleShuffle}>
+                <TouchableOpacity
+                  style={styles.shuffleButton}
+                  onPress={handleShuffle}
+                  accessibilityRole="button"
+                  accessibilityLabel="Shuffle sample machine description"
+                >
                   <Ionicons name="shuffle" size={16} color={Colors.secondary} />
                   <Text style={styles.shuffleText}>Shuffle</Text>
                 </TouchableOpacity>
@@ -319,6 +354,9 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           ]}
           onPress={handleAnalyze}
           disabled={isLoading || !hasValidInput()}
+          accessibilityRole="button"
+          accessibilityLabel="Initiate machine scan"
+          accessibilityState={{ disabled: isLoading || !hasValidInput() }}
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>

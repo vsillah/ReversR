@@ -98,6 +98,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 - Set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in the EAS production environment.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run store:preflight`.
+- Run `npm run accessibility:preflight`.
 - Confirm final app icon, adaptive icon, splash image, and favicon pass the release asset checks.
 - Run native Android and iOS camera smoke tests.
 - Capture native screenshots for both stores.

@@ -22,7 +22,11 @@ export default function PolicyPage({ title, updated, intro, sections }: PolicyPa
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Link href="/" asChild>
-          <TouchableOpacity style={styles.backLink}>
+          <TouchableOpacity
+            style={styles.backLink}
+            accessibilityRole="button"
+            accessibilityLabel="Back to ReversR Rebuild"
+          >
             <Ionicons name="arrow-back" size={16} color={Colors.accent} />
             <Text style={styles.backText}>ReversR Rebuild</Text>
           </TouchableOpacity>

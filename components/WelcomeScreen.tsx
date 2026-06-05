@@ -84,7 +84,12 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings }: Welcom
         </View>
 
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.button} onPress={onStart}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={onStart}
+            accessibilityRole="button"
+            accessibilityLabel="Start new machine reconstruction"
+          >
             <Text style={styles.buttonText}>New Reconstruction</Text>
             <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
           </TouchableOpacity>

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { spawnSync } = require('child_process');
 
 const args = new Set(process.argv.slice(2));
 const allowPlaceholder = args.has('--allow-placeholder');
@@ -22,6 +23,13 @@ const warnings = [];
 
 const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
+
+const runCheck = (label, command, args) => {
+  const result = spawnSync(command, args, { stdio: 'pipe', encoding: 'utf8' });
+  if (result.status !== 0) {
+    fail(`${label} failed: ${(result.stderr || result.stdout || '').trim()}`);
+  }
+};
 
 const appConfig = readJson('app.json').expo;
 const easConfig = readJson('eas.json');
@@ -92,6 +100,8 @@ if (allDependencies['expo-media-library']) {
 if (!allDependencies['expo-camera']) fail('expo-camera must stay installed for machine scanning.');
 if (!allDependencies['expo-sharing']) fail('expo-sharing must stay installed for reconstruction package export.');
 if (!allDependencies['expo-file-system']) fail('expo-file-system must stay installed for local package export.');
+
+runCheck('Accessibility preflight', process.execPath, ['scripts/accessibility-preflight.js']);
 
 const requiredPngAssets = [
   ['expo.icon', appConfig.icon, 1024, 1024],
