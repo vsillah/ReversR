@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T06:23:11.924Z",
+  "outputFile": "docs/store-review-safety-packet.md",
+  "sources": [
+    "docs/store-submission-packet.json",
+    "docs/privacy-policy.md",
+    "docs/terms-of-service.md",
+    "docs/store-console-copy.md",
+    "app.json"
+  ],
+  "phraseChecks": [
+    {
+      "phrase": "Camera access is used only to capture machine images",
+      "found": true
+    },
+    {
+      "phrase": "does not automatically order parts",
+      "found": true
+    },
+    {
+      "phrase": "does not automatically submit",
+      "found": true
+    },
+    {
+      "phrase": "explicit human review",
+      "found": true
+    },
+    {
+      "phrase": "qualified person",
+      "found": true
+    },
+    {
+      "phrase": "Raw inventory connector secrets must remain server-side",
+      "found": true
+    },
+    {
+      "phrase": "does not use camera data for advertising or tracking",
+      "found": true
+    },
+    {
+      "phrase": "configured AI provider",
+      "found": true
+    }
+  ],
+  "fieldChecks": [
+    {
+      "field": "appStoreConnect.appPrivacy.tracking",
+      "pass": true
+    },
+    {
+      "field": "appStoreConnect.appPrivacy.dataUsedForAdvertising",
+      "pass": true
+    },
+    {
+      "field": "googlePlay.dataSafety.tracking",
+      "pass": true
+    },
+    {
+      "field": "googlePlay.dataSafety.ads",
+      "pass": true
+    },
+    {
+      "field": "googlePlay.dataSafety.encryptedInTransit",
+      "pass": true
+    },
+    {
+      "field": "googlePlay.dataSafety.requiredPermissions.cameraOnly",
+      "pass": true
+    },
+    {
+      "field": "android.permissions.cameraOnly",
+      "pass": true
+    },
+    {
+      "field": "android.blockedPermissions.android.permission.RECORD_AUDIO",
+      "pass": true
+    },
+    {
+      "field": "android.blockedPermissions.android.permission.READ_EXTERNAL_STORAGE",
+      "pass": true
+    },
+    {
+      "field": "android.blockedPermissions.android.permission.WRITE_EXTERNAL_STORAGE",
+      "pass": true
+    },
+    {
+      "field": "android.blockedPermissions.android.permission.READ_MEDIA_IMAGES",
+      "pass": true
+    },
+    {
+      "field": "android.blockedPermissions.android.permission.READ_MEDIA_VIDEO",
+      "pass": true
+    }
+  ],
+  "failures": [],
+  "summary": {
+    "phrasePassCount": 8,
+    "phraseCount": 8,
+    "fieldPassCount": 12,
+    "fieldCount": 12
+  }
+}

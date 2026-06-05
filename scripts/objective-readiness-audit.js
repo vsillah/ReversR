@@ -118,6 +118,7 @@ const requirements = [
     requirement: 'Prepare the local release packet needed to approach Google Play and Apple App Store submission.',
     status: statusFor([
       'store-submission-packet-smoke',
+      'store-review-safety-packet',
       'store-screenshot-planning',
       'external-release-runbook',
       'release-evidence-bundle',
@@ -129,6 +130,7 @@ const requirements = [
     ]),
     evidence: gateEvidence([
       'store-submission-packet-smoke',
+      'store-review-safety-packet',
       'store-screenshot-planning',
       'external-release-runbook',
       'release-evidence-bundle',

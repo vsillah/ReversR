@@ -28,6 +28,7 @@ The app now has:
 - Store preflight script: `npm run store:preflight`
 - Store preflight checks for native build numbers and required 1024x1024 PNG release assets
 - Store submission packet: `docs/store-submission-packet.json`
+- Store review safety packet: `npm run store:review-safety` writes `docs/store-review-safety-packet.md` and `docs/store-review-safety-evidence.json`
 - Store console copy/paste packet: `docs/store-console-copy.md`
 - Store submission packet evidence: `docs/store-submission-smoke-evidence.json`
 - Store submission packet preflight for App Store Connect and Google Play metadata limits, hosted URLs, privacy/data-safety answers, and native screenshot requirements

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T06:19:06.248Z",
+  "generatedAt": "2026-06-05T06:23:28.397Z",
   "urlMode": "placeholder-allowed",
   "warnings": [
     "privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy",

@@ -247,6 +247,26 @@ addGate(
   storeSubmissionSmokeOk ? '' : 'Run npm run store:submission:preflight:local before store console setup.'
 );
 
+const storeReviewSafety = readOptionalJson('docs/store-review-safety-evidence.json');
+const storeReviewSafetyOk = (
+  storeReviewSafety?.status === 'pass' &&
+  storeReviewSafety?.summary?.phrasePassCount === storeReviewSafety?.summary?.phraseCount &&
+  storeReviewSafety?.summary?.fieldPassCount === storeReviewSafety?.summary?.fieldCount &&
+  storeReviewSafety?.phraseChecks?.some(check => check.phrase === 'explicit human review' && check.found === true) &&
+  storeReviewSafety?.phraseChecks?.some(check => check.phrase === 'does not automatically submit' && check.found === true) &&
+  storeReviewSafety?.fieldChecks?.some(check => check.field === 'android.permissions.cameraOnly' && check.pass === true)
+);
+addGate(
+  'store-local',
+  'store-review-safety-packet',
+  'Store review safety packet proves human-review and no-auto-submission boundaries',
+  storeReviewSafetyOk ? 'pass' : 'pending',
+  storeReviewSafetyOk
+    ? `docs/store-review-safety-evidence.json proves ${storeReviewSafety.summary.phrasePassCount} phrases and ${storeReviewSafety.summary.fieldPassCount} field checks at ${storeReviewSafety.generatedAt}.`
+    : 'docs/store-review-safety-evidence.json is missing or incomplete.',
+  storeReviewSafetyOk ? '' : 'Run npm run store:review-safety before store review packet handoff.'
+);
+
 const androidPermissions = appConfig.android?.permissions || [];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
 const permissionOk = (
@@ -457,6 +477,7 @@ const requiredBundleProofs = [
   'api-deployment-smoke',
   'policy-hosting-smoke',
   'store-submission-packet-smoke',
+  'store-review-safety-packet',
   'store-screenshot-planning',
   'external-release-runbook',
   'objective-readiness-audit',
@@ -508,6 +529,7 @@ const expectedLocalCiCommands = [
   'inventory-preflight',
   'policy-preflight-local',
   'store-submission-preflight-local',
+  'store-review-safety',
   'store-console-copy',
   'objective-readiness-audit',
   'store-console-preflight-local',
