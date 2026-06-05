@@ -16,6 +16,7 @@ npm run release:next-actions
 ## Current Critical Path
 
 1. Deploy the API behind HTTPS.
+   - Follow `docs/external-release-setup-runbook.md` section 5 for hosted API and policy URL sequencing.
    - Copy `docs/production-api-env.example` into the host provider's environment settings.
    - Set `API_CORS_ORIGINS` to hosted app origins, not `*`.
    - Set `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, `API_REQUEST_BODY_LIMIT`, and connector-secret settings on the API host.
@@ -29,6 +30,7 @@ EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 
 2. Deploy policy/support pages.
    - Run `npm run policy:preflight:local` and confirm `docs/policy-hosting-smoke-evidence.json` is updated.
+   - Follow `docs/external-release-setup-runbook.md` section 5 for hosted API and policy URL sequencing.
    - Host `/privacy`, `/terms`, and `/support` on public HTTPS URLs.
    - Confirm success with:
 
@@ -40,6 +42,7 @@ npm run policy:preflight -- --check-hosted
 ```
 
 3. Smoke the real machine inventory connector.
+   - Follow `docs/external-release-setup-runbook.md` section 6 before connecting real inventory credentials.
    - Validate the real export first:
 
 ```bash
@@ -61,6 +64,7 @@ npm run connector:smoke
 ```
 
 4. Link EAS for the clone identity.
+   - Follow `docs/external-release-setup-runbook.md` section 4 for EAS login, project linkage, environment variables, and credentials.
 
 ```bash
 npm run native:preflight:local
@@ -78,6 +82,7 @@ npm run native:preflight:local
 Confirm `docs/native-release-config-evidence.json` is updated before account setup, then confirm `app.json` contains `expo.extra.eas.projectId` for the clone after `eas init`. Do not reuse the original ReversR project ID if this app is shipping as a separate product.
 
 5. Create store records.
+   - Follow `docs/external-release-setup-runbook.md` sections 2 and 3 for App Store Connect and Google Play Console setup.
    - App Store Connect: create `com.vsillah.reversrrebuild`, SKU `reversr-rebuild-001`.
    - Google Play Console: create `com.vsillah.reversrrebuild`.
    - Run `npm run store:submission:preflight:local` and confirm `docs/store-submission-smoke-evidence.json` is updated.
@@ -91,6 +96,7 @@ npm run store:console:preflight
 ```
 
 6. Build preview binaries and record native QA.
+   - Follow `docs/external-release-setup-runbook.md` section 7 for preview QA evidence and screenshot files.
 
 ```bash
 npx eas-cli@20.0.0 build --platform android --profile preview

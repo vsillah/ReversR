@@ -195,6 +195,7 @@ const requiredDocs = [
   'docs/production-api-deployment.md',
   'docs/production-api-env.example',
   'docs/release-action-plan.md',
+  'docs/external-release-setup-runbook.md',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
   'docs/eas-submit-configuration.md',

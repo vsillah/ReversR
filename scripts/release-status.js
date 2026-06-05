@@ -343,6 +343,7 @@ const requiredArtifacts = [
   'docs/policy-hosting-deployment.md',
   'docs/policy-hosting-smoke-evidence.json',
   'docs/release-action-plan.md',
+  'docs/external-release-setup-runbook.md',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
   'docs/native-qa-evidence.template.json',
@@ -377,6 +378,34 @@ addGate(
   artifactsOk ? 'pass' : 'blocked',
   artifactsOk ? `${requiredArtifacts.length} required release artifacts found.` : 'Required release artifact missing.',
   artifactsOk ? '' : 'Run npm run store:preflight:local to identify missing release artifacts.'
+);
+
+const externalRunbookChecks = [
+  'App Store Connect',
+  'Google Play Console',
+  'EAS Project And Environment Setup',
+  'com.vsillah.reversrrebuild',
+  'reversr-rebuild-001',
+  'docs/store-console-evidence.json',
+  'docs/native-qa-evidence.json',
+  'npm run store:console:preflight',
+  'npm run native:qa:preflight',
+  'npm run connector:smoke',
+  'https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/',
+  'https://support.google.com/googleplay/android-developer/answer/9859152',
+  'https://docs.expo.dev/submit/introduction/',
+];
+const externalRunbookText = readText('docs/external-release-setup-runbook.md');
+const externalRunbookOk = externalRunbookChecks.every(text => externalRunbookText.includes(text));
+addGate(
+  'store-local',
+  'external-release-runbook',
+  'External Apple, Google, EAS, hosted API, and connector setup runbook is present',
+  externalRunbookOk ? 'pass' : 'pending',
+  externalRunbookOk
+    ? 'docs/external-release-setup-runbook.md covers account setup, exact clone IDs, evidence files, preflight commands, and official source links.'
+    : 'docs/external-release-setup-runbook.md is missing required external setup coverage.',
+  externalRunbookOk ? '' : 'Restore the external release setup runbook before account-side release work.'
 );
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;

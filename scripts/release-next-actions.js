@@ -28,6 +28,7 @@ const actionPlan = {
     action: 'Deploy the API container behind HTTPS and bind production API env.',
     steps: [
       'Create a production API env file from docs/production-api-env.example.',
+      'Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.',
       'Set API_CORS_ORIGINS to the hosted app origins, not *.',
       'Set AI_INTEGRATIONS_GEMINI_API_KEY, ADMIN_API_TOKEN, API_REQUEST_BODY_LIMIT, and connector secret settings on the API host.',
       'Run npm run api:deployment-smoke and confirm docs/api-deployment-smoke-evidence.json is updated.',
@@ -47,6 +48,7 @@ const actionPlan = {
     action: 'Deploy privacy, terms, and support pages to public HTTPS URLs.',
     steps: [
       'Run npm run policy:preflight:local and confirm docs/policy-hosting-smoke-evidence.json is updated.',
+      'Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.',
       'Deploy the web export or route host that serves /privacy, /terms, and /support.',
       'Set EXPO_PUBLIC_PRIVACY_POLICY_URL, EXPO_PUBLIC_TERMS_URL, and EXPO_PUBLIC_SUPPORT_URL to the hosted URLs.',
       'Run npm run policy:preflight -- --check-hosted with those env vars set.',
@@ -63,6 +65,7 @@ const actionPlan = {
     action: 'Validate the real machine inventory export and smoke the hosted connector path.',
     steps: [
       'Run npm run inventory:source:validate -- <inventory.csv-or-json> on the real export.',
+      'Follow docs/external-release-setup-runbook.md section 6 before connecting real inventory credentials.',
       'Configure the connector credential on the hosted API as a server-side credentialRef.',
       'Run npm run connector:smoke with EXPO_PUBLIC_API_BASE_URL, CONNECTOR_SMOKE_SOURCE_URL, CONNECTOR_SMOKE_AUTH_MODE, and CONNECTOR_SMOKE_CREDENTIAL_REF.',
       'Set CONNECTOR_SMOKE_EXPECTED_MACHINE_ID for a known machine when possible.',
@@ -79,6 +82,7 @@ const actionPlan = {
     action: 'Log in to EAS and link the clone identity to its own EAS project.',
     steps: [
       'Run npm run native:preflight:local and confirm docs/native-release-config-evidence.json is updated.',
+      'Follow docs/external-release-setup-runbook.md section 4 for EAS login, project linkage, env, and credentials.',
       'Run npx eas-cli@20.0.0 login.',
       'Run npx eas-cli@20.0.0 whoami --non-interactive to confirm the account.',
       'Run npx eas-cli@20.0.0 init for ReversR Rebuild.',
@@ -98,6 +102,7 @@ const actionPlan = {
     action: 'Create the App Store Connect app record and add its Apple ID to eas.json.',
     steps: [
       'Create the App Store Connect app record for com.vsillah.reversrrebuild.',
+      'Follow docs/external-release-setup-runbook.md sections 2 and 4.',
       'Copy the App Store Connect Apple ID from the app information page.',
       'Set eas.json submit.production.ios.ascAppId to that Apple ID.',
       'Keep Android submit.production.android.track set to internal for Google Play Internal Testing.',
@@ -114,6 +119,7 @@ const actionPlan = {
     action: 'Build Android/iOS preview binaries and record device QA evidence.',
     steps: [
       'Run npx eas-cli@20.0.0 build --platform android --profile preview.',
+      'Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.',
       'Run npx eas-cli@20.0.0 build --platform ios --profile preview.',
       'Copy docs/native-qa-evidence.template.json to docs/native-qa-evidence.json.',
       'Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.',
@@ -131,6 +137,7 @@ const actionPlan = {
     action: 'Create App Store Connect and Google Play Console records and fill console evidence.',
     steps: [
       'Create the App Store Connect app record for com.vsillah.reversrrebuild.',
+      'Follow docs/external-release-setup-runbook.md sections 2 and 3.',
       'Create the Google Play Console app record for com.vsillah.reversrrebuild.',
       'Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.',
       'Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.',
