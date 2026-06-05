@@ -183,6 +183,7 @@ const requiredDocs = [
   'docs/store-submission-packet.json',
   'docs/production-api-deployment.md',
   'docs/native-release-runbook.md',
+  'docs/native-qa-evidence.template.json',
   'docs/store-screenshots/README.md',
   'Dockerfile',
   '.dockerignore',
@@ -190,6 +191,7 @@ const requiredDocs = [
   'app/terms.tsx',
   'app/support.tsx',
   'scripts/native-release-preflight.js',
+  'scripts/native-qa-preflight.js',
   'scripts/store-submission-preflight.js',
   'scripts/capture-store-screenshots.js',
 ];

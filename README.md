@@ -60,6 +60,12 @@ The native App Store and Google Play release path is captured in [docs/native-re
 npm run native:preflight:local
 ```
 
+Native preview-build QA evidence is structured in [docs/native-qa-evidence.template.json](docs/native-qa-evidence.template.json). Before EAS preview builds exist, run the pending-evidence check:
+
+```bash
+npm run native:qa:preflight:local
+```
+
 The store console copy/paste packet is in [docs/store-submission-packet.json](docs/store-submission-packet.json). Validate it locally with:
 
 ```bash

@@ -30,6 +30,7 @@ The app now has:
 - API health endpoint: `GET /api/health`
 - API Dockerfile and production deployment runbook for hosted backend readiness
 - Native release runbook and `npm run native:preflight` gate for EAS project, URL, CLI, and release-profile readiness
+- Native QA evidence template and `npm run native:qa:preflight` gate for Android/iOS preview-build testing
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
 - Settings-based admin credential reference manager for listing, saving, and deleting backend registry credentials
@@ -79,6 +80,7 @@ Open gates:
 - Run `npm run store:preflight` before production builds to confirm package IDs, build numbers, release assets, permissions, hosted URLs, and EAS profile shape.
 - Run `npm run store:submission:preflight` before entering copy into App Store Connect or Play Console.
 - Run `npm run native:preflight` after EAS project linkage and hosted URLs are configured.
+- Run `npm run native:qa:preflight` after Android and iOS preview-build QA evidence is recorded.
 - Configure Android credentials and iOS credentials.
 - Build:
   - `eas build --platform android --profile production`
@@ -92,7 +94,7 @@ Open gates:
 - Production API host: a Dockerfile and deployment runbook exist, but the API still needs to be deployed behind HTTPS and verified with `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Privacy policy, terms, and support: web routes and env-driven app config exist, but the routes must be deployed to hosted HTTPS URLs and reviewed before submission.
-- Native QA: camera flow needs real iOS and Android device testing.
+- Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: quote packet export and user-reviewed email drafts are available, but the app still does not automatically submit files, request live pricing, purchase services, or place fabrication orders.
@@ -109,9 +111,10 @@ Open gates:
 4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
 5. Run `npm run store:submission:preflight` with hosted URLs, then copy the packet into App Store Connect and Play Console drafts.
 6. Link the clone with `eas init`, then run `npm run native:preflight`.
-7. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader, tap-target, and camera QA.
-8. Run EAS preview builds.
+7. Run EAS preview builds.
+8. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
 9. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
-10. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
-11. Submit to TestFlight and Google Play Internal Testing.
-12. Resolve review feedback, then submit production releases.
+10. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
+11. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+12. Submit to TestFlight and Google Play Internal Testing.
+13. Resolve review feedback, then submit production releases.

@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "2026-06-05",
+  "status": "pending",
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "easProjectId": "",
+    "apiBaseUrl": "",
+    "privacyPolicyUrl": "",
+    "termsUrl": "",
+    "supportUrl": ""
+  },
+  "builds": {
+    "androidPreview": {
+      "status": "pending",
+      "profile": "preview",
+      "buildUrl": "",
+      "artifactType": "apk",
+      "versionCode": 15,
+      "device": "",
+      "osVersion": "",
+      "tester": "",
+      "completedAt": "",
+      "notes": ""
+    },
+    "iosPreview": {
+      "status": "pending",
+      "profile": "preview",
+      "buildUrl": "",
+      "artifactType": "ipa",
+      "buildNumber": "1",
+      "device": "",
+      "osVersion": "",
+      "tester": "",
+      "completedAt": "",
+      "notes": ""
+    }
+  },
+  "checks": [
+    {
+      "id": "install-launch",
+      "label": "Install and launch preview build",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "camera-permission",
+      "label": "Camera permission prompt and scan screen",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "manual-description",
+      "label": "Manual machine description fallback",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "inventory-validation",
+      "label": "Admin inventory connector validation",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "machine-match",
+      "label": "Machine match evidence from inventory",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "bom-generation",
+      "label": "BOM generation with pricing ranges",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "assembly-steps",
+      "label": "Assembly steps and reconstruction plan",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "quote-packet-export",
+      "label": "Manufacturer quote packet export",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "vendor-request-draft",
+      "label": "Vendor request email draft",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "policy-links",
+      "label": "Privacy, terms, and support links",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "accessibility",
+      "label": "Screen-reader labels and tap targets",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "offline-api-error",
+      "label": "Hosted API outage/error handling",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "connector-auth-error",
+      "label": "Missing or invalid connector credential handling",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    },
+    {
+      "id": "native-screenshots",
+      "label": "Final native screenshots captured",
+      "requiredPlatforms": ["android", "ios"],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": ""
+    }
+  ],
+  "blockers": [
+    "Pending EAS preview builds and physical/simulator device QA."
+  ],
+  "signoff": {
+    "releaseOwner": "",
+    "qaReviewer": "",
+    "approvedForTestFlight": false,
+    "approvedForPlayInternalTesting": false,
+    "approvedForProductionSubmission": false,
+    "signedAt": ""
+  }
+}

@@ -14,6 +14,7 @@ npm run typecheck
 npm run accessibility:preflight
 npm run store:preflight:local
 npm run native:preflight:local
+npm run native:qa:preflight:local
 npx expo-doctor
 ```
 
@@ -113,15 +114,33 @@ npx eas-cli@20.0.0 build --platform ios --profile preview
 
 Run device QA before store submission:
 
+```bash
+cp docs/native-qa-evidence.template.json docs/native-qa-evidence.json
+```
+
+Fill `docs/native-qa-evidence.json` with Android and iOS build URLs, devices, tester names, completion timestamps, check statuses, and evidence notes.
+
+Required checks include:
+
+- install and launch,
 - camera permission prompt and scan flow,
+- manual machine description fallback,
 - inventory connector validation,
 - machine matching,
 - BOM generation,
+- assembly steps and reconstruction plan,
 - quote packet export,
 - vendor request draft,
 - policy/support links,
 - screen-reader labels and tap targets,
-- offline/error states for API and connector failures.
+- offline/error states for API and connector failures,
+- final native screenshot capture.
+
+Before TestFlight or Play Internal Testing submission:
+
+```bash
+npm run native:qa:preflight
+```
 
 ## 8. Capture Final Native Screenshots
 

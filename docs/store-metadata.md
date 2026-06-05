@@ -106,6 +106,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 - Run `npm run accessibility:preflight`.
 - Confirm final app icon, adaptive icon, splash image, and favicon pass the release asset checks.
 - Run native Android and iOS camera smoke tests.
+- Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, record Android/iOS preview-build evidence, and run `npm run native:qa:preflight`.
 - Run `npm run screenshots:store` for web-preview screenshot planning.
 - Capture final native screenshots for both stores.
 - Build Android AAB and iOS IPA through EAS.
