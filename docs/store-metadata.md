@@ -97,7 +97,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 ## Pre-Submission Checklist
 
 - Run `npm run release:status` for a current summary of passed local gates and pending hosted/native/store-console gates.
-- Validate the copy/paste console packet with `npm run store:submission:preflight`.
+- Validate the copy/paste console packet with `npm run store:submission:preflight`; this writes `docs/store-submission-smoke-evidence.json`.
 - After console records exist, copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console evidence, and run `npm run store:console:preflight`.
 - Host privacy policy, terms, and support pages from the built-in web routes.
 - Validate hosted privacy, terms, and support URLs with `npm run policy:preflight -- --check-hosted`.

@@ -211,6 +211,42 @@ addGate(
   policyHostingSmokeOk ? '' : 'Run npm run policy:preflight:local before deploying policy/support pages.'
 );
 
+const storeSubmissionSmoke = readOptionalJson('docs/store-submission-smoke-evidence.json');
+const storeSubmissionSmokeOk = (
+  storeSubmissionSmoke?.status === 'pass' &&
+  storeSubmissionSmoke?.appIdentity?.name === appConfig.name &&
+  storeSubmissionSmoke?.appIdentity?.version === appConfig.version &&
+  storeSubmissionSmoke?.appIdentity?.iosBundleId === appConfig.ios?.bundleIdentifier &&
+  storeSubmissionSmoke?.appIdentity?.androidPackage === appConfig.android?.package &&
+  storeSubmissionSmoke?.appStoreConnect?.nameLength <= 30 &&
+  storeSubmissionSmoke?.appStoreConnect?.subtitleLength <= 30 &&
+  storeSubmissionSmoke?.appStoreConnect?.keywordsLength <= 100 &&
+  storeSubmissionSmoke?.appStoreConnect?.privacy?.tracking === false &&
+  storeSubmissionSmoke?.appStoreConnect?.privacy?.dataUsedForAdvertising === false &&
+  Number(storeSubmissionSmoke?.appStoreConnect?.privacy?.userContentProcessedCount || 0) >= 3 &&
+  storeSubmissionSmoke?.googlePlay?.titleLength <= 30 &&
+  storeSubmissionSmoke?.googlePlay?.shortDescriptionLength <= 80 &&
+  storeSubmissionSmoke?.googlePlay?.dataSafety?.tracking === false &&
+  storeSubmissionSmoke?.googlePlay?.dataSafety?.ads === false &&
+  storeSubmissionSmoke?.googlePlay?.dataSafety?.encryptedInTransit === true &&
+  Array.isArray(storeSubmissionSmoke?.googlePlay?.dataSafety?.requiredPermissions) &&
+  storeSubmissionSmoke.googlePlay.dataSafety.requiredPermissions.length === 1 &&
+  storeSubmissionSmoke.googlePlay.dataSafety.requiredPermissions[0] === 'android.permission.CAMERA' &&
+  storeSubmissionSmoke?.screenshots?.nativeRequired === true &&
+  Number(storeSubmissionSmoke?.screenshots?.requiredSetCount || 0) >= 5 &&
+  Number(storeSubmissionSmoke?.openGatesCount || 0) >= 5
+);
+addGate(
+  'store-local',
+  'store-submission-packet-smoke',
+  'Store submission metadata and privacy packet evidence is recorded',
+  storeSubmissionSmokeOk ? 'pass' : 'pending',
+  storeSubmissionSmokeOk
+    ? `docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at ${storeSubmissionSmoke.generatedAt}.`
+    : 'docs/store-submission-smoke-evidence.json is missing or incomplete.',
+  storeSubmissionSmokeOk ? '' : 'Run npm run store:submission:preflight:local before store console setup.'
+);
+
 const androidPermissions = appConfig.android?.permissions || [];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
 const permissionOk = (
@@ -272,6 +308,7 @@ const requiredArtifacts = [
   'docs/store-assets/README.md',
   'docs/store-screenshots/native/README.md',
   'docs/store-submission-packet.json',
+  'docs/store-submission-smoke-evidence.json',
   'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',
   'scripts/api-env-preflight.js',

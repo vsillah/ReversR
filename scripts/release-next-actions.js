@@ -130,12 +130,14 @@ const actionPlan = {
     steps: [
       'Create the App Store Connect app record for com.vsillah.reversrrebuild.',
       'Create the Google Play Console app record for com.vsillah.reversrrebuild.',
+      'Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.',
       'Copy metadata from docs/store-submission-packet.json into both console drafts.',
       'Complete App Privacy, age rating, Data safety, and App content forms.',
       'Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record URLs, Apple ID, privacy URL, metadata, asset, review-gate, and signoff fields.',
       'Run npm run store:console:preflight.',
     ],
     evidence: [
+      'docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.',
       'docs/store-console-evidence.json exists with both console records.',
       'npm run store:console:preflight passes.',
     ],

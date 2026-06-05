@@ -1,7 +1,9 @@
 const fs = require('fs');
+const path = require('path');
 
 const args = new Set(process.argv.slice(2));
 const allowPlaceholder = args.has('--allow-placeholder');
+const evidenceFile = process.env.STORE_SUBMISSION_EVIDENCE_FILE || 'docs/store-submission-smoke-evidence.json';
 
 const failures = [];
 const warnings = [];
@@ -9,6 +11,12 @@ const warnings = [];
 const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
+const writeEvidence = (evidence) => {
+  const target = path.resolve(evidenceFile);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, `${JSON.stringify(evidence, null, 2)}\n`);
+  return target;
+};
 
 const packet = readJson('docs/store-submission-packet.json');
 const appConfig = readJson('app.json').expo;
@@ -101,15 +109,75 @@ if (!Array.isArray(packet.screenshots?.requiredSet) || packet.screenshots.requir
 if (packet.screenshots?.nativeRequired !== true) fail('Submission packet must mark native screenshots as required.');
 if (!Array.isArray(packet.openGates) || packet.openGates.length < 5) fail('Submission packet must list remaining release gates.');
 
-if (warnings.length > 0) {
-  console.log('Warnings:');
-  for (const message of warnings) console.log(`- ${message}`);
-}
-
 if (failures.length > 0) {
   console.error('Store submission preflight failed:');
   for (const message of failures) console.error(`- ${message}`);
   process.exit(1);
 }
 
+const evidencePath = writeEvidence({
+  schemaVersion: 1,
+  status: 'pass',
+  generatedAt: new Date().toISOString(),
+  urlMode: allowPlaceholder ? 'placeholder-allowed' : 'strict',
+  warnings,
+  appIdentity: {
+    name: packet.appIdentity?.name,
+    version: packet.appIdentity?.version,
+    iosBundleId: packet.appIdentity?.iosBundleId,
+    androidPackage: packet.appIdentity?.androidPackage,
+    sku: packet.appIdentity?.sku,
+    category: packet.appIdentity?.category,
+  },
+  urls: {
+    privacyPolicyUrl: process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL || packet.urls?.privacyPolicyUrl,
+    termsUrl: process.env.EXPO_PUBLIC_TERMS_URL || packet.urls?.termsUrl,
+    supportUrl: process.env.EXPO_PUBLIC_SUPPORT_URL || packet.urls?.supportUrl,
+    apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl,
+  },
+  appStoreConnect: {
+    nameLength: textLength(apple.name),
+    subtitleLength: textLength(apple.subtitle),
+    promotionalTextLength: textLength(apple.promotionalText),
+    descriptionLength: textLength(apple.description),
+    keywordsLength: textLength(apple.keywords),
+    reviewNotesPresent: Boolean(String(apple.reviewNotes || '').trim()),
+    privacy: {
+      tracking: apple.appPrivacy?.tracking,
+      dataUsedForAdvertising: apple.appPrivacy?.dataUsedForAdvertising,
+      userContentProcessedCount: apple.appPrivacy?.userContentProcessed?.length || 0,
+      thirdPartyProcessingCount: apple.appPrivacy?.thirdPartyProcessing?.length || 0,
+    },
+  },
+  googlePlay: {
+    titleLength: textLength(google.title),
+    shortDescriptionLength: textLength(google.shortDescription),
+    fullDescriptionLength: textLength(google.fullDescription),
+    dataSafety: {
+      tracking: google.dataSafety?.tracking,
+      ads: google.dataSafety?.ads,
+      encryptedInTransit: google.dataSafety?.encryptedInTransit,
+      dataCollectedCount: google.dataSafety?.dataCollected?.length || 0,
+      dataSharedCount: google.dataSafety?.dataShared?.length || 0,
+      requiredPermissions,
+      blockedPermissions: google.dataSafety?.blockedPermissions || [],
+    },
+  },
+  screenshots: {
+    nativeRequired: packet.screenshots?.nativeRequired,
+    requiredSetCount: packet.screenshots?.requiredSet?.length || 0,
+    googlePlayFeatureGraphic: packet.screenshots?.googlePlayFeatureGraphic,
+  },
+  releaseNotes: {
+    initialReleasePresent: Boolean(String(packet.releaseNotes?.initialRelease || '').trim()),
+  },
+  openGatesCount: packet.openGates?.length || 0,
+});
+
+if (warnings.length > 0) {
+  console.log('Warnings:');
+  for (const message of warnings) console.log(`- ${message}`);
+}
+
 console.log('Store submission preflight passed.');
+console.log(`Evidence: ${evidencePath}`);
