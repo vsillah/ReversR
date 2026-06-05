@@ -103,6 +103,20 @@ try {
   process.exit(1);
 }
 
+const readOptionalJson = (filePath) => {
+  try {
+    return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : null;
+  } catch {
+    return null;
+  }
+};
+const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
+const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
+const androidPreviewRecorded = nativeQaEvidence?.builds?.androidPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.androidPreview?.buildUrl);
+const iosPreviewRecorded = nativeQaEvidence?.builds?.iosPreview?.status === 'pass' && Boolean(nativeQaEvidence?.builds?.iosPreview?.buildUrl);
+const appStoreRecordRecorded = storeConsoleEvidence?.appStoreConnect?.status === 'pass' && Boolean(storeConsoleEvidence?.appStoreConnect?.appleId);
+const googlePlayRecordRecorded = storeConsoleEvidence?.googlePlay?.status === 'pass' && Boolean(storeConsoleEvidence?.googlePlay?.recordUrl);
+
 const actionPlan = {
   'preview-host-smoke': {
     owner: 'Release operator',
@@ -218,12 +232,23 @@ const actionPlan = {
   'native-qa-evidence': {
     owner: 'QA/release operator',
     phase: 'Native preview QA',
-    action: 'Build Android/iOS preview binaries and record device QA evidence.',
+    action: androidPreviewRecorded && !iosPreviewRecorded
+      ? 'Complete iOS preview credentials/build, then record Android and iOS device QA evidence.'
+      : 'Build Android/iOS preview binaries and record device QA evidence.',
     steps: [
-      'Run npx eas-cli@20.0.0 build --platform android --profile preview.',
+      ...(androidPreviewRecorded
+        ? ['Use the recorded Android preview build already in docs/native-qa-evidence.json.']
+        : ['Run npx eas-cli@20.0.0 build --platform android --profile preview.']),
       'Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.',
-      'Run npx eas-cli@20.0.0 build --platform ios --profile preview.',
-      'Copy docs/native-qa-evidence.template.json to docs/native-qa-evidence.json.',
+      ...(iosPreviewRecorded
+        ? ['Use the recorded iOS preview build already in docs/native-qa-evidence.json.']
+        : [
+            'Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.',
+            'Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.',
+          ]),
+      ...(nativeQaEvidence
+        ? ['Update docs/native-qa-evidence.json with device QA results.']
+        : ['Copy docs/native-qa-evidence.template.json to docs/native-qa-evidence.json.']),
       'Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.',
       'Run npm run native:qa:preflight.',
     ],
@@ -236,16 +261,22 @@ const actionPlan = {
   'store-console-records': {
     owner: 'Store release operator',
     phase: 'Store console setup',
-    action: 'Create App Store Connect and Google Play Console records and fill console evidence.',
+    action: appStoreRecordRecorded && googlePlayRecordRecorded
+      ? 'Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.'
+      : 'Create App Store Connect and Google Play Console records and fill console evidence.',
     steps: [
-      'Create the App Store Connect app record for com.vsillah.reversrrebuild.',
+      ...(appStoreRecordRecorded
+        ? ['Use the recorded App Store Connect app record and Apple ID in docs/store-console-evidence.json.']
+        : ['Create the App Store Connect app record for com.vsillah.reversrrebuild.']),
       'Follow docs/external-release-setup-runbook.md sections 2 and 3.',
-      'Create the Google Play Console app record for com.vsillah.reversrrebuild.',
+      ...(googlePlayRecordRecorded
+        ? ['Use the recorded Google Play Console app dashboard URL in docs/store-console-evidence.json.']
+        : ['Create the Google Play Console app record for com.vsillah.reversrrebuild.']),
       'Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.',
       'Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.',
-      'Copy metadata from docs/store-submission-packet.json into both console drafts.',
+      'Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.',
       'Complete App Privacy, age rating, Data safety, and App content forms.',
-      'Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record URLs, Apple ID, privacy URL, metadata, asset, review-gate, and signoff fields.',
+      'Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.',
       'Run npm run store:console:preflight.',
     ],
     evidence: [

@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T14:00:27.067Z
-Release status generated at: 2026-06-05T14:00:27.062Z
+Generated at: 2026-06-05T14:05:23.650Z
+Release status generated at: 2026-06-05T14:05:23.643Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -20,7 +20,7 @@ This generated packet is the external-operator action list for the clone release
 - Status: pending
 - Owner: QA/release operator
 - Phase: Native preview QA
-- Next action: Build Android/iOS preview binaries and record device QA evidence.
+- Next action: Complete iOS preview credentials/build, then record Android and iOS device QA evidence.
 
 Current gate evidence:
 
@@ -32,12 +32,13 @@ Run npm run native:qa:preflight and resolve any failures.
 
 Steps:
 
-1. Run npx eas-cli@20.0.0 build --platform android --profile preview.
+1. Use the recorded Android preview build already in docs/native-qa-evidence.json.
 2. Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.
-3. Run npx eas-cli@20.0.0 build --platform ios --profile preview.
-4. Copy docs/native-qa-evidence.template.json to docs/native-qa-evidence.json.
-5. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
-6. Run npm run native:qa:preflight.
+3. Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.
+4. Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.
+5. Update docs/native-qa-evidence.json with device QA results.
+6. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
+7. Run npm run native:qa:preflight.
 
 Evidence required:
 
@@ -52,7 +53,7 @@ Evidence required:
 - Status: pending
 - Owner: Store release operator
 - Phase: Store console setup
-- Next action: Create App Store Connect and Google Play Console records and fill console evidence.
+- Next action: Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.
 
 Current gate evidence:
 
@@ -64,14 +65,14 @@ Run npm run store:console:preflight and resolve any failures.
 
 Steps:
 
-1. Create the App Store Connect app record for com.vsillah.reversrrebuild.
+1. Use the recorded App Store Connect app record and Apple ID in docs/store-console-evidence.json.
 2. Follow docs/external-release-setup-runbook.md sections 2 and 3.
-3. Create the Google Play Console app record for com.vsillah.reversrrebuild.
+3. Use the recorded Google Play Console app dashboard URL in docs/store-console-evidence.json.
 4. Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.
 5. Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.
-6. Copy metadata from docs/store-submission-packet.json into both console drafts.
+6. Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.
 7. Complete App Privacy, age rating, Data safety, and App content forms.
-8. Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record URLs, Apple ID, privacy URL, metadata, asset, review-gate, and signoff fields.
+8. Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.
 9. Run npm run store:console:preflight.
 
 Evidence required:

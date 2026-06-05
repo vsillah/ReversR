@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T14:00:48.730Z",
+  "generatedAt": "2026-06-05T14:05:42.198Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T14:00:48.702Z",
+    "generatedAt": "2026-06-05T14:05:42.172Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -475,7 +475,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T14:00:27.949Z",
+      "generatedAt": "2026-06-05T14:05:24.716Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -495,7 +495,7 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T14:00:27.910Z",
+        "generatedAt": "2026-06-05T14:05:24.673Z",
         "summary": {
           "pass": 35,
           "pending": 4
@@ -644,14 +644,14 @@
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T14:00:24.047Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T14:05:19.775Z.",
               "nextStep": ""
             },
             {
               "id": "store-review-safety-packet",
               "status": "pass",
               "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T14:00:24.210Z.",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T14:05:19.974Z.",
               "nextStep": ""
             },
             {
@@ -672,7 +672,7 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T13:53:08.924Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T14:00:48.730Z.",
               "nextStep": ""
             },
             {
@@ -700,21 +700,21 @@
               "id": "store-operator-packet",
               "status": "pass",
               "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-              "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-05T14:00:25.278Z.",
+              "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-05T14:05:21.502Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-operator-packet",
               "status": "pass",
               "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T14:00:26.165Z.",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T14:05:22.605Z.",
               "nextStep": ""
             },
             {
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:00:27.067Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T14:05:23.650Z.",
               "nextStep": ""
             },
             {
@@ -728,14 +728,14 @@
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded with current EAS linkage state",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T13:52:05.310Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T14:00:30.317Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T13:59:55.673Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T14:05:01.472Z.",
               "nextStep": ""
             }
           ],
@@ -835,7 +835,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T14:00:30.711Z",
+      "generatedAt": "2026-06-05T14:05:28.044Z",
       "urlMode": "placeholder-allowed",
       "warnings": [],
       "appIdentity": {
@@ -905,7 +905,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T14:00:24.210Z",
+      "generatedAt": "2026-06-05T14:05:19.974Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -1276,7 +1276,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T14:00:30.317Z",
+      "generatedAt": "2026-06-05T14:05:27.597Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -1356,7 +1356,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T14:00:28.115Z",
+      "generatedAt": "2026-06-05T14:05:24.901Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -2026,9 +2026,9 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T14:00:25.278Z",
+      "generatedAt": "2026-06-05T14:05:21.502Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T14:00:25.273Z",
+        "generatedAt": "2026-06-05T14:05:21.493Z",
         "summary": {
           "pass": 35,
           "pending": 4
@@ -2188,9 +2188,9 @@
     "hostedOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T14:00:26.165Z",
+      "generatedAt": "2026-06-05T14:05:22.605Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T14:00:26.158Z",
+        "generatedAt": "2026-06-05T14:05:22.598Z",
         "summary": {
           "pass": 35,
           "pending": 4
@@ -2390,8 +2390,8 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-05T14:00:14.278Z",
-      "completedAt": "2026-06-05T14:00:36.531Z",
+      "startedAt": "2026-06-05T14:05:07.347Z",
+      "completedAt": "2026-06-05T14:05:34.785Z",
       "commandCount": 16,
       "passedCount": 16,
       "failedCount": 0,
@@ -2402,7 +2402,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2169,
+          "durationMs": 2705,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -2412,7 +2412,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 186,
+          "durationMs": 204,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -2422,7 +2422,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 177,
+          "durationMs": 207,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -2432,7 +2432,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 519,
+          "durationMs": 818,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -2442,7 +2442,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6549,
+          "durationMs": 8294,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-local-release-ci-policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -2452,7 +2452,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 180,
+          "durationMs": 211,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -2462,7 +2462,7 @@
           "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 163,
+          "durationMs": 198,
           "command": "npm run store:review-safety",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
           "stderrTail": ""
@@ -2472,7 +2472,7 @@
           "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 165,
+          "durationMs": 223,
           "command": "npm run store:console:copy",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
           "stderrTail": ""
@@ -2482,7 +2482,7 @@
           "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 901,
+          "durationMs": 1308,
           "command": "npm run store:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 4",
           "stderrTail": ""
@@ -2492,7 +2492,7 @@
           "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 886,
+          "durationMs": 1101,
           "command": "npm run hosted:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
           "stderrTail": ""
@@ -2502,7 +2502,7 @@
           "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 903,
+          "durationMs": 1043,
           "command": "npm run release:next-actions:write",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 3\nNext recommended gate: native-qa-evidence",
           "stderrTail": ""
@@ -2512,7 +2512,7 @@
           "proves": "Original user objective is mapped to proven local work and pending external release gates.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 879,
+          "durationMs": 1065,
           "command": "npm run release:objective",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 6/8\nPending requirements: store-readiness-packet, apple-google-store-publication",
           "stderrTail": ""
@@ -2522,7 +2522,7 @@
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 166,
+          "durationMs": 185,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- Google Play App content form is not marked complete.\n- Google Play Internal Testing readiness is not marked complete.\n- Final native screenshots are not marked captured.\n- Final app icon review is not marked complete.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -2532,7 +2532,7 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2202,
+          "durationMs": 2696,
           "command": "npm run native:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 native:preflight:local\n> node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in\n\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
@@ -2542,7 +2542,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 168,
+          "durationMs": 198,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot build-handoff is missing android device evidence.\n- Native screenshot build-handoff is missing android capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -2552,7 +2552,7 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6038,
+          "durationMs": 6980,
           "command": "npm run store:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nStore preflight passed.",
           "stderrTail": ""
@@ -2571,8 +2571,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T14:00:27.067Z",
-      "releaseStatusGeneratedAt": "2026-06-05T14:00:27.062Z",
+      "generatedAt": "2026-06-05T14:05:23.650Z",
+      "releaseStatusGeneratedAt": "2026-06-05T14:05:23.643Z",
       "summary": {
         "pass": 6,
         "pending": 3
@@ -2589,12 +2589,13 @@
           "action": {
             "owner": "QA/release operator",
             "phase": "Native preview QA",
-            "action": "Build Android/iOS preview binaries and record device QA evidence.",
+            "action": "Complete iOS preview credentials/build, then record Android and iOS device QA evidence.",
             "steps": [
-              "Run npx eas-cli@20.0.0 build --platform android --profile preview.",
+              "Use the recorded Android preview build already in docs/native-qa-evidence.json.",
               "Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.",
-              "Run npx eas-cli@20.0.0 build --platform ios --profile preview.",
-              "Copy docs/native-qa-evidence.template.json to docs/native-qa-evidence.json.",
+              "Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.",
+              "Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.",
+              "Update docs/native-qa-evidence.json with device QA results.",
               "Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.",
               "Run npm run native:qa:preflight."
             ],
@@ -2615,16 +2616,16 @@
           "action": {
             "owner": "Store release operator",
             "phase": "Store console setup",
-            "action": "Create App Store Connect and Google Play Console records and fill console evidence.",
+            "action": "Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.",
             "steps": [
-              "Create the App Store Connect app record for com.vsillah.reversrrebuild.",
+              "Use the recorded App Store Connect app record and Apple ID in docs/store-console-evidence.json.",
               "Follow docs/external-release-setup-runbook.md sections 2 and 3.",
-              "Create the Google Play Console app record for com.vsillah.reversrrebuild.",
+              "Use the recorded Google Play Console app dashboard URL in docs/store-console-evidence.json.",
               "Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.",
               "Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.",
-              "Copy metadata from docs/store-submission-packet.json into both console drafts.",
+              "Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.",
               "Complete App Privacy, age rating, Data safety, and App content forms.",
-              "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record URLs, Apple ID, privacy URL, metadata, asset, review-gate, and signoff fields.",
+              "Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.",
               "Run npm run store:console:preflight."
             ],
             "evidence": [
