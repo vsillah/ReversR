@@ -223,6 +223,8 @@ const bundle = {
     'docs/store-console-evidence.template.json',
     'docs/native-device-handoff.json',
     'docs/native-qa-evidence.template.json',
+    'scripts/native-android-qa-helper.js',
+    'docs/store-screenshots/native/README.md',
     'docs/local-release-ci-evidence.json',
     'docs/preview-host-target.json',
     'docs/farmbot-public-inventory-evidence.json',

@@ -28,4 +28,18 @@ After EAS preview builds exist:
 5. Mark each screenshot entry with `status: "pass"`, device, capture timestamp, and notes.
 6. Run `npm run native:qa:preflight`.
 
+Android helper:
+
+```bash
+npm run native:android:qa -- --probe
+npm run native:android:qa -- --launch
+npm run native:android:qa -- --capture welcome
+npm run native:android:qa -- --capture scan
+npm run native:android:qa -- --capture inventory-validation
+npm run native:android:qa -- --capture design-match
+npm run native:android:qa -- --capture build-handoff
+```
+
+The helper requires exactly one `adb devices -l` device in `device` state. It writes `docs/native-android-device-probe.json`, captures PNGs into this folder, and updates the Android screenshot entries in `docs/native-qa-evidence.json`.
+
 The web-preview screenshots in `docs/store-screenshots/generated/` are planning artifacts only.

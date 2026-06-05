@@ -43,6 +43,7 @@
     "native:preflight:local": "node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in",
     "native:qa:preflight": "node scripts/native-qa-preflight.js",
     "native:qa:preflight:local": "node scripts/native-qa-preflight.js --allow-pending",
+    "native:android:qa": "node scripts/native-android-qa-helper.js",
     "accessibility:preflight": "node scripts/accessibility-preflight.js",
     "store:submission:preflight": "node scripts/store-submission-preflight.js",
     "store:submission:preflight:local": "node scripts/store-submission-preflight.js --allow-placeholder",

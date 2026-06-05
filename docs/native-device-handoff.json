@@ -40,8 +40,10 @@
   },
   "nextNativeQaActions": [
     "Connect an Android device with USB debugging enabled or install Android Emulator/Android Studio so adb devices lists a device.",
+    "After an Android device is connected, run npm run native:android:qa -- --probe to write docs/native-android-device-probe.json and update Android device evidence.",
     "Install the APK with: adb install -r path/to/ReversR-Rebuild-preview.apk",
     "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
+    "Use npm run native:android:qa -- --launch and npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff> to capture Android native screenshots into docs/store-screenshots/native/.",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
     "Authorize and click Create on the prepared App Store Connect New App modal, or create the iOS app record manually, then copy the App Store Connect Apple ID into eas.json at submit.production.ios.ascAppId to unblock iOS preview/TestFlight work.",

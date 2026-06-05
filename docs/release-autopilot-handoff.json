@@ -92,5 +92,23 @@
     "After the app opens, copy the Apple ID from App Information and send it back.",
     "When ready for iOS credentials, run or allow Codex to run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA.",
     "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured."
+  ],
+  "preparedAutomation": [
+    {
+      "name": "Native Android QA helper",
+      "script": "scripts/native-android-qa-helper.js",
+      "npmScript": "npm run native:android:qa",
+      "purpose": "Probe a connected adb device, launch the Android preview app, capture the five required Android native screenshots, and update docs/native-qa-evidence.json.",
+      "commands": [
+        "npm run native:android:qa -- --probe",
+        "npm run native:android:qa -- --launch",
+        "npm run native:android:qa -- --capture welcome",
+        "npm run native:android:qa -- --capture scan",
+        "npm run native:android:qa -- --capture inventory-validation",
+        "npm run native:android:qa -- --capture design-match",
+        "npm run native:android:qa -- --capture build-handoff"
+      ],
+      "currentValidation": "Help and syntax pass. Probe fails cleanly because no adb device is currently attached."
+    }
   ]
 }
