@@ -17,11 +17,26 @@
     "primaryCategory": "Productivity",
     "secondaryCategory": "Business",
     "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
-    "metadataCopiedFromPacket": false,
+    "metadataCopiedFromPacket": true,
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false,
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. Metadata, App Privacy, age rating, TestFlight readiness, native screenshots, and store signoff remain pending until completed in App Store Connect and verified."
+    "metadataDraftSaved": true,
+    "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
+    "metadataDraftFields": [
+      "promotionalText",
+      "description",
+      "keywords",
+      "supportUrl",
+      "marketingUrl",
+      "copyright"
+    ],
+    "signInRequiredDraft": false,
+    "releaseTypeDraft": "MANUAL",
+    "screenshotsUploaded": false,
+    "buildSelected": false,
+    "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Privacy, age rating, TestFlight/build selection, native screenshot upload, contact information, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked."
   },
   "googlePlay": {
     "status": "pass",
@@ -93,8 +108,16 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T15:40:00.082Z",
+  "generatedAt": "2026-06-05T15:54:31.264Z",
   "consoleActions": [
+    {
+      "platform": "appStoreConnect",
+      "task": "Prepare for Submission metadata",
+      "status": "draft-saved",
+      "value": "Promotional text, description, keywords, support URL, marketing URL, copyright, no sign-in required, and manual release were present on the saved iOS version draft.",
+      "completedAt": "2026-06-05T15:54:31.264Z",
+      "note": "Chrome inspection confirmed Save was disabled after field entry. No screenshots, build selection, App Privacy, age rating, file upload, or Add for Review action was performed."
+    },
     {
       "platform": "googlePlay",
       "task": "Set privacy policy",

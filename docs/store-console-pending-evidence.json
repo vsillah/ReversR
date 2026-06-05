@@ -1,11 +1,10 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T15:40:31.426Z",
+  "generatedAt": "2026-06-05T15:56:08.605Z",
   "source": "docs/store-console-evidence.json",
   "finalEvidenceFile": "docs/store-console-evidence.json",
   "warnings": [
-    "App Store Connect metadata is not marked copied from the submission packet.",
     "App Store Connect App Privacy details are not marked complete.",
     "App Store Connect age rating is not marked complete.",
     "App Store Connect TestFlight readiness is not marked complete.",
@@ -42,7 +41,7 @@
     "appleIdPresent": true,
     "bundleIdStatus": "pass",
     "privacyPolicyUrlReady": true,
-    "metadataCopiedFromPacket": false,
+    "metadataCopiedFromPacket": true,
     "appPrivacyCompleted": false,
     "ageRatingCompleted": false,
     "testFlightReady": false
