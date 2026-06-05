@@ -75,6 +75,8 @@ requireOrWarn(googlePlay.internalTestingReady === true, 'Google Play Internal Te
 
 requireOrWarn(assets.nativeScreenshotsCaptured === true, 'Final native screenshots are not marked captured.');
 requireOrWarn(assets.appIconReviewed === true, 'Final app icon review is not marked complete.');
+requireOrWarn(assets.featureGraphicCaptured === true, 'Google Play feature graphic is not marked captured/upload-ready.');
+requireOrWarn(assets.featureGraphicPath === 'docs/store-assets/google-play-feature-graphic.png', 'Store console evidence featureGraphicPath must point to docs/store-assets/google-play-feature-graphic.png.');
 requireOrWarn(Boolean(assets.evidenceFolder), 'Store asset evidenceFolder is missing.');
 
 for (const [key, value] of Object.entries(reviewGates)) {

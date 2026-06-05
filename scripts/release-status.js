@@ -42,6 +42,10 @@ const pngIs1024 = (path) => {
   const size = readPngSize(path);
   return size?.width === 1024 && size?.height === 1024;
 };
+const pngIsSize = (path, width, height) => {
+  const size = readPngSize(path);
+  return size?.width === width && size?.height === height;
+};
 
 const expectedIdentity = (
   appConfig.name === 'ReversR Rebuild' &&
@@ -155,6 +159,16 @@ addGate(
   assetsOk ? '' : 'Regenerate release PNG assets and rerun npm run store:preflight.'
 );
 
+const storeListingAssetsOk = pngIsSize('docs/store-assets/google-play-feature-graphic.png', 1024, 500);
+addGate(
+  'store-local',
+  'store-listing-assets',
+  'Google Play feature graphic is prepared at 1024x500',
+  storeListingAssetsOk ? 'pass' : 'pending',
+  storeListingAssetsOk ? 'docs/store-assets/google-play-feature-graphic.png is 1024x500.' : 'Google Play feature graphic is missing or wrong size.',
+  storeListingAssetsOk ? '' : 'Run npm run store:assets:generate, then npm run store:assets:preflight.'
+);
+
 const requiredArtifacts = [
   'Dockerfile',
   '.dockerignore',
@@ -163,6 +177,7 @@ const requiredArtifacts = [
   'docs/policy-hosting-deployment.md',
   'docs/native-release-runbook.md',
   'docs/native-qa-evidence.template.json',
+  'docs/store-assets/README.md',
   'docs/store-submission-packet.json',
   'docs/store-console-evidence.template.json',
   'scripts/api-preflight.js',
@@ -173,6 +188,8 @@ const requiredArtifacts = [
   'scripts/store-preflight.js',
   'scripts/store-submission-preflight.js',
   'scripts/store-console-preflight.js',
+  'scripts/store-assets-preflight.js',
+  'scripts/generate-store-assets.js',
   'scripts/web-flow-smoke.js',
 ];
 const artifactsOk = requiredArtifacts.every(exists);

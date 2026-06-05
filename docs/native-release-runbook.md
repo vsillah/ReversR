@@ -14,6 +14,7 @@ npm run release:status
 npm run typecheck
 npm run accessibility:preflight
 npm run inventory:preflight
+npm run store:assets:preflight
 npm run policy:preflight:local
 npm run store:preflight:local
 npm run native:preflight:local

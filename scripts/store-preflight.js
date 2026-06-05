@@ -112,6 +112,7 @@ runCheck(
   process.execPath,
   ['scripts/policy-hosting-preflight.js', ...(allowPlaceholder ? ['--allow-placeholder'] : [])]
 );
+runCheck('Store assets preflight', process.execPath, ['scripts/store-assets-preflight.js']);
 
 const requiredPngAssets = [
   ['expo.icon', appConfig.icon, 1024, 1024],
@@ -192,6 +193,7 @@ const requiredDocs = [
   'docs/native-release-runbook.md',
   'docs/eas-submit-configuration.md',
   'docs/native-qa-evidence.template.json',
+  'docs/store-assets/README.md',
   'docs/store-screenshots/README.md',
   'Dockerfile',
   '.dockerignore',
@@ -207,6 +209,8 @@ const requiredDocs = [
   'scripts/policy-hosting-preflight.js',
   'scripts/store-submission-preflight.js',
   'scripts/store-console-preflight.js',
+  'scripts/store-assets-preflight.js',
+  'scripts/generate-store-assets.js',
   'scripts/capture-store-screenshots.js',
   'scripts/web-flow-smoke.js',
 ];

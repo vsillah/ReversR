@@ -94,6 +94,7 @@
   "screenshots": {
     "nativeRequired": true,
     "webPreviewOnly": "docs/store-screenshots/generated/",
+    "googlePlayFeatureGraphic": "docs/store-assets/google-play-feature-graphic.png",
     "requiredSet": [
       "Welcome screen showing the four reconstruction phases",
       "Scan screen with camera or description mode",

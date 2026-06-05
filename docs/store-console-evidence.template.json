@@ -39,6 +39,7 @@
     "nativeScreenshotsCaptured": false,
     "appIconReviewed": false,
     "featureGraphicCaptured": false,
+    "featureGraphicPath": "docs/store-assets/google-play-feature-graphic.png",
     "evidenceFolder": ""
   },
   "reviewGates": {
