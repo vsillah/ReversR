@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-05T13:37:23.637Z",
+  "source": "docs/store-submission-packet.json",
+  "status": "draft-console-entry-packet",
+  "appIdentity": {
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001"
+  },
+  "hostedUrls": {
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support",
+    "apiBaseUrl": "https://reversr.vercel.app"
+  },
+  "googlePlayTasks": [
+    {
+      "task": "Set privacy policy",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Privacy policy URL",
+          "value": "https://reversr.vercel.app/privacy"
+        }
+      ],
+      "saveGate": "Saving updates the Google Play Console app record."
+    },
+    {
+      "task": "Sign in details",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Does the app require sign-in?",
+          "value": "No"
+        },
+        {
+          "label": "Reasoning",
+          "value": "Current ReversR Rebuild prototype exposes scan, connector validation, reconstruction package, policy, and support flows without an account login requirement."
+        }
+      ],
+      "saveGate": "Saving updates Google Play app content answers."
+    },
+    {
+      "task": "Ads",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Contains ads?",
+          "value": "No"
+        },
+        {
+          "label": "Reasoning",
+          "value": "The release packet marks ads as false and no advertising SDK is documented for this build."
+        }
+      ],
+      "saveGate": "Saving updates Google Play app content answers."
+    },
+    {
+      "task": "Content rating",
+      "status": "review-required",
+      "fields": [
+        {
+          "label": "Expected rating target",
+          "value": "Everyone / low maturity, pending final questionnaire result"
+        },
+        {
+          "label": "Violence, sexual content, controlled substances, gambling, and user-generated public sharing",
+          "value": "No expected affirmative answers based on current app scope."
+        },
+        {
+          "label": "Camera use",
+          "value": "Camera is used for machine images only, not for public social sharing or user-generated content feeds."
+        }
+      ],
+      "saveGate": "The official questionnaire result must be reviewed before saving as final."
+    },
+    {
+      "task": "Target audience",
+      "status": "review-required",
+      "fields": [
+        {
+          "label": "Recommended target audience",
+          "value": "Adults / workplace users"
+        },
+        {
+          "label": "Children under 13",
+          "value": "No"
+        },
+        {
+          "label": "Reasoning",
+          "value": "The app is for machine reconstruction planning, BOM generation, pricing estimates, and fabrication handoff review."
+        }
+      ],
+      "saveGate": "Target audience answers affect store policy treatment and should be reviewed before saving."
+    },
+    {
+      "task": "Data safety",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Data collected",
+          "value": [
+            "Machine photos or descriptions when submitted for reconstruction planning",
+            "Inventory connector metadata",
+            "Generated reconstruction package content"
+          ]
+        },
+        {
+          "label": "Data shared",
+          "value": [
+            "Configured AI provider processing when enabled",
+            "Vendor handoff only when the user explicitly exports or shares a packet"
+          ]
+        },
+        {
+          "label": "Purposes",
+          "value": [
+            "App functionality",
+            "Inventory matching",
+            "Reconstruction package generation",
+            "Support and troubleshooting if diagnostics are added later"
+          ]
+        },
+        {
+          "label": "Encrypted in transit",
+          "value": "Yes"
+        },
+        {
+          "label": "Tracking",
+          "value": "No"
+        },
+        {
+          "label": "Account deletion required",
+          "value": "Not applicable until account/server-side user storage is added."
+        },
+        {
+          "label": "Required permission",
+          "value": "android.permission.CAMERA"
+        },
+        {
+          "label": "Blocked permissions",
+          "value": [
+            "android.permission.RECORD_AUDIO",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_MEDIA_IMAGES",
+            "android.permission.READ_MEDIA_VIDEO"
+          ]
+        }
+      ],
+      "saveGate": "Saving updates Google Play Data safety declarations and should match the final build behavior."
+    },
+    {
+      "task": "Government apps",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Is this a government app?",
+          "value": "No"
+        }
+      ],
+      "saveGate": "Saving updates Google Play app content answers."
+    },
+    {
+      "task": "Financial features",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Financial products or services?",
+          "value": "No"
+        },
+        {
+          "label": "Reasoning",
+          "value": "The app produces reconstruction planning and quote packet materials; it does not offer lending, banking, trading, payments, insurance, or financial advice."
+        }
+      ],
+      "saveGate": "Saving updates Google Play app content answers."
+    },
+    {
+      "task": "Health",
+      "status": "ready-to-enter",
+      "fields": [
+        {
+          "label": "Health features?",
+          "value": "No"
+        }
+      ],
+      "saveGate": "Saving updates Google Play app content answers."
+    },
+    {
+      "task": "Select an app category and provide contact details",
+      "status": "partial-human-value-needed",
+      "fields": [
+        {
+          "label": "App or game",
+          "value": "App"
+        },
+        {
+          "label": "Category",
+          "value": "Productivity"
+        },
+        {
+          "label": "Website",
+          "value": "https://reversr.vercel.app/support"
+        },
+        {
+          "label": "Email",
+          "value": "HITL_REQUIRED_PUBLIC_SUPPORT_EMAIL"
+        },
+        {
+          "label": "Phone",
+          "value": "Optional / leave blank unless Vambah wants public phone support listed"
+        }
+      ],
+      "saveGate": "Saving publishes contact metadata inside Google Play Console; public support email needs Vambah confirmation."
+    },
+    {
+      "task": "Set up your store listing",
+      "status": "partial-native-assets-needed",
+      "fields": [
+        {
+          "label": "App name/title",
+          "value": "ReversR Rebuild"
+        },
+        {
+          "label": "Short description",
+          "value": "Scan machines and create BOM, assembly, pricing, and fabrication packets."
+        },
+        {
+          "label": "Full description",
+          "value": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild is designed for review-driven workflows. Inventory matching, procurement, fabrication, and vendor handoff should be checked by a qualified human before parts are ordered or machines are rebuilt.\n\nThe app does not automatically order parts, submit manufacturing jobs, transmit files to vendors, or purchase services. It prepares reviewable handoff materials so users can make controlled decisions."
+        },
+        {
+          "label": "App icon",
+          "value": "1024x1024 release icon already present per store asset preflight"
+        },
+        {
+          "label": "Feature graphic",
+          "value": "docs/store-assets/google-play-feature-graphic.png"
+        },
+        {
+          "label": "Phone screenshots",
+          "value": "Pending final native Android screenshots in docs/store-screenshots/native/"
+        }
+      ],
+      "saveGate": "Store listing can be drafted, but final screenshot upload must use native preview captures."
+    }
+  ],
+  "appStoreConnectTasks": [
+    {
+      "task": "Create iOS app record",
+      "status": "hitl-create-button-staged",
+      "fields": [
+        {
+          "label": "Platform",
+          "value": "iOS"
+        },
+        {
+          "label": "Name",
+          "value": "ReversR Rebuild"
+        },
+        {
+          "label": "Primary language",
+          "value": "English (U.S.)"
+        },
+        {
+          "label": "Bundle ID",
+          "value": "ReversR Rebuild - com.vsillah.reversrrebuild"
+        },
+        {
+          "label": "SKU",
+          "value": "reversr-rebuild-001"
+        },
+        {
+          "label": "User access",
+          "value": "Full Access"
+        }
+      ],
+      "saveGate": "Clicking Create makes the persistent App Store Connect app record and is waiting for HITL."
+    },
+    {
+      "task": "App information",
+      "status": "ready-after-record-create",
+      "fields": [
+        {
+          "label": "Subtitle",
+          "value": "Machine rebuild packages"
+        },
+        {
+          "label": "Primary category",
+          "value": "Productivity"
+        },
+        {
+          "label": "Secondary category",
+          "value": "Business"
+        },
+        {
+          "label": "Privacy policy URL",
+          "value": "https://reversr.vercel.app/privacy"
+        }
+      ],
+      "saveGate": "Requires App Store Connect app record and saved console edits."
+    },
+    {
+      "task": "Version metadata",
+      "status": "ready-after-record-create",
+      "fields": [
+        {
+          "label": "Promotional text",
+          "value": "Scan or describe a machine, match it to an approved inventory record, and prepare a reviewable reconstruction package."
+        },
+        {
+          "label": "Description",
+          "value": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nThe workflow is designed for human review. Inventory matches, procurement decisions, fabrication files, and assembly steps should be checked by a qualified person before parts are ordered or machines are rebuilt.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. It prepares reviewable handoff materials so users can make controlled decisions."
+        },
+        {
+          "label": "Keywords",
+          "value": "machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D"
+        },
+        {
+          "label": "Support URL",
+          "value": "https://reversr.vercel.app/support"
+        },
+        {
+          "label": "Marketing URL",
+          "value": "https://reversr.vercel.app/support"
+        },
+        {
+          "label": "Review notes",
+          "value": "Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services."
+        }
+      ],
+      "saveGate": "Requires App Store Connect app record and saved console edits."
+    },
+    {
+      "task": "App Privacy",
+      "status": "ready-to-review",
+      "fields": [
+        {
+          "label": "Tracking",
+          "value": "No"
+        },
+        {
+          "label": "Data used for advertising",
+          "value": "No"
+        },
+        {
+          "label": "Contact info collected",
+          "value": "No"
+        },
+        {
+          "label": "Identifiers collected",
+          "value": "No"
+        },
+        {
+          "label": "Diagnostics collected",
+          "value": "No"
+        },
+        {
+          "label": "User content processed",
+          "value": [
+            "Machine images",
+            "Machine descriptions",
+            "Inventory connector metadata",
+            "Reconstruction outputs"
+          ]
+        },
+        {
+          "label": "Third-party processing",
+          "value": [
+            "Configured AI provider processing when enabled",
+            "User-initiated export or vendor handoff only"
+          ]
+        }
+      ],
+      "saveGate": "Final App Privacy answers must match final build behavior before saving."
+    },
+    {
+      "task": "Age rating",
+      "status": "review-required",
+      "fields": [
+        {
+          "label": "Expected rating target",
+          "value": "4+ / low maturity, pending official questionnaire result"
+        },
+        {
+          "label": "Human review note",
+          "value": "Answer the official questionnaire based on machine reconstruction planning, camera use, and no public user-generated content feed."
+        }
+      ],
+      "saveGate": "Official questionnaire result must be reviewed before saving as final."
+    }
+  ],
+  "hitlValuesNeeded": [
+    "App Store Connect Apple ID after the app record is created",
+    "Public support email for Google Play contact details",
+    "Final official content rating and age rating questionnaire results",
+    "Native Android and iOS screenshots from preview builds",
+    "Apple login/2FA for EAS iOS preview credentials"
+  ],
+  "safetyBoundaries": [
+    "Do not mark any store-console task complete until saved in the relevant console and verified.",
+    "Do not submit to public app review from this packet.",
+    "Do not add secrets, private connector credentials, or raw Apple/Google account data to evidence files."
+  ]
+}

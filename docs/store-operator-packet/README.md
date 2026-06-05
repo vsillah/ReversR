@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T13:32:26.918Z
+Generated at: 2026-06-05T13:37:35.764Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -35,7 +35,7 @@ Pending gates:
 1. Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.
 2. Create Google Play Console record for com.vsillah.reversrrebuild.
 3. Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.
-4. Copy App Store and Google Play text from docs/store-console-copy.md.
+4. Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.
 5. Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.
 6. Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.
 7. Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.
@@ -47,6 +47,8 @@ Use these files when filling console drafts:
 
 - docs/store-submission-packet.json
 - docs/store-console-copy.md
+- docs/store-console-task-answers.json
+- docs/store-console-task-answers.md
 - docs/store-review-safety-packet.md
 - docs/store-console-evidence.template.json
 - docs/store-console-browser-handoff.json

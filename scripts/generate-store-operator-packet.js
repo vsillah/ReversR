@@ -64,6 +64,8 @@ const pendingGates = releaseStatus.gates
 const sourceArtifacts = [
   'docs/store-submission-packet.json',
   'docs/store-console-copy.md',
+  'docs/store-console-task-answers.json',
+  'docs/store-console-task-answers.md',
   'docs/store-review-safety-packet.md',
   'docs/store-console-evidence.template.json',
   'docs/store-console-browser-handoff.json',
@@ -80,7 +82,7 @@ const consoleEntryOrder = [
   'Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.',
   'Create Google Play Console record for com.vsillah.reversrrebuild.',
   'Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.',
-  'Copy App Store and Google Play text from docs/store-console-copy.md.',
+  'Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.',
   'Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.',
   'Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.',
   'Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.',

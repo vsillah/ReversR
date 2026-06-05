@@ -52,7 +52,9 @@
         "Select an app category and provide contact details",
         "Set up your store listing"
       ],
-      "copySource": "docs/store-console-copy.md"
+      "copySource": "docs/store-console-copy.md",
+      "taskAnswerSource": "docs/store-console-task-answers.md",
+      "taskAnswerJson": "docs/store-console-task-answers.json"
     },
     "easCredentials": {
       "command": "npx eas-cli@20.0.0 credentials --platform ios",
@@ -94,6 +96,16 @@
     "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured."
   ],
   "preparedAutomation": [
+    {
+      "name": "Store console task answers",
+      "script": "scripts/generate-store-console-task-answers.js",
+      "npmScript": "npm run store:console:tasks",
+      "purpose": "Generate task-by-task App Store Connect and Google Play Console field answers from docs/store-submission-packet.json.",
+      "commands": [
+        "npm run store:console:tasks"
+      ],
+      "currentValidation": "Generated 11 Google Play task groups and 5 App Store Connect task groups."
+    },
     {
       "name": "Native Android QA helper",
       "script": "scripts/native-android-qa-helper.js",

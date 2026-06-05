@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T13:32:26.918Z",
+  "generatedAt": "2026-06-05T13:37:35.764Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T13:32:26.913Z",
+    "generatedAt": "2026-06-05T13:37:35.758Z",
     "summary": {
       "pass": 34,
       "pending": 5
@@ -66,6 +66,14 @@
       "exists": true
     },
     {
+      "path": "docs/store-console-task-answers.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-task-answers.md",
+      "exists": true
+    },
+    {
       "path": "docs/store-review-safety-packet.md",
       "exists": true
     },
@@ -114,7 +122,7 @@
     "Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.",
     "Create Google Play Console record for com.vsillah.reversrrebuild.",
     "Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.",
-    "Copy App Store and Google Play text from docs/store-console-copy.md.",
+    "Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.",
     "Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.",
     "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.",
     "Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.",
