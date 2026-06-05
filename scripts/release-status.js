@@ -380,6 +380,7 @@ const requiredArtifacts = [
   '.github/workflows/release-local-ci.yml',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
+  'docs/native-device-handoff.json',
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/README.md',
   'docs/store-screenshots/native/README.md',
@@ -655,6 +656,7 @@ const requiredStoreOperatorSources = [
   'docs/store-console-copy.md',
   'docs/store-review-safety-packet.md',
   'docs/store-console-evidence.template.json',
+  'docs/native-device-handoff.json',
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/google-play-feature-graphic.png',
 ];

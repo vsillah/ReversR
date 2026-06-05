@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T11:39:03.682Z
+Generated at: 2026-06-05T11:45:27.410Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -50,6 +50,7 @@ Use these files when filling console drafts:
 - docs/store-review-safety-packet.md
 - docs/store-console-evidence.template.json
 - docs/store-console-browser-handoff.json
+- docs/native-device-handoff.json
 - docs/native-qa-evidence.template.json
 - docs/store-screenshots/planning-evidence.json
 - docs/store-assets/google-play-feature-graphic.png

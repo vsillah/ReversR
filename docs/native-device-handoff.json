@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "pending-hitl",
+  "generatedAt": "2026-06-05T11:45:54Z",
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "easProjectId": "700c2107-2639-4a27-b374-59ed5edd54fc"
+  },
+  "androidPreviewBuild": {
+    "status": "finished",
+    "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+    "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
+    "artifactType": "apk",
+    "versionCode": 15,
+    "completedAt": "2026-06-05T11:36:35.941Z"
+  },
+  "localDeviceProbe": {
+    "checkedAt": "2026-06-05T11:45:54Z",
+    "adbPath": "/opt/homebrew/bin/adb",
+    "adbDevices": "List of devices attached",
+    "androidEmulatorPath": "",
+    "androidEmulatorAvailable": false,
+    "xcrunPath": "/usr/bin/xcrun",
+    "simctlAvailable": false,
+    "simctlError": "xcrun: error: unable to find utility \"simctl\", not a developer tool or in PATH",
+    "xcodebuildError": "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance"
+  },
+  "browserHandoff": {
+    "googlePlayConsole": {
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/create-new-app",
+      "state": "Create app form is filled; Developer Program Policies and US export laws declarations are unchecked; Create app has not been clicked."
+    },
+    "appStoreConnect": {
+      "url": "https://appstoreconnect.apple.com/m/INVALIDITCUSER?errorKey=ITC.signin.error.invalidUser.asc",
+      "state": "Signed-in Apple Account is not enabled for App Store Connect."
+    }
+  },
+  "nextNativeQaActions": [
+    "Connect an Android device with USB debugging enabled or install Android Emulator/Android Studio so adb devices lists a device.",
+    "Install the APK with: adb install -r path/to/ReversR-Rebuild-preview.apk",
+    "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
+    "Run the native QA checklist in docs/native-qa-evidence.json.",
+    "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
+    "Use an Apple Developer/App Store Connect-enabled account to create the iOS app record and unblock iOS preview/TestFlight work.",
+    "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
+  ],
+  "notCompletedByAutomation": [
+    "No Android device or emulator was available for APK install.",
+    "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
+    "No Google legal declarations were accepted.",
+    "No Apple App Store Connect app record was created."
+  ]
+}

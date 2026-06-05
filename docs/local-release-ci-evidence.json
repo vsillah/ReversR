@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "startedAt": "2026-06-05T11:38:53.631Z",
-  "completedAt": "2026-06-05T11:39:13.756Z",
+  "startedAt": "2026-06-05T11:45:16.711Z",
+  "completedAt": "2026-06-05T11:45:40.035Z",
   "commandCount": 16,
   "passedCount": 16,
   "failedCount": 0,
@@ -13,7 +13,7 @@
       "proves": "TypeScript compile surface has no static errors.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 1956,
+      "durationMs": 1888,
       "command": "npm run typecheck",
       "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
       "stderrTail": ""
@@ -23,7 +23,7 @@
       "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 199,
+      "durationMs": 167,
       "command": "npm run accessibility:preflight",
       "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
       "stderrTail": ""
@@ -33,7 +33,7 @@
       "proves": "Google Play feature graphic exists at the required 1024x500 size.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 179,
+      "durationMs": 155,
       "command": "npm run store:assets:preflight",
       "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
       "stderrTail": ""
@@ -43,7 +43,7 @@
       "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 536,
+      "durationMs": 489,
       "command": "npm run inventory:preflight",
       "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
       "stderrTail": ""
@@ -53,7 +53,7 @@
       "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 6022,
+      "durationMs": 6572,
       "command": "npm run policy:preflight:local",
       "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-local-release-ci-policy-hosting-smoke-evidence.json",
       "stderrTail": ""
@@ -63,7 +63,7 @@
       "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 148,
+      "durationMs": 174,
       "command": "npm run store:submission:preflight:local",
       "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
       "stderrTail": ""
@@ -73,7 +73,7 @@
       "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 141,
+      "durationMs": 171,
       "command": "npm run store:review-safety",
       "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
       "stderrTail": ""
@@ -83,7 +83,7 @@
       "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 147,
+      "durationMs": 161,
       "command": "npm run store:console:copy",
       "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
       "stderrTail": ""
@@ -93,7 +93,7 @@
       "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 729,
+      "durationMs": 928,
       "command": "npm run store:operator-packet",
       "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 5",
       "stderrTail": ""
@@ -103,7 +103,7 @@
       "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 724,
+      "durationMs": 897,
       "command": "npm run hosted:operator-packet",
       "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
       "stderrTail": ""
@@ -113,7 +113,7 @@
       "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 726,
+      "durationMs": 954,
       "command": "npm run release:next-actions:write",
       "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 4\nNext recommended gate: eas-submit-config",
       "stderrTail": ""
@@ -123,7 +123,7 @@
       "proves": "Original user objective is mapped to proven local work and pending external release gates.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 765,
+      "durationMs": 1175,
       "command": "npm run release:objective",
       "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 6/8\nPending requirements: store-readiness-packet, apple-google-store-publication",
       "stderrTail": ""
@@ -133,7 +133,7 @@
       "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 140,
+      "durationMs": 250,
       "command": "npm run store:console:preflight:local",
       "stdoutTail": "- Store asset evidenceFolder is missing.\n- Review gate hostedApiPreflightPassed is not marked true.\n- Review gate hostedPolicyPreflightPassed is not marked true.\n- Review gate hostedConnectorSmokePassed is not marked true.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
       "stderrTail": ""
@@ -143,7 +143,7 @@
       "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 1772,
+      "durationMs": 2524,
       "command": "npm run native:preflight:local",
       "stdoutTail": "> reversr-rebuild@1.0.0 native:preflight:local\n> node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in\n\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nWarnings:\n- Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
       "stderrTail": ""
@@ -153,7 +153,7 @@
       "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 140,
+      "durationMs": 192,
       "command": "npm run native:qa:preflight:local",
       "stdoutTail": "- Native screenshot build-handoff is missing android device evidence.\n- Native screenshot build-handoff is missing android capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
       "stderrTail": ""
@@ -163,7 +163,7 @@
       "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 5798,
+      "durationMs": 6623,
       "command": "npm run store:preflight:local",
       "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nStore preflight passed.",
       "stderrTail": ""

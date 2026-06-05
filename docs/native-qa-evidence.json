@@ -251,8 +251,9 @@
     }
   ],
   "blockers": [
-    "Android preview build is queued and needs completion plus device QA.",
-    "iOS preview build requires Apple Developer credentials in the interactive EAS credential flow.",
+    "Android preview APK exists, but no Android device or emulator was available locally for install QA.",
+    "iOS preview build requires an Apple Developer/App Store Connect-enabled account.",
+    "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
     "Final Android and iOS native screenshots require installed preview builds."
   ],
   "signoff": {
