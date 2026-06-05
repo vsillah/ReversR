@@ -114,6 +114,7 @@ const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
 const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
 const nativeDeviceHandoff = readOptionalJson('docs/native-device-handoff.json');
 const easProductionBuildSync = readOptionalJson('docs/eas-production-build-sync-evidence.json');
+const easIosSubmitAttemptEvidence = readOptionalJson('docs/eas-ios-submit-attempt-evidence.json');
 const requiredScreenshotIds = [
   'welcome',
   'scan',
@@ -139,6 +140,8 @@ const androidScreenshotsRecorded = screenshotStatus('android');
 const iosScreenshotsRecorded = screenshotStatus('ios');
 const appStoreRecordRecorded = storeConsoleEvidence?.appStoreConnect?.status === 'pass' && Boolean(storeConsoleEvidence?.appStoreConnect?.appleId);
 const googlePlayRecordRecorded = storeConsoleEvidence?.googlePlay?.status === 'pass' && Boolean(storeConsoleEvidence?.googlePlay?.recordUrl);
+const appStoreApiAccessGateVisible = easIosSubmitAttemptEvidence?.status === 'blocked-hitl' &&
+  easIosSubmitAttemptEvidence?.appStoreConnectScreen?.visibleAction === 'Request Access';
 const iosDeviceRegistrationPending = [
   ...(nativeDeviceHandoff?.nextNativeQaActions || []),
   ...(nativeDeviceHandoff?.notCompletedByAutomation || []),
@@ -316,7 +319,9 @@ const actionPlan = {
     owner: 'Store release operator',
     phase: 'Store console setup',
     action: appStoreRecordRecorded && googlePlayRecordRecorded
-      ? 'Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.'
+      ? appStoreApiAccessGateVisible
+        ? 'Request App Store Connect API access before retrying the iOS TestFlight upload; continue pending store signoff without public submission.'
+        : 'Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.'
       : 'Create App Store Connect and Google Play Console records and fill console evidence.',
     steps: [
       ...(appStoreRecordRecorded
@@ -330,12 +335,20 @@ const actionPlan = {
       'Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.',
       'Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.',
       'Complete App Privacy, age rating, Data safety, and App content forms.',
+      ...(appStoreApiAccessGateVisible ? [
+        'In App Store Connect, use Users and Access > Integrations > App Store Connect API.',
+        'Request App Store Connect API access only after explicit account-holder approval.',
+        'After access exists, configure an App Store Connect API key for EAS Submit or rerun the documented iOS submit command through an approved authenticated path.',
+      ] : []),
       'Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.',
       'Run npm run store:console:preflight.',
     ],
     evidence: [
       'docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.',
       'docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.',
+      ...(appStoreApiAccessGateVisible
+        ? ['docs/eas-ios-submit-attempt-evidence.json records the App Store Connect API Request Access gate before TestFlight upload.']
+        : []),
       'docs/store-console-evidence.json exists with both console records.',
       'npm run store:console:preflight passes.',
     ],

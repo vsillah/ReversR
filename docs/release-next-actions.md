@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T22:35:00.586Z
-Release status generated at: 2026-06-05T22:35:00.581Z
+Generated at: 2026-06-05T22:40:41.090Z
+Release status generated at: 2026-06-05T22:40:41.083Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -55,7 +55,7 @@ Evidence required:
 - Status: pending
 - Owner: Store release operator
 - Phase: Store console setup
-- Next action: Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.
+- Next action: Request App Store Connect API access before retrying the iOS TestFlight upload; continue pending store signoff without public submission.
 
 Current gate evidence:
 
@@ -74,13 +74,17 @@ Steps:
 5. Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.
 6. Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.
 7. Complete App Privacy, age rating, Data safety, and App content forms.
-8. Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.
-9. Run npm run store:console:preflight.
+8. In App Store Connect, use Users and Access > Integrations > App Store Connect API.
+9. Request App Store Connect API access only after explicit account-holder approval.
+10. After access exists, configure an App Store Connect API key for EAS Submit or rerun the documented iOS submit command through an approved authenticated path.
+11. Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.
+12. Run npm run store:console:preflight.
 
 Evidence required:
 
 - docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.
 - docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.
+- docs/eas-ios-submit-attempt-evidence.json records the App Store Connect API Request Access gate before TestFlight upload.
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 

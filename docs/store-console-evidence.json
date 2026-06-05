@@ -33,6 +33,10 @@
     "contentRightsVerification": "Content Rights is saved as No, this app does not contain, show, or access third-party content.",
     "appStoreCategoriesSaved": true,
     "testFlightReady": false,
+    "testFlightUploadAttempted": true,
+    "testFlightUploadAttemptedAt": "2026-06-05T22:39:01Z",
+    "testFlightUploadEvidence": "docs/eas-ios-submit-attempt-evidence.json",
+    "testFlightUploadBlocker": "EAS Submit found the finished iOS production/store IPA but could not upload it in non-interactive mode because App Store Connect API access is not enabled. Computer Use opened Users and Access > Integrations > App Store Connect API and verified the page shows Request Access. Codex stopped before requesting access or creating/downloading any API key.",
     "metadataDraftSaved": true,
     "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
     "metadataDraftFields": [
@@ -48,7 +52,7 @@
     "screenshotsUploaded": false,
     "buildSelected": false,
     "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. TestFlight/build selection, native screenshot upload, contact information, privacy publishing, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked."
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. A finished iOS production/store IPA exists, but TestFlight upload is blocked until App Store Connect API access is requested/enabled or another authenticated upload path is approved. Native screenshot upload, contact information, privacy publishing, TestFlight upload/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked."
   },
   "googlePlay": {
     "status": "pass",
