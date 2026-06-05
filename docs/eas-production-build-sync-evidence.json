@@ -1,36 +1,52 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T16:13:26.395Z",
+  "generatedAt": "2026-06-05T18:42:52.657Z",
   "dryRun": false,
   "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
-  "buildsChecked": 3,
-  "productionBuildsChecked": 2,
+  "buildsChecked": 4,
+  "productionBuildsChecked": 3,
   "latestProductionBuilds": {
     "android": {
       "id": "11c47edd-6dfc-4d81-8aee-3be563006d49",
-      "status": "IN_QUEUE",
-      "readinessStatus": "pending",
+      "status": "FINISHED",
+      "readinessStatus": "pass",
       "platform": "ANDROID",
       "distribution": "STORE",
       "buildProfile": "production",
       "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/11c47edd-6dfc-4d81-8aee-3be563006d49",
-      "artifactUrl": "",
+      "artifactUrl": "https://expo.dev/artifacts/eas/3cfEuq2oZkZKhkEzGHEHhD.aab",
       "artifactType": "aab",
       "appVersion": "1.0.0",
       "appBuildVersion": "17",
       "gitCommitHash": "ad9cc6241012d6ad1c460f9436b2158beae90399",
       "gitCommitMessage": "docs: prepare google play upload assets",
       "createdAt": "2026-06-05T15:43:08.745Z",
-      "updatedAt": "2026-06-05T15:43:11.600Z",
-      "completedAt": "",
+      "updatedAt": "2026-06-05T16:42:53.465Z",
+      "completedAt": "2026-06-05T16:42:53.309Z",
       "expirationDate": "2026-07-05T15:43:08.785Z"
     },
-    "ios": null
+    "ios": {
+      "id": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "status": "IN_QUEUE",
+      "readinessStatus": "pending",
+      "platform": "IOS",
+      "distribution": "STORE",
+      "buildProfile": "production",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "artifactUrl": "",
+      "artifactType": "ipa",
+      "appVersion": "1.0.0",
+      "appBuildVersion": "6",
+      "gitCommitHash": "2bdf0141248d3025482d9e96272dae0a09ff3082",
+      "gitCommitMessage": "docs: record google play category draft",
+      "createdAt": "2026-06-05T18:42:39.948Z",
+      "updatedAt": "2026-06-05T18:42:41.226Z",
+      "completedAt": "",
+      "expirationDate": "2026-07-05T18:42:39.968Z"
+    }
   },
   "nextActions": [
-    "Wait for the Android production AAB build to finish, then rerun npm run native:eas:sync-production-builds.",
-    "Complete the interactive EAS Apple credential validation flow, then start an iOS production/TestFlight build.",
     "Do not submit production builds to App Store Connect or Google Play until native QA, screenshots, store-console declarations, and human signoff are complete."
   ]
 }
