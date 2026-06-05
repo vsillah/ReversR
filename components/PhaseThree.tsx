@@ -16,7 +16,6 @@ import {
 // Using RNImage from react-native instead (imported above)
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import * as MediaLibrary from 'expo-media-library';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import {
@@ -304,87 +303,73 @@ export default function PhaseThree({
     }
   };
 
-  const handleSaveImage = async () => {
-    const imageToSave = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-    if (!imageToSave) {
+  const writeImageToDocumentFile = async (imageUri: string, filename: string): Promise<string> => {
+    const fileUri = FileSystem.documentDirectory + filename;
+
+    if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+      const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
+      if (downloadResult.status !== 200) throw new Error('Failed to download image');
+    } else {
+      const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    }
+
+    return fileUri;
+  };
+
+  const handleExportImage = async () => {
+    const imageToExport = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
+    if (!imageToExport) {
       setAlert({visible: true, title: 'No Image', message: 'No image available to save.', type: 'info'});
       return;
     }
     
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
-        return;
-      }
-
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
-      const fileUri = FileSystem.documentDirectory + filename;
-      
-      if (imageToSave.startsWith('http://') || imageToSave.startsWith('https://')) {
-        const downloadResult = await FileSystem.downloadAsync(imageToSave, fileUri);
-        if (downloadResult.status !== 200) throw new Error('Failed to download image');
-      } else {
-        const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
-        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-      }
+      const fileUri = await writeImageToDocumentFile(imageToExport, filename);
 
-      await MediaLibrary.saveToLibraryAsync(fileUri);
-      setAlert({visible: true, title: 'Saved', message: `${currentAngleImage?.label || 'Image'} saved to your photo library.`, type: 'success'});
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        setAlert({visible: true, title: 'Exported', message: `${currentAngleImage?.label || 'Image'} exported to app storage.`, type: 'success'});
+      }
     } catch (e: any) {
-      console.error('Save image error:', e?.message || e);
-      setAlert({visible: true, title: 'Error', message: `Failed to save image: ${e?.message || 'Unknown error'}`, type: 'error'});
+      console.error('Export image error:', e?.message || e);
+      setAlert({visible: true, title: 'Error', message: `Failed to export image: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
-  const handleSaveAllAngles = async () => {
+  const handleExportAllAngles = async () => {
     if (availableAngles.length === 0) {
       setAlert({visible: true, title: 'No Images', message: 'No images available to save.', type: 'info'});
       return;
     }
     
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
-        return;
-      }
-
-      let savedCount = 0;
+      let exportedCount = 0;
       for (const angle of availableAngles) {
         if (angle.imageData) {
           const imageUri = normalizeImageUri(angle.imageData);
           if (!imageUri) continue;
           
           const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angle.label.replace(/\s+/g, '_')}.png`;
-          const fileUri = FileSystem.documentDirectory + filename;
           
           try {
-            if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
-              const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
-              if (downloadResult.status !== 200) continue;
-            } else {
-              const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
-              await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-                encoding: FileSystem.EncodingType.Base64,
-              });
-            }
-            
-            await MediaLibrary.saveToLibraryAsync(fileUri);
-            savedCount++;
+            await writeImageToDocumentFile(imageUri, filename);
+            exportedCount++;
           } catch (angleError: any) {
-            console.error('Error saving angle:', angle.id, angleError?.message);
+            console.error('Error exporting angle:', angle.id, angleError?.message);
           }
         }
       }
       
-      setAlert({visible: true, title: 'Saved', message: `${savedCount} images saved to your photo library.`, type: 'success'});
+      setAlert({visible: true, title: 'Exported', message: `${exportedCount} images exported to app storage. Export one image at a time to open the system share sheet.`, type: 'success'});
     } catch (e: any) {
-      console.error('Save all angles error:', e?.message || e);
-      setAlert({visible: true, title: 'Error', message: `Failed to save images: ${e?.message || 'Unknown error'}`, type: 'error'});
+      console.error('Export all angles error:', e?.message || e);
+      setAlert({visible: true, title: 'Error', message: `Failed to export images: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
@@ -395,20 +380,7 @@ export default function PhaseThree({
     try {
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
-      const fileUri = FileSystem.documentDirectory + filename;
-      
-      // Handle HTTP URLs by downloading, base64 data URLs by extracting
-      if (imageToShare.startsWith('http://') || imageToShare.startsWith('https://')) {
-        const downloadResult = await FileSystem.downloadAsync(imageToShare, fileUri);
-        if (downloadResult.status !== 200) {
-          throw new Error('Failed to download image');
-        }
-      } else {
-        const base64Data = imageToShare.replace(/^data:image\/\w+;base64,/, '');
-        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-      }
+      const fileUri = await writeImageToDocumentFile(imageToShare, filename);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
@@ -791,10 +763,10 @@ export default function PhaseThree({
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.imageActionButton}
-                    onPress={handleSaveImage}
+                    onPress={handleExportImage}
                   >
                     <Ionicons name="download-outline" size={18} color={Colors.accent} />
-                    <Text style={styles.imageActionText}>Save</Text>
+                    <Text style={styles.imageActionText}>Export</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.imageActionButton}
@@ -806,10 +778,10 @@ export default function PhaseThree({
                   {availableAngles.length > 1 && (
                     <TouchableOpacity 
                       style={styles.imageActionButton}
-                      onPress={handleSaveAllAngles}
+                      onPress={handleExportAllAngles}
                     >
                       <Ionicons name="images-outline" size={18} color={Colors.secondary} />
-                      <Text style={[styles.imageActionText, { color: Colors.secondary }]}>Save All</Text>
+                      <Text style={[styles.imageActionText, { color: Colors.secondary }]}>Export All</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -1074,16 +1046,16 @@ export default function PhaseThree({
               <Ionicons name="add" size={24} color={Colors.white} />
             </TouchableOpacity>
             <View style={styles.modalSpacer} />
-            <TouchableOpacity style={styles.modalActionButton} onPress={handleSaveImage}>
+            <TouchableOpacity style={styles.modalActionButton} onPress={handleExportImage}>
               <Ionicons name="download-outline" size={20} color={Colors.accent} />
-              <Text style={styles.modalActionText}>Save</Text>
+              <Text style={styles.modalActionText}>Export</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalActionButton} onPress={handleShareImage}>
               <Ionicons name="share-outline" size={20} color={Colors.accent} />
               <Text style={styles.modalActionText}>Share</Text>
             </TouchableOpacity>
             {availableAngles.length > 1 && (
-              <TouchableOpacity style={styles.modalActionButton} onPress={handleSaveAllAngles}>
+              <TouchableOpacity style={styles.modalActionButton} onPress={handleExportAllAngles}>
                 <Ionicons name="images-outline" size={20} color={Colors.secondary} />
                 <Text style={[styles.modalActionText, { color: Colors.secondary }]}>All</Text>
               </TouchableOpacity>

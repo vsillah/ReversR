@@ -37,6 +37,7 @@ We use information to:
 - Reconstruction history is stored locally on the device.
 - Large base64 images are not stored in long-term local history by default.
 - Inventory connector metadata may be saved locally so admins do not need to re-enter it.
+- Exported sketches, specs, BOMs, and reconstruction packages are written to app-controlled storage before the user chooses whether to share them.
 
 ## Third-Party Processing
 
@@ -57,6 +58,8 @@ Information may be shared only when:
 ## Camera Access
 
 Camera access is used only to capture machine images for inventory matching and reconstruction planning. Camera access is not used for advertising, marketing, or unrelated data mining.
+
+The app does not request broad photo library or media library access in the current release path. Generated visual references are exported through app storage and the system share sheet instead of being saved directly to the user's photo library.
 
 ## Your Choices
 

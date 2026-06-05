@@ -44,4 +44,16 @@ See [docs/inventory-connector-spec.md](docs/inventory-connector-spec.md).
 
 ## Store Readiness
 
-The prototype is not store-ready yet. See [docs/store-readiness.md](docs/store-readiness.md) for the Apple App Store, Google Play, and EAS gates.
+The prototype is not store-ready yet. See [docs/store-readiness.md](docs/store-readiness.md) and [docs/store-metadata.md](docs/store-metadata.md) for the Apple App Store, Google Play, and EAS gates.
+
+Run the local readiness check with the placeholder API allowed:
+
+```bash
+npm run store:preflight:local
+```
+
+Before real store builds, set `EXPO_PUBLIC_API_BASE_URL` to the hosted production API and run:
+
+```bash
+npm run store:preflight
+```

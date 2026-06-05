@@ -10,7 +10,10 @@
     "api": "node server/index.js",
     "expo": "npx expo start --clear --port 8081",
     "dev": "npx concurrently \"npm:api\" \"npm:expo\"",
-    "web-preview": "npx cross-env API_PORT=3001 concurrently \"node server/index.js\" \"npx expo start --web --port 5001\""
+    "web-preview": "npx cross-env API_PORT=3001 concurrently \"node server/index.js\" \"npx expo start --web --port 5001\"",
+    "typecheck": "tsc --noEmit",
+    "store:preflight": "node scripts/store-preflight.js",
+    "store:preflight:local": "node scripts/store-preflight.js --allow-placeholder"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -25,7 +28,6 @@
     "expo-file-system": "~19.0.19",
     "expo-image": "^3.0.11",
     "expo-linking": "~8.0.10",
-    "expo-media-library": "~18.2.1",
     "expo-router": "~6.0.17",
     "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.12",

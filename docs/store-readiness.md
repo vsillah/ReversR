@@ -12,9 +12,12 @@ The app now has:
 - Android package: `com.vsillah.reversrrebuild`
 - iOS bundle identifier: `com.vsillah.reversrrebuild`
 - Camera-only Android permission
+- Explicit Android permission blocks for microphone and broad photo/media access
 - Inventory connector validation
 - Machine matching against demo, CSV, JSON, HTTP(S), and local file fixtures
 - Reconstruction package generation with assembly steps, pricing, BOM, and manufacturer handoff surfaces
+- Store preflight script: `npm run store:preflight`
+- API health endpoint: `GET /api/health`
 
 ## Store Submission Requirements
 
@@ -36,6 +39,8 @@ Open gates:
 
 Google Play sensitive-permission policy expects apps to request only permissions needed for core functionality and use privacy-oriented alternatives where possible. Source: [Google Play Permissions and APIs that Access Sensitive Information](https://support.google.com/googleplay/android-developer/answer/16558241).
 
+Expo permissions are configured with `android.permissions` and `android.blockedPermissions`; libraries can add permissions automatically, so blocking unused media/microphone permissions is part of the release gate. Source: [Expo Permissions](https://docs.expo.dev/guides/permissions/).
+
 Open gates:
 
 - Create Play Console app record for `com.vsillah.reversrrebuild`.
@@ -48,9 +53,13 @@ Open gates:
 
 Expo documents EAS Build and EAS Submit as the build/submit path for App Store and Google Play binaries. Sources: [Expo distribution overview](https://docs.expo.dev/distribution/introduction/) and [Expo submit to app stores](https://docs.expo.dev/deploy/submit-to-app-stores/).
 
+EAS build profiles can bind to `development`, `preview`, and `production` environments, and `EXPO_PUBLIC_` variables are available to app code during builds. Sources: [Configure EAS Build with eas.json](https://docs.expo.dev/build/eas-json/) and [Environment variables in EAS](https://docs.expo.dev/eas/environment-variables/).
+
 Open gates:
 
 - Run `eas init` for the new clone identity.
+- Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
+- Run `npm run store:preflight` before production builds.
 - Configure Android credentials and iOS credentials.
 - Build:
   - `eas build --platform android --profile production`
@@ -68,15 +77,16 @@ Open gates:
 - Visual generation: local no-key image fallback is intentionally minimal; production should use configured AI image generation or deterministic diagram rendering.
 - Vendor handoff: current manufacturer cards open vendor sites but do not submit files or pricing requests.
 - Accessibility: needs screen-reader and tap-target QA before submission.
-- Store assets: app icon, screenshots, description, category, support URL, and privacy URL are not complete.
+- Store assets: metadata draft exists in [store-metadata.md](./store-metadata.md), but native screenshots, support URL, hosted privacy URL, and final icon review are not complete.
 
 ## Recommended Next Sequence
 
 1. Host the API and update `hooks/useGemini.ts` to use the production backend for native builds.
 2. Add server-side connector secret storage and admin roles.
 3. Host privacy policy and terms.
-4. Run native Android/iOS camera QA.
-5. Run EAS preview builds.
-6. Prepare store metadata and screenshots.
-7. Submit to TestFlight and Google Play Internal Testing.
-8. Resolve review feedback, then submit production releases.
+4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production and run `npm run store:preflight`.
+5. Run native Android/iOS camera QA.
+6. Run EAS preview builds.
+7. Capture native screenshots and finalize store metadata.
+8. Submit to TestFlight and Google Play Internal Testing.
+9. Resolve review feedback, then submit production releases.

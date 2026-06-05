@@ -1558,11 +1558,13 @@ app.post('/api/generate-2d', (req, res) => {
 // HEALTH & STATUS
 // ============================================
 
-app.get('/health', (req, res) => {
+const getHealthPayload = () => {
   const now = Date.now();
   const availableKeys = apiKeyPool.filter(k => k.cooldownUntil <= now).length;
-  res.json({ 
+  return {
     status: 'ok',
+    service: 'reversr-rebuild-api',
+    version: '0.1.0',
     apiKeys: {
       total: apiKeyPool.length,
       available: availableKeys,
@@ -1570,8 +1572,18 @@ app.get('/health', (req, res) => {
     },
     cache: {
       size: responseCache.cache.size,
-    }
-  });
+    },
+    inventorySources: ['demo', 'file', 'http', 'https'],
+    authenticatedConnectorsEnabled: false,
+  };
+};
+
+app.get('/health', (req, res) => {
+  res.json(getHealthPayload());
+});
+
+app.get('/api/health', (req, res) => {
+  res.json(getHealthPayload());
 });
 
 // ============================================
