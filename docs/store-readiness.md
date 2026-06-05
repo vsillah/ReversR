@@ -30,7 +30,7 @@ The app now has:
 - Hosted connector smoke gate: `npm run connector:smoke`
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
 - Web-preview store screenshot capture script: `npm run screenshots:store`
-- Web-preview happy-path smoke script: `npm run web:flow-smoke`
+- Web-preview happy-path smoke script and evidence file: `npm run web:flow-smoke` writes `docs/web-flow-smoke-evidence.json`
 - Web routes for `/privacy`, `/terms`, and `/support`
 - Static web export and policy hosting preflight for the store privacy, terms, and support URLs
 - Expo Doctor passes all project health checks
@@ -109,7 +109,7 @@ Open gates:
 - Production API host: a Dockerfile, deployment runbook, environment template/preflight, and runtime config health checks exist, but the API still needs to be deployed behind HTTPS with restricted `API_CORS_ORIGINS` and verified with `npm run api:env:preflight` plus `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Protected connector QA: `npm run inventory:source:validate` validates the machine export shape before hosting, `npm run inventory:preflight` validates the local credentialRef path, and `npm run connector:smoke` now defines the hosted real-inventory gate. The hosted smoke still needs a deployed API and authorized production inventory source.
-- Web happy-path QA: `npm run web:flow-smoke` verifies the local scan, demo inventory, machine match, BOM, quote packet, and vendor draft path against a running web preview; native device QA is still required before store submission.
+- Web happy-path QA: `npm run web:flow-smoke` verifies the local scan, demo inventory, machine match, BOM, quote packet, and vendor draft path against a running web preview, then records `docs/web-flow-smoke-evidence.json`; native device QA is still required before store submission.
 - Privacy policy, terms, and support: web routes, static export, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
@@ -128,7 +128,7 @@ Open gates:
 2. Run `npm run inventory:source:validate -- <inventory.csv-or-json>` on the machine export that will back the hosted connector.
 3. Run `npm run inventory:preflight` to confirm the protected connector, match, and BOM path locally.
 4. Run `npm run store:assets:preflight` to verify the Google Play feature graphic before console setup.
-5. Start `npm run web-preview`, then run `WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke` to prove the web happy path before screenshot or native preview work.
+5. Start `npm run web-preview`, then run `WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke` to prove the web happy path and write `docs/web-flow-smoke-evidence.json` before screenshot or native preview work.
 6. Fill a production API env from `docs/production-api-env.example`, run `npm run api:env:preflight`, deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
 7. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
 8. Deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.

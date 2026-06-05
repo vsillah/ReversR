@@ -31,7 +31,9 @@ npm run web-preview
 WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke
 ```
 
-The smoke verifies scan, demo inventory validation, machine matching, BOM generation, manufacturer quote packet controls, and vendor request draft controls. Keep it as local proof only; final release evidence still requires native Android and iOS preview-build QA.
+The smoke verifies scan, demo inventory validation, machine matching, BOM generation, manufacturer quote packet controls, and vendor request draft controls. On success it writes `docs/web-flow-smoke-evidence.json`, which `npm run release:status` uses as local proof before preview binaries.
+
+Keep this as local proof only; final release evidence still requires native Android and iOS preview-build QA.
 
 ## 2. Install Or Run EAS CLI
 

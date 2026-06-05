@@ -8,6 +8,13 @@ const strict = args.has('--strict');
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
 const exists = (path) => fs.existsSync(path);
 const readText = (path) => exists(path) ? fs.readFileSync(path, 'utf8') : '';
+const readOptionalJson = (path) => {
+  try {
+    return exists(path) ? readJson(path) : null;
+  } catch {
+    return null;
+  }
+};
 const isHttpsUrl = (value) => /^https:\/\/[^/]+\.[^/]+/i.test(value || '');
 const isPlaceholder = (value = '') => (
   !value ||
@@ -237,13 +244,34 @@ addGate(
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;
 const hostedApiOk = !isPlaceholder(apiBaseUrl) && isHttpsUrl(apiBaseUrl);
+const webFlowEvidence = readOptionalJson('docs/web-flow-smoke-evidence.json');
+const requiredWebFlowChecks = [
+  'welcome',
+  'legacySitAbsent',
+  'scan',
+  'inventoryValidation',
+  'machineMatch',
+  'bom',
+  'quotePacket',
+  'vendorRequestDraft',
+  'manufacturingReadiness',
+];
+const webFlowEvidenceOk = (
+  webFlowEvidence?.status === 'pass' &&
+  webFlowEvidence?.api?.retiredSitRouteStatus === 404 &&
+  requiredWebFlowChecks.every(check => webFlowEvidence?.verified?.[check] === true)
+);
 addGate(
   'hosted',
   'web-flow-smoke',
   'Local web preview can complete the machine reconstruction happy path',
-  'pending',
-  exists('scripts/web-flow-smoke.js') ? 'Smoke script is available; execution evidence is produced by npm run web:flow-smoke.' : 'scripts/web-flow-smoke.js is missing.',
-  'Run npm run web-preview, then in another shell run WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke.'
+  webFlowEvidenceOk ? 'pass' : 'pending',
+  webFlowEvidenceOk
+    ? `docs/web-flow-smoke-evidence.json proves ${requiredWebFlowChecks.length} checkpoints at ${webFlowEvidence.generatedAt}.`
+    : exists('scripts/web-flow-smoke.js')
+      ? 'Smoke script is available, but docs/web-flow-smoke-evidence.json does not yet prove the full happy path.'
+      : 'scripts/web-flow-smoke.js is missing.',
+  webFlowEvidenceOk ? '' : 'Run npm run web-preview, then in another shell run WEB_SMOKE_APP_URL=http://localhost:5001 npm run web:flow-smoke.'
 );
 
 addGate(
