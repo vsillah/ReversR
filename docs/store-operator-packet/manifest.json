@@ -1,15 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T19:18:47.343Z",
+  "generatedAt": "2026-06-05T20:13:56.273Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T19:18:47.334Z",
+    "generatedAt": "2026-06-05T20:13:56.268Z",
     "summary": {
-      "pass": 34,
-      "pending": 5
+      "pass": 35,
+      "pending": 4
     },
     "pendingGateIds": [
-      "release-evidence-bundle",
       "local-release-ci-evidence",
       "native-qa-evidence",
       "store-console-records",
@@ -129,12 +128,6 @@
     "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
   ],
   "pendingGates": [
-    {
-      "id": "release-evidence-bundle",
-      "group": "store-local",
-      "title": "Consolidated release evidence bundle is generated for external operators",
-      "nextStep": "Run npm run release:evidence before external account-side release work."
-    },
     {
       "id": "local-release-ci-evidence",
       "group": "store-local",

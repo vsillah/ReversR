@@ -48,7 +48,38 @@
     "appCategory": "Productivity",
     "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
     "metadataCopiedFromPacket": false,
-    "dataSafetyCompleted": false,
+    "dataSafetyCompleted": true,
+    "dataSafetyDraftSavedAt": "2026-06-05T20:12:58.000Z",
+    "dataSafetyVerification": "Computer Use completed Google Play Data safety through Step 5 Preview and verified the console displayed Change saved. Send for review in Publishing overview. Send for review was not clicked.",
+    "dataSafetyAnswers": {
+      "collectsOrSharesRequiredUserDataTypes": true,
+      "encryptedInTransit": true,
+      "accountCreation": "My app does not allow users to create an account",
+      "externalAccountLogin": false,
+      "deletionRequestUrl": "https://reversr.vercel.app/support",
+      "selectedDataTypes": [
+        "Photos and videos: Photos",
+        "App activity: Other user-generated content"
+      ],
+      "handling": {
+        "photos": {
+          "collected": true,
+          "shared": true,
+          "processedEphemerally": false,
+          "collectionOptional": true,
+          "collectionPurpose": "App functionality",
+          "sharingPurpose": "App functionality"
+        },
+        "otherUserGeneratedContent": {
+          "collected": true,
+          "shared": true,
+          "processedEphemerally": false,
+          "collectionOptional": true,
+          "collectionPurpose": "App functionality",
+          "sharingPurpose": "App functionality"
+        }
+      }
+    },
     "appContentCompleted": false,
     "internalTestingReady": false,
     "categoryDraftSaved": true,
@@ -57,8 +88,8 @@
     "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
     "publicSupportEmail": "vambah@amadutown.com",
     "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
-    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. App category was later saved as Productivity in Store settings, and public support contact details were saved after Vambah confirmed vambah@amadutown.com as the public support email. Content rating, target audience, data safety, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
-    "completedSetupTaskCount": 7,
+    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. App category was later saved as Productivity in Store settings, public support contact details were saved after Vambah confirmed vambah@amadutown.com as the public support email, and Data safety was completed through Step 5 Preview with Change saved. Content rating, target audience, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "completedSetupTaskCount": 8,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
       "Set privacy policy",
@@ -67,12 +98,12 @@
       "Government apps",
       "Financial features",
       "Health",
-      "Select an app category and provide contact details"
+      "Select an app category and provide contact details",
+      "Data safety"
     ],
     "remainingSetupTasks": [
       "Content rating",
       "Target audience",
-      "Data safety",
       "Set up your store listing"
     ],
     "storeListingTextEntered": true,
@@ -190,6 +221,14 @@
       "value": "App category saved as Productivity. Store listing contact details saved with public support email vambah@amadutown.com.",
       "completedAt": "2026-06-05T18:57:00.000Z",
       "note": "Google Play Store settings contact dialog displayed Change saved after Vambah entered and saved the public support email. Send for review was not clicked. The public phone value was visible in the console but is intentionally not stored in repo evidence."
+    },
+    {
+      "platform": "googlePlay",
+      "task": "Data safety",
+      "status": "draft-saved",
+      "value": "Collected/shared required user data types disclosed as Photos and Other user-generated content; both use app functionality only. Encrypted in transit is yes, no account creation, no external-account login, and deletion requests use https://reversr.vercel.app/support.",
+      "completedAt": "2026-06-05T20:12:58.000Z",
+      "note": "Computer Use completed Data safety through Step 5 Preview and verified Change saved. Send for review in Publishing overview. Send for review was not clicked."
     },
     {
       "platform": "googlePlay",
