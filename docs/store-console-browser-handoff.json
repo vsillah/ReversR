@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:25:04Z",
+  "generatedAt": "2026-06-05T13:53:00.252Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -9,11 +9,11 @@
     "sku": "reversr-rebuild-001"
   },
   "appStoreConnect": {
-    "browserState": "Chrome is open in App Store Connect at the New App modal. The form is staged for iOS with ReversR Rebuild, English (U.S.), Bundle ID ReversR Rebuild - com.vsillah.reversrrebuild, SKU reversr-rebuild-001, and Full Access. The Create button is active and has not been clicked.",
-    "url": "https://appstoreconnect.apple.com/apps",
-    "accountGate": "Apple Developer Program activation has cleared enough for App Store Connect to open. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and App Store Connect now exposes the registered Bundle ID in the New App form.",
-    "nextHumanAction": "Authorize the final Create action in App Store Connect, or click Create manually, to create the persistent iOS app record. After creation, copy the App Store Connect Apple ID into eas.json at submit.production.ios.ascAppId.",
-    "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
+    "browserState": "App Store Connect app record exists; Apple ID and record URL have been copied into repo evidence.",
+    "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+    "accountGate": "App Store Connect app record creation gate cleared. Metadata, App Privacy, age rating, TestFlight setup, and native screenshot upload remain pending.",
+    "nextHumanAction": "Complete App Store Connect metadata, App Privacy, age rating, TestFlight setup, and native screenshot upload tasks using docs/store-console-task-answers.md.",
+    "neededValueAfterCreation": ""
   },
   "googlePlayConsole": {
     "browserState": "Chrome is open at the Google Play Console dashboard for ReversR Rebuild with the app information/store listing task list expanded.",
@@ -36,7 +36,8 @@
     "Google Play app record exists; production access and store listing are not complete.",
     "Google Play dashboard task list shows 0 of 11 app information/store listing tasks complete.",
     "No public store submission was started.",
-    "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. The next human-in-the-loop gate is the final Create action in the prepared App Store Connect New App form; App Store Connect app record creation and ascAppId collection are still required afterward.",
-    "EAS iOS preview credentials were checked with npx eas-cli@20.0.0 credentials --platform ios. Selecting the preview profile reached the Apple account login prompt, so iOS credential setup remains a human-in-the-loop Apple login gate."
+    "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, created the App Store Connect app record, and Apple ID 6777091538 is recorded in eas.json. App Store Connect metadata, App Privacy, age rating, TestFlight setup, and native screenshots remain pending.",
+    "EAS iOS preview credentials were checked with npx eas-cli@20.0.0 credentials --platform ios. Selecting the preview profile reached the Apple account login prompt, so iOS credential setup remains a human-in-the-loop Apple login gate.",
+    "App Store Connect Apple ID 6777091538 recorded at 2026-06-05T13:53:00.252Z; eas.json submit.production.ios.ascAppId is configured."
   ]
 }

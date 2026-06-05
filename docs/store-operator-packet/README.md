@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T13:41:46.483Z
+Generated at: 2026-06-05T13:52:00.930Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -17,15 +17,14 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 ## Current Status
 
-- Release pass gates: 34
-- Release pending gates: 5
+- Release pass gates: 35
+- Release pending gates: 4
 - Release blocked gates: 0
 - Release warnings: 0
 
 Pending gates:
 
 - local-release-ci-evidence: Run npm run release:local-ci before external account-side release work.
-- eas-submit-config: After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight.
 - native-qa-evidence: Run npm run native:qa:preflight and resolve any failures.
 - store-console-records: Run npm run store:console:preflight and resolve any failures.
 - native-screenshots: Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json.

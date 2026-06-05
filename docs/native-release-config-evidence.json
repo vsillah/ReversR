@@ -1,16 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T13:41:51.088Z",
+  "generatedAt": "2026-06-05T13:52:05.310Z",
   "mode": {
     "allowPlaceholder": true,
     "allowMissingCli": true,
     "allowUnlinkedEas": true,
     "allowNotLoggedIn": true
   },
-  "warnings": [
-    "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists."
-  ],
+  "warnings": [],
   "appIdentity": {
     "name": "ReversR Rebuild",
     "slug": "reversr-rebuild",
@@ -63,7 +61,7 @@
     },
     "submitProfile": {
       "androidTrack": "internal",
-      "iosAscAppIdConfigured": false
+      "iosAscAppIdConfigured": true
     }
   },
   "urls": {
@@ -77,6 +75,6 @@
     "easLogin": false,
     "hostedApiUrl": false,
     "hostedPolicyUrls": false,
-    "iosAscAppId": true
+    "iosAscAppId": false
   }
 }

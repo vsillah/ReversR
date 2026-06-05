@@ -1,38 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T13:41:48.155Z",
-  "releaseStatusGeneratedAt": "2026-06-05T13:41:48.150Z",
+  "generatedAt": "2026-06-05T13:52:02.382Z",
+  "releaseStatusGeneratedAt": "2026-06-05T13:52:02.378Z",
   "summary": {
-    "pass": 5,
-    "pending": 4
+    "pass": 6,
+    "pending": 3
   },
-  "nextRecommendedGate": "eas-submit-config",
+  "nextRecommendedGate": "native-qa-evidence",
   "pendingGates": [
-    {
-      "group": "native",
-      "id": "eas-submit-config",
-      "title": "EAS submit profile is configured for Google Play Internal Testing and TestFlight upload",
-      "status": "pending",
-      "evidence": "android.track=internal; ios.ascAppId=(missing).",
-      "nextStep": "After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight.",
-      "action": {
-        "owner": "Apple release operator",
-        "phase": "EAS submit setup",
-        "action": "Create the App Store Connect app record and add its Apple ID to eas.json.",
-        "steps": [
-          "Create the App Store Connect app record for com.vsillah.reversrrebuild.",
-          "Follow docs/external-release-setup-runbook.md sections 2 and 4.",
-          "Copy the App Store Connect Apple ID from the app information page.",
-          "Set eas.json submit.production.ios.ascAppId to that Apple ID.",
-          "Keep Android submit.production.android.track set to internal for Google Play Internal Testing.",
-          "Run npm run native:preflight."
-        ],
-        "evidence": [
-          "eas.json has submit.production.ios.ascAppId.",
-          "Native preflight no longer reports missing iOS ascAppId."
-        ]
-      }
-    },
     {
       "group": "native",
       "id": "native-qa-evidence",

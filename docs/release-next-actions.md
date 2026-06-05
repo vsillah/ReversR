@@ -1,50 +1,19 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T13:41:48.155Z
-Release status generated at: 2026-06-05T13:41:48.150Z
+Generated at: 2026-06-05T13:52:02.382Z
+Release status generated at: 2026-06-05T13:52:02.378Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
 ## Summary
 
-- Pass: 5
-- Pending: 4
+- Pass: 6
+- Pending: 3
 - Blocked: 0
 - Warn: 0
-- Next recommended gate: eas-submit-config
+- Next recommended gate: native-qa-evidence
 
-## 1. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
-
-- Gate ID: eas-submit-config
-- Group: native
-- Status: pending
-- Owner: Apple release operator
-- Phase: EAS submit setup
-- Next action: Create the App Store Connect app record and add its Apple ID to eas.json.
-
-Current gate evidence:
-
-android.track=internal; ios.ascAppId=(missing).
-
-Current gate next step:
-
-After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight.
-
-Steps:
-
-1. Create the App Store Connect app record for com.vsillah.reversrrebuild.
-2. Follow docs/external-release-setup-runbook.md sections 2 and 4.
-3. Copy the App Store Connect Apple ID from the app information page.
-4. Set eas.json submit.production.ios.ascAppId to that Apple ID.
-5. Keep Android submit.production.android.track set to internal for Google Play Internal Testing.
-6. Run npm run native:preflight.
-
-Evidence required:
-
-- eas.json has submit.production.ios.ascAppId.
-- Native preflight no longer reports missing iOS ascAppId.
-
-## 2. Android and iOS preview-build QA evidence is recorded
+## 1. Android and iOS preview-build QA evidence is recorded
 
 - Gate ID: native-qa-evidence
 - Group: native
@@ -76,7 +45,7 @@ Evidence required:
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
-## 3. App Store Connect and Google Play Console app records exist
+## 2. App Store Connect and Google Play Console app records exist
 
 - Gate ID: store-console-records
 - Group: store-console
@@ -112,7 +81,7 @@ Evidence required:
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
-## 4. Final native screenshots are captured from Android/iOS preview builds
+## 3. Final native screenshots are captured from Android/iOS preview builds
 
 - Gate ID: native-screenshots
 - Group: store-console

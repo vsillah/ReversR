@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T13:25:04Z",
+  "generatedAt": "2026-06-05T13:53:00.252Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -8,12 +8,11 @@
     "url": "https://github.com/vsillah/ReversR/pull/2"
   },
   "releaseStatus": {
-    "pass": 35,
-    "pending": 4,
+    "pass": 36,
+    "pending": 3,
     "blocked": 0,
     "warn": 0,
     "pendingGates": [
-      "eas-submit-config",
       "native-qa-evidence",
       "store-console-records",
       "native-screenshots"
@@ -21,19 +20,17 @@
   },
   "activeBrowserState": {
     "appStoreConnect": {
-      "url": "https://appstoreconnect.apple.com/apps",
-      "screen": "New App modal",
-      "state": "Prepared and waiting at the active Create button.",
+      "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+      "screen": "Created App Store Connect app record",
+      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json.",
       "fields": {
-        "platform": "iOS",
-        "name": "ReversR Rebuild",
-        "primaryLanguage": "English (U.S.)",
-        "bundleId": "ReversR Rebuild - com.vsillah.reversrrebuild",
-        "sku": "reversr-rebuild-001",
-        "userAccess": "Full Access"
+        "appleId": "6777091538",
+        "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "supportUrl": "https://reversr.vercel.app/support"
       },
-      "nextHumanAction": "Click Create or authorize Codex to click Create for this exact prepared App Store Connect record.",
-      "copyBackAfterSuccess": "App Store Connect Apple ID from the created app record for eas.json submit.production.ios.ascAppId"
+      "nextHumanAction": "Complete App Store Connect metadata, App Privacy, age rating, TestFlight setup, and native screenshots using docs/store-console-task-answers.md.",
+      "copyBackAfterSuccess": ""
     },
     "googlePlayConsole": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
@@ -64,9 +61,6 @@
     }
   },
   "lastStrictFailures": {
-    "nativePreflight": [
-      "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists."
-    ],
     "iosPreviewBuild": [
       "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode."
     ],
@@ -76,7 +70,6 @@
       "Native QA checks and native screenshots remain pending."
     ],
     "storeConsolePreflight": [
-      "App Store Connect app record, record URL, and Apple ID are missing.",
       "Google Play privacy policy URL, metadata, data safety, app content, internal testing, and signoff remain incomplete.",
       "Final native screenshots and native QA signoff remain incomplete."
     ]
@@ -90,10 +83,9 @@
     "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
   },
   "resumeInstructionsForVambah": [
-    "In the open App Store Connect tab, click Create on the prepared New App modal.",
-    "After the app opens, copy the Apple ID from App Information and send it back.",
     "When ready for iOS credentials, run or allow Codex to run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA.",
-    "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured."
+    "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured.",
+    "Complete Apple login/2FA in the EAS iOS preview credentials flow when prompted."
   ],
   "preparedAutomation": [
     {
@@ -114,7 +106,7 @@
       "commands": [
         "npm run store:appstore:record -- --apple-id 1234567890 --record-url https://appstoreconnect.apple.com/apps/1234567890/appstore"
       ],
-      "currentValidation": "Pending validation with placeholder values only; requires a real App Store Connect Apple ID after HITL creation."
+      "currentValidation": "Validated with real Apple ID 6777091538 and App Store Connect URL; strict native preflight passes."
     },
     {
       "name": "Native Android QA helper",

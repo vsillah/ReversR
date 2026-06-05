@@ -94,6 +94,7 @@ const missingLocalProofs = localProofGateIds.filter(id => gateById[id]?.status !
 const pendingExternalGates = externalGateIds
   .map(id => gateById[id])
   .filter(Boolean)
+  .filter(gate => gate.status !== 'pass')
   .map(gate => ({
     id: gate.id,
     group: gate.group,
@@ -152,7 +153,8 @@ const bundle = {
     summaryWithoutBundle,
     missingLocalProofs,
     localProofGateIds,
-    pendingExternalGateIds: externalGateIds,
+    pendingExternalGateIds: pendingExternalGates.map(gate => gate.id),
+    allExternalGateIds: externalGateIds,
     pendingExternalGates,
   },
   appStoreAndPlay: {

@@ -76,7 +76,7 @@ writeRootJson(easPath, eas);
 const storeEvidence = readJson(storeEvidencePath);
 storeEvidence.appStoreConnect = storeEvidence.appStoreConnect || {};
 Object.assign(storeEvidence.appStoreConnect, {
-  status: 'pending',
+  status: 'pass',
   recordUrl,
   appleId,
   bundleIdStatus: 'pass',
@@ -98,6 +98,11 @@ if (fs.existsSync(browserHandoffPath)) {
   browserHandoff.appStoreConnect.accountGate = 'App Store Connect app record creation gate cleared. Metadata, App Privacy, age rating, TestFlight setup, and native screenshot upload remain pending.';
   browserHandoff.appStoreConnect.nextHumanAction = 'Complete App Store Connect metadata, App Privacy, age rating, TestFlight setup, and native screenshot upload tasks using docs/store-console-task-answers.md.';
   browserHandoff.appStoreConnect.neededValueAfterCreation = '';
+  browserHandoff.notes = (browserHandoff.notes || []).filter(note =>
+    !note.includes('final Create action') &&
+    !note.includes('app record creation and ascAppId collection') &&
+    !note.startsWith('App Store Connect Apple ID ')
+  );
   appendUnique(browserHandoff.notes, `App Store Connect Apple ID ${appleId} recorded at ${now}; eas.json submit.production.ios.ascAppId is configured.`);
   writeJson(browserHandoffPath, browserHandoff);
 }
@@ -112,7 +117,11 @@ if (fs.existsSync(nativeDeviceHandoffPath)) {
   };
   nativeHandoff.nextNativeQaActions = (nativeHandoff.nextNativeQaActions || []).filter(action => !action.includes('copy the App Store Connect Apple ID'));
   appendUnique(nativeHandoff.nextNativeQaActions, 'Run npm run native:preflight, then run npx eas-cli@20.0.0 credentials --platform ios and complete Apple login/2FA for the preview profile.');
-  nativeHandoff.notCompletedByAutomation = (nativeHandoff.notCompletedByAutomation || []).filter(item => !item.includes('No Apple App Store Connect app record was created'));
+  nativeHandoff.notCompletedByAutomation = (nativeHandoff.notCompletedByAutomation || []).filter(item =>
+    !item.includes('No Apple App Store Connect app record was created') &&
+    !item.includes('App Store Connect app record creation') &&
+    !item.includes('App Store Connect app record exists')
+  );
   appendUnique(nativeHandoff.notCompletedByAutomation, 'App Store Connect app record exists, but EAS iOS preview credential setup still requires Apple login/2FA.');
   writeJson(nativeDeviceHandoffPath, nativeHandoff);
 }
@@ -136,6 +145,12 @@ if (fs.existsSync(autopilotHandoffPath)) {
   };
   autopilot.lastStrictFailures = autopilot.lastStrictFailures || {};
   delete autopilot.lastStrictFailures.nativePreflight;
+  if (Array.isArray(autopilot.lastStrictFailures.storeConsolePreflight)) {
+    autopilot.lastStrictFailures.storeConsolePreflight = autopilot.lastStrictFailures.storeConsolePreflight.filter(item =>
+      !item.includes('App Store Connect app record, record URL, and Apple ID are missing')
+    );
+    if (autopilot.lastStrictFailures.storeConsolePreflight.length === 0) delete autopilot.lastStrictFailures.storeConsolePreflight;
+  }
   autopilot.resumeInstructionsForVambah = (autopilot.resumeInstructionsForVambah || []).filter(item => !item.includes('click Create') && !item.includes('copy the Apple ID'));
   appendUnique(autopilot.resumeInstructionsForVambah, 'Complete Apple login/2FA in the EAS iOS preview credentials flow when prompted.');
   writeJson(autopilotHandoffPath, autopilot);

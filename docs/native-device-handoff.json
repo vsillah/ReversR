@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:25:04Z",
+  "generatedAt": "2026-06-05T13:53:00.252Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -34,8 +34,8 @@
       "state": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Store listing, data safety, app content, internal testing, and native screenshot upload tasks remain pending."
     },
     "appStoreConnect": {
-      "url": "https://appstoreconnect.apple.com/apps",
-      "state": "Apple Developer Agreement was accepted by Vambah and Apple Developer Program activation cleared enough for App Store Connect to open. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. Chrome is now at the App Store Connect New App modal, staged with iOS, ReversR Rebuild, English (U.S.), Bundle ID ReversR Rebuild - com.vsillah.reversrrebuild, SKU reversr-rebuild-001, and Full Access. The final Create action has not been clicked."
+      "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+      "state": "App Store Connect app record exists and Apple ID 6777091538 is recorded in eas.json submit.production.ios.ascAppId. EAS iOS credential login/2FA and iOS preview build remain pending."
     }
   },
   "nextNativeQaActions": [
@@ -46,16 +46,15 @@
     "Use npm run native:android:qa -- --launch and npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff> to capture Android native screenshots into docs/store-screenshots/native/.",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-    "Authorize and click Create on the prepared App Store Connect New App modal, or create the iOS app record manually, then copy the App Store Connect Apple ID into eas.json at submit.production.ios.ascAppId to unblock iOS preview/TestFlight work.",
     "Run npx eas-cli@20.0.0 credentials --platform ios, select the preview profile, and complete the Apple account login/2FA prompt so EAS can create or validate internal-distribution iOS credentials.",
-    "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools."
+    "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools.",
+    "Run npm run native:preflight, then run npx eas-cli@20.0.0 credentials --platform ios and complete Apple login/2FA for the preview profile."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
-    "Apple Developer App ID registration is complete for com.vsillah.reversrrebuild, but App Store Connect app record creation is still gated by the final Create action in the New App modal.",
     "EAS iOS preview credential setup reaches an Apple account login prompt and cannot proceed unattended.",
-    "No Apple App Store Connect app record was created."
+    "App Store Connect app record exists, but EAS iOS preview credential setup still requires Apple login/2FA."
   ]
 }

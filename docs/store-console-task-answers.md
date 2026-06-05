@@ -1,12 +1,11 @@
 # Store Console Task Answers
 
-Generated: 2026-06-05T13:41:32.232Z
+Generated: 2026-06-05T13:51:16.296Z
 
 Use this as a task-by-task entry packet for App Store Connect and Google Play Console. It is not proof that any console task has been saved or approved.
 
 ## Human Values Still Needed
 
-- App Store Connect Apple ID after the app record is created
 - Public support email for Google Play contact details
 - Final official content rating and age rating questionnaire results
 - Native Android and iOS screenshots from preview builds
@@ -304,8 +303,8 @@ Pending final native Android screenshots in docs/store-screenshots/native/
 
 ### Create iOS app record
 
-- Status: hitl-create-button-staged
-- Save gate: Clicking Create makes the persistent App Store Connect app record and is waiting for HITL.
+- Status: completed-recorded
+- Save gate: Record exists. Continue with metadata, privacy, age rating, TestFlight, and screenshot tasks.
 
 **Platform**
 
@@ -341,6 +340,18 @@ reversr-rebuild-001
 
 ```text
 Full Access
+```
+
+**Apple ID**
+
+```text
+6777091538
+```
+
+**Record URL**
+
+```text
+https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight
 ```
 
 ### App information

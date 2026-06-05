@@ -36,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires completion of App Store Connect and EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, and Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild. Automation staged the App Store Connect New App form with the registered Bundle ID and stopped before the final Create action. A non-interactive iOS preview build failed because EAS had no internal-distribution credentials. Interactive EAS credentials setup for the preview profile reached the Apple account login prompt. App Store Connect app record creation, ascAppId collection, and Apple credential login remain pending."
+      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. A non-interactive iOS preview build still fails because EAS has no internal-distribution iOS credentials. Interactive EAS credentials setup for the preview profile reaches the Apple account login prompt. Apple credential login/2FA remains pending."
     }
   },
   "checks": [
@@ -252,7 +252,7 @@
   ],
   "blockers": [
     "Android preview APK exists, but no Android device or emulator was available locally for install QA.",
-    "iOS preview build requires App Store Connect app record creation for com.vsillah.reversrrebuild, ascAppId collection, and interactive Apple login for EAS iOS preview credentials.",
+    "iOS preview build requires interactive Apple login for EAS iOS preview credentials.",
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
     "Final Android and iOS native screenshots require installed preview builds."
   ],

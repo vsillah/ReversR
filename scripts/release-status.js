@@ -428,19 +428,21 @@ addGate(
 
 const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
 const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
-const requiredNextActionGateIds = [
+const allowedNextActionGateIds = [
   'eas-submit-config',
   'native-qa-evidence',
   'store-console-records',
   'native-screenshots',
 ];
+const nextActionGateIds = releaseNextActions?.pendingGates?.map(gate => gate.id) || [];
+const nextRecommendedGate = nextActionGateIds[0] || '';
 const releaseNextActionsOk = (
   releaseNextActions?.schemaVersion === 1 &&
-  releaseNextActions?.nextRecommendedGate === 'eas-submit-config' &&
-  releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
+  releaseNextActions?.nextRecommendedGate === nextRecommendedGate &&
+  releaseNextActions?.summary?.pending === nextActionGateIds.length &&
   releaseNextActions?.summary?.pass >= 2 &&
-  Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
-  requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
+  nextActionGateIds.length > 0 &&
+  nextActionGateIds.every(id => allowedNextActionGateIds.includes(id)) &&
   releaseNextActions.pendingGates.every(gate => (
     gate.action?.owner &&
     gate.action?.phase &&
@@ -448,7 +450,7 @@ const releaseNextActionsOk = (
     gate.action?.evidence?.length > 0
   )) &&
   releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
-  releaseNextActionsMarkdown.includes('Next recommended gate: eas-submit-config') &&
+  releaseNextActionsMarkdown.includes(`Next recommended gate: ${nextRecommendedGate}`) &&
   releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
 );
 addGate(
@@ -568,20 +570,22 @@ const requiredBundleProofs = [
   'store-operator-packet',
   'hosted-operator-packet',
 ];
-const requiredBundlePending = [
+const allowedBundlePending = [
   'eas-submit-config',
   'native-qa-evidence',
   'store-console-records',
   'native-screenshots',
 ];
+const bundlePendingIds = releaseEvidenceBundle?.releaseStatus?.pendingExternalGateIds || [];
 const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.status === 'pass' &&
   releaseEvidenceBundle?.releaseCandidate?.appName === appConfig.name &&
   releaseEvidenceBundle?.releaseCandidate?.iosBundleId === appConfig.ios?.bundleIdentifier &&
   releaseEvidenceBundle?.releaseCandidate?.androidPackage === appConfig.android?.package &&
   requiredBundleProofs.every(id => releaseEvidenceBundle?.releaseStatus?.localProofGateIds?.includes(id)) &&
-  requiredBundlePending.every(id => releaseEvidenceBundle?.releaseStatus?.pendingExternalGateIds?.includes(id)) &&
-  Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === requiredBundlePending.length &&
+  bundlePendingIds.length > 0 &&
+  bundlePendingIds.every(id => allowedBundlePending.includes(id)) &&
+  Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === bundlePendingIds.length &&
   releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.apiHostedPreflight?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.policyHostingSmoke?.hostedChecksEnabled === true &&
@@ -594,7 +598,7 @@ const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.evidenceFiles?.previewHostTarget?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeOperatorPacket?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.hostedOperatorPacket?.status === 'pass' &&
-  Number(releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.pendingGates?.length || 0) === requiredBundlePending.length &&
+  Number(releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.pendingGates?.length || 0) === bundlePendingIds.length &&
   releaseEvidenceBundle?.evidenceFiles?.localReleaseCi?.status === 'pass'
 );
 addGate(
@@ -939,6 +943,7 @@ addGate(
 );
 
 const easProjectId = appConfig.extra?.eas?.projectId;
+const productionSubmit = easConfig.submit?.production || {};
 const nativeReleaseConfigEvidence = readOptionalJson('docs/native-release-config-evidence.json');
 const nativeReleaseConfigOk = (
   nativeReleaseConfigEvidence?.status === 'pass' &&
@@ -953,8 +958,9 @@ const nativeReleaseConfigOk = (
   nativeReleaseConfigEvidence?.eas?.buildProfiles?.production?.androidBuildType === 'app-bundle' &&
   nativeReleaseConfigEvidence?.eas?.buildProfiles?.production?.autoIncrement === true &&
   nativeReleaseConfigEvidence?.eas?.submitProfile?.androidTrack === 'internal' &&
+  nativeReleaseConfigEvidence?.eas?.submitProfile?.iosAscAppIdConfigured === Boolean(productionSubmit.ios?.ascAppId) &&
   nativeReleaseConfigEvidence?.externalGatesStillRequired?.easProjectLinkage === false &&
-  nativeReleaseConfigEvidence?.externalGatesStillRequired?.iosAscAppId === true
+  nativeReleaseConfigEvidence?.externalGatesStillRequired?.iosAscAppId === !Boolean(productionSubmit.ios?.ascAppId)
 );
 addGate(
   'native',
@@ -976,7 +982,6 @@ addGate(
   easProjectId ? '' : 'Run npx eas-cli@20.0.0 init for the clone identity.'
 );
 
-const productionSubmit = easConfig.submit?.production || {};
 const easSubmitReady = (
   productionSubmit.android?.track === 'internal' &&
   Boolean(productionSubmit.ios?.ascAppId)
@@ -1020,7 +1025,7 @@ const storeConsolePendingOk = (
   storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.appName === true &&
   storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.iosBundleId === true &&
   storeConsolePendingEvidence?.releaseCandidate?.matchesAppConfig?.androidPackage === true &&
-  storeConsolePendingEvidence?.appStoreConnect?.status === 'pending' &&
+  ['pending', 'pass'].includes(storeConsolePendingEvidence?.appStoreConnect?.status) &&
   ['pending', 'pass'].includes(storeConsolePendingEvidence?.googlePlay?.status) &&
   storeConsolePendingEvidence?.googlePlay?.packageNameMatches === true &&
   storeConsolePendingEvidence?.requiredAssets?.featureGraphicPathReady === true &&

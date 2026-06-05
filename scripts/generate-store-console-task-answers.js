@@ -13,11 +13,23 @@ const writeFile = (filePath, value) => {
 const writeJson = (filePath, value) => writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 
 const packet = readJson(packetPath);
+const readOptionalJson = (filePath) => {
+  try {
+    return fs.existsSync(filePath) ? readJson(filePath) : null;
+  } catch {
+    return null;
+  }
+};
 const appIdentity = packet.appIdentity || {};
 const urls = packet.urls || {};
 const apple = packet.appStoreConnect || {};
 const google = packet.googlePlay || {};
 const dataSafety = google.dataSafety || {};
+const storeEvidence = readOptionalJson('docs/store-console-evidence.json');
+const easConfig = readOptionalJson('eas.json');
+const recordedAppleId = storeEvidence?.appStoreConnect?.appleId || easConfig?.submit?.production?.ios?.ascAppId || '';
+const recordedAppStoreUrl = storeEvidence?.appStoreConnect?.recordUrl || '';
+const appStoreRecordExists = Boolean(recordedAppleId && recordedAppStoreUrl);
 
 const generatedAt = new Date().toISOString();
 
@@ -138,7 +150,7 @@ const googlePlayTasks = [
 const appStoreConnectTasks = [
   {
     task: 'Create iOS app record',
-    status: 'hitl-create-button-staged',
+    status: appStoreRecordExists ? 'completed-recorded' : 'hitl-create-button-staged',
     fields: [
       { label: 'Platform', value: 'iOS' },
       { label: 'Name', value: apple.name || appIdentity.appName },
@@ -146,8 +158,12 @@ const appStoreConnectTasks = [
       { label: 'Bundle ID', value: `${apple.name || appIdentity.appName} - ${appIdentity.iosBundleId}` },
       { label: 'SKU', value: appIdentity.sku },
       { label: 'User access', value: 'Full Access' },
+      { label: 'Apple ID', value: recordedAppleId || 'HITL_REQUIRED_AFTER_CREATE' },
+      { label: 'Record URL', value: recordedAppStoreUrl || 'HITL_REQUIRED_AFTER_CREATE' },
     ],
-    saveGate: 'Clicking Create makes the persistent App Store Connect app record and is waiting for HITL.',
+    saveGate: appStoreRecordExists
+      ? 'Record exists. Continue with metadata, privacy, age rating, TestFlight, and screenshot tasks.'
+      : 'Clicking Create makes the persistent App Store Connect app record and is waiting for HITL.',
   },
   {
     task: 'App information',
@@ -218,7 +234,7 @@ const packetOut = {
   googlePlayTasks,
   appStoreConnectTasks,
   hitlValuesNeeded: [
-    'App Store Connect Apple ID after the app record is created',
+    ...(!appStoreRecordExists ? ['App Store Connect Apple ID after the app record is created'] : []),
     'Public support email for Google Play contact details',
     'Final official content rating and age rating questionnaire results',
     'Native Android and iOS screenshots from preview builds',
