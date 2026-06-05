@@ -1,53 +1,19 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T08:58:41.594Z
-Release status generated at: 2026-06-05T08:58:41.587Z
+Generated at: 2026-06-05T09:34:44.456Z
+Release status generated at: 2026-06-05T09:34:44.449Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, connector, EAS, native QA, screenshot, and store-console gates.
 
 ## Summary
 
-- Pass: 1
-- Pending: 8
+- Pass: 2
+- Pending: 7
 - Blocked: 0
 - Warn: 0
-- Next recommended gate: hosted-api
+- Next recommended gate: hosted-policy-urls
 
-## 1. Hosted HTTPS API URL is configured for native builds
-
-- Gate ID: hosted-api
-- Group: hosted
-- Status: pending
-- Owner: Release operator
-- Phase: Hosted backend
-- Next action: Deploy the API container behind HTTPS and bind production API env.
-
-Current gate evidence:
-
-No proven hosted API URL in environment or store packet.
-
-Current gate next step:
-
-Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight.
-
-Steps:
-
-1. Create a production API env file from docs/production-api-env.example.
-2. Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.
-3. Set API_CORS_ORIGINS to the hosted app origins, not *.
-4. Set AI_INTEGRATIONS_GEMINI_API_KEY, ADMIN_API_TOKEN, API_REQUEST_BODY_LIMIT, and connector secret settings on the API host.
-5. Run npm run api:deployment-smoke and confirm docs/api-deployment-smoke-evidence.json is updated.
-6. Deploy the Dockerfile to the chosen host.
-7. Run EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight.
-
-Evidence required:
-
-- docs/api-deployment-smoke-evidence.json records restricted CORS, body limit, and demo inventory validation.
-- Hosted /api/health returns status ok.
-- Runtime config reports restricted CORS.
-- npm run api:preflight passes against the hosted URL.
-
-## 2. Privacy, terms, and support URLs are hosted and ready for store metadata
+## 1. Privacy, terms, and support URLs are hosted and ready for store metadata
 
 - Gate ID: hosted-policy-urls
 - Group: hosted
@@ -78,7 +44,7 @@ Evidence required:
 - All three policy/support URLs return reachable HTTPS pages.
 - npm run policy:preflight -- --check-hosted passes.
 
-## 3. Hosted API can validate and match against a real authorized machine inventory
+## 2. Hosted API can validate and match against a real authorized machine inventory
 
 - Gate ID: real-connector-smoke
 - Group: hosted
@@ -109,7 +75,7 @@ Evidence required:
 - Hosted connector smoke validates the source, matches a machine, and generates a BOM.
 - No raw connector secret appears in app responses or evidence.
 
-## 4. EAS project is linked for the clone identity
+## 3. EAS project is linked for the clone identity
 
 - Gate ID: eas-project-linkage
 - Group: native
@@ -143,7 +109,7 @@ Evidence required:
 - app.json has the clone projectId.
 - Native preflight no longer reports missing EAS project linkage.
 
-## 5. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
+## 4. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
 
 - Gate ID: eas-submit-config
 - Group: native
@@ -174,7 +140,7 @@ Evidence required:
 - eas.json has submit.production.ios.ascAppId.
 - Native preflight no longer reports missing iOS ascAppId.
 
-## 6. Android and iOS preview-build QA evidence is recorded
+## 5. Android and iOS preview-build QA evidence is recorded
 
 - Gate ID: native-qa-evidence
 - Group: native
@@ -206,7 +172,7 @@ Evidence required:
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
-## 7. App Store Connect and Google Play Console app records exist
+## 6. App Store Connect and Google Play Console app records exist
 
 - Gate ID: store-console-records
 - Group: store-console
@@ -242,7 +208,7 @@ Evidence required:
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
-## 8. Final native screenshots are captured from Android/iOS preview builds
+## 7. Final native screenshots are captured from Android/iOS preview builds
 
 - Gate ID: native-screenshots
 - Group: store-console

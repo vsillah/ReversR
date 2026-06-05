@@ -1,41 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T08:58:41.594Z",
-  "releaseStatusGeneratedAt": "2026-06-05T08:58:41.587Z",
+  "generatedAt": "2026-06-05T09:34:44.456Z",
+  "releaseStatusGeneratedAt": "2026-06-05T09:34:44.449Z",
   "summary": {
-    "pass": 1,
-    "pending": 8
+    "pass": 2,
+    "pending": 7
   },
-  "nextRecommendedGate": "hosted-api",
+  "nextRecommendedGate": "hosted-policy-urls",
   "pendingGates": [
-    {
-      "group": "hosted",
-      "id": "hosted-api",
-      "title": "Hosted HTTPS API URL is configured for native builds",
-      "status": "pending",
-      "evidence": "No proven hosted API URL in environment or store packet.",
-      "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight.",
-      "action": {
-        "owner": "Release operator",
-        "phase": "Hosted backend",
-        "action": "Deploy the API container behind HTTPS and bind production API env.",
-        "steps": [
-          "Create a production API env file from docs/production-api-env.example.",
-          "Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.",
-          "Set API_CORS_ORIGINS to the hosted app origins, not *.",
-          "Set AI_INTEGRATIONS_GEMINI_API_KEY, ADMIN_API_TOKEN, API_REQUEST_BODY_LIMIT, and connector secret settings on the API host.",
-          "Run npm run api:deployment-smoke and confirm docs/api-deployment-smoke-evidence.json is updated.",
-          "Deploy the Dockerfile to the chosen host.",
-          "Run EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight."
-        ],
-        "evidence": [
-          "docs/api-deployment-smoke-evidence.json records restricted CORS, body limit, and demo inventory validation.",
-          "Hosted /api/health returns status ok.",
-          "Runtime config reports restricted CORS.",
-          "npm run api:preflight passes against the hosted URL."
-        ]
-      }
-    },
     {
       "group": "hosted",
       "id": "hosted-policy-urls",

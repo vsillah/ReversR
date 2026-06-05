@@ -193,7 +193,11 @@ const policyHostingSmokeOk = (
   policyHostingSmoke?.routeFiles?.privacy === 'app/privacy.tsx' &&
   policyHostingSmoke?.routeFiles?.terms === 'app/terms.tsx' &&
   policyHostingSmoke?.routeFiles?.support === 'app/support.tsx' &&
-  policyHostingSmoke?.vercelRewrite?.hasSpaRewrite === true &&
+  (
+    policyHostingSmoke?.vercelRewrite?.hasSpaRewrite === true ||
+    policyHostingSmoke?.vercelRouting?.hasSpaRewrite === true ||
+    policyHostingSmoke?.vercelRouting?.hasSpaRoute === true
+  ) &&
   policyHostingSmoke?.exportFiles?.indexHtml === true &&
   policyHostingSmoke?.exportFiles?.metadataJson === true &&
   policyHostingSmoke?.exportFiles?.faviconIco === true &&
@@ -422,7 +426,6 @@ addGate(
 const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
 const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
 const requiredNextActionGateIds = [
-  'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
   'eas-project-linkage',
@@ -433,7 +436,7 @@ const requiredNextActionGateIds = [
 ];
 const releaseNextActionsOk = (
   releaseNextActions?.schemaVersion === 1 &&
-  releaseNextActions?.nextRecommendedGate === 'hosted-api' &&
+  releaseNextActions?.nextRecommendedGate === 'hosted-policy-urls' &&
   releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
   Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
   requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
@@ -444,7 +447,7 @@ const releaseNextActionsOk = (
     gate.action?.evidence?.length > 0
   )) &&
   releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
-  releaseNextActionsMarkdown.includes('Next recommended gate: hosted-api') &&
+  releaseNextActionsMarkdown.includes('Next recommended gate: hosted-policy-urls') &&
   releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
 );
 addGate(
@@ -558,11 +561,11 @@ const requiredBundleProofs = [
   'release-next-actions-packet',
   'preview-host-target-discovery',
   'preview-host-smoke',
+  'hosted-api',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const requiredBundlePending = [
-  'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
   'eas-project-linkage',
@@ -580,6 +583,7 @@ const releaseEvidenceBundleOk = (
   requiredBundlePending.every(id => releaseEvidenceBundle?.releaseStatus?.pendingExternalGateIds?.includes(id)) &&
   Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.apiHostedPreflight?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
@@ -770,6 +774,19 @@ addGate(
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;
 const hostedApiOk = !isPlaceholder(apiBaseUrl) && isHttpsUrl(apiBaseUrl);
+const hostedApiPreflight = readOptionalJson('docs/api-hosted-preflight-evidence.json');
+const vercelProtectedApiSmoke = readOptionalJson('docs/vercel-protected-api-smoke-evidence.json');
+const hostedApiPreflightOk = (
+  hostedApiPreflight?.schemaVersion === 1 &&
+  hostedApiPreflight?.status === 'pass' &&
+  hostedApiPreflight?.localApi === false &&
+  !isPlaceholder(hostedApiPreflight?.apiBaseUrl) &&
+  isHttpsUrl(hostedApiPreflight?.apiBaseUrl) &&
+  hostedApiPreflight?.checks?.health?.status === 'pass' &&
+  hostedApiPreflight?.checks?.health?.runtimeConfig?.corsMode === 'restricted' &&
+  hostedApiPreflight?.checks?.demoInventoryValidation?.status === 'pass' &&
+  Number(hostedApiPreflight?.checks?.demoInventoryValidation?.recordCount || 0) > 0
+);
 const webFlowEvidence = readOptionalJson('docs/web-flow-smoke-evidence.json');
 const requiredWebFlowChecks = [
   'welcome',
@@ -831,9 +848,15 @@ addGate(
   'hosted',
   'hosted-api',
   'Hosted HTTPS API URL is configured for native builds',
-  hostedApiOk ? 'pending' : 'pending',
-  hostedApiOk ? `Configured API URL shape: ${apiBaseUrl}` : 'No proven hosted API URL in environment or store packet.',
-  hostedApiOk ? 'Run EXPO_PUBLIC_API_BASE_URL=<url> npm run api:preflight against the deployed API.' : 'Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight.'
+  hostedApiPreflightOk ? 'pass' : 'pending',
+  hostedApiPreflightOk
+    ? `docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at ${hostedApiPreflight.generatedAt}.`
+    : vercelProtectedApiSmoke?.status === 'pass'
+      ? `Protected Vercel preview API works via authenticated CLI at ${vercelProtectedApiSmoke.generatedAt}; public/native API access is still required.`
+      : hostedApiOk
+        ? `Configured API URL shape: ${apiBaseUrl}; hosted preflight evidence is still required.`
+        : 'No proven hosted API URL in environment or store packet.',
+  hostedApiPreflightOk ? '' : 'Deploy the API behind HTTPS, then run EXPO_PUBLIC_API_BASE_URL=<url> npm run api:preflight.'
 );
 
 const hostedPolicyUrls = [

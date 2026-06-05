@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T08:58:41.375Z",
+  "generatedAt": "2026-06-05T09:34:44.507Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T08:58:41.368Z",
+    "generatedAt": "2026-06-05T09:34:44.500Z",
     "summary": {
       "pass": 31,
       "pending": 8
@@ -21,16 +21,16 @@
       "group": "hosted",
       "status": "pass",
       "title": "Vercel preview host renders app and policy/support routes before production hosting",
-      "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+      "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T09:32:44.093Z.",
       "nextStep": ""
     },
     {
       "id": "hosted-api",
       "group": "hosted",
-      "status": "pending",
+      "status": "pass",
       "title": "Hosted HTTPS API URL is configured for native builds",
-      "evidence": "No proven hosted API URL in environment or store packet.",
-      "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+      "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T09:32:11.092Z.",
+      "nextStep": ""
     },
     {
       "id": "hosted-policy-urls",

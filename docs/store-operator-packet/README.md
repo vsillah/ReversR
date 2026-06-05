@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T08:58:41.270Z
+Generated at: 2026-06-05T09:34:44.664Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -24,7 +24,7 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 Pending gates:
 
-- hosted-api: Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight.
+- policy-hosting-smoke: Run npm run policy:preflight:local before deploying policy/support pages.
 - hosted-policy-urls: Deploy /privacy, /terms, and /support, then set the hosted URL env vars.
 - real-connector-smoke: Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF.
 - eas-project-linkage: Run npx eas-cli@20.0.0 init for the clone identity.

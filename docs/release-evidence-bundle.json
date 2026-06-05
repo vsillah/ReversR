@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T08:58:53.674Z",
+  "generatedAt": "2026-06-05T09:36:34.690Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,10 +16,10 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T08:58:53.647Z",
+    "generatedAt": "2026-06-05T09:36:34.665Z",
     "summaryWithoutBundle": {
-      "pass": 30,
-      "pending": 8
+      "pass": 31,
+      "pending": 7
     },
     "missingLocalProofs": [],
     "localProofGateIds": [
@@ -45,11 +45,11 @@
       "release-next-actions-packet",
       "preview-host-target-discovery",
       "preview-host-smoke",
+      "hosted-api",
       "store-operator-packet",
       "hosted-operator-packet"
     ],
     "pendingExternalGateIds": [
-      "hosted-api",
       "hosted-policy-urls",
       "real-connector-smoke",
       "eas-project-linkage",
@@ -59,13 +59,6 @@
       "native-screenshots"
     ],
     "pendingExternalGates": [
-      {
-        "id": "hosted-api",
-        "group": "hosted",
-        "title": "Hosted HTTPS API URL is configured for native builds",
-        "evidence": "No proven hosted API URL in environment or store packet.",
-        "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
-      },
       {
         "id": "hosted-policy-urls",
         "group": "hosted",
@@ -162,7 +155,7 @@
     "apiDeploymentSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T05:09:17.896Z",
+      "generatedAt": "2026-06-05T09:17:43.453Z",
       "apiBase": "http://127.0.0.1:3021",
       "allowedOrigin": "https://reversr-rebuild.local",
       "health": {
@@ -214,10 +207,84 @@
         }
       }
     },
+    "apiHostedPreflight": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T09:32:11.092Z",
+      "startedAt": "2026-06-05T09:32:10.790Z",
+      "apiBaseUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
+      "localApi": false,
+      "allowOpenCors": false,
+      "automationBypass": {
+        "vercelBypassConfigured": false,
+        "setBypassCookie": ""
+      },
+      "checks": {
+        "health": {
+          "status": "pass",
+          "httpStatus": 200,
+          "service": "reversr-rebuild-api",
+          "runtimeConfig": {
+            "corsMode": "restricted",
+            "allowedCorsOriginCount": 1,
+            "requestBodyLimit": "50mb",
+            "adminRoutesEnabled": false,
+            "registryWritesEnabled": false,
+            "privateNetworkConnectorsEnabled": false
+          },
+          "authenticatedConnectorsEnabled": false,
+          "credentialRegistryEnabled": false
+        },
+        "demoInventoryValidation": {
+          "status": "pass",
+          "httpStatus": 200,
+          "recordCount": 2
+        },
+        "adminCredentialRegistry": {
+          "status": "skipped"
+        }
+      }
+    },
+    "vercelProtectedApiSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T09:27:52.829Z",
+      "deploymentUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
+      "accessMode": "vercel-cli-authenticated-protected-deployment",
+      "finalPublicHostedApiStillRequired": true,
+      "checks": {
+        "health": {
+          "status": "pass",
+          "service": "reversr-rebuild-api",
+          "runtimeConfig": {
+            "corsMode": "restricted",
+            "allowedCorsOriginCount": 1,
+            "requestBodyLimit": "50mb",
+            "adminRoutesEnabled": false,
+            "registryWritesEnabled": false,
+            "privateNetworkConnectorsEnabled": false
+          },
+          "authenticatedConnectorsEnabled": false,
+          "credentialRegistryEnabled": false
+        },
+        "demoInventoryValidation": {
+          "status": "pass",
+          "recordCount": 2,
+          "sampleMachineIds": [
+            "DEMO-FDM-PRINTER-001",
+            "DEMO-CNC-ROUTER-002"
+          ]
+        }
+      },
+      "notes": [
+        "This proves the Vercel protected preview API function via authenticated Vercel CLI access.",
+        "It does not replace the public hosted API gate required for native builds."
+      ]
+    },
     "policyHostingSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:58:33.839Z",
+      "generatedAt": "2026-06-05T09:34:35.349Z",
       "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
       "urls": {
         "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
@@ -232,8 +299,9 @@
         "terms": "app/terms.tsx",
         "support": "app/support.tsx"
       },
-      "vercelRewrite": {
-        "hasSpaRewrite": true,
+      "vercelRouting": {
+        "hasSpaRewrite": false,
+        "hasSpaRoute": true,
         "outputDirectory": "dist"
       },
       "exportFiles": {
@@ -256,15 +324,15 @@
     "previewHostSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:56:45.065Z",
-      "previewUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app",
+      "generatedAt": "2026-06-05T09:32:44.093Z",
+      "previewUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
       "routeCount": 4,
       "routes": [
         {
           "id": "app-root",
           "path": "/",
-          "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/",
-          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/",
+          "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/",
+          "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/",
           "status": "pass",
           "httpStatus": 200,
           "expectedTextFound": {
@@ -272,14 +340,14 @@
             "New Reconstruction": true,
             "Scan a machine. Match it to inventory.": true
           },
-          "checkedAt": "2026-06-05T08:56:38.857Z",
+          "checkedAt": "2026-06-05T09:32:37.570Z",
           "error": ""
         },
         {
           "id": "privacy",
           "path": "/privacy",
-          "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/privacy",
-          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/privacy",
+          "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/privacy",
+          "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/privacy",
           "status": "pass",
           "httpStatus": 200,
           "expectedTextFound": {
@@ -287,14 +355,14 @@
             "Camera access is used only to capture machine images": true,
             "Manufacturer quote packets and email drafts require explicit user action": true
           },
-          "checkedAt": "2026-06-05T08:56:40.558Z",
+          "checkedAt": "2026-06-05T09:32:39.591Z",
           "error": ""
         },
         {
           "id": "terms",
           "path": "/terms",
-          "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/terms",
-          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/terms",
+          "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/terms",
+          "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/terms",
           "status": "pass",
           "httpStatus": 200,
           "expectedTextFound": {
@@ -302,14 +370,14 @@
             "No Automatic Vendor Submission": true,
             "it does not automatically submit orders": true
           },
-          "checkedAt": "2026-06-05T08:56:42.066Z",
+          "checkedAt": "2026-06-05T09:32:41.095Z",
           "error": ""
         },
         {
           "id": "support",
           "path": "/support",
-          "url": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/support",
-          "finalUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app/support",
+          "url": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/support",
+          "finalUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app/support",
           "status": "pass",
           "httpStatus": 200,
           "expectedTextFound": {
@@ -317,15 +385,15 @@
             "vsillah@gmail.com": true,
             "Do not send raw API keys or OAuth tokens": true
           },
-          "checkedAt": "2026-06-05T08:56:43.566Z",
+          "checkedAt": "2026-06-05T09:32:42.595Z",
           "error": ""
         }
       ],
       "finalProductionHostedUrlsStillRequired": true,
       "deploymentProtectionLikely": false,
       "automationBypass": {
-        "vercelBypassConfigured": true,
-        "setBypassCookie": "true",
+        "vercelBypassConfigured": false,
+        "setBypassCookie": "",
         "extraHeaderNames": []
       },
       "notes": [
@@ -357,7 +425,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T08:58:47.497Z",
+      "generatedAt": "2026-06-05T09:34:53.098Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -377,7 +445,7 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T08:58:47.461Z",
+        "generatedAt": "2026-06-05T09:34:53.059Z",
         "summary": {
           "pass": 31,
           "pending": 8
@@ -534,14 +602,14 @@
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T08:58:28.626Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T09:34:29.806Z.",
               "nextStep": ""
             },
             {
               "id": "store-review-safety-packet",
               "status": "pass",
               "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T08:58:22.209Z.",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T09:34:23.915Z.",
               "nextStep": ""
             },
             {
@@ -562,14 +630,14 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 8 external gates at 2026-06-05T08:58:00.576Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 7 external gates at 2026-06-05T09:33:15.284Z.",
               "nextStep": ""
             },
             {
               "id": "local-release-ci-evidence",
               "status": "pass",
               "title": "Local release CI evidence records repeatable pre-store validation",
-              "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T08:58:33.881Z.",
+              "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T09:34:35.395Z.",
               "nextStep": ""
             },
             {
@@ -590,21 +658,21 @@
               "id": "store-operator-packet",
               "status": "pass",
               "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-              "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T08:58:41.270Z.",
+              "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T09:34:44.664Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-operator-packet",
               "status": "pass",
               "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T08:58:41.375Z.",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T09:34:44.507Z.",
               "nextStep": ""
             },
             {
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 8 external gates at 2026-06-05T08:58:41.594Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 7 external gates at 2026-06-05T09:34:44.456Z.",
               "nextStep": ""
             },
             {
@@ -618,14 +686,14 @@
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded before EAS account setup",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T08:58:28.291Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T09:34:29.460Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T08:58:26.410Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T09:34:27.617Z.",
               "nextStep": ""
             }
           ],
@@ -655,15 +723,15 @@
               "id": "preview-host-smoke",
               "status": "pass",
               "title": "Vercel preview host renders app and policy/support routes before production hosting",
-              "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+              "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T09:32:44.093Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-api",
-              "status": "pending",
+              "status": "pass",
               "title": "Hosted HTTPS API URL is configured for native builds",
-              "evidence": "No proven hosted API URL in environment or store packet.",
-              "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+              "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T09:32:11.092Z.",
+              "nextStep": ""
             },
             {
               "id": "hosted-policy-urls",
@@ -733,7 +801,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:58:52.520Z",
+      "generatedAt": "2026-06-05T09:34:29.806Z",
       "urlMode": "placeholder-allowed",
       "warnings": [
         "privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy",
@@ -808,7 +876,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:58:22.209Z",
+      "generatedAt": "2026-06-05T09:34:23.915Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -1117,7 +1185,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:58:28.291Z",
+      "generatedAt": "2026-06-05T09:34:29.460Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -1205,7 +1273,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T08:58:26.410Z",
+      "generatedAt": "2026-06-05T09:34:27.617Z",
       "source": "docs/store-console-evidence.template.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1299,15 +1367,15 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:58:41.270Z",
+      "generatedAt": "2026-06-05T09:34:44.664Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T08:58:41.263Z",
+        "generatedAt": "2026-06-05T09:34:44.656Z",
         "summary": {
           "pass": 31,
           "pending": 8
         },
         "pendingGateIds": [
-          "hosted-api",
+          "policy-hosting-smoke",
           "hosted-policy-urls",
           "real-connector-smoke",
           "eas-project-linkage",
@@ -1415,10 +1483,10 @@
       ],
       "pendingGates": [
         {
-          "id": "hosted-api",
-          "group": "hosted",
-          "title": "Hosted HTTPS API URL is configured for native builds",
-          "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+          "id": "policy-hosting-smoke",
+          "group": "store-local",
+          "title": "Policy, terms, and support static export evidence is recorded before hosting",
+          "nextStep": "Run npm run policy:preflight:local before deploying policy/support pages."
         },
         {
           "id": "hosted-policy-urls",
@@ -1473,9 +1541,9 @@
     "hostedOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T08:58:41.375Z",
+      "generatedAt": "2026-06-05T09:34:44.507Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T08:58:41.368Z",
+        "generatedAt": "2026-06-05T09:34:44.500Z",
         "summary": {
           "pass": 31,
           "pending": 8
@@ -1493,16 +1561,16 @@
           "group": "hosted",
           "status": "pass",
           "title": "Vercel preview host renders app and policy/support routes before production hosting",
-          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T09:32:44.093Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-api",
           "group": "hosted",
-          "status": "pending",
+          "status": "pass",
           "title": "Hosted HTTPS API URL is configured for native builds",
-          "evidence": "No proven hosted API URL in environment or store packet.",
-          "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+          "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T09:32:11.092Z.",
+          "nextStep": ""
         },
         {
           "id": "hosted-policy-urls",
@@ -1658,8 +1726,8 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-05T08:58:12.217Z",
-      "completedAt": "2026-06-05T08:58:33.881Z",
+      "startedAt": "2026-06-05T09:34:15.676Z",
+      "completedAt": "2026-06-05T09:34:35.395Z",
       "commandCount": 16,
       "passedCount": 16,
       "failedCount": 0,
@@ -1670,7 +1738,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2141,
+          "durationMs": 1610,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -1680,7 +1748,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 186,
+          "durationMs": 146,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -1690,7 +1758,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 166,
+          "durationMs": 141,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -1700,7 +1768,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 513,
+          "durationMs": 484,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -1710,7 +1778,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6647,
+          "durationMs": 5569,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nWarnings:\n- privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy\n- termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms\n- supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -1720,7 +1788,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 176,
+          "durationMs": 147,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nWarnings:\n- privacyPolicyUrl is placeholder or non-production: https://reversr-rebuild.example.com/privacy\n- termsUrl is placeholder or non-production: https://reversr-rebuild.example.com/terms\n- supportUrl is placeholder or non-production: https://reversr-rebuild.example.com/support\n- apiBaseUrl is placeholder or non-production: https://reversr-rebuild-api.example.com\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -1730,7 +1798,7 @@
           "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 172,
+          "durationMs": 151,
           "command": "npm run store:review-safety",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
           "stderrTail": ""
@@ -1740,7 +1808,7 @@
           "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 162,
+          "durationMs": 144,
           "command": "npm run store:console:copy",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
           "stderrTail": ""
@@ -1750,7 +1818,7 @@
           "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1039,
+          "durationMs": 782,
           "command": "npm run store:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 9",
           "stderrTail": ""
@@ -1760,7 +1828,7 @@
           "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1028,
+          "durationMs": 864,
           "command": "npm run hosted:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
           "stderrTail": ""
@@ -1770,9 +1838,9 @@
           "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 919,
+          "durationMs": 801,
           "command": "npm run release:next-actions:write",
-          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 8\nNext recommended gate: hosted-api",
+          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 7\nNext recommended gate: hosted-policy-urls",
           "stderrTail": ""
         },
         {
@@ -1780,7 +1848,7 @@
           "proves": "Original user objective is mapped to proven local work and pending external release gates.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 907,
+          "durationMs": 941,
           "command": "npm run release:objective",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 5/8\nPending requirements: photo-to-inventory-machine-match, store-readiness-packet, apple-google-store-publication",
           "stderrTail": ""
@@ -1790,7 +1858,7 @@
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 142,
+          "durationMs": 167,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- Store asset evidenceFolder is missing.\n- Review gate hostedApiPreflightPassed is not marked true.\n- Review gate hostedPolicyPreflightPassed is not marked true.\n- Review gate hostedConnectorSmokePassed is not marked true.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -1800,7 +1868,7 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1883,
+          "durationMs": 1843,
           "command": "npm run native:preflight:local",
           "stdoutTail": "\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nWarnings:\n- EAS project is not linked. Run `npx eas-cli@20.0.0 init` or set `expo.extra.eas.projectId` before native release builds.\n- Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.\n- Set EXPO_PUBLIC_API_BASE_URL to the hosted HTTPS API before native release builds.\n- Set EXPO_PUBLIC_PRIVACY_POLICY_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_TERMS_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_SUPPORT_URL to a hosted HTTPS URL before native release builds.\n- EAS CLI is not logged in for non-interactive release work through pinned npx eas-cli@20.0.0: Not logged in\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
@@ -1810,7 +1878,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 144,
+          "durationMs": 153,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot build-handoff is missing android device evidence.\n- Native screenshot build-handoff is missing android capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -1820,7 +1888,7 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 5437,
+          "durationMs": 5774,
           "command": "npm run store:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nWarnings:\n- Using placeholder API URL because --allow-placeholder was provided.\n- Using placeholder or non-production privacyPolicyUrl because --allow-placeholder was provided.\n- Using placeholder or non-production termsUrl because --allow-placeholder was provided.\n- Using placeholder or non-production supportUrl because --allow-placeholder was provided.\nStore preflight passed.",
           "stderrTail": ""
@@ -1844,42 +1912,14 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T08:58:41.594Z",
-      "releaseStatusGeneratedAt": "2026-06-05T08:58:41.587Z",
+      "generatedAt": "2026-06-05T09:34:44.456Z",
+      "releaseStatusGeneratedAt": "2026-06-05T09:34:44.449Z",
       "summary": {
-        "pass": 1,
-        "pending": 8
+        "pass": 2,
+        "pending": 7
       },
-      "nextRecommendedGate": "hosted-api",
+      "nextRecommendedGate": "hosted-policy-urls",
       "pendingGates": [
-        {
-          "group": "hosted",
-          "id": "hosted-api",
-          "title": "Hosted HTTPS API URL is configured for native builds",
-          "status": "pending",
-          "evidence": "No proven hosted API URL in environment or store packet.",
-          "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight.",
-          "action": {
-            "owner": "Release operator",
-            "phase": "Hosted backend",
-            "action": "Deploy the API container behind HTTPS and bind production API env.",
-            "steps": [
-              "Create a production API env file from docs/production-api-env.example.",
-              "Follow docs/external-release-setup-runbook.md section 5 for hosted API and policy URL sequencing.",
-              "Set API_CORS_ORIGINS to the hosted app origins, not *.",
-              "Set AI_INTEGRATIONS_GEMINI_API_KEY, ADMIN_API_TOKEN, API_REQUEST_BODY_LIMIT, and connector secret settings on the API host.",
-              "Run npm run api:deployment-smoke and confirm docs/api-deployment-smoke-evidence.json is updated.",
-              "Deploy the Dockerfile to the chosen host.",
-              "Run EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight."
-            ],
-            "evidence": [
-              "docs/api-deployment-smoke-evidence.json records restricted CORS, body limit, and demo inventory validation.",
-              "Hosted /api/health returns status ok.",
-              "Runtime config reports restricted CORS.",
-              "npm run api:preflight passes against the hosted URL."
-            ]
-          }
-        },
         {
           "group": "hosted",
           "id": "hosted-policy-urls",
@@ -2085,6 +2125,7 @@
     "storeConsolePreflightLocal": "npm run store:console:preflight:local",
     "nativePreflightLocal": "npm run native:preflight:local",
     "hostedApiPreflight": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight",
+    "vercelProtectedApiSmoke": "VERCEL_PROTECTED_API_URL=https://your-preview.vercel.app npm run api:vercel-protected-smoke",
     "hostedPolicyPreflight": "npm run policy:preflight -- --check-hosted",
     "hostedConnectorSmoke": "npm run connector:smoke",
     "nativeQaPreflight": "npm run native:qa:preflight",
@@ -2099,6 +2140,7 @@
     "docs/store-operator-packet/README.md",
     "docs/hosted-operator-packet/manifest.json",
     "docs/hosted-operator-packet/README.md",
+    "docs/api-hosted-preflight-evidence.json",
     "docs/store-console-pending-evidence.json",
     "docs/store-console-evidence.template.json",
     "docs/native-qa-evidence.template.json",
@@ -2130,6 +2172,7 @@
     "api:env:preflight",
     "api:env:preflight:local",
     "api:deployment-smoke",
+    "api:vercel-protected-smoke",
     "connector:smoke",
     "api:docker:build",
     "native:preflight",

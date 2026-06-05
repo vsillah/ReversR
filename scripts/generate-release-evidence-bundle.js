@@ -76,11 +76,11 @@ const localProofGateIds = [
   'release-next-actions-packet',
   'preview-host-target-discovery',
   'preview-host-smoke',
+  'hosted-api',
   'store-operator-packet',
   'hosted-operator-packet',
 ];
 const externalGateIds = [
-  'hosted-api',
   'hosted-policy-urls',
   'real-connector-smoke',
   'eas-project-linkage',
@@ -105,6 +105,8 @@ const pendingExternalGates = externalGateIds
 
 const evidenceFiles = {
   apiDeploymentSmoke: readOptionalJson('docs/api-deployment-smoke-evidence.json'),
+  apiHostedPreflight: readOptionalJson('docs/api-hosted-preflight-evidence.json'),
+  vercelProtectedApiSmoke: readOptionalJson('docs/vercel-protected-api-smoke-evidence.json'),
   policyHostingSmoke: readOptionalJson('docs/policy-hosting-smoke-evidence.json'),
   previewHostSmoke: readOptionalJson('docs/preview-host-smoke-evidence.json'),
   previewHostTarget: readOptionalJson('docs/preview-host-target.json'),
@@ -194,6 +196,7 @@ const bundle = {
     storeConsolePreflightLocal: 'npm run store:console:preflight:local',
     nativePreflightLocal: 'npm run native:preflight:local',
     hostedApiPreflight: 'EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight',
+    vercelProtectedApiSmoke: 'VERCEL_PROTECTED_API_URL=https://your-preview.vercel.app npm run api:vercel-protected-smoke',
     hostedPolicyPreflight: 'npm run policy:preflight -- --check-hosted',
     hostedConnectorSmoke: 'npm run connector:smoke',
     nativeQaPreflight: 'npm run native:qa:preflight',
@@ -208,6 +211,7 @@ const bundle = {
     'docs/store-operator-packet/README.md',
     'docs/hosted-operator-packet/manifest.json',
     'docs/hosted-operator-packet/README.md',
+    'docs/api-hosted-preflight-evidence.json',
     'docs/store-console-pending-evidence.json',
     'docs/store-console-evidence.template.json',
     'docs/native-qa-evidence.template.json',

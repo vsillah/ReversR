@@ -1904,7 +1904,11 @@ app.get('/api/health', async (req, res) => {
 // ============================================
 
 const PORT = process.env.API_PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`API server running on port ${PORT}`);
-  console.log(`API keys configured: ${apiKeyPool.length}`);
-});
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`API server running on port ${PORT}`);
+    console.log(`API keys configured: ${apiKeyPool.length}`);
+  });
+}
+
+module.exports = app;

@@ -71,7 +71,13 @@ const vercelConfig = readJson('vercel.json');
 const hasSpaRewrite = (vercelConfig.rewrites || []).some(rewrite => (
   rewrite.source === '/(.*)' && rewrite.destination === '/index.html'
 ));
-if (!hasSpaRewrite) fail('vercel.json must rewrite all paths to /index.html so /privacy, /terms, and /support load as SPA routes.');
+const hasSpaRoute = (vercelConfig.routes || []).some(route => (
+  route.src === '^/(.*)$' &&
+  route.dest === '/index.html'
+));
+if (!hasSpaRewrite && !hasSpaRoute) {
+  fail('vercel.json must rewrite or route all non-API paths to /index.html so /privacy, /terms, and /support load as SPA routes.');
+}
 if (vercelConfig.outputDirectory !== 'dist') fail('vercel.json outputDirectory must be dist.');
 
 fs.rmSync(outputDir, { recursive: true, force: true });
@@ -165,8 +171,9 @@ const run = async () => {
     hostedChecksEnabled: checkHosted,
     hostedChecks,
     routeFiles,
-    vercelRewrite: {
+    vercelRouting: {
       hasSpaRewrite,
+      hasSpaRoute,
       outputDirectory: vercelConfig.outputDirectory,
     },
     exportFiles: {

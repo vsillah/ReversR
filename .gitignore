@@ -39,3 +39,4 @@ docs/store-screenshots/generated/
 
 # TypeScript
 *.tsbuildinfo
+.vercel

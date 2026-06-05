@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T08:58:47.497Z",
+  "generatedAt": "2026-06-05T09:34:53.098Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -21,7 +21,7 @@
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T08:58:47.461Z",
+    "generatedAt": "2026-06-05T09:34:53.059Z",
     "summary": {
       "pass": 31,
       "pending": 8
@@ -178,14 +178,14 @@
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T08:58:28.626Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T09:34:29.806Z.",
           "nextStep": ""
         },
         {
           "id": "store-review-safety-packet",
           "status": "pass",
           "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T08:58:22.209Z.",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T09:34:23.915Z.",
           "nextStep": ""
         },
         {
@@ -206,14 +206,14 @@
           "id": "release-evidence-bundle",
           "status": "pass",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 8 external gates at 2026-06-05T08:58:00.576Z.",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 7 external gates at 2026-06-05T09:33:15.284Z.",
           "nextStep": ""
         },
         {
           "id": "local-release-ci-evidence",
           "status": "pass",
           "title": "Local release CI evidence records repeatable pre-store validation",
-          "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T08:58:33.881Z.",
+          "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T09:34:35.395Z.",
           "nextStep": ""
         },
         {
@@ -234,21 +234,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T08:58:41.270Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T09:34:44.664Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T08:58:41.375Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T09:34:44.507Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 8 external gates at 2026-06-05T08:58:41.594Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 7 external gates at 2026-06-05T09:34:44.456Z.",
           "nextStep": ""
         },
         {
@@ -262,14 +262,14 @@
           "id": "native-release-config-evidence",
           "status": "pass",
           "title": "Native release config evidence is recorded before EAS account setup",
-          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T08:58:28.291Z.",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T09:34:29.460Z.",
           "nextStep": ""
         },
         {
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T08:58:26.410Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T09:34:27.617Z.",
           "nextStep": ""
         }
       ],
@@ -299,15 +299,15 @@
           "id": "preview-host-smoke",
           "status": "pass",
           "title": "Vercel preview host renders app and policy/support routes before production hosting",
-          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T08:56:45.065Z.",
+          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T09:32:44.093Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-api",
-          "status": "pending",
+          "status": "pass",
           "title": "Hosted HTTPS API URL is configured for native builds",
-          "evidence": "No proven hosted API URL in environment or store packet.",
-          "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+          "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T09:32:11.092Z.",
+          "nextStep": ""
         },
         {
           "id": "hosted-policy-urls",
