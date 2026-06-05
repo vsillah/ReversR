@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T06:41:28.686Z",
+  "releaseStatus": {
+    "generatedAt": "2026-06-05T06:41:28.682Z",
+    "summary": {
+      "pass": 29,
+      "pending": 9
+    },
+    "pendingGateIds": [
+      "preview-host-smoke",
+      "hosted-api",
+      "hosted-policy-urls",
+      "real-connector-smoke",
+      "eas-project-linkage",
+      "eas-submit-config",
+      "native-qa-evidence",
+      "store-console-records",
+      "native-screenshots"
+    ]
+  },
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001",
+    "primaryLanguage": "en-US",
+    "category": {
+      "applePrimary": "Productivity",
+      "appleSecondary": "Business",
+      "googleCategory": "Productivity"
+    }
+  },
+  "appStoreConnect": {
+    "name": "ReversR Rebuild",
+    "subtitle": "Machine rebuild packages",
+    "keywordsLength": 66,
+    "reviewNotesPresent": true,
+    "privacyDraftReady": true
+  },
+  "googlePlay": {
+    "title": "ReversR Rebuild",
+    "shortDescriptionLength": 73,
+    "dataSafetyDraftReady": true,
+    "requiredPermissions": [
+      "android.permission.CAMERA"
+    ]
+  },
+  "assets": {
+    "featureGraphic": {
+      "path": "docs/store-assets/google-play-feature-graphic.png",
+      "exists": true
+    },
+    "nativeScreenshotsRequired": true,
+    "requiredNativeScreenshotCount": 5,
+    "webPlanningEvidence": {
+      "path": "docs/store-screenshots/planning-evidence.json",
+      "exists": true
+    }
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/store-submission-packet.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-copy.md",
+      "exists": true
+    },
+    {
+      "path": "docs/store-review-safety-packet.md",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-evidence.template.json",
+      "exists": true
+    },
+    {
+      "path": "docs/native-qa-evidence.template.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-screenshots/planning-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-assets/google-play-feature-graphic.png",
+      "exists": true
+    },
+    {
+      "path": "docs/release-next-actions.md",
+      "exists": true
+    },
+    {
+      "path": "docs/release-evidence-bundle.json",
+      "exists": true
+    },
+    {
+      "path": "docs/objective-readiness-audit.json",
+      "exists": true
+    },
+    {
+      "path": "docs/external-release-setup-runbook.md",
+      "exists": true
+    }
+  ],
+  "consoleEntryOrder": [
+    "Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.",
+    "Create Google Play Console record for com.vsillah.reversrrebuild.",
+    "Replace placeholder privacy, terms, support, and API URLs after hosted preflights pass.",
+    "Copy App Store and Google Play text from docs/store-console-copy.md.",
+    "Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.",
+    "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.",
+    "Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.",
+    "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
+  ],
+  "pendingGates": [
+    {
+      "id": "preview-host-smoke",
+      "group": "hosted",
+      "title": "Vercel preview host renders app and policy/support routes before production hosting",
+      "nextStep": "Run PREVIEW_SMOKE_URL=<vercel-preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke after the PR preview deploys; if no bypass is available, create one in Vercel Protection Bypass for Automation."
+    },
+    {
+      "id": "hosted-api",
+      "group": "hosted",
+      "title": "Hosted HTTPS API URL is configured for native builds",
+      "nextStep": "Deploy the API behind HTTPS, then set EXPO_PUBLIC_API_BASE_URL and run npm run api:preflight."
+    },
+    {
+      "id": "hosted-policy-urls",
+      "group": "hosted",
+      "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+      "nextStep": "Deploy /privacy, /terms, and /support, then set the hosted URL env vars."
+    },
+    {
+      "id": "real-connector-smoke",
+      "group": "hosted",
+      "title": "Hosted API can validate and match against a real authorized machine inventory",
+      "nextStep": "Run npm run connector:smoke with CONNECTOR_SMOKE_SOURCE_URL and CONNECTOR_SMOKE_CREDENTIAL_REF."
+    },
+    {
+      "id": "eas-project-linkage",
+      "group": "native",
+      "title": "EAS project is linked for the clone identity",
+      "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
+    },
+    {
+      "id": "eas-submit-config",
+      "group": "native",
+      "title": "EAS submit profile is configured for Google Play Internal Testing and TestFlight upload",
+      "nextStep": "After App Store Connect record creation, set submit.production.ios.ascAppId in eas.json, then run npm run native:preflight."
+    },
+    {
+      "id": "native-qa-evidence",
+      "group": "native",
+      "title": "Android and iOS preview-build QA evidence is recorded",
+      "nextStep": "Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight."
+    },
+    {
+      "id": "store-console-records",
+      "group": "store-console",
+      "title": "App Store Connect and Google Play Console app records exist",
+      "nextStep": "Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight."
+    },
+    {
+      "id": "native-screenshots",
+      "group": "store-console",
+      "title": "Final native screenshots are captured from Android/iOS preview builds",
+      "nextStep": "Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json."
+    }
+  ],
+  "safetyBoundary": [
+    "This packet is store-console setup support, not approval to submit production builds.",
+    "Final native screenshots must come from Android and iOS preview builds.",
+    "Quote packets and vendor request drafts remain explicit human-review handoffs.",
+    "Raw connector secrets must stay server-side behind credentialRef references."
+  ]
+}

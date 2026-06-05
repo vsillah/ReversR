@@ -19,11 +19,12 @@ Before starting external account or hosted-environment work, refresh the local v
 
 ```bash
 npm run release:local-ci
+npm run store:operator-packet
 npm run release:evidence
 npm run release:status
 ```
 
-`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `release:evidence` packages the local proof files, durable next-action packet, and pending external gates into `docs/release-evidence-bundle.json`.
+`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `store:operator-packet` refreshes the App Store Connect and Google Play handoff folder at `docs/store-operator-packet/`. `release:evidence` packages the local proof files, durable next-action packet, store operator packet, and pending external gates into `docs/release-evidence-bundle.json`.
 
 After the PR preview deploys, record deployed-preview evidence:
 
@@ -120,6 +121,7 @@ Confirm `docs/native-release-config-evidence.json` is updated before account set
    - Google Play Console: create `com.vsillah.reversrrebuild`.
    - Run `npm run store:submission:preflight:local` and confirm `docs/store-submission-smoke-evidence.json` is updated.
    - Run `npm run store:console:preflight:local` and confirm `docs/store-console-pending-evidence.json` is updated.
+   - Run `npm run store:operator-packet` and use `docs/store-operator-packet/README.md` as the console setup handoff.
    - Copy the App Store Connect Apple ID into `eas.json` at `submit.production.ios.ascAppId`.
    - Copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`.
    - Fill record URLs, Apple ID, hosted privacy URL, metadata status, data/privacy forms, assets, review gates, and signoff.

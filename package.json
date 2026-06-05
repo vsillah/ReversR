@@ -44,6 +44,7 @@
     "store:submission:preflight:local": "node scripts/store-submission-preflight.js --allow-placeholder",
     "store:review-safety": "node scripts/generate-store-review-safety-packet.js",
     "store:console:copy": "node scripts/generate-store-console-copy.js",
+    "store:operator-packet": "node scripts/generate-store-operator-packet.js",
     "store:console:preflight": "node scripts/store-console-preflight.js",
     "store:console:preflight:local": "node scripts/store-console-preflight.js --allow-pending",
     "store:preflight": "node scripts/store-preflight.js",

@@ -31,6 +31,7 @@ The app now has:
 - Store submission packet: `docs/store-submission-packet.json`
 - Store review safety packet: `npm run store:review-safety` writes `docs/store-review-safety-packet.md` and `docs/store-review-safety-evidence.json`
 - Store console copy/paste packet: `docs/store-console-copy.md`
+- Store operator handoff packet: `npm run store:operator-packet` writes `docs/store-operator-packet/manifest.json` and `docs/store-operator-packet/README.md`
 - Store submission packet evidence: `docs/store-submission-smoke-evidence.json`
 - Store submission packet preflight for App Store Connect and Google Play metadata limits, hosted URLs, privacy/data-safety answers, and native screenshot requirements
 - Store console evidence template and preflight: `npm run store:console:preflight`
@@ -160,13 +161,14 @@ Open gates:
 12. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
 13. Run `npm run policy:preflight:local`, deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 14. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
-15. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy` and copy `docs/store-console-copy.md` into App Store Connect and Play Console drafts.
-16. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
-17. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
-18. Run EAS preview builds.
-19. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
-20. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
-21. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
-22. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
-23. Submit to TestFlight and Google Play Internal Testing.
-24. Resolve review feedback, then submit production releases.
+15. Run `npm run store:submission:preflight` with hosted URLs, confirm `docs/store-submission-smoke-evidence.json` is updated, then run `npm run store:console:copy`.
+16. Run `npm run store:operator-packet` and use `docs/store-operator-packet/README.md` as the App Store Connect and Google Play setup handoff.
+17. Follow `docs/external-release-setup-runbook.md`, run `npm run store:console:preflight:local`, then copy `docs/store-console-evidence.template.json` to `docs/store-console-evidence.json`, fill App Store Connect and Play Console record evidence, and run `npm run store:console:preflight`.
+18. Run `npm run native:preflight:local`, link the clone with `eas init`, then run `npm run native:preflight`.
+19. Run EAS preview builds.
+20. Copy `docs/native-qa-evidence.template.json` to `docs/native-qa-evidence.json`, complete Android/iOS device QA, then run `npm run native:qa:preflight`.
+21. Run `npm run screenshots:store`, confirm `docs/store-screenshots/planning-evidence.json` is updated, then capture final native screenshots and finalize store metadata.
+22. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader and tap-target QA.
+23. Plan the Expo SDK 56 upgrade if audit policy requires zero moderate findings before release.
+24. Submit to TestFlight and Google Play Internal Testing.
+25. Resolve review feedback, then submit production releases.

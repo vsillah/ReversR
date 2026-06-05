@@ -379,6 +379,8 @@ const requiredArtifacts = [
   'docs/store-screenshots/planning-evidence.json',
   'docs/store-submission-packet.json',
   'docs/store-console-copy.md',
+  'docs/store-operator-packet/manifest.json',
+  'docs/store-operator-packet/README.md',
   'docs/store-submission-smoke-evidence.json',
   'docs/store-console-evidence.template.json',
   'docs/store-console-pending-evidence.json',
@@ -398,6 +400,7 @@ const requiredArtifacts = [
   'scripts/store-preflight.js',
   'scripts/store-submission-preflight.js',
   'scripts/generate-store-console-copy.js',
+  'scripts/generate-store-operator-packet.js',
   'scripts/store-console-preflight.js',
   'scripts/store-assets-preflight.js',
   'scripts/generate-store-assets.js',
@@ -552,6 +555,7 @@ const requiredBundleProofs = [
   'local-release-ci-evidence',
   'release-next-actions-packet',
   'preview-host-target-discovery',
+  'store-operator-packet',
 ];
 const requiredBundlePending = [
   'preview-host-smoke',
@@ -577,6 +581,7 @@ const releaseEvidenceBundleOk = (
   releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
   releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.schemaVersion === 1 &&
   releaseEvidenceBundle?.evidenceFiles?.previewHostTarget?.status === 'pass' &&
+  releaseEvidenceBundle?.evidenceFiles?.storeOperatorPacket?.status === 'pass' &&
   Number(releaseEvidenceBundle?.evidenceFiles?.releaseNextActions?.pendingGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.localReleaseCi?.status === 'pass'
 );
@@ -601,6 +606,7 @@ const expectedLocalCiCommands = [
   'store-submission-preflight-local',
   'store-review-safety',
   'store-console-copy',
+  'store-operator-packet',
   'release-next-actions-write',
   'objective-readiness-audit',
   'store-console-preflight-local',
@@ -627,6 +633,42 @@ addGate(
     ? `docs/local-release-ci-evidence.json records ${localReleaseCiEvidence.passedCount}/${localReleaseCiEvidence.commandCount} passing local checks at ${localReleaseCiEvidence.completedAt}.`
     : 'docs/local-release-ci-evidence.json is missing or incomplete.',
   localReleaseCiOk ? '' : 'Run npm run release:local-ci before external account-side release work.'
+);
+
+const storeOperatorPacket = readOptionalJson('docs/store-operator-packet/manifest.json');
+const storeOperatorReadme = readText('docs/store-operator-packet/README.md');
+const requiredStoreOperatorSources = [
+  'docs/store-submission-packet.json',
+  'docs/store-console-copy.md',
+  'docs/store-review-safety-packet.md',
+  'docs/store-console-evidence.template.json',
+  'docs/native-qa-evidence.template.json',
+  'docs/store-assets/google-play-feature-graphic.png',
+];
+const storeOperatorPacketOk = (
+  storeOperatorPacket?.schemaVersion === 1 &&
+  storeOperatorPacket?.status === 'pass' &&
+  storeOperatorPacket?.appIdentity?.iosBundleId === appConfig.ios?.bundleIdentifier &&
+  storeOperatorPacket?.appIdentity?.androidPackage === appConfig.android?.package &&
+  storeOperatorPacket?.releaseStatus?.pendingGateIds?.includes('store-console-records') &&
+  storeOperatorPacket?.releaseStatus?.pendingGateIds?.includes('native-screenshots') &&
+  storeOperatorPacket?.assets?.nativeScreenshotsRequired === true &&
+  storeOperatorPacket?.appStoreConnect?.privacyDraftReady === true &&
+  storeOperatorPacket?.googlePlay?.dataSafetyDraftReady === true &&
+  requiredStoreOperatorSources.every(source => storeOperatorPacket?.sourceArtifacts?.some(artifact => artifact.path === source && artifact.exists === true)) &&
+  storeOperatorReadme.includes('ReversR Rebuild Store Operator Packet') &&
+  storeOperatorReadme.includes('Operator Entry Order') &&
+  storeOperatorReadme.includes('This folder is the store-console handoff packet')
+);
+addGate(
+  'store-local',
+  'store-operator-packet',
+  'Store operator handoff packet is generated for App Store Connect and Google Play setup',
+  storeOperatorPacketOk ? 'pass' : 'pending',
+  storeOperatorPacketOk
+    ? `docs/store-operator-packet/manifest.json packages ${storeOperatorPacket.sourceArtifacts.length} source artifacts at ${storeOperatorPacket.generatedAt}.`
+    : 'docs/store-operator-packet/manifest.json or README.md is missing or incomplete.',
+  storeOperatorPacketOk ? '' : 'Run npm run store:operator-packet before store-console setup.'
 );
 
 const releaseWorkflowChecks = [
