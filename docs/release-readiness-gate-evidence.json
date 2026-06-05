@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T23:02:16Z",
+  "generatedAt": "2026-06-05T23:09:34.837Z",
   "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after EAS submit probes, native/device checks, and Play Console service-account inspection.",
   "pr": {
     "number": 2,
@@ -10,7 +10,7 @@
   },
   "localState": {
     "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
-    "releaseStatus": "36 pass / 3 pending before refreshed release-status generation; Android native QA evidence advanced but iOS/screenshots/signoff gates remain pending.",
+    "releaseStatus": "36 pass / 3 pending after Android native QA evidence advanced further; iOS/screenshots/signoff and store-console credential gates remain pending.",
     "pendingGateIds": [
       "native-qa-evidence",
       "store-console-records",
@@ -81,10 +81,14 @@
       "nextActionRequiringApproval": "Click Add app, add ReversR Rebuild, grant the minimum release/upload permissions needed for EAS Submit, save changes, then create or locate a Google Cloud JSON key for EAS Submit."
     },
     "appStoreConnect": {
-      "apiAccessScreen": "Users and Access > Integrations > App Store Connect API",
-      "url": "https://appstoreconnect.apple.com/access/integrations/api",
-      "visibleAction": "Request Access",
-      "nextActionRequiringApproval": "Click Request Access and create or authorize an App Store Connect API key for EAS Submit after accepting any Apple account terms."
+      "currentScreen": "App Store Connect Apple Account login for vsillah@mac.com",
+      "attemptedUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+      "currentUrl": "https://appstoreconnect.apple.com/login",
+      "visibleActions": [
+        "Continue",
+        "Sign in with Passkey"
+      ],
+      "nextActionRequiringApproval": "Complete Apple login/2FA, then request App Store Connect API access and create or authorize an EAS submit API key. Codex stopped before Continue, passkey/password, 2FA, Request Access, or API-key creation."
     }
   },
   "nativeQaAndScreenshots": {
@@ -99,7 +103,7 @@
         "docs/store-screenshots/native/android-04-design-match.png",
         "docs/store-screenshots/native/android-05-build-handoff.png"
       ],
-      "currentDeviceState": "ADB reconnected over wireless debugging via mDNS endpoint 192.168.4.96:37165. Fresh live Android QA advanced install/launch, camera permission prompt, manual description fallback, inventory validation, match/design/build/pricing, BOM generation, quote-packet controls, and vendor-control visibility.",
+      "currentDeviceState": "ADB remained connected over wireless debugging via mDNS endpoint 192.168.4.96:37165. Fresh live Android QA now covers install/launch, camera permission prompt, manual description fallback, inventory validation, match/design/build/pricing, BOM generation, quote-packet controls, vendor-control visibility, policy-link visibility, and missing-admin-token connector credential handling.",
       "liveQaEvidence": "docs/native-android-live-qa-evidence.json",
       "completedLiveChecks": [
         "install-launch",
@@ -111,12 +115,13 @@
         "assembly-steps",
         "quote-packet-export",
         "accessibility",
-        "native-screenshots"
+        "native-screenshots",
+        "policy-links",
+        "connector-auth-error"
       ],
       "remainingLiveChecks": [
         "vendor-request-draft was visible but not prepared to avoid creating a third-party communication draft",
-        "policy-links remain pending as native-device evidence",
-        "offline-api-error and connector-auth-error require controlled failure conditions"
+        "offline-api-error remains pending until an approved controlled fault window or instrumented invalid-API build is available"
       ]
     },
     "ios": {
@@ -156,7 +161,7 @@
   },
   "humanInTheLoopResumeInstructions": [
     "For Google Play internal testing upload: approve granting ReversR Rebuild permissions to appscreens@kinflo-project.iam.gserviceaccount.com and creating or locating a JSON key for EAS Submit. Keep Android submit on the internal track only.",
-    "For Apple TestFlight upload: approve App Store Connect API access and an EAS submit key, or complete Apple's Request Access flow manually and tell Codex when access is enabled.",
+    "For Apple TestFlight upload: Chrome is on the App Store Connect login screen for vsillah@mac.com. Complete Apple login/2FA, then enable App Store Connect API access and create or authorize an EAS submit key, or tell Codex when you are logged in so it can navigate to the API access screen.",
     "For Android live QA: the Pixel is currently reachable over ADB via mDNS. Further checks can continue while the phone stays online, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
     "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."

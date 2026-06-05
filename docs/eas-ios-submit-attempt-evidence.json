@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "blocked-hitl",
-  "generatedAt": "2026-06-05T22:39:01Z",
+  "generatedAt": "2026-06-05T23:09:03.622Z",
   "intent": "Upload the finished iOS production/store IPA to App Store Connect/TestFlight without submitting the app for public review.",
   "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\"",
   "result": {
@@ -11,21 +11,25 @@
     "stdoutTail": "Looking up credentials configuration for com.vsillah.reversrrebuild...\nApp Store Connect API Keys cannot be set up in --non-interactive mode.\n    Error: submit command failed."
   },
   "appStoreConnectScreen": {
-    "url": "https://appstoreconnect.apple.com/access/integrations/api",
-    "section": "Users and Access > Integrations > App Store Connect API",
-    "visibleGate": "Permission is required to access the App Store Connect API. You can request access on behalf of your organization.",
-    "visibleAction": "Request Access",
-    "actionTaken": "Opened the exact App Store Connect API access screen and stopped before clicking Request Access."
+    "attemptedUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+    "currentUrl": "https://appstoreconnect.apple.com/login",
+    "currentScreen": "App Store Connect Apple Account login for vsillah@mac.com",
+    "visibleActions": [
+      "Continue",
+      "Sign in with Passkey"
+    ],
+    "actionTaken": "Opened a new Chrome tab to the App Store Connect API access URL. Apple redirected to login, so Codex stopped before Continue, Passkey, password entry, 2FA, Request Access, or API-key creation."
   },
   "humanInTheLoopGate": {
     "type": "App Store Connect API access",
     "whyRequired": "EAS Submit needs App Store Connect API key access to upload the finished iOS IPA to App Store Connect/TestFlight in non-interactive mode. App Store Connect currently requires the account holder to request API access for the organization.",
     "riskBoundary": "Requesting API access and creating/downloading API keys creates persistent account access. Codex did not click Request Access, create a key, download a private key, upload the IPA, or submit the app for review.",
     "nextHumanAction": [
-      "In Chrome, stay on App Store Connect at Users and Access > Integrations > App Store Connect API.",
-      "Click Request Access if you approve enabling App Store Connect API access for the organization.",
-      "If Apple shows terms or an access confirmation, read it and approve only if you agree.",
-      "After access is granted, create or authorize an App Store Connect API key suitable for EAS Submit, or tell Codex: Authorized: request App Store Connect API access and create the EAS submit key.",
+      "In Chrome, use the App Store Connect tab currently showing Apple Account login for vsillah@mac.com.",
+      "Click Continue or Sign in with Passkey and complete Apple login/2FA yourself.",
+      "After login, navigate to Users and Access > Integrations > App Store Connect API, or return to this chat and tell Codex you are logged in so it can navigate there.",
+      "Click Request Access only if you approve enabling App Store Connect API access for the organization and agree to any Apple terms shown.",
+      "After API access is granted, create or authorize an App Store Connect API key suitable for EAS Submit, or tell Codex: Authorized: request App Store Connect API access and create the EAS submit key.",
       "Do not click Add for Review or submit the app for public App Review."
     ],
     "resumeCommandAfterAccess": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\""

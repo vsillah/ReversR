@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "partial-pass",
-  "generatedAt": "2026-06-05T23:02:16Z",
+  "generatedAt": "2026-06-05T23:06:36.168Z",
   "device": "Google Pixel 10 Pro Android 16",
   "packageName": "com.vsillah.reversrrebuild",
   "adb": {
@@ -21,12 +21,14 @@
     "quotePacketControls": "pass",
     "vendorRequestControls": "visible-not-prepared",
     "externalUploadOrEmailSent": false,
-    "cameraPermissionGranted": false
+    "cameraPermissionGranted": false,
+    "policyLinks": "pass-visible-controls",
+    "connectorAuthError": "pass-empty-admin-token-local-validation",
+    "rawSecretEnteredOrTransmitted": false
   },
   "blockerNotes": [
     "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft.",
-    "policy-links remain pending for live Android QA because Settings currently shows admin connector controls; policy link verification remains covered by hosted policy evidence, not native-device interaction.",
-    "offline-api-error and connector-auth-error remain pending because they require controlled network/backend fault conditions."
+    "offline-api-error remains pending because it requires controlled network/backend fault conditions."
   ],
   "screenshotEvidence": [
     "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
@@ -36,7 +38,9 @@
     "/tmp/reversr-native-artifacts/android-after-match-live.png",
     "/tmp/reversr-native-artifacts/android-build-phase-live.png",
     "/tmp/reversr-native-artifacts/android-bom-live.png",
-    "/tmp/reversr-native-artifacts/android-vendor-draft-live.png"
+    "/tmp/reversr-native-artifacts/android-vendor-draft-live.png",
+    "/tmp/reversr-native-artifacts/android-policy-links-visible.png",
+    "/tmp/reversr-native-artifacts/android-connector-auth-error-live.png"
   ],
   "updatedEvidenceFile": "docs/native-qa-evidence.json"
 }

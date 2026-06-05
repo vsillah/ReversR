@@ -24,7 +24,7 @@
       "osVersion": "16",
       "tester": "vambahsillah",
       "completedAt": "2026-06-05T11:36:35.941Z",
-      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA and core Android native screenshot capture are complete; remaining Android checks are scoped to camera permission, policy links, error handling, and vendor draft send boundaries. APK artifact downloaded and SHA-256 verified at 2026-06-05T14:44:55.285Z; install was later completed over wireless ADB. Android device probe captured at 2026-06-05T14:54:18.455Z. Android device probe captured at 2026-06-05T14:54:44.438Z. Android device probe captured at 2026-06-05T14:55:02.531Z. Android device probe captured at 2026-06-05T14:55:23.799Z. Android device probe captured at 2026-06-05T14:55:46.393Z. Android device probe captured at 2026-06-05T14:56:37.512Z. Android device probe captured at 2026-06-05T14:56:49.635Z. Android device probe captured at 2026-06-05T14:57:31.157Z. Android device probe captured at 2026-06-05T14:57:59.698Z. Android device probe captured at 2026-06-05T14:58:42.997Z. Android device probe captured at 2026-06-05T14:59:53.783Z. Installed and launched on Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z. Android device probe captured at 2026-06-05T22:53:34.901Z. Live Android QA resumed over wireless ADB and advanced camera-permission, manual-description, inventory validation, machine match, design, build, pricing, BOM, and vendor-control checks at 2026-06-05T22:58:30Z.",
+      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA and core Android native screenshot capture are complete; remaining Android checks are scoped to camera permission, policy links, error handling, and vendor draft send boundaries. APK artifact downloaded and SHA-256 verified at 2026-06-05T14:44:55.285Z; install was later completed over wireless ADB. Android device probe captured at 2026-06-05T14:54:18.455Z. Android device probe captured at 2026-06-05T14:54:44.438Z. Android device probe captured at 2026-06-05T14:55:02.531Z. Android device probe captured at 2026-06-05T14:55:23.799Z. Android device probe captured at 2026-06-05T14:55:46.393Z. Android device probe captured at 2026-06-05T14:56:37.512Z. Android device probe captured at 2026-06-05T14:56:49.635Z. Android device probe captured at 2026-06-05T14:57:31.157Z. Android device probe captured at 2026-06-05T14:57:59.698Z. Android device probe captured at 2026-06-05T14:58:42.997Z. Android device probe captured at 2026-06-05T14:59:53.783Z. Installed and launched on Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z. Android device probe captured at 2026-06-05T22:53:34.901Z. Live Android QA resumed over wireless ADB and advanced camera-permission, manual-description, inventory validation, machine match, design, build, pricing, BOM, and vendor-control checks at 2026-06-05T22:58:30Z. Android live QA resumed at 2026-06-05T23:06:19.988Z: Settings exposed clickable Privacy Policy, Terms of Service, and Support controls in the Camera & Data Use panel; Save Credential Ref with an empty admin token produced the expected local validation message without sending a secret. Android offline API outage check remains pending as of 2026-06-05T23:09:34.837Z; no device network or production hosted API disruption was performed.",
       "localArtifact": {
         "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
         "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
@@ -34,13 +34,13 @@
       },
       "installStatus": "pass",
       "adbProbe": {
-        "checkedAt": "2026-06-05T22:58:30Z",
+        "checkedAt": "2026-06-05T23:06:19.988Z",
         "adbState": "wireless-adb-mdns-connected",
         "status": "live-android-qa-pass-partial",
         "device": "Google Pixel 10 Pro Android 16",
         "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
         "endpoint": "192.168.4.96:37165",
-        "note": "ADB reconnected over wireless debugging via mDNS after the previous port refused. App launched and live Android QA checks were performed."
+        "note": "ADB remained connected over wireless debugging. Policy-link and missing-admin-token credential handling checks were performed."
       }
     },
     "iosPreview": {
@@ -187,9 +187,9 @@
         "android",
         "ios"
       ],
-      "android": "pending",
+      "android": "pass",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "On Google Pixel 10 Pro Android 16, Settings > Camera & Data Use exposed clickable Privacy Policy, Terms of Service, and Support controls. The release candidate is configured for https://reversr.vercel.app/privacy, https://reversr.vercel.app/terms, and https://reversr.vercel.app/support; hosted policy route smoke evidence remains recorded separately."
     },
     {
       "id": "accessibility",
@@ -211,7 +211,7 @@
       ],
       "android": "pending",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "Pending controlled-failure check. Android live QA has not simulated hosted API outage because disrupting the phone network or production hosted API would affect external state. Next safe path is a local/instrumented build pointed at a controlled invalid API URL, or an approved temporary device-network fault window, then verify the app shows recoverable error messaging without data loss."
     },
     {
       "id": "connector-auth-error",
@@ -220,9 +220,9 @@
         "android",
         "ios"
       ],
-      "android": "pending",
+      "android": "pass",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "On Google Pixel 10 Pro Android 16, the Admin Connector Credentials panel rejected Save Credential Ref with an empty admin token and displayed: \"Enter the API admin token to manage backend credential references.\" No API key, OAuth token, or raw connector secret was entered or transmitted."
     },
     {
       "id": "native-screenshots",

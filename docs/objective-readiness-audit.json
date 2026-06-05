@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T23:01:49.563Z",
+  "generatedAt": "2026-06-05T23:09:24.202Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -20,7 +20,7 @@
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T23:01:49.528Z",
+    "generatedAt": "2026-06-05T23:09:24.159Z",
     "summary": {
       "pass": 36,
       "pending": 3
@@ -197,7 +197,7 @@
           "id": "release-evidence-bundle",
           "status": "pass",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T23:01:41.331Z.",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T23:02:25.482Z.",
           "nextStep": ""
         },
         {
@@ -239,7 +239,7 @@
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T23:01:40.597Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T23:01:54.718Z.",
           "nextStep": ""
         },
         {
@@ -260,7 +260,7 @@
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T23:01:48.793Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T23:04:29.533Z.",
           "nextStep": ""
         }
       ],
