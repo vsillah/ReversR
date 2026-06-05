@@ -14,16 +14,17 @@
   },
   "builds": {
     "androidPreview": {
-      "status": "pending",
+      "status": "pass",
       "profile": "preview",
       "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
       "artifactType": "apk",
       "versionCode": 15,
       "device": "",
       "osVersion": "",
       "tester": "",
-      "completedAt": "",
-      "notes": "Android EAS preview build was started on 2026-06-05 and was IN_PROGRESS during this autopilot pass."
+      "completedAt": "2026-06-05T11:36:35.941Z",
+      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA, native functional checks, and final screenshots are still pending."
     },
     "iosPreview": {
       "status": "blocked",
@@ -35,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build reached Apple credential setup. The terminal is paused at the Apple ID prompt and requires user Apple Developer login/2FA."
+      "notes": "iOS EAS preview build requires an Apple Developer/App Store Connect-enabled account. Browser verification showed the signed-in Apple Account is not enabled for App Store Connect."
     }
   },
   "checks": [
