@@ -328,7 +328,8 @@
     "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
     "Final Android and iOS native screenshots require installed preview builds.",
     "Android phone was reported connected, but adb and macOS USB enumeration do not show a debuggable Android device yet.",
-    "Android APK artifact is downloaded at /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk and ready to install after USB debugging is visible."
+    "Android APK artifact is downloaded at /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk and ready to install after USB debugging is visible.",
+    "Android mirroring via scrcpy is installed and ready, but no ADB device is visible."
   ],
   "signoff": {
     "releaseOwner": "",
@@ -338,12 +339,24 @@
     "approvedForProductionSubmission": false,
     "signedAt": ""
   },
-  "generatedAt": "2026-06-05T14:44:55.285Z",
+  "generatedAt": "2026-06-05T14:47:28.658Z",
   "nextActions": [
-    "Make the Android phone visible to adb, then run npm run native:android:qa -- --probe.",
-    "Install /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk with adb install -r after adb sees the phone.",
-    "Launch and capture the five Android native screenshots with npm run native:android:qa.",
+    "Make the Android phone visible to adb over USB or wireless debugging.",
+    "If using wireless debugging, provide the pairing IP:port and code so Codex can run adb pair, adb connect, then scrcpy.",
+    "After adb sees the phone, run npm run native:android:qa -- --probe, install the APK, launch, and capture screenshots.",
     "Complete App Store/TestFlight iOS credentials or install full Xcode for iOS Simulator screenshot path.",
     "Only mark native QA and production submission signoff after real device/simulator evidence exists."
-  ]
+  ],
+  "androidMirroring": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "tool": "scrcpy",
+    "version": "4.0",
+    "path": "/opt/homebrew/bin/scrcpy",
+    "status": "ready-but-no-adb-device",
+    "lastError": "ERROR: Could not find any ADB device",
+    "nextOptions": [
+      "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+      "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+    ]
+  }
 }

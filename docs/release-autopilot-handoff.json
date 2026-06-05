@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T14:44:55.285Z",
+  "generatedAt": "2026-06-05T14:47:28.658Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -90,10 +90,10 @@
     "androidPreviewApkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35"
   },
   "resumeInstructionsForVambah": [
-    "For Android: enable USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex when adb devices shows one device.",
+    "For Android USB: unlock the phone, enable Developer options, turn on USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex to retry Android QA.",
+    "For Android wireless: open Settings > System > Developer options > Wireless debugging > Pair device with pairing code, then send the IP:port and 6-digit pairing code. Codex can run adb pair and adb connect.",
     "For Google Play privacy policy: Chrome is already on the Privacy Policy task. The prepared value is https://reversr.vercel.app/privacy. Saving it is a live console form action and needs HITL authorization or manual completion.",
-    "For iOS: abort the active internal device-registration prompt because no iOS device is available; use the production/TestFlight credentials path next.",
-    "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
+    "For iOS: use the production/TestFlight credentials path next; Apple login/2FA remains HITL."
   ],
   "preparedAutomation": [
     {
@@ -132,5 +132,22 @@
       ],
       "currentValidation": "Help and syntax pass. Probe fails cleanly because no adb device is currently attached."
     }
-  ]
+  ],
+  "androidMirroring": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "tool": "scrcpy",
+    "version": "4.0",
+    "path": "/opt/homebrew/bin/scrcpy",
+    "status": "ready-but-no-adb-device",
+    "lastError": "ERROR: Could not find any ADB device",
+    "nextOptions": [
+      "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+      "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+    ]
+  },
+  "activeTerminalState": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "cwd": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+    "state": "shell prompt returned; previous EAS iOS internal device-registration prompt is no longer active"
+  }
 }

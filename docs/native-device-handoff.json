@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T14:44:55.285Z",
+  "generatedAt": "2026-06-05T14:47:28.658Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -72,5 +72,17 @@
     "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path.",
     "Android phone was reported connected, but adb devices and macOS USB enumeration still did not expose a debuggable Android device at 2026-06-05T14:44:55.285Z.",
     "Android preview APK artifact was downloaded and checksummed locally, but installation and screenshots require adb device visibility."
-  ]
+  ],
+  "androidMirroring": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "tool": "scrcpy",
+    "version": "4.0",
+    "path": "/opt/homebrew/bin/scrcpy",
+    "status": "ready-but-no-adb-device",
+    "lastError": "ERROR: Could not find any ADB device",
+    "nextOptions": [
+      "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+      "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+    ]
+  }
 }
