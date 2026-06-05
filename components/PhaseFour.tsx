@@ -204,7 +204,7 @@ export default function PhaseFour({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
       } else {
-        setAlert({visible: true, title: 'Saved', message: 'Complete innovation package saved to device.', type: 'success'});
+        setAlert({visible: true, title: 'Saved', message: 'Complete reconstruction package saved to device.', type: 'success'});
       }
     } catch (e) {
       console.error('Export error:', e);
@@ -219,7 +219,7 @@ export default function PhaseFour({
           <Ionicons name="hammer-outline" size={28} color={Colors.orange[300]} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 4: Build</Text>
-            <Text style={styles.description}>Manufacturing readiness & Bill of Materials</Text>
+            <Text style={styles.description}>BOM, assembly sequence, pricing, and fulfillment handoff</Text>
           </View>
         </View>
       </View>
@@ -228,6 +228,44 @@ export default function PhaseFour({
         <Text style={styles.conceptName}>{innovation.conceptName}</Text>
         <Text style={styles.conceptDesc}>{innovation.conceptDescription}</Text>
       </View>
+
+      {innovation.assemblySteps && innovation.assemblySteps.length > 0 && (
+        <View style={styles.assemblyPanel}>
+          <Text style={styles.exportTitle}>Assembly Sequence</Text>
+          {innovation.assemblySteps.map(step => (
+            <View key={step.stepNumber} style={styles.assemblyStep}>
+              <View style={styles.assemblyStepHeader}>
+                <Text style={styles.assemblyStepNumber}>{step.stepNumber}</Text>
+                <View style={styles.assemblyStepTitleWrap}>
+                  <Text style={styles.assemblyStepTitle}>{step.title}</Text>
+                  <Text style={styles.assemblyStepMeta}>{step.estimatedTime}</Text>
+                </View>
+              </View>
+              <Text style={styles.assemblyInstructions}>{step.instructions}</Text>
+              <Text style={styles.assemblyParts}>Parts: {step.parts.join(', ')}</Text>
+              <Text style={styles.assemblyCheck}>QC: {step.qualityCheck}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {innovation.pricing && (
+        <View style={styles.pricingPanel}>
+          <Text style={styles.exportTitle}>Pricing Estimate</Text>
+          <View style={styles.pricingGrid}>
+            <Text style={styles.pricingLabel}>Parts</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.partsSubtotal}</Text>
+            <Text style={styles.pricingLabel}>3D modeling</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.modelingEstimate}</Text>
+            <Text style={styles.pricingLabel}>Fabrication</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.fabricationEstimate}</Text>
+            <Text style={styles.pricingLabel}>Assembly labor</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.assemblyLaborEstimate}</Text>
+            <Text style={[styles.pricingLabel, styles.pricingTotalLabel]}>Total</Text>
+            <Text style={[styles.pricingValue, styles.pricingTotalValue]}>{innovation.pricing.totalEstimate}</Text>
+          </View>
+        </View>
+      )}
 
       <View style={styles.bomPanel}>
         <TouchableOpacity 
@@ -341,7 +379,7 @@ export default function PhaseFour({
           </View>
           <View style={styles.exportInfo}>
             <Text style={styles.exportInfoLabel}>Export All includes:</Text>
-            <Text style={styles.exportInfoItem}>• Innovation concept & analysis</Text>
+            <Text style={styles.exportInfoItem}>• Machine match & reconstruction analysis</Text>
             <Text style={styles.exportInfoItem}>• Technical specifications</Text>
             <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
             <Text style={styles.exportInfoItem}>• 2D sketches (PNG)</Text>
@@ -466,7 +504,7 @@ export default function PhaseFour({
           ))}
         </View>
         <Text style={styles.manufacturerNote}>
-          Upload your 3D files (.OBJ, .STL) and BOM to get instant quotes from these manufacturers.
+          Upload your 3D files (.OBJ, .STL), BOM, and assembly sequence to request quotes from these manufacturers.
         </Text>
       </View>
 
@@ -475,7 +513,7 @@ export default function PhaseFour({
         <TouchableOpacity style={styles.actionButton} onPress={onReset}>
           <Ionicons name="add-circle" size={20} color={Colors.accent} />
           <View style={styles.actionContent}>
-            <Text style={styles.actionButtonText}>New Innovation</Text>
+            <Text style={styles.actionButtonText}>New Reconstruction</Text>
             <Text style={styles.actionButtonSubtext}>Start fresh with a new product</Text>
           </View>
         </TouchableOpacity>
@@ -954,6 +992,97 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.gray[300],
     marginBottom: Spacing.xs,
+  },
+  assemblyPanel: {
+    backgroundColor: Colors.panel,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  assemblyStep: {
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  assemblyStepHeader: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  assemblyStepNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.accent,
+    color: Colors.black,
+    textAlign: 'center',
+    lineHeight: 28,
+    fontWeight: 'bold',
+  },
+  assemblyStepTitleWrap: {
+    flex: 1,
+  },
+  assemblyStepTitle: {
+    color: Colors.white,
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+  },
+  assemblyStepMeta: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    marginTop: 2,
+  },
+  assemblyInstructions: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+    marginBottom: Spacing.sm,
+  },
+  assemblyParts: {
+    color: Colors.blue[500],
+    fontSize: FontSizes.xs,
+    marginBottom: Spacing.xs,
+  },
+  assemblyCheck: {
+    color: Colors.green[400],
+    fontSize: FontSizes.xs,
+  },
+  pricingPanel: {
+    backgroundColor: Colors.panel,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  pricingGrid: {
+    gap: Spacing.sm,
+  },
+  pricingLabel: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  pricingValue: {
+    color: Colors.white,
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    marginBottom: Spacing.xs,
+  },
+  pricingTotalLabel: {
+    color: Colors.accent,
+    marginTop: Spacing.sm,
+  },
+  pricingTotalValue: {
+    color: Colors.accent,
+    fontSize: FontSizes.xl,
   },
   manufacturerPanel: {
     backgroundColor: Colors.panel,

@@ -35,23 +35,48 @@ export interface AnalysisResult {
   rawAnalysis: string;
 }
 
-export type SITPattern = 'subtraction' | 'task_unification' | 'multiplication' | 'division' | 'attribute_dependency';
+export type SITPattern = 'inventory_match';
 
 export const SIT_PATTERN_LABELS: Record<SITPattern, string> = {
-  'subtraction': 'Subtraction',
-  'task_unification': 'Task Unification',
-  'multiplication': 'Multiplication',
-  'division': 'Division',
-  'attribute_dependency': 'Attribute Dependency',
+  'inventory_match': 'Inventory Match',
 };
 
 export const SIT_PATTERNS: SITPattern[] = [
-  'subtraction',
-  'task_unification',
-  'multiplication',
-  'division',
-  'attribute_dependency',
+  'inventory_match',
 ];
+
+export interface InventoryConnector {
+  sourceName: string;
+  sourceUrl: string;
+  connectorType: 'demo' | 'csv' | 'api' | 'erp';
+  authMode: 'none' | 'api_key' | 'oauth' | 'private_network';
+  notes?: string;
+}
+
+export interface AssemblyStep {
+  stepNumber: number;
+  title: string;
+  instructions: string;
+  parts: string[];
+  estimatedTime: string;
+  qualityCheck: string;
+}
+
+export interface PricingSnapshot {
+  partsSubtotal: string;
+  modelingEstimate: string;
+  fabricationEstimate: string;
+  assemblyLaborEstimate: string;
+  totalEstimate: string;
+  confidence: 'low' | 'medium' | 'high';
+}
+
+export interface FulfillmentOption {
+  vendorName: string;
+  serviceType: string;
+  url: string;
+  packageRequired: string[];
+}
 
 export interface InnovationResult {
   patternUsed: SITPattern;
@@ -62,6 +87,14 @@ export interface InnovationResult {
   noveltyScore: number;
   viabilityScore: number;
   marketBenefit: string;
+  machineId?: string;
+  machineName?: string;
+  inventorySource?: string;
+  confidenceScore?: number;
+  evidence?: string;
+  assemblySteps?: AssemblyStep[];
+  pricing?: PricingSnapshot;
+  fulfillmentOptions?: FulfillmentOption[];
 }
 
 export interface TechnicalSpec {
@@ -200,25 +233,25 @@ export const analyzeProduct = async (input: string, imageBase64?: string): Promi
   });
 };
 
-export const applySITPattern = async (
+export const identifyMachineFromInventory = async (
   analysis: AnalysisResult, 
-  pattern: SITPattern,
-  selectedComponents?: number[],
-  selectedResources?: number[]
+  connector: InventoryConnector,
+  capturedImage?: string | null
 ): Promise<InnovationResult> => {
   const config = await getAiConfig();
-  return fetchWithRetry(`${API_BASE}/api/gemini/apply-pattern`, {
+  return fetchWithRetry(`${API_BASE}/api/gemini/match-machine`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
       analysis, 
-      pattern,
-      selectedComponents,
-      selectedResources,
+      connector,
+      image: capturedImage,
       ...config
     })
   });
 };
+
+export const applySITPattern = identifyMachineFromInventory;
 
 export const generateTechnicalSpec = async (innovation: InnovationResult): Promise<TechnicalSpec> => {
   const config = await getAiConfig();

@@ -69,7 +69,7 @@ const createEmptyContext = (): MutationContext => {
   };
 };
 
-const PHASE_LABELS = ['SCAN', 'REVERSE', 'DESIGN', 'BUILD'];
+const PHASE_LABELS = ['SCAN', 'INVENTORY', 'DESIGN', 'BUILD'];
 const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   1: 'search',
   2: 'repeat-sharp',
@@ -222,8 +222,10 @@ export default function HomeScreen() {
     };
     setContext(newContext);
     await autoSave(newContext);
-    
-    startBackgroundImageGeneration(innovation, context.id);
+
+    // Reconstruction clone: defer visual generation until the user explicitly requests it.
+    // This keeps inventory matching and BOM generation usable without image-model credentials.
+    setImageGenStatus('idle');
   };
 
   const handlePhaseThreeComplete = async (
@@ -321,8 +323,8 @@ export default function HomeScreen() {
     if (hasProgress) {
       setConfirmAlert({
         visible: true,
-        title: 'Save Innovation?',
-        message: 'Starting a new innovation. Save progress first?',
+        title: 'Save Reconstruction?',
+        message: 'Starting a new reconstruction. Save progress first?',
         buttons: [
           {
             text: 'Discard',
@@ -381,8 +383,8 @@ export default function HomeScreen() {
     if (hasProgress) {
       setConfirmAlert({
         visible: true,
-        title: 'Save Innovation?',
-        message: 'Starting a new innovation. Save progress first?',
+        title: 'Save Reconstruction?',
+        message: 'Starting a new reconstruction. Save progress first?',
         buttons: [
           {
             text: 'Discard',
@@ -457,8 +459,8 @@ export default function HomeScreen() {
     if (isDestructive) {
       setConfirmAlert({
         visible: true,
-        title: 'Save Innovation?',
-        message: 'Starting a new innovation. Save progress first?',
+        title: 'Save Reconstruction?',
+        message: 'Starting a new reconstruction. Save progress first?',
         buttons: [
           {
             text: 'Discard',
@@ -590,7 +592,7 @@ export default function HomeScreen() {
             <Text style={styles.title}>
               REVERS<Text style={styles.titleAccent}>R</Text>
             </Text>
-            <Text style={styles.subtitle}>SYSTEMATIC INVENTIVE THINKING</Text>
+            <Text style={styles.subtitle}>MACHINE RECONSTRUCTION</Text>
           </View>
         </View>
         <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -676,6 +678,7 @@ export default function HomeScreen() {
         {context.phase === 2 && context.analysis && (
           <PhaseTwo
             analysis={context.analysis}
+            capturedImage={context.capturedImage}
             onComplete={handlePhaseTwoComplete}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
@@ -718,7 +721,7 @@ export default function HomeScreen() {
                 Specifications not found
               </Text>
               <Text style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', marginBottom: 20 }}>
-                Go back to the Design phase to generate the technical specs for your innovation.
+                Go back to the Design phase to generate the reconstruction specifications.
               </Text>
               <TouchableOpacity 
                 onPress={handleBack}
@@ -769,7 +772,7 @@ export default function HomeScreen() {
                 }}
               >
                 <Ionicons name="shuffle" size={20} color={Colors.secondary} />
-                <Text style={styles.phaseActionButtonText}>Try another pattern</Text>
+                <Text style={styles.phaseActionButtonText}>Review inventory match</Text>
               </TouchableOpacity>
             )}
 

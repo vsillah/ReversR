@@ -32,7 +32,7 @@ import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
 const DESIGN_STEPS: LoadingStep[] = [
-  { id: 'analyzing', label: 'Analyzing innovation concept' },
+  { id: 'analyzing', label: 'Analyzing reconstruction plan' },
   { id: 'specifications', label: 'Generating technical specifications' },
   { id: 'finalizing', label: 'Finalizing blueprint details' },
 ];
@@ -580,7 +580,7 @@ export default function PhaseThree({
           <Ionicons name="pencil" size={28} color={Colors.accent} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 3: Design</Text>
-            <Text style={styles.description}>Blueprint generated. Visualize your innovation.</Text>
+            <Text style={styles.description}>Inventory match ready. Prepare reconstruction specs and modeling assets.</Text>
           </View>
         </View>
       </View>
@@ -592,13 +592,11 @@ export default function PhaseThree({
           <View style={styles.summaryLeft}>
             <View style={styles.patternSection}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="bulb" size={16} color={Colors.secondary} />
-                <Text style={styles.sectionLabel}>SIT Pattern Applied</Text>
+                <Ionicons name="git-branch-outline" size={16} color={Colors.secondary} />
+                <Text style={styles.sectionLabel}>Inventory Match</Text>
               </View>
               <Text style={styles.patternName}>
-                {typeof innovation.patternUsed === 'string' 
-                  ? innovation.patternUsed.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                  : 'Pattern Applied'}
+                {innovation.machineName || innovation.conceptName || 'Machine matched'}
               </Text>
               <Text style={styles.conceptDescription}>{innovation.conceptDescription}</Text>
             </View>
@@ -608,7 +606,7 @@ export default function PhaseThree({
             <View style={styles.benefitBox}>
               <View style={styles.sectionHeader}>
                 <Ionicons name="flash" size={16} color={Colors.green[400]} />
-                <Text style={[styles.sectionLabel, { color: Colors.green[400] }]}>Key Benefit</Text>
+                <Text style={[styles.sectionLabel, { color: Colors.green[400] }]}>Rebuild Outcome</Text>
               </View>
               <Text style={styles.benefitText}>{innovation.marketBenefit}</Text>
             </View>
@@ -617,7 +615,7 @@ export default function PhaseThree({
               <View style={styles.constraintBox}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.constraintDot} />
-                  <Text style={[styles.sectionLabel, { color: Colors.purple[500] }]}>Innovation Constraint</Text>
+                  <Text style={[styles.sectionLabel, { color: Colors.purple[500] }]}>Reconstruction Constraint</Text>
                 </View>
                 <Text style={styles.constraintText}>{innovation.constraint}</Text>
               </View>
@@ -832,9 +830,9 @@ export default function PhaseThree({
             ) : (
               <View style={styles.generatePrompt}>
                 <Ionicons name="image-outline" size={48} color={Colors.gray[600]} />
-                <Text style={styles.generatePromptTitle}>Generate a high-speed 2D concept</Text>
+                <Text style={styles.generatePromptTitle}>Generate a 2D reconstruction reference</Text>
                 <Text style={styles.generatePromptDesc}>
-                  AI-generated sketch visualization of your innovation
+                  AI-generated sketch visualization of the matched machine
                 </Text>
                 <TouchableOpacity style={styles.generateButton} onPress={handleGenerate2D}>
                   <Text style={styles.generateButtonText}>Generate Sketch</Text>
@@ -983,7 +981,7 @@ export default function PhaseThree({
 
       <TouchableOpacity style={styles.tryAnotherButton} onPress={onTryAnotherPattern}>
         <Ionicons name="shuffle" size={18} color={Colors.secondary} />
-        <Text style={styles.tryAnotherText}>Try Another Pattern</Text>
+        <Text style={styles.tryAnotherText}>Review Inventory Match</Text>
       </TouchableOpacity>
 
       <View style={{ height: 50 }} />

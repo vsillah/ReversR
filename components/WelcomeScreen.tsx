@@ -20,25 +20,25 @@ const phases = [
     number: 1,
     title: 'SCAN',
     icon: 'search' as const,
-    description: 'Analyze existing products to define the Closed World boundary and essential components.',
+    description: 'Capture or describe a machine and identify visible assemblies, parts, and signals.',
   },
   {
     number: 2,
-    title: 'REVERSE',
-    icon: 'repeat-sharp' as const,
-    description: 'Apply patterns like Subtraction and Task Unification to force novel utility.',
+    title: 'INVENTORY',
+    icon: 'git-branch-outline' as const,
+    description: 'Connect an admin-approved machine inventory and match the scan to a known record.',
   },
   {
     number: 3,
     title: 'DESIGN',
     icon: 'pencil' as const,
-    description: 'Generate technical specifications, sketches, and interactive 3D prototypes.',
+    description: 'Generate reconstruction specs, visual references, and 3D modeling handoff files.',
   },
   {
     number: 4,
     title: 'BUILD',
     icon: 'hammer-outline' as const,
-    description: 'Generate Bill of Materials and prepare for manufacturing.',
+    description: 'Build a BOM, assembly sequence, pricing estimate, and fabrication handoff.',
   },
 ];
 
@@ -59,13 +59,13 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
           <Text style={styles.title}>
             REVERS<Text style={styles.titleAccent}>R</Text>
           </Text>
-          <Text style={styles.subtitle}>Systematic Inventive Thinking Engine</Text>
+          <Text style={styles.subtitle}>Machine Reconstruction Engine</Text>
         </View>
 
         <Text style={styles.description}>
-          Deconstruct reality. Apply rigorous mutation patterns. Design the impossible.
+          Scan a machine. Match it to inventory. Rebuild the path from parts to assembly.
           {'\n\n'}
-          An AI-powered tool for generating high-fidelity product innovations within a Closed World.
+          An AI-assisted workflow for reconstruction packages, BOMs, pricing, and 3D modeling handoff.
         </Text>
 
         <View style={styles.phasesContainer}>
@@ -84,7 +84,7 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
 
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.button} onPress={onStart}>
-            <Text style={styles.buttonText}>New Innovation</Text>
+            <Text style={styles.buttonText}>New Reconstruction</Text>
             <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
           </TouchableOpacity>
 

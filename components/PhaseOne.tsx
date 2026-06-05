@@ -17,8 +17,8 @@ import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
 const SCAN_STEPS: LoadingStep[] = [
   { id: 'capture', label: 'Capturing input...' },
-  { id: 'identify', label: 'Identifying components...' },
-  { id: 'map', label: 'Mapping closed world...' },
+  { id: 'identify', label: 'Identifying machine signals...' },
+  { id: 'map', label: 'Preparing inventory match...' },
 ];
 
 interface Props {
@@ -183,7 +183,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
         <View style={styles.headerText}>
           <Text style={styles.title}>Phase 1: Scan</Text>
           <Text style={styles.description}>
-            Define the boundaries. Enter a product description or scan an object.
+            Capture a machine or describe the visible assemblies and identifying marks.
           </Text>
         </View>
       </View>
@@ -234,12 +234,12 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
         <View style={styles.contentArea}>
           {inputMode === 'type' && (
             <View style={styles.typeContent}>
-              <Text style={styles.contentLabel}>Describe your product</Text>
+              <Text style={styles.contentLabel}>Describe the machine</Text>
               <TextInput
                 style={styles.textInput}
                 value={input}
                 onChangeText={setInput}
-                placeholder="e.g., A standard kitchen blender with motor, blades, pitcher, and control panel..."
+                placeholder="e.g., A desktop FDM 3D printer with aluminum frame, heated bed, extruder, belts, rails, and display..."
                 placeholderTextColor={Colors.gray[600]}
                 multiline
                 numberOfLines={4}
@@ -323,7 +323,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={Colors.white} />
-              <Text style={styles.submitButtonText}>Scanning Closed World...</Text>
+              <Text style={styles.submitButtonText}>Scanning Machine...</Text>
             </View>
           ) : (
             <View style={styles.buttonContent}>
