@@ -243,8 +243,9 @@ const actionPlan = {
       ...(iosPreviewRecorded
         ? ['Use the recorded iOS preview build already in docs/native-qa-evidence.json.']
         : [
-            'Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.',
-            'Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.',
+            'If the Apple account uses passkey-only login, create or connect an App Store Connect API key in the browser instead of retrying the EAS Apple password prompt.',
+            'Run npm run native:ios:preview-build -- --dry-run to record the exact iOS preview build command and any missing local App Store Connect API env.',
+            'After the Apple credential/API-key gate is complete, run npm run native:ios:preview-build and record the build URL after it starts.',
             'Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.',
           ]),
       ...(nativeQaEvidence

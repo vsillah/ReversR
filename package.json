@@ -44,6 +44,7 @@
     "native:qa:preflight": "node scripts/native-qa-preflight.js",
     "native:qa:preflight:local": "node scripts/native-qa-preflight.js --allow-pending",
     "native:eas:sync-builds": "node scripts/sync-eas-preview-builds.js",
+    "native:ios:preview-build": "node scripts/start-ios-preview-build.js",
     "native:android:qa": "node scripts/native-android-qa-helper.js",
     "accessibility:preflight": "node scripts/accessibility-preflight.js",
     "store:submission:preflight": "node scripts/store-submission-preflight.js",

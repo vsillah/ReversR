@@ -10,9 +10,11 @@ This app uses EAS Submit for the first store review lanes:
 Current state:
 
 - Android submit track is configured for the internal testing lane.
-- iOS submit profile is intentionally incomplete until App Store Connect provides the app's Apple ID.
+- iOS submit profile has the App Store Connect Apple ID after the app record was created.
 
 Do not put Apple account passwords, App Store Connect API keys, or Google service account JSON in this repo. Configure those through EAS credentials, EAS environment variables, local ignored files, or the store consoles.
+
+For a passkey-only Apple account, the EAS CLI Apple password prompt is not a viable credential path because the passkey cannot be revealed as a text password. Use App Store Connect in the browser to create or connect an API key, then provide the key path and identifiers through local environment variables or EAS-managed credentials.
 
 After the App Store Connect record exists, update `eas.json`:
 

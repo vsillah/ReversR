@@ -116,6 +116,24 @@ npx eas-cli@20.0.0 credentials --platform ios
 
 Create or attach the Apple distribution certificate and provisioning profile for `com.vsillah.reversrrebuild`. Confirm the bundle ID exists in Apple Developer and App Store Connect before production submission.
 
+If the Apple account is passkey-only, do not keep retrying the EAS CLI Apple password prompt. Use the browser/App Store Connect path instead:
+
+1. Sign in to App Store Connect with the passkey.
+2. Go to `Users and Access` -> `Integrations` -> `App Store Connect API`.
+3. Create an API key with the least role that can support the needed EAS operation; for EAS build credential repair in CI, use an Admin-capable key.
+4. Download the `.p8` file once and keep it outside git. This repo ignores `*.p8`.
+5. Export these values only in the local terminal session before the iOS build:
+
+```bash
+export EXPO_ASC_API_KEY_PATH=/absolute/path/to/AuthKey_KEYID.p8
+export EXPO_ASC_KEY_ID=KEYID
+export EXPO_ASC_ISSUER_ID=issuer-uuid-from-app-store-connect
+export EXPO_APPLE_TEAM_ID=your-apple-team-id
+export EXPO_APPLE_TEAM_TYPE=INDIVIDUAL
+```
+
+Use `COMPANY_OR_ORGANIZATION` for `EXPO_APPLE_TEAM_TYPE` if the developer account is an organization rather than an individual account.
+
 After the App Store Connect app record exists, copy its Apple ID into the EAS submit profile:
 
 ```json
@@ -168,7 +186,8 @@ Set `CONNECTOR_SMOKE_EXPECTED_MACHINE_ID` and `CONNECTOR_SMOKE_ANALYSIS_JSON` wh
 
 ```bash
 npx eas-cli@20.0.0 build --platform android --profile preview
-npx eas-cli@20.0.0 build --platform ios --profile preview
+npm run native:ios:preview-build -- --dry-run
+npm run native:ios:preview-build
 ```
 
 After a preview build starts or completes, sync EAS build URLs into the native QA evidence:

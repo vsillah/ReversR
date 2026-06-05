@@ -36,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. A non-interactive iOS preview build still fails because EAS has no internal-distribution iOS credentials. Interactive EAS credentials setup for the preview profile reaches the Apple account login prompt. Apple credential login/2FA remains pending."
+      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. A non-interactive iOS preview build still fails because EAS has no internal-distribution iOS credentials. Interactive EAS credentials setup for the preview profile reaches the Apple password prompt; the most direct next step is for Vambah to enter the Apple password and 2FA in the terminal. App Store Connect API key setup is documented as the fallback path if the password prompt cannot be completed."
     }
   },
   "checks": [

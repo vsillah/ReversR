@@ -182,6 +182,17 @@ npx eas-cli@20.0.0 credentials --platform android
 npx eas-cli@20.0.0 credentials --platform ios
 ```
 
+If the Apple account signs in with a passkey and no known password, do not keep retrying the EAS CLI Apple password prompt. Passkeys cannot be converted into a text password for the CLI. Use the browser/App Store Connect API-key path:
+
+1. Sign in to App Store Connect with the passkey.
+2. Open `Users and Access`.
+3. Open `Integrations`.
+4. Open `App Store Connect API`.
+5. Create an API key for EAS iOS release operations. Use an Admin-capable key when EAS needs to check or repair Apple build credentials.
+6. Download the `.p8` key once and keep it outside git. This repo ignores `*.p8`, `.p12`, `.mobileprovision`, and related native credential files.
+7. Export `EXPO_ASC_API_KEY_PATH`, `EXPO_ASC_KEY_ID`, `EXPO_ASC_ISSUER_ID`, `EXPO_APPLE_TEAM_ID`, and `EXPO_APPLE_TEAM_TYPE` in the local terminal session before starting the iOS preview build.
+8. Run `npm run native:ios:preview-build -- --dry-run`, then `npm run native:ios:preview-build`.
+
 Do not commit Apple passwords, App Store Connect API keys, Google service account JSON, inventory API keys, or Gemini keys into the repo.
 
 Server-only values belong on the API host:
@@ -256,7 +267,9 @@ Build preview binaries:
 
 ```bash
 npx eas-cli@20.0.0 build --platform android --profile preview
-npx eas-cli@20.0.0 build --platform ios --profile preview
+npm run native:ios:preview-build -- --dry-run
+npm run native:ios:preview-build
+npm run native:eas:sync-builds
 ```
 
 Create the native QA evidence file:
