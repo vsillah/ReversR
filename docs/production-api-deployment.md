@@ -124,6 +124,7 @@ EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support
 Then run:
 
 ```bash
+npm run release:status
 npm run inventory:preflight
 npm run api:preflight
 npm run connector:smoke

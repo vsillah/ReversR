@@ -199,6 +199,7 @@ const requiredDocs = [
   'app/support.tsx',
   'scripts/native-release-preflight.js',
   'scripts/native-qa-preflight.js',
+  'scripts/release-status.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
   'scripts/policy-hosting-preflight.js',

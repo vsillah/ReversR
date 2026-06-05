@@ -15,6 +15,7 @@
     "policy:preflight": "node scripts/policy-hosting-preflight.js",
     "policy:preflight:local": "node scripts/policy-hosting-preflight.js --allow-placeholder",
     "screenshots:store": "node scripts/capture-store-screenshots.js",
+    "release:status": "node scripts/release-status.js",
     "typecheck": "tsc --noEmit",
     "api:preflight": "node scripts/api-preflight.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
