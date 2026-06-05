@@ -30,14 +30,14 @@ interface Props {
 }
 
 const PRODUCT_PRESETS = [
-  "A mechanical analog wristwatch with leather strap, stainless steel case, crystal glass face, and gear mechanisms.",
-  "A smart coffee maker with water reservoir, filter basket, heating element, and Wi-Fi connectivity.",
-  "A standard bicycle with frame, two wheels, handlebars, pedals, chain, gears, and brakes.",
-  "A robotic vacuum cleaner with brushes, dustbin, battery, sensors, and charging dock.",
-  "A portable Bluetooth speaker with drivers, battery, control buttons, and rugged casing.",
-  "A reusable water bottle with stainless steel body, screw-top lid, and carrying loop.",
-  "An electric toothbrush with handle, battery, motor, brush head, and charging base.",
-  "A consumer drone with propellers, camera, battery, remote controller, and GPS module.",
+  "A desktop FDM 3D printer with aluminum extrusion frame, heated bed, extruder, belts, rails, stepper motors, control board, power supply, nozzle, and display.",
+  "A desktop CNC router with aluminum frame, spindle, gantry, stepper motors, control board, power supply, linear rails, lead screws, and wasteboard.",
+  "A benchtop drill press with cast base, column, quill, chuck, belt drive, motor, depth stop, table, and safety guard.",
+  "A small conveyor sorting machine with frame, belt, rollers, drive motor, sensors, controller, power supply, and diverter gate.",
+  "A compact injection molding machine with clamp frame, heated barrel, screw drive, hopper, hydraulic unit, controller, and mold platen.",
+  "A pneumatic packaging sealer with frame, heated sealing jaw, air cylinder, foot pedal, control board, power supply, and safety shield.",
+  "A lab centrifuge with rotor, motor, lid latch, control panel, vibration sensor, power supply, and enclosure.",
+  "A laser cutter with gantry frame, laser tube, mirrors, lens head, stepper motors, honeycomb bed, controller, exhaust fan, and water pump.",
 ];
 
 type InputMode = 'type' | 'scan' | 'lucky';
@@ -119,7 +119,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     if (!permission?.granted) {
       const result = await requestPermission();
       if (!result.granted) {
-        setAlert({visible: true, title: 'Permission needed', message: 'Camera access is required to scan objects.'});
+        setAlert({visible: true, title: 'Permission needed', message: 'Camera access is required to scan machines.'});
         return;
       }
     }
@@ -247,7 +247,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
               color={inputMode === 'lucky' ? Colors.white : Colors.gray[400]} 
             />
             <Text style={[styles.modeTabText, inputMode === 'lucky' && styles.modeTabTextActive]}>
-              Lucky
+              Sample
             </Text>
           </TouchableOpacity>
         </View>
@@ -305,7 +305,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
                   </View>
                   <Text style={styles.cameraPromptTitle}>Tap to Open Camera</Text>
                   <Text style={styles.cameraPromptHint}>
-                    Point at any physical object to scan
+                    Point at a machine, model plate, or visible assembly
                   </Text>
                 </TouchableOpacity>
               )}
@@ -314,7 +314,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
                 value={input}
                 onChangeText={setInput}
                 accessibilityLabel="Optional machine scan notes"
-                placeholder="Optional: Add details about the object..."
+                placeholder="Optional: Add model number, visible assemblies, damage, or inventory clues..."
                 placeholderTextColor={Colors.gray[600]}
                 multiline
                 numberOfLines={2}
@@ -326,7 +326,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           {inputMode === 'lucky' && (
             <View style={styles.luckyContent}>
               <View style={styles.luckyHeader}>
-                <Text style={styles.contentLabel}>Random Product</Text>
+                <Text style={styles.contentLabel}>Sample machine</Text>
                 <TouchableOpacity
                   style={styles.shuffleButton}
                   onPress={handleShuffle}
@@ -365,7 +365,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
             </View>
           ) : (
             <View style={styles.buttonContent}>
-              <Text style={styles.submitButtonText}>Initiate Scan</Text>
+              <Text style={styles.submitButtonText}>Start Machine Scan</Text>
               <Ionicons name="flash" size={18} color={Colors.white} />
             </View>
           )}

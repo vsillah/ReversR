@@ -85,6 +85,21 @@ addGate(
   inventoryUi ? '' : 'Restore the Phase 2 connector controls before release testing.'
 );
 
+const machineScanExamples = allFilesContain([
+  ['components/PhaseOne.tsx', 'desktop FDM 3D printer'],
+  ['components/PhaseOne.tsx', 'desktop CNC router'],
+  ['components/PhaseOne.tsx', 'Point at a machine, model plate, or visible assembly'],
+  ['components/PhaseOne.tsx', 'Sample machine'],
+]);
+addGate(
+  'clone',
+  'machine-scan-examples',
+  'Default scan examples and camera guidance are machine-specific',
+  machineScanExamples ? 'pass' : 'blocked',
+  machineScanExamples ? 'Phase 1 presets and camera prompt are aligned to machine reconstruction.' : 'Phase 1 still has generic object/product scan examples.',
+  machineScanExamples ? '' : 'Replace generic product/object copy with machine-focused scan examples.'
+);
+
 const reconstructionFlow = allFilesContain([
   ['server/index.js', '/api/gemini/match-machine'],
   ['server/index.js', '/api/gemini/generate-bom'],

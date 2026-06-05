@@ -1552,8 +1552,8 @@ Description: ${innovation.conceptDescription}
 Machine ID: ${innovation.machineId || 'pending'}
 Rebuild Outcome: ${innovation.marketBenefit}
 
-Generate a clean, professional product concept sketch with:
-- Clear line drawings showing the product from multiple angles
+Generate a clean, professional machine reconstruction sketch with:
+- Clear line drawings showing the matched machine from multiple angles
 - Technical/blueprint aesthetic with a modern feel
 - DO NOT include any text, labels, annotations, or written words in the image
 - Use visual indicators like arrows or lines instead of text labels
@@ -1627,8 +1627,8 @@ Rebuild Outcome: ${innovation.marketBenefit || 'Reconstruction package'}
 
 VIEW ANGLE: ${angle.prompt}
 
-Generate a clean, professional product concept sketch with:
-- ${angle.label} showing the product clearly
+Generate a clean, professional machine reconstruction sketch with:
+- ${angle.label} showing the matched machine clearly
 - Clean technical line drawings
 - Technical/blueprint aesthetic with a modern feel
 - White or light background for clarity
@@ -1693,8 +1693,8 @@ Rebuild Outcome: ${innovation.marketBenefit || 'Reconstruction package'}
 
 VIEW ANGLE: ${angle.prompt}
 
-Generate a clean, professional product concept sketch with:
-- ${angle.label} showing the product clearly
+Generate a clean, professional machine reconstruction sketch with:
+- ${angle.label} showing the matched machine clearly
 - Clean technical line drawings
 - Technical/blueprint aesthetic with a modern feel
 - White or light background for clarity
