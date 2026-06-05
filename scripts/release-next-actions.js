@@ -121,6 +121,10 @@ const iosDeviceRegistrationPending = [
   ...(nativeDeviceHandoff?.nextNativeQaActions || []),
   ...(nativeDeviceHandoff?.notCompletedByAutomation || []),
 ].some(item => /device-registration|register.*device|registration profile/i.test(item));
+const iosInternalDeviceUnavailable = [
+  ...(nativeDeviceHandoff?.nextNativeQaActions || []),
+  ...(nativeDeviceHandoff?.notCompletedByAutomation || []),
+].some(item => /no iOS device|internal preview path is not viable|TestFlight\/App Store distribution credentials|production\/TestFlight credentials/i.test(item));
 
 const actionPlan = {
   'preview-host-smoke': {
@@ -247,7 +251,13 @@ const actionPlan = {
       'Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.',
       ...(iosPreviewRecorded
         ? ['Use the recorded iOS preview build already in docs/native-qa-evidence.json.']
-        : iosDeviceRegistrationPending ? [
+        : iosInternalDeviceUnavailable ? [
+            'Use the Android phone for Android preview QA and screenshots now; make sure adb devices lists exactly one device.',
+            'Abort the active EAS iOS internal device-registration prompt because no iOS device is available.',
+            'Configure iOS production/TestFlight credentials instead of internal preview credentials.',
+            'After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.',
+            'Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.',
+          ] : iosDeviceRegistrationPending ? [
             'Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.',
             'After the device registration profile is installed, return to the EAS credentials terminal and press any key so provisioning profile creation can continue.',
             'After EAS finishes creating the iOS provisioning profile, run npm run native:ios:preview-build and record the build URL after it starts.',

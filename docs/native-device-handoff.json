@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T14:31:34Z",
+  "generatedAt": "2026-06-05T14:37:12Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -35,28 +35,29 @@
     },
     "appStoreConnect": {
       "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
-      "state": "App Store Connect app record exists and Apple ID 6777091538 is recorded in eas.json submit.production.ios.ascAppId. EAS Apple login/2FA succeeded and an Apple distribution certificate was created. EAS generated an iOS device-registration URL and is waiting for a test device to finish registration before provisioning profile creation can continue."
+      "state": "App Store Connect app record exists and Apple ID 6777091538 is recorded in eas.json submit.production.ios.ascAppId. EAS Apple login/2FA succeeded and an Apple distribution certificate was created in the preview credentials flow. Vambah confirmed no iOS device is available, so the internal-distribution device-registration path is not viable right now. Use Android device QA for Android evidence and switch iOS to the TestFlight/App Store distribution credential path."
     }
   },
   "nextNativeQaActions": [
-    "Connect an Android device with USB debugging enabled or install Android Emulator/Android Studio so adb devices lists a device.",
+    "Connect the Android phone with USB debugging enabled so adb devices lists exactly one device.",
     "After an Android device is connected, run npm run native:android:qa -- --probe to write docs/native-android-device-probe.json and update Android device evidence.",
     "Install the APK with: adb install -r path/to/ReversR-Rebuild-preview.apk",
     "Launch the app with: adb shell monkey -p com.vsillah.reversrrebuild 1",
     "Use npm run native:android:qa -- --launch and npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff> to capture Android native screenshots into docs/store-screenshots/native/.",
     "Run the native QA checklist in docs/native-qa-evidence.json.",
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
-    "Open the EAS-generated device-registration URL on the target iPhone/iPad, install the Apple profile, and return to the terminal.",
-    "After device registration is complete, press any key in the EAS credentials terminal so it can continue creating the provisioning profile.",
+    "Abort the active EAS iOS internal device-registration prompt because no iOS test device is available.",
+    "Run the iOS credentials flow for the production profile instead of preview, then complete Apple login/authorization if prompted so EAS can create App Store/TestFlight distribution credentials.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools.",
-    "After EAS iOS credentials are available, run npm run native:ios:preview-build and npm run native:eas:sync-builds to record the iOS build URL in docs/native-qa-evidence.json."
+    "After EAS iOS App Store/TestFlight credentials are available, run an iOS production build or create a dedicated store-distribution build helper and record the build URL in docs/native-qa-evidence.json."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
     "EAS Apple login/2FA succeeded and an Apple distribution certificate was created.",
-    "EAS generated an iOS device-registration URL at 2026-06-05T14:31:34Z. The URL is intentionally not committed. Device profile installation remains a human-in-the-loop action.",
-    "iOS provisioning profile creation and iOS preview build remain pending until a test device is registered."
+    "EAS generated an iOS device-registration URL at 2026-06-05T14:31:34Z. The URL is intentionally not committed.",
+    "Vambah confirmed no iOS device is available at 2026-06-05T14:37:12Z, so iOS internal preview device registration cannot be completed.",
+    "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path."
   ]
 }

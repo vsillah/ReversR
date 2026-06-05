@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T14:31:34Z",
+  "generatedAt": "2026-06-05T14:37:12Z",
   "command": "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait --json",
   "evidenceFile": "docs/eas-ios-preview-build-start-evidence.json",
   "releaseGate": "native-qa-evidence",
@@ -27,9 +27,9 @@
     "secretHandling": "Do not commit .p8 files, Apple passwords, App Store Connect API keys, or team secrets. This repo ignores *.p8 and related native credential files."
   },
   "nextActions": [
-    "Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.",
-    "After device registration completes, press any key in the EAS credentials terminal so provisioning profile creation can continue.",
-    "Run npm run native:ios:preview-build after the provisioning profile is created, then run npm run native:eas:sync-builds.",
+    "Do not continue the active iOS internal device-registration prompt unless an iPhone/iPad becomes available.",
+    "Abort the internal device-registration prompt and configure iOS production/TestFlight credentials instead.",
+    "After App Store/TestFlight distribution credentials are available, run the iOS store build path and record the build URL in docs/native-qa-evidence.json.",
     "After Android and iOS preview builds are recorded, install them on devices and complete docs/native-qa-evidence.json plus final native screenshots."
   ],
   "status": "dry-run",

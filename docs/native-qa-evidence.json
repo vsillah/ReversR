@@ -36,7 +36,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. EAS Apple login/2FA succeeded and an Apple distribution certificate was created for the preview credentials flow. The active gate is iOS test-device registration: EAS generated a registration QR/link and is waiting for the target iPhone/iPad to install the profile before it can continue provisioning profile creation."
+      "notes": "iOS EAS preview build requires EAS Apple credential setup. Apple Developer Agreement was accepted by Vambah, Apple Developer Program activation cleared enough for App Store Connect to open, Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, and the App Store Connect app record now exists with Apple ID 6777091538 recorded in eas.json. EAS Apple login/2FA succeeded and an Apple distribution certificate was created for the preview credentials flow. EAS then reached iOS test-device registration for internal distribution, but Vambah confirmed no iOS device is available. The recommended iOS route is now App Store/TestFlight distribution credentials instead of internal preview device registration."
     }
   },
   "checks": [

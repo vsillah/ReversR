@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T14:31:34Z",
+  "generatedAt": "2026-06-05T14:37:12Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -57,15 +57,16 @@
       "command": "npx eas-cli@20.0.0 credentials --platform ios",
       "profileSelected": "preview",
       "nextPrompt": "Press any key if you've already finished device registration.",
-      "lastCheckedAt": "2026-06-05T14:31:34Z",
-      "state": "Apple login/2FA succeeded, bundle identifier linkage succeeded, and an Apple distribution certificate was created. EAS generated a device-registration QR/link and is waiting for the target iPhone/iPad to install the registration profile.",
-      "nextHumanAction": "Open the EAS-generated registration link on the target iPhone/iPad, install the profile, return to the terminal, then press any key so EAS can continue creating the provisioning profile."
+      "lastCheckedAt": "2026-06-05T14:37:12Z",
+      "state": "Apple login/2FA succeeded, bundle identifier linkage succeeded, and an Apple distribution certificate was created. EAS generated a device-registration QR/link for internal distribution, but Vambah confirmed no iOS device is available.",
+      "nextHumanAction": "Abort the internal device-registration prompt and use the production/TestFlight iOS credentials path, or install full Xcode later and use an iOS Simulator for screenshots."
     }
   },
   "lastStrictFailures": {
     "iosPreviewBuild": [
       "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode.",
-      "EAS iOS preview credential setup advanced through Apple login/2FA and certificate creation, then paused at device registration."
+      "EAS iOS preview credential setup advanced through Apple login/2FA and certificate creation, then paused at device registration.",
+      "No iOS device is available, so the internal preview path is not viable right now. A production/TestFlight credential flow is the recommended iOS path."
     ],
     "nativeQaPreflight": [
       "No Android tested device or tester evidence.",
@@ -86,9 +87,9 @@
     "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable."
   },
   "resumeInstructionsForVambah": [
-    "Open the EAS-generated device-registration URL on the target iPhone/iPad and install the registration profile.",
-    "Return to the EAS credentials terminal and press any key after device registration completes.",
-    "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured.",
+    "Connect the Android phone with USB debugging enabled before native Android QA and screenshots can be captured.",
+    "Abort the active iOS internal device-registration prompt because no iOS device is available.",
+    "Use the iOS production/TestFlight credentials path for Apple release builds, or install full Xcode later for iOS Simulator screenshots.",
     "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
   ],
   "preparedAutomation": [
