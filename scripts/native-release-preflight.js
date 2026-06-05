@@ -14,6 +14,7 @@ const fail = (message) => failures.push(message);
 const warn = (message) => warnings.push(message);
 const exists = (path) => fs.existsSync(path);
 const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
+const outputText = (result) => `${result.stdout || ''}${result.stderr || ''}`.trim();
 
 const appConfig = readJson('app.json').expo;
 const easConfig = readJson('eas.json');
@@ -106,22 +107,34 @@ for (const path of [
   if (!exists(path)) fail(`Missing native release document: ${path}`);
 }
 
-const easVersion = spawnSync('eas', ['--version'], { encoding: 'utf8' });
-if (easVersion.status !== 0) {
+const easCliCandidates = [
+  { label: 'global eas', command: 'eas', baseArgs: [] },
+  { label: 'pinned npx eas-cli@20.0.0', command: 'npx', baseArgs: ['--yes', 'eas-cli@20.0.0'] },
+];
+const easResults = easCliCandidates.map(candidate => {
+  const version = spawnSync(candidate.command, [...candidate.baseArgs, '--version'], { encoding: 'utf8' });
+  return { ...candidate, version };
+});
+const easCli = easResults.find(result => result.version.status === 0);
+
+if (!easCli) {
+  const details = easResults
+    .map(result => `${result.label}: ${outputText(result.version) || 'not available'}`)
+    .join(' | ');
   requireOrWarn(
     false,
-    'EAS CLI is not installed as `eas`. Use `npx eas-cli@20.0.0` or install the CLI before release builds.',
+    `EAS CLI is not available. Use \`npx eas-cli@20.0.0\` or install \`eas\` before release builds. Checked: ${details}`,
     allowMissingCli
   );
 } else {
-  const output = `${easVersion.stdout}${easVersion.stderr}`.trim();
-  if (output) console.log(`EAS CLI: ${output}`);
+  const output = outputText(easCli.version);
+  if (output) console.log(`EAS CLI (${easCli.label}): ${output}`);
   else warn('EAS CLI returned an empty version string.');
 
-  const whoami = spawnSync('eas', ['whoami', '--non-interactive'], { encoding: 'utf8' });
+  const whoami = spawnSync(easCli.command, [...easCli.baseArgs, 'whoami', '--non-interactive'], { encoding: 'utf8' });
   requireOrWarn(
     whoami.status === 0,
-    `EAS CLI is not logged in for non-interactive release work: ${(whoami.stderr || whoami.stdout || '').trim()}`,
+    `EAS CLI is not logged in for non-interactive release work through ${easCli.label}: ${outputText(whoami)}`,
     allowNotLoggedIn
   );
 }

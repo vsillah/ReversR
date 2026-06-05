@@ -34,6 +34,8 @@ npx eas-cli@20.0.0 whoami --non-interactive
 
 The CLI is intentionally not a committed dev dependency because the current CLI dependency tree adds high-severity dev-only audit findings. Use the pinned `npx eas-cli@20.0.0` command or a globally installed `eas` binary for release operations.
 
+`npm run native:preflight` accepts either a global `eas` binary or the pinned `npx eas-cli@20.0.0` path. It still fails strict release checks when the CLI cannot verify a non-interactive login.
+
 ## 3. Link The Expo Project
 
 Create or link the EAS project for the clone identity:
