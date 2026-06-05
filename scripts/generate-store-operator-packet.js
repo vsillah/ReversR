@@ -66,6 +66,7 @@ const sourceArtifacts = [
   'docs/store-console-copy.md',
   'docs/store-review-safety-packet.md',
   'docs/store-console-evidence.template.json',
+  'docs/store-console-browser-handoff.json',
   'docs/native-qa-evidence.template.json',
   'docs/store-screenshots/planning-evidence.json',
   'docs/store-assets/google-play-feature-graphic.png',

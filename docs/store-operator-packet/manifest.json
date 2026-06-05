@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T11:20:43.343Z",
+  "generatedAt": "2026-06-05T11:31:16.917Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T11:20:43.337Z",
+    "generatedAt": "2026-06-05T11:31:16.912Z",
     "summary": {
       "pass": 34,
       "pending": 5
@@ -71,6 +71,10 @@
     },
     {
       "path": "docs/store-console-evidence.template.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-browser-handoff.json",
       "exists": true
     },
     {

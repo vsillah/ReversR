@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "pending-hitl",
+  "generatedAt": "2026-06-05T11:28:20Z",
+  "appIdentity": {
+    "appName": "ReversR Rebuild",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001"
+  },
+  "appStoreConnect": {
+    "browserState": "Chrome is open at the App Store Connect Apple login screen.",
+    "url": "https://appstoreconnect.apple.com/login?targetUrl=%2Fapps&authResult=FAILED",
+    "nextHumanAction": "Sign in with the Apple Developer account, complete 2FA/legal prompts, and create the App Store Connect app record for the iOS bundle ID.",
+    "neededValueAfterCreation": "App Store Connect Apple ID for eas.json submit.production.ios.ascAppId"
+  },
+  "googlePlayConsole": {
+    "browserState": "Chrome is open at Google Play Console Create app with factual fields filled.",
+    "developerAccount": "Vambah Sillah",
+    "developerAccountId": "8864864114913698241",
+    "url": "https://play.google.com/console/u/0/developers/8864864114913698241/create-new-app",
+    "fieldsPrepared": {
+      "appName": "ReversR Rebuild",
+      "packageName": "com.vsillah.reversrrebuild",
+      "packageNameAvailability": "available",
+      "defaultLanguage": "English (United States) – en-US",
+      "appOrGame": "App",
+      "freeOrPaid": "Free"
+    },
+    "nextHumanAction": "Review and accept the Developer Program Policies and US export laws declarations, then click Create app if appropriate."
+  },
+  "notes": [
+    "No legal declarations were accepted by automation.",
+    "No public store submission was started.",
+    "This evidence is a handoff record only; docs/store-console-evidence.json is still required after real console records exist."
+  ]
+}
