@@ -562,10 +562,17 @@ export default function HomeScreen() {
 
   if (!started) {
     return (
-      <WelcomeScreen
-        onStart={handleStartNew}
-        onHistory={openHistory}
-      />
+      <>
+        <WelcomeScreen
+          onStart={handleStartNew}
+          onHistory={openHistory}
+          onSettings={() => setShowSettings(true)}
+        />
+        <SettingsModal
+          visible={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      </>
     );
   }
 
@@ -599,12 +606,16 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={styles.historyButton}
             onPress={() => setShowSettings(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Open settings"
           >
             <Ionicons name="settings-outline" size={24} color={Colors.gray[400]} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.historyButton}
             onPress={openHistory}
+            accessibilityRole="button"
+            accessibilityLabel="Open reconstruction history"
           >
             <Ionicons name="time-outline" size={24} color={Colors.gray[400]} />
           </TouchableOpacity>

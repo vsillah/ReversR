@@ -40,9 +40,9 @@ machine, inventory, reconstruction, bill of materials, BOM, manufacturing, repai
 
 These must be hosted before submission:
 
-- Privacy policy URL: pending
-- Terms of service URL: pending
-- Support URL: pending
+- Privacy policy URL: configured placeholder in `app.json` as `expo.extra.privacyPolicyUrl`; must be replaced with hosted production URL.
+- Terms of service URL: configured placeholder in `app.json` as `expo.extra.termsUrl`; must be replaced with hosted production URL.
+- Support URL: configured placeholder in `app.json` as `expo.extra.supportUrl`; must be replaced with hosted production URL.
 - User privacy choices URL: optional, pending
 
 ## Screenshots Needed
@@ -92,6 +92,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 ## Pre-Submission Checklist
 
 - Host privacy policy, terms, and support pages.
+- Replace placeholder policy/support URLs in `app.json`.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run store:preflight`.
 - Run native Android and iOS camera smoke tests.

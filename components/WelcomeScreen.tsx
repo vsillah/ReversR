@@ -13,6 +13,7 @@ import { Colors, Spacing, FontSizes } from '../constants/theme';
 interface WelcomeScreenProps {
   onStart: () => void;
   onHistory?: () => void;
+  onSettings?: () => void;
 }
 
 const phases = [
@@ -42,7 +43,7 @@ const phases = [
   },
 ];
 
-export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onStart, onHistory, onSettings }: WelcomeScreenProps) {
   return (
     <ScrollView 
       style={styles.container}
@@ -89,9 +90,26 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
           </TouchableOpacity>
 
           {onHistory && (
-            <TouchableOpacity style={styles.historyButton} onPress={onHistory}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={onHistory}
+              accessibilityRole="button"
+              accessibilityLabel="Open reconstruction history"
+            >
               <Ionicons name="time-outline" size={20} color={Colors.gray[400]} />
-              <Text style={styles.historyButtonText}>History</Text>
+              <Text style={styles.secondaryButtonText}>History</Text>
+            </TouchableOpacity>
+          )}
+
+          {onSettings && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={onSettings}
+              accessibilityRole="button"
+              accessibilityLabel="Open settings"
+            >
+              <Ionicons name="settings-outline" size={20} color={Colors.gray[400]} />
+              <Text style={styles.secondaryButtonText}>Settings</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -199,14 +217,14 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     letterSpacing: 1,
   },
-  historyButton: {
+  secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
-  historyButtonText: {
+  secondaryButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.gray[400],
   },

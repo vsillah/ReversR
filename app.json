@@ -51,7 +51,10 @@
     ],
     "scheme": "reversr-rebuild",
     "extra": {
-      "apiBaseUrl": "https://reversr-rebuild-api.example.com"
+      "apiBaseUrl": "https://reversr-rebuild-api.example.com",
+      "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
+      "termsUrl": "https://reversr-rebuild.example.com/terms",
+      "supportUrl": "https://reversr-rebuild.example.com/support"
     }
   }
 }

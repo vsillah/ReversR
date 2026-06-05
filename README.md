@@ -59,3 +59,5 @@ Before real store builds, set `EXPO_PUBLIC_API_BASE_URL` to the hosted productio
 npm run api:preflight
 npm run store:preflight
 ```
+
+`store:preflight` also requires hosted HTTPS privacy policy, terms, and support URLs in `app.json`.

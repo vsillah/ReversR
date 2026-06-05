@@ -85,13 +85,30 @@ if (profiles.production?.android?.buildType !== 'app-bundle') {
   fail('Production Android EAS build must use app-bundle for Google Play.');
 }
 
+const isPlaceholderUrl = (value) => !value || value.includes('example.com') || value.includes('example.org') || value.includes('localhost');
+const isHttpsUrl = (value) => /^https:\/\/[^/]+\.[^/]+/i.test(value || '');
+
 const configuredApiBase = process.env.EXPO_PUBLIC_API_BASE_URL || appConfig.extra?.apiBaseUrl || '';
-const placeholderApi = !configuredApiBase || configuredApiBase.includes('example.com');
+const placeholderApi = isPlaceholderUrl(configuredApiBase);
 if (placeholderApi && !allowPlaceholder) {
   fail('Set EXPO_PUBLIC_API_BASE_URL to the production API URL before store builds. Use --allow-placeholder only for local prototype checks.');
 }
 if (placeholderApi && allowPlaceholder) {
   warn('Using placeholder API URL because --allow-placeholder was provided.');
+}
+
+const requiredHostedUrls = [
+  ['privacyPolicyUrl', appConfig.extra?.privacyPolicyUrl],
+  ['termsUrl', appConfig.extra?.termsUrl],
+  ['supportUrl', appConfig.extra?.supportUrl],
+];
+for (const [key, value] of requiredHostedUrls) {
+  if ((isPlaceholderUrl(value) || !isHttpsUrl(value)) && !allowPlaceholder) {
+    fail(`Set expo.extra.${key} to a real hosted HTTPS URL before store builds. Use --allow-placeholder only for local prototype checks.`);
+  }
+  if ((isPlaceholderUrl(value) || !isHttpsUrl(value)) && allowPlaceholder) {
+    warn(`Using placeholder or non-production ${key} because --allow-placeholder was provided.`);
+  }
 }
 
 const requiredDocs = [
