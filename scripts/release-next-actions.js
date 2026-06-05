@@ -115,6 +115,7 @@ const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json'
 const nativeDeviceHandoff = readOptionalJson('docs/native-device-handoff.json');
 const easProductionBuildSync = readOptionalJson('docs/eas-production-build-sync-evidence.json');
 const easIosSubmitAttemptEvidence = readOptionalJson('docs/eas-ios-submit-attempt-evidence.json');
+const easAndroidSubmitAttemptEvidence = readOptionalJson('docs/eas-android-submit-attempt-evidence.json');
 const requiredScreenshotIds = [
   'welcome',
   'scan',
@@ -142,6 +143,8 @@ const appStoreRecordRecorded = storeConsoleEvidence?.appStoreConnect?.status ===
 const googlePlayRecordRecorded = storeConsoleEvidence?.googlePlay?.status === 'pass' && Boolean(storeConsoleEvidence?.googlePlay?.recordUrl);
 const appStoreApiAccessGateVisible = easIosSubmitAttemptEvidence?.status === 'blocked-hitl' &&
   easIosSubmitAttemptEvidence?.appStoreConnectScreen?.visibleAction === 'Request Access';
+const googlePlayServiceAccountGateVisible = easAndroidSubmitAttemptEvidence?.status === 'blocked-hitl' &&
+  /Google Service Account Keys/i.test(easAndroidSubmitAttemptEvidence?.result?.stdoutTail || '');
 const iosDeviceRegistrationPending = [
   ...(nativeDeviceHandoff?.nextNativeQaActions || []),
   ...(nativeDeviceHandoff?.notCompletedByAutomation || []),
@@ -320,7 +323,7 @@ const actionPlan = {
     phase: 'Store console setup',
     action: appStoreRecordRecorded && googlePlayRecordRecorded
       ? appStoreApiAccessGateVisible
-        ? 'Request App Store Connect API access before retrying the iOS TestFlight upload; continue pending store signoff without public submission.'
+        ? 'Request App Store Connect API access and configure Google Play service account submit credentials before retrying store uploads; continue pending store signoff without public submission.'
         : 'Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.'
       : 'Create App Store Connect and Google Play Console records and fill console evidence.',
     steps: [
@@ -340,6 +343,11 @@ const actionPlan = {
         'Request App Store Connect API access only after explicit account-holder approval.',
         'After access exists, configure an App Store Connect API key for EAS Submit or rerun the documented iOS submit command through an approved authenticated path.',
       ] : []),
+      ...(googlePlayServiceAccountGateVisible ? [
+        'Configure a Google Play service account key for EAS Submit only after explicit account-holder approval.',
+        'Keep Android submit on the internal track; do not start a production rollout.',
+        'After the service account key exists, rerun the documented Android internal-track submit command.',
+      ] : []),
       'Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.',
       'Run npm run store:console:preflight.',
     ],
@@ -348,6 +356,9 @@ const actionPlan = {
       'docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.',
       ...(appStoreApiAccessGateVisible
         ? ['docs/eas-ios-submit-attempt-evidence.json records the App Store Connect API Request Access gate before TestFlight upload.']
+        : []),
+      ...(googlePlayServiceAccountGateVisible
+        ? ['docs/eas-android-submit-attempt-evidence.json records the Google service account key gate before internal-track upload.']
         : []),
       'docs/store-console-evidence.json exists with both console records.',
       'npm run store:console:preflight passes.',

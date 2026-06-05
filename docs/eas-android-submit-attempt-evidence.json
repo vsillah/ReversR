@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "status": "blocked-hitl",
+  "generatedAt": "2026-06-05T22:43:33Z",
+  "intent": "Upload the finished Android production AAB to Google Play internal testing without starting a production rollout.",
+  "command": "npx eas-cli@20.0.0 submit --platform android --profile production --id 11c47edd-6dfc-4d81-8aee-3be563006d49 --non-interactive --no-wait",
+  "submitProfile": {
+    "profile": "production",
+    "track": "internal"
+  },
+  "result": {
+    "exitCode": 1,
+    "uploadStarted": false,
+    "productionRolloutStarted": false,
+    "stdoutTail": "Looking up credentials configuration for com.vsillah.reversrrebuild...\nGoogle Service Account Keys cannot be set up in --non-interactive mode.\n    Error: submit command failed."
+  },
+  "humanInTheLoopGate": {
+    "type": "Google Play service account key",
+    "whyRequired": "EAS Submit needs a Google Play service account key to upload the finished Android AAB to the internal testing track in non-interactive mode. EAS will not create or configure that key non-interactively.",
+    "riskBoundary": "Creating or uploading a Google service account key grants persistent Play Console access. Codex did not create a key, upload the AAB, create an internal release, send a release for review, or start production rollout.",
+    "playConsoleUiFinding": {
+      "checkedAt": "2026-06-05T22:54:00Z",
+      "developerAccount": "8864864114913698241",
+      "existingServiceAccountFound": true,
+      "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+      "reversrRebuildPermissionPresent": false,
+      "currentScreen": "Google Play Console > Users and permissions > appscreens@kinflo-project.iam.gserviceaccount.com",
+      "finding": "The existing service account has app permissions for older apps, but ReversR Rebuild is not listed. The next account-side action is to grant ReversR Rebuild app permissions to this service account and create or locate a JSON key through Google Cloud for EAS Submit."
+    },
+    "nextHumanAction": [
+      "Approve granting ReversR Rebuild permissions to appscreens@kinflo-project.iam.gserviceaccount.com and creating or locating a JSON key for EAS Submit, or provide an already-created key through an approved secure path.",
+      "Keep the EAS submit profile pointed at the internal track, not production.",
+      "Do not start a production rollout; the 12-tester closed-testing production gate is still intentionally skipped.",
+      "After the key is configured, rerun the Android submit command below."
+    ],
+    "resumeCommandAfterAccess": "npx eas-cli@20.0.0 submit --platform android --profile production --id 11c47edd-6dfc-4d81-8aee-3be563006d49 --non-interactive --no-wait"
+  }
+}
