@@ -53,7 +53,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and docs/eas-production-build-sync-evidence.json; QA and screenshots still need an iOS device, TestFlight install, or full Xcode Simulator path before this native QA gate can pass."
+      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and docs/eas-production-build-sync-evidence.json; QA and screenshots still need an iOS device, TestFlight install, or full Xcode Simulator path before this native QA gate can pass. Fresh probe at 2026-06-05T23:56:51Z confirmed xcode-select points to /Library/Developer/CommandLineTools and xcrun cannot find simctl, so no simulator automation path is available on this Mac yet."
     }
   },
   "productionBuilds": {
@@ -442,5 +442,21 @@
       "/tmp/reversr-native-artifacts/android-bom-live.png",
       "/tmp/reversr-native-artifacts/android-vendor-draft-live.png"
     ]
+  },
+  "tooling": {
+    "iosSimulator": {
+      "status": "unavailable-command-line-tools-only",
+      "checkedAt": "2026-06-05T23:57:22.000Z",
+      "xcodeSelectPath": "/Library/Developer/CommandLineTools",
+      "simctlAvailable": false,
+      "finding": "xcrun --find simctl and xcrun simctl list devices both fail because full Xcode simulator tooling is not installed/selected."
+    },
+    "androidAdb": {
+      "status": "connected",
+      "checkedAt": "2026-06-05T23:57:22.000Z",
+      "device": "Google Pixel 10 Pro Android 16",
+      "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
+      "note": "adb devices -l still lists the Pixel in device state over wireless debugging, but Android QA and screenshots are already recorded; remaining native gate is iOS QA/screenshots plus gated Android vendor/offline checks."
+    }
   }
 }

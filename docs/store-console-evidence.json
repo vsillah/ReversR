@@ -52,7 +52,21 @@
     "screenshotsUploaded": false,
     "buildSelected": false,
     "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. A finished iOS production/store IPA exists, but TestFlight upload is blocked until App Store Connect API access is requested/enabled or another authenticated upload path is approved. Native screenshot upload, contact information, privacy publishing, TestFlight upload/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked."
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. A finished iOS production/store IPA exists, but TestFlight upload is blocked until App Store Connect API access is requested/enabled or another authenticated upload path is approved. Native screenshot upload, contact information, privacy publishing, TestFlight upload/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked. App Store Connect is logged in as of 2026-06-05T23:57:22Z. Users and Access > Integrations > App Store Connect API shows Request Access. EAS iOS submit still cannot proceed non-interactively until API access/key setup is authorized and completed.",
+    "appStoreConnectApi": {
+      "status": "request-access-visible-hitl",
+      "checkedAt": "2026-06-05T23:57:22.000Z",
+      "currentUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+      "loggedIn": true,
+      "visibleAction": "Request Access",
+      "visibleMessage": "Permission is required to access the App Store Connect API. You can request access on behalf of your organization.",
+      "testFlightUploadReady": false,
+      "apiKeyCreated": false,
+      "privateKeyDownloaded": false,
+      "onePasswordItemCreated": false,
+      "note": "Codex navigated to the API access page after Apple login and stopped before persistent API access or key creation."
+    },
+    "addForReviewClicked": false
   },
   "googlePlay": {
     "status": "pass",
