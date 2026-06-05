@@ -245,6 +245,7 @@ const actionPlan = {
         : [
             'Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.',
             'Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.',
+            'Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.',
           ]),
       ...(nativeQaEvidence
         ? ['Update docs/native-qa-evidence.json with device QA results.']

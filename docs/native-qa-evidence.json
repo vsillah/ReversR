@@ -43,7 +43,10 @@
     {
       "id": "install-launch",
       "label": "Install and launch preview build",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -51,7 +54,10 @@
     {
       "id": "camera-permission",
       "label": "Camera permission prompt and scan screen",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -59,7 +65,10 @@
     {
       "id": "manual-description",
       "label": "Manual machine description fallback",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -67,7 +76,10 @@
     {
       "id": "inventory-validation",
       "label": "Admin inventory connector validation",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -75,7 +87,10 @@
     {
       "id": "machine-match",
       "label": "Machine match evidence from inventory",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -83,7 +98,10 @@
     {
       "id": "bom-generation",
       "label": "BOM generation with pricing ranges",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -91,7 +109,10 @@
     {
       "id": "assembly-steps",
       "label": "Assembly steps and reconstruction plan",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -99,7 +120,10 @@
     {
       "id": "quote-packet-export",
       "label": "Manufacturer quote packet export",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -107,7 +131,10 @@
     {
       "id": "vendor-request-draft",
       "label": "Vendor request email draft",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -115,7 +142,10 @@
     {
       "id": "policy-links",
       "label": "Privacy, terms, and support links",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -123,7 +153,10 @@
     {
       "id": "accessibility",
       "label": "Screen-reader labels and tap targets",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -131,7 +164,10 @@
     {
       "id": "offline-api-error",
       "label": "Hosted API outage/error handling",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -139,7 +175,10 @@
     {
       "id": "connector-auth-error",
       "label": "Missing or invalid connector credential handling",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": ""
@@ -147,7 +186,10 @@
     {
       "id": "native-screenshots",
       "label": "Final native screenshots captured",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": "pending",
       "ios": "pending",
       "evidence": "Complete the screenshots array below with final native PNG files from Android and iOS preview builds."
@@ -157,7 +199,10 @@
     {
       "id": "welcome",
       "label": "Welcome screen with the four reconstruction phases",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": {
         "status": "pending",
         "file": "docs/store-screenshots/native/android-01-welcome.png",
@@ -176,7 +221,10 @@
     {
       "id": "scan",
       "label": "Scan screen with camera or description mode",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": {
         "status": "pending",
         "file": "docs/store-screenshots/native/android-02-scan.png",
@@ -195,7 +243,10 @@
     {
       "id": "inventory-validation",
       "label": "Inventory connector validation preview",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": {
         "status": "pending",
         "file": "docs/store-screenshots/native/android-03-inventory-validation.png",
@@ -214,7 +265,10 @@
     {
       "id": "design-match",
       "label": "Design screen with machine match evidence",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": {
         "status": "pending",
         "file": "docs/store-screenshots/native/android-04-design-match.png",
@@ -233,7 +287,10 @@
     {
       "id": "build-handoff",
       "label": "Build screen with assembly steps, pricing, BOM, quote packet, and vendor draft controls",
-      "requiredPlatforms": ["android", "ios"],
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
       "android": {
         "status": "pending",
         "file": "docs/store-screenshots/native/android-05-build-handoff.png",

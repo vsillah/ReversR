@@ -171,6 +171,12 @@ npx eas-cli@20.0.0 build --platform android --profile preview
 npx eas-cli@20.0.0 build --platform ios --profile preview
 ```
 
+After a preview build starts or completes, sync EAS build URLs into the native QA evidence:
+
+```bash
+npm run native:eas:sync-builds
+```
+
 Run device QA before store submission:
 
 ```bash

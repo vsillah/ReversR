@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T14:10:15.444Z",
+  "dryRun": false,
+  "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
+  "evidenceFile": "docs/native-qa-evidence.json",
+  "buildsChecked": 1,
+  "previewBuildsChecked": 1,
+  "latestPreviewBuilds": {
+    "android": {
+      "id": "4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "status": "FINISHED",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
+      "completedAt": "2026-06-05T11:36:35.941Z",
+      "appBuildVersion": "15"
+    },
+    "ios": null
+  },
+  "nextActions": [
+    "Complete EAS iOS preview credentials, start an iOS preview build, then rerun npm run native:eas:sync-builds.",
+    "After Android and iOS preview builds are recorded, install them on test devices and complete docs/native-qa-evidence.json device QA and screenshot records."
+  ]
+}

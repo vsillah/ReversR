@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T14:05:23.650Z
-Release status generated at: 2026-06-05T14:05:23.643Z
+Generated at: 2026-06-05T14:11:00.319Z
+Release status generated at: 2026-06-05T14:11:00.310Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -36,9 +36,10 @@ Steps:
 2. Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.
 3. Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.
 4. Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.
-5. Update docs/native-qa-evidence.json with device QA results.
-6. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
-7. Run npm run native:qa:preflight.
+5. Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.
+6. Update docs/native-qa-evidence.json with device QA results.
+7. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
+8. Run npm run native:qa:preflight.
 
 Evidence required:
 

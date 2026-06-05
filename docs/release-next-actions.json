@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T14:05:23.650Z",
-  "releaseStatusGeneratedAt": "2026-06-05T14:05:23.643Z",
+  "generatedAt": "2026-06-05T14:11:00.319Z",
+  "releaseStatusGeneratedAt": "2026-06-05T14:11:00.310Z",
   "summary": {
     "pass": 6,
     "pending": 3
@@ -24,6 +24,7 @@
           "Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.",
           "Run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA so EAS can create or validate iOS internal-distribution credentials.",
           "Run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL after it starts.",
+          "Run npm run native:eas:sync-builds to refresh docs/native-qa-evidence.json and docs/eas-preview-build-sync-evidence.json from EAS build:list.",
           "Update docs/native-qa-evidence.json with device QA results.",
           "Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.",
           "Run npm run native:qa:preflight."
