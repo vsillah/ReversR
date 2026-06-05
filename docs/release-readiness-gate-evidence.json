@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "status": "pending-hitl",
+  "generatedAt": "2026-06-05T23:02:16Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after EAS submit probes, native/device checks, and Play Console service-account inspection.",
+  "pr": {
+    "number": 2,
+    "branch": "codex/inventory-reconstruction-clone",
+    "url": "https://github.com/vsillah/ReversR/pull/2"
+  },
+  "localState": {
+    "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+    "releaseStatus": "36 pass / 3 pending before refreshed release-status generation; Android native QA evidence advanced but iOS/screenshots/signoff gates remain pending.",
+    "pendingGateIds": [
+      "native-qa-evidence",
+      "store-console-records",
+      "native-screenshots"
+    ],
+    "latestStrictCommands": [
+      {
+        "command": "npm run native:preflight",
+        "status": "pass",
+        "note": "Strict native release config is valid and EAS CLI is logged in."
+      },
+      {
+        "command": "npm run native:qa:preflight",
+        "status": "failed-as-expected",
+        "note": "Android partial QA and screenshots are recorded; iOS preview/device/screenshot evidence, additional Android runtime checks, and final QA signoff are still missing."
+      },
+      {
+        "command": "npm run native:qa:preflight:local",
+        "status": "pass-with-pending-warnings",
+        "note": "The native QA evidence schema is valid while pending external device and signoff gates remain."
+      },
+      {
+        "command": "npm run store:console:preflight",
+        "status": "failed-as-expected",
+        "note": "Store records exist, but App Privacy publish, TestFlight readiness, Play Internal Testing readiness, native screenshots, and final signoff remain incomplete."
+      },
+      {
+        "command": "npm run store:console:preflight:local",
+        "status": "pass-with-pending-warnings",
+        "note": "Pending store-console evidence was refreshed without claiming final approval."
+      }
+    ]
+  },
+  "easSubmitConfig": {
+    "status": "configured-but-credential-gated",
+    "android": {
+      "submitProfile": "production",
+      "track": "internal",
+      "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+      "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
+      "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
+      "currentGate": "Google Play service account key and ReversR Rebuild app permissions are required before EAS can upload the AAB to internal testing."
+    },
+    "ios": {
+      "submitProfile": "production",
+      "ascAppId": "6777091538",
+      "finishedBuildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "artifactType": "ipa",
+      "submitAttemptEvidence": "docs/eas-ios-submit-attempt-evidence.json",
+      "currentGate": "App Store Connect API access is required before EAS can upload the IPA to TestFlight non-interactively."
+    }
+  },
+  "computerUseState": {
+    "googlePlay": {
+      "currentScreen": "Google Play Console > Users and permissions > appscreens@kinflo-project.iam.gserviceaccount.com",
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/users-and-permissions/appscreens%40kinflo-project.iam.gserviceaccount.com",
+      "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+      "serviceAccountStatus": "Active; access never expires",
+      "reversrRebuildPermissionPresent": false,
+      "visibleAppsWithPermissions": [
+        "Bar Code",
+        "ConsciousCart",
+        "ReversR",
+        "SnapSplit",
+        "StackRay",
+        "The Visioneer"
+      ],
+      "nextActionRequiringApproval": "Click Add app, add ReversR Rebuild, grant the minimum release/upload permissions needed for EAS Submit, save changes, then create or locate a Google Cloud JSON key for EAS Submit."
+    },
+    "appStoreConnect": {
+      "apiAccessScreen": "Users and Access > Integrations > App Store Connect API",
+      "url": "https://appstoreconnect.apple.com/access/integrations/api",
+      "visibleAction": "Request Access",
+      "nextActionRequiringApproval": "Click Request Access and create or authorize an App Store Connect API key for EAS Submit after accepting any Apple account terms."
+    }
+  },
+  "nativeQaAndScreenshots": {
+    "status": "partial-android-blocked-ios",
+    "android": {
+      "previewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "deviceEvidence": "Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z",
+      "screenshotsCaptured": [
+        "docs/store-screenshots/native/android-01-welcome.png",
+        "docs/store-screenshots/native/android-02-scan.png",
+        "docs/store-screenshots/native/android-03-inventory-validation.png",
+        "docs/store-screenshots/native/android-04-design-match.png",
+        "docs/store-screenshots/native/android-05-build-handoff.png"
+      ],
+      "currentDeviceState": "ADB reconnected over wireless debugging via mDNS endpoint 192.168.4.96:37165. Fresh live Android QA advanced install/launch, camera permission prompt, manual description fallback, inventory validation, match/design/build/pricing, BOM generation, quote-packet controls, and vendor-control visibility.",
+      "liveQaEvidence": "docs/native-android-live-qa-evidence.json",
+      "completedLiveChecks": [
+        "install-launch",
+        "camera-permission",
+        "manual-description",
+        "inventory-validation",
+        "machine-match",
+        "bom-generation",
+        "assembly-steps",
+        "quote-packet-export",
+        "accessibility",
+        "native-screenshots"
+      ],
+      "remainingLiveChecks": [
+        "vendor-request-draft was visible but not prepared to avoid creating a third-party communication draft",
+        "policy-links remain pending as native-device evidence",
+        "offline-api-error and connector-auth-error require controlled failure conditions"
+      ]
+    },
+    "ios": {
+      "productionStoreBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "previewBuild": "",
+      "currentBlockers": [
+        "No iOS device is available for native QA or screenshots.",
+        "Full Xcode is not installed; xcrun simctl is unavailable.",
+        "The iOS IPA has not been uploaded to TestFlight because App Store Connect API access is not enabled."
+      ]
+    }
+  },
+  "storeConsoleRecords": {
+    "status": "records-exist-final-readiness-pending",
+    "appStoreConnect": {
+      "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+      "metadataSaved": true,
+      "appInformationSaved": true,
+      "appPrivacyConfiguredNotPublished": true,
+      "ageRatingCompleted": true,
+      "testFlightReady": false,
+      "addForReviewClicked": false
+    },
+    "googlePlay": {
+      "recordUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+      "completedSetupTaskCount": 11,
+      "totalSetupTaskCount": 11,
+      "appContentCompleted": true,
+      "dataSafetyCompleted": true,
+      "storeListingAssetsUploaded": true,
+      "internalTestingReady": false,
+      "closedTestingSkippedForNow": true,
+      "closedTestingMinimumTesterCount": 12,
+      "closedTestingMinimumDays": 14,
+      "sendForReviewClicked": false
+    }
+  },
+  "humanInTheLoopResumeInstructions": [
+    "For Google Play internal testing upload: approve granting ReversR Rebuild permissions to appscreens@kinflo-project.iam.gserviceaccount.com and creating or locating a JSON key for EAS Submit. Keep Android submit on the internal track only.",
+    "For Apple TestFlight upload: approve App Store Connect API access and an EAS submit key, or complete Apple's Request Access flow manually and tell Codex when access is enabled.",
+    "For Android live QA: the Pixel is currently reachable over ADB via mDNS. Further checks can continue while the phone stays online, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
+    "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
+    "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
+  ]
+}

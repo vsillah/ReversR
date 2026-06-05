@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "status": "partial-pass",
+  "generatedAt": "2026-06-05T23:02:16Z",
+  "device": "Google Pixel 10 Pro Android 16",
+  "packageName": "com.vsillah.reversrrebuild",
+  "adb": {
+    "initialDevices": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp device product:blazer model:Pixel_10_Pro device:blazer",
+    "mdnsEndpoint": "192.168.4.96:37165",
+    "oldEndpoint": "192.168.4.96:33423 refused connection"
+  },
+  "result": {
+    "launch": "pass",
+    "cameraPermissionPrompt": "pass-denied-after-observation",
+    "manualDescriptionFallback": "pass",
+    "inventoryConnectorValidation": "pass",
+    "machineMatch": "pass",
+    "designPhase": "pass",
+    "buildPricingAssembly": "pass",
+    "bomGeneration": "pass",
+    "quotePacketControls": "pass",
+    "vendorRequestControls": "visible-not-prepared",
+    "externalUploadOrEmailSent": false,
+    "cameraPermissionGranted": false
+  },
+  "blockerNotes": [
+    "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft.",
+    "policy-links remain pending for live Android QA because Settings currently shows admin connector controls; policy link verification remains covered by hosted policy evidence, not native-device interaction.",
+    "offline-api-error and connector-auth-error remain pending because they require controlled network/backend fault conditions."
+  ],
+  "screenshotEvidence": [
+    "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
+    "/tmp/reversr-native-artifacts/android-camera-permission-denied.png",
+    "/tmp/reversr-native-artifacts/android-after-manual-scan.png",
+    "/tmp/reversr-native-artifacts/android-connector-validated-live.png",
+    "/tmp/reversr-native-artifacts/android-after-match-live.png",
+    "/tmp/reversr-native-artifacts/android-build-phase-live.png",
+    "/tmp/reversr-native-artifacts/android-bom-live.png",
+    "/tmp/reversr-native-artifacts/android-vendor-draft-live.png"
+  ],
+  "updatedEvidenceFile": "docs/native-qa-evidence.json"
+}

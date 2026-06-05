@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T22:34:13.946Z",
+  "generatedAt": "2026-06-05T22:52:17.843Z",
   "dryRun": false,
   "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
   "buildsChecked": 4,

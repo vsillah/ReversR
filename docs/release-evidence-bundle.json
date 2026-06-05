@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T22:48:39.575Z",
+  "generatedAt": "2026-06-05T23:02:25.482Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T22:48:39.550Z",
+    "generatedAt": "2026-06-05T23:02:25.458Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -475,7 +475,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T22:46:20.858Z",
+      "generatedAt": "2026-06-05T23:01:49.563Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -494,7 +494,7 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T22:46:20.795Z",
+        "generatedAt": "2026-06-05T23:01:49.528Z",
         "summary": {
           "pass": 36,
           "pending": 3
@@ -671,7 +671,7 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T22:44:18.906Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T23:01:41.331Z.",
               "nextStep": ""
             },
             {
@@ -713,7 +713,7 @@
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T22:46:19.789Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T23:01:40.597Z.",
               "nextStep": ""
             },
             {
@@ -727,14 +727,14 @@
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded with current EAS linkage state",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T22:44:42.012Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T22:52:15.820Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T22:44:39.529Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T23:01:48.793Z.",
               "nextStep": ""
             }
           ],
@@ -1275,7 +1275,7 @@
     "easPreviewBuildSync": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T22:34:05.327Z",
+      "generatedAt": "2026-06-05T22:52:15.296Z",
       "dryRun": false,
       "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
       "evidenceFile": "docs/native-qa-evidence.json",
@@ -1300,7 +1300,7 @@
     "easProductionBuildSync": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T22:34:13.946Z",
+      "generatedAt": "2026-06-05T22:52:17.843Z",
       "dryRun": false,
       "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
       "buildsChecked": 4,
@@ -1499,6 +1499,212 @@
         "resumeCommandAfterAccess": "npx eas-cli@20.0.0 submit --platform android --profile production --id 11c47edd-6dfc-4d81-8aee-3be563006d49 --non-interactive --no-wait"
       }
     },
+    "nativeAndroidLiveQa": {
+      "schemaVersion": 1,
+      "status": "partial-pass",
+      "generatedAt": "2026-06-05T23:02:16Z",
+      "device": "Google Pixel 10 Pro Android 16",
+      "packageName": "com.vsillah.reversrrebuild",
+      "adb": {
+        "initialDevices": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp device product:blazer model:Pixel_10_Pro device:blazer",
+        "mdnsEndpoint": "192.168.4.96:37165",
+        "oldEndpoint": "192.168.4.96:33423 refused connection"
+      },
+      "result": {
+        "launch": "pass",
+        "cameraPermissionPrompt": "pass-denied-after-observation",
+        "manualDescriptionFallback": "pass",
+        "inventoryConnectorValidation": "pass",
+        "machineMatch": "pass",
+        "designPhase": "pass",
+        "buildPricingAssembly": "pass",
+        "bomGeneration": "pass",
+        "quotePacketControls": "pass",
+        "vendorRequestControls": "visible-not-prepared",
+        "externalUploadOrEmailSent": false,
+        "cameraPermissionGranted": false
+      },
+      "blockerNotes": [
+        "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft.",
+        "policy-links remain pending for live Android QA because Settings currently shows admin connector controls; policy link verification remains covered by hosted policy evidence, not native-device interaction.",
+        "offline-api-error and connector-auth-error remain pending because they require controlled network/backend fault conditions."
+      ],
+      "screenshotEvidence": [
+        "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
+        "/tmp/reversr-native-artifacts/android-camera-permission-denied.png",
+        "/tmp/reversr-native-artifacts/android-after-manual-scan.png",
+        "/tmp/reversr-native-artifacts/android-connector-validated-live.png",
+        "/tmp/reversr-native-artifacts/android-after-match-live.png",
+        "/tmp/reversr-native-artifacts/android-build-phase-live.png",
+        "/tmp/reversr-native-artifacts/android-bom-live.png",
+        "/tmp/reversr-native-artifacts/android-vendor-draft-live.png"
+      ],
+      "updatedEvidenceFile": "docs/native-qa-evidence.json"
+    },
+    "releaseReadinessGateEvidence": {
+      "schemaVersion": 1,
+      "status": "pending-hitl",
+      "generatedAt": "2026-06-05T23:02:16Z",
+      "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after EAS submit probes, native/device checks, and Play Console service-account inspection.",
+      "pr": {
+        "number": 2,
+        "branch": "codex/inventory-reconstruction-clone",
+        "url": "https://github.com/vsillah/ReversR/pull/2"
+      },
+      "localState": {
+        "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+        "releaseStatus": "36 pass / 3 pending before refreshed release-status generation; Android native QA evidence advanced but iOS/screenshots/signoff gates remain pending.",
+        "pendingGateIds": [
+          "native-qa-evidence",
+          "store-console-records",
+          "native-screenshots"
+        ],
+        "latestStrictCommands": [
+          {
+            "command": "npm run native:preflight",
+            "status": "pass",
+            "note": "Strict native release config is valid and EAS CLI is logged in."
+          },
+          {
+            "command": "npm run native:qa:preflight",
+            "status": "failed-as-expected",
+            "note": "Android partial QA and screenshots are recorded; iOS preview/device/screenshot evidence, additional Android runtime checks, and final QA signoff are still missing."
+          },
+          {
+            "command": "npm run native:qa:preflight:local",
+            "status": "pass-with-pending-warnings",
+            "note": "The native QA evidence schema is valid while pending external device and signoff gates remain."
+          },
+          {
+            "command": "npm run store:console:preflight",
+            "status": "failed-as-expected",
+            "note": "Store records exist, but App Privacy publish, TestFlight readiness, Play Internal Testing readiness, native screenshots, and final signoff remain incomplete."
+          },
+          {
+            "command": "npm run store:console:preflight:local",
+            "status": "pass-with-pending-warnings",
+            "note": "Pending store-console evidence was refreshed without claiming final approval."
+          }
+        ]
+      },
+      "easSubmitConfig": {
+        "status": "configured-but-credential-gated",
+        "android": {
+          "submitProfile": "production",
+          "track": "internal",
+          "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+          "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
+          "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
+          "currentGate": "Google Play service account key and ReversR Rebuild app permissions are required before EAS can upload the AAB to internal testing."
+        },
+        "ios": {
+          "submitProfile": "production",
+          "ascAppId": "6777091538",
+          "finishedBuildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+          "artifactType": "ipa",
+          "submitAttemptEvidence": "docs/eas-ios-submit-attempt-evidence.json",
+          "currentGate": "App Store Connect API access is required before EAS can upload the IPA to TestFlight non-interactively."
+        }
+      },
+      "computerUseState": {
+        "googlePlay": {
+          "currentScreen": "Google Play Console > Users and permissions > appscreens@kinflo-project.iam.gserviceaccount.com",
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/users-and-permissions/appscreens%40kinflo-project.iam.gserviceaccount.com",
+          "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+          "serviceAccountStatus": "Active; access never expires",
+          "reversrRebuildPermissionPresent": false,
+          "visibleAppsWithPermissions": [
+            "Bar Code",
+            "ConsciousCart",
+            "ReversR",
+            "SnapSplit",
+            "StackRay",
+            "The Visioneer"
+          ],
+          "nextActionRequiringApproval": "Click Add app, add ReversR Rebuild, grant the minimum release/upload permissions needed for EAS Submit, save changes, then create or locate a Google Cloud JSON key for EAS Submit."
+        },
+        "appStoreConnect": {
+          "apiAccessScreen": "Users and Access > Integrations > App Store Connect API",
+          "url": "https://appstoreconnect.apple.com/access/integrations/api",
+          "visibleAction": "Request Access",
+          "nextActionRequiringApproval": "Click Request Access and create or authorize an App Store Connect API key for EAS Submit after accepting any Apple account terms."
+        }
+      },
+      "nativeQaAndScreenshots": {
+        "status": "partial-android-blocked-ios",
+        "android": {
+          "previewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+          "deviceEvidence": "Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z",
+          "screenshotsCaptured": [
+            "docs/store-screenshots/native/android-01-welcome.png",
+            "docs/store-screenshots/native/android-02-scan.png",
+            "docs/store-screenshots/native/android-03-inventory-validation.png",
+            "docs/store-screenshots/native/android-04-design-match.png",
+            "docs/store-screenshots/native/android-05-build-handoff.png"
+          ],
+          "currentDeviceState": "ADB reconnected over wireless debugging via mDNS endpoint 192.168.4.96:37165. Fresh live Android QA advanced install/launch, camera permission prompt, manual description fallback, inventory validation, match/design/build/pricing, BOM generation, quote-packet controls, and vendor-control visibility.",
+          "liveQaEvidence": "docs/native-android-live-qa-evidence.json",
+          "completedLiveChecks": [
+            "install-launch",
+            "camera-permission",
+            "manual-description",
+            "inventory-validation",
+            "machine-match",
+            "bom-generation",
+            "assembly-steps",
+            "quote-packet-export",
+            "accessibility",
+            "native-screenshots"
+          ],
+          "remainingLiveChecks": [
+            "vendor-request-draft was visible but not prepared to avoid creating a third-party communication draft",
+            "policy-links remain pending as native-device evidence",
+            "offline-api-error and connector-auth-error require controlled failure conditions"
+          ]
+        },
+        "ios": {
+          "productionStoreBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+          "previewBuild": "",
+          "currentBlockers": [
+            "No iOS device is available for native QA or screenshots.",
+            "Full Xcode is not installed; xcrun simctl is unavailable.",
+            "The iOS IPA has not been uploaded to TestFlight because App Store Connect API access is not enabled."
+          ]
+        }
+      },
+      "storeConsoleRecords": {
+        "status": "records-exist-final-readiness-pending",
+        "appStoreConnect": {
+          "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+          "metadataSaved": true,
+          "appInformationSaved": true,
+          "appPrivacyConfiguredNotPublished": true,
+          "ageRatingCompleted": true,
+          "testFlightReady": false,
+          "addForReviewClicked": false
+        },
+        "googlePlay": {
+          "recordUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+          "completedSetupTaskCount": 11,
+          "totalSetupTaskCount": 11,
+          "appContentCompleted": true,
+          "dataSafetyCompleted": true,
+          "storeListingAssetsUploaded": true,
+          "internalTestingReady": false,
+          "closedTestingSkippedForNow": true,
+          "closedTestingMinimumTesterCount": 12,
+          "closedTestingMinimumDays": 14,
+          "sendForReviewClicked": false
+        }
+      },
+      "humanInTheLoopResumeInstructions": [
+        "For Google Play internal testing upload: approve granting ReversR Rebuild permissions to appscreens@kinflo-project.iam.gserviceaccount.com and creating or locating a JSON key for EAS Submit. Keep Android submit on the internal track only.",
+        "For Apple TestFlight upload: approve App Store Connect API access and an EAS submit key, or complete Apple's Request Access flow manually and tell Codex when access is enabled.",
+        "For Android live QA: the Pixel is currently reachable over ADB via mDNS. Further checks can continue while the phone stays online, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
+        "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
+        "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
+      ]
+    },
     "webFlowSmoke": {
       "schemaVersion": 1,
       "status": "pass",
@@ -1561,12 +1767,12 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T22:44:42.012Z",
+      "generatedAt": "2026-06-05T22:52:15.820Z",
       "mode": {
-        "allowPlaceholder": true,
-        "allowMissingCli": true,
-        "allowUnlinkedEas": true,
-        "allowNotLoggedIn": true
+        "allowPlaceholder": false,
+        "allowMissingCli": false,
+        "allowUnlinkedEas": false,
+        "allowNotLoggedIn": false
       },
       "warnings": [],
       "appIdentity": {
@@ -1641,7 +1847,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T22:44:39.529Z",
+      "generatedAt": "2026-06-05T23:01:48.793Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -2961,8 +3167,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T22:48:38.615Z",
-      "releaseStatusGeneratedAt": "2026-06-05T22:48:38.608Z",
+      "generatedAt": "2026-06-05T23:01:54.718Z",
+      "releaseStatusGeneratedAt": "2026-06-05T23:01:54.711Z",
       "summary": {
         "pass": 6,
         "pending": 3
@@ -3122,6 +3328,8 @@
     "docs/eas-ios-production-build-attempt-evidence.json",
     "docs/eas-ios-submit-attempt-evidence.json",
     "docs/eas-android-submit-attempt-evidence.json",
+    "docs/native-android-live-qa-evidence.json",
+    "docs/release-readiness-gate-evidence.json",
     "docs/eas-ios-preview-build-start-evidence.json",
     "docs/native-qa-evidence.template.json",
     "scripts/sync-eas-preview-builds.js",

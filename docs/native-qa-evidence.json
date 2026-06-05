@@ -24,7 +24,7 @@
       "osVersion": "16",
       "tester": "vambahsillah",
       "completedAt": "2026-06-05T11:36:35.941Z",
-      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA and core Android native screenshot capture are complete; remaining Android checks are scoped to camera permission, policy links, error handling, and vendor draft send boundaries. APK artifact downloaded and SHA-256 verified at 2026-06-05T14:44:55.285Z; install was later completed over wireless ADB. Android device probe captured at 2026-06-05T14:54:18.455Z. Android device probe captured at 2026-06-05T14:54:44.438Z. Android device probe captured at 2026-06-05T14:55:02.531Z. Android device probe captured at 2026-06-05T14:55:23.799Z. Android device probe captured at 2026-06-05T14:55:46.393Z. Android device probe captured at 2026-06-05T14:56:37.512Z. Android device probe captured at 2026-06-05T14:56:49.635Z. Android device probe captured at 2026-06-05T14:57:31.157Z. Android device probe captured at 2026-06-05T14:57:59.698Z. Android device probe captured at 2026-06-05T14:58:42.997Z. Android device probe captured at 2026-06-05T14:59:53.783Z. Installed and launched on Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z.",
+      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA and core Android native screenshot capture are complete; remaining Android checks are scoped to camera permission, policy links, error handling, and vendor draft send boundaries. APK artifact downloaded and SHA-256 verified at 2026-06-05T14:44:55.285Z; install was later completed over wireless ADB. Android device probe captured at 2026-06-05T14:54:18.455Z. Android device probe captured at 2026-06-05T14:54:44.438Z. Android device probe captured at 2026-06-05T14:55:02.531Z. Android device probe captured at 2026-06-05T14:55:23.799Z. Android device probe captured at 2026-06-05T14:55:46.393Z. Android device probe captured at 2026-06-05T14:56:37.512Z. Android device probe captured at 2026-06-05T14:56:49.635Z. Android device probe captured at 2026-06-05T14:57:31.157Z. Android device probe captured at 2026-06-05T14:57:59.698Z. Android device probe captured at 2026-06-05T14:58:42.997Z. Android device probe captured at 2026-06-05T14:59:53.783Z. Installed and launched on Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z. Android device probe captured at 2026-06-05T22:53:34.901Z. Live Android QA resumed over wireless ADB and advanced camera-permission, manual-description, inventory validation, machine match, design, build, pricing, BOM, and vendor-control checks at 2026-06-05T22:58:30Z.",
       "localArtifact": {
         "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
         "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
@@ -34,11 +34,13 @@
       },
       "installStatus": "pass",
       "adbProbe": {
-        "checkedAt": "2026-06-05T15:03:28.217Z",
-        "adbState": "wireless-adb-paired-disconnected-after-capture",
-        "status": "qa-capture-complete",
+        "checkedAt": "2026-06-05T22:58:30Z",
+        "adbState": "wireless-adb-mdns-connected",
+        "status": "live-android-qa-pass-partial",
         "device": "Google Pixel 10 Pro Android 16",
-        "note": "Wireless ADB was paired for capture, then disconnected after screenshots were saved."
+        "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
+        "endpoint": "192.168.4.96:37165",
+        "note": "ADB reconnected over wireless debugging via mDNS after the previous port refused. App launched and live Android QA checks were performed."
       }
     },
     "iosPreview": {
@@ -88,7 +90,7 @@
       ],
       "android": "pass",
       "ios": "pending",
-      "evidence": "Preview APK installed with adb install -r and launched into com.vsillah.reversrrebuild/.MainActivity on Pixel 10 Pro Android 16."
+      "evidence": "Preview APK launched into com.vsillah.reversrrebuild/.MainActivity on Google Pixel 10 Pro Android 16; uiautomator confirmed the ReversR welcome screen and New Reconstruction button."
     },
     {
       "id": "camera-permission",
@@ -97,9 +99,9 @@
         "android",
         "ios"
       ],
-      "android": "pending",
+      "android": "pass",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "On Google Pixel 10 Pro Android 16, Scan mode exposed the Android permission dialog: \"Allow ReversR Rebuild to take pictures and record video?\" with While using the app, Only this time, and Don't allow options. Camera access was denied to avoid granting persistent permission; the app responded with its own \"Permission needed\" dialog explaining camera access is required to scan machines."
     },
     {
       "id": "manual-description",
@@ -108,9 +110,9 @@
         "android",
         "ios"
       ],
-      "android": "pending",
+      "android": "pass",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "On Google Pixel 10 Pro Android 16, Type mode accepted a manual CNC-router description, enabled Start Machine Scan, and advanced to Phase 2 with a READY TO MATCH scan summary and expected components."
     },
     {
       "id": "inventory-validation",
@@ -121,7 +123,7 @@
       ],
       "android": "pass",
       "ios": "pending",
-      "evidence": "Demo Machine Inventory connector validated on Android; inventory preview showed 2 records and connector controls."
+      "evidence": "On Google Pixel 10 Pro Android 16, the Demo Machine Inventory connector validated successfully and displayed 2 records, including Desktop FDM 3D Printer and Desktop CNC Router."
     },
     {
       "id": "machine-match",
@@ -132,7 +134,7 @@
       ],
       "android": "pass",
       "ios": "pending",
-      "evidence": "Android sample scan matched against the demo inventory and advanced to Phase 3 Design."
+      "evidence": "On Google Pixel 10 Pro Android 16, Match Machine & Build Plan advanced from the validated demo inventory to Phase 3 Design with matched-machine reconstruction constraints and design/reference tooling."
     },
     {
       "id": "bom-generation",
@@ -143,7 +145,7 @@
       ],
       "android": "pass",
       "ios": "pending",
-      "evidence": "Android build phase generated a Bill of Materials with itemized inventory-matched parts and supplier/cost ranges."
+      "evidence": "On Google Pixel 10 Pro Android 16, Generate BOM produced Desktop CNC Router Reconstruction Package v0.1-review with 9 inventory-matched items, quantities, cost ranges, supplier guidance, and lead-time fields."
     },
     {
       "id": "assembly-steps",
@@ -154,7 +156,7 @@
       ],
       "android": "pass",
       "ios": "pending",
-      "evidence": "Android build phase displayed assembly sequence and pricing estimate for the matched machine."
+      "evidence": "On Google Pixel 10 Pro Android 16, Build phase showed assembly sequence steps, QC notes, and pricing estimates: parts $420-$780, 3D modeling $300-$900, fabrication $500-$1,600, assembly labor $240-$640, total $1,460-$3,920."
     },
     {
       "id": "quote-packet-export",
@@ -165,7 +167,7 @@
       ],
       "android": "pass",
       "ios": "pending",
-      "evidence": "Android quote packet export generated Desktop_CNC_Router_Reconstruction_Package_manufacturer_quote_packet.json and opened a Drive upload sheet; external upload was not completed."
+      "evidence": "On Google Pixel 10 Pro Android 16, Build phase displayed Export BOM (CSV), Export All (JSON), and Export Quote Packet controls, plus the Manufacturer Handoff section. External upload/share was not started."
     },
     {
       "id": "vendor-request-draft",
@@ -176,7 +178,7 @@
       ],
       "android": "pending",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "On Google Pixel 10 Pro Android 16, Vendor Request Draft controls were visible with Xometry and Protolabs target options, recipient email field, admin notes field, and Prepare Request Email button. The draft was not prepared because creating a third-party vendor email draft remains a communication boundary."
     },
     {
       "id": "policy-links",
@@ -196,9 +198,9 @@
         "android",
         "ios"
       ],
-      "android": "pending",
+      "android": "pass",
       "ios": "pending",
-      "evidence": ""
+      "evidence": "Android uiautomator exposed accessible labels/content descriptions for primary controls including Start new machine reconstruction, settings/history, scan mode, camera mode, connector validation, match/build, export packet, and vendor request controls. Local accessibility preflight also covers app-level labels."
     },
     {
       "id": "offline-api-error",
@@ -402,6 +404,43 @@
       "BOM generation produced itemized inventory-matched parts.",
       "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
       "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+    ]
+  },
+  "liveAndroidQa": {
+    "status": "partial-pass",
+    "checkedAt": "2026-06-05T22:58:30Z",
+    "device": "Google Pixel 10 Pro Android 16",
+    "adb": {
+      "initialDevices": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp device product:blazer model:Pixel_10_Pro device:blazer",
+      "mdnsEndpoint": "192.168.4.96:37165",
+      "oldEndpoint": "192.168.4.96:33423 refused connection"
+    },
+    "completedAndroidChecks": [
+      "install-launch",
+      "camera-permission",
+      "manual-description",
+      "inventory-validation",
+      "machine-match",
+      "bom-generation",
+      "assembly-steps",
+      "quote-packet-export",
+      "accessibility",
+      "native-screenshots"
+    ],
+    "remainingAndroidChecks": [
+      "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft.",
+      "policy-links remain pending for live Android QA because Settings currently shows admin connector controls; policy link verification remains covered by hosted policy evidence, not native-device interaction.",
+      "offline-api-error and connector-auth-error remain pending because they require controlled network/backend fault conditions."
+    ],
+    "screenshotsObserved": [
+      "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
+      "/tmp/reversr-native-artifacts/android-camera-permission-denied.png",
+      "/tmp/reversr-native-artifacts/android-after-manual-scan.png",
+      "/tmp/reversr-native-artifacts/android-connector-validated-live.png",
+      "/tmp/reversr-native-artifacts/android-after-match-live.png",
+      "/tmp/reversr-native-artifacts/android-build-phase-live.png",
+      "/tmp/reversr-native-artifacts/android-bom-live.png",
+      "/tmp/reversr-native-artifacts/android-vendor-draft-live.png"
     ]
   }
 }

@@ -1,22 +1,17 @@
 {
-  "checkedAt": "2026-06-05T14:59:53.783Z",
+  "checkedAt": "2026-06-05T22:53:41.510Z",
   "adbPath": "/opt/homebrew/bin/adb",
   "devices": [
     {
-      "serial": "192.168.4.96:33423",
-      "state": "device",
-      "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:39"
-    },
-    {
       "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
       "state": "device",
-      "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:38"
+      "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:4"
     }
   ],
   "selectedDevice": {
-    "serial": "192.168.4.96:33423",
+    "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
     "state": "device",
-    "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:39",
+    "details": "product:blazer model:Pixel_10_Pro device:blazer transport_id:4",
     "manufacturer": "Google",
     "model": "Pixel 10 Pro",
     "osVersion": "16",
