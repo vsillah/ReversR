@@ -145,6 +145,11 @@ const appStoreApiAccessGateVisible = easIosSubmitAttemptEvidence?.status === 'bl
   easIosSubmitAttemptEvidence?.appStoreConnectScreen?.visibleAction === 'Request Access';
 const googlePlayServiceAccountGateVisible = easAndroidSubmitAttemptEvidence?.status === 'blocked-hitl' &&
   /Google Service Account Keys/i.test(easAndroidSubmitAttemptEvidence?.result?.stdoutTail || '');
+const googlePlayAndroidDeveloperApiGateVisible = (
+  easAndroidSubmitAttemptEvidence?.status === 'blocked-google-api-disabled' ||
+  /Google Play Android Developer API.*disabled/i.test(easAndroidSubmitAttemptEvidence?.result?.stdoutTailSanitized || '') ||
+  /androidpublisher\.googleapis\.com/i.test(easAndroidSubmitAttemptEvidence?.remainingVerificationGate?.nextAction || '')
+);
 const iosDeviceRegistrationPending = [
   ...(nativeDeviceHandoff?.nextNativeQaActions || []),
   ...(nativeDeviceHandoff?.notCompletedByAutomation || []),
@@ -348,6 +353,13 @@ const actionPlan = {
         'Keep Android submit on the internal track; do not start a production rollout.',
         'After the service account key exists, rerun the documented Android internal-track submit command.',
       ] : []),
+      ...(googlePlayAndroidDeveloperApiGateVisible ? [
+        'Open the Google Cloud Console page for Google Play Android Developer API on the Kinflo Project.',
+        'Enable androidpublisher.googleapis.com only after explicit account-holder approval for this Google Cloud account-side action.',
+        'After the API is enabled, wait a few minutes for propagation if Google says it may be needed.',
+        'Rerun the documented Android EAS submit command with the target track still set to internal.',
+        'Do not click Google Play Send for review or start a production rollout.',
+      ] : []),
       'Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.',
       'Run npm run store:console:preflight.',
     ],
@@ -359,6 +371,9 @@ const actionPlan = {
         : []),
       ...(googlePlayServiceAccountGateVisible
         ? ['docs/eas-android-submit-attempt-evidence.json records the Google service account key gate before internal-track upload.']
+        : []),
+      ...(googlePlayAndroidDeveloperApiGateVisible
+        ? ['docs/eas-android-submit-attempt-evidence.json records the Google Play Android Developer API enablement gate after the internal-track EAS submission reached Fastlane.']
         : []),
       'docs/store-console-evidence.json exists with both console records.',
       'npm run store:console:preflight passes.',

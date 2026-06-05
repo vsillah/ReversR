@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T23:09:24.202Z",
+  "generatedAt": "2026-06-05T23:33:40.350Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -11,19 +11,20 @@
   },
   "summary": {
     "requirementCount": 8,
-    "passedCount": 7,
-    "pendingCount": 1,
+    "passedCount": 6,
+    "pendingCount": 2,
     "blockedCount": 0,
     "pendingRequirementIds": [
+      "store-readiness-packet",
       "apple-google-store-publication"
     ],
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T23:09:24.159Z",
+    "generatedAt": "2026-06-05T23:33:40.321Z",
     "summary": {
-      "pass": 36,
-      "pending": 3
+      "pass": 35,
+      "pending": 4
     }
   },
   "requirements": [
@@ -163,20 +164,20 @@
     {
       "id": "store-readiness-packet",
       "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
-      "status": "pass",
+      "status": "pending",
       "evidence": [
         {
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T22:44:42.449Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T23:33:37.226Z.",
           "nextStep": ""
         },
         {
           "id": "store-review-safety-packet",
           "status": "pass",
           "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T22:44:34.824Z.",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T23:33:37.360Z.",
           "nextStep": ""
         },
         {
@@ -197,15 +198,15 @@
           "id": "release-evidence-bundle",
           "status": "pass",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T23:02:25.482Z.",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-05T23:33:14.684Z.",
           "nextStep": ""
         },
         {
           "id": "local-release-ci-evidence",
-          "status": "pass",
+          "status": "pending",
           "title": "Local release CI evidence records repeatable pre-store validation",
-          "evidence": "docs/local-release-ci-evidence.json records 16/16 passing local checks at 2026-06-05T22:44:48.523Z.",
-          "nextStep": ""
+          "evidence": "docs/local-release-ci-evidence.json is missing or incomplete.",
+          "nextStep": "Run npm run release:local-ci before external account-side release work."
         },
         {
           "id": "release-local-ci-workflow",
@@ -225,21 +226,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-05T22:44:36.185Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-05T23:33:38.193Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T22:44:37.311Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T23:33:38.892Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T23:01:54.718Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-05T23:33:39.618Z.",
           "nextStep": ""
         },
         {
@@ -260,7 +261,7 @@
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T23:04:29.533Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T23:33:14.069Z.",
           "nextStep": ""
         }
       ],

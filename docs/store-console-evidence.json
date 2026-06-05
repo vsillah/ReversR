@@ -99,16 +99,16 @@
     "appContentCompleted": true,
     "internalTestingReady": false,
     "internalTestingUploadAttempted": true,
-    "internalTestingUploadAttemptedAt": "2026-06-05T22:43:33Z",
+    "internalTestingUploadAttemptedAt": "2026-06-05T23:30:45.635Z",
     "internalTestingUploadEvidence": "docs/eas-android-submit-attempt-evidence.json",
-    "internalTestingUploadBlocker": "EAS Submit found the finished Android production AAB and the production submit profile targets the Google Play internal track, but upload did not start because Google Service Account Keys cannot be set up in --non-interactive mode. Codex did not create a service account key, upload the AAB, create an internal release, send a release for review, or start production rollout.",
+    "internalTestingUploadBlocker": "Google Play Android Developer API is disabled for Google Cloud project number 165345817438. Enable androidpublisher.googleapis.com for that project, wait for propagation if needed, then rerun the internal-track EAS submit command.",
     "categoryDraftSaved": true,
     "categoryDraftSavedAt": "2026-06-05T16:11:30.815Z",
     "contactDetailsCompleted": true,
     "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
     "publicSupportEmail": "vambah@amadutown.com",
     "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
-    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. Google Play quick checks completed, but Publishing overview still blocks Send app for review until required dashboard release/testing steps are completed. EAS Android internal-track upload was attempted with the finished AAB but did not start because a Google service account key is not configured for non-interactive submit. Internal testing, closed testing, production access, native QA signoff, and final Send for review remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. Google Play quick checks completed, but Publishing overview still blocks Send app for review until required dashboard release/testing steps are completed. EAS Android internal-track submission is scheduled and pending Play/EAS processing verification. Internal testing readiness, closed testing, production access, native QA signoff, and final Send for review remain pending. No Send for review, testing release, production access application, or public submission was started.",
     "completedSetupTaskCount": 11,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
@@ -195,7 +195,40 @@
     "appContentCaughtUp": true,
     "targetAudienceCompleted": true,
     "targetAudienceVerifiedAt": "2026-06-05T20:43:48.099Z",
-    "targetAudienceVerification": "Computer Use verified the Google Play Dashboard shows Target audience as a completed setup task and App content Need attention is caught up. Send for review was not clicked."
+    "targetAudienceVerification": "Computer Use verified the Google Play Dashboard shows Target audience as a completed setup task and App content Need attention is caught up. Send for review was not clicked.",
+    "internalTestingUploadStatus": "blocked-google-play-android-developer-api-disabled",
+    "internalTestingUploadVerificationPending": "EAS submission f2b72ede-9f72-4505-b88f-eda2fbe11a1b reached Fastlane/Google Play for the internal track, then errored because Google Play Android Developer API is disabled for Google Cloud project number 165345817438.",
+    "internalTestingSubmission": {
+      "status": "errored-google-api-disabled",
+      "scheduledAt": "2026-06-05T23:30:45.635Z",
+      "submissionId": "f2b72ede-9f72-4505-b88f-eda2fbe11a1b",
+      "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/f2b72ede-9f72-4505-b88f-eda2fbe11a1b",
+      "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+      "track": "internal",
+      "releaseStatusRequested": "COMPLETED",
+      "versionCode": 17,
+      "productionRolloutStarted": false,
+      "publicReviewSubmissionStarted": false,
+      "checkedAt": "2026-06-05T23:32:14.774Z",
+      "errorCode": "SUBMISSION_SERVICE_ANDROID_UNKNOWN_ERROR",
+      "errorSummary": "Google Play Android Developer API is disabled for project number 165345817438.",
+      "apiEnableUrl": "https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com?project=165345817438"
+    },
+    "googlePlayServiceAccount": {
+      "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+      "reversrRebuildPermissionPresent": true,
+      "permissionCount": 12,
+      "googleCloudKeyPresent": true,
+      "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+      "onePasswordItem": {
+        "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+        "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+        "vault": "Employee",
+        "category": "API_CREDENTIAL",
+        "attachment": "google-play-service-account.json"
+      },
+      "localKeyPathStoredOutsideRepo": true
+    }
   },
   "requiredAssets": {
     "nativeScreenshotsCaptured": false,
@@ -238,7 +271,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved."
   },
-  "generatedAt": "2026-06-05T23:11:51.539Z",
+  "generatedAt": "2026-06-05T23:32:14.774Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",

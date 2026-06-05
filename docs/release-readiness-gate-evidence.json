@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T23:09:34.837Z",
-  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after EAS submit probes, native/device checks, and Play Console service-account inspection.",
+  "generatedAt": "2026-06-05T23:32:14.774Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play service-account permission/key setup, 1Password credential persistence, Android EAS internal-track submission scheduling, native/device checks, and store-console inspection.",
   "pr": {
     "number": 2,
     "branch": "codex/inventory-reconstruction-clone",
@@ -10,8 +10,9 @@
   },
   "localState": {
     "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
-    "releaseStatus": "36 pass / 3 pending after Android native QA evidence advanced further; iOS/screenshots/signoff and store-console credential gates remain pending.",
+    "releaseStatus": "Pending after Android EAS internal-track submission reached Google Play but errored because Google Play Android Developer API is disabled for Google Cloud project number 165345817438; Google API enablement, iOS/TestFlight credentials, iOS screenshots/QA, and final store signoff remain pending.",
     "pendingGateIds": [
+      "eas-submit-config",
       "native-qa-evidence",
       "store-console-records",
       "native-screenshots"
@@ -45,14 +46,41 @@
     ]
   },
   "easSubmitConfig": {
-    "status": "configured-but-credential-gated",
+    "status": "android-google-api-disabled-ios-credential-gated",
     "android": {
       "submitProfile": "production",
       "track": "internal",
       "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
       "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
       "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
-      "currentGate": "Google Play service account key and ReversR Rebuild app permissions are required before EAS can upload the AAB to internal testing."
+      "currentGate": "Enable Google Play Android Developer API for Google Cloud project number 165345817438, then rerun the Android internal-track EAS submit command.",
+      "submission": {
+        "status": "errored-google-api-disabled",
+        "scheduledAt": "2026-06-05T23:30:45.635Z",
+        "submissionId": "f2b72ede-9f72-4505-b88f-eda2fbe11a1b",
+        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/f2b72ede-9f72-4505-b88f-eda2fbe11a1b",
+        "track": "internal",
+        "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+        "productionRolloutStarted": false,
+        "publicReviewSubmissionStarted": false,
+        "checkedAt": "2026-06-05T23:32:14.774Z",
+        "errorSummary": "Google Play Android Developer API is disabled for project number 165345817438.",
+        "apiEnableUrl": "https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com?project=165345817438"
+      },
+      "serviceAccount": {
+        "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+        "reversrRebuildPermissionPresent": true,
+        "permissionCount": 12,
+        "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+        "onePasswordItem": {
+          "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+          "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+          "vault": "Employee",
+          "category": "API_CREDENTIAL",
+          "attachment": "google-play-service-account.json"
+        },
+        "localKeyPathStoredOutsideRepo": true
+      }
     },
     "ios": {
       "submitProfile": "production",
@@ -65,11 +93,11 @@
   },
   "computerUseState": {
     "googlePlay": {
-      "currentScreen": "Google Play Console > Users and permissions > appscreens@kinflo-project.iam.gserviceaccount.com",
-      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/users-and-permissions/appscreens%40kinflo-project.iam.gserviceaccount.com",
+      "currentScreen": "Google Cloud Console > IAM & Admin > Service account AppScreens > Keys, with the new key visible. Next target is the Google Play Android Developer API enablement screen.",
+      "url": "https://console.cloud.google.com/iam-admin/serviceaccounts/details/103396245814489689911/keys?project=kinflo-project",
       "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
       "serviceAccountStatus": "Active; access never expires",
-      "reversrRebuildPermissionPresent": false,
+      "reversrRebuildPermissionPresent": true,
       "visibleAppsWithPermissions": [
         "Bar Code",
         "ConsciousCart",
@@ -78,7 +106,16 @@
         "StackRay",
         "The Visioneer"
       ],
-      "nextActionRequiringApproval": "Click Add app, add ReversR Rebuild, grant the minimum release/upload permissions needed for EAS Submit, save changes, then create or locate a Google Cloud JSON key for EAS Submit."
+      "nextActionRequiringApproval": "Enable Google Play Android Developer API for project number 165345817438, then rerun the Android EAS submit command to the internal track. Do not click Google Play Send for review or start production rollout.",
+      "googleCloudKeyPresent": true,
+      "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+      "onePasswordItem": {
+        "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+        "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+        "vault": "Employee",
+        "category": "API_CREDENTIAL",
+        "attachment": "google-play-service-account.json"
+      }
     },
     "appStoreConnect": {
       "currentScreen": "App Store Connect Apple Account login for vsillah@mac.com",
@@ -156,13 +193,15 @@
       "closedTestingSkippedForNow": true,
       "closedTestingMinimumTesterCount": 12,
       "closedTestingMinimumDays": 14,
-      "sendForReviewClicked": false
+      "sendForReviewClicked": false,
+      "internalTestingSubmissionScheduled": true,
+      "internalTestingSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/f2b72ede-9f72-4505-b88f-eda2fbe11a1b"
     }
   },
   "humanInTheLoopResumeInstructions": [
-    "For Google Play internal testing upload: approve granting ReversR Rebuild permissions to appscreens@kinflo-project.iam.gserviceaccount.com and creating or locating a JSON key for EAS Submit. Keep Android submit on the internal track only.",
-    "For Apple TestFlight upload: Chrome is on the App Store Connect login screen for vsillah@mac.com. Complete Apple login/2FA, then enable App Store Connect API access and create or authorize an EAS submit key, or tell Codex when you are logged in so it can navigate to the API access screen.",
-    "For Android live QA: the Pixel is currently reachable over ADB via mDNS. Further checks can continue while the phone stays online, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
+    "For Google Play internal testing upload: EAS submission f2b72ede-9f72-4505-b88f-eda2fbe11a1b errored because Google Play Android Developer API is disabled for Google Cloud project number 165345817438. Enable androidpublisher.googleapis.com for that project, wait a few minutes if needed, then rerun the internal-track EAS submit. Do not click Send for review or start production rollout.",
+    "For Apple TestFlight upload: Chrome still has an App Store Connect login tab for vsillah@mac.com. Complete Apple login/2FA, then enable App Store Connect API access and create or authorize an EAS submit key, or tell Codex when you are logged in so it can navigate to the API access screen.",
+    "For Android live QA: further checks can continue if the Pixel remains reachable, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
     "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
   ]

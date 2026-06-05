@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T23:11:57.457Z
-Release status generated at: 2026-06-05T23:11:57.451Z
+Generated at: 2026-06-05T23:33:39.618Z
+Release status generated at: 2026-06-05T23:33:39.613Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -74,17 +74,19 @@ Steps:
 5. Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.
 6. Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.
 7. Complete App Privacy, age rating, Data safety, and App content forms.
-8. Configure a Google Play service account key for EAS Submit only after explicit account-holder approval.
-9. Keep Android submit on the internal track; do not start a production rollout.
-10. After the service account key exists, rerun the documented Android internal-track submit command.
-11. Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.
-12. Run npm run store:console:preflight.
+8. Open the Google Cloud Console page for Google Play Android Developer API on the Kinflo Project.
+9. Enable androidpublisher.googleapis.com only after explicit account-holder approval for this Google Cloud account-side action.
+10. After the API is enabled, wait a few minutes for propagation if Google says it may be needed.
+11. Rerun the documented Android EAS submit command with the target track still set to internal.
+12. Do not click Google Play Send for review or start a production rollout.
+13. Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.
+14. Run npm run store:console:preflight.
 
 Evidence required:
 
 - docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.
 - docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.
-- docs/eas-android-submit-attempt-evidence.json records the Google service account key gate before internal-track upload.
+- docs/eas-android-submit-attempt-evidence.json records the Google Play Android Developer API enablement gate after the internal-track EAS submission reached Fastlane.
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
