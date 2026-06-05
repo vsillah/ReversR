@@ -93,6 +93,23 @@ For a hosted production API, `npm run api:preflight` fails if `/api/health` repo
 EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight -- --allow-open-cors
 ```
 
+## Hosted Connector Smoke
+
+After the API host has the real connector credential in its server-side secret store, run a connector smoke against the deployed API:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example \
+CONNECTOR_SMOKE_SOURCE_NAME="Production Machine Inventory" \
+CONNECTOR_SMOKE_SOURCE_URL=https://inventory.your-domain.example/machines.json \
+CONNECTOR_SMOKE_CONNECTOR_TYPE=json \
+CONNECTOR_SMOKE_AUTH_MODE=api_key \
+CONNECTOR_SMOKE_CREDENTIAL_REF=partsledger-prod \
+CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=INV-FDM-100 \
+npm run connector:smoke
+```
+
+The smoke sends only connector metadata and `credentialRef`. It verifies `POST /api/inventory/validate`, `POST /api/gemini/match-machine`, and `POST /api/gemini/generate-bom` against the hosted API and real connector. If the real connector is not a 3D printer inventory, set `CONNECTOR_SMOKE_ANALYSIS_JSON` or `CONNECTOR_SMOKE_COMPONENTS_JSON` to a representative machine scan before running it.
+
 ## Store Build Binding
 
 Set these EAS production environment variables before native builds:
@@ -109,11 +126,14 @@ Then run:
 ```bash
 npm run inventory:preflight
 npm run api:preflight
+npm run connector:smoke
 npm run accessibility:preflight
 npm run store:preflight
 ```
 
 `npm run inventory:preflight` is local by design. It starts a protected fixture inventory and local API server to prove credential-reference validation, inventory matching, BOM generation, and no-secret response handling before the hosted API is bound into native builds.
+
+`npm run connector:smoke` is hosted by design. It should run against the production API and real inventory connector before EAS preview builds are treated as release candidates.
 
 ## Connector Secret Handling
 
@@ -139,6 +159,7 @@ The production API gate is not complete until:
 - `API_REQUEST_BODY_LIMIT` is set intentionally for scan/image payloads,
 - `/api/health` passes from an external network,
 - `npm run api:preflight` passes against the hosted URL,
+- `npm run connector:smoke` passes against the real inventory connector,
 - EAS production has the same `EXPO_PUBLIC_API_BASE_URL`,
 - connector secrets are managed server-side,
 - native Android and iOS builds can complete the scan, inventory match, BOM, quote packet, and vendor draft flow against the hosted API.

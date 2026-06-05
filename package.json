@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit",
     "api:preflight": "node scripts/api-preflight.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
+    "connector:smoke": "node scripts/hosted-connector-smoke.js",
     "api:docker:build": "docker build -t reversr-rebuild-api .",
     "native:preflight": "node scripts/native-release-preflight.js",
     "native:preflight:local": "node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in",

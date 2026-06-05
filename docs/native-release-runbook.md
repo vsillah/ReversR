@@ -12,6 +12,7 @@ The app is still draft-release ready, not store-published. Do not submit product
 npm install
 npm run typecheck
 npm run accessibility:preflight
+npm run inventory:preflight
 npm run policy:preflight:local
 npm run store:preflight:local
 npm run native:preflight:local
@@ -114,6 +115,20 @@ Then verify the hosted backend:
 ```bash
 EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 ```
+
+Then verify the hosted inventory connector:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example \
+CONNECTOR_SMOKE_SOURCE_NAME="Production Machine Inventory" \
+CONNECTOR_SMOKE_SOURCE_URL=https://inventory.your-domain.example/machines.json \
+CONNECTOR_SMOKE_CONNECTOR_TYPE=json \
+CONNECTOR_SMOKE_AUTH_MODE=api_key \
+CONNECTOR_SMOKE_CREDENTIAL_REF=partsledger-prod \
+npm run connector:smoke
+```
+
+Set `CONNECTOR_SMOKE_EXPECTED_MACHINE_ID` and `CONNECTOR_SMOKE_ANALYSIS_JSON` when the production smoke should validate a known machine record. Raw connector secrets must already be configured on the API host.
 
 ## 7. Build Preview Binaries
 

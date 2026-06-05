@@ -24,6 +24,7 @@ The app now has:
 - Store submission packet: `docs/store-submission-packet.json`
 - Store submission packet preflight for App Store Connect and Google Play metadata limits, hosted URLs, privacy/data-safety answers, and native screenshot requirements
 - Protected inventory connector preflight: `npm run inventory:preflight`
+- Hosted connector smoke gate: `npm run connector:smoke`
 - Accessibility preflight script for critical scan, inventory, design, build, Settings, and policy controls
 - Web-preview store screenshot capture script: `npm run screenshots:store`
 - Web routes for `/privacy`, `/terms`, and `/support`
@@ -81,6 +82,7 @@ Open gates:
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Run `npm run api:preflight` against the hosted API.
 - Run `npm run inventory:preflight` locally before store builds to verify protected connector matching and BOM generation.
+- Run `npm run connector:smoke` against the hosted API and real inventory connector before preview builds are release candidates.
 - Run `npm run policy:preflight -- --check-hosted` after policy/support routes are hosted.
 - Run `npm run store:preflight` before production builds to confirm package IDs, build numbers, release assets, permissions, hosted URLs, and EAS profile shape.
 - Run `npm run store:submission:preflight` before entering copy into App Store Connect or Play Console.
@@ -98,7 +100,7 @@ Open gates:
 
 - Production API host: a Dockerfile, deployment runbook, and runtime config health checks exist, but the API still needs to be deployed behind HTTPS with restricted `API_CORS_ORIGINS` and verified with `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
-- Protected connector QA: `npm run inventory:preflight` validates the local credentialRef path, but a production connector still needs a hosted API smoke against the real inventory system.
+- Protected connector QA: `npm run inventory:preflight` validates the local credentialRef path, and `npm run connector:smoke` now defines the hosted real-inventory gate. The hosted smoke still needs a deployed API and authorized production inventory source.
 - Privacy policy, terms, and support: web routes, static export, and hosting preflight exist, but the routes must still be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: a required evidence template exists, but camera flow and reconstruction/export checks still need real iOS and Android preview-build testing.
 - EAS linkage: `eas init` still needs to create the clone project ID before strict native release preflight can pass.
@@ -113,7 +115,7 @@ Open gates:
 
 1. Run `npm run inventory:preflight` to confirm the protected connector, match, and BOM path locally.
 2. Deploy the API container behind HTTPS with `API_CORS_ORIGINS` and `API_REQUEST_BODY_LIMIT`, then run `npm run api:preflight` against the hosted URL.
-3. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
+3. Move connector credentials from the prototype registry file into a managed secret store, add admin roles, and run `npm run connector:smoke` against a real authorized inventory source.
 4. Deploy the web `/privacy`, `/terms`, and `/support` routes, run `npm run policy:preflight -- --check-hosted`, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
 5. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
 6. Run `npm run store:submission:preflight` with hosted URLs, then copy the packet into App Store Connect and Play Console drafts.

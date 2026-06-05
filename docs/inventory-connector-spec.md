@@ -191,6 +191,28 @@ The preflight starts a local protected JSON inventory fixture and a local API se
 
 Default ports are `3917` for the fixture and `3013` for the API. Override them with `INVENTORY_PREFLIGHT_FIXTURE_PORT` and `INVENTORY_PREFLIGHT_API_PORT` if those ports are in use.
 
+## Hosted Connector Smoke
+
+After the production API is hosted and a real inventory connector is configured on that API host, run:
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example \
+CONNECTOR_SMOKE_SOURCE_NAME="Production Machine Inventory" \
+CONNECTOR_SMOKE_SOURCE_URL=https://inventory.your-domain.example/machines.json \
+CONNECTOR_SMOKE_CONNECTOR_TYPE=json \
+CONNECTOR_SMOKE_AUTH_MODE=api_key \
+CONNECTOR_SMOKE_CREDENTIAL_REF=partsledger-prod \
+npm run connector:smoke
+```
+
+Use `CONNECTOR_SMOKE_EXPECTED_MACHINE_ID` when the smoke analysis should match a specific record. Override the default scan analysis with `CONNECTOR_SMOKE_ANALYSIS_JSON` or `CONNECTOR_SMOKE_COMPONENTS_JSON` when testing a different machine class.
+
+The hosted smoke verifies the deployed API health, hardened runtime config, inventory validation, credential-reference status, machine matching, assembly/pricing output, and BOM generation against the real connector metadata. Do not set raw API keys, tokens, fixed headers, or OAuth secrets in the connector smoke environment. Configure those values on the API host and send only `CONNECTOR_SMOKE_CREDENTIAL_REF`.
+
+For controlled local tests against an HTTP fixture, pass `--allow-insecure-connector`. Do not use that flag for store-bound production validation.
+
+For controlled prototype checks against `demo://sample-machines` on a hosted API, pass `--allow-demo-connector`. Do not use that flag as production connector evidence.
+
 ## Admin Credential Registry
 
 For runtime credential management, configure:

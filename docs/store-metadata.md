@@ -101,6 +101,7 @@ Authenticated ERP/API connectors use backend credential references so raw secret
 - Validate hosted privacy, terms, and support URLs with `npm run policy:preflight -- --check-hosted`.
 - Set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in the EAS production environment.
 - Deploy the production API container and run `npm run api:preflight` against the hosted URL.
+- Configure a real inventory connector on the API host and run `npm run connector:smoke`.
 - Set `EXPO_PUBLIC_API_BASE_URL` in the EAS production environment.
 - Link the clone with `eas init`, then run `npm run native:preflight`.
 - Run `npm run store:preflight`.
