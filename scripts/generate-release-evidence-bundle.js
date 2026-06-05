@@ -68,6 +68,7 @@ const localProofGateIds = [
   'web-flow-smoke',
   'native-release-config-evidence',
   'store-console-pending-evidence',
+  'local-release-ci-evidence',
 ];
 const externalGateIds = [
   'hosted-api',
@@ -101,6 +102,7 @@ const evidenceFiles = {
   webFlowSmoke: readOptionalJson('docs/web-flow-smoke-evidence.json'),
   nativeReleaseConfig: readOptionalJson('docs/native-release-config-evidence.json'),
   storeConsolePending: readOptionalJson('docs/store-console-pending-evidence.json'),
+  localReleaseCi: readOptionalJson('docs/local-release-ci-evidence.json'),
 };
 
 const gitBranch = run('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
@@ -163,6 +165,7 @@ const bundle = {
   scripts: {
     releaseStatus: 'npm run release:status',
     releaseNextActions: 'npm run release:next-actions',
+    releaseLocalCi: 'npm run release:local-ci',
     storePreflightLocal: 'npm run store:preflight:local',
     storeConsolePreflightLocal: 'npm run store:console:preflight:local',
     nativePreflightLocal: 'npm run native:preflight:local',
@@ -177,6 +180,7 @@ const bundle = {
     'docs/store-console-pending-evidence.json',
     'docs/store-console-evidence.template.json',
     'docs/native-qa-evidence.template.json',
+    'docs/local-release-ci-evidence.json',
     'docs/external-release-setup-runbook.md',
     'docs/release-action-plan.md',
     'docs/store-readiness.md',

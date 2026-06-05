@@ -21,6 +21,7 @@
     "release:status": "node scripts/release-status.js",
     "release:next-actions": "node scripts/release-next-actions.js",
     "release:evidence": "node scripts/generate-release-evidence-bundle.js",
+    "release:local-ci": "node scripts/local-release-ci.js",
     "typecheck": "tsc --noEmit",
     "api:preflight": "node scripts/api-preflight.js",
     "api:env:preflight": "node scripts/api-env-preflight.js",

@@ -27,6 +27,8 @@ npm run release:status
 npm run release:next-actions
 npm run typecheck
 npm run accessibility:preflight
+npm run release:local-ci
+npm run release:evidence
 npm run store:preflight:local
 npm run native:preflight:local
 npm run store:console:preflight:local
@@ -35,6 +37,8 @@ npm run store:console:preflight:local
 Confirm the expected local state:
 
 - `npm run release:status` shows the clone, store-local, local web, native config, and store-console pending evidence gates as passed.
+- `docs/local-release-ci-evidence.json` exists with all local checks passed.
+- `docs/release-evidence-bundle.json` exists with `status: pass`.
 - Hosted API, hosted policies, real inventory connector, EAS linkage, App Store Connect, Google Play Console, preview builds, native QA, and final screenshots remain pending until external evidence exists.
 - `docs/store-console-pending-evidence.json` exists and says both App Store Connect and Google Play setup are still pending.
 

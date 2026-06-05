@@ -188,6 +188,22 @@ const actionPlan = {
       'npm run release:status passes the release-evidence-bundle gate.',
     ],
   },
+  'local-release-ci-evidence': {
+    owner: 'Release operator',
+    phase: 'Local release CI',
+    action: 'Run the repeatable local validation suite and record evidence before external release work.',
+    steps: [
+      'Run npm run release:local-ci.',
+      'Confirm docs/local-release-ci-evidence.json has status pass.',
+      'Run npm run release:evidence to refresh the consolidated proof packet.',
+      'Run npm run release:status and confirm the local-release-ci-evidence gate passes.',
+    ],
+    evidence: [
+      'docs/local-release-ci-evidence.json exists with all local commands passed.',
+      'The evidence names the external gates still required.',
+      'npm run release:status passes the local-release-ci-evidence gate.',
+    ],
+  },
 };
 
 const pendingGates = releaseStatus.gates

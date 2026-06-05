@@ -13,6 +13,16 @@ npm run release:next-actions
 
 `release:status` shows what is proven from repo evidence. `release:next-actions` expands each pending gate into owner, action, steps, and evidence required.
 
+Before starting external account or hosted-environment work, refresh the local validation packet:
+
+```bash
+npm run release:local-ci
+npm run release:evidence
+npm run release:status
+```
+
+`release:local-ci` reruns the repeatable pre-store checks and writes `docs/local-release-ci-evidence.json`. `release:evidence` packages the local proof files and pending external gates into `docs/release-evidence-bundle.json`.
+
 ## Current Critical Path
 
 1. Deploy the API behind HTTPS.

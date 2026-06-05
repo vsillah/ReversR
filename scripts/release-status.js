@@ -344,6 +344,7 @@ const requiredArtifacts = [
   'docs/policy-hosting-smoke-evidence.json',
   'docs/release-action-plan.md',
   'docs/release-evidence-bundle.json',
+  'docs/local-release-ci-evidence.json',
   'docs/external-release-setup-runbook.md',
   'docs/native-release-runbook.md',
   'docs/native-release-config-evidence.json',
@@ -359,6 +360,7 @@ const requiredArtifacts = [
   'scripts/api-env-preflight.js',
   'scripts/api-deployment-smoke.js',
   'scripts/release-next-actions.js',
+  'scripts/local-release-ci.js',
   'scripts/validate-machine-inventory.js',
   'scripts/inventory-connector-preflight.js',
   'scripts/hosted-connector-smoke.js',
@@ -423,6 +425,7 @@ const requiredBundleProofs = [
   'web-flow-smoke',
   'native-release-config-evidence',
   'store-console-pending-evidence',
+  'local-release-ci-evidence',
 ];
 const requiredBundlePending = [
   'hosted-api',
@@ -444,7 +447,8 @@ const releaseEvidenceBundleOk = (
   Number(releaseEvidenceBundle?.releaseStatus?.pendingExternalGates?.length || 0) === requiredBundlePending.length &&
   releaseEvidenceBundle?.evidenceFiles?.apiDeploymentSmoke?.status === 'pass' &&
   releaseEvidenceBundle?.evidenceFiles?.webFlowSmoke?.status === 'pass' &&
-  releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending'
+  releaseEvidenceBundle?.evidenceFiles?.storeConsolePending?.status === 'pending' &&
+  releaseEvidenceBundle?.evidenceFiles?.localReleaseCi?.status === 'pass'
 );
 addGate(
   'store-local',
@@ -455,6 +459,39 @@ addGate(
     ? `docs/release-evidence-bundle.json packages local proofs and ${releaseEvidenceBundle.releaseStatus.pendingExternalGates.length} external gates at ${releaseEvidenceBundle.generatedAt}.`
     : 'docs/release-evidence-bundle.json is missing or incomplete.',
   releaseEvidenceBundleOk ? '' : 'Run npm run release:evidence before external account-side release work.'
+);
+
+const localReleaseCiEvidence = readOptionalJson('docs/local-release-ci-evidence.json');
+const expectedLocalCiCommands = [
+  'typecheck',
+  'accessibility-preflight',
+  'store-assets-preflight',
+  'inventory-preflight',
+  'policy-preflight-local',
+  'store-submission-preflight-local',
+  'store-console-preflight-local',
+  'native-preflight-local',
+  'native-qa-preflight-local',
+  'store-preflight-local',
+];
+const localReleaseCiOk = (
+  localReleaseCiEvidence?.status === 'pass' &&
+  localReleaseCiEvidence?.commandCount === expectedLocalCiCommands.length &&
+  localReleaseCiEvidence?.passedCount === expectedLocalCiCommands.length &&
+  expectedLocalCiCommands.every(id => localReleaseCiEvidence?.results?.some(result => result.id === id && result.status === 'pass')) &&
+  Array.isArray(localReleaseCiEvidence?.externalGatesStillRequired) &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('hosted-api') &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots')
+);
+addGate(
+  'store-local',
+  'local-release-ci-evidence',
+  'Local release CI evidence records repeatable pre-store validation',
+  localReleaseCiOk ? 'pass' : 'pending',
+  localReleaseCiOk
+    ? `docs/local-release-ci-evidence.json records ${localReleaseCiEvidence.passedCount}/${localReleaseCiEvidence.commandCount} passing local checks at ${localReleaseCiEvidence.completedAt}.`
+    : 'docs/local-release-ci-evidence.json is missing or incomplete.',
+  localReleaseCiOk ? '' : 'Run npm run release:local-ci before external account-side release work.'
 );
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseUrl || appConfig.extra?.apiBaseUrl;
