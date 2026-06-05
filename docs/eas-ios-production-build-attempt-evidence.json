@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "pending-hitl",
+  "generatedAt": "2026-06-05T15:11:23.300Z",
+  "command": "EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait",
+  "result": {
+    "exitCode": 130,
+    "buildStarted": false,
+    "credentialsEntered": false,
+    "appleLoginAttempted": false,
+    "promptReached": "Do you want to log in to your Apple account? (Y/n)",
+    "note": "The prompt was cancelled before Apple login, 2FA, credential validation, or build submission. EAS remotely incremented the iOS build number from 3 to 4 before the credential prompt."
+  },
+  "humanInTheLoopGate": {
+    "type": "Apple account credential validation",
+    "whyRequired": "EAS needs Apple account access to generate and fully validate missing iOS production/TestFlight build credentials. Without Apple account access, missing values must be provided manually and validation is limited.",
+    "nextHumanAction": [
+      "Resume this command from the repo root.",
+      "At the prompt, choose yes to log in to the Apple account if you want EAS to generate and validate iOS credentials.",
+      "Enter the Apple ID and password/passkey flow when prompted.",
+      "Complete Apple 2FA if requested.",
+      "Stop before any App Store public submission or irreversible review action."
+    ],
+    "resumeCommand": "EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait"
+  }
+}

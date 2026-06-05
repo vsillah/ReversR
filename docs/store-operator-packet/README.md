@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-05T14:24:55.706Z
+Generated at: 2026-06-05T15:16:56.160Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -17,13 +17,14 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 ## Current Status
 
-- Release pass gates: 35
-- Release pending gates: 4
+- Release pass gates: 34
+- Release pending gates: 5
 - Release blocked gates: 0
 - Release warnings: 0
 
 Pending gates:
 
+- release-evidence-bundle: Run npm run release:evidence before external account-side release work.
 - local-release-ci-evidence: Run npm run release:local-ci before external account-side release work.
 - native-qa-evidence: Run npm run native:qa:preflight and resolve any failures.
 - store-console-records: Run npm run store:console:preflight and resolve any failures.
