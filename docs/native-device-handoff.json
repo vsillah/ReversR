@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T13:53:00.252Z",
+  "generatedAt": "2026-06-05T13:59:04Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -18,7 +18,7 @@
     "completedAt": "2026-06-05T11:36:35.941Z"
   },
   "localDeviceProbe": {
-    "checkedAt": "2026-06-05T11:45:54Z",
+    "checkedAt": "2026-06-05T13:59:04Z",
     "adbPath": "/opt/homebrew/bin/adb",
     "adbDevices": "List of devices attached",
     "androidEmulatorPath": "",
@@ -48,13 +48,15 @@
     "Capture Android screenshots into docs/store-screenshots/native/android-01-welcome.png through docs/store-screenshots/native/android-05-build-handoff.png.",
     "Run npx eas-cli@20.0.0 credentials --platform ios, select the preview profile, and complete the Apple account login/2FA prompt so EAS can create or validate internal-distribution iOS credentials.",
     "Install full Xcode if local iOS Simulator screenshots are desired; the current machine only exposes Command Line Tools.",
-    "Run npm run native:preflight, then run npx eas-cli@20.0.0 credentials --platform ios and complete Apple login/2FA for the preview profile."
+    "Run npm run native:preflight, then run npx eas-cli@20.0.0 credentials --platform ios and complete Apple login/2FA for the preview profile.",
+    "After EAS iOS credentials are available, run npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait and record the build URL in docs/native-qa-evidence.json."
   ],
   "notCompletedByAutomation": [
     "No Android device or emulator was available for APK install.",
     "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
     "No Google legal declarations were accepted.",
     "EAS iOS preview credential setup reaches an Apple account login prompt and cannot proceed unattended.",
-    "App Store Connect app record exists, but EAS iOS preview credential setup still requires Apple login/2FA."
+    "App Store Connect app record exists, but EAS iOS preview credential setup still requires Apple login/2FA.",
+    "npx eas-cli@20.0.0 credentials --platform ios reached the preview-profile Apple account login prompt at 2026-06-05T13:59:04Z."
   ]
 }

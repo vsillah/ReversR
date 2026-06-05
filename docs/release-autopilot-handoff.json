@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T13:53:00.252Z",
+  "generatedAt": "2026-06-05T13:59:04Z",
   "status": "pending-hitl",
   "currentPr": {
     "number": 2,
@@ -21,21 +21,21 @@
   "activeBrowserState": {
     "appStoreConnect": {
       "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
-      "screen": "Created App Store Connect app record",
-      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json.",
+      "screen": "iOS App Version 1.0 Prepare for Submission",
+      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json. Computer Use verified the page shows screenshot upload, metadata, build, app review information, and release controls. Save is disabled and Add for Review is visible; no public review submission was started.",
       "fields": {
         "appleId": "6777091538",
         "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
         "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
         "supportUrl": "https://reversr.vercel.app/support"
       },
-      "nextHumanAction": "Complete App Store Connect metadata, App Privacy, age rating, TestFlight setup, and native screenshots using docs/store-console-task-answers.md.",
+      "nextHumanAction": "Authorize live App Store Connect field entry/saves or complete metadata, App Privacy, age rating, TestFlight setup, and native screenshots manually using docs/store-console-task-answers.md.",
       "copyBackAfterSuccess": ""
     },
     "googlePlayConsole": {
       "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
       "screen": "Dashboard task list",
-      "state": "Google Play app record exists. The Provide app information and create your store listing task list shows 0 of 11 tasks complete.",
+      "state": "Google Play app record exists. Computer Use verified the Provide app information and create your store listing task list is expanded and shows 0 of 11 tasks complete. Production access also requires a closed test with at least 12 testers opted in for at least 14 days.",
       "openTasks": [
         "Set privacy policy",
         "Sign in details",
@@ -57,6 +57,7 @@
       "command": "npx eas-cli@20.0.0 credentials --platform ios",
       "profileSelected": "preview",
       "nextPrompt": "Do you want to log in to your Apple account?",
+      "lastCheckedAt": "2026-06-05T13:59:04Z",
       "nextHumanAction": "Complete Apple login/2FA in the EAS credentials flow so Expo can generate or validate internal-distribution iOS credentials."
     }
   },
@@ -85,7 +86,8 @@
   "resumeInstructionsForVambah": [
     "When ready for iOS credentials, run or allow Codex to run npx eas-cli@20.0.0 credentials --platform ios, select preview, and complete Apple login/2FA.",
     "Connect an Android device with USB debugging enabled or install Android Studio/Emulator before native Android QA and screenshots can be captured.",
-    "Complete Apple login/2FA in the EAS iOS preview credentials flow when prompted."
+    "Complete Apple login/2FA in the EAS iOS preview credentials flow when prompted.",
+    "Authorize live App Store Connect and Google Play saved edits before Codex types into or saves third-party store-console forms."
   ],
   "preparedAutomation": [
     {
