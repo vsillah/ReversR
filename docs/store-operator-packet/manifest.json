@@ -1,17 +1,16 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:40:08.752Z",
+  "generatedAt": "2026-06-05T10:51:00.306Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:40:08.747Z",
+    "generatedAt": "2026-06-05T10:51:00.302Z",
     "summary": {
-      "pass": 32,
-      "pending": 7
+      "pass": 33,
+      "pending": 6
     },
     "pendingGateIds": [
       "release-evidence-bundle",
       "local-release-ci-evidence",
-      "eas-project-linkage",
       "eas-submit-config",
       "native-qa-evidence",
       "store-console-records",
@@ -126,12 +125,6 @@
       "group": "store-local",
       "title": "Local release CI evidence records repeatable pre-store validation",
       "nextStep": "Run npm run release:local-ci before external account-side release work."
-    },
-    {
-      "id": "eas-project-linkage",
-      "group": "native",
-      "title": "EAS project is linked for the clone identity",
-      "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
     },
     {
       "id": "eas-submit-config",

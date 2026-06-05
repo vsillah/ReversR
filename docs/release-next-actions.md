@@ -1,53 +1,19 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-05T10:40:10.413Z
-Release status generated at: 2026-06-05T10:40:10.408Z
+Generated at: 2026-06-05T10:51:01.645Z
+Release status generated at: 2026-06-05T10:51:01.641Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
 ## Summary
 
-- Pass: 4
-- Pending: 5
+- Pass: 5
+- Pending: 4
 - Blocked: 0
 - Warn: 0
-- Next recommended gate: eas-project-linkage
+- Next recommended gate: eas-submit-config
 
-## 1. EAS project is linked for the clone identity
-
-- Gate ID: eas-project-linkage
-- Group: native
-- Status: pending
-- Owner: Apple/Google release operator
-- Phase: EAS project setup
-- Next action: Log in to EAS and link the clone identity to its own EAS project.
-
-Current gate evidence:
-
-expo.extra.eas.projectId is not set.
-
-Current gate next step:
-
-Run npx eas-cli@20.0.0 init for the clone identity.
-
-Steps:
-
-1. Run npm run native:preflight:local and confirm docs/native-release-config-evidence.json is updated.
-2. Follow docs/external-release-setup-runbook.md section 4 for EAS login, project linkage, env, and credentials.
-3. Run npx eas-cli@20.0.0 login.
-4. Run npx eas-cli@20.0.0 whoami --non-interactive to confirm the account.
-5. Run npx eas-cli@20.0.0 init for ReversR Rebuild.
-6. Confirm app.json contains expo.extra.eas.projectId for the clone.
-7. Run npm run native:preflight:local, then strict npm run native:preflight after hosted URLs are configured.
-
-Evidence required:
-
-- docs/native-release-config-evidence.json records native identity, camera permissions, EAS profile shape, submit profile shape, CLI availability, and remaining external gates.
-- EAS whoami returns the intended account.
-- app.json has the clone projectId.
-- Native preflight no longer reports missing EAS project linkage.
-
-## 2. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
+## 1. EAS submit profile is configured for Google Play Internal Testing and TestFlight upload
 
 - Gate ID: eas-submit-config
 - Group: native
@@ -78,7 +44,7 @@ Evidence required:
 - eas.json has submit.production.ios.ascAppId.
 - Native preflight no longer reports missing iOS ascAppId.
 
-## 3. Android and iOS preview-build QA evidence is recorded
+## 2. Android and iOS preview-build QA evidence is recorded
 
 - Gate ID: native-qa-evidence
 - Group: native
@@ -110,7 +76,7 @@ Evidence required:
 - All required Android and iOS checks pass.
 - npm run native:qa:preflight passes.
 
-## 4. App Store Connect and Google Play Console app records exist
+## 3. App Store Connect and Google Play Console app records exist
 
 - Gate ID: store-console-records
 - Group: store-console
@@ -146,7 +112,7 @@ Evidence required:
 - docs/store-console-evidence.json exists with both console records.
 - npm run store:console:preflight passes.
 
-## 5. Final native screenshots are captured from Android/iOS preview builds
+## 4. Final native screenshots are captured from Android/iOS preview builds
 
 - Gate ID: native-screenshots
 - Group: store-console

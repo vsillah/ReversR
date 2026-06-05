@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-05T10:40:11.263Z",
+  "generatedAt": "2026-06-05T10:51:02.402Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -21,10 +21,10 @@
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:40:11.231Z",
+    "generatedAt": "2026-06-05T10:51:02.368Z",
     "summary": {
-      "pass": 32,
-      "pending": 7
+      "pass": 33,
+      "pending": 6
     }
   },
   "requirements": [
@@ -170,14 +170,14 @@
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T10:40:07.740Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T10:50:59.203Z.",
           "nextStep": ""
         },
         {
           "id": "store-review-safety-packet",
           "status": "pass",
           "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T10:40:07.870Z.",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T10:50:59.346Z.",
           "nextStep": ""
         },
         {
@@ -226,21 +226,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T10:40:08.752Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T10:51:00.306Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T10:40:09.528Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T10:51:00.982Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 5 external gates at 2026-06-05T10:40:10.413Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 4 external gates at 2026-06-05T10:51:01.645Z.",
           "nextStep": ""
         },
         {
@@ -253,15 +253,15 @@
         {
           "id": "native-release-config-evidence",
           "status": "pass",
-          "title": "Native release config evidence is recorded before EAS account setup",
-          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T10:08:07.910Z.",
+          "title": "Native release config evidence is recorded with current EAS linkage state",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T10:50:11.238Z.",
           "nextStep": ""
         },
         {
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T10:08:06.516Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T10:40:11.422Z.",
           "nextStep": ""
         }
       ],
@@ -310,10 +310,10 @@
         },
         {
           "id": "eas-project-linkage",
-          "status": "pending",
+          "status": "pass",
           "title": "EAS project is linked for the clone identity",
-          "evidence": "expo.extra.eas.projectId is not set.",
-          "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
+          "evidence": "projectId=700c2107-2639-4a27-b374-59ed5edd54fc",
+          "nextStep": ""
         },
         {
           "id": "eas-submit-config",

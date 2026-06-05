@@ -1,41 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T10:40:10.413Z",
-  "releaseStatusGeneratedAt": "2026-06-05T10:40:10.408Z",
+  "generatedAt": "2026-06-05T10:51:01.645Z",
+  "releaseStatusGeneratedAt": "2026-06-05T10:51:01.641Z",
   "summary": {
-    "pass": 4,
-    "pending": 5
+    "pass": 5,
+    "pending": 4
   },
-  "nextRecommendedGate": "eas-project-linkage",
+  "nextRecommendedGate": "eas-submit-config",
   "pendingGates": [
-    {
-      "group": "native",
-      "id": "eas-project-linkage",
-      "title": "EAS project is linked for the clone identity",
-      "status": "pending",
-      "evidence": "expo.extra.eas.projectId is not set.",
-      "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity.",
-      "action": {
-        "owner": "Apple/Google release operator",
-        "phase": "EAS project setup",
-        "action": "Log in to EAS and link the clone identity to its own EAS project.",
-        "steps": [
-          "Run npm run native:preflight:local and confirm docs/native-release-config-evidence.json is updated.",
-          "Follow docs/external-release-setup-runbook.md section 4 for EAS login, project linkage, env, and credentials.",
-          "Run npx eas-cli@20.0.0 login.",
-          "Run npx eas-cli@20.0.0 whoami --non-interactive to confirm the account.",
-          "Run npx eas-cli@20.0.0 init for ReversR Rebuild.",
-          "Confirm app.json contains expo.extra.eas.projectId for the clone.",
-          "Run npm run native:preflight:local, then strict npm run native:preflight after hosted URLs are configured."
-        ],
-        "evidence": [
-          "docs/native-release-config-evidence.json records native identity, camera permissions, EAS profile shape, submit profile shape, CLI availability, and remaining external gates.",
-          "EAS whoami returns the intended account.",
-          "app.json has the clone projectId.",
-          "Native preflight no longer reports missing EAS project linkage."
-        ]
-      }
-    },
     {
       "group": "native",
       "id": "eas-submit-config",

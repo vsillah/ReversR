@@ -428,7 +428,6 @@ addGate(
 const releaseNextActions = readOptionalJson('docs/release-next-actions.json');
 const releaseNextActionsMarkdown = readText('docs/release-next-actions.md');
 const requiredNextActionGateIds = [
-  'eas-project-linkage',
   'eas-submit-config',
   'native-qa-evidence',
   'store-console-records',
@@ -436,9 +435,9 @@ const requiredNextActionGateIds = [
 ];
 const releaseNextActionsOk = (
   releaseNextActions?.schemaVersion === 1 &&
-  releaseNextActions?.nextRecommendedGate === 'eas-project-linkage' &&
+  releaseNextActions?.nextRecommendedGate === 'eas-submit-config' &&
   releaseNextActions?.summary?.pending === requiredNextActionGateIds.length &&
-  releaseNextActions?.summary?.pass >= 1 &&
+  releaseNextActions?.summary?.pass >= 2 &&
   Number(releaseNextActions?.pendingGates?.length || 0) === requiredNextActionGateIds.length &&
   requiredNextActionGateIds.every(id => releaseNextActions.pendingGates.some(gate => gate.id === id)) &&
   releaseNextActions.pendingGates.every(gate => (
@@ -448,7 +447,7 @@ const releaseNextActionsOk = (
     gate.action?.evidence?.length > 0
   )) &&
   releaseNextActionsMarkdown.includes('ReversR Rebuild Release Next Actions') &&
-  releaseNextActionsMarkdown.includes('Next recommended gate: eas-project-linkage') &&
+  releaseNextActionsMarkdown.includes('Next recommended gate: eas-submit-config') &&
   releaseNextActionsMarkdown.includes('This generated packet is the external-operator action list')
 );
 addGate(
@@ -569,7 +568,6 @@ const requiredBundleProofs = [
   'hosted-operator-packet',
 ];
 const requiredBundlePending = [
-  'eas-project-linkage',
   'eas-submit-config',
   'native-qa-evidence',
   'store-console-records',
@@ -635,7 +633,8 @@ const localReleaseCiOk = (
   expectedLocalCiCommands.every(id => localReleaseCiEvidence?.results?.some(result => result.id === id && result.status === 'pass')) &&
   Array.isArray(localReleaseCiEvidence?.externalGatesStillRequired) &&
   !localReleaseCiEvidence.externalGatesStillRequired.includes('real-connector-smoke') &&
-  localReleaseCiEvidence.externalGatesStillRequired.includes('eas-project-linkage') &&
+  !localReleaseCiEvidence.externalGatesStillRequired.includes('eas-project-linkage') &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('eas-submit-config') &&
   localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots')
 );
 addGate(
@@ -952,18 +951,18 @@ const nativeReleaseConfigOk = (
   nativeReleaseConfigEvidence?.eas?.buildProfiles?.production?.androidBuildType === 'app-bundle' &&
   nativeReleaseConfigEvidence?.eas?.buildProfiles?.production?.autoIncrement === true &&
   nativeReleaseConfigEvidence?.eas?.submitProfile?.androidTrack === 'internal' &&
-  nativeReleaseConfigEvidence?.externalGatesStillRequired?.easProjectLinkage === true &&
+  nativeReleaseConfigEvidence?.externalGatesStillRequired?.easProjectLinkage === false &&
   nativeReleaseConfigEvidence?.externalGatesStillRequired?.iosAscAppId === true
 );
 addGate(
   'native',
   'native-release-config-evidence',
-  'Native release config evidence is recorded before EAS account setup',
+  'Native release config evidence is recorded with current EAS linkage state',
   nativeReleaseConfigOk ? 'pass' : 'pending',
   nativeReleaseConfigOk
-    ? `docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at ${nativeReleaseConfigEvidence.generatedAt}.`
+    ? `docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at ${nativeReleaseConfigEvidence.generatedAt}.`
     : 'docs/native-release-config-evidence.json is missing or incomplete.',
-  nativeReleaseConfigOk ? '' : 'Run npm run native:preflight:local before EAS project linkage.'
+  nativeReleaseConfigOk ? '' : 'Run npm run native:preflight:local after native config or EAS account changes.'
 );
 
 addGate(

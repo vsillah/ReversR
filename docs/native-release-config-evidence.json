@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:40:13.203Z",
+  "generatedAt": "2026-06-05T10:51:04.351Z",
   "mode": {
     "allowPlaceholder": true,
     "allowMissingCli": true,
@@ -9,13 +9,7 @@
     "allowNotLoggedIn": true
   },
   "warnings": [
-    "EAS project is not linked. Run `npx eas-cli@20.0.0 init` or set `expo.extra.eas.projectId` before native release builds.",
-    "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.",
-    "Set EXPO_PUBLIC_API_BASE_URL to the hosted HTTPS API before native release builds.",
-    "Set EXPO_PUBLIC_PRIVACY_POLICY_URL to a hosted HTTPS URL before native release builds.",
-    "Set EXPO_PUBLIC_TERMS_URL to a hosted HTTPS URL before native release builds.",
-    "Set EXPO_PUBLIC_SUPPORT_URL to a hosted HTTPS URL before native release builds.",
-    "EAS CLI is not logged in for non-interactive release work through pinned npx eas-cli@20.0.0: Not logged in"
+    "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists."
   ],
   "appIdentity": {
     "name": "ReversR Rebuild",
@@ -25,7 +19,7 @@
     "iosBuildNumber": "1",
     "androidPackage": "com.vsillah.reversrrebuild",
     "androidVersionCode": 15,
-    "easProjectLinked": false
+    "easProjectLinked": true
   },
   "permissions": {
     "androidPermissions": [
@@ -47,8 +41,8 @@
       "version": "eas-cli/20.0.0 darwin-arm64 node-v24.15.0"
     },
     "whoami": {
-      "status": 1,
-      "output": "Not logged in"
+      "status": 0,
+      "output": "vsillah\nvsillah@gmail.com"
     },
     "buildProfiles": {
       "development": {
@@ -73,16 +67,16 @@
     }
   },
   "urls": {
-    "apiBaseUrl": "https://reversr-rebuild-api.example.com",
-    "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
-    "termsUrl": "https://reversr-rebuild.example.com/terms",
-    "supportUrl": "https://reversr-rebuild.example.com/support"
+    "apiBaseUrl": "https://reversr.vercel.app",
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support"
   },
   "externalGatesStillRequired": {
-    "easProjectLinkage": true,
-    "easLogin": true,
-    "hostedApiUrl": true,
-    "hostedPolicyUrls": true,
+    "easProjectLinkage": false,
+    "easLogin": false,
+    "hostedApiUrl": false,
+    "hostedPolicyUrls": false,
     "iosAscAppId": true
   }
 }

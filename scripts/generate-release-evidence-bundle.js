@@ -83,7 +83,6 @@ const localProofGateIds = [
   'hosted-operator-packet',
 ];
 const externalGateIds = [
-  'eas-project-linkage',
   'eas-submit-config',
   'native-qa-evidence',
   'store-console-records',

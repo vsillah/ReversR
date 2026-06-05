@@ -53,10 +53,15 @@
     ],
     "scheme": "reversr-rebuild",
     "extra": {
-      "apiBaseUrl": "https://reversr-rebuild-api.example.com",
-      "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
-      "termsUrl": "https://reversr-rebuild.example.com/terms",
-      "supportUrl": "https://reversr-rebuild.example.com/support"
-    }
+      "apiBaseUrl": "https://reversr.vercel.app",
+      "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+      "termsUrl": "https://reversr.vercel.app/terms",
+      "supportUrl": "https://reversr.vercel.app/support",
+      "router": {},
+      "eas": {
+        "projectId": "700c2107-2639-4a27-b374-59ed5edd54fc"
+      }
+    },
+    "owner": "vsillah"
   }
 }

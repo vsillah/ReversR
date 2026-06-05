@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:40:24.524Z",
+  "generatedAt": "2026-06-05T10:51:16.072Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,10 +16,10 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-05T10:40:24.502Z",
+    "generatedAt": "2026-06-05T10:51:16.051Z",
     "summaryWithoutBundle": {
-      "pass": 33,
-      "pending": 5
+      "pass": 34,
+      "pending": 4
     },
     "missingLocalProofs": [],
     "localProofGateIds": [
@@ -52,20 +52,12 @@
       "hosted-operator-packet"
     ],
     "pendingExternalGateIds": [
-      "eas-project-linkage",
       "eas-submit-config",
       "native-qa-evidence",
       "store-console-records",
       "native-screenshots"
     ],
     "pendingExternalGates": [
-      {
-        "id": "eas-project-linkage",
-        "group": "native",
-        "title": "EAS project is linked for the clone identity",
-        "evidence": "expo.extra.eas.projectId is not set.",
-        "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
-      },
       {
         "id": "eas-submit-config",
         "group": "native",
@@ -126,7 +118,7 @@
     "encryptedInTransit": true
   },
   "eas": {
-    "projectId": "",
+    "projectId": "700c2107-2639-4a27-b374-59ed5edd54fc",
     "buildProfiles": [
       "development",
       "preview",
@@ -485,7 +477,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T10:40:11.263Z",
+      "generatedAt": "2026-06-05T10:51:02.402Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -505,10 +497,10 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-05T10:40:11.231Z",
+        "generatedAt": "2026-06-05T10:51:02.368Z",
         "summary": {
-          "pass": 32,
-          "pending": 7
+          "pass": 33,
+          "pending": 6
         }
       },
       "requirements": [
@@ -654,14 +646,14 @@
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T10:40:07.740Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-05T10:50:59.203Z.",
               "nextStep": ""
             },
             {
               "id": "store-review-safety-packet",
               "status": "pass",
               "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T10:40:07.870Z.",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-05T10:50:59.346Z.",
               "nextStep": ""
             },
             {
@@ -710,21 +702,21 @@
               "id": "store-operator-packet",
               "status": "pass",
               "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-              "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T10:40:08.752Z.",
+              "evidence": "docs/store-operator-packet/manifest.json packages 11 source artifacts at 2026-06-05T10:51:00.306Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-operator-packet",
               "status": "pass",
               "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T10:40:09.528Z.",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-05T10:51:00.982Z.",
               "nextStep": ""
             },
             {
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 5 external gates at 2026-06-05T10:40:10.413Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 4 external gates at 2026-06-05T10:51:01.645Z.",
               "nextStep": ""
             },
             {
@@ -737,15 +729,15 @@
             {
               "id": "native-release-config-evidence",
               "status": "pass",
-              "title": "Native release config evidence is recorded before EAS account setup",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, and remaining account gates at 2026-06-05T10:08:07.910Z.",
+              "title": "Native release config evidence is recorded with current EAS linkage state",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-05T10:50:11.238Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T10:08:06.516Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-05T10:40:11.422Z.",
               "nextStep": ""
             }
           ],
@@ -794,10 +786,10 @@
             },
             {
               "id": "eas-project-linkage",
-              "status": "pending",
+              "status": "pass",
               "title": "EAS project is linked for the clone identity",
-              "evidence": "expo.extra.eas.projectId is not set.",
-              "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
+              "evidence": "projectId=700c2107-2639-4a27-b374-59ed5edd54fc",
+              "nextStep": ""
             },
             {
               "id": "eas-submit-config",
@@ -845,7 +837,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T10:40:13.607Z",
+      "generatedAt": "2026-06-05T10:51:04.670Z",
       "urlMode": "placeholder-allowed",
       "warnings": [],
       "appIdentity": {
@@ -915,7 +907,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T10:40:07.870Z",
+      "generatedAt": "2026-06-05T10:50:59.346Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -1224,7 +1216,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T10:40:13.203Z",
+      "generatedAt": "2026-06-05T10:51:04.351Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -1232,13 +1224,7 @@
         "allowNotLoggedIn": true
       },
       "warnings": [
-        "EAS project is not linked. Run `npx eas-cli@20.0.0 init` or set `expo.extra.eas.projectId` before native release builds.",
-        "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.",
-        "Set EXPO_PUBLIC_API_BASE_URL to the hosted HTTPS API before native release builds.",
-        "Set EXPO_PUBLIC_PRIVACY_POLICY_URL to a hosted HTTPS URL before native release builds.",
-        "Set EXPO_PUBLIC_TERMS_URL to a hosted HTTPS URL before native release builds.",
-        "Set EXPO_PUBLIC_SUPPORT_URL to a hosted HTTPS URL before native release builds.",
-        "EAS CLI is not logged in for non-interactive release work through pinned npx eas-cli@20.0.0: Not logged in"
+        "Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists."
       ],
       "appIdentity": {
         "name": "ReversR Rebuild",
@@ -1248,7 +1234,7 @@
         "iosBuildNumber": "1",
         "androidPackage": "com.vsillah.reversrrebuild",
         "androidVersionCode": 15,
-        "easProjectLinked": false
+        "easProjectLinked": true
       },
       "permissions": {
         "androidPermissions": [
@@ -1270,8 +1256,8 @@
           "version": "eas-cli/20.0.0 darwin-arm64 node-v24.15.0"
         },
         "whoami": {
-          "status": 1,
-          "output": "Not logged in"
+          "status": 0,
+          "output": "vsillah\nvsillah@gmail.com"
         },
         "buildProfiles": {
           "development": {
@@ -1296,23 +1282,23 @@
         }
       },
       "urls": {
-        "apiBaseUrl": "https://reversr-rebuild-api.example.com",
-        "privacyPolicyUrl": "https://reversr-rebuild.example.com/privacy",
-        "termsUrl": "https://reversr-rebuild.example.com/terms",
-        "supportUrl": "https://reversr-rebuild.example.com/support"
+        "apiBaseUrl": "https://reversr.vercel.app",
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "termsUrl": "https://reversr.vercel.app/terms",
+        "supportUrl": "https://reversr.vercel.app/support"
       },
       "externalGatesStillRequired": {
-        "easProjectLinkage": true,
-        "easLogin": true,
-        "hostedApiUrl": true,
-        "hostedPolicyUrls": true,
+        "easProjectLinkage": false,
+        "easLogin": false,
+        "hostedApiUrl": false,
+        "hostedPolicyUrls": false,
         "iosAscAppId": true
       }
     },
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-05T10:40:11.422Z",
+      "generatedAt": "2026-06-05T10:51:02.540Z",
       "source": "docs/store-console-evidence.template.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -1406,17 +1392,16 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T10:40:08.752Z",
+      "generatedAt": "2026-06-05T10:51:00.306Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T10:40:08.747Z",
+        "generatedAt": "2026-06-05T10:51:00.302Z",
         "summary": {
-          "pass": 32,
-          "pending": 7
+          "pass": 33,
+          "pending": 6
         },
         "pendingGateIds": [
           "release-evidence-bundle",
           "local-release-ci-evidence",
-          "eas-project-linkage",
           "eas-submit-config",
           "native-qa-evidence",
           "store-console-records",
@@ -1533,12 +1518,6 @@
           "nextStep": "Run npm run release:local-ci before external account-side release work."
         },
         {
-          "id": "eas-project-linkage",
-          "group": "native",
-          "title": "EAS project is linked for the clone identity",
-          "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity."
-        },
-        {
           "id": "eas-submit-config",
           "group": "native",
           "title": "EAS submit profile is configured for Google Play Internal Testing and TestFlight upload",
@@ -1573,12 +1552,12 @@
     "hostedOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T10:40:09.528Z",
+      "generatedAt": "2026-06-05T10:51:00.982Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-05T10:40:09.523Z",
+        "generatedAt": "2026-06-05T10:51:00.978Z",
         "summary": {
-          "pass": 32,
-          "pending": 7
+          "pass": 33,
+          "pending": 6
         }
       },
       "appIdentity": {
@@ -1775,8 +1754,8 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-05T10:39:58.801Z",
-      "completedAt": "2026-06-05T10:40:19.254Z",
+      "startedAt": "2026-06-05T10:50:50.717Z",
+      "completedAt": "2026-06-05T10:51:10.029Z",
       "commandCount": 16,
       "passedCount": 16,
       "failedCount": 0,
@@ -1787,7 +1766,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1588,
+          "durationMs": 1623,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -1797,7 +1776,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 142,
+          "durationMs": 160,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -1807,7 +1786,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 138,
+          "durationMs": 152,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -1817,7 +1796,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 467,
+          "durationMs": 487,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -1827,7 +1806,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6473,
+          "durationMs": 5927,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-local-release-ci-policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -1837,7 +1816,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 139,
+          "durationMs": 144,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -1847,7 +1826,7 @@
           "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 130,
+          "durationMs": 144,
           "command": "npm run store:review-safety",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
           "stderrTail": ""
@@ -1857,7 +1836,7 @@
           "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 128,
+          "durationMs": 127,
           "command": "npm run store:console:copy",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
           "stderrTail": ""
@@ -1867,9 +1846,9 @@
           "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 754,
+          "durationMs": 831,
           "command": "npm run store:operator-packet",
-          "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 7",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 6",
           "stderrTail": ""
         },
         {
@@ -1877,7 +1856,7 @@
           "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 776,
+          "durationMs": 676,
           "command": "npm run hosted:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
           "stderrTail": ""
@@ -1887,9 +1866,9 @@
           "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 886,
+          "durationMs": 664,
           "command": "npm run release:next-actions:write",
-          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 5\nNext recommended gate: eas-project-linkage",
+          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 4\nNext recommended gate: eas-submit-config",
           "stderrTail": ""
         },
         {
@@ -1897,7 +1876,7 @@
           "proves": "Original user objective is mapped to proven local work and pending external release gates.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 848,
+          "durationMs": 757,
           "command": "npm run release:objective",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 6/8\nPending requirements: store-readiness-packet, apple-google-store-publication",
           "stderrTail": ""
@@ -1907,7 +1886,7 @@
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 158,
+          "durationMs": 136,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- Store asset evidenceFolder is missing.\n- Review gate hostedApiPreflightPassed is not marked true.\n- Review gate hostedPolicyPreflightPassed is not marked true.\n- Review gate hostedConnectorSmokePassed is not marked true.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -1917,9 +1896,9 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1782,
+          "durationMs": 1811,
           "command": "npm run native:preflight:local",
-          "stdoutTail": "\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nWarnings:\n- EAS project is not linked. Run `npx eas-cli@20.0.0 init` or set `expo.extra.eas.projectId` before native release builds.\n- Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.\n- Set EXPO_PUBLIC_API_BASE_URL to the hosted HTTPS API before native release builds.\n- Set EXPO_PUBLIC_PRIVACY_POLICY_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_TERMS_URL to a hosted HTTPS URL before native release builds.\n- Set EXPO_PUBLIC_SUPPORT_URL to a hosted HTTPS URL before native release builds.\n- EAS CLI is not logged in for non-interactive release work through pinned npx eas-cli@20.0.0: Not logged in\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
+          "stdoutTail": "> reversr-rebuild@1.0.0 native:preflight:local\n> node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in\n\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nWarnings:\n- Set eas.json submit.production.ios.ascAppId to the App Store Connect Apple ID after the app record exists.\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
         },
         {
@@ -1927,7 +1906,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 181,
+          "durationMs": 134,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot build-handoff is missing android device evidence.\n- Native screenshot build-handoff is missing android capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -1937,14 +1916,13 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 5861,
+          "durationMs": 5537,
           "command": "npm run store:preflight:local",
-          "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nWarnings:\n- Using placeholder API URL because --allow-placeholder was provided.\n- Using placeholder or non-production privacyPolicyUrl because --allow-placeholder was provided.\n- Using placeholder or non-production termsUrl because --allow-placeholder was provided.\n- Using placeholder or non-production supportUrl because --allow-placeholder was provided.\nStore preflight passed.",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nStore preflight passed.",
           "stderrTail": ""
         }
       ],
       "externalGatesStillRequired": [
-        "eas-project-linkage",
         "eas-submit-config",
         "native-qa-evidence",
         "store-console-records",
@@ -1952,47 +1930,19 @@
       ],
       "notes": [
         "This is a local CI pass for pre-store readiness only.",
-        "EAS linkage, store records, preview builds, native QA, and final screenshots remain external gates."
+        "EAS submit config, store records, preview builds, native QA, and final screenshots remain external gates."
       ]
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-05T10:40:10.413Z",
-      "releaseStatusGeneratedAt": "2026-06-05T10:40:10.408Z",
+      "generatedAt": "2026-06-05T10:51:01.645Z",
+      "releaseStatusGeneratedAt": "2026-06-05T10:51:01.641Z",
       "summary": {
-        "pass": 4,
-        "pending": 5
+        "pass": 5,
+        "pending": 4
       },
-      "nextRecommendedGate": "eas-project-linkage",
+      "nextRecommendedGate": "eas-submit-config",
       "pendingGates": [
-        {
-          "group": "native",
-          "id": "eas-project-linkage",
-          "title": "EAS project is linked for the clone identity",
-          "status": "pending",
-          "evidence": "expo.extra.eas.projectId is not set.",
-          "nextStep": "Run npx eas-cli@20.0.0 init for the clone identity.",
-          "action": {
-            "owner": "Apple/Google release operator",
-            "phase": "EAS project setup",
-            "action": "Log in to EAS and link the clone identity to its own EAS project.",
-            "steps": [
-              "Run npm run native:preflight:local and confirm docs/native-release-config-evidence.json is updated.",
-              "Follow docs/external-release-setup-runbook.md section 4 for EAS login, project linkage, env, and credentials.",
-              "Run npx eas-cli@20.0.0 login.",
-              "Run npx eas-cli@20.0.0 whoami --non-interactive to confirm the account.",
-              "Run npx eas-cli@20.0.0 init for ReversR Rebuild.",
-              "Confirm app.json contains expo.extra.eas.projectId for the clone.",
-              "Run npm run native:preflight:local, then strict npm run native:preflight after hosted URLs are configured."
-            ],
-            "evidence": [
-              "docs/native-release-config-evidence.json records native identity, camera permissions, EAS profile shape, submit profile shape, CLI availability, and remaining external gates.",
-              "EAS whoami returns the intended account.",
-              "app.json has the clone projectId.",
-              "Native preflight no longer reports missing EAS project linkage."
-            ]
-          }
-        },
         {
           "group": "native",
           "id": "eas-submit-config",
