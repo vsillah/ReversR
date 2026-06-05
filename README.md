@@ -48,6 +48,12 @@ See [docs/inventory-connector-spec.md](docs/inventory-connector-spec.md).
 
 The prototype is not store-ready yet. See [docs/store-readiness.md](docs/store-readiness.md) and [docs/store-metadata.md](docs/store-metadata.md) for the Apple App Store, Google Play, and EAS gates.
 
+The API now has a deployable container bootstrap for production hosting. See [docs/production-api-deployment.md](docs/production-api-deployment.md), then build the API image with:
+
+```bash
+npm run api:docker:build
+```
+
 Run the local readiness check with the placeholder API allowed:
 
 ```bash

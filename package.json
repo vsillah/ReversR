@@ -14,6 +14,7 @@
     "screenshots:store": "node scripts/capture-store-screenshots.js",
     "typecheck": "tsc --noEmit",
     "api:preflight": "node scripts/api-preflight.js",
+    "api:docker:build": "docker build -t reversr-rebuild-api .",
     "accessibility:preflight": "node scripts/accessibility-preflight.js",
     "store:preflight": "node scripts/store-preflight.js",
     "store:preflight:local": "node scripts/store-preflight.js --allow-placeholder"

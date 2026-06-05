@@ -26,6 +26,7 @@ The app now has:
 - Web routes for `/privacy`, `/terms`, and `/support`
 - Expo Doctor passes all project health checks
 - API health endpoint: `GET /api/health`
+- API Dockerfile and production deployment runbook for hosted backend readiness
 - Server-side credential references for authenticated inventory connectors
 - Admin-token protected credential registry endpoints for prototype operations
 - Settings-based admin credential reference manager for listing, saving, and deleting backend registry credentials
@@ -83,7 +84,7 @@ Open gates:
 
 ## Technical Gaps Before Store Review
 
-- Production API host: mobile builds currently point non-web requests to a placeholder backend URL in `hooks/useGemini.ts` and `app.json`.
+- Production API host: a Dockerfile and deployment runbook exist, but the API still needs to be deployed behind HTTPS and verified with `npm run api:preflight` before native store builds.
 - Authenticated connectors: API key and OAuth sources are supported through backend credential references, admin-token registry endpoints, and a Settings-based prototype admin manager, but production should move registry-file secrets into a managed secret store and add user/admin roles.
 - Privacy policy, terms, and support: web routes and env-driven app config exist, but the routes must be deployed to hosted HTTPS URLs and reviewed before submission.
 - Native QA: camera flow needs real iOS and Android device testing.
@@ -95,10 +96,10 @@ Open gates:
 
 ## Recommended Next Sequence
 
-1. Host the API and update `hooks/useGemini.ts` to use the production backend for native builds.
+1. Deploy the API container behind HTTPS, then run `npm run api:preflight` against the hosted URL.
 2. Move connector credentials from the prototype registry file into a managed secret store and add admin roles.
 3. Deploy the web `/privacy`, `/terms`, and `/support` routes, then set `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` in EAS production.
-4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run api:preflight` and `npm run store:preflight`.
+4. Set `EXPO_PUBLIC_API_BASE_URL` in EAS production, then run `npm run store:preflight`.
 5. Run `npm run accessibility:preflight`, then native Android/iOS screen-reader, tap-target, and camera QA.
 6. Run EAS preview builds.
 7. Run `npm run screenshots:store`, then capture final native screenshots and finalize store metadata.
