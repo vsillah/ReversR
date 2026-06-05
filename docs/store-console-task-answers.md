@@ -1,12 +1,11 @@
 # Store Console Task Answers
 
-Generated: 2026-06-05T13:51:16.296Z
+Generated: 2026-06-05T19:18:25.826Z
 
 Use this as a task-by-task entry packet for App Store Connect and Google Play Console. It is not proof that any console task has been saved or approved.
 
 ## Human Values Still Needed
 
-- Public support email for Google Play contact details
 - Final official content rating and age rating questionnaire results
 - Native Android and iOS screenshots from preview builds
 - Apple login/2FA for EAS iOS preview credentials
@@ -208,8 +207,8 @@ No
 
 ### Select an app category and provide contact details
 
-- Status: partial-human-value-needed
-- Save gate: Saving publishes contact metadata inside Google Play Console; public support email needs Vambah confirmation.
+- Status: draft-saved
+- Save gate: Saved in Google Play Console; do not click Send for review until final store signoff.
 
 **App or game**
 
@@ -232,7 +231,7 @@ https://reversr.vercel.app/support
 **Email**
 
 ```text
-HITL_REQUIRED_PUBLIC_SUPPORT_EMAIL
+vambah@amadutown.com
 ```
 
 **Phone**

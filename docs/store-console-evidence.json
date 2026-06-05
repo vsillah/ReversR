@@ -53,10 +53,12 @@
     "internalTestingReady": false,
     "categoryDraftSaved": true,
     "categoryDraftSavedAt": "2026-06-05T16:11:30.815Z",
-    "contactDetailsCompleted": false,
-    "contactDetailsPendingReason": "Public support email must be confirmed before saving contact details to Google Play.",
-    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. App category was later saved as Productivity in Store settings, but the category/contact task still needs public support contact details before it can be considered complete. Content rating, target audience, data safety, public contact details, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
-    "completedSetupTaskCount": 6,
+    "contactDetailsCompleted": true,
+    "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
+    "publicSupportEmail": "vambah@amadutown.com",
+    "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
+    "notes": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Play setup showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health declarations. App category was later saved as Productivity in Store settings, and public support contact details were saved after Vambah confirmed vambah@amadutown.com as the public support email. Content rating, target audience, data safety, full store listing asset upload, internal testing, and production access remain pending. No Send for review, testing release, production access application, or public submission was started.",
+    "completedSetupTaskCount": 7,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
       "Set privacy policy",
@@ -64,13 +66,13 @@
       "Ads",
       "Government apps",
       "Financial features",
-      "Health"
+      "Health",
+      "Select an app category and provide contact details"
     ],
     "remainingSetupTasks": [
       "Content rating",
       "Target audience",
       "Data safety",
-      "Select an app category and provide contact details",
       "Set up your store listing"
     ],
     "storeListingTextEntered": true,
@@ -184,10 +186,10 @@
     {
       "platform": "googlePlay",
       "task": "Select an app category and provide contact details",
-      "status": "partial-draft-saved",
-      "value": "App category saved as Productivity. Public support contact details were not entered.",
-      "completedAt": "2026-06-05T16:11:30.815Z",
-      "note": "Google Play Store settings displayed Change saved / Send for review in Publishing overview after saving category. Send for review was not clicked. Public support email remains HITL before contact details can be saved."
+      "status": "draft-saved",
+      "value": "App category saved as Productivity. Store listing contact details saved with public support email vambah@amadutown.com.",
+      "completedAt": "2026-06-05T18:57:00.000Z",
+      "note": "Google Play Store settings contact dialog displayed Change saved after Vambah entered and saved the public support email. Send for review was not clicked. The public phone value was visible in the console but is intentionally not stored in repo evidence."
     },
     {
       "platform": "googlePlay",

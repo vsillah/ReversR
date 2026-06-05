@@ -30,6 +30,8 @@ const easConfig = readOptionalJson('eas.json');
 const recordedAppleId = storeEvidence?.appStoreConnect?.appleId || easConfig?.submit?.production?.ios?.ascAppId || '';
 const recordedAppStoreUrl = storeEvidence?.appStoreConnect?.recordUrl || '';
 const appStoreRecordExists = Boolean(recordedAppleId && recordedAppStoreUrl);
+const savedGooglePlaySupportEmail = storeEvidence?.googlePlay?.publicSupportEmail || '';
+const googlePlayContactDetailsCompleted = storeEvidence?.googlePlay?.contactDetailsCompleted === true && Boolean(savedGooglePlaySupportEmail);
 
 const generatedAt = new Date().toISOString();
 
@@ -122,15 +124,17 @@ const googlePlayTasks = [
   },
   {
     task: 'Select an app category and provide contact details',
-    status: 'partial-human-value-needed',
+    status: googlePlayContactDetailsCompleted ? 'draft-saved' : 'partial-human-value-needed',
     fields: [
       { label: 'App or game', value: 'App' },
       { label: 'Category', value: 'Productivity' },
       { label: 'Website', value: urls.supportUrl },
-      { label: 'Email', value: 'HITL_REQUIRED_PUBLIC_SUPPORT_EMAIL' },
+      { label: 'Email', value: savedGooglePlaySupportEmail || 'HITL_REQUIRED_PUBLIC_SUPPORT_EMAIL' },
       { label: 'Phone', value: 'Optional / leave blank unless Vambah wants public phone support listed' },
     ],
-    saveGate: 'Saving publishes contact metadata inside Google Play Console; public support email needs Vambah confirmation.',
+    saveGate: googlePlayContactDetailsCompleted
+      ? 'Saved in Google Play Console; do not click Send for review until final store signoff.'
+      : 'Saving publishes contact metadata inside Google Play Console; public support email needs Vambah confirmation.',
   },
   {
     task: 'Set up your store listing',
@@ -235,7 +239,7 @@ const packetOut = {
   appStoreConnectTasks,
   hitlValuesNeeded: [
     ...(!appStoreRecordExists ? ['App Store Connect Apple ID after the app record is created'] : []),
-    'Public support email for Google Play contact details',
+    ...(!googlePlayContactDetailsCompleted ? ['Public support email for Google Play contact details'] : []),
     'Final official content rating and age rating questionnaire results',
     'Native Android and iOS screenshots from preview builds',
     'Apple login/2FA for EAS iOS preview credentials',
