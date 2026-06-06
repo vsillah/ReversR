@@ -36,7 +36,7 @@
     "testFlightUploadAttempted": true,
     "testFlightUploadAttemptedAt": "2026-06-05T22:39:01Z",
     "testFlightUploadEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. App Privacy is published and What to Test is saved. TestFlight tester readiness remains pending because App Store Connect has zero existing testers and zero groups available for this build; adding new tester emails or creating tester groups requires a tester decision. Local iOS simulator QA and screenshots are recorded in docs/native-qa-evidence.json.",
+    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. App Privacy is published and What to Test is saved. The Add New Testers dialog is staged with empty tester fields and Next disabled; TestFlight tester readiness remains pending until Vambah provides/authorizes tester identities or a TestFlight group.",
     "metadataDraftSaved": true,
     "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
     "metadataDraftFields": [
@@ -52,7 +52,7 @@
     "screenshotsUploaded": false,
     "buildSelected": false,
     "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details were configured and later published after explicit Vambah authorization; App Store Connect showed Published a few seconds ago by Vambah Sillah. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload/contact information gates were previously pending; local iOS simulator QA/screenshots are now recorded. Add for Review was not clicked. TestFlight processing was verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. TestFlight What to Test was saved from the repo-backed copy; Apple showed no assignable groups and no existing testers, so no group/tester assignment occurred and no new tester emails were entered or invited. No public App Review submission occurred.",
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details were configured and later published after explicit Vambah authorization; App Store Connect showed Published a few seconds ago by Vambah Sillah. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload/contact information gates were previously pending; local iOS simulator QA/screenshots are now recorded. Add for Review was not clicked. TestFlight processing was verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. TestFlight What to Test was saved from the repo-backed copy; Apple showed no assignable groups and no existing testers, so no group/tester assignment occurred and no new tester emails were entered or invited. Codex later staged Add New Testers on the empty tester-entry dialog and stopped before entering identities or sending invites. No public App Review submission occurred.",
     "appStoreConnectApi": {
       "status": "approved-active-key",
       "checkedAt": "2026-06-06T00:23:50.346Z",
@@ -145,28 +145,39 @@
     "testFlightWhatToTestDraftSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
     "testFlightWhatToTestLength": 592,
     "testFlightCurrentScreenPrepared": {
-      "status": "what-to-test-saved-no-existing-testers-available",
-      "checkedAt": "2026-06-06T09:57:16.094Z",
-      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+      "status": "add-new-testers-form-staged-empty",
+      "checkedAt": "2026-06-06T10:10:18.464Z",
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Add New Testers to Build 1.0.0 (6)",
       "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
       "version": "1.0.0",
       "build": "6",
-      "whatToTestSaved": true,
-      "groupsCount": 0,
-      "individualTestersCount": 0,
-      "addExistingTestersResult": "Apple dialog displayed: You haven’t added any testers. Add Testers.",
+      "formFieldsVisible": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "availableTesterSlotsLabel": "0 of 10,000 Available",
+      "emailFieldsEmpty": true,
+      "firstNameFieldsEmpty": true,
+      "lastNameFieldsEmpty": true,
+      "nextButtonState": "disabled",
+      "cancelButtonVisible": true,
+      "autofillSuggestionVisible": true,
+      "autofillSuggestionSelected": false,
       "newTesterEmailsEntered": false,
       "testerInvitesSent": false,
-      "actionTaken": "Codex reopened the TestFlight build after App Privacy publishing, verified What to Test remains saved, opened Add Existing Testers, and confirmed no existing testers are available.",
+      "actionTaken": "Codex opened Add Testers > Add New Testers and stopped on the empty tester-entry dialog so Vambah can provide or authorize tester identities.",
       "actionsNotTaken": [
-        "No new tester email address was entered or transmitted.",
-        "No TestFlight group was created.",
+        "No autofill suggestion was selected.",
+        "No tester email address, first name, or last name was typed.",
+        "Next was not clicked.",
         "No tester invitation was sent.",
+        "No TestFlight group was created.",
         "Expire Build was not clicked.",
         "Add for Review was not clicked.",
         "Public App Review submission was not started."
       ],
-      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. Local iOS simulator QA and screenshots are complete; real-device TestFlight QA remains optional/next-best before public review."
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses/names and authorize adding/sending invites, or cancel this dialog and create/provide a TestFlight group. Do not click Add for Review until final signoff is explicit."
     },
     "testFlightWhatToTestSaved": true,
     "testFlightWhatToTestSavedAt": "2026-06-06T03:04:24.221Z",
@@ -174,32 +185,78 @@
     "testFlightExistingTestersAvailable": false,
     "testFlightTesterInvitesSent": false,
     "testFlightSetup": {
-      "status": "what-to-test-saved-no-existing-testers-available",
-      "checkedAt": "2026-06-06T09:57:16.094Z",
-      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+      "status": "add-new-testers-form-staged-empty",
+      "checkedAt": "2026-06-06T10:10:18.464Z",
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Add New Testers to Build 1.0.0 (6)",
       "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
       "version": "1.0.0",
       "build": "6",
-      "whatToTestSaved": true,
-      "groupsCount": 0,
-      "individualTestersCount": 0,
-      "addExistingTestersResult": "Apple dialog displayed: You haven’t added any testers. Add Testers.",
+      "formFieldsVisible": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "availableTesterSlotsLabel": "0 of 10,000 Available",
+      "emailFieldsEmpty": true,
+      "firstNameFieldsEmpty": true,
+      "lastNameFieldsEmpty": true,
+      "nextButtonState": "disabled",
+      "cancelButtonVisible": true,
+      "autofillSuggestionVisible": true,
+      "autofillSuggestionSelected": false,
       "newTesterEmailsEntered": false,
       "testerInvitesSent": false,
-      "actionTaken": "Codex reopened the TestFlight build after App Privacy publishing, verified What to Test remains saved, opened Add Existing Testers, and confirmed no existing testers are available.",
+      "actionTaken": "Codex opened Add Testers > Add New Testers and stopped on the empty tester-entry dialog so Vambah can provide or authorize tester identities.",
       "actionsNotTaken": [
-        "No new tester email address was entered or transmitted.",
-        "No TestFlight group was created.",
+        "No autofill suggestion was selected.",
+        "No tester email address, first name, or last name was typed.",
+        "Next was not clicked.",
         "No tester invitation was sent.",
+        "No TestFlight group was created.",
         "Expire Build was not clicked.",
         "Add for Review was not clicked.",
         "Public App Review submission was not started."
       ],
-      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. Local iOS simulator QA and screenshots are complete; real-device TestFlight QA remains optional/next-best before public review."
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses/names and authorize adding/sending invites, or cancel this dialog and create/provide a TestFlight group. Do not click Add for Review until final signoff is explicit."
     },
     "appPrivacyPublished": true,
     "appPrivacyPublishedAt": "2026-06-06T09:49:52.689Z",
-    "appPrivacyPublishedBy": "Vambah Sillah"
+    "appPrivacyPublishedBy": "Vambah Sillah",
+    "testFlightNewTesterFormStaged": {
+      "status": "add-new-testers-form-staged-empty",
+      "checkedAt": "2026-06-06T10:10:18.464Z",
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Add New Testers to Build 1.0.0 (6)",
+      "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+      "version": "1.0.0",
+      "build": "6",
+      "formFieldsVisible": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "availableTesterSlotsLabel": "0 of 10,000 Available",
+      "emailFieldsEmpty": true,
+      "firstNameFieldsEmpty": true,
+      "lastNameFieldsEmpty": true,
+      "nextButtonState": "disabled",
+      "cancelButtonVisible": true,
+      "autofillSuggestionVisible": true,
+      "autofillSuggestionSelected": false,
+      "newTesterEmailsEntered": false,
+      "testerInvitesSent": false,
+      "actionTaken": "Codex opened Add Testers > Add New Testers and stopped on the empty tester-entry dialog so Vambah can provide or authorize tester identities.",
+      "actionsNotTaken": [
+        "No autofill suggestion was selected.",
+        "No tester email address, first name, or last name was typed.",
+        "Next was not clicked.",
+        "No tester invitation was sent.",
+        "No TestFlight group was created.",
+        "Expire Build was not clicked.",
+        "Add for Review was not clicked.",
+        "Public App Review submission was not started."
+      ],
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses/names and authorize adding/sending invites, or cancel this dialog and create/provide a TestFlight group. Do not click Add for Review until final signoff is explicit."
+    }
   },
   "googlePlay": {
     "status": "pass",
@@ -479,7 +536,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved. App Store Connect App Privacy is published, TestFlight processing/What to Test are verified, Google Play internal testing is active for the existing ReversR App Testers list, and local native QA/screenshots are recorded. Remaining blockers are Apple TestFlight tester setup/readiness, Google Play public-review/production decision gates, final store review signoff, and public review actions."
   },
-  "generatedAt": "2026-06-06T09:57:16.094Z",
+  "generatedAt": "2026-06-06T10:10:18.464Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -624,6 +681,14 @@
       "value": "ReversR App Testers selected; 13 users; Internal testing track shows Active; latest release 1.0.0.",
       "completedAt": "2026-06-06T09:56:14.438Z",
       "note": "Codex selected the existing tester list and saved. Join link was not copied/transmitted. Send for review, closed testing, and production rollout were not clicked."
+    },
+    {
+      "platform": "appStoreConnect",
+      "task": "Stage Add New Testers dialog",
+      "status": "staged-empty-hitl",
+      "value": "Add New Testers dialog for TestFlight build 1.0.0 (6) is open with empty Email, First Name, and Last Name fields; Next is disabled.",
+      "completedAt": "2026-06-06T10:10:18.464Z",
+      "note": "No autofill suggestion was selected, no tester data was entered, and no invite/review submission action was clicked."
     }
   ],
   "nativeQaPreflightPassedAt": "2026-06-06T09:12:16.673Z"
