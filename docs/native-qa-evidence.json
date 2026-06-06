@@ -53,7 +53,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and docs/eas-production-build-sync-evidence.json; QA and screenshots still need an iOS device, TestFlight install, or full Xcode Simulator path before this native QA gate can pass. Fresh probe at 2026-06-05T23:56:51Z confirmed xcode-select points to /Library/Developer/CommandLineTools and xcrun cannot find simctl, so no simulator automation path is available on this Mac yet."
+      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and EAS scheduled TestFlight upload submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0; QA and screenshots still need an iOS device, TestFlight install, or full Xcode Simulator path before this native QA gate can pass. Fresh probe at 2026-06-05T23:56:51Z confirmed xcode-select points to /Library/Developer/CommandLineTools and xcrun cannot find simctl, so no simulator automation path is available on this Mac yet."
     }
   },
   "productionBuilds": {
@@ -77,7 +77,7 @@
       "artifactType": "ipa",
       "buildNumber": "6",
       "completedAt": "2026-06-05T18:47:24.731Z",
-      "notes": "iOS production/store IPA exists for the TestFlight/App Store path. It has not been installed, tested, uploaded to App Store Connect, selected for review, or submitted for App Review."
+      "notes": "iOS production/store IPA exists for the TestFlight/App Store path. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6), but App Store Connect/TestFlight processing, install QA, screenshot capture, build selection, and App Review submission are not verified or approved."
     }
   },
   "checks": [
@@ -211,7 +211,7 @@
       ],
       "android": "pending",
       "ios": "pending",
-      "evidence": "Pending controlled-failure check. Android live QA has not simulated hosted API outage because disrupting the phone network or production hosted API would affect external state. Next safe path is a local/instrumented build pointed at a controlled invalid API URL, or an approved temporary device-network fault window, then verify the app shows recoverable error messaging without data loss."
+      "evidence": "A controlled invalid-API Android preview build was started at 2026-06-06T00:02:39.481Z with EXPO_PUBLIC_API_BASE_URL=https://invalid.reversr.invalid (build 737d558f-9742-469a-8bf6-2842ff7cb3a6), but it remained IN_PROGRESS during this evidence refresh. Offline/API outage UI verification remains pending until that build finishes, is installed, and the failure path is captured without disrupting production API or device network settings."
     },
     {
       "id": "connector-auth-error",
@@ -363,7 +363,7 @@
     "approvedForProductionSubmission": false,
     "signedAt": ""
   },
-  "generatedAt": "2026-06-05T15:03:28.217Z",
+  "generatedAt": "2026-06-06T00:11:39.082Z",
   "nextActions": [
     "Complete remaining native Android checks for camera permission, policy links, offline API error, connector-auth error, and vendor draft without sending externally.",
     "Use the recorded iOS production/store build for the TestFlight path, or install full Xcode for an iOS Simulator screenshot path.",
@@ -404,7 +404,17 @@
       "BOM generation produced itemized inventory-matched parts.",
       "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
       "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
-    ]
+    ],
+    "controlledInvalidApiBuild": {
+      "status": "in-progress",
+      "buildId": "737d558f-9742-469a-8bf6-2842ff7cb3a6",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/737d558f-9742-469a-8bf6-2842ff7cb3a6",
+      "startedAt": "2026-06-06T00:02:39.481Z",
+      "profile": "preview",
+      "distribution": "internal",
+      "apiBaseUrl": "https://invalid.reversr.invalid",
+      "purpose": "Controlled offline/API error handling QA without touching production API or device network settings."
+    }
   },
   "liveAndroidQa": {
     "status": "partial-pass",

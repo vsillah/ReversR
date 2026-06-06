@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pending-hitl",
-  "generatedAt": "2026-06-05T23:57:22.000Z",
-  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play service-account permission/key setup, 1Password credential persistence, Google Play Android Developer API enablement, Android EAS internal-track submission completion, Google Play Internal testing visibility verification, native/device checks, and store-console inspection.",
+  "generatedAt": "2026-06-06T00:11:39.082Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play internal-track submission, Apple App Store Connect API access approval, App Store Connect API key creation, 1Password credential persistence, and EAS iOS TestFlight upload scheduling.",
   "pr": {
     "number": 2,
     "branch": "codex/inventory-reconstruction-clone",
@@ -10,9 +10,8 @@
   },
   "localState": {
     "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
-    "releaseStatus": "Pending after Android EAS internal-track submission finished and is visible in Google Play Console Internal testing; Apple is now logged in but App Store Connect API still shows Request Access, so TestFlight upload remains gated by persistent API access/key setup. iOS screenshots/QA, closed testing/production access, and final store signoff remain pending.",
+    "releaseStatus": "Pending after Android EAS internal-track submission finished and is visible in Google Play Console Internal testing, and iOS EAS submission was scheduled to App Store Connect/TestFlight using the authorized App Store Connect API key. Remaining gates are TestFlight processing/build selection verification, iOS QA/screenshots without an iOS device or full Xcode simulator, Google Play tester/signoff steps, and final store signoff.",
     "pendingGateIds": [
-      "eas-submit-config",
       "native-qa-evidence",
       "store-console-records",
       "native-screenshots"
@@ -46,7 +45,7 @@
     ]
   },
   "easSubmitConfig": {
-    "status": "android-internal-submit-finished-ios-api-access-request-gated",
+    "status": "android-internal-submit-finished-ios-submit-scheduled",
     "android": {
       "submitProfile": "production",
       "track": "internal",
@@ -97,17 +96,32 @@
       "finishedBuildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
       "artifactType": "ipa",
       "submitAttemptEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-      "currentGate": "App Store Connect is logged in and Users and Access > Integrations > App Store Connect API shows Request Access. Codex stopped before requesting persistent API access or creating/downloading a key.",
+      "currentGate": "App Store Connect API access is approved, the ReversR EAS Submit key exists, the private .p8 is stored outside the repo and in 1Password, and EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0. TestFlight processing/build selection remains pending; no public review submission was started.",
       "latestSubmitRetry": {
-        "status": "blocked-hitl-request-access-visible",
-        "checkedAt": "2026-06-05T23:57:22.000Z",
-        "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\"",
-        "exitCode": 1,
-        "uploadStarted": false,
+        "status": "scheduled",
+        "checkedAt": "2026-06-06T00:11:39.082Z",
+        "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait",
+        "exitCode": 0,
+        "uploadScheduled": true,
         "publicReviewSubmissionStarted": false,
-        "errorSummary": "App Store Connect API Keys cannot be set up in --non-interactive mode.",
-        "appStoreConnectUrl": "https://appstoreconnect.apple.com/access/integrations/api",
-        "visibleAction": "Request Access"
+        "appReviewAddForReviewClicked": false,
+        "submissionId": "a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+        "note": "The upload was scheduled without TestFlight changelog text because EAS reported the what-to-test/changelog parameter is Enterprise-plan only. This is an App Store Connect/TestFlight upload attempt, not public App Review submission."
+      },
+      "appStoreConnectApiAccess": {
+        "status": "approved",
+        "currentScreen": "Users and Access > Integrations > App Store Connect API",
+        "activeKeyName": "ReversR EAS Submit",
+        "activeKeyId": "FZ4LLB2243",
+        "accessRole": "App Manager"
+      },
+      "onePasswordItem": {
+        "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+        "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+        "vault": "Employee",
+        "category": "API Credential",
+        "attachment": "App Store Connect .p8 private key"
       }
     }
   },
@@ -143,9 +157,15 @@
       "currentUrl": "https://appstoreconnect.apple.com/access/integrations/api",
       "loggedIn": true,
       "visibleActions": [
-        "Request Access"
+        "Active (1)",
+        "Edit"
       ],
-      "nextActionRequiringApproval": "Click Request Access only if Vambah approves enabling App Store Connect API access for the organization. If access is granted, create or authorize an EAS submit API key and store it in 1Password before rerunning iOS EAS submit. Do not click Apple Add for Review or submit public App Review."
+      "activeKey": {
+        "name": "ReversR EAS Submit",
+        "keyId": "FZ4LLB2243",
+        "access": "App Manager"
+      },
+      "nextActionRequiringApproval": "Wait for App Store Connect/TestFlight processing and verify build 1.0.0 (6) appears. Do not click Apple Add for Review, App Privacy Publish, or public App Review submission without explicit final approval."
     }
   },
   "nativeQaAndScreenshots": {
@@ -187,7 +207,7 @@
       "currentBlockers": [
         "No iOS device is available for native QA or screenshots.",
         "Full Xcode is not installed; xcrun simctl is unavailable.",
-        "The iOS IPA has not been uploaded to TestFlight because App Store Connect API access is not enabled."
+        "The iOS IPA upload has been scheduled through EAS, but App Store Connect/TestFlight processing and install QA are not verified yet."
       ]
     }
   },
@@ -200,7 +220,9 @@
       "appPrivacyConfiguredNotPublished": true,
       "ageRatingCompleted": true,
       "testFlightReady": false,
-      "addForReviewClicked": false
+      "addForReviewClicked": false,
+      "testFlightUploadScheduled": true,
+      "testFlightUploadSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0"
     },
     "googlePlay": {
       "recordUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
@@ -224,7 +246,7 @@
   },
   "humanInTheLoopResumeInstructions": [
     "For Google Play internal testing: release 1.0.0 is visible in Play Console as Available to internal testers with 1 version code and Not reviewed. The Testers tab shows an existing ReversR App Testers email list with 13 users and a Join on the web link. To continue, explicitly authorize assigning/changing tester access or provide the tester decision. Do not click Save, copy/send the join link, Send for review, closed testing, production access, or production rollout without explicit final approval.",
-    "For Apple TestFlight upload: App Store Connect is logged in and the browser is on Users and Access > Integrations > App Store Connect API. The page shows Request Access. To continue, explicitly authorize clicking Request Access and completing any Apple terms/account-holder gate. If API access is granted and a key-management page appears, explicitly authorize creating an EAS Submit API key and saving it to 1Password. Do not click Add for Review or public App Review submission.",
+    "For Apple TestFlight upload: EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 using the App Store Connect API key saved in 1Password. Next, verify App Store Connect > TestFlight after Apple processing completes and confirm build 1.0.0 (6) appears. Do not click Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
     "For Android live QA: further checks can continue if the Pixel remains reachable, but creating a vendor email draft or granting camera permission remains a HITL boundary.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
     "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."

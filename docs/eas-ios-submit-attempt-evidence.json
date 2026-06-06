@@ -1,16 +1,47 @@
 {
   "schemaVersion": 1,
-  "status": "blocked-hitl",
-  "generatedAt": "2026-06-05T23:57:22.000Z",
+  "status": "scheduled",
+  "generatedAt": "2026-06-06T00:11:39.082Z",
   "intent": "Upload the finished iOS production/store IPA to App Store Connect/TestFlight without submitting the app for public review.",
-  "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\"",
+  "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait",
   "result": {
-    "exitCode": 1,
-    "uploadStarted": false,
+    "exitCode": 0,
+    "uploadScheduled": true,
+    "uploadProcessingVerified": false,
     "publicReviewSubmissionStarted": false,
-    "stdoutTail": "Looking up credentials configuration for com.vsillah.reversrrebuild...\nApp Store Connect API Keys cannot be set up in --non-interactive mode.\n    Error: submit command failed.",
-    "retriedAt": "2026-06-05T23:57:22.000Z",
-    "retryFinding": "The non-interactive EAS iOS submit retry still stops before upload because App Store Connect API keys cannot be set up in non-interactive mode."
+    "appReviewAddForReviewClicked": false,
+    "submissionId": "a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+    "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+    "stdoutTailSanitized": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 using App Store Connect app 6777091538 and local ASC API key metadata. The local private key path was used only in an uncommitted eas.json change and removed before evidence generation."
+  },
+  "appStoreConnectApiAccess": {
+    "status": "approved",
+    "requestedAt": "2026-06-06T00:00:00.000Z",
+    "approvedAt": "2026-06-06T00:00:00.000Z",
+    "visibleMessage": "Your request to access the App Store Connect API was approved."
+  },
+  "appStoreConnectApiKey": {
+    "keyName": "ReversR EAS Submit",
+    "keyId": "FZ4LLB2243",
+    "issuerId": "d4e5bef0-4168-4aad-b41e-fcd8079e9bfc",
+    "accessRole": "App Manager",
+    "generatedBy": "Vambah Sillah",
+    "onePasswordItem": {
+      "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+      "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+      "vault": "Employee",
+      "category": "API Credential",
+      "attachment": "App Store Connect .p8 private key"
+    },
+    "localKeyStoredOutsideRepo": true,
+    "privateKeyCommitted": false
+  },
+  "firstRetryWithChangelog": {
+    "status": "failed-unsupported-plan-feature",
+    "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\"",
+    "exitCode": 1,
+    "errorSummary": "This submission specified the changelog parameter. Changelog submission is currently available for Enterprise plan only.",
+    "resolution": "Reran the same iOS submit without --what-to-test and scheduled the upload successfully."
   },
   "appStoreConnectScreen": {
     "attemptedUrl": "https://appstoreconnect.apple.com/access/integrations/api",
@@ -18,22 +49,26 @@
     "currentScreen": "App Store Connect > Users and Access > Integrations > App Store Connect API for Vambah Sillah account",
     "loggedIn": true,
     "visibleActions": [
-      "Request Access"
+      "Active (1)",
+      "Edit"
     ],
-    "visibleMessage": "Permission is required to access the App Store Connect API. You can request access on behalf of your organization.",
-    "actionTaken": "After Vambah completed Apple login/2FA, Codex navigated to Users and Access > Integrations > App Store Connect API and stopped before Request Access, API-key creation, private-key download, IPA upload, or public review submission."
+    "visibleMessage": "Your request to access the App Store Connect API was approved.",
+    "activeKey": {
+      "name": "ReversR EAS Submit",
+      "keyId": "FZ4LLB2243",
+      "access": "App Manager",
+      "downloadAvailable": false
+    },
+    "actionTaken": "Codex created the authorized ReversR EAS Submit key, downloaded the .p8 once, saved it outside the repo and in 1Password, temporarily used the key for EAS Submit, removed the local key fields from eas.json, and did not click Add for Review or public App Review submission."
   },
-  "humanInTheLoopGate": {
-    "type": "App Store Connect API access",
-    "whyRequired": "EAS Submit needs App Store Connect API key access to upload the finished iOS IPA to App Store Connect/TestFlight in non-interactive mode. App Store Connect is logged in and currently shows the Request Access button for the organization.",
-    "riskBoundary": "Requesting API access and creating/downloading API keys creates persistent account access. Codex did not click Request Access, create a key, download a private key, upload the IPA, add the app for review, or submit the app for public App Review.",
-    "nextHumanAction": [
-      "In Chrome, stay on App Store Connect > Users and Access > Integrations > App Store Connect API.",
-      "Click Request Access only if you approve enabling App Store Connect API access for the organization and agree to any Apple terms shown.",
-      "If Apple grants access and shows a key-management table, tell Codex: Authorized: create App Store Connect API key for EAS Submit and save it to 1Password.",
-      "If Apple shows legal terms, payment, organization, or account-holder confirmation, complete or report that gate before Codex proceeds.",
-      "Do not click Add for Review or submit the app for public App Review."
-    ],
-    "resumeCommandAfterAccess": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\""
+  "remainingVerificationGate": {
+    "type": "TestFlight processing and store signoff",
+    "whyRequired": "EAS accepted and scheduled the upload, but App Store Connect processing/build selection and final store signoff still need verification before TestFlight or public submission can be marked ready.",
+    "riskBoundary": "Codex did not publish App Privacy, add the app for review, submit public App Review, or approve production submission.",
+    "nextActions": [
+      "Check App Store Connect > TestFlight for build 1.0.0 (6) after Apple processing completes.",
+      "If processing succeeds, select/build-test metadata can be prepared for TestFlight only after Vambah approves the next console action.",
+      "Do not click Add for Review or submit public App Review until final signoff is explicit."
+    ]
   }
 }
