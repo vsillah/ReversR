@@ -325,11 +325,11 @@ const actionPlan = {
   },
   'store-console-records': {
     owner: 'Store release operator',
-    phase: 'Store console setup',
+    phase: 'Store console final review',
     action: appStoreRecordRecorded && googlePlayRecordRecorded
       ? appStoreApiAccessGateVisible
         ? 'Request App Store Connect API access and configure Google Play service account submit credentials before retrying store uploads; continue pending store signoff without public submission.'
-        : 'Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.'
+        : 'Resolve the remaining App Store Connect and Google Play review/signoff gates without starting public submission.'
       : 'Create App Store Connect and Google Play Console records and fill console evidence.',
     steps: [
       ...(appStoreRecordRecorded
@@ -341,8 +341,11 @@ const actionPlan = {
         : ['Create the Google Play Console app record for com.vsillah.reversrrebuild.']),
       'Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.',
       'Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.',
-      'Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.',
-      'Complete App Privacy, age rating, Data safety, and App content forms.',
+      'Review the saved App Store Connect metadata, age rating, content rights, and configured App Privacy answers.',
+      'Only after explicit approval, publish App Privacy and complete any Apple legal/accuracy attestation.',
+      'Complete TestFlight tester/group readiness or explicitly decide to proceed without TestFlight tester expansion.',
+      'Review the saved Google Play metadata, Data Safety, App Content, content rating, target audience, Advertising ID, and internal-testing release.',
+      'Only after explicit approval, complete Google Play internal-testing tester access/review readiness and any Send for review action.',
       ...(appStoreApiAccessGateVisible ? [
         'In App Store Connect, use Users and Access > Integrations > App Store Connect API.',
         'Request App Store Connect API access only after explicit account-holder approval.',
@@ -360,8 +363,8 @@ const actionPlan = {
         'Rerun the documented Android EAS submit command with the target track still set to internal.',
         'Do not click Google Play Send for review or start a production rollout.',
       ] : []),
-      'Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.',
-      'Run npm run store:console:preflight.',
+      'Update docs/store-console-evidence.json with final console task results, review-gate, and signoff fields.',
+      'Run npm run store:console:preflight:local for pending-safe proof; run strict npm run store:console:preflight only after final signoff fields are complete.',
     ],
     evidence: [
       'docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.',
@@ -376,7 +379,7 @@ const actionPlan = {
         ? ['docs/eas-android-submit-attempt-evidence.json records the Google Play Android Developer API enablement gate after the internal-track EAS submission reached Fastlane.']
         : []),
       'docs/store-console-evidence.json exists with both console records.',
-      'npm run store:console:preflight passes.',
+      'npm run store:console:preflight:local passes with only explicitly gated warnings until final signoff is complete.',
     ],
   },
   'native-screenshots': {

@@ -252,6 +252,7 @@ const bundle = {
     'docs/native-android-live-qa-evidence.json',
     'docs/release-readiness-gate-evidence.json',
     'docs/eas-ios-preview-build-start-evidence.json',
+    'docs/native-qa-evidence.json',
     'docs/native-qa-evidence.template.json',
     'scripts/sync-eas-preview-builds.js',
     'scripts/sync-eas-production-builds.js',
@@ -273,7 +274,7 @@ const bundle = {
   ],
   notes: [
     'This bundle is local readiness evidence, not App Store Connect or Google Play approval.',
-    'Production release still requires EAS linkage, preview builds, native QA, final native screenshots, TestFlight, Play Internal Testing, and store-console approval.',
+    'Production release still requires store-console approval, tester/review decisions, and explicit human signoff before public submission.',
     'Raw connector secrets must remain server-side and should not appear in mobile app config or evidence files.',
   ],
   packageScriptsAvailable: Object.keys(packageJson.scripts || {}).filter(name => (

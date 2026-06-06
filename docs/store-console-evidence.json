@@ -36,7 +36,7 @@
     "testFlightUploadAttempted": true,
     "testFlightUploadAttemptedAt": "2026-06-05T22:39:01Z",
     "testFlightUploadEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. TestFlight readiness remains pending until tester-facing What to Test copy, groups/testers, iOS install QA/screenshots, privacy publish, and final signoff are complete.",
+    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. TestFlight readiness remains pending until tester groups/testers, App Privacy publish, final build/screenshot review, and final signoff are complete. Local iOS simulator QA and screenshots are now recorded in docs/native-qa-evidence.json.",
     "metadataDraftSaved": true,
     "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
     "metadataDraftFields": [
@@ -172,7 +172,7 @@
         "Add for Review was not clicked.",
         "Public App Review submission was not started."
       ],
-      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. Local iOS simulator QA and screenshots are complete; real-device TestFlight QA remains optional/next-best before public review."
     },
     "testFlightWhatToTestSaved": true,
     "testFlightWhatToTestSavedAt": "2026-06-06T03:04:24.221Z",
@@ -207,7 +207,7 @@
         "Add for Review was not clicked.",
         "Public App Review submission was not started."
       ],
-      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. Local iOS simulator QA and screenshots are complete; real-device TestFlight QA remains optional/next-best before public review."
     }
   },
   "googlePlay": {
@@ -460,7 +460,7 @@
     }
   },
   "requiredAssets": {
-    "nativeScreenshotsCaptured": false,
+    "nativeScreenshotsCaptured": true,
     "appIconReviewed": true,
     "featureGraphicCaptured": true,
     "featureGraphicPath": "docs/store-assets/google-play-feature-graphic.png",
@@ -485,22 +485,36 @@
     "appIconReviewedAt": "2026-06-05T23:11:51.539Z",
     "appIconReviewEvidence": "Codex local asset review verified assets/icon.png, assets/adaptive-icon.png, and assets/splash-icon.png are 1024x1024 PNGs, docs/store-assets/google-play-icon.png is 512x512 PNG, and the rendered icon is legible with ReversR branding. This is an asset-readiness review only, not store submission approval.",
     "googlePlayIconDimensions": "512x512",
-    "expoIconDimensions": "1024x1024"
+    "expoIconDimensions": "1024x1024",
+    "nativeScreenshotsCapturedAt": "2026-06-06T09:12:16.673Z",
+    "nativeScreenshotEvidence": "docs/native-qa-evidence.json",
+    "nativeScreenshotPaths": [
+      "docs/store-screenshots/native/android-01-welcome.png",
+      "docs/store-screenshots/native/android-02-scan.png",
+      "docs/store-screenshots/native/android-03-inventory-validation.png",
+      "docs/store-screenshots/native/android-04-design-match.png",
+      "docs/store-screenshots/native/android-05-build-handoff.png",
+      "docs/store-screenshots/native/ios-01-welcome.png",
+      "docs/store-screenshots/native/ios-02-scan.png",
+      "docs/store-screenshots/native/ios-03-inventory-validation.png",
+      "docs/store-screenshots/native/ios-04-design-match.png",
+      "docs/store-screenshots/native/ios-05-build-handoff.png"
+    ]
   },
   "reviewGates": {
     "hostedApiPreflightPassed": true,
     "hostedPolicyPreflightPassed": true,
     "hostedConnectorSmokePassed": true,
-    "nativeQaPreflightPassed": false,
+    "nativeQaPreflightPassed": true,
     "productionSubmissionApproved": false
   },
   "signoff": {
     "releaseOwner": "",
     "storeReviewer": "",
     "signedAt": "",
-    "notes": "Partial console evidence only. No production submission is approved. App Store Connect TestFlight processing is verified, but tester setup, iOS install QA/screenshots, privacy publish, and final review signoff remain pending."
+    "notes": "Partial console evidence only. No production submission is approved. App Store Connect TestFlight processing is verified and local iOS simulator QA/screenshots are recorded, but tester setup, App Privacy publish, final store review signoff, and public review actions remain pending."
   },
-  "generatedAt": "2026-06-06T00:49:04.023Z",
+  "generatedAt": "2026-06-06T09:12:16.673Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -630,5 +644,6 @@
       "completedAt": "2026-06-05T20:43:48.099Z",
       "note": "Computer Use verified the Google Play Dashboard lists Target audience as a completed setup task. Send for review was not clicked."
     }
-  ]
+  ],
+  "nativeQaPreflightPassedAt": "2026-06-06T09:12:16.673Z"
 }

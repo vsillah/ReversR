@@ -1,18 +1,15 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T08:58:33.293Z",
+  "generatedAt": "2026-06-06T09:15:46.306Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-06T08:58:33.290Z",
+    "generatedAt": "2026-06-06T09:15:46.302Z",
     "summary": {
-      "pass": 35,
-      "pending": 4
+      "pass": 38,
+      "pending": 1
     },
     "pendingGateIds": [
-      "local-release-ci-evidence",
-      "native-qa-evidence",
-      "store-console-records",
-      "native-screenshots"
+      "store-console-records"
     ]
   },
   "appIdentity": {
@@ -49,6 +46,7 @@
       "exists": true
     },
     "nativeScreenshotsRequired": true,
+    "nativeScreenshotsCaptured": true,
     "requiredNativeScreenshotCount": 5,
     "webPlanningEvidence": {
       "path": "docs/store-screenshots/planning-evidence.json",
@@ -74,6 +72,10 @@
     },
     {
       "path": "docs/store-review-safety-packet.md",
+      "exists": true
+    },
+    {
+      "path": "docs/native-qa-evidence.json",
       "exists": true
     },
     {
@@ -124,33 +126,15 @@
     "Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.",
     "Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.",
     "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.",
-    "Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.",
+    "Use docs/native-qa-evidence.json and docs/store-screenshots/native/ as the recorded native QA/screenshot source.",
     "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
   ],
   "pendingGates": [
     {
-      "id": "local-release-ci-evidence",
-      "group": "store-local",
-      "title": "Local release CI evidence records repeatable pre-store validation",
-      "nextStep": "Run npm run release:local-ci before external account-side release work."
-    },
-    {
-      "id": "native-qa-evidence",
-      "group": "native",
-      "title": "Android and iOS preview-build QA evidence is recorded",
-      "nextStep": "Run npm run native:qa:preflight and resolve any failures."
-    },
-    {
       "id": "store-console-records",
       "group": "store-console",
-      "title": "App Store Connect and Google Play Console app records exist",
-      "nextStep": "Run npm run store:console:preflight and resolve any failures."
-    },
-    {
-      "id": "native-screenshots",
-      "group": "store-console",
-      "title": "Final native screenshots are captured from Android/iOS preview builds",
-      "nextStep": "Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json."
+      "title": "Store console final review and submission gates are resolved",
+      "nextStep": "Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission."
     }
   ],
   "safetyBoundary": [

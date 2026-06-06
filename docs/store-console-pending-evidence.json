@@ -1,15 +1,13 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-06T08:58:34.945Z",
+  "generatedAt": "2026-06-06T09:15:38.444Z",
   "source": "docs/store-console-evidence.json",
   "finalEvidenceFile": "docs/store-console-evidence.json",
   "warnings": [
     "App Store Connect App Privacy details are not marked complete.",
     "App Store Connect TestFlight readiness is not marked complete.",
     "Google Play Internal Testing readiness is not marked complete.",
-    "Final native screenshots are not marked captured.",
-    "Review gate nativeQaPreflightPassed is not marked true.",
     "Review gate productionSubmissionApproved is not marked true.",
     "Production submission is not approved.",
     "Store console signoff is missing releaseOwner.",
@@ -52,7 +50,7 @@
     "internalTestingReady": false
   },
   "requiredAssets": {
-    "nativeScreenshotsCaptured": false,
+    "nativeScreenshotsCaptured": true,
     "appIconReviewed": true,
     "featureGraphicCaptured": true,
     "featureGraphicPathReady": true,
@@ -62,7 +60,7 @@
     "hostedApiPreflightPassed": true,
     "hostedPolicyPreflightPassed": true,
     "hostedConnectorSmokePassed": true,
-    "nativeQaPreflightPassed": false,
+    "nativeQaPreflightPassed": true,
     "productionSubmissionApproved": false
   },
   "signoff": {

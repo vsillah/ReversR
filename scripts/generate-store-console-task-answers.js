@@ -26,12 +26,23 @@ const apple = packet.appStoreConnect || {};
 const google = packet.googlePlay || {};
 const dataSafety = google.dataSafety || {};
 const storeEvidence = readOptionalJson('docs/store-console-evidence.json');
+const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
 const easConfig = readOptionalJson('eas.json');
 const recordedAppleId = storeEvidence?.appStoreConnect?.appleId || easConfig?.submit?.production?.ios?.ascAppId || '';
 const recordedAppStoreUrl = storeEvidence?.appStoreConnect?.recordUrl || '';
 const appStoreRecordExists = Boolean(recordedAppleId && recordedAppStoreUrl);
 const savedGooglePlaySupportEmail = storeEvidence?.googlePlay?.publicSupportEmail || '';
 const googlePlayContactDetailsCompleted = storeEvidence?.googlePlay?.contactDetailsCompleted === true && Boolean(savedGooglePlaySupportEmail);
+const requiredScreenshotIds = ['welcome', 'scan', 'inventory-validation', 'design-match', 'build-handoff'];
+const screenshotStatus = (platform) => {
+  const screenshots = nativeQaEvidence?.screenshots || [];
+  const byId = new Map(screenshots.map((screenshot) => [screenshot.id, screenshot]));
+  return requiredScreenshotIds.every((id) => {
+    const platformEvidence = byId.get(id)?.[platform];
+    return platformEvidence?.status === 'pass' && Boolean(platformEvidence.file);
+  });
+};
+const nativeScreenshotsCaptured = screenshotStatus('android') && screenshotStatus('ios');
 
 const generatedAt = new Date().toISOString();
 
@@ -138,16 +149,23 @@ const googlePlayTasks = [
   },
   {
     task: 'Set up your store listing',
-    status: 'partial-native-assets-needed',
+    status: nativeScreenshotsCaptured ? 'draft-saved-assets-ready' : 'partial-native-assets-needed',
     fields: [
       { label: 'App name/title', value: google.title || appIdentity.appName },
       { label: 'Short description', value: google.shortDescription },
       { label: 'Full description', value: google.fullDescription },
       { label: 'App icon', value: '1024x1024 release icon already present per store asset preflight' },
       { label: 'Feature graphic', value: packet.screenshots?.googlePlayFeatureGraphic },
-      { label: 'Phone screenshots', value: 'Pending final native Android screenshots in docs/store-screenshots/native/' },
+      {
+        label: 'Phone screenshots',
+        value: nativeScreenshotsCaptured
+          ? 'Final Android and iOS native screenshots are recorded in docs/store-screenshots/native/ and docs/native-qa-evidence.json.'
+          : 'Pending final native Android/iOS screenshots in docs/store-screenshots/native/',
+      },
     ],
-    saveGate: 'Store listing can be drafted, but final screenshot upload must use native preview captures.',
+    saveGate: nativeScreenshotsCaptured
+      ? 'Store listing assets are available; do not click Send for review until final store signoff.'
+      : 'Store listing can be drafted, but final screenshot upload must use native preview captures.',
   },
 ];
 

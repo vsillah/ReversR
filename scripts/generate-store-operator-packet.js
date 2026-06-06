@@ -52,6 +52,16 @@ const app = packet.appIdentity || {};
 const apple = packet.appStoreConnect || {};
 const google = packet.googlePlay || {};
 const screenshots = packet.screenshots || {};
+const nativeQaEvidence = readJson('docs/native-qa-evidence.json');
+const requiredScreenshotIds = ['welcome', 'scan', 'inventory-validation', 'design-match', 'build-handoff'];
+const screenshotStatus = (platform) => {
+  const byId = new Map((nativeQaEvidence.screenshots || []).map((screenshot) => [screenshot.id, screenshot]));
+  return requiredScreenshotIds.every((id) => {
+    const platformEvidence = byId.get(id)?.[platform];
+    return platformEvidence?.status === 'pass' && Boolean(platformEvidence.file);
+  });
+};
+const nativeScreenshotsCaptured = screenshotStatus('android') && screenshotStatus('ios');
 const pendingGates = releaseStatus.gates
   .filter(gate => gate.status !== 'pass')
   .map(gate => ({
@@ -67,6 +77,7 @@ const sourceArtifacts = [
   'docs/store-console-task-answers.json',
   'docs/store-console-task-answers.md',
   'docs/store-review-safety-packet.md',
+  'docs/native-qa-evidence.json',
   'docs/store-console-evidence.template.json',
   'docs/store-console-browser-handoff.json',
   'docs/native-device-handoff.json',
@@ -85,7 +96,9 @@ const consoleEntryOrder = [
   'Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.',
   'Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.',
   'Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.',
-  'Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.',
+  nativeScreenshotsCaptured
+    ? 'Use docs/native-qa-evidence.json and docs/store-screenshots/native/ as the recorded native QA/screenshot source.'
+    : 'Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.',
   'Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission.',
 ];
 
@@ -123,6 +136,7 @@ const manifest = {
   assets: {
     featureGraphic: sourceStatus('docs/store-assets/google-play-feature-graphic.png'),
     nativeScreenshotsRequired: screenshots.nativeRequired === true,
+    nativeScreenshotsCaptured,
     requiredNativeScreenshotCount: screenshots.requiredSet?.length || 0,
     webPlanningEvidence: sourceStatus('docs/store-screenshots/planning-evidence.json'),
   },

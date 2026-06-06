@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-06T08:58:33.293Z
+Generated at: 2026-06-06T09:15:46.306Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -17,17 +17,14 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 ## Current Status
 
-- Release pass gates: 35
-- Release pending gates: 4
+- Release pass gates: 38
+- Release pending gates: 1
 - Release blocked gates: 0
 - Release warnings: 0
 
 Pending gates:
 
-- local-release-ci-evidence: Run npm run release:local-ci before external account-side release work.
-- native-qa-evidence: Run npm run native:qa:preflight and resolve any failures.
-- store-console-records: Run npm run store:console:preflight and resolve any failures.
-- native-screenshots: Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json.
+- store-console-records: Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission.
 
 ## Operator Entry Order
 
@@ -37,7 +34,7 @@ Pending gates:
 4. Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.
 5. Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.
 6. Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.
-7. Build Android and iOS preview binaries, complete docs/native-qa-evidence.json, and capture native screenshots.
+7. Use docs/native-qa-evidence.json and docs/store-screenshots/native/ as the recorded native QA/screenshot source.
 8. Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission.
 
 ## Copy Sources
@@ -49,6 +46,7 @@ Use these files when filling console drafts:
 - docs/store-console-task-answers.json
 - docs/store-console-task-answers.md
 - docs/store-review-safety-packet.md
+- docs/native-qa-evidence.json
 - docs/store-console-evidence.template.json
 - docs/store-console-browser-handoff.json
 - docs/native-device-handoff.json

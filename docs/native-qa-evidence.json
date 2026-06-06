@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026-06-05",
-  "status": "partial-pass-ios-pending",
+  "status": "partial-pass-store-signoff-pending",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -44,16 +44,16 @@
       }
     },
     "iosPreview": {
-      "status": "blocked",
-      "profile": "preview",
+      "status": "pass",
+      "profile": "local-development-build",
       "buildUrl": "",
-      "artifactType": "ipa",
-      "buildNumber": "1",
-      "device": "",
-      "osVersion": "",
-      "tester": "",
-      "completedAt": "",
-      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and EAS scheduled TestFlight upload submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0; QA and screenshots still need an iOS device, TestFlight install, or stable Xcode Simulator path before this native QA gate can pass. Fresh probe at 2026-06-06T04:14:24Z confirmed Xcode 26.5 (17F42), CocoaPods 1.16.2, and the iOS 26.5 Simulator runtime are installed. The local Expo run:ios path completed prebuild and CocoaPods install, but CoreSimulator hung during simctl/XcodeBuildMCP device listing after first boot, so iOS simulator screenshots were not captured."
+      "artifactType": "simulator-app",
+      "buildNumber": "local-debug",
+      "device": "iPhone 17 Pro Simulator iOS 26.5",
+      "osVersion": "26.5",
+      "tester": "codex-local-simulator",
+      "completedAt": "2026-06-06T09:08:47.209Z",
+      "notes": "Local Expo run:ios succeeded after Xcode license acceptance: Expo prebuild completed, CocoaPods installed, Xcode build succeeded, ReversRRebuild.app installed, and com.vsillah.reversrrebuild launched on iPhone 17 Pro Simulator iOS 26.5. This verifies local iOS install/launch and screenshot QA, but it does not replace TestFlight install QA on a real iOS device."
     }
   },
   "productionBuilds": {
@@ -89,8 +89,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "Preview APK launched into com.vsillah.reversrrebuild/.MainActivity on Google Pixel 10 Pro Android 16; uiautomator confirmed the ReversR welcome screen and New Reconstruction button."
+      "ios": "pass",
+      "evidence": "Preview APK launched into com.vsillah.reversrrebuild/.MainActivity on Google Pixel 10 Pro Android 16; uiautomator confirmed the ReversR welcome screen and New Reconstruction button. On iPhone 17 Pro Simulator iOS 26.5, EXPO_NO_TELEMETRY=1 npx expo run:ios built, installed, and opened com.vsillah.reversrrebuild on simulator A5E30E83-9A15-44AE-A98F-1F0626D96331 at 2026-06-06T09:08:47.209Z."
     },
     {
       "id": "camera-permission",
@@ -111,8 +111,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "On Google Pixel 10 Pro Android 16, Type mode accepted a manual CNC-router description, enabled Start Machine Scan, and advanced to Phase 2 with a READY TO MATCH scan summary and expected components."
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Type mode accepted a manual CNC-router description, enabled Start Machine Scan, and advanced to Phase 2 with a READY TO MATCH scan summary and expected components. On iPhone 17 Pro Simulator iOS 26.5, Type mode accepted the desktop CNC router description, enabled Initiate machine scan, and advanced to Phase 2 Inventory with READY TO MATCH scan summary."
     },
     {
       "id": "inventory-validation",
@@ -122,8 +122,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "On Google Pixel 10 Pro Android 16, the Demo Machine Inventory connector validated successfully and displayed 2 records, including Desktop FDM 3D Printer and Desktop CNC Router."
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, the Demo Machine Inventory connector validated successfully and displayed 2 records, including Desktop FDM 3D Printer and Desktop CNC Router. On iPhone 17 Pro Simulator iOS 26.5, the Demo Machine Inventory connector validated successfully and displayed 2 records including Desktop CNC Router."
     },
     {
       "id": "machine-match",
@@ -133,8 +133,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "On Google Pixel 10 Pro Android 16, Match Machine & Build Plan advanced from the validated demo inventory to Phase 3 Design with matched-machine reconstruction constraints and design/reference tooling."
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Match Machine & Build Plan advanced from the validated demo inventory to Phase 3 Design with matched-machine reconstruction constraints and design/reference tooling. On iPhone 17 Pro Simulator iOS 26.5, Match machine and build reconstruction plan advanced to Phase 3 Design with Desktop CNC Router inventory match evidence."
     },
     {
       "id": "bom-generation",
@@ -144,8 +144,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "On Google Pixel 10 Pro Android 16, Generate BOM produced Desktop CNC Router Reconstruction Package v0.1-review with 9 inventory-matched items, quantities, cost ranges, supplier guidance, and lead-time fields."
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Generate BOM produced Desktop CNC Router Reconstruction Package v0.1-review with 9 inventory-matched items, quantities, cost ranges, supplier guidance, and lead-time fields. On iPhone 17 Pro Simulator iOS 26.5, the Build phase showed inventory-matched parts, assembly sequence, and pricing estimates for the Desktop CNC Router reconstruction package."
     },
     {
       "id": "assembly-steps",
@@ -155,8 +155,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "On Google Pixel 10 Pro Android 16, Build phase showed assembly sequence steps, QC notes, and pricing estimates: parts $420-$780, 3D modeling $300-$900, fabrication $500-$1,600, assembly labor $240-$640, total $1,460-$3,920."
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Build phase showed assembly sequence steps, QC notes, and pricing estimates: parts $420-$780, 3D modeling $300-$900, fabrication $500-$1,600, assembly labor $240-$640, total $1,460-$3,920. On iPhone 17 Pro Simulator iOS 26.5, the Build phase showed assembly steps, QC notes, and the same pricing ranges observed on Android: parts $420-$780, 3D modeling $300-$900, fabrication $500-$1,600, assembly labor $240-$640, total $1,460-$3,920."
     },
     {
       "id": "quote-packet-export",
@@ -166,8 +166,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "On Google Pixel 10 Pro Android 16, Build phase displayed Export BOM (CSV), Export All (JSON), and Export Quote Packet controls, plus the Manufacturer Handoff section. External upload/share was not started."
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Build phase displayed Export BOM (CSV), Export All (JSON), and Export Quote Packet controls, plus the Manufacturer Handoff section. External upload/share was not started. On iPhone 17 Pro Simulator iOS 26.5, the lower Build phase exposed vendor quote target controls and instructed the reviewer to export/upload the quote packet, BOM, assembly sequence, and generated files; no external upload/share was started."
     },
     {
       "id": "vendor-request-draft",
@@ -199,8 +199,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "Android uiautomator exposed accessible labels/content descriptions for primary controls including Start new machine reconstruction, settings/history, scan mode, camera mode, connector validation, match/build, export packet, and vendor request controls. Local accessibility preflight also covers app-level labels."
+      "ios": "pass",
+      "evidence": "Android uiautomator exposed accessible labels/content descriptions for primary controls including Start new machine reconstruction, settings/history, scan mode, camera mode, connector validation, match/build, export packet, and vendor request controls. Local accessibility preflight also covers app-level labels. iOS runtime snapshots exposed accessible button/text-field labels for primary controls including Start new machine reconstruction, text scan, inventory connector, validate connector, match/build, design tools, build phase, and vendor quote controls."
     },
     {
       "id": "offline-api-error",
@@ -232,8 +232,8 @@
         "ios"
       ],
       "android": "pass",
-      "ios": "pending",
-      "evidence": "Complete the screenshots array below with final native PNG files from Android and iOS preview builds. Five Android native screenshots captured from Pixel 10 Pro under docs/store-screenshots/native/."
+      "ios": "pass",
+      "evidence": "Five Android native screenshots and five iOS simulator screenshots are captured under docs/store-screenshots/native/. iOS files were captured from iPhone 17 Pro Simulator iOS 26.5 at 2026-06-06T09:08:47.209Z."
     }
   ],
   "screenshots": [
@@ -252,11 +252,11 @@
         "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
       },
       "ios": {
-        "status": "pending",
+        "status": "pass",
         "file": "docs/store-screenshots/native/ios-01-welcome.png",
-        "device": "",
-        "capturedAt": "",
-        "notes": ""
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
       }
     },
     {
@@ -274,11 +274,11 @@
         "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
       },
       "ios": {
-        "status": "pending",
+        "status": "pass",
         "file": "docs/store-screenshots/native/ios-02-scan.png",
-        "device": "",
-        "capturedAt": "",
-        "notes": ""
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
       }
     },
     {
@@ -296,11 +296,11 @@
         "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
       },
       "ios": {
-        "status": "pending",
+        "status": "pass",
         "file": "docs/store-screenshots/native/ios-03-inventory-validation.png",
-        "device": "",
-        "capturedAt": "",
-        "notes": ""
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
       }
     },
     {
@@ -318,11 +318,11 @@
         "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
       },
       "ios": {
-        "status": "pending",
+        "status": "pass",
         "file": "docs/store-screenshots/native/ios-04-design-match.png",
-        "device": "",
-        "capturedAt": "",
-        "notes": ""
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
       }
     },
     {
@@ -340,20 +340,18 @@
         "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
       },
       "ios": {
-        "status": "pending",
+        "status": "pass",
         "file": "docs/store-screenshots/native/ios-05-build-handoff.png",
-        "device": "",
-        "capturedAt": "",
-        "notes": ""
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
       }
     }
   ],
   "blockers": [
-    "iOS internal preview build remains blocked because no iOS test device is available for device registration.",
-    "Full Xcode 26.5 (17F42), CocoaPods 1.16.2, and the iOS 26.5 Simulator runtime are installed on this Mac, but CoreSimulator hung after first simulator boot and did not stay healthy enough for iOS app launch or screenshot capture.",
-    "An iOS production/store IPA exists and TestFlight processing is verified, but iOS native QA and screenshot evidence remain pending because no iOS device is available and local simulator access is currently blocked by CoreSimulator instability.",
-    "Vendor request draft remains visible but unprepared on native Android because creating a third-party communication draft remains a communication boundary.",
-    "iOS native screenshots remain pending because no iOS device is available and the local CoreSimulator service hung before screenshots could be captured."
+    "No physical iOS test device is available, so TestFlight install QA on real hardware remains unverified even though local iOS simulator QA and screenshots now pass.",
+    "Vendor request draft remains visible but unprepared because creating a third-party communication draft remains a communication boundary.",
+    "Apple App Review submission, App Privacy publish, tester invitations, and Google Play public review/production actions remain gated by explicit final approval."
   ],
   "signoff": {
     "releaseOwner": "",
@@ -363,12 +361,12 @@
     "approvedForProductionSubmission": false,
     "signedAt": ""
   },
-  "generatedAt": "2026-06-06T00:38:39.640Z",
+  "generatedAt": "2026-06-06T09:08:47.209Z",
   "nextActions": [
-    "For Android, only the vendor request draft communication boundary remains from the live QA checklist; do not prepare or send third-party vendor email without explicit approval.",
-    "Use the processed TestFlight build 1.0.0 (6) for an iOS install QA path, or recover CoreSimulator on this Mac and retry the local iOS Simulator screenshot path.",
-    "Continue Google Play setup tasks; privacy policy URL is saved as a draft change, not sent for review.",
-    "Only mark production submission signoff after all native QA and store-console tasks are complete."
+    "Keep Android vendor request draft pending until explicit approval is given to prepare a third-party vendor email draft.",
+    "Use the processed TestFlight build 1.0.0 (6) for real iOS install QA when an iOS device or tester is available; local iOS simulator QA is now captured.",
+    "Continue remaining Apple/Google console setup without clicking irreversible public review or production submission actions until explicitly approved.",
+    "Only mark production submission signoff after store-console tasks, native QA review, and release-owner approval are complete."
   ],
   "androidMirroring": {
     "checkedAt": "2026-06-05T14:47:28.658Z",
@@ -490,8 +488,8 @@
   },
   "tooling": {
     "iosSimulator": {
-      "status": "runtime-installed-coresimulator-hung",
-      "checkedAt": "2026-06-06T04:14:24Z",
+      "status": "pass-local-simulator-run",
+      "checkedAt": "2026-06-06T09:08:47.209Z",
       "xcodeSelectPath": "/Applications/Xcode.app/Contents/Developer",
       "xcodeVersion": "Xcode 26.5",
       "xcodeBuildVersion": "17F42",
@@ -500,21 +498,25 @@
       "cocoaPodsVersion": "1.16.2",
       "cocoaPodsPath": "/opt/homebrew/bin/pod",
       "firstBootSimulator": "iPhone 17 Pro (A5E30E83-9A15-44AE-A98F-1F0626D96331)",
-      "simctlAvailable": false,
+      "simctlAvailable": true,
       "licenseAccepted": true,
       "expoRunIosAttempt": {
-        "status": "blocked-coresimulator-hung",
-        "attemptedAt": "2026-06-06T04:14:24Z",
+        "status": "pass-build-install-launch",
+        "attemptedAt": "2026-06-06T09:08:47.209Z",
         "command": "EXPO_NO_TELEMETRY=1 npx expo run:ios",
         "completedSteps": [
           "Created temporary ios/ native directory",
           "Ran Expo prebuild",
-          "Installed CocoaPods"
+          "Installed CocoaPods",
+          "Built ReversRRebuild.app with Xcode",
+          "Installed com.vsillah.reversrrebuild on iPhone 17 Pro Simulator",
+          "Opened the app through the Expo development client URL",
+          "Captured five iOS simulator screenshots"
         ],
-        "cleanup": "Temporary ios/ directory and Expo-mutated package.json scripts were removed from the worktree because the simulator run did not complete and the project remains managed Expo.",
-        "finding": "After first simulator boot, simctl list devices and XcodeBuildMCP list_sims hung. The Expo run:ios process was stopped before an app install or screenshot capture."
+        "cleanup": "Temporary ios/ directory and Expo-mutated package.json scripts should be removed from the worktree after evidence capture because the project remains managed Expo.",
+        "finding": "CoreSimulator recovered after Xcode license acceptance; local Expo run:ios completed build, install, launch, and screenshot QA on iPhone 17 Pro Simulator iOS 26.5."
       },
-      "finding": "Xcode 26.5 (17F42), the iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 are installed. CoreSimulator became unstable after first boot and simctl/XcodeBuildMCP device listing hung, so local iOS simulator QA remains pending."
+      "finding": "Xcode 26.5 (17F42), the iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 are installed. Local iOS simulator build/install/launch and screenshot QA passed on iPhone 17 Pro Simulator."
     },
     "androidAdb": {
       "status": "connected",
@@ -598,6 +600,39 @@
       "Add for Review was not clicked.",
       "App Privacy Publish was not clicked.",
       "Public App Review submission was not started."
+    ]
+  },
+  "iosSimulatorRun": {
+    "status": "pass-local-simulator-qa",
+    "checkedAt": "2026-06-06T09:08:47.209Z",
+    "device": "iPhone 17 Pro Simulator iOS 26.5",
+    "simulatorId": "A5E30E83-9A15-44AE-A98F-1F0626D96331",
+    "appBundleId": "com.vsillah.reversrrebuild",
+    "command": "EXPO_NO_TELEMETRY=1 npx expo run:ios",
+    "xcodeVersion": "Xcode 26.5",
+    "xcodeBuildVersion": "17F42",
+    "iosRuntime": "iOS 26.5 (26.5 - 23F77)",
+    "cocoaPodsVersion": "1.16.2",
+    "workflowVerified": [
+      "welcome screen",
+      "manual machine description scan fallback",
+      "demo inventory connector validation",
+      "Desktop CNC Router inventory match",
+      "design/reconstruction package screen",
+      "build phase assembly/pricing/vendor handoff controls"
+    ],
+    "screenshots": [
+      "docs/store-screenshots/native/ios-01-welcome.png",
+      "docs/store-screenshots/native/ios-02-scan.png",
+      "docs/store-screenshots/native/ios-03-inventory-validation.png",
+      "docs/store-screenshots/native/ios-04-design-match.png",
+      "docs/store-screenshots/native/ios-05-build-handoff.png"
+    ],
+    "externalActionsAvoided": [
+      "No TestFlight tester invite was created.",
+      "No App Review/Add for Review action was clicked.",
+      "No vendor email draft was prepared or sent.",
+      "No external quote packet upload was started."
     ]
   }
 }

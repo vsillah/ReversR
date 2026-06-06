@@ -1,98 +1,43 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T08:58:34.313Z",
-  "releaseStatusGeneratedAt": "2026-06-06T08:58:34.309Z",
+  "generatedAt": "2026-06-06T09:15:45.733Z",
+  "releaseStatusGeneratedAt": "2026-06-06T09:15:45.728Z",
   "summary": {
-    "pass": 6,
-    "pending": 3
+    "pass": 8,
+    "pending": 1
   },
-  "nextRecommendedGate": "native-qa-evidence",
+  "nextRecommendedGate": "store-console-records",
   "pendingGates": [
-    {
-      "group": "native",
-      "id": "native-qa-evidence",
-      "title": "Android and iOS preview-build QA evidence is recorded",
-      "status": "pending",
-      "evidence": "docs/native-qa-evidence.json exists; run npm run native:qa:preflight for proof.",
-      "nextStep": "Run npm run native:qa:preflight and resolve any failures.",
-      "action": {
-        "owner": "QA/release operator",
-        "phase": "Native preview QA",
-        "action": "Use the finished iOS store build for the TestFlight path, then record remaining device/simulator QA evidence.",
-        "steps": [
-          "Use the recorded Android preview build already in docs/native-qa-evidence.json.",
-          "Follow docs/external-release-setup-runbook.md section 7 for preview QA evidence and screenshot files.",
-          "Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.",
-          "Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.",
-          "Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.",
-          "Use the installed Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 for local simulator screenshots only after CoreSimulator recovers; otherwise use the processed TestFlight build on an iOS device.",
-          "Update docs/native-qa-evidence.json with device QA results.",
-          "Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.",
-          "Run npm run native:qa:preflight."
-        ],
-        "evidence": [
-          "docs/eas-production-build-sync-evidence.json records a finished iOS production/store build for the TestFlight path.",
-          "All required Android and iOS checks pass.",
-          "npm run native:qa:preflight passes."
-        ]
-      }
-    },
     {
       "group": "store-console",
       "id": "store-console-records",
-      "title": "App Store Connect and Google Play Console app records exist",
+      "title": "Store console final review and submission gates are resolved",
       "status": "pending",
-      "evidence": "docs/store-console-evidence.json exists; run npm run store:console:preflight for proof.",
-      "nextStep": "Run npm run store:console:preflight and resolve any failures.",
+      "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; final privacy/TestFlight/internal-testing/signoff gates remain pending.",
+      "nextStep": "Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission.",
       "action": {
         "owner": "Store release operator",
-        "phase": "Store console setup",
-        "action": "Complete App Store Connect and Google Play metadata, policy forms, testing setup, and console evidence.",
+        "phase": "Store console final review",
+        "action": "Resolve the remaining App Store Connect and Google Play review/signoff gates without starting public submission.",
         "steps": [
           "Use the recorded App Store Connect app record and Apple ID in docs/store-console-evidence.json.",
           "Follow docs/external-release-setup-runbook.md sections 2 and 3.",
           "Use the recorded Google Play Console app dashboard URL in docs/store-console-evidence.json.",
           "Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.",
           "Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.",
-          "Copy or authorize saved entry of metadata from docs/store-submission-packet.json into both console drafts.",
-          "Complete App Privacy, age rating, Data safety, and App content forms.",
-          "Update docs/store-console-evidence.json with saved console task results, privacy URL, metadata, asset, review-gate, and signoff fields.",
-          "Run npm run store:console:preflight."
+          "Review the saved App Store Connect metadata, age rating, content rights, and configured App Privacy answers.",
+          "Only after explicit approval, publish App Privacy and complete any Apple legal/accuracy attestation.",
+          "Complete TestFlight tester/group readiness or explicitly decide to proceed without TestFlight tester expansion.",
+          "Review the saved Google Play metadata, Data Safety, App Content, content rating, target audience, Advertising ID, and internal-testing release.",
+          "Only after explicit approval, complete Google Play internal-testing tester access/review readiness and any Send for review action.",
+          "Update docs/store-console-evidence.json with final console task results, review-gate, and signoff fields.",
+          "Run npm run store:console:preflight:local for pending-safe proof; run strict npm run store:console:preflight only after final signoff fields are complete."
         ],
         "evidence": [
           "docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.",
           "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.",
           "docs/store-console-evidence.json exists with both console records.",
-          "npm run store:console:preflight passes."
-        ]
-      }
-    },
-    {
-      "group": "store-console",
-      "id": "native-screenshots",
-      "title": "Final native screenshots are captured from Android/iOS preview builds",
-      "status": "pending",
-      "evidence": "Web-preview screenshots are planning artifacts only; native screenshots are not represented in repo evidence yet.",
-      "nextStep": "Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json.",
-      "action": {
-        "owner": "QA/release operator",
-        "phase": "Native store screenshots",
-        "action": "Use the recorded Android screenshots and capture the remaining iOS screenshot set.",
-        "steps": [
-          "Run npm run screenshots:store against the local web preview and confirm docs/store-screenshots/planning-evidence.json is updated.",
-          "Use the five recorded Android Pixel screenshots already saved under docs/store-screenshots/native/.",
-          "Install the latest iOS preview/TestFlight build on an iPhone/iPad, or recover CoreSimulator on this Mac and use the installed iOS 26.5 Simulator runtime.",
-          "Capture the five required iOS screenshots.",
-          "Save PNGs under docs/store-screenshots/native/ using the documented filenames.",
-          "Reference each PNG in docs/native-qa-evidence.json with device and capturedAt metadata.",
-          "Run npm run native:qa:preflight."
-        ],
-        "evidence": [
-          "docs/store-screenshots/planning-evidence.json maps the web planning captures to the required native screenshot filenames.",
-          "Five Android native screenshot PNGs exist and are referenced in docs/native-qa-evidence.json.",
-          "Five iOS native screenshot PNGs exist.",
-          "docs/native-qa-evidence.json marks each screenshot pass on Android and iOS.",
-          "npm run native:qa:preflight passes."
+          "npm run store:console:preflight:local passes with only explicitly gated warnings until final signoff is complete."
         ]
       }
     }

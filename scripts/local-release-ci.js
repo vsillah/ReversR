@@ -94,14 +94,11 @@ const evidence = {
   notRun,
   results,
   externalGatesStillRequired: [
-    'eas-submit-config',
-    'native-qa-evidence',
     'store-console-records',
-    'native-screenshots',
   ],
   notes: [
     'This is a local CI pass for pre-store readiness only.',
-    'EAS submit config, store records, preview builds, native QA, and final screenshots remain external gates.',
+    'Store console records, final store signoff, and public review/production actions remain external gates.',
   ],
 };
 

@@ -639,8 +639,10 @@ const localReleaseCiOk = (
   Array.isArray(localReleaseCiEvidence?.externalGatesStillRequired) &&
   !localReleaseCiEvidence.externalGatesStillRequired.includes('real-connector-smoke') &&
   !localReleaseCiEvidence.externalGatesStillRequired.includes('eas-project-linkage') &&
-  localReleaseCiEvidence.externalGatesStillRequired.includes('eas-submit-config') &&
-  localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots')
+  !localReleaseCiEvidence.externalGatesStillRequired.includes('eas-submit-config') &&
+  !localReleaseCiEvidence.externalGatesStillRequired.includes('native-qa-evidence') &&
+  !localReleaseCiEvidence.externalGatesStillRequired.includes('native-screenshots') &&
+  localReleaseCiEvidence.externalGatesStillRequired.includes('store-console-records')
 );
 addGate(
   'store-local',
@@ -661,6 +663,7 @@ const requiredStoreOperatorSources = [
   'docs/store-review-safety-packet.md',
   'docs/store-console-evidence.template.json',
   'docs/native-device-handoff.json',
+  'docs/native-qa-evidence.json',
   'docs/native-qa-evidence.template.json',
   'docs/store-assets/google-play-feature-graphic.png',
 ];
@@ -670,8 +673,8 @@ const storeOperatorPacketOk = (
   storeOperatorPacket?.appIdentity?.iosBundleId === appConfig.ios?.bundleIdentifier &&
   storeOperatorPacket?.appIdentity?.androidPackage === appConfig.android?.package &&
   storeOperatorPacket?.releaseStatus?.pendingGateIds?.includes('store-console-records') &&
-  storeOperatorPacket?.releaseStatus?.pendingGateIds?.includes('native-screenshots') &&
   storeOperatorPacket?.assets?.nativeScreenshotsRequired === true &&
+  storeOperatorPacket?.assets?.nativeScreenshotsCaptured === true &&
   storeOperatorPacket?.appStoreConnect?.privacyDraftReady === true &&
   storeOperatorPacket?.googlePlay?.dataSafetyDraftReady === true &&
   requiredStoreOperatorSources.every(source => storeOperatorPacket?.sourceArtifacts?.some(artifact => artifact.path === source && artifact.exists === true)) &&
@@ -1009,14 +1012,55 @@ addGate(
   easVersion.status === 0 ? 'Run npx eas-cli@20.0.0 login and npm run native:preflight.' : 'Install network/cache access for npx eas-cli@20.0.0 or install global eas.'
 );
 
-const nativeQaEvidenceExists = exists('docs/native-qa-evidence.json');
+const nativeQaEvidence = readOptionalJson('docs/native-qa-evidence.json');
+const nativeQaEvidenceExists = Boolean(nativeQaEvidence);
+const requiredNativeQaCoreCheckIds = [
+  'install-launch',
+  'manual-description',
+  'inventory-validation',
+  'machine-match',
+  'bom-generation',
+  'assembly-steps',
+  'quote-packet-export',
+  'accessibility',
+  'native-screenshots',
+];
+const requiredNativeScreenshotIds = [
+  'welcome',
+  'scan',
+  'inventory-validation',
+  'design-match',
+  'build-handoff',
+];
+const nativeQaCheckById = new Map((nativeQaEvidence?.checks || []).map(check => [check.id, check]));
+const nativeScreenshotById = new Map((nativeQaEvidence?.screenshots || []).map(screenshot => [screenshot.id, screenshot]));
+const nativeQaCoreChecksOk = requiredNativeQaCoreCheckIds.every(id => {
+  const check = nativeQaCheckById.get(id);
+  return check?.android === 'pass' && check?.ios === 'pass';
+});
+const nativeScreenshotsOk = requiredNativeScreenshotIds.every(id => {
+  const screenshot = nativeScreenshotById.get(id);
+  return ['android', 'ios'].every(platform => {
+    const evidence = screenshot?.[platform];
+    return evidence?.status === 'pass' && Boolean(evidence.file) && exists(evidence.file);
+  });
+});
+const nativeQaBuildsOk = (
+  nativeQaEvidence?.builds?.androidPreview?.status === 'pass' &&
+  Boolean(nativeQaEvidence?.builds?.androidPreview?.buildUrl) &&
+  nativeQaEvidence?.builds?.iosPreview?.status === 'pass' &&
+  Boolean(nativeQaEvidence?.builds?.iosPreview?.device)
+);
+const nativeQaEvidenceOk = nativeQaEvidenceExists && nativeQaBuildsOk && nativeQaCoreChecksOk && nativeScreenshotsOk;
 addGate(
   'native',
   'native-qa-evidence',
   'Android and iOS preview-build QA evidence is recorded',
-  nativeQaEvidenceExists ? 'pending' : 'pending',
-  nativeQaEvidenceExists ? 'docs/native-qa-evidence.json exists; run npm run native:qa:preflight for proof.' : 'docs/native-qa-evidence.json is missing.',
-  nativeQaEvidenceExists ? 'Run npm run native:qa:preflight and resolve any failures.' : 'Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight.'
+  nativeQaEvidenceOk ? 'pass' : 'pending',
+  nativeQaEvidenceOk
+    ? `docs/native-qa-evidence.json records cross-platform core QA and native screenshots at ${nativeQaEvidence.generatedAt}.`
+    : nativeQaEvidenceExists ? 'docs/native-qa-evidence.json exists; run npm run native:qa:preflight for proof.' : 'docs/native-qa-evidence.json is missing.',
+  nativeQaEvidenceOk ? '' : nativeQaEvidenceExists ? 'Run npm run native:qa:preflight and resolve any failures.' : 'Build EAS preview binaries, copy docs/native-qa-evidence.template.json, fill evidence, then run npm run native:qa:preflight.'
 );
 
 const storeConsolePendingEvidence = readOptionalJson('docs/store-console-pending-evidence.json');
@@ -1032,7 +1076,7 @@ const storeConsolePendingOk = (
   typeof storeConsolePendingEvidence?.reviewGates?.hostedApiPreflightPassed === 'boolean' &&
   typeof storeConsolePendingEvidence?.reviewGates?.hostedPolicyPreflightPassed === 'boolean' &&
   typeof storeConsolePendingEvidence?.reviewGates?.hostedConnectorSmokePassed === 'boolean' &&
-  storeConsolePendingEvidence?.reviewGates?.nativeQaPreflightPassed === false
+  typeof storeConsolePendingEvidence?.reviewGates?.nativeQaPreflightPassed === 'boolean'
 );
 addGate(
   'store-console',
@@ -1049,13 +1093,13 @@ const storeConsoleEvidenceExists = exists('docs/store-console-evidence.json');
 addGate(
   'store-console',
   'store-console-records',
-  'App Store Connect and Google Play Console app records exist',
+  'Store console final review and submission gates are resolved',
   storeConsoleEvidenceExists ? 'pending' : 'pending',
   storeConsoleEvidenceExists
-    ? 'docs/store-console-evidence.json exists; run npm run store:console:preflight for proof.'
+    ? 'docs/store-console-evidence.json exists and records Apple/Google app records; final privacy/TestFlight/internal-testing/signoff gates remain pending.'
     : `Expected iOS bundle ${appConfig.ios?.bundleIdentifier}; expected Android package ${appConfig.android?.package}; docs/store-console-evidence.json is missing.`,
   storeConsoleEvidenceExists
-    ? 'Run npm run store:console:preflight and resolve any failures.'
+    ? 'Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission.'
     : 'Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight.'
 );
 
@@ -1063,9 +1107,11 @@ addGate(
   'store-console',
   'native-screenshots',
   'Final native screenshots are captured from Android/iOS preview builds',
-  'pending',
-  'Web-preview screenshots are planning artifacts only; native screenshots are not represented in repo evidence yet.',
-  'Capture final screenshots from EAS preview builds and record them in docs/native-qa-evidence.json.'
+  nativeScreenshotsOk ? 'pass' : 'pending',
+  nativeScreenshotsOk
+    ? `Five Android and five iOS native screenshots are recorded in docs/native-qa-evidence.json at ${nativeQaEvidence.generatedAt}.`
+    : 'Web-preview screenshots are planning artifacts only; native screenshots are not fully represented in repo evidence yet.',
+  nativeScreenshotsOk ? '' : 'Capture final screenshots from Android and iOS preview builds and record them in docs/native-qa-evidence.json.'
 );
 
 const groups = ['clone', 'store-local', 'hosted', 'native', 'store-console'];
