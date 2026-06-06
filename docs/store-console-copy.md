@@ -78,6 +78,19 @@ machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D
 Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
 ```
 
+### TestFlight What To Test
+
+```text
+Please focus on the core reconstruction workflow:
+- Start a new reconstruction using Type mode and a machine description.
+- Validate the demo or approved inventory connector.
+- Confirm the app matches the machine to an inventory record.
+- Generate the BOM and review parts, quantities, pricing ranges, and supplier guidance.
+- Review assembly steps, quote packet controls, policy links, and error handling.
+
+Do not submit real purchase orders or send vendor requests from this build. Treat generated BOMs and assembly steps as review drafts that require qualified human validation before use.
+```
+
 ### App Privacy Draft
 
 - Tracking: false

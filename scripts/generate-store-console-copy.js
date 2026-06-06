@@ -54,6 +54,8 @@ ${fenced(apple.description)}
 ${fenced(apple.keywords)}
 ### Review Notes
 ${fenced(apple.reviewNotes)}
+### TestFlight What To Test
+${fenced(apple.testFlightWhatToTest)}
 ### App Privacy Draft
 
 - Tracking: ${apple.appPrivacy?.tracking}

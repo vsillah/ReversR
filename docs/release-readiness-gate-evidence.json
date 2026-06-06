@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "release-readiness-partial-testflight-processed",
-  "generatedAt": "2026-06-06T00:38:39.640Z",
+  "generatedAt": "2026-06-06T00:44:58.101Z",
   "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play internal-track submission, Apple App Store Connect API access approval, App Store Connect API key creation, 1Password credential persistence, and EAS iOS TestFlight upload scheduling.",
   "pr": {
     "number": 2,
@@ -229,28 +229,24 @@
       }
     },
     "appStoreConnect": {
-      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Build Metadata",
-      "attemptedUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+      "attemptedUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
       "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
       "loggedIn": true,
-      "build": {
-        "version": "1.0.0",
-        "build": "6",
-        "status": "Ready to Submit",
-        "binaryState": "Validated",
-        "expiresIn": "90 days",
-        "uploadDate": "Jun 5, 2026 at 8:09 PM",
-        "originalFileName": "38f358ce-2600-4ce9-bb3a-7fea08181900.ipa",
-        "bundleId": "com.vsillah.reversrrebuild",
-        "buildUuid": "114ac3cb-f26b-4384-82d6-d661adf05dff"
+      "visibleGate": {
+        "whatToTestFieldVisible": true,
+        "whatToTestEmpty": true,
+        "groupsCount": 0,
+        "individualTestersCount": 0,
+        "saveButtonDisabled": true,
+        "addGroupVisible": true,
+        "addTestersVisible": true
       },
-      "activeApiKey": {
-        "name": "ReversR EAS Submit",
-        "keyId": "FZ4LLB2243",
-        "access": "App Manager",
-        "onePasswordItemId": "ihmhb6yq7ge2ilyavb344s3tcq"
+      "preparedCopy": {
+        "source": "docs/store-console-copy.md#testflight-what-to-test",
+        "characterCount": 592
       },
-      "nextActionRequiringApproval": "Authorize saving tester-facing What to Test copy and creating/assigning a TestFlight internal group/testers, or provide an iOS QA path. Codex did not click Add for Review, App Privacy Publish, save TestFlight copy, create groups, invite testers, or start public App Review."
+      "nextActionRequiringApproval": "Authorize Codex to paste and save the prepared What to Test copy and create/assign a TestFlight internal group/testers, or provide an iOS QA path. Codex did not type into the field, click Save, Add Group, Add Testers, Expire Build, App Privacy Publish, Add for Review, or public App Review submission."
     }
   },
   "nativeQaAndScreenshots": {
@@ -369,7 +365,7 @@
     }
   },
   "humanInTheLoopResumeInstructions": [
-    "For Apple TestFlight: App Store Connect shows build 1.0.0 (6) Ready to Submit. To continue, authorize Codex to save tester-facing What to Test copy and create/assign an internal TestFlight group/testers, or provide an iOS test device/full Xcode path for iOS QA. Do not click Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
+    "For Apple TestFlight: Chrome is positioned on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. The What to Test field is empty, Groups is 0, Individual Testers is 0, and Save is disabled. Repo-backed What to Test copy is prepared in docs/store-console-copy.md. To continue, authorize Codex to paste/save that copy and create/assign an internal TestFlight group/testers, or provide an iOS test device/full Xcode path for iOS QA. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
     "For Google Play internal testing: release 1.0.0 is visible in Play Console as Available to internal testers with 1 version code and Not reviewed. The Testers tab shows an existing ReversR App Testers email list with 13 users and a Join on the web link. To continue, explicitly authorize assigning/changing tester access or provide the tester decision. Do not click Save, copy/send the join link, Send for review, closed testing, production access, or production rollout without explicit final approval.",
     "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",

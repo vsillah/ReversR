@@ -65,6 +65,8 @@ maxLength('appStoreConnect.description', apple.description, 4000);
 requireText('appStoreConnect.keywords', apple.keywords);
 maxLength('appStoreConnect.keywords', apple.keywords, 100);
 requireText('appStoreConnect.reviewNotes', apple.reviewNotes);
+requireText('appStoreConnect.testFlightWhatToTest', apple.testFlightWhatToTest);
+maxLength('appStoreConnect.testFlightWhatToTest', apple.testFlightWhatToTest, 4000);
 
 if (apple.appPrivacy?.tracking !== false) fail('Apple privacy draft must state tracking=false.');
 if (apple.appPrivacy?.dataUsedForAdvertising !== false) fail('Apple privacy draft must state dataUsedForAdvertising=false.');
@@ -142,6 +144,7 @@ const evidencePath = writeEvidence({
     descriptionLength: textLength(apple.description),
     keywordsLength: textLength(apple.keywords),
     reviewNotesPresent: Boolean(String(apple.reviewNotes || '').trim()),
+    testFlightWhatToTestLength: textLength(apple.testFlightWhatToTest),
     privacy: {
       tracking: apple.appPrivacy?.tracking,
       dataUsedForAdvertising: apple.appPrivacy?.dataUsedForAdvertising,

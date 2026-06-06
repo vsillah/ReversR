@@ -52,7 +52,7 @@
     "screenshotsUploaded": false,
     "buildSelected": false,
     "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload, contact information, privacy publishing, TestFlight processing/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked. TestFlight processing was later verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. What to Test is empty and was not saved; no TestFlight invites, App Privacy Publish, Add for Review, or public App Review submission occurred.",
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload, contact information, privacy publishing, TestFlight processing/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked. TestFlight processing was later verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. What to Test is empty and was not saved; no TestFlight invites, App Privacy Publish, Add for Review, or public App Review submission occurred. Codex later navigated to the TestFlight Test Information tab and prepared repo-backed What to Test copy in docs/store-console-copy.md, but did not type/save it, create groups, add testers, expire the build, or start review.",
     "appStoreConnectApi": {
       "status": "approved-active-key",
       "checkedAt": "2026-06-06T00:23:50.346Z",
@@ -112,7 +112,27 @@
     "testFlightProcessingVerifiedAt": "2026-06-06T00:23:50.346Z",
     "testFlightGroupsCount": 0,
     "testFlightIndividualTestersCount": 0,
-    "testFlightWhatToTestEmpty": true
+    "testFlightWhatToTestEmpty": true,
+    "testFlightWhatToTestDraftPrepared": true,
+    "testFlightWhatToTestDraftSource": "docs/store-console-copy.md#testflight-what-to-test",
+    "testFlightWhatToTestLength": 592,
+    "testFlightCurrentScreenPrepared": {
+      "checkedAt": "2026-06-06T00:44:58.101Z",
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+      "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+      "visibleFields": [
+        "What to Test",
+        "Groups (0)",
+        "Individual Testers (0)"
+      ],
+      "saveButtonDisabled": true,
+      "gatedActions": [
+        "Save What to Test",
+        "Add Group",
+        "Add Testers",
+        "Expire Build"
+      ]
+    }
   },
   "googlePlay": {
     "status": "pass",
@@ -362,7 +382,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved. App Store Connect TestFlight processing is verified, but tester setup, iOS install QA/screenshots, privacy publish, and final review signoff remain pending."
   },
-  "generatedAt": "2026-06-06T00:23:50.346Z",
+  "generatedAt": "2026-06-06T00:44:58.101Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
