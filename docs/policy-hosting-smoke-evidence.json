@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:06:32.305Z",
+  "generatedAt": "2026-06-06T09:42:55.772Z",
   "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
   "urls": {
     "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
@@ -11,9 +11,9 @@
   "urlMode": "strict",
   "hostedChecksEnabled": true,
   "hostedChecks": {
-    "supportUrl": "pass",
     "privacyPolicyUrl": "pass",
-    "termsUrl": "pass"
+    "termsUrl": "pass",
+    "supportUrl": "pass"
   },
   "routeFiles": {
     "privacy": "app/privacy.tsx",
@@ -43,7 +43,7 @@
       "Support": true,
       "Camera access is used only to capture machine images": true,
       "Manufacturer quote packets and email drafts require explicit user action": true,
-      "vsillah@gmail.com": true
+      "vambah@amadutown.com": true
     }
   }
 }

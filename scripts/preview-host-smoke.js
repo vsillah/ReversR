@@ -60,7 +60,7 @@ const routeChecks = [
     path: '/support',
     expectedTexts: [
       'Support',
-      'vsillah@gmail.com',
+      'vambah@amadutown.com',
       'Do not send raw API keys or OAuth tokens',
     ],
   },

@@ -85,6 +85,6 @@ We may update this Privacy Policy. Updates will include a new "Last Updated" dat
 
 For questions, contact:
 
-vsillah@gmail.com
+vambah@amadutown.com
 
 **Location:** Boston, Massachusetts, USA

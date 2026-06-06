@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T09:15:46.850Z",
+  "generatedAt": "2026-06-06T09:43:20.926Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-06T09:15:46.836Z",
+    "generatedAt": "2026-06-06T09:43:20.911Z",
     "summaryWithoutBundle": {
       "pass": 37,
       "pending": 1
@@ -244,7 +244,7 @@
     "policyHostingSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-05T10:06:32.305Z",
+      "generatedAt": "2026-06-06T09:42:55.772Z",
       "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
       "urls": {
         "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
@@ -254,9 +254,9 @@
       "urlMode": "strict",
       "hostedChecksEnabled": true,
       "hostedChecks": {
-        "supportUrl": "pass",
         "privacyPolicyUrl": "pass",
-        "termsUrl": "pass"
+        "termsUrl": "pass",
+        "supportUrl": "pass"
       },
       "routeFiles": {
         "privacy": "app/privacy.tsx",
@@ -286,7 +286,7 @@
           "Support": true,
           "Camera access is used only to capture machine images": true,
           "Manufacturer quote packets and email drafts require explicit user action": true,
-          "vsillah@gmail.com": true
+          "vambah@amadutown.com": true
         }
       }
     },
@@ -819,8 +819,8 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T09:15:40.235Z",
-      "urlMode": "placeholder-allowed",
+      "generatedAt": "2026-06-06T09:42:42.781Z",
+      "urlMode": "strict",
       "warnings": [],
       "appIdentity": {
         "name": "ReversR Rebuild",
@@ -890,7 +890,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T09:15:36.132Z",
+      "generatedAt": "2026-06-06T09:43:06.585Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -3148,9 +3148,9 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T09:15:46.306Z",
+      "generatedAt": "2026-06-06T09:43:20.618Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-06T09:15:46.302Z",
+        "generatedAt": "2026-06-06T09:43:20.614Z",
         "summary": {
           "pass": 38,
           "pending": 1

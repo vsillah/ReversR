@@ -40,7 +40,7 @@ export default function TermsRoute() {
         },
         {
           title: 'Contact',
-          body: 'For questions, contact vsillah@gmail.com.',
+          body: 'For questions, contact vambah@amadutown.com.',
         },
       ]}
     />

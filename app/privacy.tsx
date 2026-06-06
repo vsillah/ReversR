@@ -50,7 +50,7 @@ export default function PrivacyRoute() {
         },
         {
           title: 'Contact',
-          body: 'For privacy questions, contact vsillah@gmail.com.',
+          body: 'For privacy questions, contact vambah@amadutown.com.',
         },
       ]}
     />

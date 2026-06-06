@@ -95,7 +95,7 @@ const pages = {
       },
       {
         title: 'Contact',
-        body: 'For privacy questions, contact vsillah@gmail.com.',
+        body: 'For privacy questions, contact vambah@amadutown.com.',
       },
     ],
   },
@@ -136,7 +136,7 @@ const pages = {
       },
       {
         title: 'Contact',
-        body: 'For questions, contact vsillah@gmail.com.',
+        body: 'For questions, contact vambah@amadutown.com.',
       },
     ],
   },
@@ -148,7 +148,7 @@ const pages = {
       {
         title: 'Contact',
         bullets: [
-          'Email: vsillah@gmail.com',
+          'Email: vambah@amadutown.com',
           'Location: Boston, Massachusetts, USA',
           'App: ReversR Rebuild',
         ],

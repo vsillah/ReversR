@@ -104,7 +104,7 @@ const expectedBundleTexts = [
   'Support',
   'Camera access is used only to capture machine images',
   'Manufacturer quote packets and email drafts require explicit user action',
-  'vsillah@gmail.com',
+  'vambah@amadutown.com',
 ];
 const bundleEvidence = {
   bundleCount: 0,

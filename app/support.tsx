@@ -11,7 +11,7 @@ export default function SupportRoute() {
         {
           title: 'Contact',
           bullets: [
-            'Email: vsillah@gmail.com',
+            'Email: vambah@amadutown.com',
             'Location: Boston, Massachusetts, USA',
             'App: ReversR Rebuild',
           ],
