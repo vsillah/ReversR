@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "partial-pass",
-  "generatedAt": "2026-06-05T23:06:36.168Z",
+  "status": "partial-pass-vendor-boundary-only",
+  "generatedAt": "2026-06-06T00:38:39.640Z",
   "device": "Google Pixel 10 Pro Android 16",
   "packageName": "com.vsillah.reversrrebuild",
   "adb": {
@@ -24,11 +24,49 @@
     "cameraPermissionGranted": false,
     "policyLinks": "pass-visible-controls",
     "connectorAuthError": "pass-empty-admin-token-local-validation",
-    "rawSecretEnteredOrTransmitted": false
+    "rawSecretEnteredOrTransmitted": false,
+    "offlineApiError": "pass-controlled-invalid-api-build",
+    "controlledInvalidApiBuild": {
+      "status": "pass",
+      "buildId": "d90e9595-56f1-49a7-8348-6541fa500edb",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/d90e9595-56f1-49a7-8348-6541fa500edb",
+      "artifactUrl": "https://expo.dev/artifacts/eas/sNzGmqUBfzZ6Wv4uNa2bqc.apk",
+      "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview-env.apk",
+      "apkSha256": "a33edb213bbe248ee223da83c29623cf35ee8d5afae4af49d4ccd6a68aeea271",
+      "completedAt": "2026-06-06T00:35:46.067Z",
+      "installedAt": "2026-06-06T00:38:39.640Z",
+      "profile": "preview",
+      "distribution": "internal",
+      "apiBaseUrl": "https://invalid.reversr.invalid",
+      "appConfigProof": "assets/app.config extra.apiBaseUrl was https://invalid.reversr.invalid before install.",
+      "temporaryEasPreviewEnv": {
+        "variableName": "EXPO_PUBLIC_API_BASE_URL",
+        "value": "https://invalid.reversr.invalid",
+        "createdBeforeBuild": true,
+        "deletedAfterBuild": true,
+        "postDeleteVerification": "npx eas-cli@20.0.0 env:list preview --format long returned no variables for preview."
+      },
+      "device": "Google Pixel 10 Pro Android 16",
+      "settingsScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+      "networkErrorScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png",
+      "observedSettingsText": "API host: https://invalid.reversr.invalid",
+      "observedErrorText": "Network error. Check your internet connection and try again.",
+      "externalNetworkChanged": false,
+      "purpose": "Controlled offline/API error handling QA without touching production API or device network settings."
+    },
+    "priorInvalidApiBuildAttempt": {
+      "status": "config-drift-not-used-for-pass",
+      "buildId": "737d558f-9742-469a-8bf6-2842ff7cb3a6",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/737d558f-9742-469a-8bf6-2842ff7cb3a6",
+      "artifactUrl": "https://expo.dev/artifacts/eas/fg9uPKcRBNba9NBqdu7j7j.apk",
+      "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+      "apkSha256": "9954f8800d6492913de8ef0c93fda6bec88abd103a1586bcecf1d73e0740c8cf",
+      "completedAt": "2026-06-06T00:15:43.549Z",
+      "finding": "The APK installed successfully, but Settings and assets/app.config still showed https://reversr.vercel.app because no EAS preview environment variable existed; local shell env alone did not bake into the remote build."
+    }
   },
   "blockerNotes": [
-    "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft.",
-    "offline-api-error remains pending because it requires controlled network/backend fault conditions."
+    "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft."
   ],
   "screenshotEvidence": [
     "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
@@ -40,7 +78,16 @@
     "/tmp/reversr-native-artifacts/android-bom-live.png",
     "/tmp/reversr-native-artifacts/android-vendor-draft-live.png",
     "/tmp/reversr-native-artifacts/android-policy-links-visible.png",
-    "/tmp/reversr-native-artifacts/android-connector-auth-error-live.png"
+    "/tmp/reversr-native-artifacts/android-connector-auth-error-live.png",
+    "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+    "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png"
   ],
-  "updatedEvidenceFile": "docs/native-qa-evidence.json"
+  "updatedEvidenceFile": "docs/native-qa-evidence.json",
+  "checkedAt": "2026-06-06T00:38:39.640Z",
+  "deviceRestoration": {
+    "restoredAt": "2026-06-06T00:39:16.572Z",
+    "restoredFromLocalArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+    "restoredHostObserved": "API host: https://reversr.vercel.app",
+    "reason": "After controlled invalid-host QA, Codex restored the connected Pixel to a live-host preview APK so the device was not left in the intentionally broken state."
+  }
 }

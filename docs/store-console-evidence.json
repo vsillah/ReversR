@@ -36,7 +36,7 @@
     "testFlightUploadAttempted": true,
     "testFlightUploadAttemptedAt": "2026-06-05T22:39:01Z",
     "testFlightUploadEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-    "testFlightUploadBlocker": "EAS iOS submission is no longer blocked by App Store Connect API access. Codex generated the authorized ReversR EAS Submit API key, saved it to 1Password, scheduled EAS iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6), and removed local API-key fields from eas.json before committing evidence. TestFlight readiness remains pending until Apple processing/build selection is verified.",
+    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. TestFlight readiness remains pending until tester-facing What to Test copy, groups/testers, iOS install QA/screenshots, privacy publish, and final signoff are complete.",
     "metadataDraftSaved": true,
     "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
     "metadataDraftFields": [
@@ -52,28 +52,47 @@
     "screenshotsUploaded": false,
     "buildSelected": false,
     "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload, contact information, privacy publishing, TestFlight processing/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked.",
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload, contact information, privacy publishing, TestFlight processing/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked. TestFlight processing was later verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. What to Test is empty and was not saved; no TestFlight invites, App Privacy Publish, Add for Review, or public App Review submission occurred.",
     "appStoreConnectApi": {
-      "status": "request-access-visible-hitl",
-      "checkedAt": "2026-06-05T23:57:22.000Z",
+      "status": "approved-active-key",
+      "checkedAt": "2026-06-06T00:23:50.346Z",
       "currentUrl": "https://appstoreconnect.apple.com/access/integrations/api",
       "loggedIn": true,
-      "visibleAction": "Request Access",
-      "visibleMessage": "Permission is required to access the App Store Connect API. You can request access on behalf of your organization.",
-      "testFlightUploadReady": false,
-      "apiKeyCreated": false,
-      "privateKeyDownloaded": false,
-      "onePasswordItemCreated": false,
-      "note": "Codex navigated to the API access page after Apple login and stopped before persistent API access or key creation."
+      "visibleActions": [
+        "Active (1)",
+        "Edit"
+      ],
+      "visibleMessage": "Your request to access the App Store Connect API was approved.",
+      "activeKey": {
+        "name": "ReversR EAS Submit",
+        "keyId": "FZ4LLB2243",
+        "access": "App Manager",
+        "downloadAvailable": false
+      },
+      "issuerId": "d4e5bef0-4168-4aad-b41e-fcd8079e9bfc",
+      "apiKeyCreated": true,
+      "privateKeyDownloaded": true,
+      "onePasswordItemCreated": true,
+      "onePasswordItem": {
+        "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+        "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+        "vault": "Employee",
+        "category": "API Credential",
+        "attachment": "App Store Connect .p8 private key"
+      },
+      "localKeyStoredOutsideRepo": true,
+      "privateKeyCommitted": false,
+      "note": "Authorized API key is active and stored in 1Password. The .p8 private key is not committed to the repository."
     },
     "addForReviewClicked": false,
     "testFlightUploadScheduled": true,
     "testFlightUploadSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
-    "testFlightUploadStatus": "scheduled-unverified-processing",
+    "testFlightUploadStatus": "processed-ready-to-submit",
     "apiAccess": {
       "status": "approved",
       "activeKeyName": "ReversR EAS Submit",
       "activeKeyId": "FZ4LLB2243",
+      "issuerId": "d4e5bef0-4168-4aad-b41e-fcd8079e9bfc",
       "accessRole": "App Manager",
       "onePasswordItem": {
         "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
@@ -83,7 +102,17 @@
         "attachment": "App Store Connect .p8 private key"
       },
       "privateKeyCommitted": false
-    }
+    },
+    "testFlightBuildVisible": true,
+    "testFlightBuildStatus": "Ready to Submit",
+    "testFlightBinaryState": "Validated",
+    "testFlightVersion": "1.0.0",
+    "testFlightBuild": "6",
+    "testFlightBuildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+    "testFlightProcessingVerifiedAt": "2026-06-06T00:23:50.346Z",
+    "testFlightGroupsCount": 0,
+    "testFlightIndividualTestersCount": 0,
+    "testFlightWhatToTestEmpty": true
   },
   "googlePlay": {
     "status": "pass",
@@ -331,9 +360,9 @@
     "releaseOwner": "",
     "storeReviewer": "",
     "signedAt": "",
-    "notes": "Partial console evidence only. No production submission is approved."
+    "notes": "Partial console evidence only. No production submission is approved. App Store Connect TestFlight processing is verified, but tester setup, iOS install QA/screenshots, privacy publish, and final review signoff remain pending."
   },
-  "generatedAt": "2026-06-06T00:11:39.082Z",
+  "generatedAt": "2026-06-06T00:23:50.346Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
