@@ -53,7 +53,7 @@
       "osVersion": "",
       "tester": "",
       "completedAt": "",
-      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and EAS scheduled TestFlight upload submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0; QA and screenshots still need an iOS device, TestFlight install, or full Xcode Simulator path before this native QA gate can pass. Fresh probe at 2026-06-05T23:56:51Z confirmed xcode-select points to /Library/Developer/CommandLineTools and xcrun cannot find simctl, so no simulator automation path is available on this Mac yet."
+      "notes": "iOS internal preview remains blocked because it requires registering an iOS test device and Vambah confirmed no iOS device is available. The route moved to App Store/TestFlight distribution instead of internal preview device registration. A finished iOS production/store IPA is recorded in productionBuilds.ios and EAS scheduled TestFlight upload submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0; QA and screenshots still need an iOS device, TestFlight install, or stable Xcode Simulator path before this native QA gate can pass. Fresh probe at 2026-06-06T04:14:24Z confirmed Xcode 26.5 (17F42), CocoaPods 1.16.2, and the iOS 26.5 Simulator runtime are installed. The local Expo run:ios path completed prebuild and CocoaPods install, but CoreSimulator hung during simctl/XcodeBuildMCP device listing after first boot, so iOS simulator screenshots were not captured."
     }
   },
   "productionBuilds": {
@@ -350,10 +350,10 @@
   ],
   "blockers": [
     "iOS internal preview build remains blocked because no iOS test device is available for device registration.",
-    "Full Xcode/simctl is not available on this Mac, so local iOS simulator screenshots could not be captured.",
-    "An iOS production/store IPA exists and TestFlight processing is verified, but iOS native QA and screenshot evidence remain pending because no iOS device is available and full Xcode/simctl is not installed.",
+    "Full Xcode 26.5 (17F42), CocoaPods 1.16.2, and the iOS 26.5 Simulator runtime are installed on this Mac, but CoreSimulator hung after first simulator boot and did not stay healthy enough for iOS app launch or screenshot capture.",
+    "An iOS production/store IPA exists and TestFlight processing is verified, but iOS native QA and screenshot evidence remain pending because no iOS device is available and local simulator access is currently blocked by CoreSimulator instability.",
     "Vendor request draft remains visible but unprepared on native Android because creating a third-party communication draft remains a communication boundary.",
-    "iOS native screenshots remain pending because no iOS device is available and full Xcode/simctl is not installed."
+    "iOS native screenshots remain pending because no iOS device is available and the local CoreSimulator service hung before screenshots could be captured."
   ],
   "signoff": {
     "releaseOwner": "",
@@ -366,7 +366,7 @@
   "generatedAt": "2026-06-06T00:38:39.640Z",
   "nextActions": [
     "For Android, only the vendor request draft communication boundary remains from the live QA checklist; do not prepare or send third-party vendor email without explicit approval.",
-    "Use the processed TestFlight build 1.0.0 (6) for an iOS install QA path, or install full Xcode for an iOS Simulator screenshot path.",
+    "Use the processed TestFlight build 1.0.0 (6) for an iOS install QA path, or recover CoreSimulator on this Mac and retry the local iOS Simulator screenshot path.",
     "Continue Google Play setup tasks; privacy policy URL is saved as a draft change, not sent for review.",
     "Only mark production submission signoff after all native QA and store-console tasks are complete."
   ],
@@ -490,11 +490,31 @@
   },
   "tooling": {
     "iosSimulator": {
-      "status": "unavailable-command-line-tools-only",
-      "checkedAt": "2026-06-05T23:57:22.000Z",
-      "xcodeSelectPath": "/Library/Developer/CommandLineTools",
+      "status": "runtime-installed-coresimulator-hung",
+      "checkedAt": "2026-06-06T04:14:24Z",
+      "xcodeSelectPath": "/Applications/Xcode.app/Contents/Developer",
+      "xcodeVersion": "Xcode 26.5",
+      "xcodeBuildVersion": "17F42",
+      "iosRuntime": "iOS 26.5 (26.5 - 23F77)",
+      "iosRuntimeIdentifier": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+      "cocoaPodsVersion": "1.16.2",
+      "cocoaPodsPath": "/opt/homebrew/bin/pod",
+      "firstBootSimulator": "iPhone 17 Pro (A5E30E83-9A15-44AE-A98F-1F0626D96331)",
       "simctlAvailable": false,
-      "finding": "xcrun --find simctl and xcrun simctl list devices both fail because full Xcode simulator tooling is not installed/selected."
+      "licenseAccepted": true,
+      "expoRunIosAttempt": {
+        "status": "blocked-coresimulator-hung",
+        "attemptedAt": "2026-06-06T04:14:24Z",
+        "command": "EXPO_NO_TELEMETRY=1 npx expo run:ios",
+        "completedSteps": [
+          "Created temporary ios/ native directory",
+          "Ran Expo prebuild",
+          "Installed CocoaPods"
+        ],
+        "cleanup": "Temporary ios/ directory and Expo-mutated package.json scripts were removed from the worktree because the simulator run did not complete and the project remains managed Expo.",
+        "finding": "After first simulator boot, simctl list devices and XcodeBuildMCP list_sims hung. The Expo run:ios process was stopped before an app install or screenshot capture."
+      },
+      "finding": "Xcode 26.5 (17F42), the iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 are installed. CoreSimulator became unstable after first boot and simctl/XcodeBuildMCP device listing hung, so local iOS simulator QA remains pending."
     },
     "androidAdb": {
       "status": "connected",

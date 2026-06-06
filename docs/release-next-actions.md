@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-06T03:04:57.109Z
-Release status generated at: 2026-06-06T03:04:57.102Z
+Generated at: 2026-06-06T08:58:34.313Z
+Release status generated at: 2026-06-06T08:58:34.309Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -37,7 +37,7 @@ Steps:
 3. Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.
 4. Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.
 5. Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.
-6. Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.
+6. Use the installed Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 for local simulator screenshots only after CoreSimulator recovers; otherwise use the processed TestFlight build on an iOS device.
 7. Update docs/native-qa-evidence.json with device QA results.
 8. Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.
 9. Run npm run native:qa:preflight.
@@ -105,7 +105,7 @@ Steps:
 
 1. Run npm run screenshots:store against the local web preview and confirm docs/store-screenshots/planning-evidence.json is updated.
 2. Use the five recorded Android Pixel screenshots already saved under docs/store-screenshots/native/.
-3. Install the latest iOS preview/TestFlight build on an iPhone/iPad, or install full Xcode and use an iOS Simulator.
+3. Install the latest iOS preview/TestFlight build on an iPhone/iPad, or recover CoreSimulator on this Mac and use the installed iOS 26.5 Simulator runtime.
 4. Capture the five required iOS screenshots.
 5. Save PNGs under docs/store-screenshots/native/ using the documented filenames.
 6. Reference each PNG in docs/native-qa-evidence.json with device and capturedAt metadata.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T03:04:57.109Z",
-  "releaseStatusGeneratedAt": "2026-06-06T03:04:57.102Z",
+  "generatedAt": "2026-06-06T08:58:34.313Z",
+  "releaseStatusGeneratedAt": "2026-06-06T08:58:34.309Z",
   "summary": {
     "pass": 6,
     "pending": 3
@@ -25,7 +25,7 @@
           "Do not repeat Android screenshot capture unless a visual regression is found; Android Pixel screenshot evidence is already recorded in docs/native-qa-evidence.json.",
           "Use the production/TestFlight iOS path instead of the internal device-registration path because no iOS device is available.",
           "Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.",
-          "Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.",
+          "Use the installed Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 for local simulator screenshots only after CoreSimulator recovers; otherwise use the processed TestFlight build on an iOS device.",
           "Update docs/native-qa-evidence.json with device QA results.",
           "Fill build URLs, devices, testers, timestamps, platform check statuses, screenshot records, and signoff fields.",
           "Run npm run native:qa:preflight."
@@ -81,7 +81,7 @@
         "steps": [
           "Run npm run screenshots:store against the local web preview and confirm docs/store-screenshots/planning-evidence.json is updated.",
           "Use the five recorded Android Pixel screenshots already saved under docs/store-screenshots/native/.",
-          "Install the latest iOS preview/TestFlight build on an iPhone/iPad, or install full Xcode and use an iOS Simulator.",
+          "Install the latest iOS preview/TestFlight build on an iPhone/iPad, or recover CoreSimulator on this Mac and use the installed iOS 26.5 Simulator runtime.",
           "Capture the five required iOS screenshots.",
           "Save PNGs under docs/store-screenshots/native/ using the documented filenames.",
           "Reference each PNG in docs/native-qa-evidence.json with device and capturedAt metadata.",

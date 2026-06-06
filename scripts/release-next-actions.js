@@ -297,7 +297,7 @@ const actionPlan = {
                   'Configure iOS production/TestFlight credentials instead of internal preview credentials.',
                   'After EAS finishes creating App Store/TestFlight distribution credentials, start an iOS store build and record the build URL.',
                 ]),
-            'Install full Xcode later if local iOS Simulator screenshots are needed without a physical iOS device.',
+            'Use the installed Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 for local simulator screenshots only after CoreSimulator recovers; otherwise use the processed TestFlight build on an iOS device.',
           ] : iosDeviceRegistrationPending ? [
             'Complete the active EAS iOS device-registration prompt by opening the generated registration URL on the target iPhone/iPad and installing the profile.',
             'After the device registration profile is installed, return to the EAS credentials terminal and press any key so provisioning profile creation can continue.',
@@ -393,7 +393,7 @@ const actionPlan = {
       ...(iosScreenshotsRecorded
         ? ['Use the five recorded iOS screenshots already saved under docs/store-screenshots/native/.']
         : [
-            'Install the latest iOS preview/TestFlight build on an iPhone/iPad, or install full Xcode and use an iOS Simulator.',
+            'Install the latest iOS preview/TestFlight build on an iPhone/iPad, or recover CoreSimulator on this Mac and use the installed iOS 26.5 Simulator runtime.',
             'Capture the five required iOS screenshots.',
           ]),
       'Save PNGs under docs/store-screenshots/native/ using the documented filenames.',
