@@ -1,15 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T09:59:55.183Z",
+  "generatedAt": "2026-06-06T10:05:30.592Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-06T09:59:55.179Z",
+    "generatedAt": "2026-06-06T10:05:30.589Z",
     "summary": {
-      "pass": 37,
-      "pending": 2
+      "pass": 38,
+      "pending": 1
     },
     "pendingGateIds": [
-      "local-release-ci-evidence",
       "store-console-records"
     ]
   },
@@ -131,12 +130,6 @@
     "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
   ],
   "pendingGates": [
-    {
-      "id": "local-release-ci-evidence",
-      "group": "store-local",
-      "title": "Local release CI evidence records repeatable pre-store validation",
-      "nextStep": "Run npm run release:local-ci before external account-side release work."
-    },
     {
       "id": "store-console-records",
       "group": "store-console",

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "status": "release-readiness-partial-testflight-processed",
-  "generatedAt": "2026-06-06T00:49:04.023Z",
-  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play internal-track submission, Apple App Store Connect API access approval, App Store Connect API key creation, 1Password credential persistence, and EAS iOS TestFlight upload scheduling.",
+  "status": "release-readiness-partial-store-signoff-pending",
+  "generatedAt": "2026-06-06T10:04:16.567Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after App Privacy publishing, Google Play internal testing activation, cross-platform native QA/screenshots, and EAS/App Store Connect setup evidence.",
   "pr": {
     "number": 2,
     "branch": "codex/inventory-reconstruction-clone",
@@ -10,11 +10,9 @@
   },
   "localState": {
     "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
-    "releaseStatus": "Pending after Android EAS internal-track submission finished and is visible in Google Play Console Internal testing, and iOS EAS submission was scheduled to App Store Connect/TestFlight using the authorized App Store Connect API key. Remaining gates are TestFlight processing/build selection verification, iOS QA/screenshots without an iOS device or full Xcode simulator, Google Play tester/signoff steps, and final store signoff.",
+    "releaseStatus": "Pending with EAS submit config, cross-platform native QA/screenshots, App Privacy publishing, and Google Play internal testing ready. Remaining gates are Apple TestFlight tester/group readiness and final release-owner/store-reviewer signoff before any public review submission.",
     "pendingGateIds": [
-      "native-qa-evidence",
-      "store-console-records",
-      "native-screenshots"
+      "store-console-records"
     ],
     "latestStrictCommands": [
       {
@@ -24,18 +22,18 @@
       },
       {
         "command": "npm run native:qa:preflight",
-        "status": "failed-as-expected",
-        "note": "Android partial QA and screenshots are recorded; iOS preview/device/screenshot evidence, additional Android runtime checks, and final QA signoff are still missing."
+        "status": "pass",
+        "note": "Cross-platform native QA and Android/iOS native screenshots are recorded; production submission signoff remains intentionally gated."
       },
       {
         "command": "npm run native:qa:preflight:local",
-        "status": "pass-with-pending-warnings",
-        "note": "The native QA evidence schema is valid while pending external device and signoff gates remain."
+        "status": "pass-with-signoff-warnings",
+        "note": "The native QA evidence schema is valid; remaining warnings are signoff/communication boundaries, not missing platform QA or screenshots."
       },
       {
         "command": "npm run store:console:preflight",
         "status": "failed-as-expected",
-        "note": "Store records exist, but App Privacy publish, TestFlight readiness, Play Internal Testing readiness, native screenshots, and final signoff remain incomplete."
+        "note": "Store records exist; App Privacy is published and Google Play internal testing is active. Strict preflight remains gated by TestFlight tester readiness and final signoff."
       },
       {
         "command": "npm run store:console:preflight:local",
@@ -96,7 +94,7 @@
       "finishedBuildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
       "artifactType": "ipa",
       "submitAttemptEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-      "currentGate": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 and App Store Connect now shows TestFlight build 1.0.0 (6) as Ready to Submit with Binary State Validated. TestFlight tester-facing test information/groups, iOS install QA/screenshots, privacy publish, and final signoff remain pending; no public review submission was started.",
+      "currentGate": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 and App Store Connect shows TestFlight build 1.0.0 (6) as Ready to Submit with Binary State Validated. App Privacy is published and What to Test is saved. TestFlight group/tester assignment remains pending because no existing groups/testers were available and no new tester emails were authorized or entered.",
       "latestSubmitRetry": {
         "status": "scheduled",
         "checkedAt": "2026-06-06T00:11:39.082Z",
@@ -186,17 +184,16 @@
         "testing": {
           "groupsCount": 0,
           "individualTestersCount": 0,
-          "whatToTestEmpty": true,
+          "whatToTestEmpty": false,
           "saveButtonDisabled": true,
           "testersAdded": false,
-          "testInfoSaved": false
+          "testInfoSaved": true
         },
         "actionsNotTaken": [
-          "No TestFlight group was created.",
-          "No tester was invited.",
-          "What to Test was not saved because tester-facing copy needs explicit content/action approval.",
+          "No new TestFlight group was created.",
+          "No new tester email address was entered or transmitted.",
+          "No tester invitation was sent.",
           "Add for Review was not clicked.",
-          "App Privacy Publish was not clicked.",
           "Public App Review submission was not started."
         ]
       }
@@ -204,11 +201,11 @@
   },
   "computerUseState": {
     "googlePlay": {
-      "checkedAt": "2026-06-06T00:49:04.023Z",
+      "checkedAt": "2026-06-06T09:56:14.438Z",
       "currentScreen": "Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing > Testers",
       "currentUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
       "trackSummary": {
-        "visibleState": "Inactive",
+        "visibleState": "Active",
         "latestRelease": "1.0.0",
         "temporaryAppName": "com.vsillah.reversrrebuild (unreviewed)"
       },
@@ -225,7 +222,7 @@
       "existingEmailListVisible": true,
       "existingEmailListName": "ReversR App Testers",
       "existingEmailListUserCount": 13,
-      "existingEmailListSelected": false,
+      "existingEmailListSelected": true,
       "selectAllSelected": false,
       "saveButtonEnabled": false,
       "createEmailListVisible": true,
@@ -243,8 +240,8 @@
         "Send for review",
         "Production rollout"
       ],
-      "actionTaken": "Codex inspected Releases and Testers tabs only. No tester list was selected, no save occurred, no join link was copied or transmitted, and no review/release action was started.",
-      "nextActionRequiringApproval": "Authorize selecting the visible ReversR App Testers list and saving tester access, or explicitly authorize copying/transmitting the Join on the web link. Codex did not select the list, copy the link, click Save, create/edit email lists, Send for review, closed testing, production access, promote release, pause track, or production rollout."
+      "actionTaken": "Codex selected the existing ReversR App Testers email list and saved the internal testing tester access change. The track summary changed to Active. The join link was not copied or transmitted, and no Send for review, closed testing, production access, or production rollout action was clicked.",
+      "nextActionRequiringApproval": "Share the internal testing join link with intended testers outside Codex if desired. Keep Send for review, closed testing, production access, and production rollout gated behind explicit final approval."
     },
     "appStoreConnect": {
       "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
@@ -376,42 +373,41 @@
     }
   },
   "storeConsoleRecords": {
-    "status": "records-exist-testflight-processed-final-readiness-pending",
+    "status": "partial-pass-testflight-and-signoff-pending",
     "appStoreConnect": {
-      "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
-      "metadataSaved": true,
-      "appInformationSaved": true,
-      "appPrivacyConfiguredNotPublished": true,
-      "ageRatingCompleted": true,
+      "appPrivacyCompleted": true,
+      "testFlightProcessingReady": true,
+      "whatToTestSaved": true,
       "testFlightReady": false,
+      "groupsCount": 0,
+      "individualTestersCount": 0,
+      "existingTestersAvailable": false,
+      "testerInvitesSent": false,
       "addForReviewClicked": false,
-      "testFlightUploadScheduled": true,
-      "testFlightUploadSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
-      "testFlightBuildVisible": true,
       "testFlightBuildStatus": "Ready to Submit",
-      "testFlightBinaryState": "Validated",
-      "testFlightVersion": "1.0.0",
-      "testFlightBuild": "6"
+      "testFlightBinaryState": "Validated"
     },
     "googlePlay": {
-      "recordUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
-      "completedSetupTaskCount": 11,
-      "totalSetupTaskCount": 11,
-      "appContentCompleted": true,
-      "dataSafetyCompleted": true,
-      "storeListingAssetsUploaded": true,
-      "internalTestingReady": false,
-      "closedTestingSkippedForNow": true,
-      "closedTestingMinimumTesterCount": 12,
-      "closedTestingMinimumDays": 14,
+      "internalTestingReady": true,
+      "internalTestingReadyAt": "2026-06-06T09:56:14.438Z",
+      "testerListSelected": true,
+      "testerCount": 13,
+      "joinLinkCopiedOrTransmitted": false,
       "sendForReviewClicked": false,
-      "internalTestingSubmissionScheduled": true,
-      "internalTestingSubmissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
-      "internalTestingSubmissionStatus": "finished-visible-in-play-console-tester-assignment-gated",
-      "internalTestingReleaseVisible": true,
-      "internalTestingTesterListVisible": true,
-      "internalTestingTesterListUserCount": 13
-    }
+      "productionSubmissionApproved": false
+    },
+    "requiredAssets": {
+      "nativeScreenshotsCaptured": true,
+      "appIconReviewed": true,
+      "featureGraphicCaptured": true
+    },
+    "signoff": {
+      "releaseOwnerPresent": false,
+      "storeReviewerPresent": false,
+      "signedAtPresent": false,
+      "productionSubmissionApproved": false
+    },
+    "remainingGate": "Apple TestFlight tester/group readiness and final release-owner/store-reviewer signoff remain pending. No public App Review, Google Play Send for review, closed testing, production access, or production rollout action is approved or started."
   },
   "humanInTheLoopResumeInstructions": [
     "For Apple TestFlight: What to Test is saved on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. Apple showed no assignable groups and no existing testers. To continue, provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing TestFlight/App Store Connect tester group. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
