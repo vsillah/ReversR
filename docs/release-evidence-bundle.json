@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T01:55:03.404Z",
+  "generatedAt": "2026-06-06T03:04:26.211Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-06T01:55:03.378Z",
+    "generatedAt": "2026-06-06T03:04:26.181Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -475,7 +475,7 @@
     "objectiveReadinessAudit": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-06T00:56:08.870Z",
+      "generatedAt": "2026-06-06T01:55:48.958Z",
       "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
       "completionClaim": {
         "fullObjectiveComplete": false,
@@ -495,7 +495,7 @@
         "blockedRequirementIds": []
       },
       "releaseStatus": {
-        "generatedAt": "2026-06-06T00:56:08.827Z",
+        "generatedAt": "2026-06-06T01:55:48.928Z",
         "summary": {
           "pass": 35,
           "pending": 4
@@ -644,14 +644,14 @@
               "id": "store-submission-packet-smoke",
               "status": "pass",
               "title": "Store submission metadata and privacy packet evidence is recorded",
-              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T00:56:04.607Z.",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T01:55:45.573Z.",
               "nextStep": ""
             },
             {
               "id": "store-review-safety-packet",
               "status": "pass",
               "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T00:56:04.761Z.",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T01:55:45.731Z.",
               "nextStep": ""
             },
             {
@@ -672,7 +672,7 @@
               "id": "release-evidence-bundle",
               "status": "pass",
               "title": "Consolidated release evidence bundle is generated for external operators",
-              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-06T00:55:42.909Z.",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 3 external gates at 2026-06-06T01:55:03.404Z.",
               "nextStep": ""
             },
             {
@@ -700,21 +700,21 @@
               "id": "store-operator-packet",
               "status": "pass",
               "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-              "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-06T00:56:05.888Z.",
+              "evidence": "docs/store-operator-packet/manifest.json packages 15 source artifacts at 2026-06-06T01:55:46.715Z.",
               "nextStep": ""
             },
             {
               "id": "hosted-operator-packet",
               "status": "pass",
               "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T00:56:06.859Z.",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T01:55:47.482Z.",
               "nextStep": ""
             },
             {
               "id": "release-next-actions-packet",
               "status": "pass",
               "title": "Durable external-gate next action packet is generated",
-              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-06T00:56:07.850Z.",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 3 external gates at 2026-06-06T01:55:48.243Z.",
               "nextStep": ""
             },
             {
@@ -728,14 +728,14 @@
               "id": "native-release-config-evidence",
               "status": "pass",
               "title": "Native release config evidence is recorded with current EAS linkage state",
-              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T00:55:34.061Z.",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T00:56:11.549Z.",
               "nextStep": ""
             },
             {
               "id": "store-console-pending-evidence",
               "status": "pass",
               "title": "Store console pending evidence records account-side setup requirements",
-              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T00:55:31.320Z.",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T01:55:26.319Z.",
               "nextStep": ""
             }
           ],
@@ -835,7 +835,7 @@
     "storeSubmissionSmoke": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T00:56:11.966Z",
+      "generatedAt": "2026-06-06T01:55:51.570Z",
       "urlMode": "placeholder-allowed",
       "warnings": [],
       "appIdentity": {
@@ -906,7 +906,7 @@
     "storeReviewSafety": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T00:56:04.761Z",
+      "generatedAt": "2026-06-06T01:55:45.731Z",
       "outputFile": "docs/store-review-safety-packet.md",
       "sources": [
         "docs/store-submission-packet.json",
@@ -1593,19 +1593,29 @@
         "testing": {
           "groupsCount": 0,
           "individualTestersCount": 0,
-          "whatToTestEmpty": true,
+          "whatToTestEmpty": false,
           "saveButtonDisabled": true,
           "testersAdded": false,
-          "testInfoSaved": false
+          "testInfoSaved": true,
+          "whatToTestSaved": true,
+          "whatToTestSavedAt": "2026-06-06T03:04:24.221Z",
+          "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+          "whatToTestCharacterCount": 592,
+          "addGroupResult": "No current groups this build can be assigned to.",
+          "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+          "newTesterEmailsEntered": false,
+          "testerInvitesSent": false
         },
         "actionsNotTaken": [
+          "No new tester email address was entered or transmitted.",
           "No TestFlight group was created.",
-          "No tester was invited.",
-          "What to Test was not saved because tester-facing copy needs explicit content/action approval.",
-          "Add for Review was not clicked.",
+          "No tester invitation was sent.",
+          "Expire Build was not clicked.",
           "App Privacy Publish was not clicked.",
+          "Add for Review was not clicked.",
           "Public App Review submission was not started."
-        ]
+        ],
+        "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
       }
     },
     "easAndroidSubmitAttempt": {
@@ -2040,10 +2050,11 @@
           "loggedIn": true,
           "visibleGate": {
             "whatToTestFieldVisible": true,
-            "whatToTestEmpty": true,
+            "whatToTestEmpty": false,
+            "whatToTestSaved": true,
+            "saveButtonDisabled": true,
             "groupsCount": 0,
             "individualTestersCount": 0,
-            "saveButtonDisabled": true,
             "addGroupVisible": true,
             "addTestersVisible": true
           },
@@ -2051,7 +2062,37 @@
             "source": "docs/store-console-copy.md#testflight-what-to-test",
             "characterCount": 592
           },
-          "nextActionRequiringApproval": "Authorize Codex to paste and save the prepared What to Test copy and create/assign a TestFlight internal group/testers, or provide an iOS QA path. Codex did not type into the field, click Save, Add Group, Add Testers, Expire Build, App Privacy Publish, Add for Review, or public App Review submission."
+          "savedCopy": {
+            "status": "what-to-test-saved-no-testers-available",
+            "checkedAt": "2026-06-06T03:04:24.221Z",
+            "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+            "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+            "version": "1.0.0",
+            "build": "6",
+            "whatToTestSaved": true,
+            "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+            "whatToTestCharacterCount": 592,
+            "whatToTestCharactersRemaining": 3407,
+            "savedButtonStateAfterSave": "Saved disabled",
+            "groupsCount": 0,
+            "individualTestersCount": 0,
+            "addGroupResult": "No current groups this build can be assigned to.",
+            "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+            "newTesterEmailsEntered": false,
+            "testerInvitesSent": false,
+            "actionTaken": "Codex pasted the validated repo-backed What to Test copy, verified the field value, clicked Save, opened Add Group and Add Existing Testers, and found no assignable groups or existing testers.",
+            "actionsNotTaken": [
+              "No new tester email address was entered or transmitted.",
+              "No TestFlight group was created.",
+              "No tester invitation was sent.",
+              "Expire Build was not clicked.",
+              "App Privacy Publish was not clicked.",
+              "Add for Review was not clicked.",
+              "Public App Review submission was not started."
+            ],
+            "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+          },
+          "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
         }
       },
       "nativeQaAndScreenshots": {
@@ -2170,7 +2211,7 @@
         }
       },
       "humanInTheLoopResumeInstructions": [
-        "For Apple TestFlight: Chrome is positioned on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. The What to Test field is empty, Groups is 0, Individual Testers is 0, and Save is disabled. Repo-backed What to Test copy is prepared in docs/store-console-copy.md. To continue, authorize Codex to paste/save that copy and create/assign an internal TestFlight group/testers, or provide an iOS test device/full Xcode path for iOS QA. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
+        "For Apple TestFlight: What to Test is saved on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. Apple showed no assignable groups and no existing testers. To continue, provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing TestFlight/App Store Connect tester group. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
         "For Google Play internal testing: Chrome is positioned on Google Play Console > ReversR Rebuild > Internal testing > Testers. The ReversR App Testers email list with 13 users is visible but unchecked, Join on the web is visible but not copied, and Save is disabled. The Releases tab was inspected and shows release 1.0.0 Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed. To continue, explicitly authorize selecting/saving tester access or copying/transmitting the join link. Do not click Send for review, closed testing, production access, promote release, pause track, or production rollout without explicit final approval.",
         "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
         "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
@@ -2271,7 +2312,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T00:56:11.549Z",
+      "generatedAt": "2026-06-06T01:55:51.237Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -2351,7 +2392,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-06T00:56:09.068Z",
+      "generatedAt": "2026-06-06T01:55:49.095Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -3125,9 +3166,9 @@
     "storeOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T00:56:05.888Z",
+      "generatedAt": "2026-06-06T01:55:46.715Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-06T00:56:05.881Z",
+        "generatedAt": "2026-06-06T01:55:46.711Z",
         "summary": {
           "pass": 35,
           "pending": 4
@@ -3287,9 +3328,9 @@
     "hostedOperatorPacket": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T00:56:06.859Z",
+      "generatedAt": "2026-06-06T01:55:47.482Z",
       "releaseStatus": {
-        "generatedAt": "2026-06-06T00:56:06.853Z",
+        "generatedAt": "2026-06-06T01:55:47.476Z",
         "summary": {
           "pass": 35,
           "pending": 4
@@ -3489,8 +3530,8 @@
     "localReleaseCi": {
       "schemaVersion": 1,
       "status": "pass",
-      "startedAt": "2026-06-06T00:55:54.305Z",
-      "completedAt": "2026-06-06T00:56:17.970Z",
+      "startedAt": "2026-06-06T01:55:36.092Z",
+      "completedAt": "2026-06-06T01:55:56.974Z",
       "commandCount": 16,
       "passedCount": 16,
       "failedCount": 0,
@@ -3501,7 +3542,7 @@
           "proves": "TypeScript compile surface has no static errors.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2416,
+          "durationMs": 1925,
           "command": "npm run typecheck",
           "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
           "stderrTail": ""
@@ -3511,7 +3552,7 @@
           "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 178,
+          "durationMs": 158,
           "command": "npm run accessibility:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
           "stderrTail": ""
@@ -3521,7 +3562,7 @@
           "proves": "Google Play feature graphic exists at the required 1024x500 size.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 176,
+          "durationMs": 137,
           "command": "npm run store:assets:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
           "stderrTail": ""
@@ -3531,7 +3572,7 @@
           "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 507,
+          "durationMs": 473,
           "command": "npm run inventory:preflight",
           "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
           "stderrTail": ""
@@ -3541,7 +3582,7 @@
           "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6878,
+          "durationMs": 6621,
           "command": "npm run policy:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-local-release-ci-policy-hosting-smoke-evidence.json",
           "stderrTail": ""
@@ -3551,7 +3592,7 @@
           "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 156,
+          "durationMs": 177,
           "command": "npm run store:submission:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
           "stderrTail": ""
@@ -3561,7 +3602,7 @@
           "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 155,
+          "durationMs": 156,
           "command": "npm run store:review-safety",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
           "stderrTail": ""
@@ -3571,7 +3612,7 @@
           "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 153,
+          "durationMs": 152,
           "command": "npm run store:console:copy",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
           "stderrTail": ""
@@ -3581,7 +3622,7 @@
           "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 975,
+          "durationMs": 831,
           "command": "npm run store:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 4",
           "stderrTail": ""
@@ -3591,7 +3632,7 @@
           "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 971,
+          "durationMs": 766,
           "command": "npm run hosted:operator-packet",
           "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
           "stderrTail": ""
@@ -3601,7 +3642,7 @@
           "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 991,
+          "durationMs": 759,
           "command": "npm run release:next-actions:write",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 3\nNext recommended gate: native-qa-evidence",
           "stderrTail": ""
@@ -3611,7 +3652,7 @@
           "proves": "Original user objective is mapped to proven local work and pending external release gates.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 1021,
+          "durationMs": 716,
           "command": "npm run release:objective",
           "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 6/8\nPending requirements: store-readiness-packet, apple-google-store-publication",
           "stderrTail": ""
@@ -3621,7 +3662,7 @@
           "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 194,
+          "durationMs": 135,
           "command": "npm run store:console:preflight:local",
           "stdoutTail": "- App Store Connect App Privacy details are not marked complete.\n- App Store Connect TestFlight readiness is not marked complete.\n- Google Play Internal Testing readiness is not marked complete.\n- Final native screenshots are not marked captured.\n- Review gate nativeQaPreflightPassed is not marked true.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
           "stderrTail": ""
@@ -3631,7 +3672,7 @@
           "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 2483,
+          "durationMs": 2144,
           "command": "npm run native:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 native:preflight:local\n> node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in\n\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
           "stderrTail": ""
@@ -3641,7 +3682,7 @@
           "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 176,
+          "durationMs": 144,
           "command": "npm run native:qa:preflight:local",
           "stdoutTail": "- Native screenshot design-match is missing ios device evidence.\n- Native screenshot design-match is missing ios capturedAt.\n- Native screenshot build-handoff is pending on ios.\n- Native screenshot build-handoff is missing ios device evidence.\n- Native screenshot build-handoff is missing ios capturedAt.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
           "stderrTail": ""
@@ -3651,7 +3692,7 @@
           "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
           "status": "pass",
           "exitCode": 0,
-          "durationMs": 6233,
+          "durationMs": 5585,
           "command": "npm run store:preflight:local",
           "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nStore preflight passed.",
           "stderrTail": ""
@@ -3670,8 +3711,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-06T01:55:02.533Z",
-      "releaseStatusGeneratedAt": "2026-06-06T01:55:02.526Z",
+      "generatedAt": "2026-06-06T03:04:25.294Z",
+      "releaseStatusGeneratedAt": "2026-06-06T03:04:25.287Z",
       "summary": {
         "pass": 6,
         "pending": 3

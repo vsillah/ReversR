@@ -161,18 +161,28 @@
     "testing": {
       "groupsCount": 0,
       "individualTestersCount": 0,
-      "whatToTestEmpty": true,
+      "whatToTestEmpty": false,
       "saveButtonDisabled": true,
       "testersAdded": false,
-      "testInfoSaved": false
+      "testInfoSaved": true,
+      "whatToTestSaved": true,
+      "whatToTestSavedAt": "2026-06-06T03:04:24.221Z",
+      "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+      "whatToTestCharacterCount": 592,
+      "addGroupResult": "No current groups this build can be assigned to.",
+      "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+      "newTesterEmailsEntered": false,
+      "testerInvitesSent": false
     },
     "actionsNotTaken": [
+      "No new tester email address was entered or transmitted.",
       "No TestFlight group was created.",
-      "No tester was invited.",
-      "What to Test was not saved because tester-facing copy needs explicit content/action approval.",
-      "Add for Review was not clicked.",
+      "No tester invitation was sent.",
+      "Expire Build was not clicked.",
       "App Privacy Publish was not clicked.",
+      "Add for Review was not clicked.",
       "Public App Review submission was not started."
-    ]
+    ],
+    "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
   }
 }

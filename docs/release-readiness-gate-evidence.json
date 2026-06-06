@@ -253,10 +253,11 @@
       "loggedIn": true,
       "visibleGate": {
         "whatToTestFieldVisible": true,
-        "whatToTestEmpty": true,
+        "whatToTestEmpty": false,
+        "whatToTestSaved": true,
+        "saveButtonDisabled": true,
         "groupsCount": 0,
         "individualTestersCount": 0,
-        "saveButtonDisabled": true,
         "addGroupVisible": true,
         "addTestersVisible": true
       },
@@ -264,7 +265,37 @@
         "source": "docs/store-console-copy.md#testflight-what-to-test",
         "characterCount": 592
       },
-      "nextActionRequiringApproval": "Authorize Codex to paste and save the prepared What to Test copy and create/assign a TestFlight internal group/testers, or provide an iOS QA path. Codex did not type into the field, click Save, Add Group, Add Testers, Expire Build, App Privacy Publish, Add for Review, or public App Review submission."
+      "savedCopy": {
+        "status": "what-to-test-saved-no-testers-available",
+        "checkedAt": "2026-06-06T03:04:24.221Z",
+        "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+        "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+        "version": "1.0.0",
+        "build": "6",
+        "whatToTestSaved": true,
+        "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+        "whatToTestCharacterCount": 592,
+        "whatToTestCharactersRemaining": 3407,
+        "savedButtonStateAfterSave": "Saved disabled",
+        "groupsCount": 0,
+        "individualTestersCount": 0,
+        "addGroupResult": "No current groups this build can be assigned to.",
+        "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+        "newTesterEmailsEntered": false,
+        "testerInvitesSent": false,
+        "actionTaken": "Codex pasted the validated repo-backed What to Test copy, verified the field value, clicked Save, opened Add Group and Add Existing Testers, and found no assignable groups or existing testers.",
+        "actionsNotTaken": [
+          "No new tester email address was entered or transmitted.",
+          "No TestFlight group was created.",
+          "No tester invitation was sent.",
+          "Expire Build was not clicked.",
+          "App Privacy Publish was not clicked.",
+          "Add for Review was not clicked.",
+          "Public App Review submission was not started."
+        ],
+        "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+      },
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
     }
   },
   "nativeQaAndScreenshots": {
@@ -383,7 +414,7 @@
     }
   },
   "humanInTheLoopResumeInstructions": [
-    "For Apple TestFlight: Chrome is positioned on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. The What to Test field is empty, Groups is 0, Individual Testers is 0, and Save is disabled. Repo-backed What to Test copy is prepared in docs/store-console-copy.md. To continue, authorize Codex to paste/save that copy and create/assign an internal TestFlight group/testers, or provide an iOS test device/full Xcode path for iOS QA. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
+    "For Apple TestFlight: What to Test is saved on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. Apple showed no assignable groups and no existing testers. To continue, provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing TestFlight/App Store Connect tester group. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
     "For Google Play internal testing: Chrome is positioned on Google Play Console > ReversR Rebuild > Internal testing > Testers. The ReversR App Testers email list with 13 users is visible but unchecked, Join on the web is visible but not copied, and Save is disabled. The Releases tab was inspected and shows release 1.0.0 Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed. To continue, explicitly authorize selecting/saving tester access or copying/transmitting the join link. Do not click Send for review, closed testing, production access, promote release, pause track, or production rollout without explicit final approval.",
     "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
