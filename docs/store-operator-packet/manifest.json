@@ -1,14 +1,15 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T09:51:11.561Z",
+  "generatedAt": "2026-06-06T09:59:55.183Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-06T09:51:11.557Z",
+    "generatedAt": "2026-06-06T09:59:55.179Z",
     "summary": {
-      "pass": 38,
-      "pending": 1
+      "pass": 37,
+      "pending": 2
     },
     "pendingGateIds": [
+      "local-release-ci-evidence",
       "store-console-records"
     ]
   },
@@ -131,10 +132,16 @@
   ],
   "pendingGates": [
     {
+      "id": "local-release-ci-evidence",
+      "group": "store-local",
+      "title": "Local release CI evidence records repeatable pre-store validation",
+      "nextStep": "Run npm run release:local-ci before external account-side release work."
+    },
+    {
       "id": "store-console-records",
       "group": "store-console",
       "title": "Store console final review and submission gates are resolved",
-      "nextStep": "Complete TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff before any public submission."
+      "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission."
     }
   ],
   "safetyBoundary": [

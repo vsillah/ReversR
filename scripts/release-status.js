@@ -1092,12 +1092,22 @@ addGate(
 const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
 const storeConsoleEvidenceExists = Boolean(storeConsoleEvidence);
 const appPrivacyPublished = storeConsoleEvidence?.appStoreConnect?.appPrivacyCompleted === true;
+const testFlightReady = storeConsoleEvidence?.appStoreConnect?.testFlightReady === true;
+const googleInternalTestingReady = storeConsoleEvidence?.googlePlay?.internalTestingReady === true;
+const signoffReady = Boolean(
+  storeConsoleEvidence?.signoff?.releaseOwner &&
+  storeConsoleEvidence?.signoff?.storeReviewer &&
+  storeConsoleEvidence?.signoff?.signedAt
+);
 const storeConsoleRemaining = [
   ...(!appPrivacyPublished ? ['App Privacy publish'] : []),
-  'TestFlight tester/review readiness',
-  'Google Play internal-testing/review readiness',
-  'final signoff',
+  ...(!testFlightReady ? ['TestFlight tester/review readiness'] : []),
+  ...(!googleInternalTestingReady ? ['Google Play internal-testing readiness'] : []),
+  ...(!signoffReady ? ['final signoff'] : []),
 ];
+const storeConsoleNextStep = storeConsoleRemaining.length > 0
+  ? `Complete ${storeConsoleRemaining.join(', ')} before any public submission.`
+  : 'Store console evidence is ready for final public submission approval; do not submit until explicitly approved.';
 addGate(
   'store-console',
   'store-console-records',
@@ -1107,7 +1117,7 @@ addGate(
     ? `docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: ${storeConsoleRemaining.join(', ')}.`
     : `Expected iOS bundle ${appConfig.ios?.bundleIdentifier}; expected Android package ${appConfig.android?.package}; docs/store-console-evidence.json is missing.`,
   storeConsoleEvidenceExists
-    ? `Complete ${storeConsoleRemaining.join(', ')} before any public submission.`
+    ? storeConsoleNextStep
     : 'Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight.'
 );
 

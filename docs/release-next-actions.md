@@ -1,7 +1,7 @@
 # ReversR Rebuild Release Next Actions
 
-Generated at: 2026-06-06T09:50:55.251Z
-Release status generated at: 2026-06-06T09:50:55.247Z
+Generated at: 2026-06-06T09:59:56.303Z
+Release status generated at: 2026-06-06T09:59:56.299Z
 
 This generated packet is the external-operator action list for the clone release. It does not mark the app store-ready; it preserves the pending hosted, EAS, native QA, screenshot, and store-console gates.
 
@@ -24,11 +24,11 @@ This generated packet is the external-operator action list for the clone release
 
 Current gate evidence:
 
-docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff.
+docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, final signoff.
 
 Current gate next step:
 
-Complete TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff before any public submission.
+Complete TestFlight tester/review readiness, final signoff before any public submission.
 
 Steps:
 

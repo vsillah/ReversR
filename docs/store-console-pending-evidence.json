@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-06T09:50:55.893Z",
+  "generatedAt": "2026-06-06T10:00:20.182Z",
   "source": "docs/store-console-evidence.json",
   "finalEvidenceFile": "docs/store-console-evidence.json",
   "warnings": [
     "App Store Connect TestFlight readiness is not marked complete.",
-    "Google Play Internal Testing readiness is not marked complete.",
     "Review gate productionSubmissionApproved is not marked true.",
     "Production submission is not approved.",
     "Store console signoff is missing releaseOwner.",
@@ -46,7 +45,7 @@
     "metadataCopiedFromPacket": true,
     "dataSafetyCompleted": true,
     "appContentCompleted": true,
-    "internalTestingReady": false
+    "internalTestingReady": true
   },
   "requiredAssets": {
     "nativeScreenshotsCaptured": true,
