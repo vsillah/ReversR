@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T00:49:39.031Z",
+  "generatedAt": "2026-06-06T00:55:42.909Z",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
     "version": "1.0.0",
@@ -16,7 +16,7 @@
     "branch": "codex/inventory-reconstruction-clone"
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-06T00:49:39.003Z",
+    "generatedAt": "2026-06-06T00:55:42.883Z",
     "summaryWithoutBundle": {
       "pass": 35,
       "pending": 3
@@ -2211,7 +2211,7 @@
     "nativeReleaseConfig": {
       "schemaVersion": 1,
       "status": "pass",
-      "generatedAt": "2026-06-06T00:49:31.974Z",
+      "generatedAt": "2026-06-06T00:55:34.061Z",
       "mode": {
         "allowPlaceholder": true,
         "allowMissingCli": true,
@@ -2291,7 +2291,7 @@
     "storeConsolePending": {
       "schemaVersion": 1,
       "status": "pending",
-      "generatedAt": "2026-06-06T00:49:29.902Z",
+      "generatedAt": "2026-06-06T00:55:31.320Z",
       "source": "docs/store-console-evidence.json",
       "finalEvidenceFile": "docs/store-console-evidence.json",
       "warnings": [
@@ -3610,8 +3610,8 @@
     },
     "releaseNextActions": {
       "schemaVersion": 1,
-      "generatedAt": "2026-06-06T00:49:28.861Z",
-      "releaseStatusGeneratedAt": "2026-06-06T00:49:28.854Z",
+      "generatedAt": "2026-06-06T00:55:41.923Z",
+      "releaseStatusGeneratedAt": "2026-06-06T00:55:41.916Z",
       "summary": {
         "pass": 6,
         "pending": 3
