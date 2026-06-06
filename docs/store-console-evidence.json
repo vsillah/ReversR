@@ -21,11 +21,11 @@
     "appInformationSaved": true,
     "appInformationSavedAt": "2026-06-05T22:27:34Z",
     "subtitle": "Machine rebuild packages",
-    "appPrivacyCompleted": false,
+    "appPrivacyCompleted": true,
     "appPrivacyConfigured": true,
     "appPrivacyConfiguredAt": "2026-06-05T22:27:34Z",
-    "appPrivacyPublishPendingExplicitApproval": true,
-    "appPrivacyVerification": "Computer Use configured App Privacy in App Store Connect with Privacy Policy URL https://reversr.vercel.app/privacy, Data Collection answered Yes, Photos or Videos and Other User Content selected, both used for App Functionality only, not linked to user identity, and not used for tracking. The final Publish dialog was not confirmed because it contains an accuracy/legal attestation.",
+    "appPrivacyPublishPendingExplicitApproval": false,
+    "appPrivacyVerification": "Computer Use verified App Store Connect App Privacy at https://appstoreconnect.apple.com/apps/6777091538/distribution/privacy after Vambah authorized publishing. The page shows Published a few seconds ago by Vambah Sillah, Privacy Policy URL https://reversr.vercel.app/privacy, Data Not Linked to You, collected data types Other User Content and Photos or Videos, and both data types used for App Functionality. The final Publish legal/accuracy attestation dialog was confirmed under explicit user authorization. Add for Review was not clicked.",
     "ageRatingCompleted": true,
     "ageRatingSavedAt": "2026-06-05T22:27:34Z",
     "ageRatingVerification": "Computer Use completed the App Store Connect age rating questionnaire with all mature/chance/violence/medical/sexuality flags set to None or No, Not Applicable selected for age-category override, and Apple calculated a 4+ rating for 173 countries or regions plus regional exceptions. The App Information page was saved afterward.",
@@ -36,7 +36,7 @@
     "testFlightUploadAttempted": true,
     "testFlightUploadAttemptedAt": "2026-06-05T22:39:01Z",
     "testFlightUploadEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. TestFlight readiness remains pending until tester groups/testers, App Privacy publish, final build/screenshot review, and final signoff are complete. Local iOS simulator QA and screenshots are now recorded in docs/native-qa-evidence.json.",
+    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. App Privacy is published. TestFlight readiness remains pending until tester groups/testers, final build/screenshot review, and final signoff are complete. Local iOS simulator QA and screenshots are recorded in docs/native-qa-evidence.json.",
     "metadataDraftSaved": true,
     "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
     "metadataDraftFields": [
@@ -52,7 +52,7 @@
     "screenshotsUploaded": false,
     "buildSelected": false,
     "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details are configured but not published because Apple's final Publish dialog is an accuracy/legal attestation requiring explicit approval. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload, contact information, privacy publishing, TestFlight processing/build selection, and store signoff remain pending until completed in App Store Connect and verified. Add for Review was not clicked. TestFlight processing was later verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. What to Test is empty and was not saved; no TestFlight invites, App Privacy Publish, Add for Review, or public App Review submission occurred. Codex later navigated to the TestFlight Test Information tab and prepared repo-backed What to Test copy in docs/store-console-copy.md, but did not type/save it, create groups, add testers, expire the build, or start review. TestFlight What to Test was saved from the repo-backed copy; Apple showed no assignable groups and no existing testers, so no group/tester assignment occurred and no new tester emails were entered or invited.",
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details were configured and later published after explicit Vambah authorization; App Store Connect showed Published a few seconds ago by Vambah Sillah. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload/contact information gates were previously pending; local iOS simulator QA/screenshots are now recorded. Add for Review was not clicked. TestFlight processing was verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. TestFlight What to Test was saved from the repo-backed copy; Apple showed no assignable groups and no existing testers, so no group/tester assignment occurred and no new tester emails were entered or invited. No public App Review submission occurred.",
     "appStoreConnectApi": {
       "status": "approved-active-key",
       "checkedAt": "2026-06-06T00:23:50.346Z",
@@ -168,9 +168,9 @@
         "No TestFlight group was created.",
         "No tester invitation was sent.",
         "Expire Build was not clicked.",
-        "App Privacy Publish was not clicked.",
         "Add for Review was not clicked.",
-        "Public App Review submission was not started."
+        "Public App Review submission was not started.",
+        "No public App Review submission was started."
       ],
       "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. Local iOS simulator QA and screenshots are complete; real-device TestFlight QA remains optional/next-best before public review."
     },
@@ -203,12 +203,15 @@
         "No TestFlight group was created.",
         "No tester invitation was sent.",
         "Expire Build was not clicked.",
-        "App Privacy Publish was not clicked.",
         "Add for Review was not clicked.",
-        "Public App Review submission was not started."
+        "Public App Review submission was not started.",
+        "No public App Review submission was started."
       ],
       "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. Local iOS simulator QA and screenshots are complete; real-device TestFlight QA remains optional/next-best before public review."
-    }
+    },
+    "appPrivacyPublished": true,
+    "appPrivacyPublishedAt": "2026-06-06T09:49:52.689Z",
+    "appPrivacyPublishedBy": "Vambah Sillah"
   },
   "googlePlay": {
     "status": "pass",
@@ -512,9 +515,9 @@
     "releaseOwner": "",
     "storeReviewer": "",
     "signedAt": "",
-    "notes": "Partial console evidence only. No production submission is approved. App Store Connect TestFlight processing is verified and local iOS simulator QA/screenshots are recorded, but tester setup, App Privacy publish, final store review signoff, and public review actions remain pending."
+    "notes": "Partial console evidence only. No production submission is approved. App Store Connect App Privacy is published, TestFlight processing is verified, and local iOS simulator QA/screenshots are recorded, but tester setup, Google Play internal-testing readiness, final store review signoff, and public review actions remain pending."
   },
-  "generatedAt": "2026-06-06T09:12:16.673Z",
+  "generatedAt": "2026-06-06T09:49:52.689Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -643,6 +646,14 @@
       "value": "Adults / workplace users; not designed for children under 13.",
       "completedAt": "2026-06-05T20:43:48.099Z",
       "note": "Computer Use verified the Google Play Dashboard lists Target audience as a completed setup task. Send for review was not clicked."
+    },
+    {
+      "platform": "appStoreConnect",
+      "task": "Publish App Privacy",
+      "status": "published",
+      "value": "Privacy Policy URL https://reversr.vercel.app/privacy; data not linked to user; Other User Content and Photos or Videos used for App Functionality.",
+      "completedAt": "2026-06-06T09:49:52.689Z",
+      "note": "Completed in App Store Connect after explicit user authorization. Final Publish accuracy/legal attestation was confirmed. Add for Review was not clicked."
     }
   ],
   "nativeQaPreflightPassedAt": "2026-06-06T09:12:16.673Z"

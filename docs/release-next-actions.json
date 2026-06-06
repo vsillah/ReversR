@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T09:15:45.733Z",
-  "releaseStatusGeneratedAt": "2026-06-06T09:15:45.728Z",
+  "generatedAt": "2026-06-06T09:50:55.251Z",
+  "releaseStatusGeneratedAt": "2026-06-06T09:50:55.247Z",
   "summary": {
     "pass": 8,
     "pending": 1
@@ -13,8 +13,8 @@
       "id": "store-console-records",
       "title": "Store console final review and submission gates are resolved",
       "status": "pending",
-      "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; final privacy/TestFlight/internal-testing/signoff gates remain pending.",
-      "nextStep": "Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission.",
+      "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff.",
+      "nextStep": "Complete TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff before any public submission.",
       "action": {
         "owner": "Store release operator",
         "phase": "Store console final review",

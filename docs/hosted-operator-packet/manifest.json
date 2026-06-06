@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T09:15:37.277Z",
+  "generatedAt": "2026-06-06T09:50:54.697Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-06T09:15:37.273Z",
+    "generatedAt": "2026-06-06T09:50:54.693Z",
     "summary": {
       "pass": 37,
       "pending": 2
@@ -37,7 +37,7 @@
       "group": "hosted",
       "status": "pass",
       "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-      "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-05T10:06:32.305Z.",
+      "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
       "nextStep": ""
     },
     {

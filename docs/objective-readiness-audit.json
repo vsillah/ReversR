@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-06T09:15:38.351Z",
+  "generatedAt": "2026-06-06T09:50:55.798Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -21,7 +21,7 @@
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-06T09:15:38.330Z",
+    "generatedAt": "2026-06-06T09:50:55.777Z",
     "summary": {
       "pass": 37,
       "pending": 2
@@ -170,14 +170,14 @@
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T09:15:36.036Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T09:50:53.443Z.",
           "nextStep": ""
         },
         {
           "id": "store-review-safety-packet",
           "status": "pass",
           "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T09:15:36.132Z.",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T09:50:53.537Z.",
           "nextStep": ""
         },
         {
@@ -198,7 +198,7 @@
           "id": "release-evidence-bundle",
           "status": "pass",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 1 external gates at 2026-06-06T09:15:28.791Z.",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 1 external gates at 2026-06-06T09:50:37.422Z.",
           "nextStep": ""
         },
         {
@@ -226,21 +226,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-06T09:15:36.762Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-06T09:50:54.161Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T09:15:37.277Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T09:50:54.697Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-06T09:15:37.809Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-06T09:50:55.251Z.",
           "nextStep": ""
         },
         {
@@ -254,14 +254,14 @@
           "id": "native-release-config-evidence",
           "status": "pass",
           "title": "Native release config evidence is recorded with current EAS linkage state",
-          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T09:14:23.518Z.",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T09:15:39.998Z.",
           "nextStep": ""
         },
         {
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T09:14:21.992Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T09:50:27.239Z.",
           "nextStep": ""
         }
       ],
@@ -305,7 +305,7 @@
           "id": "hosted-policy-urls",
           "status": "pass",
           "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-          "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-05T10:06:32.305Z.",
+          "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
           "nextStep": ""
         },
         {
@@ -333,8 +333,8 @@
           "id": "store-console-records",
           "status": "pending",
           "title": "Store console final review and submission gates are resolved",
-          "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; final privacy/TestFlight/internal-testing/signoff gates remain pending.",
-          "nextStep": "Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission."
+          "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff.",
+          "nextStep": "Complete TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff before any public submission."
         },
         {
           "id": "native-screenshots",

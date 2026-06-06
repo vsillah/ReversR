@@ -1089,17 +1089,25 @@ addGate(
   storeConsolePendingOk ? '' : 'Run npm run store:console:preflight:local before creating console records.'
 );
 
-const storeConsoleEvidenceExists = exists('docs/store-console-evidence.json');
+const storeConsoleEvidence = readOptionalJson('docs/store-console-evidence.json');
+const storeConsoleEvidenceExists = Boolean(storeConsoleEvidence);
+const appPrivacyPublished = storeConsoleEvidence?.appStoreConnect?.appPrivacyCompleted === true;
+const storeConsoleRemaining = [
+  ...(!appPrivacyPublished ? ['App Privacy publish'] : []),
+  'TestFlight tester/review readiness',
+  'Google Play internal-testing/review readiness',
+  'final signoff',
+];
 addGate(
   'store-console',
   'store-console-records',
   'Store console final review and submission gates are resolved',
   storeConsoleEvidenceExists ? 'pending' : 'pending',
   storeConsoleEvidenceExists
-    ? 'docs/store-console-evidence.json exists and records Apple/Google app records; final privacy/TestFlight/internal-testing/signoff gates remain pending.'
+    ? `docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: ${storeConsoleRemaining.join(', ')}.`
     : `Expected iOS bundle ${appConfig.ios?.bundleIdentifier}; expected Android package ${appConfig.android?.package}; docs/store-console-evidence.json is missing.`,
   storeConsoleEvidenceExists
-    ? 'Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission.'
+    ? `Complete ${storeConsoleRemaining.join(', ')} before any public submission.`
     : 'Create the App Store Connect and Play Console app records, copy docs/store-console-evidence.template.json, fill evidence, then run npm run store:console:preflight.'
 );
 

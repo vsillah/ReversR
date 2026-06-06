@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T09:43:20.618Z",
+  "generatedAt": "2026-06-06T09:51:11.561Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-06T09:43:20.614Z",
+    "generatedAt": "2026-06-06T09:51:11.557Z",
     "summary": {
       "pass": 38,
       "pending": 1
@@ -134,7 +134,7 @@
       "id": "store-console-records",
       "group": "store-console",
       "title": "Store console final review and submission gates are resolved",
-      "nextStep": "Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission."
+      "nextStep": "Complete TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff before any public submission."
     }
   ],
   "safetyBoundary": [

@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-06T09:43:20.618Z
+Generated at: 2026-06-06T09:51:11.561Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -24,7 +24,7 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 Pending gates:
 
-- store-console-records: Complete App Privacy publish, TestFlight tester/review readiness, Google Play internal-testing/review readiness, and final signoff before any public submission.
+- store-console-records: Complete TestFlight tester/review readiness, Google Play internal-testing/review readiness, final signoff before any public submission.
 
 ## Operator Entry Order
 
