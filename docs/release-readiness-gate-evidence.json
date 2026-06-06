@@ -388,5 +388,37 @@
     "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
     "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
-  ]
+  ],
+  "accountSideProgress": {
+    "appStoreConnectApiKey": {
+      "onePasswordCliVerification": {
+        "status": "verified-with-1password-cli",
+        "verifiedAt": "2026-06-06T01:55:01.427Z",
+        "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+        "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+        "vault": "Employee",
+        "category": "API_CREDENTIAL",
+        "attachmentCount": 1,
+        "attachments": [
+          {
+            "name": "p8",
+            "sizeBytes": 257
+          }
+        ],
+        "metadataFieldsPresent": [
+          "owner",
+          "purpose",
+          "key_id",
+          "issuer_id",
+          "access_role",
+          "team_name",
+          "asc_app_id",
+          "local_path_hint",
+          "sha256"
+        ],
+        "secretValuesCaptured": false,
+        "note": "Verified through op item get with jq redaction. The .p8 attachment and concealed/secret field values were not printed or committed."
+      }
+    }
+  }
 }
