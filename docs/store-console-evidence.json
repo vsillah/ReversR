@@ -188,7 +188,7 @@
     "contactDetailsSavedAt": "2026-06-05T18:57:00.000Z",
     "publicSupportEmail": "vambah@amadutown.com",
     "contactDetailsVerification": "Computer Use verified the Store listing contact details dialog showed Change saved with the confirmed public support email. The phone value was visible in the console but is intentionally not stored in repo evidence.",
-    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. EAS Android internal-track submission finished after the Google Play Android Developer API was enabled, and Play Console Internal testing shows release 1.0.0 available to internal testers. Tester access changes, closed testing, production access, native QA signoff, and final Send for review remain pending. No tester-list change, join-link transmission, Send for review, testing release review submission, production access application, or public submission was started.",
+    "notes": "Google Play Console app record exists and opens to ReversR Rebuild. App content declarations are complete as draft changes in Publishing overview: privacy policy, sign-in details, ads, government apps, financial features, health, Target audience, Data safety, Content ratings, and Advertising ID. Store settings category/contact details are saved. Default store listing text and required graphics/screenshots were saved to Publishing overview. EAS Android internal-track submission finished after the Google Play Android Developer API was enabled, and Play Console Internal testing shows release 1.0.0 available to internal testers. Tester access changes, closed testing, production access, native QA signoff, and final Send for review remain pending. No tester-list change, join-link transmission, Send for review, testing release review submission, production access application, or public submission was started. Codex later revisited Internal testing, verified release 1.0.0 on the Releases tab, and returned to the Testers tab where ReversR App Testers with 13 users is visible but unchecked and Save remains disabled. The join link is visible but was not copied, transmitted, or committed.",
     "completedSetupTaskCount": 11,
     "totalSetupTaskCount": 11,
     "completedSetupTasks": [
@@ -327,18 +327,60 @@
     },
     "internalTestingReleaseVisible": true,
     "internalTestingReleaseVerifiedAt": "2026-06-05T23:52:35.000Z",
-    "internalTestingReleaseVerification": "Computer Use opened Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing. The Releases tab showed release 1.0.0, Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, and Not reviewed.",
+    "internalTestingReleaseVerification": "Computer Use verified Google Play Console > ReversR Rebuild > Internal testing > Releases shows release 1.0.0, Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, and Not reviewed. The Testers tab shows ReversR App Testers with 13 users, unchecked, Save disabled, and Join on the web visible. No access/link/review action was taken.",
     "internalTestingTesterSetup": {
-      "status": "tester-access-change-gated",
-      "checkedAt": "2026-06-05T23:52:35.000Z",
+      "status": "tester-access-change-gated-current-screen-staged",
+      "checkedAt": "2026-06-06T00:49:04.023Z",
       "tabUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
       "existingEmailListVisible": true,
       "existingEmailListName": "ReversR App Testers",
       "existingEmailListUserCount": 13,
       "joinOnWebLinkVisible": true,
-      "joinOnWebLink": "[visible-in-console-not-committed]",
+      "joinOnWebLink": "[visible-in-console-not-copied-not-committed]",
       "saveButtonEnabled": false,
-      "note": "Codex inspected the Testers tab but did not select email lists, edit tester lists, copy/send the join link, or save changes because changing tester access is a human-in-the-loop permission/release action."
+      "note": "Chrome is positioned on the Internal testing Testers tab. Codex inspected the Releases tab and returned to Testers. No tester-list change, email-list edit, join-link copy/transmission, Save, Send for review, closed testing, production access, or production rollout action occurred.",
+      "currentScreenPrepared": {
+        "checkedAt": "2026-06-06T00:49:04.023Z",
+        "currentScreen": "Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing > Testers",
+        "currentUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
+        "trackSummary": {
+          "visibleState": "Inactive",
+          "latestRelease": "1.0.0",
+          "temporaryAppName": "com.vsillah.reversrrebuild (unreviewed)"
+        },
+        "releasesTabVerified": {
+          "checkedAt": "2026-06-06T00:49:04.023Z",
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=releases",
+          "releaseName": "1.0.0",
+          "status": "Available to internal testers",
+          "versionCodeCount": 1,
+          "releasedAtLabel": "Jun 5 7:42 PM",
+          "reviewStatus": "Not reviewed"
+        },
+        "testersTabVisible": true,
+        "existingEmailListVisible": true,
+        "existingEmailListName": "ReversR App Testers",
+        "existingEmailListUserCount": 13,
+        "existingEmailListSelected": false,
+        "selectAllSelected": false,
+        "saveButtonEnabled": false,
+        "createEmailListVisible": true,
+        "editEmailListVisible": true,
+        "joinOnWebLinkVisible": true,
+        "joinOnWebLinkCommitted": false,
+        "gatedActions": [
+          "Select ReversR App Testers email list",
+          "Save tester access changes",
+          "Create or edit email list",
+          "Copy or transmit Join on the web link",
+          "Create new release",
+          "Promote release",
+          "Pause track",
+          "Send for review",
+          "Production rollout"
+        ],
+        "actionTaken": "Codex inspected Releases and Testers tabs only. No tester list was selected, no save occurred, no join link was copied or transmitted, and no review/release action was started."
+      }
     }
   },
   "requiredAssets": {
@@ -382,7 +424,7 @@
     "signedAt": "",
     "notes": "Partial console evidence only. No production submission is approved. App Store Connect TestFlight processing is verified, but tester setup, iOS install QA/screenshots, privacy publish, and final review signoff remain pending."
   },
-  "generatedAt": "2026-06-06T00:44:58.101Z",
+  "generatedAt": "2026-06-06T00:49:04.023Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",

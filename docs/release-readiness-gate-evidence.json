@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "release-readiness-partial-testflight-processed",
-  "generatedAt": "2026-06-06T00:44:58.101Z",
+  "generatedAt": "2026-06-06T00:49:04.023Z",
   "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after Google Play internal-track submission, Apple App Store Connect API access approval, App Store Connect API key creation, 1Password credential persistence, and EAS iOS TestFlight upload scheduling.",
   "pr": {
     "number": 2,
@@ -204,29 +204,47 @@
   },
   "computerUseState": {
     "googlePlay": {
-      "currentScreen": "Google Play Console > ReversR Rebuild > Internal testing > Testers tab, showing existing ReversR App Testers email list with 13 users and a Join on the web link.",
-      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
-      "existingServiceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
-      "serviceAccountStatus": "Active; access never expires",
-      "reversrRebuildPermissionPresent": true,
-      "visibleAppsWithPermissions": [
-        "Bar Code",
-        "ConsciousCart",
-        "ReversR",
-        "SnapSplit",
-        "StackRay",
-        "The Visioneer"
+      "checkedAt": "2026-06-06T00:49:04.023Z",
+      "currentScreen": "Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing > Testers",
+      "currentUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
+      "trackSummary": {
+        "visibleState": "Inactive",
+        "latestRelease": "1.0.0",
+        "temporaryAppName": "com.vsillah.reversrrebuild (unreviewed)"
+      },
+      "releasesTabVerified": {
+        "checkedAt": "2026-06-06T00:49:04.023Z",
+        "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=releases",
+        "releaseName": "1.0.0",
+        "status": "Available to internal testers",
+        "versionCodeCount": 1,
+        "releasedAtLabel": "Jun 5 7:42 PM",
+        "reviewStatus": "Not reviewed"
+      },
+      "testersTabVisible": true,
+      "existingEmailListVisible": true,
+      "existingEmailListName": "ReversR App Testers",
+      "existingEmailListUserCount": 13,
+      "existingEmailListSelected": false,
+      "selectAllSelected": false,
+      "saveButtonEnabled": false,
+      "createEmailListVisible": true,
+      "editEmailListVisible": true,
+      "joinOnWebLinkVisible": true,
+      "joinOnWebLinkCommitted": false,
+      "gatedActions": [
+        "Select ReversR App Testers email list",
+        "Save tester access changes",
+        "Create or edit email list",
+        "Copy or transmit Join on the web link",
+        "Create new release",
+        "Promote release",
+        "Pause track",
+        "Send for review",
+        "Production rollout"
       ],
-      "nextActionRequiringApproval": "Authorize assigning/changing tester access for the visible ReversR App Testers list with 13 users, or provide the tester access decision. Codex did not click Save, copy/send the join link, Send for review, or production rollout.",
-      "googleCloudKeyPresent": true,
-      "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
-      "onePasswordItem": {
-        "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
-        "itemId": "btozyacjl7slchbuqjkjnhdpqa",
-        "vault": "Employee",
-        "category": "API_CREDENTIAL",
-        "attachment": "google-play-service-account.json"
-      }
+      "actionTaken": "Codex inspected Releases and Testers tabs only. No tester list was selected, no save occurred, no join link was copied or transmitted, and no review/release action was started.",
+      "nextActionRequiringApproval": "Authorize selecting the visible ReversR App Testers list and saving tester access, or explicitly authorize copying/transmitting the Join on the web link. Codex did not select the list, copy the link, click Save, create/edit email lists, Send for review, closed testing, production access, promote release, pause track, or production rollout."
     },
     "appStoreConnect": {
       "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
@@ -366,7 +384,7 @@
   },
   "humanInTheLoopResumeInstructions": [
     "For Apple TestFlight: Chrome is positioned on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. The What to Test field is empty, Groups is 0, Individual Testers is 0, and Save is disabled. Repo-backed What to Test copy is prepared in docs/store-console-copy.md. To continue, authorize Codex to paste/save that copy and create/assign an internal TestFlight group/testers, or provide an iOS test device/full Xcode path for iOS QA. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
-    "For Google Play internal testing: release 1.0.0 is visible in Play Console as Available to internal testers with 1 version code and Not reviewed. The Testers tab shows an existing ReversR App Testers email list with 13 users and a Join on the web link. To continue, explicitly authorize assigning/changing tester access or provide the tester decision. Do not click Save, copy/send the join link, Send for review, closed testing, production access, or production rollout without explicit final approval.",
+    "For Google Play internal testing: Chrome is positioned on Google Play Console > ReversR Rebuild > Internal testing > Testers. The ReversR App Testers email list with 13 users is visible but unchecked, Join on the web is visible but not copied, and Save is disabled. The Releases tab was inspected and shows release 1.0.0 Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed. To continue, explicitly authorize selecting/saving tester access or copying/transmitting the join link. Do not click Send for review, closed testing, production access, promote release, pause track, or production rollout without explicit final approval.",
     "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
     "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
     "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
