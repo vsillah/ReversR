@@ -36,7 +36,7 @@
     "testFlightUploadAttempted": true,
     "testFlightUploadAttemptedAt": "2026-06-05T22:39:01Z",
     "testFlightUploadEvidence": "docs/eas-ios-submit-attempt-evidence.json",
-    "testFlightUploadBlocker": "TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit and Binary State is Validated. App Privacy is published and What to Test is saved. The Add New Testers dialog is staged with empty tester fields and Next disabled; TestFlight tester readiness remains pending until Vambah provides/authorizes tester identities or a TestFlight group.",
+    "testFlightUploadBlocker": null,
     "metadataDraftSaved": true,
     "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z",
     "metadataDraftFields": [
@@ -51,8 +51,8 @@
     "releaseTypeDraft": "MANUAL",
     "screenshotsUploaded": false,
     "buildSelected": false,
-    "submissionBoundary": "App Store Connect Add for Review remained visible and was not clicked.",
-    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details were configured and later published after explicit Vambah authorization; App Store Connect showed Published a few seconds ago by Vambah Sillah. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload/contact information gates were previously pending; local iOS simulator QA/screenshots are now recorded. Add for Review was not clicked. TestFlight processing was verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. TestFlight What to Test was saved from the repo-backed copy; Apple showed no assignable groups and no existing testers, so no group/tester assignment occurred and no new tester emails were entered or invited. Codex later staged Add New Testers on the empty tester-entry dialog and stopped before entering identities or sending invites. No public App Review submission occurred.",
+    "submissionBoundary": "Apple TestFlight Beta App Review was submitted for build 1.0.0 (6). Public App Store Add for Review and production release were not clicked.",
+    "notes": "App Store Connect app record exists for ReversR Rebuild. Recorded Apple ID 6777091538 and app record URL at 2026-06-05T13:53:00.252Z. App Store product metadata was entered from the store packet and Save was disabled afterward, indicating the draft page was saved. App Information was later saved with subtitle Machine rebuild packages, primary category Productivity, secondary category Business, content rights set to no third-party content, and age rating saved as 4+. App Privacy details were configured and later published after explicit Vambah authorization; App Store Connect showed Published a few seconds ago by Vambah Sillah. App Store Connect API access is approved; the ReversR EAS Submit key is active with App Manager access and stored in 1Password. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6). Native screenshot upload/contact information gates were previously pending; local iOS simulator QA/screenshots are now recorded. Add for Review was not clicked. TestFlight processing was verified in App Store Connect: build 1.0.0 (6) is Ready to Submit with Binary State Validated, expires in 90 days, and has zero groups/testers configured. TestFlight What to Test was saved from the repo-backed copy; Apple showed no assignable groups and no existing testers, so no group/tester assignment occurred and no new tester emails were entered or invited. Codex later staged Add New Testers on the empty tester-entry dialog and stopped before entering identities or sending invites. No public App Review submission occurred. Computer Use submitted iOS TestFlight build 1.0.0 (6) to Apple TestFlight Beta App Review at 2026-06-08T12:41:51Z after explicit Vambah authorization. App Store Connect returned to the ReversR External Beta group builds tab and shows build 1.0.0 (6) with status Waiting for Review, platform iOS, and expires in 88 days. This is external TestFlight beta review, not public App Review or production release. No TestFlight tester emails were entered or invited. Public App Review/Add for Review and production release remain unstarted.",
     "appStoreConnectApi": {
       "status": "approved-active-key",
       "checkedAt": "2026-06-06T00:23:50.346Z",
@@ -132,13 +132,13 @@
       "privateKeyCommitted": false
     },
     "testFlightBuildVisible": true,
-    "testFlightBuildStatus": "Ready to Submit",
+    "testFlightBuildStatus": "Waiting for Review",
     "testFlightBinaryState": "Validated",
     "testFlightVersion": "1.0.0",
     "testFlightBuild": "6",
     "testFlightBuildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
     "testFlightProcessingVerifiedAt": "2026-06-06T00:23:50.346Z",
-    "testFlightGroupsCount": 0,
+    "testFlightGroupsCount": 2,
     "testFlightIndividualTestersCount": 0,
     "testFlightWhatToTestEmpty": false,
     "testFlightWhatToTestDraftPrepared": true,
@@ -185,39 +185,31 @@
     "testFlightExistingTestersAvailable": false,
     "testFlightTesterInvitesSent": false,
     "testFlightSetup": {
-      "status": "add-new-testers-form-staged-empty",
-      "checkedAt": "2026-06-06T10:10:18.464Z",
-      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Add New Testers to Build 1.0.0 (6)",
-      "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+      "status": "external-beta-review-waiting-for-review-no-testers",
+      "checkedAt": "2026-06-08T12:41:51Z",
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > ReversR External Beta > Builds",
+      "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/355ad927-f5a9-4ec5-81c7-3fb54f12ce62/builds",
       "version": "1.0.0",
       "build": "6",
-      "formFieldsVisible": [
-        "Email",
-        "First Name",
-        "Last Name"
+      "buildStatus": "Waiting for Review",
+      "groupsCreated": [
+        "ReversR Internal QA",
+        "ReversR External Beta"
       ],
-      "availableTesterSlotsLabel": "0 of 10,000 Available",
-      "emailFieldsEmpty": true,
-      "firstNameFieldsEmpty": true,
-      "lastNameFieldsEmpty": true,
-      "nextButtonState": "disabled",
-      "cancelButtonVisible": true,
-      "autofillSuggestionVisible": true,
-      "autofillSuggestionSelected": false,
-      "newTesterEmailsEntered": false,
-      "testerInvitesSent": false,
-      "actionTaken": "Codex opened Add Testers > Add New Testers and stopped on the empty tester-entry dialog so Vambah can provide or authorize tester identities.",
+      "externalGroupTesterCount": 0,
+      "internalGroupTesterCount": 0,
+      "whatToTestSaved": true,
+      "betaReviewSubmitted": true,
+      "publicAppReviewSubmissionStarted": false,
+      "productionReleaseSubmitted": false,
+      "actionTaken": "Codex created internal and external TestFlight groups, assigned build 1.0.0 (6), entered beta review metadata, and submitted the build for Apple TestFlight Beta App Review after explicit user authorization.",
       "actionsNotTaken": [
-        "No autofill suggestion was selected.",
-        "No tester email address, first name, or last name was typed.",
-        "Next was not clicked.",
+        "No tester email addresses were entered.",
         "No tester invitation was sent.",
-        "No TestFlight group was created.",
-        "Expire Build was not clicked.",
-        "Add for Review was not clicked.",
-        "Public App Review submission was not started."
+        "No public App Store Add for Review action was clicked.",
+        "No production release was submitted."
       ],
-      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses/names and authorize adding/sending invites, or cancel this dialog and create/provide a TestFlight group. Do not click Add for Review until final signoff is explicit."
+      "nextActionRequiringApproval": "Wait for Apple TestFlight Beta App Review approval, then add or invite intended TestFlight testers/groups if desired. Keep public App Review/Add for Review and production release gated behind explicit final approval."
     },
     "appPrivacyPublished": true,
     "appPrivacyPublishedAt": "2026-06-06T09:49:52.689Z",
@@ -256,7 +248,37 @@
         "Public App Review submission was not started."
       ],
       "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses/names and authorize adding/sending invites, or cancel this dialog and create/provide a TestFlight group. Do not click Add for Review until final signoff is explicit."
-    }
+    },
+    "testFlightBetaReviewSubmitted": true,
+    "testFlightBetaReviewSubmittedAt": "2026-06-08T12:41:51Z",
+    "testFlightBetaReviewStatus": "Waiting for Review",
+    "testFlightBetaReviewSubmission": {
+      "status": "waiting-for-review",
+      "submittedAt": "2026-06-08T12:41:51Z",
+      "version": "1.0.0",
+      "build": "6",
+      "platform": "iOS",
+      "buildStatus": "Waiting for Review",
+      "buildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+      "externalGroupName": "ReversR External Beta",
+      "externalGroupUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/355ad927-f5a9-4ec5-81c7-3fb54f12ce62/builds",
+      "externalGroupTesterCount": 0,
+      "externalGroupBuildCount": 1,
+      "internalGroupName": "ReversR Internal QA",
+      "internalGroupUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/0e95a925-c6fa-4a5d-beda-a8311ec15785",
+      "internalGroupTesterCount": 0,
+      "internalGroupBuildCount": 1,
+      "automaticallyNotifyTesters": true,
+      "publicAppReviewSubmissionStarted": false,
+      "productionReleaseSubmitted": false,
+      "note": "Computer Use submitted iOS TestFlight build 1.0.0 (6) to Apple TestFlight Beta App Review at 2026-06-08T12:41:51Z after explicit Vambah authorization. App Store Connect returned to the ReversR External Beta group builds tab and shows build 1.0.0 (6) with status Waiting for Review, platform iOS, and expires in 88 days. This is external TestFlight beta review, not public App Review or production release."
+    },
+    "testFlightExternalGroupCreated": true,
+    "testFlightExternalGroupName": "ReversR External Beta",
+    "testFlightExternalGroupUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/355ad927-f5a9-4ec5-81c7-3fb54f12ce62/builds",
+    "testFlightInternalGroupCreated": true,
+    "testFlightInternalGroupName": "ReversR Internal QA",
+    "testFlightInternalGroupUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/0e95a925-c6fa-4a5d-beda-a8311ec15785"
   },
   "googlePlay": {
     "status": "pass",
@@ -534,9 +556,9 @@
     "releaseOwner": "",
     "storeReviewer": "",
     "signedAt": "",
-    "notes": "Partial console evidence only. No production submission is approved. App Store Connect App Privacy is published, TestFlight processing/What to Test are verified, Google Play internal testing is active for the existing ReversR App Testers list, and local native QA/screenshots are recorded. Remaining blockers are Apple TestFlight tester setup/readiness, Google Play public-review/production decision gates, final store review signoff, and public review actions."
+    "notes": "Partial console evidence only. No production submission is approved. App Store Connect App Privacy is published, TestFlight build 1.0.0 (6) is submitted to Apple TestFlight Beta App Review with status Waiting for Review, Google Play internal testing is active for the existing ReversR App Testers list, and local native QA/screenshots are recorded. Remaining blockers are Apple beta review approval/tester rollout, Google Play public-review/production decision gates, final store review signoff, and public review actions."
   },
-  "generatedAt": "2026-06-06T10:10:18.464Z",
+  "generatedAt": "2026-06-08T12:41:51Z",
   "consoleActions": [
     {
       "platform": "appStoreConnect",
@@ -689,6 +711,14 @@
       "value": "Add New Testers dialog for TestFlight build 1.0.0 (6) is open with empty Email, First Name, and Last Name fields; Next is disabled.",
       "completedAt": "2026-06-06T10:10:18.464Z",
       "note": "No autofill suggestion was selected, no tester data was entered, and no invite/review submission action was clicked."
+    },
+    {
+      "platform": "appStoreConnect",
+      "task": "Submit TestFlight Beta App Review",
+      "status": "submitted-waiting-for-review",
+      "value": "Build 1.0.0 (6) assigned to ReversR External Beta and submitted to Apple TestFlight Beta App Review. App Store Connect shows Waiting for Review.",
+      "completedAt": "2026-06-08T12:41:51Z",
+      "note": "Completed after explicit Vambah authorization. No tester emails were entered, no public App Store Add for Review action was clicked, and no production release was submitted."
     }
   ],
   "nativeQaPreflightPassedAt": "2026-06-06T09:12:16.673Z"

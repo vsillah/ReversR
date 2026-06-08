@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "pending-hitl",
-  "generatedAt": "2026-06-05T16:11:30.815Z",
+  "status": "apple-testflight-beta-review-waiting",
+  "generatedAt": "2026-06-08T12:41:51Z",
   "appIdentity": {
     "appName": "ReversR Rebuild",
     "iosBundleId": "com.vsillah.reversrrebuild",
@@ -9,10 +9,10 @@
     "sku": "reversr-rebuild-001"
   },
   "appStoreConnect": {
-    "browserState": "Chrome is open at the App Store Connect iOS App Version 1.0 Prepare for Submission page for ReversR Rebuild. Product metadata from docs/store-console-copy.md is present on the page, Sign-in required is unchecked, manual release is selected, Save is disabled, Add for Review is visible, and no public review submission was started.",
-    "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
-    "accountGate": "App Store Connect app record creation and metadata draft gates are cleared. App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload remain pending.",
-    "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete. For the iOS build gate, run the interactive EAS production build command recorded in docs/eas-ios-production-build-attempt-evidence.json and copy back the Expo build URL once it starts.",
+    "browserState": "Chrome is open in App Store Connect at ReversR External Beta > Builds. Build 1.0.0 (6) is attached to the group and shows Waiting for Review after Apple TestFlight Beta App Review submission.",
+    "url": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/355ad927-f5a9-4ec5-81c7-3fb54f12ce62/builds",
+    "accountGate": "Apple TestFlight Beta App Review is submitted and waiting for Apple review. Public App Store Add for Review/production release remains gated.",
+    "nextHumanAction": "Wait for Apple TestFlight Beta App Review approval, then authorize tester invites/groups if desired. Do not click public App Review/Add for Review or production release without explicit final approval.",
     "neededValueAfterCreation": ""
   },
   "googlePlayConsole": {
@@ -65,7 +65,8 @@
     "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
     "The Android phone is no longer required for current cloud build, store-console, Vercel, or GitHub evidence work. Future live Android QA would require reconnecting a device.",
     "A non-interactive iOS production/TestFlight EAS build attempt at 2026-06-05T16:01:31.192Z detected remote iOS credentials but failed because EAS requires interactive Apple credential validation before using the distribution certificate. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started.",
-    "Google Play store listing asset upload was attempted at 2026-06-05T16:11:30.815Z. Chrome automation reached the asset-library drawer, but the file chooser/file-input path did not complete, so no app icon, feature graphic, or phone screenshot upload was verified."
+    "Google Play store listing asset upload was attempted at 2026-06-05T16:11:30.815Z. Chrome automation reached the asset-library drawer, but the file chooser/file-input path did not complete, so no app icon, feature graphic, or phone screenshot upload was verified.",
+    "Computer Use submitted iOS TestFlight build 1.0.0 (6) to Apple TestFlight Beta App Review at 2026-06-08T12:41:51Z after explicit Vambah authorization. App Store Connect returned to the ReversR External Beta group builds tab and shows build 1.0.0 (6) with status Waiting for Review, platform iOS, and expires in 88 days. This is external TestFlight beta review, not public App Review or production release."
   ],
   "androidWirelessAdb": {
     "status": "paired-connected",
