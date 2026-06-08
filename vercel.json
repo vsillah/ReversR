@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run web:export",
+  "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "^/api(?:/(.*))?$",
+      "dest": "/api/[...path]?...path=$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/index.html"
+    }
+  ]
+}

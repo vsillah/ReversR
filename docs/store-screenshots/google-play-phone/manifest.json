@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-05T15:39:19.626Z",
+  "status": "pass",
+  "outputDirectory": "docs/store-screenshots/google-play-phone",
+  "targetSize": {
+    "width": 1080,
+    "height": 1920
+  },
+  "source": "docs/store-screenshots/native",
+  "screenshots": [
+    {
+      "source": "docs/store-screenshots/native/android-01-welcome.png",
+      "output": "docs/store-screenshots/google-play-phone/google-play-phone-01-welcome.png",
+      "sourceSize": {
+        "width": 1280,
+        "height": 2856
+      },
+      "outputSize": {
+        "width": 1080,
+        "height": 1920
+      }
+    },
+    {
+      "source": "docs/store-screenshots/native/android-02-scan.png",
+      "output": "docs/store-screenshots/google-play-phone/google-play-phone-02-scan.png",
+      "sourceSize": {
+        "width": 1280,
+        "height": 2856
+      },
+      "outputSize": {
+        "width": 1080,
+        "height": 1920
+      }
+    },
+    {
+      "source": "docs/store-screenshots/native/android-03-inventory-validation.png",
+      "output": "docs/store-screenshots/google-play-phone/google-play-phone-03-inventory-validation.png",
+      "sourceSize": {
+        "width": 1280,
+        "height": 2856
+      },
+      "outputSize": {
+        "width": 1080,
+        "height": 1920
+      }
+    },
+    {
+      "source": "docs/store-screenshots/native/android-04-design-match.png",
+      "output": "docs/store-screenshots/google-play-phone/google-play-phone-04-design-match.png",
+      "sourceSize": {
+        "width": 1280,
+        "height": 2856
+      },
+      "outputSize": {
+        "width": 1080,
+        "height": 1920
+      }
+    },
+    {
+      "source": "docs/store-screenshots/native/android-05-build-handoff.png",
+      "output": "docs/store-screenshots/google-play-phone/google-play-phone-05-build-handoff.png",
+      "sourceSize": {
+        "width": 1280,
+        "height": 2856
+      },
+      "outputSize": {
+        "width": 1080,
+        "height": 1920
+      }
+    }
+  ],
+  "note": "Google Play requires phone screenshots in 16:9 or 9:16. These upload-ready screenshots preserve the full native Pixel capture inside a 1080x1920 canvas without cropping."
+}

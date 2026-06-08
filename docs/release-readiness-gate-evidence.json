@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 1,
+  "status": "release-readiness-partial-store-signoff-pending",
+  "generatedAt": "2026-06-06T10:04:16.567Z",
+  "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after App Privacy publishing, Google Play internal testing activation, cross-platform native QA/screenshots, and EAS/App Store Connect setup evidence.",
+  "pr": {
+    "number": 2,
+    "branch": "codex/inventory-reconstruction-clone",
+    "url": "https://github.com/vsillah/ReversR/pull/2"
+  },
+  "localState": {
+    "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+    "releaseStatus": "Pending with EAS submit config, cross-platform native QA/screenshots, App Privacy publishing, and Google Play internal testing ready. Remaining gates are Apple TestFlight tester/group readiness and final release-owner/store-reviewer signoff before any public review submission.",
+    "pendingGateIds": [
+      "store-console-records"
+    ],
+    "latestStrictCommands": [
+      {
+        "command": "npm run native:preflight",
+        "status": "pass",
+        "note": "Strict native release config is valid and EAS CLI is logged in."
+      },
+      {
+        "command": "npm run native:qa:preflight",
+        "status": "pass",
+        "note": "Cross-platform native QA and Android/iOS native screenshots are recorded; production submission signoff remains intentionally gated."
+      },
+      {
+        "command": "npm run native:qa:preflight:local",
+        "status": "pass-with-signoff-warnings",
+        "note": "The native QA evidence schema is valid; remaining warnings are signoff/communication boundaries, not missing platform QA or screenshots."
+      },
+      {
+        "command": "npm run store:console:preflight",
+        "status": "failed-as-expected",
+        "note": "Store records exist; App Privacy is published and Google Play internal testing is active. Strict preflight remains gated by TestFlight tester readiness and final signoff."
+      },
+      {
+        "command": "npm run store:console:preflight:local",
+        "status": "pass-with-pending-warnings",
+        "note": "Pending store-console evidence was refreshed without claiming final approval."
+      }
+    ]
+  },
+  "easSubmitConfig": {
+    "status": "android-internal-submit-finished-ios-testflight-processed",
+    "android": {
+      "submitProfile": "production",
+      "track": "internal",
+      "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+      "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
+      "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
+      "currentGate": "EAS Android internal-track submission finished and the release is visible in Google Play Console Internal testing; assigning tester access or transmitting the join link remains a gated action.",
+      "submission": {
+        "status": "finished-visible-in-play-console",
+        "scheduledAt": "2026-06-05T23:44:05.000Z",
+        "submissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+        "track": "internal",
+        "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+        "productionRolloutStarted": false,
+        "publicReviewSubmissionStarted": false,
+        "checkedAt": "2026-06-05T23:52:35.000Z",
+        "errorSummary": null,
+        "googleCloudApiStatus": "enabled-before-rerun",
+        "playConsoleVisibility": {
+          "status": "visible",
+          "releaseName": "1.0.0",
+          "versionCodeCount": 1,
+          "releaseAvailability": "Available to internal testers",
+          "releasedAtLabel": "Jun 5 7:42 PM",
+          "reviewStatus": "Not reviewed",
+          "checkedAt": "2026-06-05T23:52:35.000Z"
+        }
+      },
+      "serviceAccount": {
+        "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+        "reversrRebuildPermissionPresent": true,
+        "permissionCount": 12,
+        "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+        "onePasswordItem": {
+          "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+          "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+          "vault": "Employee",
+          "category": "API_CREDENTIAL",
+          "attachment": "google-play-service-account.json"
+        },
+        "localKeyPathStoredOutsideRepo": true
+      }
+    },
+    "ios": {
+      "submitProfile": "production",
+      "ascAppId": "6777091538",
+      "finishedBuildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "artifactType": "ipa",
+      "submitAttemptEvidence": "docs/eas-ios-submit-attempt-evidence.json",
+      "currentGate": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 and App Store Connect shows TestFlight build 1.0.0 (6) as Ready to Submit with Binary State Validated. App Privacy is published and What to Test is saved. TestFlight group/tester assignment remains pending because no existing groups/testers were available and no new tester emails were authorized or entered.",
+      "latestSubmitRetry": {
+        "status": "scheduled",
+        "checkedAt": "2026-06-06T00:11:39.082Z",
+        "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait",
+        "exitCode": 0,
+        "uploadScheduled": true,
+        "publicReviewSubmissionStarted": false,
+        "appReviewAddForReviewClicked": false,
+        "submissionId": "a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+        "note": "The upload was scheduled without TestFlight changelog text because EAS reported the what-to-test/changelog parameter is Enterprise-plan only. This is an App Store Connect/TestFlight upload attempt, not public App Review submission.",
+        "uploadProcessingVerified": true
+      },
+      "appStoreConnectApiAccess": {
+        "status": "approved",
+        "currentScreen": "Users and Access > Integrations > App Store Connect API",
+        "activeKeyName": "ReversR EAS Submit",
+        "activeKeyId": "FZ4LLB2243",
+        "accessRole": "App Manager"
+      },
+      "onePasswordItem": {
+        "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+        "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+        "vault": "Employee",
+        "category": "API Credential",
+        "attachment": "App Store Connect .p8 private key"
+      },
+      "appStoreConnectTestFlight": {
+        "verifiedAt": "2026-06-06T00:23:50.346Z",
+        "appName": "ReversR Rebuild",
+        "appAppleId": "6777091538",
+        "bundleId": "com.vsillah.reversrrebuild",
+        "testFlightUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+        "buildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+        "version": "1.0.0",
+        "build": "6",
+        "buildStatus": "Ready to Submit",
+        "binaryState": "Validated",
+        "expiresIn": "90 days",
+        "uploadDate": "Jun 5, 2026 at 8:09 PM",
+        "originalFileName": "38f358ce-2600-4ce9-bb3a-7fea08181900.ipa",
+        "buildUuid": "114ac3cb-f26b-4384-82d6-d661adf05dff",
+        "buildSdk": "23A339",
+        "buildPlatform": "23A339",
+        "bundleShortVersionString": "1.0.0",
+        "bundleVersionString": "6",
+        "includesSymbols": true,
+        "usesNonExemptEncryption": false,
+        "onDemandResources": false,
+        "siriKit": false,
+        "watchOnlyApp": false,
+        "iMessageApp": {
+          "includesIMessageApp": false,
+          "includesStickers": false,
+          "appIconHidden": false
+        },
+        "deviceRequirements": {
+          "minimumIosVersion": "15.1",
+          "minimumMacosVersion": "12.0",
+          "minimumVisionosVersion": "1.0",
+          "lsMinimumSystemVersion": "12.0",
+          "supportedArchitectures": [
+            "arm64"
+          ],
+          "deviceProtocols": "-",
+          "deviceFamily": [
+            "iPhone",
+            "iPad"
+          ],
+          "requiredCapabilities": [
+            "arm64"
+          ]
+        },
+        "storeInformation": {
+          "localizations": [
+            "English"
+          ],
+          "entitlements": {
+            "application-identifier": "2388NUMA3J.com.vsillah.reversrrebuild",
+            "get-task-allow": false,
+            "beta-reports-active": true,
+            "com.apple.developer.team-identifier": "2388NUMA3J"
+          },
+          "newsstandApp": false,
+          "prerenderedIconFlag": true
+        },
+        "testing": {
+          "groupsCount": 0,
+          "individualTestersCount": 0,
+          "whatToTestEmpty": false,
+          "saveButtonDisabled": true,
+          "testersAdded": false,
+          "testInfoSaved": true
+        },
+        "actionsNotTaken": [
+          "No new TestFlight group was created.",
+          "No new tester email address was entered or transmitted.",
+          "No tester invitation was sent.",
+          "Add for Review was not clicked.",
+          "Public App Review submission was not started."
+        ]
+      }
+    }
+  },
+  "computerUseState": {
+    "googlePlay": {
+      "checkedAt": "2026-06-06T09:56:14.438Z",
+      "currentScreen": "Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing > Testers",
+      "currentUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
+      "trackSummary": {
+        "visibleState": "Active",
+        "latestRelease": "1.0.0",
+        "temporaryAppName": "com.vsillah.reversrrebuild (unreviewed)"
+      },
+      "releasesTabVerified": {
+        "checkedAt": "2026-06-06T00:49:04.023Z",
+        "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=releases",
+        "releaseName": "1.0.0",
+        "status": "Available to internal testers",
+        "versionCodeCount": 1,
+        "releasedAtLabel": "Jun 5 7:42 PM",
+        "reviewStatus": "Not reviewed"
+      },
+      "testersTabVisible": true,
+      "existingEmailListVisible": true,
+      "existingEmailListName": "ReversR App Testers",
+      "existingEmailListUserCount": 13,
+      "existingEmailListSelected": true,
+      "selectAllSelected": false,
+      "saveButtonEnabled": false,
+      "createEmailListVisible": true,
+      "editEmailListVisible": true,
+      "joinOnWebLinkVisible": true,
+      "joinOnWebLinkCommitted": false,
+      "gatedActions": [
+        "Select ReversR App Testers email list",
+        "Save tester access changes",
+        "Create or edit email list",
+        "Copy or transmit Join on the web link",
+        "Create new release",
+        "Promote release",
+        "Pause track",
+        "Send for review",
+        "Production rollout"
+      ],
+      "actionTaken": "Codex selected the existing ReversR App Testers email list and saved the internal testing tester access change. The track summary changed to Active. The join link was not copied or transmitted, and no Send for review, closed testing, production access, or production rollout action was clicked.",
+      "nextActionRequiringApproval": "Share the internal testing join link with intended testers outside Codex if desired. Keep Send for review, closed testing, production access, and production rollout gated behind explicit final approval."
+    },
+    "appStoreConnect": {
+      "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+      "attemptedUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+      "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+      "loggedIn": true,
+      "visibleGate": {
+        "whatToTestFieldVisible": true,
+        "whatToTestEmpty": false,
+        "whatToTestSaved": true,
+        "saveButtonDisabled": true,
+        "groupsCount": 0,
+        "individualTestersCount": 0,
+        "addGroupVisible": true,
+        "addTestersVisible": true
+      },
+      "preparedCopy": {
+        "source": "docs/store-console-copy.md#testflight-what-to-test",
+        "characterCount": 592
+      },
+      "savedCopy": {
+        "status": "what-to-test-saved-no-testers-available",
+        "checkedAt": "2026-06-06T03:04:24.221Z",
+        "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+        "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+        "version": "1.0.0",
+        "build": "6",
+        "whatToTestSaved": true,
+        "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+        "whatToTestCharacterCount": 592,
+        "whatToTestCharactersRemaining": 3407,
+        "savedButtonStateAfterSave": "Saved disabled",
+        "groupsCount": 0,
+        "individualTestersCount": 0,
+        "addGroupResult": "No current groups this build can be assigned to.",
+        "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+        "newTesterEmailsEntered": false,
+        "testerInvitesSent": false,
+        "actionTaken": "Codex pasted the validated repo-backed What to Test copy, verified the field value, clicked Save, opened Add Group and Add Existing Testers, and found no assignable groups or existing testers.",
+        "actionsNotTaken": [
+          "No new tester email address was entered or transmitted.",
+          "No TestFlight group was created.",
+          "No tester invitation was sent.",
+          "Expire Build was not clicked.",
+          "App Privacy Publish was not clicked.",
+          "Add for Review was not clicked.",
+          "Public App Review submission was not started."
+        ],
+        "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+      },
+      "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+    }
+  },
+  "nativeQaAndScreenshots": {
+    "status": "partial-android-blocked-ios",
+    "android": {
+      "previewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "deviceEvidence": "Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z",
+      "screenshotsCaptured": [
+        "docs/store-screenshots/native/android-01-welcome.png",
+        "docs/store-screenshots/native/android-02-scan.png",
+        "docs/store-screenshots/native/android-03-inventory-validation.png",
+        "docs/store-screenshots/native/android-04-design-match.png",
+        "docs/store-screenshots/native/android-05-build-handoff.png"
+      ],
+      "currentDeviceState": "ADB remained connected over wireless debugging. Fresh live Android QA now covers install/launch, camera permission prompt, manual description fallback, inventory validation, match/design/build/pricing, BOM generation, quote-packet controls, vendor-control visibility, policy-link visibility, missing-admin-token connector credential handling, and controlled invalid-API network error handling.",
+      "liveQaEvidence": "docs/native-android-live-qa-evidence.json",
+      "completedLiveChecks": [
+        "install-launch",
+        "camera-permission",
+        "manual-description",
+        "inventory-validation",
+        "machine-match",
+        "bom-generation",
+        "assembly-steps",
+        "quote-packet-export",
+        "accessibility",
+        "native-screenshots",
+        "policy-links",
+        "connector-auth-error",
+        "offline-api-error"
+      ],
+      "remainingLiveChecks": [
+        "vendor-request-draft was visible but not prepared to avoid creating a third-party communication draft"
+      ],
+      "controlledInvalidApiBuild": {
+        "status": "pass",
+        "buildId": "d90e9595-56f1-49a7-8348-6541fa500edb",
+        "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/d90e9595-56f1-49a7-8348-6541fa500edb",
+        "artifactUrl": "https://expo.dev/artifacts/eas/sNzGmqUBfzZ6Wv4uNa2bqc.apk",
+        "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview-env.apk",
+        "apkSha256": "a33edb213bbe248ee223da83c29623cf35ee8d5afae4af49d4ccd6a68aeea271",
+        "completedAt": "2026-06-06T00:35:46.067Z",
+        "installedAt": "2026-06-06T00:38:39.640Z",
+        "profile": "preview",
+        "distribution": "internal",
+        "apiBaseUrl": "https://invalid.reversr.invalid",
+        "appConfigProof": "assets/app.config extra.apiBaseUrl was https://invalid.reversr.invalid before install.",
+        "temporaryEasPreviewEnv": {
+          "variableName": "EXPO_PUBLIC_API_BASE_URL",
+          "value": "https://invalid.reversr.invalid",
+          "createdBeforeBuild": true,
+          "deletedAfterBuild": true,
+          "postDeleteVerification": "npx eas-cli@20.0.0 env:list preview --format long returned no variables for preview."
+        },
+        "device": "Google Pixel 10 Pro Android 16",
+        "settingsScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+        "networkErrorScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png",
+        "observedSettingsText": "API host: https://invalid.reversr.invalid",
+        "observedErrorText": "Network error. Check your internet connection and try again.",
+        "externalNetworkChanged": false,
+        "purpose": "Controlled offline/API error handling QA without touching production API or device network settings."
+      },
+      "deviceRestoration": {
+        "restoredAt": "2026-06-06T00:39:16.572Z",
+        "restoredFromLocalArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+        "restoredHostObserved": "API host: https://reversr.vercel.app",
+        "reason": "After controlled invalid-host QA, Codex restored the connected Pixel to a live-host preview APK so the device was not left in the intentionally broken state."
+      }
+    },
+    "ios": {
+      "productionStoreBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "previewBuild": "",
+      "currentBlockers": [
+        "No iOS device is available for native QA or screenshots.",
+        "Full Xcode is not installed; xcrun simctl is unavailable.",
+        "The iOS IPA upload is processed in TestFlight as build 1.0.0 (6) Ready to Submit, but TestFlight groups/testers and What to Test copy are not configured and install QA/screenshots are not captured."
+      ]
+    }
+  },
+  "storeConsoleRecords": {
+    "status": "partial-pass-testflight-and-signoff-pending",
+    "appStoreConnect": {
+      "appPrivacyCompleted": true,
+      "testFlightProcessingReady": true,
+      "whatToTestSaved": true,
+      "testFlightReady": false,
+      "groupsCount": 0,
+      "individualTestersCount": 0,
+      "existingTestersAvailable": false,
+      "testerInvitesSent": false,
+      "addForReviewClicked": false,
+      "testFlightBuildStatus": "Ready to Submit",
+      "testFlightBinaryState": "Validated"
+    },
+    "googlePlay": {
+      "internalTestingReady": true,
+      "internalTestingReadyAt": "2026-06-06T09:56:14.438Z",
+      "testerListSelected": true,
+      "testerCount": 13,
+      "joinLinkCopiedOrTransmitted": false,
+      "sendForReviewClicked": false,
+      "productionSubmissionApproved": false
+    },
+    "requiredAssets": {
+      "nativeScreenshotsCaptured": true,
+      "appIconReviewed": true,
+      "featureGraphicCaptured": true
+    },
+    "signoff": {
+      "releaseOwnerPresent": false,
+      "storeReviewerPresent": false,
+      "signedAtPresent": false,
+      "productionSubmissionApproved": false
+    },
+    "remainingGate": "Apple TestFlight tester/group readiness and final release-owner/store-reviewer signoff remain pending. No public App Review, Google Play Send for review, closed testing, production access, or production rollout action is approved or started."
+  },
+  "humanInTheLoopResumeInstructions": [
+    "For Apple TestFlight: What to Test is saved on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. Apple showed no assignable groups and no existing testers. To continue, provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing TestFlight/App Store Connect tester group. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
+    "For Google Play internal testing: Chrome is positioned on Google Play Console > ReversR Rebuild > Internal testing > Testers. The ReversR App Testers email list with 13 users is visible but unchecked, Join on the web is visible but not copied, and Save is disabled. The Releases tab was inspected and shows release 1.0.0 Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed. To continue, explicitly authorize selecting/saving tester access or copying/transmitting the join link. Do not click Send for review, closed testing, production access, promote release, pause track, or production rollout without explicit final approval.",
+    "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
+    "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
+    "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
+  ],
+  "accountSideProgress": {
+    "appStoreConnectApiKey": {
+      "onePasswordCliVerification": {
+        "status": "verified-with-1password-cli",
+        "verifiedAt": "2026-06-06T01:55:01.427Z",
+        "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+        "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+        "vault": "Employee",
+        "category": "API_CREDENTIAL",
+        "attachmentCount": 1,
+        "attachments": [
+          {
+            "name": "p8",
+            "sizeBytes": 257
+          }
+        ],
+        "metadataFieldsPresent": [
+          "owner",
+          "purpose",
+          "key_id",
+          "issuer_id",
+          "access_role",
+          "team_name",
+          "asc_app_id",
+          "local_path_hint",
+          "sha256"
+        ],
+        "secretValuesCaptured": false,
+        "note": "Verified through op item get with jq redaction. The .p8 attachment and concealed/secret field values were not printed or committed."
+      }
+    }
+  }
+}

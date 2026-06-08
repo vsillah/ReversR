@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-06T10:10:47.895Z",
+  "urlMode": "placeholder-allowed",
+  "warnings": [],
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001",
+    "category": {
+      "applePrimary": "Productivity",
+      "appleSecondary": "Business",
+      "googleCategory": "Productivity"
+    }
+  },
+  "urls": {
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support",
+    "apiBaseUrl": "https://reversr.vercel.app"
+  },
+  "appStoreConnect": {
+    "nameLength": 15,
+    "subtitleLength": 24,
+    "promotionalTextLength": 118,
+    "descriptionLength": 1080,
+    "keywordsLength": 66,
+    "reviewNotesPresent": true,
+    "testFlightWhatToTestLength": 592,
+    "privacy": {
+      "tracking": false,
+      "dataUsedForAdvertising": false,
+      "userContentProcessedCount": 4,
+      "thirdPartyProcessingCount": 2
+    }
+  },
+  "googlePlay": {
+    "titleLength": 15,
+    "shortDescriptionLength": 73,
+    "fullDescriptionLength": 1089,
+    "dataSafety": {
+      "tracking": false,
+      "ads": false,
+      "encryptedInTransit": true,
+      "dataCollectedCount": 3,
+      "dataSharedCount": 2,
+      "requiredPermissions": [
+        "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
+      ]
+    }
+  },
+  "screenshots": {
+    "nativeRequired": true,
+    "requiredSetCount": 5,
+    "googlePlayFeatureGraphic": "docs/store-assets/google-play-feature-graphic.png"
+  },
+  "releaseNotes": {
+    "initialReleasePresent": true
+  },
+  "openGatesCount": 10
+}

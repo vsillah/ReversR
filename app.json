@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ReversR",
-    "slug": "reversr",
+    "name": "ReversR Rebuild",
+    "slug": "reversr-rebuild",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,13 @@
       "backgroundColor": "#0a0a0a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vsillah.reversrrebuild",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,10 +26,16 @@
         "backgroundColor": "#0a0a0a"
       },
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.CAMERA"
       ],
-      "package": "com.vsillah.reversr",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
+      ],
+      "package": "com.vsillah.reversrrebuild",
       "versionCode": 15
     },
     "web": {
@@ -34,16 +46,23 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow ReversR to access your camera to scan products."
+          "cameraPermission": "Allow ReversR Rebuild to access your camera to scan machines for inventory matching."
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ],
-    "scheme": "reversr",
+    "scheme": "reversr-rebuild",
     "extra": {
+      "apiBaseUrl": "https://reversr.vercel.app",
+      "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+      "termsUrl": "https://reversr.vercel.app/terms",
+      "supportUrl": "https://reversr.vercel.app/support",
+      "router": {},
       "eas": {
-        "projectId": "9e2de870-06ee-4cb4-ad47-60efbb533baa"
+        "projectId": "700c2107-2639-4a27-b374-59ed5edd54fc"
       }
-    }
+    },
+    "owner": "vsillah"
   }
 }

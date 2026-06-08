@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-06T10:10:45.076Z",
+  "releaseStatusGeneratedAt": "2026-06-06T10:10:45.071Z",
+  "summary": {
+    "pass": 8,
+    "pending": 1
+  },
+  "nextRecommendedGate": "store-console-records",
+  "pendingGates": [
+    {
+      "group": "store-console",
+      "id": "store-console-records",
+      "title": "Store console final review and submission gates are resolved",
+      "status": "pending",
+      "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, final signoff.",
+      "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission.",
+      "action": {
+        "owner": "Store release operator",
+        "phase": "Store console final review",
+        "action": "Resolve the remaining App Store Connect and Google Play review/signoff gates without starting public submission.",
+        "steps": [
+          "Use the recorded App Store Connect app record and Apple ID in docs/store-console-evidence.json.",
+          "Follow docs/external-release-setup-runbook.md sections 2 and 3.",
+          "Use the recorded Google Play Console app dashboard URL in docs/store-console-evidence.json.",
+          "Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.",
+          "Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.",
+          "Review the saved App Store Connect metadata, age rating, content rights, and configured App Privacy answers.",
+          "Only after explicit approval, publish App Privacy and complete any Apple legal/accuracy attestation.",
+          "Complete TestFlight tester/group readiness or explicitly decide to proceed without TestFlight tester expansion.",
+          "Review the saved Google Play metadata, Data Safety, App Content, content rating, target audience, Advertising ID, and internal-testing release.",
+          "Only after explicit approval, complete Google Play internal-testing tester access/review readiness and any Send for review action.",
+          "Update docs/store-console-evidence.json with final console task results, review-gate, and signoff fields.",
+          "Run npm run store:console:preflight:local for pending-safe proof; run strict npm run store:console:preflight only after final signoff fields are complete."
+        ],
+        "evidence": [
+          "docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.",
+          "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.",
+          "docs/store-console-evidence.json exists with both console records.",
+          "npm run store:console:preflight:local passes with only explicitly gated warnings until final signoff is complete."
+        ]
+      }
+    }
+  ]
+}

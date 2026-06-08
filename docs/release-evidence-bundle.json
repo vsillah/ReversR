@@ -1,0 +1,3838 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-06T10:11:00.382Z",
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "slug": "reversr-rebuild",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "androidVersionCode": 15,
+    "iosBuildNumber": "1",
+    "sku": "reversr-rebuild-001"
+  },
+  "git": {
+    "branch": "codex/inventory-reconstruction-clone"
+  },
+  "releaseStatus": {
+    "generatedAt": "2026-06-06T10:11:00.365Z",
+    "summaryWithoutBundle": {
+      "pass": 37,
+      "pending": 1
+    },
+    "missingLocalProofs": [],
+    "localProofGateIds": [
+      "clone-identity",
+      "retired-sit-step",
+      "inventory-admin-connector",
+      "inventory-source-validator",
+      "machine-scan-examples",
+      "reconstruction-package",
+      "api-deployment-smoke",
+      "policy-hosting-smoke",
+      "store-submission-packet-smoke",
+      "store-review-safety-packet",
+      "store-screenshot-planning",
+      "external-release-runbook",
+      "objective-readiness-audit",
+      "web-flow-smoke",
+      "native-release-config-evidence",
+      "store-console-pending-evidence",
+      "local-release-ci-evidence",
+      "release-local-ci-workflow",
+      "store-console-copy-packet",
+      "release-next-actions-packet",
+      "preview-host-target-discovery",
+      "preview-host-smoke",
+      "hosted-api",
+      "hosted-policy-urls",
+      "real-connector-smoke",
+      "store-operator-packet",
+      "hosted-operator-packet"
+    ],
+    "pendingExternalGateIds": [
+      "store-console-records"
+    ],
+    "allExternalGateIds": [
+      "eas-submit-config",
+      "native-qa-evidence",
+      "store-console-records",
+      "native-screenshots"
+    ],
+    "pendingExternalGates": [
+      {
+        "id": "store-console-records",
+        "group": "store-console",
+        "title": "Store console final review and submission gates are resolved",
+        "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, final signoff.",
+        "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission."
+      }
+    ]
+  },
+  "appStoreAndPlay": {
+    "appStoreName": "ReversR Rebuild",
+    "appStoreSubtitle": "Machine rebuild packages",
+    "googlePlayTitle": "ReversR Rebuild",
+    "googlePlayShortDescription": "Scan machines and create BOM, assembly, pricing, and fabrication packets.",
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support",
+    "apiBaseUrl": "https://reversr.vercel.app",
+    "nativeScreenshotsRequired": true,
+    "googlePlayFeatureGraphic": "docs/store-assets/google-play-feature-graphic.png"
+  },
+  "permissionsAndPrivacy": {
+    "androidPermissions": [
+      "android.permission.CAMERA"
+    ],
+    "androidBlockedPermissions": [
+      "android.permission.RECORD_AUDIO",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_MEDIA_VIDEO"
+    ],
+    "cameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
+    "appleTracking": false,
+    "googlePlayTracking": false,
+    "googlePlayAds": false,
+    "encryptedInTransit": true
+  },
+  "eas": {
+    "projectId": "700c2107-2639-4a27-b374-59ed5edd54fc",
+    "buildProfiles": [
+      "development",
+      "preview",
+      "production"
+    ],
+    "previewDistribution": "internal",
+    "productionAndroidBuildType": "app-bundle",
+    "submitAndroidTrack": "internal",
+    "submitIosAscAppIdConfigured": true
+  },
+  "evidenceFiles": {
+    "apiDeploymentSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T09:17:43.453Z",
+      "apiBase": "http://127.0.0.1:3021",
+      "allowedOrigin": "https://reversr-rebuild.local",
+      "health": {
+        "status": "ok",
+        "service": "reversr-rebuild-api",
+        "version": "0.1.0",
+        "apiKeys": {
+          "total": 0,
+          "available": 0,
+          "allInCooldown": true
+        },
+        "cache": {
+          "size": 0
+        },
+        "inventorySources": [
+          "demo",
+          "file",
+          "http",
+          "https"
+        ],
+        "authenticatedConnectorsEnabled": false,
+        "credentialRegistryEnabled": false,
+        "credentialCount": 0,
+        "privateNetworkConnectorsEnabled": false,
+        "runtimeConfig": {
+          "corsMode": "restricted",
+          "allowedCorsOriginCount": 1,
+          "requestBodyLimit": "25mb",
+          "adminRoutesEnabled": true,
+          "registryWritesEnabled": false,
+          "privateNetworkConnectorsEnabled": false
+        }
+      },
+      "checks": {
+        "healthOk": true,
+        "restrictedCors": true,
+        "allowedOriginAccepted": true,
+        "deniedOriginRejected": true,
+        "requestBodyLimit": "25mb",
+        "retiredSitRouteStatus": 404,
+        "demoInventoryValidation": {
+          "status": "ok",
+          "recordCount": 2
+        },
+        "adminRegistry": {
+          "reachable": true,
+          "registryEnabled": false,
+          "credentialCount": 0
+        }
+      }
+    },
+    "apiHostedPreflight": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T10:00:07.092Z",
+      "startedAt": "2026-06-05T10:00:06.660Z",
+      "apiBaseUrl": "https://reversr.vercel.app",
+      "localApi": false,
+      "allowOpenCors": false,
+      "automationBypass": {
+        "vercelBypassConfigured": false,
+        "setBypassCookie": ""
+      },
+      "checks": {
+        "health": {
+          "status": "pass",
+          "httpStatus": 200,
+          "service": "reversr-rebuild-api",
+          "runtimeConfig": {
+            "corsMode": "restricted",
+            "allowedCorsOriginCount": 1,
+            "requestBodyLimit": "50mb",
+            "adminRoutesEnabled": false,
+            "registryWritesEnabled": false,
+            "privateNetworkConnectorsEnabled": false
+          },
+          "authenticatedConnectorsEnabled": false,
+          "credentialRegistryEnabled": false
+        },
+        "demoInventoryValidation": {
+          "status": "pass",
+          "httpStatus": 200,
+          "recordCount": 2
+        },
+        "adminCredentialRegistry": {
+          "status": "skipped"
+        }
+      }
+    },
+    "vercelProtectedApiSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T09:27:52.829Z",
+      "deploymentUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
+      "accessMode": "vercel-cli-authenticated-protected-deployment",
+      "finalPublicHostedApiStillRequired": true,
+      "checks": {
+        "health": {
+          "status": "pass",
+          "service": "reversr-rebuild-api",
+          "runtimeConfig": {
+            "corsMode": "restricted",
+            "allowedCorsOriginCount": 1,
+            "requestBodyLimit": "50mb",
+            "adminRoutesEnabled": false,
+            "registryWritesEnabled": false,
+            "privateNetworkConnectorsEnabled": false
+          },
+          "authenticatedConnectorsEnabled": false,
+          "credentialRegistryEnabled": false
+        },
+        "demoInventoryValidation": {
+          "status": "pass",
+          "recordCount": 2,
+          "sampleMachineIds": [
+            "DEMO-FDM-PRINTER-001",
+            "DEMO-CNC-ROUTER-002"
+          ]
+        }
+      },
+      "notes": [
+        "This proves the Vercel protected preview API function via authenticated Vercel CLI access.",
+        "It does not replace the public hosted API gate required for native builds."
+      ]
+    },
+    "policyHostingSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-06T09:42:55.772Z",
+      "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
+      "urls": {
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "termsUrl": "https://reversr.vercel.app/terms",
+        "supportUrl": "https://reversr.vercel.app/support"
+      },
+      "urlMode": "strict",
+      "hostedChecksEnabled": true,
+      "hostedChecks": {
+        "privacyPolicyUrl": "pass",
+        "termsUrl": "pass",
+        "supportUrl": "pass"
+      },
+      "routeFiles": {
+        "privacy": "app/privacy.tsx",
+        "terms": "app/terms.tsx",
+        "support": "app/support.tsx"
+      },
+      "vercelRouting": {
+        "hasSpaRewrite": false,
+        "hasSpaRoute": true,
+        "outputDirectory": "dist"
+      },
+      "exportFiles": {
+        "indexHtml": true,
+        "metadataJson": true,
+        "faviconIco": true,
+        "staticPolicyPages": {
+          "privacy": true,
+          "terms": true,
+          "support": true
+        }
+      },
+      "bundle": {
+        "bundleCount": 1,
+        "expectedTextFound": {
+          "Privacy Policy": true,
+          "Terms of Service": true,
+          "Support": true,
+          "Camera access is used only to capture machine images": true,
+          "Manufacturer quote packets and email drafts require explicit user action": true,
+          "vambah@amadutown.com": true
+        }
+      }
+    },
+    "previewHostSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T10:00:13.150Z",
+      "previewUrl": "https://reversr.vercel.app",
+      "routeCount": 4,
+      "routes": [
+        {
+          "id": "app-root",
+          "path": "/",
+          "url": "https://reversr.vercel.app/",
+          "finalUrl": "https://reversr.vercel.app/",
+          "status": "pass",
+          "httpStatus": 200,
+          "expectedTextFound": {
+            "Machine Reconstruction Engine": true,
+            "New Reconstruction": true,
+            "Scan a machine. Match it to inventory.": true
+          },
+          "checkedAt": "2026-06-05T10:00:07.161Z",
+          "error": ""
+        },
+        {
+          "id": "privacy",
+          "path": "/privacy",
+          "url": "https://reversr.vercel.app/privacy",
+          "finalUrl": "https://reversr.vercel.app/privacy",
+          "status": "pass",
+          "httpStatus": 200,
+          "expectedTextFound": {
+            "Privacy Policy": true,
+            "Camera access is used only to capture machine images": true,
+            "Manufacturer quote packets and email drafts require explicit user action": true
+          },
+          "checkedAt": "2026-06-05T10:00:09.135Z",
+          "error": ""
+        },
+        {
+          "id": "terms",
+          "path": "/terms",
+          "url": "https://reversr.vercel.app/terms",
+          "finalUrl": "https://reversr.vercel.app/terms",
+          "status": "pass",
+          "httpStatus": 200,
+          "expectedTextFound": {
+            "Terms of Service": true,
+            "No Automatic Vendor Submission": true,
+            "it does not automatically submit orders": true
+          },
+          "checkedAt": "2026-06-05T10:00:10.463Z",
+          "error": ""
+        },
+        {
+          "id": "support",
+          "path": "/support",
+          "url": "https://reversr.vercel.app/support",
+          "finalUrl": "https://reversr.vercel.app/support",
+          "status": "pass",
+          "httpStatus": 200,
+          "expectedTextFound": {
+            "Support": true,
+            "vsillah@gmail.com": true,
+            "Do not send raw API keys or OAuth tokens": true
+          },
+          "checkedAt": "2026-06-05T10:00:11.800Z",
+          "error": ""
+        }
+      ],
+      "finalProductionHostedUrlsStillRequired": true,
+      "deploymentProtectionLikely": false,
+      "automationBypass": {
+        "vercelBypassConfigured": false,
+        "setBypassCookie": "",
+        "extraHeaderNames": []
+      },
+      "notes": [
+        "This proves the current PR preview renders the app and policy/support routes.",
+        "It does not replace hosted production API, hosted production policy URLs, EAS native QA, App Store Connect, or Google Play Console evidence."
+      ]
+    },
+    "previewHostTarget": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T08:55:09.709Z",
+      "source": "github-pr-comments",
+      "pr": {
+        "number": 2,
+        "url": "https://github.com/vsillah/ReversR/pull/2",
+        "headRefName": "codex/inventory-reconstruction-clone"
+      },
+      "previewUrl": "https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app",
+      "inspectorUrl": "https://vercel.com/static/status/ready.svg",
+      "vercelCommentCount": 1,
+      "command": "gh pr view 2 --json number,url,headRefName,comments",
+      "nextSmokeCommand": "PREVIEW_SMOKE_URL=https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
+      "previewSmokeStillRequired": true,
+      "notes": [
+        "This discovers the current Vercel PR preview URL; it does not prove the preview renders.",
+        "Run preview:smoke with the discovered URL and an approved bypass secret when deployment protection is enabled."
+      ]
+    },
+    "farmbotPublicInventory": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T10:38:20.216Z",
+      "outputFile": "public/inventory/farmbot-genesis-v1.8.json",
+      "sourcePartCount": 147,
+      "selectedPartCount": 24,
+      "machineId": "FARMBOT-GENESIS-V1-8",
+      "machineName": "FarmBot Genesis v1.8",
+      "partsSubtotal": "$2,556",
+      "sourceLinks": {
+        "product": "https://farm.bot/pages/genesis",
+        "openSource": "https://farm.bot/pages/open-source",
+        "documentation": "https://genesis.farm.bot/v1.8",
+        "bom": "https://genesis.farm.bot/v1.8/bom",
+        "github": "https://github.com/FarmBot-Docs/farmbot-genesis"
+      },
+      "sourceCategories": [
+        "drivetrain",
+        "electronics-and-wiring",
+        "extrusions",
+        "fasteners-and-hardware",
+        "plastic-parts",
+        "plates-and-brackets",
+        "tubing"
+      ]
+    },
+    "hostedConnectorSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T10:39:16.612Z",
+      "apiBaseUrl": "https://reversr.vercel.app",
+      "localApi": false,
+      "connector": {
+        "sourceName": "FarmBot Genesis public machine inventory",
+        "sourceUrl": "https://raw.githubusercontent.com/vsillah/ReversR/f66e9bc41891116ca6e05df6fea9638b4d9b9d41/public/inventory/farmbot-genesis-v1.8.json",
+        "connectorType": "json",
+        "authMode": "none",
+        "credentialRefConfigured": false,
+        "notes": "Hosted connector smoke metadata. Raw secrets remain on the API host."
+      },
+      "validation": {
+        "status": "ok",
+        "recordCount": 1,
+        "credentialStatus": "not_required"
+      },
+      "match": {
+        "patternUsed": "inventory_match",
+        "machineId": "FARMBOT-GENESIS-V1-8",
+        "machineName": "FarmBot Genesis v1.8",
+        "confidenceScore": 0.66,
+        "evidence": "Matched on parts: track extrusion, gantry main beam, farmduino, raspberry pi, motor, utm pcb, solenoid valve, power supply; aliases: farmbot, farmbot genesis, cnc farming machine; materials: raspberry pi.",
+        "assemblyStepCount": 7,
+        "fulfillmentOptionCount": 3,
+        "totalEstimate": "$2,856-$4,506"
+      },
+      "bom": {
+        "itemCount": 7,
+        "totalEstimatedCost": "$2,556"
+      },
+      "safety": {
+        "rawSecretsIncluded": false,
+        "secretHandling": "Connector smoke sends credentialRef metadata only. Raw connector secrets must remain server-side."
+      }
+    },
+    "objectiveReadinessAudit": {
+      "schemaVersion": 1,
+      "status": "pending",
+      "generatedAt": "2026-06-06T10:10:45.677Z",
+      "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
+      "completionClaim": {
+        "fullObjectiveComplete": false,
+        "storeReady": false,
+        "productionSubmissionReady": false,
+        "reason": "Implementation, hosted policy/API, and public inventory connector evidence are advanced, but EAS, store-console, native QA, and screenshot evidence remain pending."
+      },
+      "summary": {
+        "requirementCount": 8,
+        "passedCount": 6,
+        "pendingCount": 2,
+        "blockedCount": 0,
+        "pendingRequirementIds": [
+          "store-readiness-packet",
+          "apple-google-store-publication"
+        ],
+        "blockedRequirementIds": []
+      },
+      "releaseStatus": {
+        "generatedAt": "2026-06-06T10:10:45.654Z",
+        "summary": {
+          "pass": 37,
+          "pending": 2
+        }
+      },
+      "requirements": [
+        {
+          "id": "original-codebase-cloned",
+          "requirement": "Use the original ReversR codebase from GitHub as the starting point.",
+          "status": "pass",
+          "evidence": [
+            "git.remote.origin=https://github.com/vsillah/ReversR.git",
+            "git.branch=codex/inventory-reconstruction-clone"
+          ],
+          "gates": [],
+          "nextStep": ""
+        },
+        {
+          "id": "distinct-clone-identity",
+          "requirement": "Create a clone version with distinct app identity for store submission.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "clone-identity",
+              "status": "pass",
+              "title": "Clone app identity is distinct from the original ReversR app",
+              "evidence": "name=ReversR Rebuild; slug=reversr-rebuild; ios=com.vsillah.reversrrebuild; android=com.vsillah.reversrrebuild",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "clone-identity"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "remove-systematic-inventive-thinking",
+          "requirement": "Remove the Systematic Inventive Thinking step from the active app and server flow.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "retired-sit-step",
+              "status": "pass",
+              "title": "Original Systematic Inventive Thinking step is removed from the active app/server flow",
+              "evidence": "No active SIT route or label found in server/components.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "retired-sit-step"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "admin-machine-inventory-connector",
+          "requirement": "Replace that step with an admin-entered link or connector to a machine inventory.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "inventory-admin-connector",
+              "status": "pass",
+              "title": "Admin inventory connector form supports URL, auth mode, credentialRef, and validation",
+              "evidence": "components/PhaseTwo.tsx exposes connector URL, credentialRef, and validation controls.",
+              "nextStep": ""
+            },
+            {
+              "id": "inventory-source-validator",
+              "status": "pass",
+              "title": "Machine inventory exports can be validated before connector smoke",
+              "evidence": "scripts/validate-machine-inventory.js and docs/inventory-connector-spec.md define source validation.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "inventory-admin-connector",
+            "inventory-source-validator"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "photo-to-inventory-machine-match",
+          "requirement": "When a picture or scan is supplied, identify the matching machine from the approved inventory.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "machine-scan-examples",
+              "status": "pass",
+              "title": "Default scan examples and camera guidance are machine-specific",
+              "evidence": "Phase 1 presets and camera prompt are aligned to machine reconstruction.",
+              "nextStep": ""
+            },
+            {
+              "id": "web-flow-smoke",
+              "status": "pass",
+              "title": "Local web preview can complete the machine reconstruction happy path",
+              "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "real-connector-smoke",
+              "status": "pass",
+              "title": "Hosted API can validate and match against a public machine inventory",
+              "evidence": "docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at 2026-06-05T10:39:16.612Z.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "machine-scan-examples",
+            "web-flow-smoke",
+            "real-connector-smoke"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "bom-assembly-pricing-vendor-handoff",
+          "requirement": "Build a bill of materials, assembly steps, pricing, and 3D modeling/fabrication handoff package.",
+          "status": "pass",
+          "evidence": [
+            {
+              "id": "reconstruction-package",
+              "status": "pass",
+              "title": "Machine match produces BOM, assembly, pricing, quote packet, and vendor request surfaces",
+              "evidence": "Server and Phase 4 UI include match, BOM, assembly, pricing, quote packet, and vendor draft paths.",
+              "nextStep": ""
+            },
+            {
+              "id": "web-flow-smoke",
+              "status": "pass",
+              "title": "Local web preview can complete the machine reconstruction happy path",
+              "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "reconstruction-package",
+            "web-flow-smoke"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "store-readiness-packet",
+          "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
+          "status": "pending",
+          "evidence": [
+            {
+              "id": "store-submission-packet-smoke",
+              "status": "pass",
+              "title": "Store submission metadata and privacy packet evidence is recorded",
+              "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T10:10:43.109Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-review-safety-packet",
+              "status": "pass",
+              "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
+              "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T10:10:43.212Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-screenshot-planning",
+              "status": "pass",
+              "title": "Web-preview screenshot planning evidence is recorded before native screenshot capture",
+              "evidence": "docs/store-screenshots/planning-evidence.json proves web planning captures and native screenshot filename mapping at 2026-06-05T05:19:54.138Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "external-release-runbook",
+              "status": "pass",
+              "title": "External Apple, Google, EAS, hosted API, and connector setup runbook is present",
+              "evidence": "docs/external-release-setup-runbook.md covers account setup, exact clone IDs, evidence files, preflight commands, and official source links.",
+              "nextStep": ""
+            },
+            {
+              "id": "release-evidence-bundle",
+              "status": "pass",
+              "title": "Consolidated release evidence bundle is generated for external operators",
+              "evidence": "docs/release-evidence-bundle.json packages local proofs and 1 external gates at 2026-06-06T10:10:20.656Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "local-release-ci-evidence",
+              "status": "pending",
+              "title": "Local release CI evidence records repeatable pre-store validation",
+              "evidence": "docs/local-release-ci-evidence.json is missing or incomplete.",
+              "nextStep": "Run npm run release:local-ci before external account-side release work."
+            },
+            {
+              "id": "release-local-ci-workflow",
+              "status": "pass",
+              "title": "GitHub Actions workflow runs local release evidence checks on pull requests",
+              "evidence": ".github/workflows/release-local-ci.yml runs local release CI, refreshes the release evidence bundle, verifies release status, and uploads evidence artifacts.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-console-copy-packet",
+              "status": "pass",
+              "title": "Store console copy/paste packet is generated from submission metadata",
+              "evidence": "docs/store-console-copy.md contains App Store, Google Play, privacy, data-safety, screenshot, release-note, and safety copy.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-operator-packet",
+              "status": "pass",
+              "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
+              "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-06T10:10:43.913Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "hosted-operator-packet",
+              "status": "pass",
+              "title": "Hosted API, policy, preview, and connector handoff packet is generated",
+              "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T10:10:44.478Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "release-next-actions-packet",
+              "status": "pass",
+              "title": "Durable external-gate next action packet is generated",
+              "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-06T10:10:45.076Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "preview-host-target-discovery",
+              "status": "pass",
+              "title": "Current Vercel PR preview target is discovered for preview smoke",
+              "evidence": "docs/preview-host-target.json records https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app at 2026-06-05T08:55:09.709Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "native-release-config-evidence",
+              "status": "pass",
+              "title": "Native release config evidence is recorded with current EAS linkage state",
+              "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T10:04:41.692Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-console-pending-evidence",
+              "status": "pass",
+              "title": "Store console pending evidence records account-side setup requirements",
+              "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T10:10:18.597Z.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "store-submission-packet-smoke",
+            "store-screenshot-planning",
+            "external-release-runbook",
+            "release-evidence-bundle",
+            "local-release-ci-evidence",
+            "release-local-ci-workflow",
+            "store-console-copy-packet",
+            "store-operator-packet",
+            "hosted-operator-packet",
+            "release-next-actions-packet",
+            "preview-host-target-discovery",
+            "native-release-config-evidence",
+            "store-console-pending-evidence"
+          ],
+          "nextStep": ""
+        },
+        {
+          "id": "apple-google-store-publication",
+          "requirement": "Get as close as possible to release on Google Play and Apple App Store, without falsely claiming external approvals.",
+          "status": "pending",
+          "evidence": [
+            {
+              "id": "preview-host-smoke",
+              "status": "pass",
+              "title": "Vercel preview host renders app and policy/support routes before production hosting",
+              "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T10:00:13.150Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "hosted-api",
+              "status": "pass",
+              "title": "Hosted HTTPS API URL is configured for native builds",
+              "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "hosted-policy-urls",
+              "status": "pass",
+              "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+              "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "eas-project-linkage",
+              "status": "pass",
+              "title": "EAS project is linked for the clone identity",
+              "evidence": "projectId=700c2107-2639-4a27-b374-59ed5edd54fc",
+              "nextStep": ""
+            },
+            {
+              "id": "eas-submit-config",
+              "status": "pass",
+              "title": "EAS submit profile is configured for Google Play Internal Testing and TestFlight upload",
+              "evidence": "android.track=internal; ios.ascAppId configured.",
+              "nextStep": ""
+            },
+            {
+              "id": "native-qa-evidence",
+              "status": "pass",
+              "title": "Android and iOS preview-build QA evidence is recorded",
+              "evidence": "docs/native-qa-evidence.json records cross-platform core QA and native screenshots at 2026-06-06T09:08:47.209Z.",
+              "nextStep": ""
+            },
+            {
+              "id": "store-console-records",
+              "status": "pending",
+              "title": "Store console final review and submission gates are resolved",
+              "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, final signoff.",
+              "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission."
+            },
+            {
+              "id": "native-screenshots",
+              "status": "pass",
+              "title": "Final native screenshots are captured from Android/iOS preview builds",
+              "evidence": "Five Android and five iOS native screenshots are recorded in docs/native-qa-evidence.json at 2026-06-06T09:08:47.209Z.",
+              "nextStep": ""
+            }
+          ],
+          "gates": [
+            "preview-host-smoke",
+            "hosted-api",
+            "hosted-policy-urls",
+            "eas-project-linkage",
+            "eas-submit-config",
+            "native-qa-evidence",
+            "store-console-records",
+            "native-screenshots"
+          ],
+          "nextStep": "Clear the remaining EAS, App Store Connect, Google Play Console, preview-build, native QA, and screenshot evidence gates."
+        }
+      ]
+    },
+    "storeSubmissionSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-06T10:10:47.895Z",
+      "urlMode": "placeholder-allowed",
+      "warnings": [],
+      "appIdentity": {
+        "name": "ReversR Rebuild",
+        "version": "1.0.0",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "sku": "reversr-rebuild-001",
+        "category": {
+          "applePrimary": "Productivity",
+          "appleSecondary": "Business",
+          "googleCategory": "Productivity"
+        }
+      },
+      "urls": {
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "termsUrl": "https://reversr.vercel.app/terms",
+        "supportUrl": "https://reversr.vercel.app/support",
+        "apiBaseUrl": "https://reversr.vercel.app"
+      },
+      "appStoreConnect": {
+        "nameLength": 15,
+        "subtitleLength": 24,
+        "promotionalTextLength": 118,
+        "descriptionLength": 1080,
+        "keywordsLength": 66,
+        "reviewNotesPresent": true,
+        "testFlightWhatToTestLength": 592,
+        "privacy": {
+          "tracking": false,
+          "dataUsedForAdvertising": false,
+          "userContentProcessedCount": 4,
+          "thirdPartyProcessingCount": 2
+        }
+      },
+      "googlePlay": {
+        "titleLength": 15,
+        "shortDescriptionLength": 73,
+        "fullDescriptionLength": 1089,
+        "dataSafety": {
+          "tracking": false,
+          "ads": false,
+          "encryptedInTransit": true,
+          "dataCollectedCount": 3,
+          "dataSharedCount": 2,
+          "requiredPermissions": [
+            "android.permission.CAMERA"
+          ],
+          "blockedPermissions": [
+            "android.permission.RECORD_AUDIO",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_MEDIA_IMAGES",
+            "android.permission.READ_MEDIA_VIDEO"
+          ]
+        }
+      },
+      "screenshots": {
+        "nativeRequired": true,
+        "requiredSetCount": 5,
+        "googlePlayFeatureGraphic": "docs/store-assets/google-play-feature-graphic.png"
+      },
+      "releaseNotes": {
+        "initialReleasePresent": true
+      },
+      "openGatesCount": 10
+    },
+    "storeReviewSafety": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-06T10:10:43.212Z",
+      "outputFile": "docs/store-review-safety-packet.md",
+      "sources": [
+        "docs/store-submission-packet.json",
+        "docs/privacy-policy.md",
+        "docs/terms-of-service.md",
+        "docs/store-console-copy.md",
+        "app.json"
+      ],
+      "phraseChecks": [
+        {
+          "phrase": "Camera access is used only to capture machine images",
+          "found": true
+        },
+        {
+          "phrase": "does not automatically order parts",
+          "found": true
+        },
+        {
+          "phrase": "does not automatically submit",
+          "found": true
+        },
+        {
+          "phrase": "explicit human review",
+          "found": true
+        },
+        {
+          "phrase": "qualified person",
+          "found": true
+        },
+        {
+          "phrase": "Raw inventory connector secrets must remain server-side",
+          "found": true
+        },
+        {
+          "phrase": "does not use camera data for advertising or tracking",
+          "found": true
+        },
+        {
+          "phrase": "configured AI provider",
+          "found": true
+        }
+      ],
+      "fieldChecks": [
+        {
+          "field": "appStoreConnect.appPrivacy.tracking",
+          "pass": true
+        },
+        {
+          "field": "appStoreConnect.appPrivacy.dataUsedForAdvertising",
+          "pass": true
+        },
+        {
+          "field": "googlePlay.dataSafety.tracking",
+          "pass": true
+        },
+        {
+          "field": "googlePlay.dataSafety.ads",
+          "pass": true
+        },
+        {
+          "field": "googlePlay.dataSafety.encryptedInTransit",
+          "pass": true
+        },
+        {
+          "field": "googlePlay.dataSafety.requiredPermissions.cameraOnly",
+          "pass": true
+        },
+        {
+          "field": "android.permissions.cameraOnly",
+          "pass": true
+        },
+        {
+          "field": "android.blockedPermissions.android.permission.RECORD_AUDIO",
+          "pass": true
+        },
+        {
+          "field": "android.blockedPermissions.android.permission.READ_EXTERNAL_STORAGE",
+          "pass": true
+        },
+        {
+          "field": "android.blockedPermissions.android.permission.WRITE_EXTERNAL_STORAGE",
+          "pass": true
+        },
+        {
+          "field": "android.blockedPermissions.android.permission.READ_MEDIA_IMAGES",
+          "pass": true
+        },
+        {
+          "field": "android.blockedPermissions.android.permission.READ_MEDIA_VIDEO",
+          "pass": true
+        }
+      ],
+      "failures": [],
+      "summary": {
+        "phrasePassCount": 8,
+        "phraseCount": 8,
+        "fieldPassCount": 12,
+        "fieldCount": 12
+      }
+    },
+    "screenshotPlanning": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T05:19:54.138Z",
+      "appUrl": "http://localhost:5001",
+      "outputDir": "docs/store-screenshots/generated",
+      "note": "Web preview screenshots for store-review planning. Final App Store and Google Play submissions still require native device screenshots from EAS preview builds.",
+      "viewports": [
+        {
+          "name": "phone",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "name": "tablet",
+          "width": 1024,
+          "height": 1366
+        }
+      ],
+      "expectedScreenIds": [
+        "welcome",
+        "scan",
+        "inventory-validation",
+        "design-match",
+        "build-handoff",
+        "privacy"
+      ],
+      "capturedByViewport": {
+        "phone": true,
+        "tablet": true
+      },
+      "captures": [
+        {
+          "file": "docs/store-screenshots/generated/phone-01-welcome.png",
+          "viewport": "phone",
+          "sequence": 1,
+          "screenId": "welcome",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "file": "docs/store-screenshots/generated/phone-02-scan.png",
+          "viewport": "phone",
+          "sequence": 2,
+          "screenId": "scan",
+          "width": 398,
+          "height": 844
+        },
+        {
+          "file": "docs/store-screenshots/generated/phone-03-inventory-validation.png",
+          "viewport": "phone",
+          "sequence": 3,
+          "screenId": "inventory-validation",
+          "width": 398,
+          "height": 844
+        },
+        {
+          "file": "docs/store-screenshots/generated/phone-04-design-match.png",
+          "viewport": "phone",
+          "sequence": 4,
+          "screenId": "design-match",
+          "width": 398,
+          "height": 844
+        },
+        {
+          "file": "docs/store-screenshots/generated/phone-05-build-handoff.png",
+          "viewport": "phone",
+          "sequence": 5,
+          "screenId": "build-handoff",
+          "width": 398,
+          "height": 844
+        },
+        {
+          "file": "docs/store-screenshots/generated/phone-06-privacy.png",
+          "viewport": "phone",
+          "sequence": 6,
+          "screenId": "privacy",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "file": "docs/store-screenshots/generated/tablet-01-welcome.png",
+          "viewport": "tablet",
+          "sequence": 1,
+          "screenId": "welcome",
+          "width": 1024,
+          "height": 1366
+        },
+        {
+          "file": "docs/store-screenshots/generated/tablet-02-scan.png",
+          "viewport": "tablet",
+          "sequence": 2,
+          "screenId": "scan",
+          "width": 1024,
+          "height": 1366
+        },
+        {
+          "file": "docs/store-screenshots/generated/tablet-03-inventory-validation.png",
+          "viewport": "tablet",
+          "sequence": 3,
+          "screenId": "inventory-validation",
+          "width": 1024,
+          "height": 1366
+        },
+        {
+          "file": "docs/store-screenshots/generated/tablet-04-design-match.png",
+          "viewport": "tablet",
+          "sequence": 4,
+          "screenId": "design-match",
+          "width": 1024,
+          "height": 1366
+        },
+        {
+          "file": "docs/store-screenshots/generated/tablet-05-build-handoff.png",
+          "viewport": "tablet",
+          "sequence": 5,
+          "screenId": "build-handoff",
+          "width": 1024,
+          "height": 1366
+        },
+        {
+          "file": "docs/store-screenshots/generated/tablet-06-privacy.png",
+          "viewport": "tablet",
+          "sequence": 6,
+          "screenId": "privacy",
+          "width": 1024,
+          "height": 1366
+        }
+      ],
+      "nativeRequirement": {
+        "finalNativeScreenshotsStillRequired": true,
+        "directory": "docs/store-screenshots/native/",
+        "filenames": [
+          "android-01-welcome.png",
+          "android-02-scan.png",
+          "android-03-inventory-validation.png",
+          "android-04-design-match.png",
+          "android-05-build-handoff.png",
+          "ios-01-welcome.png",
+          "ios-02-scan.png",
+          "ios-03-inventory-validation.png",
+          "ios-04-design-match.png",
+          "ios-05-build-handoff.png"
+        ]
+      }
+    },
+    "nativeDeviceHandoff": {
+      "schemaVersion": 1,
+      "status": "pending-hitl",
+      "generatedAt": "2026-06-05T15:03:28.217Z",
+      "releaseCandidate": {
+        "appName": "ReversR Rebuild",
+        "version": "1.0.0",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "easProjectId": "700c2107-2639-4a27-b374-59ed5edd54fc"
+      },
+      "androidPreviewBuild": {
+        "status": "finished",
+        "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+        "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
+        "artifactType": "apk",
+        "versionCode": 15,
+        "completedAt": "2026-06-05T11:36:35.941Z",
+        "downloadedArtifact": {
+          "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+          "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+          "size": "103M",
+          "downloadedAt": "2026-06-05T14:44:55.285Z",
+          "installCommand": "adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk"
+        }
+      },
+      "localDeviceProbe": {
+        "checkedAt": "2026-06-05T14:44:55.285Z",
+        "adbPath": "/opt/homebrew/bin/adb",
+        "adbDevices": "List of devices attached",
+        "androidEmulatorPath": "",
+        "androidEmulatorAvailable": false,
+        "xcrunPath": "/usr/bin/xcrun",
+        "simctlAvailable": false,
+        "simctlError": "xcrun: error: unable to find utility \"simctl\", not a developer tool or in PATH",
+        "xcodebuildError": "xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance",
+        "adbState": "no devices/emulators found",
+        "macUsbEnumeration": "No Android/ADB/MTP phone device was visible in system_profiler SPUSBDataType or adb devices after adb restart/reconnect.",
+        "status": "not-visible-to-adb"
+      },
+      "browserHandoff": {
+        "googlePlayConsole": {
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+          "state": "Google Play Console app record exists and opens to the ReversR Rebuild dashboard. Store listing, data safety, app content, internal testing, and native screenshot upload tasks remain pending."
+        },
+        "appStoreConnect": {
+          "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+          "state": "App Store Connect app record exists and Apple ID 6777091538 is recorded in eas.json submit.production.ios.ascAppId. EAS Apple login/2FA succeeded and an Apple distribution certificate was created in the preview credentials flow. Vambah confirmed no iOS device is available, so the internal-distribution device-registration path is not viable right now. Use Android device QA for Android evidence and switch iOS to the TestFlight/App Store distribution credential path."
+        }
+      },
+      "nextNativeQaActions": [
+        "On the Android phone, enable Developer options by tapping Settings > About phone > Build number seven times if needed.",
+        "Open Settings > System > Developer options and turn on USB debugging.",
+        "After plugging in USB, change the USB mode notification from Charge only to File transfer / Android Auto if available.",
+        "Accept the Allow USB debugging RSA prompt on the phone and choose Always allow from this computer if offered.",
+        "If adb devices still stays empty, try a known data-capable USB cable or a different USB-C port/hub.",
+        "When adb devices lists exactly one device in the device state, run npm run native:android:qa -- --probe.",
+        "Install the downloaded APK with: adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk.",
+        "Launch the app with: npm run native:android:qa -- --launch.",
+        "Navigate the app to each target screen and run npm run native:android:qa -- --capture <welcome|scan|inventory-validation|design-match|build-handoff>.",
+        "Run npm run native:qa:preflight after all screenshots and QA checks are recorded.",
+        "Abort the active EAS iOS internal device-registration prompt because no iOS test device is available.",
+        "Use the iOS production/TestFlight credentials path for Apple release builds; this may require Apple login/2FA HITL."
+      ],
+      "notCompletedByAutomation": [
+        "No Android device or emulator was available for APK install.",
+        "No full Xcode/simctl runtime was available for iOS simulator screenshots.",
+        "No Google legal declarations were accepted.",
+        "EAS Apple login/2FA succeeded and an Apple distribution certificate was created.",
+        "EAS generated an iOS device-registration URL at 2026-06-05T14:31:34Z. The URL is intentionally not committed.",
+        "Vambah confirmed no iOS device is available at 2026-06-05T14:37:12Z, so iOS internal preview device registration cannot be completed.",
+        "iOS should proceed through TestFlight/App Store distribution credentials rather than the internal preview device-registration path.",
+        "Android phone was reported connected, but adb devices and macOS USB enumeration still did not expose a debuggable Android device at 2026-06-05T14:44:55.285Z.",
+        "Android preview APK artifact was downloaded and checksummed locally, but installation and screenshots require adb device visibility."
+      ],
+      "androidMirroring": {
+        "checkedAt": "2026-06-05T14:47:28.658Z",
+        "tool": "scrcpy",
+        "version": "4.0",
+        "path": "/opt/homebrew/bin/scrcpy",
+        "status": "ready-but-no-adb-device",
+        "lastError": "ERROR: Could not find any ADB device",
+        "nextOptions": [
+          "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+          "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+        ]
+      },
+      "androidWirelessAdb": {
+        "status": "paired-connected",
+        "pairedAt": "2026-06-05T15:01:45.812Z",
+        "serial": "192.168.4.96:33423",
+        "device": "Google Pixel 10 Pro Android 16",
+        "scrcpy": "started successfully with scrcpy 4.0",
+        "disconnectedAt": "2026-06-05T15:03:28.217Z",
+        "disconnectStatus": "adb devices empty after explicit adb disconnect of host:port and mdns alias"
+      },
+      "androidRun": {
+        "checkedAt": "2026-06-05T15:01:45.812Z",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "192.168.4.96:33423",
+        "appPackage": "com.vsillah.reversrrebuild",
+        "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+        "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "screenshots": [
+          "docs/store-screenshots/native/android-01-welcome.png",
+          "docs/store-screenshots/native/android-02-scan.png",
+          "docs/store-screenshots/native/android-03-inventory-validation.png",
+          "docs/store-screenshots/native/android-04-design-match.png",
+          "docs/store-screenshots/native/android-05-build-handoff.png"
+        ],
+        "notes": [
+          "Wireless ADB paired and connected successfully.",
+          "Preview APK installed and launched on Pixel 10 Pro.",
+          "Sample scan path advanced through inventory validation, design match, and build handoff.",
+          "BOM generation produced itemized inventory-matched parts.",
+          "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+          "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+        ]
+      }
+    },
+    "easPreviewBuildSync": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T23:07:52.670Z",
+      "dryRun": false,
+      "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
+      "evidenceFile": "docs/native-qa-evidence.json",
+      "buildsChecked": 4,
+      "previewBuildsChecked": 1,
+      "latestPreviewBuilds": {
+        "android": {
+          "id": "4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+          "status": "FINISHED",
+          "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+          "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
+          "completedAt": "2026-06-05T11:36:35.941Z",
+          "appBuildVersion": "15"
+        },
+        "ios": null
+      },
+      "nextActions": [
+        "Complete EAS iOS preview credentials, start an iOS preview build, then rerun npm run native:eas:sync-builds.",
+        "After Android and iOS preview builds are recorded, install them on test devices and complete docs/native-qa-evidence.json device QA and screenshot records."
+      ]
+    },
+    "easProductionBuildSync": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T23:07:54.408Z",
+      "dryRun": false,
+      "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
+      "buildsChecked": 4,
+      "productionBuildsChecked": 3,
+      "latestProductionBuilds": {
+        "android": {
+          "id": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+          "status": "FINISHED",
+          "readinessStatus": "pass",
+          "platform": "ANDROID",
+          "distribution": "STORE",
+          "buildProfile": "production",
+          "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/11c47edd-6dfc-4d81-8aee-3be563006d49",
+          "artifactUrl": "https://expo.dev/artifacts/eas/3cfEuq2oZkZKhkEzGHEHhD.aab",
+          "artifactType": "aab",
+          "appVersion": "1.0.0",
+          "appBuildVersion": "17",
+          "gitCommitHash": "ad9cc6241012d6ad1c460f9436b2158beae90399",
+          "gitCommitMessage": "docs: prepare google play upload assets",
+          "createdAt": "2026-06-05T15:43:08.745Z",
+          "updatedAt": "2026-06-05T20:01:00.753Z",
+          "completedAt": "2026-06-05T16:42:53.309Z",
+          "expirationDate": "2026-07-05T15:43:08.785Z"
+        },
+        "ios": {
+          "id": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+          "status": "FINISHED",
+          "readinessStatus": "pass",
+          "platform": "IOS",
+          "distribution": "STORE",
+          "buildProfile": "production",
+          "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+          "artifactUrl": "https://expo.dev/artifacts/eas/gYrv6C7dKH9CufRX2aXitF.ipa",
+          "artifactType": "ipa",
+          "appVersion": "1.0.0",
+          "appBuildVersion": "6",
+          "gitCommitHash": "2bdf0141248d3025482d9e96272dae0a09ff3082",
+          "gitCommitMessage": "docs: record google play category draft",
+          "createdAt": "2026-06-05T18:42:39.948Z",
+          "updatedAt": "2026-06-05T22:00:52.742Z",
+          "completedAt": "2026-06-05T18:47:24.731Z",
+          "expirationDate": "2026-07-05T18:42:39.968Z"
+        }
+      },
+      "nextActions": [
+        "Do not submit production builds to App Store Connect or Google Play until native QA, screenshots, store-console declarations, and human signoff are complete."
+      ]
+    },
+    "easIosPreviewBuildStart": {
+      "schemaVersion": 1,
+      "generatedAt": "2026-06-05T14:37:12Z",
+      "command": "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait --json",
+      "evidenceFile": "docs/eas-ios-preview-build-start-evidence.json",
+      "releaseGate": "native-qa-evidence",
+      "intent": "Start an iOS EAS preview build without entering an Apple password in the CLI.",
+      "credentialContext": {
+        "nonInteractiveApplePasswordPromptSupported": false,
+        "passkeyFallbackDocumented": true,
+        "preferredPath": "Complete EAS-managed Apple credentials through the interactive CLI flow, or use an App Store Connect API key when password entry is not available.",
+        "localAscEnvConfigured": false,
+        "missingLocalAscEnv": [
+          "apiKeyPath",
+          "keyId",
+          "issuerId",
+          "appleTeamId",
+          "appleTeamType"
+        ],
+        "localAscEnvNames": [
+          "apiKeyPath",
+          "keyId",
+          "issuerId",
+          "appleTeamId",
+          "appleTeamType"
+        ],
+        "secretHandling": "Do not commit .p8 files, Apple passwords, App Store Connect API keys, or team secrets. This repo ignores *.p8 and related native credential files."
+      },
+      "nextActions": [
+        "Do not continue the active iOS internal device-registration prompt unless an iPhone/iPad becomes available.",
+        "Abort the internal device-registration prompt and configure iOS production/TestFlight credentials instead.",
+        "After App Store/TestFlight distribution credentials are available, run the iOS store build path and record the build URL in docs/native-qa-evidence.json.",
+        "After Android and iOS preview builds are recorded, install them on devices and complete docs/native-qa-evidence.json plus final native screenshots."
+      ],
+      "status": "dry-run",
+      "dryRun": true,
+      "didStartBuild": false
+    },
+    "easIosProductionBuildAttempt": {
+      "schemaVersion": 1,
+      "status": "superseded-by-finished-build",
+      "generatedAt": "2026-06-05T16:01:31.192Z",
+      "supersededAt": "2026-06-05T22:32:11.814Z",
+      "supersededBy": {
+        "evidenceFile": "docs/eas-production-build-sync-evidence.json",
+        "buildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+        "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+        "artifactType": "ipa",
+        "completedAt": "2026-06-05T18:47:24.731Z"
+      },
+      "command": "npx eas-cli@20.0.0 build --platform ios --profile production --non-interactive --no-wait --json",
+      "result": {
+        "exitCode": 1,
+        "buildStarted": false,
+        "credentialsEntered": false,
+        "appleLoginAttempted": false,
+        "promptReached": "",
+        "remoteCredentialsDetected": true,
+        "nonInteractiveCredentialValidationAllowed": false,
+        "remoteBuildNumberIncrement": {
+          "from": 4,
+          "to": 5
+        },
+        "stdoutTail": "No environment variables with visibility \"Plain text\" and \"Sensitive\" found for the \"production\" environment on EAS.\n\n- Incrementing buildNumber from 4 to 5.\n✔ Incremented buildNumber from 4 to 5.\n\n✔ Using remote iOS credentials (Expo server)\n\nDistribution Certificate is not validated for non-interactive builds.\nFailed to set up credentials.\nCredentials are not set up. Run this command again in interactive mode.",
+        "note": "This earlier non-interactive iOS production/TestFlight build did not start. It is superseded by the later finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json. No App Store upload or public review submission is implied by this earlier attempt evidence."
+      },
+      "humanInTheLoopGate": {
+        "type": "iOS QA/screenshot access",
+        "whyRequired": "Superseded. The iOS production/store build was later completed. Remaining HITL is now iOS device/TestFlight or full Xcode Simulator access for QA screenshots, not EAS build startup.",
+        "nextHumanAction": [
+          "Use the finished iOS production/store build recorded in docs/eas-production-build-sync-evidence.json.",
+          "Either install full Xcode on this Mac so Codex can use an iOS Simulator, or provide an iOS device/TestFlight path.",
+          "Capture the five required iOS screenshots under docs/store-screenshots/native/.",
+          "Update docs/native-qa-evidence.json with iOS device/simulator, timestamps, screenshot records, and QA results.",
+          "Stop before any App Store public submission or irreversible review action."
+        ],
+        "resumeCommand": ""
+      }
+    },
+    "easIosSubmitAttempt": {
+      "schemaVersion": 1,
+      "status": "processed-ready-to-submit",
+      "generatedAt": "2026-06-06T00:23:50.346Z",
+      "intent": "Upload the finished iOS production/store IPA to App Store Connect/TestFlight without submitting the app for public review.",
+      "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait",
+      "result": {
+        "exitCode": 0,
+        "uploadScheduled": true,
+        "uploadProcessingVerified": true,
+        "publicReviewSubmissionStarted": false,
+        "appReviewAddForReviewClicked": false,
+        "submissionId": "a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+        "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+        "stdoutTailSanitized": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 using App Store Connect app 6777091538 and local ASC API key metadata. The local private key path was used only in an uncommitted eas.json change and removed before evidence generation."
+      },
+      "appStoreConnectApiAccess": {
+        "status": "approved",
+        "requestedAt": "2026-06-06T00:00:00.000Z",
+        "approvedAt": "2026-06-06T00:00:00.000Z",
+        "visibleMessage": "Your request to access the App Store Connect API was approved."
+      },
+      "appStoreConnectApiKey": {
+        "keyName": "ReversR EAS Submit",
+        "keyId": "FZ4LLB2243",
+        "issuerId": "d4e5bef0-4168-4aad-b41e-fcd8079e9bfc",
+        "accessRole": "App Manager",
+        "generatedBy": "Vambah Sillah",
+        "onePasswordItem": {
+          "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+          "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+          "vault": "Employee",
+          "category": "API Credential",
+          "attachment": "App Store Connect .p8 private key"
+        },
+        "localKeyStoredOutsideRepo": true,
+        "privateKeyCommitted": false,
+        "onePasswordCliVerification": {
+          "status": "verified-with-1password-cli",
+          "verifiedAt": "2026-06-06T01:55:01.427Z",
+          "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+          "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+          "vault": "Employee",
+          "category": "API_CREDENTIAL",
+          "attachmentCount": 1,
+          "attachments": [
+            {
+              "name": "p8",
+              "sizeBytes": 257
+            }
+          ],
+          "metadataFieldsPresent": [
+            "owner",
+            "purpose",
+            "key_id",
+            "issuer_id",
+            "access_role",
+            "team_name",
+            "asc_app_id",
+            "local_path_hint",
+            "sha256"
+          ],
+          "secretValuesCaptured": false,
+          "note": "Verified through op item get with jq redaction. The .p8 attachment and concealed/secret field values were not printed or committed."
+        }
+      },
+      "firstRetryWithChangelog": {
+        "status": "failed-unsupported-plan-feature",
+        "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\"",
+        "exitCode": 1,
+        "errorSummary": "This submission specified the changelog parameter. Changelog submission is currently available for Enterprise plan only.",
+        "resolution": "Reran the same iOS submit without --what-to-test and scheduled the upload successfully."
+      },
+      "appStoreConnectScreen": {
+        "attemptedUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+        "currentUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+        "currentScreen": "App Store Connect > Users and Access > Integrations > App Store Connect API for Vambah Sillah account",
+        "loggedIn": true,
+        "visibleActions": [
+          "Active (1)",
+          "Edit"
+        ],
+        "visibleMessage": "Your request to access the App Store Connect API was approved.",
+        "activeKey": {
+          "name": "ReversR EAS Submit",
+          "keyId": "FZ4LLB2243",
+          "access": "App Manager",
+          "downloadAvailable": false
+        },
+        "actionTaken": "Codex created the authorized ReversR EAS Submit key, downloaded the .p8 once, saved it outside the repo and in 1Password, temporarily used the key for EAS Submit, removed the local key fields from eas.json, and did not click Add for Review or public App Review submission."
+      },
+      "remainingVerificationGate": {
+        "type": "TestFlight tester setup, iOS install QA, screenshots, privacy publish, and store signoff",
+        "whyRequired": "App Store Connect now shows build 1.0.0 (6) as Ready to Submit with Binary State Validated, but no TestFlight group/testers or What to Test copy are configured, no iOS install QA/screenshots are captured, and no public review action is authorized.",
+        "riskBoundary": "Codex did not publish App Privacy, create TestFlight groups, invite testers, save tester-facing What to Test text, add the app for review, or submit public App Review.",
+        "nextActions": [
+          "If Vambah authorizes TestFlight setup, save What to Test copy and create or assign an internal tester group in App Store Connect.",
+          "Use an iOS device/TestFlight or full Xcode simulator path to capture iOS native QA and screenshots.",
+          "Do not click Add for Review or submit public App Review until final signoff is explicit."
+        ]
+      },
+      "appStoreConnectTestFlight": {
+        "verifiedAt": "2026-06-06T00:23:50.346Z",
+        "appName": "ReversR Rebuild",
+        "appAppleId": "6777091538",
+        "bundleId": "com.vsillah.reversrrebuild",
+        "testFlightUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+        "buildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+        "version": "1.0.0",
+        "build": "6",
+        "buildStatus": "Ready to Submit",
+        "binaryState": "Validated",
+        "expiresIn": "90 days",
+        "uploadDate": "Jun 5, 2026 at 8:09 PM",
+        "originalFileName": "38f358ce-2600-4ce9-bb3a-7fea08181900.ipa",
+        "buildUuid": "114ac3cb-f26b-4384-82d6-d661adf05dff",
+        "buildSdk": "23A339",
+        "buildPlatform": "23A339",
+        "bundleShortVersionString": "1.0.0",
+        "bundleVersionString": "6",
+        "includesSymbols": true,
+        "usesNonExemptEncryption": false,
+        "onDemandResources": false,
+        "siriKit": false,
+        "watchOnlyApp": false,
+        "iMessageApp": {
+          "includesIMessageApp": false,
+          "includesStickers": false,
+          "appIconHidden": false
+        },
+        "deviceRequirements": {
+          "minimumIosVersion": "15.1",
+          "minimumMacosVersion": "12.0",
+          "minimumVisionosVersion": "1.0",
+          "lsMinimumSystemVersion": "12.0",
+          "supportedArchitectures": [
+            "arm64"
+          ],
+          "deviceProtocols": "-",
+          "deviceFamily": [
+            "iPhone",
+            "iPad"
+          ],
+          "requiredCapabilities": [
+            "arm64"
+          ]
+        },
+        "storeInformation": {
+          "localizations": [
+            "English"
+          ],
+          "entitlements": {
+            "application-identifier": "2388NUMA3J.com.vsillah.reversrrebuild",
+            "get-task-allow": false,
+            "beta-reports-active": true,
+            "com.apple.developer.team-identifier": "2388NUMA3J"
+          },
+          "newsstandApp": false,
+          "prerenderedIconFlag": true
+        },
+        "testing": {
+          "groupsCount": 0,
+          "individualTestersCount": 0,
+          "whatToTestEmpty": false,
+          "saveButtonDisabled": true,
+          "testersAdded": false,
+          "testInfoSaved": true,
+          "whatToTestSaved": true,
+          "whatToTestSavedAt": "2026-06-06T03:04:24.221Z",
+          "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+          "whatToTestCharacterCount": 592,
+          "addGroupResult": "No current groups this build can be assigned to.",
+          "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+          "newTesterEmailsEntered": false,
+          "testerInvitesSent": false
+        },
+        "actionsNotTaken": [
+          "No new tester email address was entered or transmitted.",
+          "No TestFlight group was created.",
+          "No tester invitation was sent.",
+          "Expire Build was not clicked.",
+          "App Privacy Publish was not clicked.",
+          "Add for Review was not clicked.",
+          "Public App Review submission was not started."
+        ],
+        "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+      }
+    },
+    "easAndroidSubmitAttempt": {
+      "schemaVersion": 1,
+      "status": "finished",
+      "generatedAt": "2026-06-05T23:52:35.000Z",
+      "intent": "Upload the finished Android production AAB to Google Play internal testing without starting a production rollout.",
+      "command": "npx eas-cli@20.0.0 submit --platform android --profile production --id 11c47edd-6dfc-4d81-8aee-3be563006d49 --non-interactive --no-wait",
+      "submitProfile": {
+        "profile": "production",
+        "track": "internal",
+        "temporaryServiceAccountKeyPathUsed": true,
+        "committedServiceAccountKeyPath": false
+      },
+      "serviceAccountKey": {
+        "projectId": "kinflo-project",
+        "clientEmail": "appscreens@kinflo-project.iam.gserviceaccount.com",
+        "privateKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+        "googleCloudConsoleVerified": true,
+        "googleCloudConsoleVerifiedAt": "2026-06-05T23:30:45.635Z",
+        "googleCloudConsoleFinding": "Google Cloud IAM > AppScreens > Keys shows an active generated key with ID da43f0c8902cf89691334f3c527fd7923953aea5 created Jun 5, 2026. The key contents were not printed or committed.",
+        "localKey": {
+          "storedOutsideRepo": true,
+          "locationHint": "~/.config/reversr/eas-submit/google-play-service-account.json",
+          "fileMode": "600",
+          "note": "Use the 1Password item for durable recovery; do not commit or paste the JSON key."
+        },
+        "onePassword": {
+          "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+          "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+          "vault": "Employee",
+          "category": "API_CREDENTIAL",
+          "attachment": "google-play-service-account.json"
+        }
+      },
+      "playConsolePermissions": {
+        "developerAccount": "8864864114913698241",
+        "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+        "reversrRebuildPermissionPresent": true,
+        "app": "ReversR Rebuild com.vsillah.reversrrebuild",
+        "permissionCount": 12,
+        "savedAt": "2026-06-05T23:30:45.635Z",
+        "adminAllPermissionsSelected": false,
+        "releaseAppsToTestingTracksVisible": true,
+        "finding": "Google Play Console user details for appscreens@kinflo-project.iam.gserviceaccount.com showed ReversR Rebuild with 12 app permissions after Save changes and confirmation."
+      },
+      "result": {
+        "exitCode": 0,
+        "easSubmissionScheduled": true,
+        "easSubmissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+        "easSubmissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+        "releaseTrack": "internal",
+        "releaseStatusRequested": "COMPLETED",
+        "appVersion": "1.0.0",
+        "versionCode": 17,
+        "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+        "googleServiceAccountEmail": "appscreens@kinflo-project.iam.gserviceaccount.com",
+        "playInternalReleaseVerified": true,
+        "productionRolloutStarted": false,
+        "publicReviewSubmissionStarted": false,
+        "stdoutTailSanitized": "EAS scheduled Android submission 805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b to Google Play track internal using production build 11c47edd-6dfc-4d81-8aee-3be563006d49, app version 1.0.0, version code 17. The submit job later reported FINISHED with no EAS error. The service account key path was used only locally and removed from eas.json before evidence generation.",
+        "easSubmissionStatusChecked": true,
+        "easSubmissionStatusCheckedAt": "2026-06-05T23:44:05.000Z",
+        "easSubmissionStatus": "FINISHED",
+        "playUploadAttemptedByEas": true,
+        "playUploadFinishedByEas": true,
+        "errorCode": null,
+        "errorMessage": null,
+        "playInternalReleaseVerifiedAt": "2026-06-05T23:52:35.000Z",
+        "playInternalReleaseVerification": "Google Play Console Internal testing Releases tab shows release 1.0.0 available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed."
+      },
+      "remainingVerificationGate": {
+        "type": "Google Play tester access, closed testing, and final review readiness",
+        "whyStillPending": "The EAS hosted Android submission finished successfully and the release is visible in Google Play Console Internal testing, but Codex did not assign/change tester access, copy or transmit the join link, click Send for review, start closed testing, or request production access. Those actions remain gated behind explicit final approval and tester readiness.",
+        "nextAction": "If ready, explicitly authorize assigning the visible ReversR App Testers list with 13 users or provide the tester access decision. Keep Send for review, closed testing, and production rollout gated behind explicit final approval.",
+        "playConsoleInternalTestingUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers"
+      },
+      "googleCloudApi": {
+        "serviceName": "androidpublisher.googleapis.com",
+        "projectId": "kinflo-project",
+        "projectNumberFromPreviousError": "165345817438",
+        "enabledByComputerUse": true,
+        "enabledAt": "2026-06-05T23:44:05.000Z",
+        "verification": "Google Cloud Console API/Service Details for Google Play Android Developer API showed Status: Enabled and a Disable API action after the authorized enable step."
+      }
+    },
+    "nativeAndroidLiveQa": {
+      "schemaVersion": 1,
+      "status": "partial-pass-vendor-boundary-only",
+      "generatedAt": "2026-06-06T00:38:39.640Z",
+      "device": "Google Pixel 10 Pro Android 16",
+      "packageName": "com.vsillah.reversrrebuild",
+      "adb": {
+        "initialDevices": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp device product:blazer model:Pixel_10_Pro device:blazer",
+        "mdnsEndpoint": "192.168.4.96:37165",
+        "oldEndpoint": "192.168.4.96:33423 refused connection"
+      },
+      "result": {
+        "launch": "pass",
+        "cameraPermissionPrompt": "pass-denied-after-observation",
+        "manualDescriptionFallback": "pass",
+        "inventoryConnectorValidation": "pass",
+        "machineMatch": "pass",
+        "designPhase": "pass",
+        "buildPricingAssembly": "pass",
+        "bomGeneration": "pass",
+        "quotePacketControls": "pass",
+        "vendorRequestControls": "visible-not-prepared",
+        "externalUploadOrEmailSent": false,
+        "cameraPermissionGranted": false,
+        "policyLinks": "pass-visible-controls",
+        "connectorAuthError": "pass-empty-admin-token-local-validation",
+        "rawSecretEnteredOrTransmitted": false,
+        "offlineApiError": "pass-controlled-invalid-api-build",
+        "controlledInvalidApiBuild": {
+          "status": "pass",
+          "buildId": "d90e9595-56f1-49a7-8348-6541fa500edb",
+          "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/d90e9595-56f1-49a7-8348-6541fa500edb",
+          "artifactUrl": "https://expo.dev/artifacts/eas/sNzGmqUBfzZ6Wv4uNa2bqc.apk",
+          "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview-env.apk",
+          "apkSha256": "a33edb213bbe248ee223da83c29623cf35ee8d5afae4af49d4ccd6a68aeea271",
+          "completedAt": "2026-06-06T00:35:46.067Z",
+          "installedAt": "2026-06-06T00:38:39.640Z",
+          "profile": "preview",
+          "distribution": "internal",
+          "apiBaseUrl": "https://invalid.reversr.invalid",
+          "appConfigProof": "assets/app.config extra.apiBaseUrl was https://invalid.reversr.invalid before install.",
+          "temporaryEasPreviewEnv": {
+            "variableName": "EXPO_PUBLIC_API_BASE_URL",
+            "value": "https://invalid.reversr.invalid",
+            "createdBeforeBuild": true,
+            "deletedAfterBuild": true,
+            "postDeleteVerification": "npx eas-cli@20.0.0 env:list preview --format long returned no variables for preview."
+          },
+          "device": "Google Pixel 10 Pro Android 16",
+          "settingsScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+          "networkErrorScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png",
+          "observedSettingsText": "API host: https://invalid.reversr.invalid",
+          "observedErrorText": "Network error. Check your internet connection and try again.",
+          "externalNetworkChanged": false,
+          "purpose": "Controlled offline/API error handling QA without touching production API or device network settings."
+        },
+        "priorInvalidApiBuildAttempt": {
+          "status": "config-drift-not-used-for-pass",
+          "buildId": "737d558f-9742-469a-8bf6-2842ff7cb3a6",
+          "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/737d558f-9742-469a-8bf6-2842ff7cb3a6",
+          "artifactUrl": "https://expo.dev/artifacts/eas/fg9uPKcRBNba9NBqdu7j7j.apk",
+          "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+          "apkSha256": "9954f8800d6492913de8ef0c93fda6bec88abd103a1586bcecf1d73e0740c8cf",
+          "completedAt": "2026-06-06T00:15:43.549Z",
+          "finding": "The APK installed successfully, but Settings and assets/app.config still showed https://reversr.vercel.app because no EAS preview environment variable existed; local shell env alone did not bake into the remote build."
+        }
+      },
+      "blockerNotes": [
+        "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft."
+      ],
+      "screenshotEvidence": [
+        "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
+        "/tmp/reversr-native-artifacts/android-camera-permission-denied.png",
+        "/tmp/reversr-native-artifacts/android-after-manual-scan.png",
+        "/tmp/reversr-native-artifacts/android-connector-validated-live.png",
+        "/tmp/reversr-native-artifacts/android-after-match-live.png",
+        "/tmp/reversr-native-artifacts/android-build-phase-live.png",
+        "/tmp/reversr-native-artifacts/android-bom-live.png",
+        "/tmp/reversr-native-artifacts/android-vendor-draft-live.png",
+        "/tmp/reversr-native-artifacts/android-policy-links-visible.png",
+        "/tmp/reversr-native-artifacts/android-connector-auth-error-live.png",
+        "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+        "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png"
+      ],
+      "updatedEvidenceFile": "docs/native-qa-evidence.json",
+      "checkedAt": "2026-06-06T00:38:39.640Z",
+      "deviceRestoration": {
+        "restoredAt": "2026-06-06T00:39:16.572Z",
+        "restoredFromLocalArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+        "restoredHostObserved": "API host: https://reversr.vercel.app",
+        "reason": "After controlled invalid-host QA, Codex restored the connected Pixel to a live-host preview APK so the device was not left in the intentionally broken state."
+      }
+    },
+    "releaseReadinessGateEvidence": {
+      "schemaVersion": 1,
+      "status": "release-readiness-partial-store-signoff-pending",
+      "generatedAt": "2026-06-06T10:04:16.567Z",
+      "scope": "Current ReversR Rebuild release-readiness gates for PR #2 after App Privacy publishing, Google Play internal testing activation, cross-platform native QA/screenshots, and EAS/App Store Connect setup evidence.",
+      "pr": {
+        "number": 2,
+        "branch": "codex/inventory-reconstruction-clone",
+        "url": "https://github.com/vsillah/ReversR/pull/2"
+      },
+      "localState": {
+        "repo": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+        "releaseStatus": "Pending with EAS submit config, cross-platform native QA/screenshots, App Privacy publishing, and Google Play internal testing ready. Remaining gates are Apple TestFlight tester/group readiness and final release-owner/store-reviewer signoff before any public review submission.",
+        "pendingGateIds": [
+          "store-console-records"
+        ],
+        "latestStrictCommands": [
+          {
+            "command": "npm run native:preflight",
+            "status": "pass",
+            "note": "Strict native release config is valid and EAS CLI is logged in."
+          },
+          {
+            "command": "npm run native:qa:preflight",
+            "status": "pass",
+            "note": "Cross-platform native QA and Android/iOS native screenshots are recorded; production submission signoff remains intentionally gated."
+          },
+          {
+            "command": "npm run native:qa:preflight:local",
+            "status": "pass-with-signoff-warnings",
+            "note": "The native QA evidence schema is valid; remaining warnings are signoff/communication boundaries, not missing platform QA or screenshots."
+          },
+          {
+            "command": "npm run store:console:preflight",
+            "status": "failed-as-expected",
+            "note": "Store records exist; App Privacy is published and Google Play internal testing is active. Strict preflight remains gated by TestFlight tester readiness and final signoff."
+          },
+          {
+            "command": "npm run store:console:preflight:local",
+            "status": "pass-with-pending-warnings",
+            "note": "Pending store-console evidence was refreshed without claiming final approval."
+          }
+        ]
+      },
+      "easSubmitConfig": {
+        "status": "android-internal-submit-finished-ios-testflight-processed",
+        "android": {
+          "submitProfile": "production",
+          "track": "internal",
+          "finishedBuildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+          "artifact": "/tmp/reversr-native-artifacts/reversr-rebuild-production.aab",
+          "submitAttemptEvidence": "docs/eas-android-submit-attempt-evidence.json",
+          "currentGate": "EAS Android internal-track submission finished and the release is visible in Google Play Console Internal testing; assigning tester access or transmitting the join link remains a gated action.",
+          "submission": {
+            "status": "finished-visible-in-play-console",
+            "scheduledAt": "2026-06-05T23:44:05.000Z",
+            "submissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+            "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+            "track": "internal",
+            "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+            "productionRolloutStarted": false,
+            "publicReviewSubmissionStarted": false,
+            "checkedAt": "2026-06-05T23:52:35.000Z",
+            "errorSummary": null,
+            "googleCloudApiStatus": "enabled-before-rerun",
+            "playConsoleVisibility": {
+              "status": "visible",
+              "releaseName": "1.0.0",
+              "versionCodeCount": 1,
+              "releaseAvailability": "Available to internal testers",
+              "releasedAtLabel": "Jun 5 7:42 PM",
+              "reviewStatus": "Not reviewed",
+              "checkedAt": "2026-06-05T23:52:35.000Z"
+            }
+          },
+          "serviceAccount": {
+            "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+            "reversrRebuildPermissionPresent": true,
+            "permissionCount": 12,
+            "googleCloudKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+            "onePasswordItem": {
+              "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+              "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+              "vault": "Employee",
+              "category": "API_CREDENTIAL",
+              "attachment": "google-play-service-account.json"
+            },
+            "localKeyPathStoredOutsideRepo": true
+          }
+        },
+        "ios": {
+          "submitProfile": "production",
+          "ascAppId": "6777091538",
+          "finishedBuildId": "815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+          "artifactType": "ipa",
+          "submitAttemptEvidence": "docs/eas-ios-submit-attempt-evidence.json",
+          "currentGate": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 and App Store Connect shows TestFlight build 1.0.0 (6) as Ready to Submit with Binary State Validated. App Privacy is published and What to Test is saved. TestFlight group/tester assignment remains pending because no existing groups/testers were available and no new tester emails were authorized or entered.",
+          "latestSubmitRetry": {
+            "status": "scheduled",
+            "checkedAt": "2026-06-06T00:11:39.082Z",
+            "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait",
+            "exitCode": 0,
+            "uploadScheduled": true,
+            "publicReviewSubmissionStarted": false,
+            "appReviewAddForReviewClicked": false,
+            "submissionId": "a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+            "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+            "note": "The upload was scheduled without TestFlight changelog text because EAS reported the what-to-test/changelog parameter is Enterprise-plan only. This is an App Store Connect/TestFlight upload attempt, not public App Review submission.",
+            "uploadProcessingVerified": true
+          },
+          "appStoreConnectApiAccess": {
+            "status": "approved",
+            "currentScreen": "Users and Access > Integrations > App Store Connect API",
+            "activeKeyName": "ReversR EAS Submit",
+            "activeKeyId": "FZ4LLB2243",
+            "accessRole": "App Manager"
+          },
+          "onePasswordItem": {
+            "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+            "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+            "vault": "Employee",
+            "category": "API Credential",
+            "attachment": "App Store Connect .p8 private key"
+          },
+          "appStoreConnectTestFlight": {
+            "verifiedAt": "2026-06-06T00:23:50.346Z",
+            "appName": "ReversR Rebuild",
+            "appAppleId": "6777091538",
+            "bundleId": "com.vsillah.reversrrebuild",
+            "testFlightUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+            "buildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+            "version": "1.0.0",
+            "build": "6",
+            "buildStatus": "Ready to Submit",
+            "binaryState": "Validated",
+            "expiresIn": "90 days",
+            "uploadDate": "Jun 5, 2026 at 8:09 PM",
+            "originalFileName": "38f358ce-2600-4ce9-bb3a-7fea08181900.ipa",
+            "buildUuid": "114ac3cb-f26b-4384-82d6-d661adf05dff",
+            "buildSdk": "23A339",
+            "buildPlatform": "23A339",
+            "bundleShortVersionString": "1.0.0",
+            "bundleVersionString": "6",
+            "includesSymbols": true,
+            "usesNonExemptEncryption": false,
+            "onDemandResources": false,
+            "siriKit": false,
+            "watchOnlyApp": false,
+            "iMessageApp": {
+              "includesIMessageApp": false,
+              "includesStickers": false,
+              "appIconHidden": false
+            },
+            "deviceRequirements": {
+              "minimumIosVersion": "15.1",
+              "minimumMacosVersion": "12.0",
+              "minimumVisionosVersion": "1.0",
+              "lsMinimumSystemVersion": "12.0",
+              "supportedArchitectures": [
+                "arm64"
+              ],
+              "deviceProtocols": "-",
+              "deviceFamily": [
+                "iPhone",
+                "iPad"
+              ],
+              "requiredCapabilities": [
+                "arm64"
+              ]
+            },
+            "storeInformation": {
+              "localizations": [
+                "English"
+              ],
+              "entitlements": {
+                "application-identifier": "2388NUMA3J.com.vsillah.reversrrebuild",
+                "get-task-allow": false,
+                "beta-reports-active": true,
+                "com.apple.developer.team-identifier": "2388NUMA3J"
+              },
+              "newsstandApp": false,
+              "prerenderedIconFlag": true
+            },
+            "testing": {
+              "groupsCount": 0,
+              "individualTestersCount": 0,
+              "whatToTestEmpty": false,
+              "saveButtonDisabled": true,
+              "testersAdded": false,
+              "testInfoSaved": true
+            },
+            "actionsNotTaken": [
+              "No new TestFlight group was created.",
+              "No new tester email address was entered or transmitted.",
+              "No tester invitation was sent.",
+              "Add for Review was not clicked.",
+              "Public App Review submission was not started."
+            ]
+          }
+        }
+      },
+      "computerUseState": {
+        "googlePlay": {
+          "checkedAt": "2026-06-06T09:56:14.438Z",
+          "currentScreen": "Google Play Console > ReversR Rebuild > Test and release > Testing > Internal testing > Testers",
+          "currentUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers",
+          "trackSummary": {
+            "visibleState": "Active",
+            "latestRelease": "1.0.0",
+            "temporaryAppName": "com.vsillah.reversrrebuild (unreviewed)"
+          },
+          "releasesTabVerified": {
+            "checkedAt": "2026-06-06T00:49:04.023Z",
+            "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=releases",
+            "releaseName": "1.0.0",
+            "status": "Available to internal testers",
+            "versionCodeCount": 1,
+            "releasedAtLabel": "Jun 5 7:42 PM",
+            "reviewStatus": "Not reviewed"
+          },
+          "testersTabVisible": true,
+          "existingEmailListVisible": true,
+          "existingEmailListName": "ReversR App Testers",
+          "existingEmailListUserCount": 13,
+          "existingEmailListSelected": true,
+          "selectAllSelected": false,
+          "saveButtonEnabled": false,
+          "createEmailListVisible": true,
+          "editEmailListVisible": true,
+          "joinOnWebLinkVisible": true,
+          "joinOnWebLinkCommitted": false,
+          "gatedActions": [
+            "Select ReversR App Testers email list",
+            "Save tester access changes",
+            "Create or edit email list",
+            "Copy or transmit Join on the web link",
+            "Create new release",
+            "Promote release",
+            "Pause track",
+            "Send for review",
+            "Production rollout"
+          ],
+          "actionTaken": "Codex selected the existing ReversR App Testers email list and saved the internal testing tester access change. The track summary changed to Active. The join link was not copied or transmitted, and no Send for review, closed testing, production access, or production rollout action was clicked.",
+          "nextActionRequiringApproval": "Share the internal testing join link with intended testers outside Codex if desired. Keep Send for review, closed testing, production access, and production rollout gated behind explicit final approval."
+        },
+        "appStoreConnect": {
+          "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+          "attemptedUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+          "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+          "loggedIn": true,
+          "visibleGate": {
+            "whatToTestFieldVisible": true,
+            "whatToTestEmpty": false,
+            "whatToTestSaved": true,
+            "saveButtonDisabled": true,
+            "groupsCount": 0,
+            "individualTestersCount": 0,
+            "addGroupVisible": true,
+            "addTestersVisible": true
+          },
+          "preparedCopy": {
+            "source": "docs/store-console-copy.md#testflight-what-to-test",
+            "characterCount": 592
+          },
+          "savedCopy": {
+            "status": "what-to-test-saved-no-testers-available",
+            "checkedAt": "2026-06-06T03:04:24.221Z",
+            "currentScreen": "App Store Connect > ReversR Rebuild > TestFlight > iOS Builds > 1.0.0 (6) > Test Information",
+            "currentUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+            "version": "1.0.0",
+            "build": "6",
+            "whatToTestSaved": true,
+            "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+            "whatToTestCharacterCount": 592,
+            "whatToTestCharactersRemaining": 3407,
+            "savedButtonStateAfterSave": "Saved disabled",
+            "groupsCount": 0,
+            "individualTestersCount": 0,
+            "addGroupResult": "No current groups this build can be assigned to.",
+            "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+            "newTesterEmailsEntered": false,
+            "testerInvitesSent": false,
+            "actionTaken": "Codex pasted the validated repo-backed What to Test copy, verified the field value, clicked Save, opened Add Group and Add Existing Testers, and found no assignable groups or existing testers.",
+            "actionsNotTaken": [
+              "No new tester email address was entered or transmitted.",
+              "No TestFlight group was created.",
+              "No tester invitation was sent.",
+              "Expire Build was not clicked.",
+              "App Privacy Publish was not clicked.",
+              "Add for Review was not clicked.",
+              "Public App Review submission was not started."
+            ],
+            "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+          },
+          "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+        }
+      },
+      "nativeQaAndScreenshots": {
+        "status": "partial-android-blocked-ios",
+        "android": {
+          "previewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+          "deviceEvidence": "Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z",
+          "screenshotsCaptured": [
+            "docs/store-screenshots/native/android-01-welcome.png",
+            "docs/store-screenshots/native/android-02-scan.png",
+            "docs/store-screenshots/native/android-03-inventory-validation.png",
+            "docs/store-screenshots/native/android-04-design-match.png",
+            "docs/store-screenshots/native/android-05-build-handoff.png"
+          ],
+          "currentDeviceState": "ADB remained connected over wireless debugging. Fresh live Android QA now covers install/launch, camera permission prompt, manual description fallback, inventory validation, match/design/build/pricing, BOM generation, quote-packet controls, vendor-control visibility, policy-link visibility, missing-admin-token connector credential handling, and controlled invalid-API network error handling.",
+          "liveQaEvidence": "docs/native-android-live-qa-evidence.json",
+          "completedLiveChecks": [
+            "install-launch",
+            "camera-permission",
+            "manual-description",
+            "inventory-validation",
+            "machine-match",
+            "bom-generation",
+            "assembly-steps",
+            "quote-packet-export",
+            "accessibility",
+            "native-screenshots",
+            "policy-links",
+            "connector-auth-error",
+            "offline-api-error"
+          ],
+          "remainingLiveChecks": [
+            "vendor-request-draft was visible but not prepared to avoid creating a third-party communication draft"
+          ],
+          "controlledInvalidApiBuild": {
+            "status": "pass",
+            "buildId": "d90e9595-56f1-49a7-8348-6541fa500edb",
+            "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/d90e9595-56f1-49a7-8348-6541fa500edb",
+            "artifactUrl": "https://expo.dev/artifacts/eas/sNzGmqUBfzZ6Wv4uNa2bqc.apk",
+            "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview-env.apk",
+            "apkSha256": "a33edb213bbe248ee223da83c29623cf35ee8d5afae4af49d4ccd6a68aeea271",
+            "completedAt": "2026-06-06T00:35:46.067Z",
+            "installedAt": "2026-06-06T00:38:39.640Z",
+            "profile": "preview",
+            "distribution": "internal",
+            "apiBaseUrl": "https://invalid.reversr.invalid",
+            "appConfigProof": "assets/app.config extra.apiBaseUrl was https://invalid.reversr.invalid before install.",
+            "temporaryEasPreviewEnv": {
+              "variableName": "EXPO_PUBLIC_API_BASE_URL",
+              "value": "https://invalid.reversr.invalid",
+              "createdBeforeBuild": true,
+              "deletedAfterBuild": true,
+              "postDeleteVerification": "npx eas-cli@20.0.0 env:list preview --format long returned no variables for preview."
+            },
+            "device": "Google Pixel 10 Pro Android 16",
+            "settingsScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+            "networkErrorScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png",
+            "observedSettingsText": "API host: https://invalid.reversr.invalid",
+            "observedErrorText": "Network error. Check your internet connection and try again.",
+            "externalNetworkChanged": false,
+            "purpose": "Controlled offline/API error handling QA without touching production API or device network settings."
+          },
+          "deviceRestoration": {
+            "restoredAt": "2026-06-06T00:39:16.572Z",
+            "restoredFromLocalArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+            "restoredHostObserved": "API host: https://reversr.vercel.app",
+            "reason": "After controlled invalid-host QA, Codex restored the connected Pixel to a live-host preview APK so the device was not left in the intentionally broken state."
+          }
+        },
+        "ios": {
+          "productionStoreBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+          "previewBuild": "",
+          "currentBlockers": [
+            "No iOS device is available for native QA or screenshots.",
+            "Full Xcode is not installed; xcrun simctl is unavailable.",
+            "The iOS IPA upload is processed in TestFlight as build 1.0.0 (6) Ready to Submit, but TestFlight groups/testers and What to Test copy are not configured and install QA/screenshots are not captured."
+          ]
+        }
+      },
+      "storeConsoleRecords": {
+        "status": "partial-pass-testflight-and-signoff-pending",
+        "appStoreConnect": {
+          "appPrivacyCompleted": true,
+          "testFlightProcessingReady": true,
+          "whatToTestSaved": true,
+          "testFlightReady": false,
+          "groupsCount": 0,
+          "individualTestersCount": 0,
+          "existingTestersAvailable": false,
+          "testerInvitesSent": false,
+          "addForReviewClicked": false,
+          "testFlightBuildStatus": "Ready to Submit",
+          "testFlightBinaryState": "Validated"
+        },
+        "googlePlay": {
+          "internalTestingReady": true,
+          "internalTestingReadyAt": "2026-06-06T09:56:14.438Z",
+          "testerListSelected": true,
+          "testerCount": 13,
+          "joinLinkCopiedOrTransmitted": false,
+          "sendForReviewClicked": false,
+          "productionSubmissionApproved": false
+        },
+        "requiredAssets": {
+          "nativeScreenshotsCaptured": true,
+          "appIconReviewed": true,
+          "featureGraphicCaptured": true
+        },
+        "signoff": {
+          "releaseOwnerPresent": false,
+          "storeReviewerPresent": false,
+          "signedAtPresent": false,
+          "productionSubmissionApproved": false
+        },
+        "remainingGate": "Apple TestFlight tester/group readiness and final release-owner/store-reviewer signoff remain pending. No public App Review, Google Play Send for review, closed testing, production access, or production rollout action is approved or started."
+      },
+      "humanInTheLoopResumeInstructions": [
+        "For Apple TestFlight: What to Test is saved on App Store Connect > ReversR Rebuild > TestFlight > build 1.0.0 (6) > Test Information. Apple showed no assignable groups and no existing testers. To continue, provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing TestFlight/App Store Connect tester group. Do not click Expire Build, Add for Review, App Privacy Publish, or public App Review submission without explicit final approval.",
+        "For Google Play internal testing: Chrome is positioned on Google Play Console > ReversR Rebuild > Internal testing > Testers. The ReversR App Testers email list with 13 users is visible but unchecked, Join on the web is visible but not copied, and Save is disabled. The Releases tab was inspected and shows release 1.0.0 Available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed. To continue, explicitly authorize selecting/saving tester access or copying/transmitting the join link. Do not click Send for review, closed testing, production access, promote release, pause track, or production rollout without explicit final approval.",
+        "For Android live QA: offline/API error handling is now verified with a controlled invalid-host APK. The remaining Android boundary is vendor-request-draft preparation/sending, which requires explicit communication approval.",
+        "For iOS native QA/screenshots: provide an iOS test device/TestFlight path or install full Xcode so a simulator path can be used.",
+        "Do not click Google Play Send for review, Apple Add for Review, Apple App Privacy Publish, or any production/public submission action until final signoff is explicit."
+      ],
+      "accountSideProgress": {
+        "appStoreConnectApiKey": {
+          "onePasswordCliVerification": {
+            "status": "verified-with-1password-cli",
+            "verifiedAt": "2026-06-06T01:55:01.427Z",
+            "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+            "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+            "vault": "Employee",
+            "category": "API_CREDENTIAL",
+            "attachmentCount": 1,
+            "attachments": [
+              {
+                "name": "p8",
+                "sizeBytes": 257
+              }
+            ],
+            "metadataFieldsPresent": [
+              "owner",
+              "purpose",
+              "key_id",
+              "issuer_id",
+              "access_role",
+              "team_name",
+              "asc_app_id",
+              "local_path_hint",
+              "sha256"
+            ],
+            "secretValuesCaptured": false,
+            "note": "Verified through op item get with jq redaction. The .p8 attachment and concealed/secret field values were not printed or committed."
+          }
+        }
+      }
+    },
+    "webFlowSmoke": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-05T05:01:45.082Z",
+      "appUrl": "http://localhost:5001",
+      "apiUrl": "http://localhost:3001",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "machineDescription": "A desktop FDM 3D printer with aluminum extrusion frame, heated bed, extruder, belts, rails, stepper motors, control board, power supply, nozzle, and display.",
+      "api": {
+        "healthStatus": 200,
+        "healthOk": true,
+        "healthBody": {
+          "status": "ok",
+          "service": "reversr-rebuild-api",
+          "version": "0.1.0",
+          "apiKeys": {
+            "total": 0,
+            "available": 0,
+            "allInCooldown": true
+          },
+          "cache": {
+            "size": 0
+          },
+          "inventorySources": [
+            "demo",
+            "file",
+            "http",
+            "https"
+          ],
+          "authenticatedConnectorsEnabled": false,
+          "credentialRegistryEnabled": false,
+          "credentialCount": 0,
+          "privateNetworkConnectorsEnabled": false
+        },
+        "retiredSitRouteStatus": 404
+      },
+      "verified": {
+        "welcome": true,
+        "legacySitAbsent": true,
+        "scan": true,
+        "inventoryValidation": true,
+        "machineMatch": true,
+        "bom": true,
+        "quotePacket": true,
+        "vendorRequestDraft": true,
+        "manufacturingReadiness": true
+      },
+      "observed": {
+        "matchedMachineName": "Desktop FDM 3D Printer",
+        "flow": "scan -> inventory validation -> machine match -> BOM -> quote packet/vendor draft"
+      },
+      "errors": {
+        "console": [],
+        "page": []
+      }
+    },
+    "nativeReleaseConfig": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-06T10:10:47.610Z",
+      "mode": {
+        "allowPlaceholder": true,
+        "allowMissingCli": true,
+        "allowUnlinkedEas": true,
+        "allowNotLoggedIn": true
+      },
+      "warnings": [],
+      "appIdentity": {
+        "name": "ReversR Rebuild",
+        "slug": "reversr-rebuild",
+        "version": "1.0.0",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "iosBuildNumber": "1",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "androidVersionCode": 15,
+        "easProjectLinked": true
+      },
+      "permissions": {
+        "androidPermissions": [
+          "android.permission.CAMERA"
+        ],
+        "androidBlockedPermissions": [
+          "android.permission.RECORD_AUDIO",
+          "android.permission.READ_EXTERNAL_STORAGE",
+          "android.permission.WRITE_EXTERNAL_STORAGE",
+          "android.permission.READ_MEDIA_IMAGES",
+          "android.permission.READ_MEDIA_VIDEO"
+        ],
+        "iosCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
+        "cameraPluginConfigured": true
+      },
+      "eas": {
+        "cli": {
+          "label": "pinned npx eas-cli@20.0.0",
+          "version": "eas-cli/20.0.0 darwin-arm64 node-v24.15.0\n★ eas-cli@20.1.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
+        },
+        "whoami": {
+          "status": 0,
+          "output": "vsillah\nvsillah@gmail.com\n★ eas-cli@20.1.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
+        },
+        "buildProfiles": {
+          "development": {
+            "environment": "development",
+            "distribution": "internal",
+            "developmentClient": true
+          },
+          "preview": {
+            "environment": "preview",
+            "distribution": "internal",
+            "androidBuildType": "apk"
+          },
+          "production": {
+            "environment": "production",
+            "androidBuildType": "app-bundle",
+            "autoIncrement": true
+          }
+        },
+        "submitProfile": {
+          "androidTrack": "internal",
+          "iosAscAppIdConfigured": true
+        }
+      },
+      "urls": {
+        "apiBaseUrl": "https://reversr.vercel.app",
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "termsUrl": "https://reversr.vercel.app/terms",
+        "supportUrl": "https://reversr.vercel.app/support"
+      },
+      "externalGatesStillRequired": {
+        "easProjectLinkage": false,
+        "easLogin": false,
+        "hostedApiUrl": false,
+        "hostedPolicyUrls": false,
+        "iosAscAppId": false
+      }
+    },
+    "storeConsolePending": {
+      "schemaVersion": 1,
+      "status": "pending",
+      "generatedAt": "2026-06-06T10:10:45.784Z",
+      "source": "docs/store-console-evidence.json",
+      "finalEvidenceFile": "docs/store-console-evidence.json",
+      "warnings": [
+        "App Store Connect TestFlight readiness is not marked complete.",
+        "Review gate productionSubmissionApproved is not marked true.",
+        "Production submission is not approved.",
+        "Store console signoff is missing releaseOwner.",
+        "Store console signoff is missing storeReviewer.",
+        "Store console signoff is missing signedAt."
+      ],
+      "releaseCandidate": {
+        "appName": "ReversR Rebuild",
+        "version": "1.0.0",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "sku": "reversr-rebuild-001",
+        "matchesAppConfig": {
+          "appName": true,
+          "version": true,
+          "iosBundleId": true,
+          "androidPackage": true,
+          "sku": true
+        }
+      },
+      "appStoreConnect": {
+        "status": "pass",
+        "recordUrlPresent": true,
+        "appleIdPresent": true,
+        "bundleIdStatus": "pass",
+        "privacyPolicyUrlReady": true,
+        "metadataCopiedFromPacket": true,
+        "appPrivacyCompleted": true,
+        "ageRatingCompleted": true,
+        "testFlightReady": false
+      },
+      "googlePlay": {
+        "status": "pass",
+        "recordUrlPresent": true,
+        "packageNameMatches": true,
+        "privacyPolicyUrlReady": true,
+        "metadataCopiedFromPacket": true,
+        "dataSafetyCompleted": true,
+        "appContentCompleted": true,
+        "internalTestingReady": true
+      },
+      "requiredAssets": {
+        "nativeScreenshotsCaptured": true,
+        "appIconReviewed": true,
+        "featureGraphicCaptured": true,
+        "featureGraphicPathReady": true,
+        "evidenceFolderPresent": true
+      },
+      "reviewGates": {
+        "hostedApiPreflightPassed": true,
+        "hostedPolicyPreflightPassed": true,
+        "hostedConnectorSmokePassed": true,
+        "nativeQaPreflightPassed": true,
+        "productionSubmissionApproved": false
+      },
+      "signoff": {
+        "productionSubmissionApproved": false,
+        "releaseOwnerPresent": false,
+        "storeReviewerPresent": false,
+        "signedAtPresent": false
+      }
+    },
+    "storeConsoleBrowserHandoff": {
+      "schemaVersion": 1,
+      "status": "pending-hitl",
+      "generatedAt": "2026-06-05T16:11:30.815Z",
+      "appIdentity": {
+        "appName": "ReversR Rebuild",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "sku": "reversr-rebuild-001"
+      },
+      "appStoreConnect": {
+        "browserState": "Chrome is open at the App Store Connect iOS App Version 1.0 Prepare for Submission page for ReversR Rebuild. Product metadata from docs/store-console-copy.md is present on the page, Sign-in required is unchecked, manual release is selected, Save is disabled, Add for Review is visible, and no public review submission was started.",
+        "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+        "accountGate": "App Store Connect app record creation and metadata draft gates are cleared. App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload remain pending.",
+        "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete. For the iOS build gate, run the interactive EAS production build command recorded in docs/eas-ios-production-build-attempt-evidence.json and copy back the Expo build URL once it starts.",
+        "neededValueAfterCreation": ""
+      },
+      "googlePlayConsole": {
+        "browserState": "Chrome Play Console is authenticated for ReversR Rebuild. Store settings now show App category saved as Productivity. Draft-saved tasks remain privacy policy, sign-in details, ads, government apps, financial features, and health. Store listing text was entered earlier, but the task remains incomplete because required graphics/screenshots/contact gates remain. The default store listing editor was opened and the Play asset-library drawer was reached, but asset upload could not be completed through Chrome automation. No Send for review action was clicked.",
+        "developerAccount": "Vambah Sillah",
+        "developerAccountId": "8864864114913698241",
+        "appId": "4972956671966100551",
+        "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+        "fieldsPrepared": {
+          "appName": "ReversR Rebuild",
+          "packageName": "com.vsillah.reversrrebuild",
+          "packageNameAvailability": "available",
+          "defaultLanguage": "English (United States) – en-US",
+          "appOrGame": "App",
+          "freeOrPaid": "Free"
+        },
+        "legalDeclarationsPending": [],
+        "nextHumanAction": "Confirm the public support email before saving Google Play contact details. Then complete Content rating, Target audience, Data safety, contact details, store listing asset upload, and testing/release setup manually or with supervised browser automation. Use docs/store-console-copy.md and docs/store-console-task-answers.md as the copy source. Do not click Send for review until all native QA/store evidence and signoff are complete.",
+        "currentScreen": {
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+          "title": "Dashboard | ReversR Rebuild",
+          "setupProgress": "6 of 11 complete",
+          "completedTasks": [
+            "Set privacy policy",
+            "Sign in details",
+            "Ads",
+            "Government apps",
+            "Financial features",
+            "Health",
+            "App category saved as Productivity inside Store settings"
+          ],
+          "remainingTasks": [
+            "Content rating",
+            "Target audience",
+            "Data safety",
+            "Select an app category and provide contact details",
+            "Set up your store listing"
+          ],
+          "submissionBoundary": "No Send for review, testing release, production access application, or public submission action was clicked. App category save created a draft change in Publishing overview."
+        }
+      },
+      "notes": [
+        "Google Play app record exists; production access and store listing are not complete.",
+        "Google Play dashboard task list showed 6 of 11 app information/store listing tasks complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store settings category was later saved as Productivity, but public support contact details remain pending.",
+        "No public store submission was started.",
+        "Apple Developer Agreement was accepted by Vambah. Vambah registered the Apple Developer App ID for com.vsillah.reversrrebuild, created the App Store Connect app record, and Apple ID 6777091538 is recorded in eas.json. App Store Connect metadata is saved as a draft. App Privacy, age rating, TestFlight setup, contact information, build selection, and native screenshots remain pending.",
+        "EAS iOS preview credentials were checked with npx eas-cli@20.0.0 credentials --platform ios. Selecting the preview profile reached the Apple account login prompt, so iOS credential setup remains a human-in-the-loop Apple login gate.",
+        "App Store Connect Apple ID 6777091538 recorded at 2026-06-05T13:53:00.252Z; eas.json submit.production.ios.ascAppId is configured.",
+        "Chrome automation verified at 2026-06-05T15:54:31.264Z that App Store Connect is on the iOS App Version 1.0 Prepare for Submission page with metadata values present, Save disabled, and Add for Review visible but untouched.",
+        "Live store-console field entry, saved edits, file uploads, closed/internal testing release creation, and app review submission remain human-in-the-loop actions.",
+        "The Android phone is no longer required for current cloud build, store-console, Vercel, or GitHub evidence work. Future live Android QA would require reconnecting a device.",
+        "A non-interactive iOS production/TestFlight EAS build attempt at 2026-06-05T16:01:31.192Z detected remote iOS credentials but failed because EAS requires interactive Apple credential validation before using the distribution certificate. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started.",
+        "Google Play store listing asset upload was attempted at 2026-06-05T16:11:30.815Z. Chrome automation reached the asset-library drawer, but the file chooser/file-input path did not complete, so no app icon, feature graphic, or phone screenshot upload was verified."
+      ],
+      "androidWirelessAdb": {
+        "status": "paired-connected",
+        "pairedAt": "2026-06-05T15:01:45.812Z",
+        "serial": "192.168.4.96:33423",
+        "device": "Google Pixel 10 Pro Android 16",
+        "scrcpy": "started successfully with scrcpy 4.0"
+      },
+      "androidRun": {
+        "checkedAt": "2026-06-05T15:01:45.812Z",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "192.168.4.96:33423",
+        "appPackage": "com.vsillah.reversrrebuild",
+        "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+        "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "screenshots": [
+          "docs/store-screenshots/native/android-01-welcome.png",
+          "docs/store-screenshots/native/android-02-scan.png",
+          "docs/store-screenshots/native/android-03-inventory-validation.png",
+          "docs/store-screenshots/native/android-04-design-match.png",
+          "docs/store-screenshots/native/android-05-build-handoff.png"
+        ],
+        "notes": [
+          "Wireless ADB paired and connected successfully.",
+          "Preview APK installed and launched on Pixel 10 Pro.",
+          "Sample scan path advanced through inventory validation, design match, and build handoff.",
+          "BOM generation produced itemized inventory-matched parts.",
+          "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+          "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+        ]
+      }
+    },
+    "storeConsoleTaskAnswers": {
+      "schemaVersion": 1,
+      "generatedAt": "2026-06-05T20:43:48.444Z",
+      "source": "docs/store-submission-packet.json",
+      "status": "draft-console-entry-packet",
+      "appIdentity": {
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "sku": "reversr-rebuild-001"
+      },
+      "hostedUrls": {
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "termsUrl": "https://reversr.vercel.app/terms",
+        "supportUrl": "https://reversr.vercel.app/support",
+        "apiBaseUrl": "https://reversr.vercel.app"
+      },
+      "googlePlayTasks": [
+        {
+          "task": "Set privacy policy",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Privacy policy URL",
+              "value": "https://reversr.vercel.app/privacy"
+            }
+          ],
+          "saveGate": "Saving updates the Google Play Console app record."
+        },
+        {
+          "task": "Sign in details",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Does the app require sign-in?",
+              "value": "No"
+            },
+            {
+              "label": "Reasoning",
+              "value": "Current ReversR Rebuild prototype exposes scan, connector validation, reconstruction package, policy, and support flows without an account login requirement."
+            }
+          ],
+          "saveGate": "Saving updates Google Play app content answers."
+        },
+        {
+          "task": "Ads",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Contains ads?",
+              "value": "No"
+            },
+            {
+              "label": "Reasoning",
+              "value": "The release packet marks ads as false and no advertising SDK is documented for this build."
+            }
+          ],
+          "saveGate": "Saving updates Google Play app content answers."
+        },
+        {
+          "task": "Content rating",
+          "status": "review-required",
+          "fields": [
+            {
+              "label": "Expected rating target",
+              "value": "Everyone / low maturity, pending final questionnaire result"
+            },
+            {
+              "label": "Violence, sexual content, controlled substances, gambling, and user-generated public sharing",
+              "value": "No expected affirmative answers based on current app scope."
+            },
+            {
+              "label": "Camera use",
+              "value": "Camera is used for machine images only, not for public social sharing or user-generated content feeds."
+            }
+          ],
+          "saveGate": "The official questionnaire result must be reviewed before saving as final."
+        },
+        {
+          "task": "Target audience",
+          "status": "review-required",
+          "fields": [
+            {
+              "label": "Recommended target audience",
+              "value": "Adults / workplace users"
+            },
+            {
+              "label": "Children under 13",
+              "value": "No"
+            },
+            {
+              "label": "Reasoning",
+              "value": "The app is for machine reconstruction planning, BOM generation, pricing estimates, and fabrication handoff review."
+            }
+          ],
+          "saveGate": "Target audience answers affect store policy treatment and should be reviewed before saving."
+        },
+        {
+          "task": "Data safety",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Data collected",
+              "value": [
+                "Machine photos or descriptions when submitted for reconstruction planning",
+                "Inventory connector metadata",
+                "Generated reconstruction package content"
+              ]
+            },
+            {
+              "label": "Data shared",
+              "value": [
+                "Configured AI provider processing when enabled",
+                "Vendor handoff only when the user explicitly exports or shares a packet"
+              ]
+            },
+            {
+              "label": "Purposes",
+              "value": [
+                "App functionality",
+                "Inventory matching",
+                "Reconstruction package generation",
+                "Support and troubleshooting if diagnostics are added later"
+              ]
+            },
+            {
+              "label": "Encrypted in transit",
+              "value": "Yes"
+            },
+            {
+              "label": "Tracking",
+              "value": "No"
+            },
+            {
+              "label": "Account deletion required",
+              "value": "Not applicable until account/server-side user storage is added."
+            },
+            {
+              "label": "Required permission",
+              "value": "android.permission.CAMERA"
+            },
+            {
+              "label": "Blocked permissions",
+              "value": [
+                "android.permission.RECORD_AUDIO",
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+                "android.permission.READ_MEDIA_IMAGES",
+                "android.permission.READ_MEDIA_VIDEO"
+              ]
+            }
+          ],
+          "saveGate": "Saving updates Google Play Data safety declarations and should match the final build behavior."
+        },
+        {
+          "task": "Government apps",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Is this a government app?",
+              "value": "No"
+            }
+          ],
+          "saveGate": "Saving updates Google Play app content answers."
+        },
+        {
+          "task": "Financial features",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Financial products or services?",
+              "value": "No"
+            },
+            {
+              "label": "Reasoning",
+              "value": "The app produces reconstruction planning and quote packet materials; it does not offer lending, banking, trading, payments, insurance, or financial advice."
+            }
+          ],
+          "saveGate": "Saving updates Google Play app content answers."
+        },
+        {
+          "task": "Health",
+          "status": "ready-to-enter",
+          "fields": [
+            {
+              "label": "Health features?",
+              "value": "No"
+            }
+          ],
+          "saveGate": "Saving updates Google Play app content answers."
+        },
+        {
+          "task": "Select an app category and provide contact details",
+          "status": "draft-saved",
+          "fields": [
+            {
+              "label": "App or game",
+              "value": "App"
+            },
+            {
+              "label": "Category",
+              "value": "Productivity"
+            },
+            {
+              "label": "Website",
+              "value": "https://reversr.vercel.app/support"
+            },
+            {
+              "label": "Email",
+              "value": "vambah@amadutown.com"
+            },
+            {
+              "label": "Phone",
+              "value": "Optional / leave blank unless Vambah wants public phone support listed"
+            }
+          ],
+          "saveGate": "Saved in Google Play Console; do not click Send for review until final store signoff."
+        },
+        {
+          "task": "Set up your store listing",
+          "status": "partial-native-assets-needed",
+          "fields": [
+            {
+              "label": "App name/title",
+              "value": "ReversR Rebuild"
+            },
+            {
+              "label": "Short description",
+              "value": "Scan machines and create BOM, assembly, pricing, and fabrication packets."
+            },
+            {
+              "label": "Full description",
+              "value": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild is designed for review-driven workflows. Inventory matching, procurement, fabrication, and vendor handoff should be checked by a qualified human before parts are ordered or machines are rebuilt.\n\nThe app does not automatically order parts, submit manufacturing jobs, transmit files to vendors, or purchase services. It prepares reviewable handoff materials so users can make controlled decisions."
+            },
+            {
+              "label": "App icon",
+              "value": "1024x1024 release icon already present per store asset preflight"
+            },
+            {
+              "label": "Feature graphic",
+              "value": "docs/store-assets/google-play-feature-graphic.png"
+            },
+            {
+              "label": "Phone screenshots",
+              "value": "Pending final native Android screenshots in docs/store-screenshots/native/"
+            }
+          ],
+          "saveGate": "Store listing can be drafted, but final screenshot upload must use native preview captures."
+        }
+      ],
+      "appStoreConnectTasks": [
+        {
+          "task": "Create iOS app record",
+          "status": "completed-recorded",
+          "fields": [
+            {
+              "label": "Platform",
+              "value": "iOS"
+            },
+            {
+              "label": "Name",
+              "value": "ReversR Rebuild"
+            },
+            {
+              "label": "Primary language",
+              "value": "English (U.S.)"
+            },
+            {
+              "label": "Bundle ID",
+              "value": "ReversR Rebuild - com.vsillah.reversrrebuild"
+            },
+            {
+              "label": "SKU",
+              "value": "reversr-rebuild-001"
+            },
+            {
+              "label": "User access",
+              "value": "Full Access"
+            },
+            {
+              "label": "Apple ID",
+              "value": "6777091538"
+            },
+            {
+              "label": "Record URL",
+              "value": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight"
+            }
+          ],
+          "saveGate": "Record exists. Continue with metadata, privacy, age rating, TestFlight, and screenshot tasks."
+        },
+        {
+          "task": "App information",
+          "status": "ready-after-record-create",
+          "fields": [
+            {
+              "label": "Subtitle",
+              "value": "Machine rebuild packages"
+            },
+            {
+              "label": "Primary category",
+              "value": "Productivity"
+            },
+            {
+              "label": "Secondary category",
+              "value": "Business"
+            },
+            {
+              "label": "Privacy policy URL",
+              "value": "https://reversr.vercel.app/privacy"
+            }
+          ],
+          "saveGate": "Requires App Store Connect app record and saved console edits."
+        },
+        {
+          "task": "Version metadata",
+          "status": "ready-after-record-create",
+          "fields": [
+            {
+              "label": "Promotional text",
+              "value": "Scan or describe a machine, match it to an approved inventory record, and prepare a reviewable reconstruction package."
+            },
+            {
+              "label": "Description",
+              "value": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nThe workflow is designed for human review. Inventory matches, procurement decisions, fabrication files, and assembly steps should be checked by a qualified person before parts are ordered or machines are rebuilt.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. It prepares reviewable handoff materials so users can make controlled decisions."
+            },
+            {
+              "label": "Keywords",
+              "value": "machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D"
+            },
+            {
+              "label": "Support URL",
+              "value": "https://reversr.vercel.app/support"
+            },
+            {
+              "label": "Marketing URL",
+              "value": "https://reversr.vercel.app/support"
+            },
+            {
+              "label": "Review notes",
+              "value": "Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services."
+            }
+          ],
+          "saveGate": "Requires App Store Connect app record and saved console edits."
+        },
+        {
+          "task": "App Privacy",
+          "status": "ready-to-review",
+          "fields": [
+            {
+              "label": "Tracking",
+              "value": "No"
+            },
+            {
+              "label": "Data used for advertising",
+              "value": "No"
+            },
+            {
+              "label": "Contact info collected",
+              "value": "No"
+            },
+            {
+              "label": "Identifiers collected",
+              "value": "No"
+            },
+            {
+              "label": "Diagnostics collected",
+              "value": "No"
+            },
+            {
+              "label": "User content processed",
+              "value": [
+                "Machine images",
+                "Machine descriptions",
+                "Inventory connector metadata",
+                "Reconstruction outputs"
+              ]
+            },
+            {
+              "label": "Third-party processing",
+              "value": [
+                "Configured AI provider processing when enabled",
+                "User-initiated export or vendor handoff only"
+              ]
+            }
+          ],
+          "saveGate": "Final App Privacy answers must match final build behavior before saving."
+        },
+        {
+          "task": "Age rating",
+          "status": "review-required",
+          "fields": [
+            {
+              "label": "Expected rating target",
+              "value": "4+ / low maturity, pending official questionnaire result"
+            },
+            {
+              "label": "Human review note",
+              "value": "Answer the official questionnaire based on machine reconstruction planning, camera use, and no public user-generated content feed."
+            }
+          ],
+          "saveGate": "Official questionnaire result must be reviewed before saving as final."
+        }
+      ],
+      "hitlValuesNeeded": [
+        "Final official content rating and age rating questionnaire results",
+        "Native Android and iOS screenshots from preview builds",
+        "Apple login/2FA for EAS iOS preview credentials"
+      ],
+      "safetyBoundaries": [
+        "Do not mark any store-console task complete until saved in the relevant console and verified.",
+        "Do not submit to public app review from this packet.",
+        "Do not add secrets, private connector credentials, or raw Apple/Google account data to evidence files."
+      ]
+    },
+    "releaseAutopilotHandoff": {
+      "schemaVersion": 1,
+      "generatedAt": "2026-06-05T16:11:30.815Z",
+      "status": "pending-hitl",
+      "currentPr": {
+        "number": 2,
+        "branch": "codex/inventory-reconstruction-clone",
+        "url": "https://github.com/vsillah/ReversR/pull/2"
+      },
+      "releaseStatus": {
+        "pass": 36,
+        "pending": 3,
+        "blocked": 0,
+        "warn": 0,
+        "pendingGates": [
+          "native-qa-evidence",
+          "store-console-records",
+          "native-screenshots"
+        ]
+      },
+      "activeBrowserState": {
+        "appStoreConnect": {
+          "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+          "screen": "iOS App Version 1.0 Prepare for Submission",
+          "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json. Chrome automation verified product metadata from docs/store-console-copy.md is present on the iOS version page, Sign-in required is unchecked, manual release is selected, Save is disabled, and Add for Review is visible. The App Store Connect tab is left open at the iOS App Version 1.0 Prepare for Submission page. No public review submission was started.",
+          "fields": {
+            "appleId": "6777091538",
+            "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+            "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+            "supportUrl": "https://reversr.vercel.app/support",
+            "marketingUrl": "https://reversr.vercel.app",
+            "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z"
+          },
+          "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete.",
+          "copyBackAfterSuccess": ""
+        },
+        "googlePlayConsole": {
+          "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+          "screen": "Store settings / default store listing editor",
+          "state": "Google Play is authenticated for ReversR Rebuild. Setup progress last showed 6 of 11 complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store settings category was saved as Productivity, creating a draft change in Publishing overview. Store listing text was entered earlier, but store listing remains incomplete because required asset uploads/contact gates remain. Chrome automation reached the default store listing asset-library drawer but could not complete the file chooser path, so no asset upload was verified.",
+          "openTasks": [
+            "Content rating",
+            "Target audience",
+            "Data safety",
+            "Provide public support contact details",
+            "Set up your store listing"
+          ],
+          "copySource": "docs/store-console-copy.md",
+          "taskAnswerSource": "docs/store-console-task-answers.md",
+          "taskAnswerJson": "docs/store-console-task-answers.json",
+          "nextHumanAction": "Confirm the public support email for Google Play contact details, complete content rating, target audience, data safety, required store listing asset uploads, and internal testing setup. Do not click Send for review until all native QA/store evidence and signoff are complete."
+        },
+        "easCredentials": {
+          "command": "npx eas-cli@20.0.0 credentials --platform ios",
+          "profileSelected": "preview",
+          "nextPrompt": "Press any key if you've already finished device registration.",
+          "lastCheckedAt": "2026-06-05T14:37:12Z",
+          "lastProductionAttemptAt": "2026-06-05T16:01:31.192Z",
+          "productionAttemptCommand": "npx eas-cli@20.0.0 build --platform ios --profile production --non-interactive --no-wait --json",
+          "state": "Apple login/2FA succeeded earlier, bundle identifier linkage succeeded, and an Apple distribution certificate was created during the preview credentials flow. No iOS device is available for internal distribution. A later non-interactive iOS production/TestFlight build attempt detected remote iOS credentials but failed because EAS will not validate the distribution certificate non-interactively. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started.",
+          "nextHumanAction": "Run the interactive iOS production/TestFlight EAS build command so EAS can validate or repair Apple credentials. If prompted, complete Apple login and 2FA, then copy back the Expo build URL once the build starts. Stop before any App Store public submission or Add for Review action."
+        }
+      },
+      "lastStrictFailures": {
+        "iosPreviewBuild": [
+          "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode.",
+          "EAS iOS preview credential setup advanced through Apple login/2FA and certificate creation, then paused at device registration.",
+          "No iOS device is available, so the internal preview path is not viable right now. A production/TestFlight credential flow is the recommended iOS path."
+        ],
+        "nativeQaPreflight": [
+          "No Android tested device or tester evidence.",
+          "No iOS preview build URL, tested device, tester, or completedAt evidence.",
+          "Android preview QA and Android native screenshots are recorded; remaining native QA and screenshot blockers are iOS build/screenshot evidence, unverified Android edge checks, and final QA signoff."
+        ],
+        "storeConsolePreflight": [
+          "Google Play privacy policy URL, metadata, data safety, app content, internal testing, and signoff remain incomplete.",
+          "Final native screenshots and native QA signoff remain incomplete.",
+          "Google Play public support contact details remain incomplete because the public support email needs confirmation.",
+          "Google Play store listing asset upload remains incomplete because Chrome automation could not complete the file chooser/file-input path."
+        ]
+      },
+      "verifiedLocalConstraints": {
+        "easWhoami": "vsillah / vsillah@gmail.com",
+        "androidPreviewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+        "adbDevices": "Android wireless device was paired and QA evidence was captured earlier. The phone is not required for current cloud build/store-console work and can be disconnected until another live Android QA pass is needed.",
+        "androidEmulator": "emulator command not found.",
+        "sdkmanager": "sdkmanager not found.",
+        "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable.",
+        "androidPreviewApk": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "androidPreviewApkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35"
+      },
+      "resumeInstructionsForVambah": [
+        "For Android USB: unlock the phone, enable Developer options, turn on USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex to retry Android QA.",
+        "For Android wireless later: reconnect only if another live Android QA pass or visual regression check is needed. The current Android Pixel screenshot evidence is already recorded.",
+        "For Google Play: Chrome is authenticated. Privacy policy, sign-in details, ads, government apps, financial features, health, and app category Productivity are draft-saved. Remaining HITL tasks are public support contact details, content rating, target audience, data safety, store listing asset upload, and testing/release setup.",
+        "For iOS: from /Users/vambahsillah/Documents/ReversR/original-ReversR run EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait. Complete Apple credential validation/login/2FA if prompted, then send the Expo build URL back to Codex."
+      ],
+      "preparedAutomation": [
+        {
+          "name": "Store console task answers",
+          "script": "scripts/generate-store-console-task-answers.js",
+          "npmScript": "npm run store:console:tasks",
+          "purpose": "Generate task-by-task App Store Connect and Google Play Console field answers from docs/store-submission-packet.json.",
+          "commands": [
+            "npm run store:console:tasks"
+          ],
+          "currentValidation": "Generated 11 Google Play task groups and 5 App Store Connect task groups."
+        },
+        {
+          "name": "App Store Connect record helper",
+          "script": "scripts/record-app-store-connect.js",
+          "npmScript": "npm run store:appstore:record",
+          "purpose": "After the App Store Connect app record is created, record the Apple ID and app URL into eas.json, store evidence, and handoff files.",
+          "commands": [
+            "npm run store:appstore:record -- --apple-id 1234567890 --record-url https://appstoreconnect.apple.com/apps/1234567890/appstore"
+          ],
+          "currentValidation": "Validated with real Apple ID 6777091538 and App Store Connect URL; strict native preflight passes."
+        },
+        {
+          "name": "Native Android QA helper",
+          "script": "scripts/native-android-qa-helper.js",
+          "npmScript": "npm run native:android:qa",
+          "purpose": "Probe a connected adb device, launch the Android preview app, capture the five required Android native screenshots, and update docs/native-qa-evidence.json.",
+          "commands": [
+            "npm run native:android:qa -- --probe",
+            "npm run native:android:qa -- --launch",
+            "npm run native:android:qa -- --capture welcome",
+            "npm run native:android:qa -- --capture scan",
+            "npm run native:android:qa -- --capture inventory-validation",
+            "npm run native:android:qa -- --capture design-match",
+            "npm run native:android:qa -- --capture build-handoff"
+          ],
+          "currentValidation": "Help and syntax pass. Probe fails cleanly because no adb device is currently attached."
+        }
+      ],
+      "androidMirroring": {
+        "checkedAt": "2026-06-05T14:47:28.658Z",
+        "tool": "scrcpy",
+        "version": "4.0",
+        "path": "/opt/homebrew/bin/scrcpy",
+        "status": "ready-but-no-adb-device",
+        "lastError": "ERROR: Could not find any ADB device",
+        "nextOptions": [
+          "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+          "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+        ]
+      },
+      "activeTerminalState": {
+        "checkedAt": "2026-06-05T14:47:28.658Z",
+        "cwd": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+        "state": "shell prompt returned; previous EAS iOS internal device-registration prompt is no longer active"
+      },
+      "androidWirelessAdb": {
+        "status": "paired-connected",
+        "pairedAt": "2026-06-05T15:01:45.812Z",
+        "serial": "192.168.4.96:33423",
+        "device": "Google Pixel 10 Pro Android 16",
+        "scrcpy": "started successfully with scrcpy 4.0",
+        "disconnectedAt": "2026-06-05T15:03:28.217Z",
+        "disconnectStatus": "adb devices empty after explicit adb disconnect of host:port and mdns alias"
+      },
+      "androidRun": {
+        "checkedAt": "2026-06-05T15:01:45.812Z",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "192.168.4.96:33423",
+        "appPackage": "com.vsillah.reversrrebuild",
+        "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+        "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "screenshots": [
+          "docs/store-screenshots/native/android-01-welcome.png",
+          "docs/store-screenshots/native/android-02-scan.png",
+          "docs/store-screenshots/native/android-03-inventory-validation.png",
+          "docs/store-screenshots/native/android-04-design-match.png",
+          "docs/store-screenshots/native/android-05-build-handoff.png"
+        ],
+        "notes": [
+          "Wireless ADB paired and connected successfully.",
+          "Preview APK installed and launched on Pixel 10 Pro.",
+          "Sample scan path advanced through inventory validation, design match, and build handoff.",
+          "BOM generation produced itemized inventory-matched parts.",
+          "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+          "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+        ]
+      }
+    },
+    "storeOperatorPacket": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-06T10:10:59.110Z",
+      "releaseStatus": {
+        "generatedAt": "2026-06-06T10:10:59.105Z",
+        "summary": {
+          "pass": 38,
+          "pending": 1
+        },
+        "pendingGateIds": [
+          "store-console-records"
+        ]
+      },
+      "appIdentity": {
+        "name": "ReversR Rebuild",
+        "version": "1.0.0",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild",
+        "sku": "reversr-rebuild-001",
+        "primaryLanguage": "en-US",
+        "category": {
+          "applePrimary": "Productivity",
+          "appleSecondary": "Business",
+          "googleCategory": "Productivity"
+        }
+      },
+      "appStoreConnect": {
+        "name": "ReversR Rebuild",
+        "subtitle": "Machine rebuild packages",
+        "keywordsLength": 66,
+        "reviewNotesPresent": true,
+        "privacyDraftReady": true
+      },
+      "googlePlay": {
+        "title": "ReversR Rebuild",
+        "shortDescriptionLength": 73,
+        "dataSafetyDraftReady": true,
+        "requiredPermissions": [
+          "android.permission.CAMERA"
+        ]
+      },
+      "assets": {
+        "featureGraphic": {
+          "path": "docs/store-assets/google-play-feature-graphic.png",
+          "exists": true
+        },
+        "nativeScreenshotsRequired": true,
+        "nativeScreenshotsCaptured": true,
+        "requiredNativeScreenshotCount": 5,
+        "webPlanningEvidence": {
+          "path": "docs/store-screenshots/planning-evidence.json",
+          "exists": true
+        }
+      },
+      "sourceArtifacts": [
+        {
+          "path": "docs/store-submission-packet.json",
+          "exists": true
+        },
+        {
+          "path": "docs/store-console-copy.md",
+          "exists": true
+        },
+        {
+          "path": "docs/store-console-task-answers.json",
+          "exists": true
+        },
+        {
+          "path": "docs/store-console-task-answers.md",
+          "exists": true
+        },
+        {
+          "path": "docs/store-review-safety-packet.md",
+          "exists": true
+        },
+        {
+          "path": "docs/native-qa-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/store-console-evidence.template.json",
+          "exists": true
+        },
+        {
+          "path": "docs/store-console-browser-handoff.json",
+          "exists": true
+        },
+        {
+          "path": "docs/native-device-handoff.json",
+          "exists": true
+        },
+        {
+          "path": "docs/native-qa-evidence.template.json",
+          "exists": true
+        },
+        {
+          "path": "docs/store-screenshots/planning-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/store-assets/google-play-feature-graphic.png",
+          "exists": true
+        },
+        {
+          "path": "docs/release-next-actions.md",
+          "exists": true
+        },
+        {
+          "path": "docs/release-evidence-bundle.json",
+          "exists": true
+        },
+        {
+          "path": "docs/objective-readiness-audit.json",
+          "exists": true
+        },
+        {
+          "path": "docs/external-release-setup-runbook.md",
+          "exists": true
+        }
+      ],
+      "consoleEntryOrder": [
+        "Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.",
+        "Create Google Play Console record for com.vsillah.reversrrebuild.",
+        "Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.",
+        "Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.",
+        "Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.",
+        "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.",
+        "Use docs/native-qa-evidence.json and docs/store-screenshots/native/ as the recorded native QA/screenshot source.",
+        "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
+      ],
+      "pendingGates": [
+        {
+          "id": "store-console-records",
+          "group": "store-console",
+          "title": "Store console final review and submission gates are resolved",
+          "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission."
+        }
+      ],
+      "safetyBoundary": [
+        "This packet is store-console setup support, not approval to submit production builds.",
+        "Final native screenshots must come from Android and iOS preview builds.",
+        "Quote packets and vendor request drafts remain explicit human-review handoffs.",
+        "Raw connector secrets must stay server-side behind credentialRef references."
+      ]
+    },
+    "hostedOperatorPacket": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "generatedAt": "2026-06-06T10:10:59.724Z",
+      "releaseStatus": {
+        "generatedAt": "2026-06-06T10:10:59.720Z",
+        "summary": {
+          "pass": 38,
+          "pending": 1
+        }
+      },
+      "appIdentity": {
+        "name": "ReversR Rebuild",
+        "version": "1.0.0",
+        "iosBundleId": "com.vsillah.reversrrebuild",
+        "androidPackage": "com.vsillah.reversrrebuild"
+      },
+      "hostedGates": [
+        {
+          "id": "preview-host-smoke",
+          "group": "hosted",
+          "status": "pass",
+          "title": "Vercel preview host renders app and policy/support routes before production hosting",
+          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T10:00:13.150Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "hosted-api",
+          "group": "hosted",
+          "status": "pass",
+          "title": "Hosted HTTPS API URL is configured for native builds",
+          "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "hosted-policy-urls",
+          "group": "hosted",
+          "status": "pass",
+          "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+          "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "real-connector-smoke",
+          "group": "hosted",
+          "status": "pass",
+          "title": "Hosted API can validate and match against a public machine inventory",
+          "evidence": "docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at 2026-06-05T10:39:16.612Z.",
+          "nextStep": ""
+        }
+      ],
+      "sourceArtifacts": [
+        {
+          "path": "docs/production-api-deployment.md",
+          "exists": true
+        },
+        {
+          "path": "docs/production-api-env.example",
+          "exists": true
+        },
+        {
+          "path": "docs/policy-hosting-deployment.md",
+          "exists": true
+        },
+        {
+          "path": "docs/external-release-setup-runbook.md",
+          "exists": true
+        },
+        {
+          "path": "docs/api-deployment-smoke-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/policy-hosting-smoke-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/preview-host-target.json",
+          "exists": true
+        },
+        {
+          "path": "docs/preview-host-smoke-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/farmbot-public-inventory-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/hosted-connector-smoke-evidence.json",
+          "exists": true
+        },
+        {
+          "path": "docs/sample-machine-inventory.csv",
+          "exists": true
+        },
+        {
+          "path": "public/inventory/farmbot-genesis-v1.8.json",
+          "exists": true
+        },
+        {
+          "path": "Dockerfile",
+          "exists": true
+        },
+        {
+          "path": "vercel.json",
+          "exists": true
+        },
+        {
+          "path": "scripts/generate-farmbot-inventory.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/api-env-preflight.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/api-preflight.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/api-deployment-smoke.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/policy-hosting-preflight.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/hosted-connector-smoke.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/preview-host-smoke.js",
+          "exists": true
+        }
+      ],
+      "commandSequence": [
+        {
+          "id": "api-env-preflight",
+          "command": "API_ENV_FILE=/path/to/provider-env-export npm run api:env:preflight",
+          "purpose": "Validate hosted API CORS, body limit, AI key, admin token, connector-secret, and private-network settings before deploy."
+        },
+        {
+          "id": "api-deployment-smoke",
+          "command": "npm run api:deployment-smoke",
+          "purpose": "Refresh local production-style API smoke evidence before deploying the container."
+        },
+        {
+          "id": "api-hosted-preflight",
+          "command": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight",
+          "purpose": "Prove the deployed API health, restricted CORS, demo inventory validation, and optional admin registry access."
+        },
+        {
+          "id": "policy-hosted-preflight",
+          "command": "EXPO_PUBLIC_PRIVACY_POLICY_URL=https://your-domain.example/privacy EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support npm run policy:preflight -- --check-hosted",
+          "purpose": "Prove hosted privacy, terms, and support URLs are reachable over public HTTPS."
+        },
+        {
+          "id": "inventory-source-validate",
+          "command": "npm run inventory:farmbot:validate",
+          "purpose": "Generate and validate the public FarmBot Genesis v1.8 machine inventory before connecting it to the hosted API."
+        },
+        {
+          "id": "hosted-connector-smoke",
+          "command": "EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR/refs/heads/codex/inventory-reconstruction-clone/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke",
+          "purpose": "Prove hosted machine inventory validation, machine matching, BOM generation, and no-raw-secret handling against a public source."
+        },
+        {
+          "id": "preview-smoke",
+          "command": "PREVIEW_SMOKE_URL=<preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
+          "purpose": "Prove the PR preview renders the app and policy/support routes before production hosting decisions."
+        }
+      ],
+      "requiredEnv": [
+        "API_CORS_ORIGINS",
+        "API_REQUEST_BODY_LIMIT",
+        "AI_INTEGRATIONS_GEMINI_API_KEY",
+        "ADMIN_API_TOKEN",
+        "INVENTORY_CONNECTOR_SECRETS_JSON or INVENTORY_CONNECTOR_SECRETS_FILE",
+        "EXPO_PUBLIC_API_BASE_URL",
+        "EXPO_PUBLIC_PRIVACY_POLICY_URL",
+        "EXPO_PUBLIC_TERMS_URL",
+        "EXPO_PUBLIC_SUPPORT_URL",
+        "CONNECTOR_SMOKE_SOURCE_URL"
+      ],
+      "outputsToUpdateAfterHostedWork": [
+        "docs/preview-host-smoke-evidence.json",
+        "docs/api-deployment-smoke-evidence.json",
+        "docs/policy-hosting-smoke-evidence.json",
+        "docs/store-submission-packet.json hosted URLs, if it remains the console copy source",
+        "docs/native-release-config-evidence.json after EAS hosted env binding",
+        "docs/release-evidence-bundle.json"
+      ],
+      "safetyBoundary": [
+        "Do not put Gemini keys, admin tokens, connector API keys, or OAuth tokens in mobile app config or committed files.",
+        "Restrict API_CORS_ORIGINS to hosted app origins before native release builds.",
+        "Keep INVENTORY_PRIVATE_NETWORK_ENABLED=false unless the API host has approved network controls.",
+        "Connector smoke should send credentialRef only; raw connector secrets must remain server-side.",
+        "Hosted preview and policy evidence does not replace native Android/iOS QA evidence."
+      ]
+    },
+    "localReleaseCi": {
+      "schemaVersion": 1,
+      "status": "pass",
+      "startedAt": "2026-06-06T10:10:35.559Z",
+      "completedAt": "2026-06-06T10:10:53.026Z",
+      "commandCount": 16,
+      "passedCount": 16,
+      "failedCount": 0,
+      "notRun": [],
+      "results": [
+        {
+          "id": "typecheck",
+          "proves": "TypeScript compile surface has no static errors.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 1335,
+          "command": "npm run typecheck",
+          "stdoutTail": "> reversr-rebuild@1.0.0 typecheck\n> tsc --noEmit",
+          "stderrTail": ""
+        },
+        {
+          "id": "accessibility-preflight",
+          "proves": "Critical scan, inventory, design, build, Settings, and policy controls have required labels/copy.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 117,
+          "command": "npm run accessibility:preflight",
+          "stdoutTail": "> reversr-rebuild@1.0.0 accessibility:preflight\n> node scripts/accessibility-preflight.js\n\nAccessibility preflight passed.",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-assets-preflight",
+          "proves": "Google Play feature graphic exists at the required 1024x500 size.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 119,
+          "command": "npm run store:assets:preflight",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:assets:preflight\n> node scripts/store-assets-preflight.js\n\nStore assets preflight passed.",
+          "stderrTail": ""
+        },
+        {
+          "id": "inventory-preflight",
+          "proves": "Protected local credentialRef inventory connector can validate, match a machine, and generate a BOM.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 433,
+          "command": "npm run inventory:preflight",
+          "stdoutTail": "> reversr-rebuild@1.0.0 inventory:preflight\n> node scripts/inventory-connector-preflight.js\n\nInventory connector preflight passed.\n- protected inventory fixture: http://127.0.0.1:3917/machines.json\n- credentialRef verified: preflight-api-key\n- matched machine: INV-FDM-100 (Desktop FDM 3D Printer)\n- BOM items: 6",
+          "stderrTail": ""
+        },
+        {
+          "id": "policy-preflight-local",
+          "proves": "Privacy, terms, and support web export content is ready before hosted deployment.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 5448,
+          "command": "npm run policy:preflight:local",
+          "stdoutTail": "> reversr-rebuild@1.0.0 policy:preflight:local\n> node scripts/policy-hosting-preflight.js --allow-placeholder\n\nPolicy hosting preflight passed. Web export verified at /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export\nEvidence: /var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-local-release-ci-policy-hosting-smoke-evidence.json",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-submission-preflight-local",
+          "proves": "App Store and Google Play packet copy, privacy, data-safety, and screenshot requirements fit local constraints.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 104,
+          "command": "npm run store:submission:preflight:local",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:submission:preflight:local\n> node scripts/store-submission-preflight.js --allow-placeholder\n\nStore submission preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-submission-smoke-evidence.json",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-review-safety",
+          "proves": "Store review safety packet proves human review, camera-only data use, and no automatic vendor submission.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 103,
+          "command": "npm run store:review-safety",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:review-safety\n> node scripts/generate-store-review-safety-packet.js\n\nStore review safety packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-packet.md\nStore review safety evidence written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-review-safety-evidence.json\nStatus: pass",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-console-copy",
+          "proves": "App Store Connect and Google Play Console copy/paste packet is generated from submission metadata.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 101,
+          "command": "npm run store:console:copy",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:console:copy\n> node scripts/generate-store-console-copy.js\n\nStore console copy packet written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-copy.md",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-operator-packet",
+          "proves": "Store-console operator handoff packet is generated from release evidence and submission metadata.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 600,
+          "command": "npm run store:operator-packet",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:operator-packet\n> node scripts/generate-store-operator-packet.js\n\nStore operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/manifest.json\nStore operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-operator-packet/README.md\nPending gates included: 2",
+          "stderrTail": ""
+        },
+        {
+          "id": "hosted-operator-packet",
+          "proves": "Hosted API, policy URL, preview, and connector operator packet is generated.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 565,
+          "command": "npm run hosted:operator-packet",
+          "stdoutTail": "> reversr-rebuild@1.0.0 hosted:operator-packet\n> node scripts/generate-hosted-operator-packet.js\n\nHosted operator packet manifest written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/manifest.json\nHosted operator packet README written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/hosted-operator-packet/README.md\nHosted gates included: 4",
+          "stderrTail": ""
+        },
+        {
+          "id": "release-next-actions-write",
+          "proves": "External release next actions are generated as durable JSON and Markdown artifacts.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 598,
+          "command": "npm run release:next-actions:write",
+          "stdoutTail": "> reversr-rebuild@1.0.0 release:next-actions:write\n> node scripts/release-next-actions.js --write\n\nRelease next actions JSON written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.json\nRelease next actions Markdown written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/release-next-actions.md\nPending gates: 1\nNext recommended gate: store-console-records",
+          "stderrTail": ""
+        },
+        {
+          "id": "objective-readiness-audit",
+          "proves": "Original user objective is mapped to proven local work and pending external release gates.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 601,
+          "command": "npm run release:objective",
+          "stdoutTail": "> reversr-rebuild@1.0.0 release:objective\n> node scripts/objective-readiness-audit.js\n\nObjective readiness audit written: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/objective-readiness-audit.json\nStatus: pending\nRequirements passed: 6/8\nPending requirements: store-readiness-packet, apple-google-store-publication",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-console-preflight-local",
+          "proves": "Store-console pending evidence records account-side requirements without claiming final console proof.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 106,
+          "command": "npm run store:console:preflight:local",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:console:preflight:local\n> node scripts/store-console-preflight.js --allow-pending\n\nWarnings:\n- App Store Connect TestFlight readiness is not marked complete.\n- Review gate productionSubmissionApproved is not marked true.\n- Production submission is not approved.\n- Store console signoff is missing releaseOwner.\n- Store console signoff is missing storeReviewer.\n- Store console signoff is missing signedAt.\nPending evidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/store-console-pending-evidence.json\nStore console preflight passed.",
+          "stderrTail": ""
+        },
+        {
+          "id": "native-preflight-local",
+          "proves": "Native identity, permissions, EAS profile shape, and remaining external native gates are recorded.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 1826,
+          "command": "npm run native:preflight:local",
+          "stdoutTail": "> reversr-rebuild@1.0.0 native:preflight:local\n> node scripts/native-release-preflight.js --allow-placeholder --allow-missing-cli --allow-unlinked-eas --allow-not-logged-in\n\nEAS CLI (pinned npx eas-cli@20.0.0): eas-cli/20.0.0 darwin-arm64 node-v24.15.0\n★ eas-cli@20.1.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version.\nNative release preflight passed.\nEvidence: /Users/vambahsillah/Documents/ReversR/original-ReversR/docs/native-release-config-evidence.json",
+          "stderrTail": ""
+        },
+        {
+          "id": "native-qa-preflight-local",
+          "proves": "Native QA evidence template is structurally valid while preview-build evidence remains pending.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 129,
+          "command": "npm run native:qa:preflight:local",
+          "stdoutTail": "- Native QA check vendor-request-draft is pending on android.\n- Native QA check vendor-request-draft is pending on ios.\n- Native QA check policy-links is pending on ios.\n- Native QA check offline-api-error is pending on ios.\n- Native QA check connector-auth-error is pending on ios.\n- Native QA is not approved for TestFlight yet.\n- Native QA is not approved for Play Internal Testing yet.\n- Native QA is not approved for production submission yet.\n- Native QA signoff is missing releaseOwner.\n- Native QA signoff is missing qaReviewer.\n- Native QA signoff is missing signedAt.\nNative QA preflight passed.",
+          "stderrTail": ""
+        },
+        {
+          "id": "store-preflight-local",
+          "proves": "The full local store preflight passes with placeholder hosted URLs explicitly allowed.",
+          "status": "pass",
+          "exitCode": 0,
+          "durationMs": 5281,
+          "command": "npm run store:preflight:local",
+          "stdoutTail": "> reversr-rebuild@1.0.0 store:preflight:local\n> node scripts/store-preflight.js --allow-placeholder\n\nStore preflight passed.",
+          "stderrTail": ""
+        }
+      ],
+      "externalGatesStillRequired": [
+        "store-console-records"
+      ],
+      "notes": [
+        "This is a local CI pass for pre-store readiness only.",
+        "Store console records, final store signoff, and public review/production actions remain external gates."
+      ]
+    },
+    "releaseNextActions": {
+      "schemaVersion": 1,
+      "generatedAt": "2026-06-06T10:10:45.076Z",
+      "releaseStatusGeneratedAt": "2026-06-06T10:10:45.071Z",
+      "summary": {
+        "pass": 8,
+        "pending": 1
+      },
+      "nextRecommendedGate": "store-console-records",
+      "pendingGates": [
+        {
+          "group": "store-console",
+          "id": "store-console-records",
+          "title": "Store console final review and submission gates are resolved",
+          "status": "pending",
+          "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, final signoff.",
+          "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission.",
+          "action": {
+            "owner": "Store release operator",
+            "phase": "Store console final review",
+            "action": "Resolve the remaining App Store Connect and Google Play review/signoff gates without starting public submission.",
+            "steps": [
+              "Use the recorded App Store Connect app record and Apple ID in docs/store-console-evidence.json.",
+              "Follow docs/external-release-setup-runbook.md sections 2 and 3.",
+              "Use the recorded Google Play Console app dashboard URL in docs/store-console-evidence.json.",
+              "Run npm run store:submission:preflight:local and confirm docs/store-submission-smoke-evidence.json is updated.",
+              "Run npm run store:console:preflight:local and confirm docs/store-console-pending-evidence.json is updated.",
+              "Review the saved App Store Connect metadata, age rating, content rights, and configured App Privacy answers.",
+              "Only after explicit approval, publish App Privacy and complete any Apple legal/accuracy attestation.",
+              "Complete TestFlight tester/group readiness or explicitly decide to proceed without TestFlight tester expansion.",
+              "Review the saved Google Play metadata, Data Safety, App Content, content rating, target audience, Advertising ID, and internal-testing release.",
+              "Only after explicit approval, complete Google Play internal-testing tester access/review readiness and any Send for review action.",
+              "Update docs/store-console-evidence.json with final console task results, review-gate, and signoff fields.",
+              "Run npm run store:console:preflight:local for pending-safe proof; run strict npm run store:console:preflight only after final signoff fields are complete."
+            ],
+            "evidence": [
+              "docs/store-submission-smoke-evidence.json records App Store metadata, Google Play metadata, privacy/data-safety answers, native screenshot requirements, and open gates.",
+              "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup requirements.",
+              "docs/store-console-evidence.json exists with both console records.",
+              "npm run store:console:preflight:local passes with only explicitly gated warnings until final signoff is complete."
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "releaseStatus": "npm run release:status",
+    "releaseNextActions": "npm run release:next-actions",
+    "releaseNextActionsWrite": "npm run release:next-actions:write",
+    "previewHostDiscover": "npm run preview:discover -- --pr <pull-request-number>",
+    "releaseObjective": "npm run release:objective",
+    "releaseLocalCi": "npm run release:local-ci",
+    "storeReviewSafety": "npm run store:review-safety",
+    "storeConsoleCopy": "npm run store:console:copy",
+    "storeOperatorPacket": "npm run store:operator-packet",
+    "hostedOperatorPacket": "npm run hosted:operator-packet",
+    "previewHostSmoke": "PREVIEW_SMOKE_URL=https://your-pr-preview.vercel.app PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
+    "storePreflightLocal": "npm run store:preflight:local",
+    "storeConsolePreflightLocal": "npm run store:console:preflight:local",
+    "nativePreflightLocal": "npm run native:preflight:local",
+    "hostedApiPreflight": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight",
+    "vercelProtectedApiSmoke": "VERCEL_PROTECTED_API_URL=https://your-preview.vercel.app npm run api:vercel-protected-smoke",
+    "hostedPolicyPreflight": "npm run policy:preflight -- --check-hosted",
+    "farmbotInventoryValidate": "npm run inventory:farmbot:validate",
+    "hostedConnectorSmoke": "npm run connector:smoke",
+    "storeGooglePlayScreenshots": "npm run store:screenshots:google-play",
+    "storeAssetsPreflight": "npm run store:assets:preflight",
+    "nativeQaPreflight": "npm run native:qa:preflight",
+    "nativeEasSyncBuilds": "npm run native:eas:sync-builds",
+    "nativeEasSyncProductionBuilds": "npm run native:eas:sync-production-builds",
+    "nativeIosPreviewBuild": "npm run native:ios:preview-build",
+    "storeConsolePreflight": "npm run store:console:preflight"
+  },
+  "sourceArtifacts": [
+    "docs/store-submission-packet.json",
+    "docs/store-review-safety-packet.md",
+    "docs/store-review-safety-evidence.json",
+    "docs/store-console-copy.md",
+    "docs/store-console-task-answers.json",
+    "docs/store-console-task-answers.md",
+    "scripts/record-app-store-connect.js",
+    "docs/store-operator-packet/manifest.json",
+    "docs/store-operator-packet/README.md",
+    "docs/hosted-operator-packet/manifest.json",
+    "docs/hosted-operator-packet/README.md",
+    "docs/api-hosted-preflight-evidence.json",
+    "docs/store-console-pending-evidence.json",
+    "docs/store-console-browser-handoff.json",
+    "docs/release-autopilot-handoff.json",
+    "docs/store-console-evidence.template.json",
+    "docs/store-assets/google-play-icon.png",
+    "docs/store-screenshots/google-play-phone/manifest.json",
+    "scripts/generate-google-play-phone-screenshots.js",
+    "docs/native-device-handoff.json",
+    "docs/eas-preview-build-sync-evidence.json",
+    "docs/eas-production-build-sync-evidence.json",
+    "docs/eas-ios-production-build-attempt-evidence.json",
+    "docs/eas-ios-submit-attempt-evidence.json",
+    "docs/eas-android-submit-attempt-evidence.json",
+    "docs/native-android-live-qa-evidence.json",
+    "docs/release-readiness-gate-evidence.json",
+    "docs/eas-ios-preview-build-start-evidence.json",
+    "docs/native-qa-evidence.json",
+    "docs/native-qa-evidence.template.json",
+    "scripts/sync-eas-preview-builds.js",
+    "scripts/sync-eas-production-builds.js",
+    "scripts/start-ios-preview-build.js",
+    "scripts/native-android-qa-helper.js",
+    "docs/store-screenshots/native/README.md",
+    "docs/local-release-ci-evidence.json",
+    "docs/preview-host-target.json",
+    "docs/farmbot-public-inventory-evidence.json",
+    "docs/hosted-connector-smoke-evidence.json",
+    "public/inventory/farmbot-genesis-v1.8.json",
+    "docs/objective-readiness-audit.json",
+    "docs/external-release-setup-runbook.md",
+    ".github/workflows/release-local-ci.yml",
+    "docs/release-action-plan.md",
+    "docs/release-next-actions.json",
+    "docs/release-next-actions.md",
+    "docs/store-readiness.md"
+  ],
+  "notes": [
+    "This bundle is local readiness evidence, not App Store Connect or Google Play approval.",
+    "Production release still requires store-console approval, tester/review decisions, and explicit human signoff before public submission.",
+    "Raw connector secrets must remain server-side and should not appear in mobile app config or evidence files."
+  ],
+  "packageScriptsAvailable": [
+    "store:assets:generate",
+    "store:screenshots:google-play",
+    "store:assets:preflight",
+    "release:status",
+    "release:next-actions",
+    "release:next-actions:write",
+    "release:objective",
+    "release:evidence",
+    "release:local-ci",
+    "api:preflight",
+    "api:env:preflight",
+    "api:env:preflight:local",
+    "api:deployment-smoke",
+    "api:vercel-protected-smoke",
+    "inventory:farmbot:generate",
+    "inventory:farmbot:validate",
+    "inventory:source:validate",
+    "inventory:preflight",
+    "connector:smoke",
+    "api:docker:build",
+    "native:preflight",
+    "native:preflight:local",
+    "native:qa:preflight",
+    "native:qa:preflight:local",
+    "native:eas:sync-builds",
+    "native:eas:sync-production-builds",
+    "native:ios:preview-build",
+    "native:android:qa",
+    "store:submission:preflight",
+    "store:submission:preflight:local",
+    "store:review-safety",
+    "store:console:copy",
+    "store:console:tasks",
+    "store:appstore:record",
+    "store:operator-packet",
+    "store:console:preflight",
+    "store:console:preflight:local",
+    "store:preflight",
+    "store:preflight:local"
+  ]
+}

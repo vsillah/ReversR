@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T10:39:16.612Z",
+  "apiBaseUrl": "https://reversr.vercel.app",
+  "localApi": false,
+  "connector": {
+    "sourceName": "FarmBot Genesis public machine inventory",
+    "sourceUrl": "https://raw.githubusercontent.com/vsillah/ReversR/f66e9bc41891116ca6e05df6fea9638b4d9b9d41/public/inventory/farmbot-genesis-v1.8.json",
+    "connectorType": "json",
+    "authMode": "none",
+    "credentialRefConfigured": false,
+    "notes": "Hosted connector smoke metadata. Raw secrets remain on the API host."
+  },
+  "validation": {
+    "status": "ok",
+    "recordCount": 1,
+    "credentialStatus": "not_required"
+  },
+  "match": {
+    "patternUsed": "inventory_match",
+    "machineId": "FARMBOT-GENESIS-V1-8",
+    "machineName": "FarmBot Genesis v1.8",
+    "confidenceScore": 0.66,
+    "evidence": "Matched on parts: track extrusion, gantry main beam, farmduino, raspberry pi, motor, utm pcb, solenoid valve, power supply; aliases: farmbot, farmbot genesis, cnc farming machine; materials: raspberry pi.",
+    "assemblyStepCount": 7,
+    "fulfillmentOptionCount": 3,
+    "totalEstimate": "$2,856-$4,506"
+  },
+  "bom": {
+    "itemCount": 7,
+    "totalEstimatedCost": "$2,556"
+  },
+  "safety": {
+    "rawSecretsIncluded": false,
+    "secretHandling": "Connector smoke sends credentialRef metadata only. Raw connector secrets must remain server-side."
+  }
+}

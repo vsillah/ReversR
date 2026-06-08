@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-08T10:00:52.207Z",
+  "appUrl": "http://localhost:5001",
+  "apiUrl": "http://localhost:3001",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "machineDescription": "A desktop FDM 3D printer with aluminum extrusion frame, heated bed, extruder, belts, rails, stepper motors, control board, power supply, nozzle, and display.",
+  "api": {
+    "healthStatus": 200,
+    "healthOk": true,
+    "healthBody": {
+      "status": "ok",
+      "service": "reversr-rebuild-api",
+      "version": "0.1.0",
+      "apiKeys": {
+        "total": 0,
+        "available": 0,
+        "allInCooldown": true
+      },
+      "cache": {
+        "size": 0
+      },
+      "inventorySources": [
+        "demo",
+        "file",
+        "http",
+        "https"
+      ],
+      "authenticatedConnectorsEnabled": false,
+      "credentialRegistryEnabled": false,
+      "credentialCount": 0,
+      "privateNetworkConnectorsEnabled": false,
+      "runtimeConfig": {
+        "corsMode": "open",
+        "allowedCorsOriginCount": 0,
+        "requestBodyLimit": "50mb",
+        "adminRoutesEnabled": false,
+        "registryWritesEnabled": false,
+        "privateNetworkConnectorsEnabled": false
+      }
+    },
+    "retiredSitRouteStatus": 404
+  },
+  "verified": {
+    "welcome": true,
+    "legacySitAbsent": true,
+    "scan": true,
+    "inventoryValidation": true,
+    "machineMatch": true,
+    "bom": true,
+    "quotePacket": true,
+    "vendorRequestDraft": true,
+    "manufacturingReadiness": true
+  },
+  "observed": {
+    "matchedMachineName": "Desktop FDM 3D Printer",
+    "flow": "scan -> inventory validation -> machine match -> BOM -> quote packet/vendor draft"
+  },
+  "errors": {
+    "console": [],
+    "page": []
+  }
+}

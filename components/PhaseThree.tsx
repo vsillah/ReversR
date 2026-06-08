@@ -16,7 +16,6 @@ import {
 // Using RNImage from react-native instead (imported above)
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import * as MediaLibrary from 'expo-media-library';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import {
@@ -32,7 +31,7 @@ import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
 const DESIGN_STEPS: LoadingStep[] = [
-  { id: 'analyzing', label: 'Analyzing innovation concept' },
+  { id: 'analyzing', label: 'Analyzing reconstruction plan' },
   { id: 'specifications', label: 'Generating technical specifications' },
   { id: 'finalizing', label: 'Finalizing blueprint details' },
 ];
@@ -304,87 +303,73 @@ export default function PhaseThree({
     }
   };
 
-  const handleSaveImage = async () => {
-    const imageToSave = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
-    if (!imageToSave) {
+  const writeImageToDocumentFile = async (imageUri: string, filename: string): Promise<string> => {
+    const fileUri = FileSystem.documentDirectory + filename;
+
+    if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+      const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
+      if (downloadResult.status !== 200) throw new Error('Failed to download image');
+    } else {
+      const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    }
+
+    return fileUri;
+  };
+
+  const handleExportImage = async () => {
+    const imageToExport = normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
+    if (!imageToExport) {
       setAlert({visible: true, title: 'No Image', message: 'No image available to save.', type: 'info'});
       return;
     }
     
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
-        return;
-      }
-
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
-      const fileUri = FileSystem.documentDirectory + filename;
-      
-      if (imageToSave.startsWith('http://') || imageToSave.startsWith('https://')) {
-        const downloadResult = await FileSystem.downloadAsync(imageToSave, fileUri);
-        if (downloadResult.status !== 200) throw new Error('Failed to download image');
-      } else {
-        const base64Data = imageToSave.replace(/^data:image\/\w+;base64,/, '');
-        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-      }
+      const fileUri = await writeImageToDocumentFile(imageToExport, filename);
 
-      await MediaLibrary.saveToLibraryAsync(fileUri);
-      setAlert({visible: true, title: 'Saved', message: `${currentAngleImage?.label || 'Image'} saved to your photo library.`, type: 'success'});
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        setAlert({visible: true, title: 'Exported', message: `${currentAngleImage?.label || 'Image'} exported to app storage.`, type: 'success'});
+      }
     } catch (e: any) {
-      console.error('Save image error:', e?.message || e);
-      setAlert({visible: true, title: 'Error', message: `Failed to save image: ${e?.message || 'Unknown error'}`, type: 'error'});
+      console.error('Export image error:', e?.message || e);
+      setAlert({visible: true, title: 'Error', message: `Failed to export image: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
-  const handleSaveAllAngles = async () => {
+  const handleExportAllAngles = async () => {
     if (availableAngles.length === 0) {
       setAlert({visible: true, title: 'No Images', message: 'No images available to save.', type: 'info'});
       return;
     }
     
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        setAlert({visible: true, title: 'Permission Required', message: 'Please allow access to save images.', type: 'error'});
-        return;
-      }
-
-      let savedCount = 0;
+      let exportedCount = 0;
       for (const angle of availableAngles) {
         if (angle.imageData) {
           const imageUri = normalizeImageUri(angle.imageData);
           if (!imageUri) continue;
           
           const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angle.label.replace(/\s+/g, '_')}.png`;
-          const fileUri = FileSystem.documentDirectory + filename;
           
           try {
-            if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
-              const downloadResult = await FileSystem.downloadAsync(imageUri, fileUri);
-              if (downloadResult.status !== 200) continue;
-            } else {
-              const base64Data = imageUri.replace(/^data:image\/\w+;base64,/, '');
-              await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-                encoding: FileSystem.EncodingType.Base64,
-              });
-            }
-            
-            await MediaLibrary.saveToLibraryAsync(fileUri);
-            savedCount++;
+            await writeImageToDocumentFile(imageUri, filename);
+            exportedCount++;
           } catch (angleError: any) {
-            console.error('Error saving angle:', angle.id, angleError?.message);
+            console.error('Error exporting angle:', angle.id, angleError?.message);
           }
         }
       }
       
-      setAlert({visible: true, title: 'Saved', message: `${savedCount} images saved to your photo library.`, type: 'success'});
+      setAlert({visible: true, title: 'Exported', message: `${exportedCount} images exported to app storage. Export one image at a time to open the system share sheet.`, type: 'success'});
     } catch (e: any) {
-      console.error('Save all angles error:', e?.message || e);
-      setAlert({visible: true, title: 'Error', message: `Failed to save images: ${e?.message || 'Unknown error'}`, type: 'error'});
+      console.error('Export all angles error:', e?.message || e);
+      setAlert({visible: true, title: 'Error', message: `Failed to export images: ${e?.message || 'Unknown error'}`, type: 'error'});
     }
   };
 
@@ -395,20 +380,7 @@ export default function PhaseThree({
     try {
       const angleSuffix = currentAngleImage?.label?.replace(/\s+/g, '_') || '2D';
       const filename = `${innovation.conceptName.replace(/\s+/g, '_')}_${angleSuffix}.png`;
-      const fileUri = FileSystem.documentDirectory + filename;
-      
-      // Handle HTTP URLs by downloading, base64 data URLs by extracting
-      if (imageToShare.startsWith('http://') || imageToShare.startsWith('https://')) {
-        const downloadResult = await FileSystem.downloadAsync(imageToShare, fileUri);
-        if (downloadResult.status !== 200) {
-          throw new Error('Failed to download image');
-        }
-      } else {
-        const base64Data = imageToShare.replace(/^data:image\/\w+;base64,/, '');
-        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-      }
+      const fileUri = await writeImageToDocumentFile(imageToShare, filename);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri);
@@ -580,7 +552,7 @@ export default function PhaseThree({
           <Ionicons name="pencil" size={28} color={Colors.accent} />
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 3: Design</Text>
-            <Text style={styles.description}>Blueprint generated. Visualize your innovation.</Text>
+            <Text style={styles.description}>Inventory match ready. Prepare reconstruction specs and modeling assets.</Text>
           </View>
         </View>
       </View>
@@ -592,13 +564,11 @@ export default function PhaseThree({
           <View style={styles.summaryLeft}>
             <View style={styles.patternSection}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="bulb" size={16} color={Colors.secondary} />
-                <Text style={styles.sectionLabel}>SIT Pattern Applied</Text>
+                <Ionicons name="git-branch-outline" size={16} color={Colors.secondary} />
+                <Text style={styles.sectionLabel}>Inventory Match</Text>
               </View>
               <Text style={styles.patternName}>
-                {typeof innovation.patternUsed === 'string' 
-                  ? innovation.patternUsed.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                  : 'Pattern Applied'}
+                {innovation.machineName || innovation.conceptName || 'Machine matched'}
               </Text>
               <Text style={styles.conceptDescription}>{innovation.conceptDescription}</Text>
             </View>
@@ -608,7 +578,7 @@ export default function PhaseThree({
             <View style={styles.benefitBox}>
               <View style={styles.sectionHeader}>
                 <Ionicons name="flash" size={16} color={Colors.green[400]} />
-                <Text style={[styles.sectionLabel, { color: Colors.green[400] }]}>Key Benefit</Text>
+                <Text style={[styles.sectionLabel, { color: Colors.green[400] }]}>Rebuild Outcome</Text>
               </View>
               <Text style={styles.benefitText}>{innovation.marketBenefit}</Text>
             </View>
@@ -617,7 +587,7 @@ export default function PhaseThree({
               <View style={styles.constraintBox}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.constraintDot} />
-                  <Text style={[styles.sectionLabel, { color: Colors.purple[500] }]}>Innovation Constraint</Text>
+                  <Text style={[styles.sectionLabel, { color: Colors.purple[500] }]}>Reconstruction Constraint</Text>
                 </View>
                 <Text style={styles.constraintText}>{innovation.constraint}</Text>
               </View>
@@ -631,6 +601,9 @@ export default function PhaseThree({
           <TouchableOpacity
             style={[styles.tab, activeTab === '2d' && styles.tabActive]}
             onPress={() => setActiveTab('2d')}
+            accessibilityRole="button"
+            accessibilityLabel="Show 2D sketch tools"
+            accessibilityState={{ selected: activeTab === '2d' }}
           >
             <Ionicons 
               name="image" 
@@ -644,6 +617,9 @@ export default function PhaseThree({
           <TouchableOpacity
             style={[styles.tab, activeTab === '3d' && styles.tabActive]}
             onPress={() => setActiveTab('3d')}
+            accessibilityRole="button"
+            accessibilityLabel="Show 3D wireframe tools"
+            accessibilityState={{ selected: activeTab === '3d' }}
           >
             <Ionicons 
               name="cube" 
@@ -665,6 +641,8 @@ export default function PhaseThree({
               <TouchableOpacity 
                 style={styles.skipButton}
                 onPress={() => setStatus(spec ? 'specs_ready' : 'generating_specs')}
+                accessibilityRole="button"
+                accessibilityLabel="Skip visual generation"
               >
                 <Text style={styles.skipButtonText}>Skip</Text>
               </TouchableOpacity>
@@ -793,10 +771,10 @@ export default function PhaseThree({
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.imageActionButton}
-                    onPress={handleSaveImage}
+                    onPress={handleExportImage}
                   >
                     <Ionicons name="download-outline" size={18} color={Colors.accent} />
-                    <Text style={styles.imageActionText}>Save</Text>
+                    <Text style={styles.imageActionText}>Export</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.imageActionButton}
@@ -808,10 +786,10 @@ export default function PhaseThree({
                   {availableAngles.length > 1 && (
                     <TouchableOpacity 
                       style={styles.imageActionButton}
-                      onPress={handleSaveAllAngles}
+                      onPress={handleExportAllAngles}
                     >
                       <Ionicons name="images-outline" size={18} color={Colors.secondary} />
-                      <Text style={[styles.imageActionText, { color: Colors.secondary }]}>Save All</Text>
+                      <Text style={[styles.imageActionText, { color: Colors.secondary }]}>Export All</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -832,11 +810,16 @@ export default function PhaseThree({
             ) : (
               <View style={styles.generatePrompt}>
                 <Ionicons name="image-outline" size={48} color={Colors.gray[600]} />
-                <Text style={styles.generatePromptTitle}>Generate a high-speed 2D concept</Text>
+                <Text style={styles.generatePromptTitle}>Generate a 2D reconstruction reference</Text>
                 <Text style={styles.generatePromptDesc}>
-                  AI-generated sketch visualization of your innovation
+                  AI-generated sketch visualization of the matched machine
                 </Text>
-                <TouchableOpacity style={styles.generateButton} onPress={handleGenerate2D}>
+                <TouchableOpacity
+                  style={styles.generateButton}
+                  onPress={handleGenerate2D}
+                  accessibilityRole="button"
+                  accessibilityLabel="Generate 2D reconstruction sketch"
+                >
                   <Text style={styles.generateButtonText}>Generate Sketch</Text>
                 </TouchableOpacity>
               </View>
@@ -910,7 +893,12 @@ export default function PhaseThree({
                 <Text style={styles.generatePromptDesc}>
                   Exportable 3D scene description for CAD software
                 </Text>
-                <TouchableOpacity style={styles.generateButton} onPress={handleGenerate3D}>
+                <TouchableOpacity
+                  style={styles.generateButton}
+                  onPress={handleGenerate3D}
+                  accessibilityRole="button"
+                  accessibilityLabel="Generate 3D wireframe"
+                >
                   <Text style={styles.generateButtonText}>Generate 3D</Text>
                 </TouchableOpacity>
               </View>
@@ -964,7 +952,12 @@ export default function PhaseThree({
                 <Text style={styles.specValue}>{spec.implementationNotes}</Text>
               </View>
 
-              <TouchableOpacity style={styles.downloadButton} onPress={handleExportSpecs}>
+              <TouchableOpacity
+                style={styles.downloadButton}
+                onPress={handleExportSpecs}
+                accessibilityRole="button"
+                accessibilityLabel="Export technical specifications"
+              >
                 <Ionicons name="download" size={16} color={Colors.accent} />
                 <Text style={styles.downloadButtonText}>Export Specs</Text>
               </TouchableOpacity>
@@ -975,15 +968,25 @@ export default function PhaseThree({
 
       {/* Continue to Build button */}
       {spec && (
-        <TouchableOpacity style={styles.continueButton} onPress={onContinueToBuild}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={onContinueToBuild}
+          accessibilityRole="button"
+          accessibilityLabel="Continue to build phase"
+        >
           <Text style={styles.continueButtonText}>Continue to Build</Text>
           <Ionicons name="arrow-forward" size={20} color={Colors.black} />
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={styles.tryAnotherButton} onPress={onTryAnotherPattern}>
+      <TouchableOpacity
+        style={styles.tryAnotherButton}
+        onPress={onTryAnotherPattern}
+        accessibilityRole="button"
+        accessibilityLabel="Review inventory match"
+      >
         <Ionicons name="shuffle" size={18} color={Colors.secondary} />
-        <Text style={styles.tryAnotherText}>Try Another Pattern</Text>
+        <Text style={styles.tryAnotherText}>Review Inventory Match</Text>
       </TouchableOpacity>
 
       <View style={{ height: 50 }} />
@@ -1076,16 +1079,16 @@ export default function PhaseThree({
               <Ionicons name="add" size={24} color={Colors.white} />
             </TouchableOpacity>
             <View style={styles.modalSpacer} />
-            <TouchableOpacity style={styles.modalActionButton} onPress={handleSaveImage}>
+            <TouchableOpacity style={styles.modalActionButton} onPress={handleExportImage}>
               <Ionicons name="download-outline" size={20} color={Colors.accent} />
-              <Text style={styles.modalActionText}>Save</Text>
+              <Text style={styles.modalActionText}>Export</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalActionButton} onPress={handleShareImage}>
               <Ionicons name="share-outline" size={20} color={Colors.accent} />
               <Text style={styles.modalActionText}>Share</Text>
             </TouchableOpacity>
             {availableAngles.length > 1 && (
-              <TouchableOpacity style={styles.modalActionButton} onPress={handleSaveAllAngles}>
+              <TouchableOpacity style={styles.modalActionButton} onPress={handleExportAllAngles}>
                 <Ionicons name="images-outline" size={20} color={Colors.secondary} />
                 <Text style={[styles.modalActionText, { color: Colors.secondary }]}>All</Text>
               </TouchableOpacity>

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-05T14:37:12Z",
+  "command": "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait --json",
+  "evidenceFile": "docs/eas-ios-preview-build-start-evidence.json",
+  "releaseGate": "native-qa-evidence",
+  "intent": "Start an iOS EAS preview build without entering an Apple password in the CLI.",
+  "credentialContext": {
+    "nonInteractiveApplePasswordPromptSupported": false,
+    "passkeyFallbackDocumented": true,
+    "preferredPath": "Complete EAS-managed Apple credentials through the interactive CLI flow, or use an App Store Connect API key when password entry is not available.",
+    "localAscEnvConfigured": false,
+    "missingLocalAscEnv": [
+      "apiKeyPath",
+      "keyId",
+      "issuerId",
+      "appleTeamId",
+      "appleTeamType"
+    ],
+    "localAscEnvNames": [
+      "apiKeyPath",
+      "keyId",
+      "issuerId",
+      "appleTeamId",
+      "appleTeamType"
+    ],
+    "secretHandling": "Do not commit .p8 files, Apple passwords, App Store Connect API keys, or team secrets. This repo ignores *.p8 and related native credential files."
+  },
+  "nextActions": [
+    "Do not continue the active iOS internal device-registration prompt unless an iPhone/iPad becomes available.",
+    "Abort the internal device-registration prompt and configure iOS production/TestFlight credentials instead.",
+    "After App Store/TestFlight distribution credentials are available, run the iOS store build path and record the build URL in docs/native-qa-evidence.json.",
+    "After Android and iOS preview builds are recorded, install them on devices and complete docs/native-qa-evidence.json plus final native screenshots."
+  ],
+  "status": "dry-run",
+  "dryRun": true,
+  "didStartBuild": false
+}

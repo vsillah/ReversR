@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T09:27:52.829Z",
+  "deploymentUrl": "https://reversr-j7zmn3ett-vsillahs-projects.vercel.app",
+  "accessMode": "vercel-cli-authenticated-protected-deployment",
+  "finalPublicHostedApiStillRequired": true,
+  "checks": {
+    "health": {
+      "status": "pass",
+      "service": "reversr-rebuild-api",
+      "runtimeConfig": {
+        "corsMode": "restricted",
+        "allowedCorsOriginCount": 1,
+        "requestBodyLimit": "50mb",
+        "adminRoutesEnabled": false,
+        "registryWritesEnabled": false,
+        "privateNetworkConnectorsEnabled": false
+      },
+      "authenticatedConnectorsEnabled": false,
+      "credentialRegistryEnabled": false
+    },
+    "demoInventoryValidation": {
+      "status": "pass",
+      "recordCount": 2,
+      "sampleMachineIds": [
+        "DEMO-FDM-PRINTER-001",
+        "DEMO-CNC-ROUTER-002"
+      ]
+    }
+  },
+  "notes": [
+    "This proves the Vercel protected preview API function via authenticated Vercel CLI access.",
+    "It does not replace the public hosted API gate required for native builds."
+  ]
+}

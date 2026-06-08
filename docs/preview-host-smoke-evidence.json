@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T10:00:13.150Z",
+  "previewUrl": "https://reversr.vercel.app",
+  "routeCount": 4,
+  "routes": [
+    {
+      "id": "app-root",
+      "path": "/",
+      "url": "https://reversr.vercel.app/",
+      "finalUrl": "https://reversr.vercel.app/",
+      "status": "pass",
+      "httpStatus": 200,
+      "expectedTextFound": {
+        "Machine Reconstruction Engine": true,
+        "New Reconstruction": true,
+        "Scan a machine. Match it to inventory.": true
+      },
+      "checkedAt": "2026-06-05T10:00:07.161Z",
+      "error": ""
+    },
+    {
+      "id": "privacy",
+      "path": "/privacy",
+      "url": "https://reversr.vercel.app/privacy",
+      "finalUrl": "https://reversr.vercel.app/privacy",
+      "status": "pass",
+      "httpStatus": 200,
+      "expectedTextFound": {
+        "Privacy Policy": true,
+        "Camera access is used only to capture machine images": true,
+        "Manufacturer quote packets and email drafts require explicit user action": true
+      },
+      "checkedAt": "2026-06-05T10:00:09.135Z",
+      "error": ""
+    },
+    {
+      "id": "terms",
+      "path": "/terms",
+      "url": "https://reversr.vercel.app/terms",
+      "finalUrl": "https://reversr.vercel.app/terms",
+      "status": "pass",
+      "httpStatus": 200,
+      "expectedTextFound": {
+        "Terms of Service": true,
+        "No Automatic Vendor Submission": true,
+        "it does not automatically submit orders": true
+      },
+      "checkedAt": "2026-06-05T10:00:10.463Z",
+      "error": ""
+    },
+    {
+      "id": "support",
+      "path": "/support",
+      "url": "https://reversr.vercel.app/support",
+      "finalUrl": "https://reversr.vercel.app/support",
+      "status": "pass",
+      "httpStatus": 200,
+      "expectedTextFound": {
+        "Support": true,
+        "vsillah@gmail.com": true,
+        "Do not send raw API keys or OAuth tokens": true
+      },
+      "checkedAt": "2026-06-05T10:00:11.800Z",
+      "error": ""
+    }
+  ],
+  "finalProductionHostedUrlsStillRequired": true,
+  "deploymentProtectionLikely": false,
+  "automationBypass": {
+    "vercelBypassConfigured": false,
+    "setBypassCookie": "",
+    "extraHeaderNames": []
+  },
+  "notes": [
+    "This proves the current PR preview renders the app and policy/support routes.",
+    "It does not replace hosted production API, hosted production policy URLs, EAS native QA, App Store Connect, or Google Play Console evidence."
+  ]
+}

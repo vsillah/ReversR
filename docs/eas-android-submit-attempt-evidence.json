@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "finished",
+  "generatedAt": "2026-06-05T23:52:35.000Z",
+  "intent": "Upload the finished Android production AAB to Google Play internal testing without starting a production rollout.",
+  "command": "npx eas-cli@20.0.0 submit --platform android --profile production --id 11c47edd-6dfc-4d81-8aee-3be563006d49 --non-interactive --no-wait",
+  "submitProfile": {
+    "profile": "production",
+    "track": "internal",
+    "temporaryServiceAccountKeyPathUsed": true,
+    "committedServiceAccountKeyPath": false
+  },
+  "serviceAccountKey": {
+    "projectId": "kinflo-project",
+    "clientEmail": "appscreens@kinflo-project.iam.gserviceaccount.com",
+    "privateKeyId": "da43f0c8902cf89691334f3c527fd7923953aea5",
+    "googleCloudConsoleVerified": true,
+    "googleCloudConsoleVerifiedAt": "2026-06-05T23:30:45.635Z",
+    "googleCloudConsoleFinding": "Google Cloud IAM > AppScreens > Keys shows an active generated key with ID da43f0c8902cf89691334f3c527fd7923953aea5 created Jun 5, 2026. The key contents were not printed or committed.",
+    "localKey": {
+      "storedOutsideRepo": true,
+      "locationHint": "~/.config/reversr/eas-submit/google-play-service-account.json",
+      "fileMode": "600",
+      "note": "Use the 1Password item for durable recovery; do not commit or paste the JSON key."
+    },
+    "onePassword": {
+      "itemTitle": "ReversR Rebuild - Google Play EAS Submit Service Account",
+      "itemId": "btozyacjl7slchbuqjkjnhdpqa",
+      "vault": "Employee",
+      "category": "API_CREDENTIAL",
+      "attachment": "google-play-service-account.json"
+    }
+  },
+  "playConsolePermissions": {
+    "developerAccount": "8864864114913698241",
+    "serviceAccount": "appscreens@kinflo-project.iam.gserviceaccount.com",
+    "reversrRebuildPermissionPresent": true,
+    "app": "ReversR Rebuild com.vsillah.reversrrebuild",
+    "permissionCount": 12,
+    "savedAt": "2026-06-05T23:30:45.635Z",
+    "adminAllPermissionsSelected": false,
+    "releaseAppsToTestingTracksVisible": true,
+    "finding": "Google Play Console user details for appscreens@kinflo-project.iam.gserviceaccount.com showed ReversR Rebuild with 12 app permissions after Save changes and confirmation."
+  },
+  "result": {
+    "exitCode": 0,
+    "easSubmissionScheduled": true,
+    "easSubmissionId": "805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+    "easSubmissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b",
+    "releaseTrack": "internal",
+    "releaseStatusRequested": "COMPLETED",
+    "appVersion": "1.0.0",
+    "versionCode": 17,
+    "buildId": "11c47edd-6dfc-4d81-8aee-3be563006d49",
+    "googleServiceAccountEmail": "appscreens@kinflo-project.iam.gserviceaccount.com",
+    "playInternalReleaseVerified": true,
+    "productionRolloutStarted": false,
+    "publicReviewSubmissionStarted": false,
+    "stdoutTailSanitized": "EAS scheduled Android submission 805ea7a9-2bb3-460b-9e4c-dfbd64d4a42b to Google Play track internal using production build 11c47edd-6dfc-4d81-8aee-3be563006d49, app version 1.0.0, version code 17. The submit job later reported FINISHED with no EAS error. The service account key path was used only locally and removed from eas.json before evidence generation.",
+    "easSubmissionStatusChecked": true,
+    "easSubmissionStatusCheckedAt": "2026-06-05T23:44:05.000Z",
+    "easSubmissionStatus": "FINISHED",
+    "playUploadAttemptedByEas": true,
+    "playUploadFinishedByEas": true,
+    "errorCode": null,
+    "errorMessage": null,
+    "playInternalReleaseVerifiedAt": "2026-06-05T23:52:35.000Z",
+    "playInternalReleaseVerification": "Google Play Console Internal testing Releases tab shows release 1.0.0 available to internal testers, 1 version code, Released on Jun 5 7:42 PM, Not reviewed."
+  },
+  "remainingVerificationGate": {
+    "type": "Google Play tester access, closed testing, and final review readiness",
+    "whyStillPending": "The EAS hosted Android submission finished successfully and the release is visible in Google Play Console Internal testing, but Codex did not assign/change tester access, copy or transmit the join link, click Send for review, start closed testing, or request production access. Those actions remain gated behind explicit final approval and tester readiness.",
+    "nextAction": "If ready, explicitly authorize assigning the visible ReversR App Testers list with 13 users or provide the tester access decision. Keep Send for review, closed testing, and production rollout gated behind explicit final approval.",
+    "playConsoleInternalTestingUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/tracks/internal-testing?tab=testers"
+  },
+  "googleCloudApi": {
+    "serviceName": "androidpublisher.googleapis.com",
+    "projectId": "kinflo-project",
+    "projectNumberFromPreviousError": "165345817438",
+    "enabledByComputerUse": true,
+    "enabledAt": "2026-06-05T23:44:05.000Z",
+    "verification": "Google Cloud Console API/Service Details for Google Play Android Developer API showed Status: Enabled and a Disable API action after the authorized enable step."
+  }
+}

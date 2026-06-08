@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "status": "processed-ready-to-submit",
+  "generatedAt": "2026-06-06T00:23:50.346Z",
+  "intent": "Upload the finished iOS production/store IPA to App Store Connect/TestFlight without submitting the app for public review.",
+  "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait",
+  "result": {
+    "exitCode": 0,
+    "uploadScheduled": true,
+    "uploadProcessingVerified": true,
+    "publicReviewSubmissionStarted": false,
+    "appReviewAddForReviewClicked": false,
+    "submissionId": "a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+    "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0",
+    "stdoutTailSanitized": "EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 using App Store Connect app 6777091538 and local ASC API key metadata. The local private key path was used only in an uncommitted eas.json change and removed before evidence generation."
+  },
+  "appStoreConnectApiAccess": {
+    "status": "approved",
+    "requestedAt": "2026-06-06T00:00:00.000Z",
+    "approvedAt": "2026-06-06T00:00:00.000Z",
+    "visibleMessage": "Your request to access the App Store Connect API was approved."
+  },
+  "appStoreConnectApiKey": {
+    "keyName": "ReversR EAS Submit",
+    "keyId": "FZ4LLB2243",
+    "issuerId": "d4e5bef0-4168-4aad-b41e-fcd8079e9bfc",
+    "accessRole": "App Manager",
+    "generatedBy": "Vambah Sillah",
+    "onePasswordItem": {
+      "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+      "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+      "vault": "Employee",
+      "category": "API Credential",
+      "attachment": "App Store Connect .p8 private key"
+    },
+    "localKeyStoredOutsideRepo": true,
+    "privateKeyCommitted": false,
+    "onePasswordCliVerification": {
+      "status": "verified-with-1password-cli",
+      "verifiedAt": "2026-06-06T01:55:01.427Z",
+      "itemId": "ihmhb6yq7ge2ilyavb344s3tcq",
+      "itemTitle": "ReversR Rebuild - App Store Connect EAS Submit API Key",
+      "vault": "Employee",
+      "category": "API_CREDENTIAL",
+      "attachmentCount": 1,
+      "attachments": [
+        {
+          "name": "p8",
+          "sizeBytes": 257
+        }
+      ],
+      "metadataFieldsPresent": [
+        "owner",
+        "purpose",
+        "key_id",
+        "issuer_id",
+        "access_role",
+        "team_name",
+        "asc_app_id",
+        "local_path_hint",
+        "sha256"
+      ],
+      "secretValuesCaptured": false,
+      "note": "Verified through op item get with jq redaction. The .p8 attachment and concealed/secret field values were not printed or committed."
+    }
+  },
+  "firstRetryWithChangelog": {
+    "status": "failed-unsupported-plan-feature",
+    "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id 815a726d-7dfc-4cfa-a38d-e9757b5aafb1 --non-interactive --no-wait --what-to-test \"ReversR Rebuild validates machine inventory matching, BOM generation, assembly steps, and quote packet handoff.\"",
+    "exitCode": 1,
+    "errorSummary": "This submission specified the changelog parameter. Changelog submission is currently available for Enterprise plan only.",
+    "resolution": "Reran the same iOS submit without --what-to-test and scheduled the upload successfully."
+  },
+  "appStoreConnectScreen": {
+    "attemptedUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+    "currentUrl": "https://appstoreconnect.apple.com/access/integrations/api",
+    "currentScreen": "App Store Connect > Users and Access > Integrations > App Store Connect API for Vambah Sillah account",
+    "loggedIn": true,
+    "visibleActions": [
+      "Active (1)",
+      "Edit"
+    ],
+    "visibleMessage": "Your request to access the App Store Connect API was approved.",
+    "activeKey": {
+      "name": "ReversR EAS Submit",
+      "keyId": "FZ4LLB2243",
+      "access": "App Manager",
+      "downloadAvailable": false
+    },
+    "actionTaken": "Codex created the authorized ReversR EAS Submit key, downloaded the .p8 once, saved it outside the repo and in 1Password, temporarily used the key for EAS Submit, removed the local key fields from eas.json, and did not click Add for Review or public App Review submission."
+  },
+  "remainingVerificationGate": {
+    "type": "TestFlight tester setup, iOS install QA, screenshots, privacy publish, and store signoff",
+    "whyRequired": "App Store Connect now shows build 1.0.0 (6) as Ready to Submit with Binary State Validated, but no TestFlight group/testers or What to Test copy are configured, no iOS install QA/screenshots are captured, and no public review action is authorized.",
+    "riskBoundary": "Codex did not publish App Privacy, create TestFlight groups, invite testers, save tester-facing What to Test text, add the app for review, or submit public App Review.",
+    "nextActions": [
+      "If Vambah authorizes TestFlight setup, save What to Test copy and create or assign an internal tester group in App Store Connect.",
+      "Use an iOS device/TestFlight or full Xcode simulator path to capture iOS native QA and screenshots.",
+      "Do not click Add for Review or submit public App Review until final signoff is explicit."
+    ]
+  },
+  "appStoreConnectTestFlight": {
+    "verifiedAt": "2026-06-06T00:23:50.346Z",
+    "appName": "ReversR Rebuild",
+    "appAppleId": "6777091538",
+    "bundleId": "com.vsillah.reversrrebuild",
+    "testFlightUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+    "buildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+    "version": "1.0.0",
+    "build": "6",
+    "buildStatus": "Ready to Submit",
+    "binaryState": "Validated",
+    "expiresIn": "90 days",
+    "uploadDate": "Jun 5, 2026 at 8:09 PM",
+    "originalFileName": "38f358ce-2600-4ce9-bb3a-7fea08181900.ipa",
+    "buildUuid": "114ac3cb-f26b-4384-82d6-d661adf05dff",
+    "buildSdk": "23A339",
+    "buildPlatform": "23A339",
+    "bundleShortVersionString": "1.0.0",
+    "bundleVersionString": "6",
+    "includesSymbols": true,
+    "usesNonExemptEncryption": false,
+    "onDemandResources": false,
+    "siriKit": false,
+    "watchOnlyApp": false,
+    "iMessageApp": {
+      "includesIMessageApp": false,
+      "includesStickers": false,
+      "appIconHidden": false
+    },
+    "deviceRequirements": {
+      "minimumIosVersion": "15.1",
+      "minimumMacosVersion": "12.0",
+      "minimumVisionosVersion": "1.0",
+      "lsMinimumSystemVersion": "12.0",
+      "supportedArchitectures": [
+        "arm64"
+      ],
+      "deviceProtocols": "-",
+      "deviceFamily": [
+        "iPhone",
+        "iPad"
+      ],
+      "requiredCapabilities": [
+        "arm64"
+      ]
+    },
+    "storeInformation": {
+      "localizations": [
+        "English"
+      ],
+      "entitlements": {
+        "application-identifier": "2388NUMA3J.com.vsillah.reversrrebuild",
+        "get-task-allow": false,
+        "beta-reports-active": true,
+        "com.apple.developer.team-identifier": "2388NUMA3J"
+      },
+      "newsstandApp": false,
+      "prerenderedIconFlag": true
+    },
+    "testing": {
+      "groupsCount": 0,
+      "individualTestersCount": 0,
+      "whatToTestEmpty": false,
+      "saveButtonDisabled": true,
+      "testersAdded": false,
+      "testInfoSaved": true,
+      "whatToTestSaved": true,
+      "whatToTestSavedAt": "2026-06-06T03:04:24.221Z",
+      "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+      "whatToTestCharacterCount": 592,
+      "addGroupResult": "No current groups this build can be assigned to.",
+      "addExistingTestersResult": "No existing testers available; Apple dialog displayed: You haven’t added any testers. Add Testers.",
+      "newTesterEmailsEntered": false,
+      "testerInvitesSent": false
+    },
+    "actionsNotTaken": [
+      "No new tester email address was entered or transmitted.",
+      "No TestFlight group was created.",
+      "No tester invitation was sent.",
+      "Expire Build was not clicked.",
+      "App Privacy Publish was not clicked.",
+      "Add for Review was not clicked.",
+      "Public App Review submission was not started."
+    ],
+    "nextActionRequiringApproval": "Provide specific TestFlight tester email addresses and authorize adding them, or create/provide an existing App Store Connect/TestFlight tester group. iOS QA/screenshots still require an iOS device/TestFlight install path or full Xcode simulator path."
+  }
+}

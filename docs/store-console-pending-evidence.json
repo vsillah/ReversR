@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "status": "pending",
+  "generatedAt": "2026-06-06T10:10:45.784Z",
+  "source": "docs/store-console-evidence.json",
+  "finalEvidenceFile": "docs/store-console-evidence.json",
+  "warnings": [
+    "App Store Connect TestFlight readiness is not marked complete.",
+    "Review gate productionSubmissionApproved is not marked true.",
+    "Production submission is not approved.",
+    "Store console signoff is missing releaseOwner.",
+    "Store console signoff is missing storeReviewer.",
+    "Store console signoff is missing signedAt."
+  ],
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001",
+    "matchesAppConfig": {
+      "appName": true,
+      "version": true,
+      "iosBundleId": true,
+      "androidPackage": true,
+      "sku": true
+    }
+  },
+  "appStoreConnect": {
+    "status": "pass",
+    "recordUrlPresent": true,
+    "appleIdPresent": true,
+    "bundleIdStatus": "pass",
+    "privacyPolicyUrlReady": true,
+    "metadataCopiedFromPacket": true,
+    "appPrivacyCompleted": true,
+    "ageRatingCompleted": true,
+    "testFlightReady": false
+  },
+  "googlePlay": {
+    "status": "pass",
+    "recordUrlPresent": true,
+    "packageNameMatches": true,
+    "privacyPolicyUrlReady": true,
+    "metadataCopiedFromPacket": true,
+    "dataSafetyCompleted": true,
+    "appContentCompleted": true,
+    "internalTestingReady": true
+  },
+  "requiredAssets": {
+    "nativeScreenshotsCaptured": true,
+    "appIconReviewed": true,
+    "featureGraphicCaptured": true,
+    "featureGraphicPathReady": true,
+    "evidenceFolderPresent": true
+  },
+  "reviewGates": {
+    "hostedApiPreflightPassed": true,
+    "hostedPolicyPreflightPassed": true,
+    "hostedConnectorSmokePassed": true,
+    "nativeQaPreflightPassed": true,
+    "productionSubmissionApproved": false
+  },
+  "signoff": {
+    "productionSubmissionApproved": false,
+    "releaseOwnerPresent": false,
+    "storeReviewerPresent": false,
+    "signedAtPresent": false
+  }
+}

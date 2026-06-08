@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-06T10:10:59.724Z",
+  "releaseStatus": {
+    "generatedAt": "2026-06-06T10:10:59.720Z",
+    "summary": {
+      "pass": 38,
+      "pending": 1
+    }
+  },
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild"
+  },
+  "hostedGates": [
+    {
+      "id": "preview-host-smoke",
+      "group": "hosted",
+      "status": "pass",
+      "title": "Vercel preview host renders app and policy/support routes before production hosting",
+      "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T10:00:13.150Z.",
+      "nextStep": ""
+    },
+    {
+      "id": "hosted-api",
+      "group": "hosted",
+      "status": "pass",
+      "title": "Hosted HTTPS API URL is configured for native builds",
+      "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
+      "nextStep": ""
+    },
+    {
+      "id": "hosted-policy-urls",
+      "group": "hosted",
+      "status": "pass",
+      "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+      "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
+      "nextStep": ""
+    },
+    {
+      "id": "real-connector-smoke",
+      "group": "hosted",
+      "status": "pass",
+      "title": "Hosted API can validate and match against a public machine inventory",
+      "evidence": "docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at 2026-06-05T10:39:16.612Z.",
+      "nextStep": ""
+    }
+  ],
+  "sourceArtifacts": [
+    {
+      "path": "docs/production-api-deployment.md",
+      "exists": true
+    },
+    {
+      "path": "docs/production-api-env.example",
+      "exists": true
+    },
+    {
+      "path": "docs/policy-hosting-deployment.md",
+      "exists": true
+    },
+    {
+      "path": "docs/external-release-setup-runbook.md",
+      "exists": true
+    },
+    {
+      "path": "docs/api-deployment-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/policy-hosting-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/preview-host-target.json",
+      "exists": true
+    },
+    {
+      "path": "docs/preview-host-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/farmbot-public-inventory-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/hosted-connector-smoke-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/sample-machine-inventory.csv",
+      "exists": true
+    },
+    {
+      "path": "public/inventory/farmbot-genesis-v1.8.json",
+      "exists": true
+    },
+    {
+      "path": "Dockerfile",
+      "exists": true
+    },
+    {
+      "path": "vercel.json",
+      "exists": true
+    },
+    {
+      "path": "scripts/generate-farmbot-inventory.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/api-env-preflight.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/api-preflight.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/api-deployment-smoke.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/policy-hosting-preflight.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/hosted-connector-smoke.js",
+      "exists": true
+    },
+    {
+      "path": "scripts/preview-host-smoke.js",
+      "exists": true
+    }
+  ],
+  "commandSequence": [
+    {
+      "id": "api-env-preflight",
+      "command": "API_ENV_FILE=/path/to/provider-env-export npm run api:env:preflight",
+      "purpose": "Validate hosted API CORS, body limit, AI key, admin token, connector-secret, and private-network settings before deploy."
+    },
+    {
+      "id": "api-deployment-smoke",
+      "command": "npm run api:deployment-smoke",
+      "purpose": "Refresh local production-style API smoke evidence before deploying the container."
+    },
+    {
+      "id": "api-hosted-preflight",
+      "command": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight",
+      "purpose": "Prove the deployed API health, restricted CORS, demo inventory validation, and optional admin registry access."
+    },
+    {
+      "id": "policy-hosted-preflight",
+      "command": "EXPO_PUBLIC_PRIVACY_POLICY_URL=https://your-domain.example/privacy EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support npm run policy:preflight -- --check-hosted",
+      "purpose": "Prove hosted privacy, terms, and support URLs are reachable over public HTTPS."
+    },
+    {
+      "id": "inventory-source-validate",
+      "command": "npm run inventory:farmbot:validate",
+      "purpose": "Generate and validate the public FarmBot Genesis v1.8 machine inventory before connecting it to the hosted API."
+    },
+    {
+      "id": "hosted-connector-smoke",
+      "command": "EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR/refs/heads/codex/inventory-reconstruction-clone/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke",
+      "purpose": "Prove hosted machine inventory validation, machine matching, BOM generation, and no-raw-secret handling against a public source."
+    },
+    {
+      "id": "preview-smoke",
+      "command": "PREVIEW_SMOKE_URL=<preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke",
+      "purpose": "Prove the PR preview renders the app and policy/support routes before production hosting decisions."
+    }
+  ],
+  "requiredEnv": [
+    "API_CORS_ORIGINS",
+    "API_REQUEST_BODY_LIMIT",
+    "AI_INTEGRATIONS_GEMINI_API_KEY",
+    "ADMIN_API_TOKEN",
+    "INVENTORY_CONNECTOR_SECRETS_JSON or INVENTORY_CONNECTOR_SECRETS_FILE",
+    "EXPO_PUBLIC_API_BASE_URL",
+    "EXPO_PUBLIC_PRIVACY_POLICY_URL",
+    "EXPO_PUBLIC_TERMS_URL",
+    "EXPO_PUBLIC_SUPPORT_URL",
+    "CONNECTOR_SMOKE_SOURCE_URL"
+  ],
+  "outputsToUpdateAfterHostedWork": [
+    "docs/preview-host-smoke-evidence.json",
+    "docs/api-deployment-smoke-evidence.json",
+    "docs/policy-hosting-smoke-evidence.json",
+    "docs/store-submission-packet.json hosted URLs, if it remains the console copy source",
+    "docs/native-release-config-evidence.json after EAS hosted env binding",
+    "docs/release-evidence-bundle.json"
+  ],
+  "safetyBoundary": [
+    "Do not put Gemini keys, admin tokens, connector API keys, or OAuth tokens in mobile app config or committed files.",
+    "Restrict API_CORS_ORIGINS to hosted app origins before native release builds.",
+    "Keep INVENTORY_PRIVATE_NETWORK_ENABLED=false unless the API host has approved network controls.",
+    "Connector smoke should send credentialRef only; raw connector secrets must remain server-side.",
+    "Hosted preview and policy evidence does not replace native Android/iOS QA evidence."
+  ]
+}

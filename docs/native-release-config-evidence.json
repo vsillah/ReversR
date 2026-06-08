@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-06T10:10:47.610Z",
+  "mode": {
+    "allowPlaceholder": true,
+    "allowMissingCli": true,
+    "allowUnlinkedEas": true,
+    "allowNotLoggedIn": true
+  },
+  "warnings": [],
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "slug": "reversr-rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "iosBuildNumber": "1",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "androidVersionCode": 15,
+    "easProjectLinked": true
+  },
+  "permissions": {
+    "androidPermissions": [
+      "android.permission.CAMERA"
+    ],
+    "androidBlockedPermissions": [
+      "android.permission.RECORD_AUDIO",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_MEDIA_VIDEO"
+    ],
+    "iosCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
+    "cameraPluginConfigured": true
+  },
+  "eas": {
+    "cli": {
+      "label": "pinned npx eas-cli@20.0.0",
+      "version": "eas-cli/20.0.0 darwin-arm64 node-v24.15.0\n★ eas-cli@20.1.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
+    },
+    "whoami": {
+      "status": 0,
+      "output": "vsillah\nvsillah@gmail.com\n★ eas-cli@20.1.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
+    },
+    "buildProfiles": {
+      "development": {
+        "environment": "development",
+        "distribution": "internal",
+        "developmentClient": true
+      },
+      "preview": {
+        "environment": "preview",
+        "distribution": "internal",
+        "androidBuildType": "apk"
+      },
+      "production": {
+        "environment": "production",
+        "androidBuildType": "app-bundle",
+        "autoIncrement": true
+      }
+    },
+    "submitProfile": {
+      "androidTrack": "internal",
+      "iosAscAppIdConfigured": true
+    }
+  },
+  "urls": {
+    "apiBaseUrl": "https://reversr.vercel.app",
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support"
+  },
+  "externalGatesStillRequired": {
+    "easProjectLinkage": false,
+    "easLogin": false,
+    "hostedApiUrl": false,
+    "hostedPolicyUrls": false,
+    "iosAscAppId": false
+  }
+}

@@ -13,6 +13,7 @@ import { Colors, Spacing, FontSizes } from '../constants/theme';
 interface WelcomeScreenProps {
   onStart: () => void;
   onHistory?: () => void;
+  onSettings?: () => void;
 }
 
 const phases = [
@@ -20,29 +21,29 @@ const phases = [
     number: 1,
     title: 'SCAN',
     icon: 'search' as const,
-    description: 'Analyze existing products to define the Closed World boundary and essential components.',
+    description: 'Capture or describe a machine and identify visible assemblies, parts, and signals.',
   },
   {
     number: 2,
-    title: 'REVERSE',
-    icon: 'repeat-sharp' as const,
-    description: 'Apply patterns like Subtraction and Task Unification to force novel utility.',
+    title: 'INVENTORY',
+    icon: 'git-branch-outline' as const,
+    description: 'Connect an admin-approved machine inventory and match the scan to a known record.',
   },
   {
     number: 3,
     title: 'DESIGN',
     icon: 'pencil' as const,
-    description: 'Generate technical specifications, sketches, and interactive 3D prototypes.',
+    description: 'Generate reconstruction specs, visual references, and 3D modeling handoff files.',
   },
   {
     number: 4,
     title: 'BUILD',
     icon: 'hammer-outline' as const,
-    description: 'Generate Bill of Materials and prepare for manufacturing.',
+    description: 'Build a BOM, assembly sequence, pricing estimate, and fabrication handoff.',
   },
 ];
 
-export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onStart, onHistory, onSettings }: WelcomeScreenProps) {
   return (
     <ScrollView 
       style={styles.container}
@@ -59,13 +60,13 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
           <Text style={styles.title}>
             REVERS<Text style={styles.titleAccent}>R</Text>
           </Text>
-          <Text style={styles.subtitle}>Systematic Inventive Thinking Engine</Text>
+          <Text style={styles.subtitle}>Machine Reconstruction Engine</Text>
         </View>
 
         <Text style={styles.description}>
-          Deconstruct reality. Apply rigorous mutation patterns. Design the impossible.
+          Scan a machine. Match it to inventory. Rebuild the path from parts to assembly.
           {'\n\n'}
-          An AI-powered tool for generating high-fidelity product innovations within a Closed World.
+          An AI-assisted workflow for reconstruction packages, BOMs, pricing, and 3D modeling handoff.
         </Text>
 
         <View style={styles.phasesContainer}>
@@ -83,15 +84,37 @@ export default function WelcomeScreen({ onStart, onHistory }: WelcomeScreenProps
         </View>
 
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.button} onPress={onStart}>
-            <Text style={styles.buttonText}>New Innovation</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={onStart}
+            accessibilityRole="button"
+            accessibilityLabel="Start new machine reconstruction"
+          >
+            <Text style={styles.buttonText}>New Reconstruction</Text>
             <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
           </TouchableOpacity>
 
           {onHistory && (
-            <TouchableOpacity style={styles.historyButton} onPress={onHistory}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={onHistory}
+              accessibilityRole="button"
+              accessibilityLabel="Open reconstruction history"
+            >
               <Ionicons name="time-outline" size={20} color={Colors.gray[400]} />
-              <Text style={styles.historyButtonText}>History</Text>
+              <Text style={styles.secondaryButtonText}>History</Text>
+            </TouchableOpacity>
+          )}
+
+          {onSettings && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={onSettings}
+              accessibilityRole="button"
+              accessibilityLabel="Open settings"
+            >
+              <Ionicons name="settings-outline" size={20} color={Colors.gray[400]} />
+              <Text style={styles.secondaryButtonText}>Settings</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -199,14 +222,14 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     letterSpacing: 1,
   },
-  historyButton: {
+  secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
-  historyButtonText: {
+  secondaryButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.gray[400],
   },

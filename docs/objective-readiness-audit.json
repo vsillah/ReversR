@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "status": "pending",
+  "generatedAt": "2026-06-06T10:10:45.677Z",
+  "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
+  "completionClaim": {
+    "fullObjectiveComplete": false,
+    "storeReady": false,
+    "productionSubmissionReady": false,
+    "reason": "Implementation, hosted policy/API, and public inventory connector evidence are advanced, but EAS, store-console, native QA, and screenshot evidence remain pending."
+  },
+  "summary": {
+    "requirementCount": 8,
+    "passedCount": 6,
+    "pendingCount": 2,
+    "blockedCount": 0,
+    "pendingRequirementIds": [
+      "store-readiness-packet",
+      "apple-google-store-publication"
+    ],
+    "blockedRequirementIds": []
+  },
+  "releaseStatus": {
+    "generatedAt": "2026-06-06T10:10:45.654Z",
+    "summary": {
+      "pass": 37,
+      "pending": 2
+    }
+  },
+  "requirements": [
+    {
+      "id": "original-codebase-cloned",
+      "requirement": "Use the original ReversR codebase from GitHub as the starting point.",
+      "status": "pass",
+      "evidence": [
+        "git.remote.origin=https://github.com/vsillah/ReversR.git",
+        "git.branch=codex/inventory-reconstruction-clone"
+      ],
+      "gates": [],
+      "nextStep": ""
+    },
+    {
+      "id": "distinct-clone-identity",
+      "requirement": "Create a clone version with distinct app identity for store submission.",
+      "status": "pass",
+      "evidence": [
+        {
+          "id": "clone-identity",
+          "status": "pass",
+          "title": "Clone app identity is distinct from the original ReversR app",
+          "evidence": "name=ReversR Rebuild; slug=reversr-rebuild; ios=com.vsillah.reversrrebuild; android=com.vsillah.reversrrebuild",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "clone-identity"
+      ],
+      "nextStep": ""
+    },
+    {
+      "id": "remove-systematic-inventive-thinking",
+      "requirement": "Remove the Systematic Inventive Thinking step from the active app and server flow.",
+      "status": "pass",
+      "evidence": [
+        {
+          "id": "retired-sit-step",
+          "status": "pass",
+          "title": "Original Systematic Inventive Thinking step is removed from the active app/server flow",
+          "evidence": "No active SIT route or label found in server/components.",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "retired-sit-step"
+      ],
+      "nextStep": ""
+    },
+    {
+      "id": "admin-machine-inventory-connector",
+      "requirement": "Replace that step with an admin-entered link or connector to a machine inventory.",
+      "status": "pass",
+      "evidence": [
+        {
+          "id": "inventory-admin-connector",
+          "status": "pass",
+          "title": "Admin inventory connector form supports URL, auth mode, credentialRef, and validation",
+          "evidence": "components/PhaseTwo.tsx exposes connector URL, credentialRef, and validation controls.",
+          "nextStep": ""
+        },
+        {
+          "id": "inventory-source-validator",
+          "status": "pass",
+          "title": "Machine inventory exports can be validated before connector smoke",
+          "evidence": "scripts/validate-machine-inventory.js and docs/inventory-connector-spec.md define source validation.",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "inventory-admin-connector",
+        "inventory-source-validator"
+      ],
+      "nextStep": ""
+    },
+    {
+      "id": "photo-to-inventory-machine-match",
+      "requirement": "When a picture or scan is supplied, identify the matching machine from the approved inventory.",
+      "status": "pass",
+      "evidence": [
+        {
+          "id": "machine-scan-examples",
+          "status": "pass",
+          "title": "Default scan examples and camera guidance are machine-specific",
+          "evidence": "Phase 1 presets and camera prompt are aligned to machine reconstruction.",
+          "nextStep": ""
+        },
+        {
+          "id": "web-flow-smoke",
+          "status": "pass",
+          "title": "Local web preview can complete the machine reconstruction happy path",
+          "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "real-connector-smoke",
+          "status": "pass",
+          "title": "Hosted API can validate and match against a public machine inventory",
+          "evidence": "docs/hosted-connector-smoke-evidence.json proves FarmBot public inventory validation, machine match, and BOM generation at 2026-06-05T10:39:16.612Z.",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "machine-scan-examples",
+        "web-flow-smoke",
+        "real-connector-smoke"
+      ],
+      "nextStep": ""
+    },
+    {
+      "id": "bom-assembly-pricing-vendor-handoff",
+      "requirement": "Build a bill of materials, assembly steps, pricing, and 3D modeling/fabrication handoff package.",
+      "status": "pass",
+      "evidence": [
+        {
+          "id": "reconstruction-package",
+          "status": "pass",
+          "title": "Machine match produces BOM, assembly, pricing, quote packet, and vendor request surfaces",
+          "evidence": "Server and Phase 4 UI include match, BOM, assembly, pricing, quote packet, and vendor draft paths.",
+          "nextStep": ""
+        },
+        {
+          "id": "web-flow-smoke",
+          "status": "pass",
+          "title": "Local web preview can complete the machine reconstruction happy path",
+          "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "reconstruction-package",
+        "web-flow-smoke"
+      ],
+      "nextStep": ""
+    },
+    {
+      "id": "store-readiness-packet",
+      "requirement": "Prepare the local release packet needed to approach Google Play and Apple App Store submission.",
+      "status": "pending",
+      "evidence": [
+        {
+          "id": "store-submission-packet-smoke",
+          "status": "pass",
+          "title": "Store submission metadata and privacy packet evidence is recorded",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T10:10:43.109Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "store-review-safety-packet",
+          "status": "pass",
+          "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T10:10:43.212Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "store-screenshot-planning",
+          "status": "pass",
+          "title": "Web-preview screenshot planning evidence is recorded before native screenshot capture",
+          "evidence": "docs/store-screenshots/planning-evidence.json proves web planning captures and native screenshot filename mapping at 2026-06-05T05:19:54.138Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "external-release-runbook",
+          "status": "pass",
+          "title": "External Apple, Google, EAS, hosted API, and connector setup runbook is present",
+          "evidence": "docs/external-release-setup-runbook.md covers account setup, exact clone IDs, evidence files, preflight commands, and official source links.",
+          "nextStep": ""
+        },
+        {
+          "id": "release-evidence-bundle",
+          "status": "pass",
+          "title": "Consolidated release evidence bundle is generated for external operators",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 1 external gates at 2026-06-06T10:10:20.656Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "local-release-ci-evidence",
+          "status": "pending",
+          "title": "Local release CI evidence records repeatable pre-store validation",
+          "evidence": "docs/local-release-ci-evidence.json is missing or incomplete.",
+          "nextStep": "Run npm run release:local-ci before external account-side release work."
+        },
+        {
+          "id": "release-local-ci-workflow",
+          "status": "pass",
+          "title": "GitHub Actions workflow runs local release evidence checks on pull requests",
+          "evidence": ".github/workflows/release-local-ci.yml runs local release CI, refreshes the release evidence bundle, verifies release status, and uploads evidence artifacts.",
+          "nextStep": ""
+        },
+        {
+          "id": "store-console-copy-packet",
+          "status": "pass",
+          "title": "Store console copy/paste packet is generated from submission metadata",
+          "evidence": "docs/store-console-copy.md contains App Store, Google Play, privacy, data-safety, screenshot, release-note, and safety copy.",
+          "nextStep": ""
+        },
+        {
+          "id": "store-operator-packet",
+          "status": "pass",
+          "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
+          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-06T10:10:43.913Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "hosted-operator-packet",
+          "status": "pass",
+          "title": "Hosted API, policy, preview, and connector handoff packet is generated",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T10:10:44.478Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "release-next-actions-packet",
+          "status": "pass",
+          "title": "Durable external-gate next action packet is generated",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-06T10:10:45.076Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "preview-host-target-discovery",
+          "status": "pass",
+          "title": "Current Vercel PR preview target is discovered for preview smoke",
+          "evidence": "docs/preview-host-target.json records https://reversr-git-codex-inventory-reconstruc-3f8dd2-vsillahs-projects.vercel.app at 2026-06-05T08:55:09.709Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "native-release-config-evidence",
+          "status": "pass",
+          "title": "Native release config evidence is recorded with current EAS linkage state",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T10:04:41.692Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "store-console-pending-evidence",
+          "status": "pass",
+          "title": "Store console pending evidence records account-side setup requirements",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T10:10:18.597Z.",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "store-submission-packet-smoke",
+        "store-screenshot-planning",
+        "external-release-runbook",
+        "release-evidence-bundle",
+        "local-release-ci-evidence",
+        "release-local-ci-workflow",
+        "store-console-copy-packet",
+        "store-operator-packet",
+        "hosted-operator-packet",
+        "release-next-actions-packet",
+        "preview-host-target-discovery",
+        "native-release-config-evidence",
+        "store-console-pending-evidence"
+      ],
+      "nextStep": ""
+    },
+    {
+      "id": "apple-google-store-publication",
+      "requirement": "Get as close as possible to release on Google Play and Apple App Store, without falsely claiming external approvals.",
+      "status": "pending",
+      "evidence": [
+        {
+          "id": "preview-host-smoke",
+          "status": "pass",
+          "title": "Vercel preview host renders app and policy/support routes before production hosting",
+          "evidence": "docs/preview-host-smoke-evidence.json proves 4 deployed preview routes at 2026-06-05T10:00:13.150Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "hosted-api",
+          "status": "pass",
+          "title": "Hosted HTTPS API URL is configured for native builds",
+          "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "hosted-policy-urls",
+          "status": "pass",
+          "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
+          "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "eas-project-linkage",
+          "status": "pass",
+          "title": "EAS project is linked for the clone identity",
+          "evidence": "projectId=700c2107-2639-4a27-b374-59ed5edd54fc",
+          "nextStep": ""
+        },
+        {
+          "id": "eas-submit-config",
+          "status": "pass",
+          "title": "EAS submit profile is configured for Google Play Internal Testing and TestFlight upload",
+          "evidence": "android.track=internal; ios.ascAppId configured.",
+          "nextStep": ""
+        },
+        {
+          "id": "native-qa-evidence",
+          "status": "pass",
+          "title": "Android and iOS preview-build QA evidence is recorded",
+          "evidence": "docs/native-qa-evidence.json records cross-platform core QA and native screenshots at 2026-06-06T09:08:47.209Z.",
+          "nextStep": ""
+        },
+        {
+          "id": "store-console-records",
+          "status": "pending",
+          "title": "Store console final review and submission gates are resolved",
+          "evidence": "docs/store-console-evidence.json exists and records Apple/Google app records; remaining gates: TestFlight tester/review readiness, final signoff.",
+          "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission."
+        },
+        {
+          "id": "native-screenshots",
+          "status": "pass",
+          "title": "Final native screenshots are captured from Android/iOS preview builds",
+          "evidence": "Five Android and five iOS native screenshots are recorded in docs/native-qa-evidence.json at 2026-06-06T09:08:47.209Z.",
+          "nextStep": ""
+        }
+      ],
+      "gates": [
+        "preview-host-smoke",
+        "hosted-api",
+        "hosted-policy-urls",
+        "eas-project-linkage",
+        "eas-submit-config",
+        "native-qa-evidence",
+        "store-console-records",
+        "native-screenshots"
+      ],
+      "nextStep": "Clear the remaining EAS, App Store Connect, Google Play Console, preview-build, native QA, and screenshot evidence gates."
+    }
+  ]
+}

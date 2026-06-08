@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-06T10:10:59.110Z",
+  "releaseStatus": {
+    "generatedAt": "2026-06-06T10:10:59.105Z",
+    "summary": {
+      "pass": 38,
+      "pending": 1
+    },
+    "pendingGateIds": [
+      "store-console-records"
+    ]
+  },
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "sku": "reversr-rebuild-001",
+    "primaryLanguage": "en-US",
+    "category": {
+      "applePrimary": "Productivity",
+      "appleSecondary": "Business",
+      "googleCategory": "Productivity"
+    }
+  },
+  "appStoreConnect": {
+    "name": "ReversR Rebuild",
+    "subtitle": "Machine rebuild packages",
+    "keywordsLength": 66,
+    "reviewNotesPresent": true,
+    "privacyDraftReady": true
+  },
+  "googlePlay": {
+    "title": "ReversR Rebuild",
+    "shortDescriptionLength": 73,
+    "dataSafetyDraftReady": true,
+    "requiredPermissions": [
+      "android.permission.CAMERA"
+    ]
+  },
+  "assets": {
+    "featureGraphic": {
+      "path": "docs/store-assets/google-play-feature-graphic.png",
+      "exists": true
+    },
+    "nativeScreenshotsRequired": true,
+    "nativeScreenshotsCaptured": true,
+    "requiredNativeScreenshotCount": 5,
+    "webPlanningEvidence": {
+      "path": "docs/store-screenshots/planning-evidence.json",
+      "exists": true
+    }
+  },
+  "sourceArtifacts": [
+    {
+      "path": "docs/store-submission-packet.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-copy.md",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-task-answers.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-task-answers.md",
+      "exists": true
+    },
+    {
+      "path": "docs/store-review-safety-packet.md",
+      "exists": true
+    },
+    {
+      "path": "docs/native-qa-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-evidence.template.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-console-browser-handoff.json",
+      "exists": true
+    },
+    {
+      "path": "docs/native-device-handoff.json",
+      "exists": true
+    },
+    {
+      "path": "docs/native-qa-evidence.template.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-screenshots/planning-evidence.json",
+      "exists": true
+    },
+    {
+      "path": "docs/store-assets/google-play-feature-graphic.png",
+      "exists": true
+    },
+    {
+      "path": "docs/release-next-actions.md",
+      "exists": true
+    },
+    {
+      "path": "docs/release-evidence-bundle.json",
+      "exists": true
+    },
+    {
+      "path": "docs/objective-readiness-audit.json",
+      "exists": true
+    },
+    {
+      "path": "docs/external-release-setup-runbook.md",
+      "exists": true
+    }
+  ],
+  "consoleEntryOrder": [
+    "Create App Store Connect record for com.vsillah.reversrrebuild and SKU reversr-rebuild-001.",
+    "Create Google Play Console record for com.vsillah.reversrrebuild.",
+    "Use the configured Vercel production privacy, terms, support, and API URLs in store console drafts.",
+    "Copy App Store and Google Play text from docs/store-console-copy.md and use docs/store-console-task-answers.md for task-by-task console answers.",
+    "Complete App Privacy, Data safety, age rating, App content, and review notes from the packet.",
+    "Copy docs/store-console-evidence.template.json to docs/store-console-evidence.json and fill record evidence.",
+    "Use docs/native-qa-evidence.json and docs/store-screenshots/native/ as the recorded native QA/screenshot source.",
+    "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
+  ],
+  "pendingGates": [
+    {
+      "id": "store-console-records",
+      "group": "store-console",
+      "title": "Store console final review and submission gates are resolved",
+      "nextStep": "Complete TestFlight tester/review readiness, final signoff before any public submission."
+    }
+  ],
+  "safetyBoundary": [
+    "This packet is store-console setup support, not approval to submit production builds.",
+    "Final native screenshots must come from Android and iOS preview builds.",
+    "Quote packets and vendor request drafts remain explicit human-review handoffs.",
+    "Raw connector secrets must stay server-side behind credentialRef references."
+  ]
+}

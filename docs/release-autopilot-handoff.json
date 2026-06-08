@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-05T16:11:30.815Z",
+  "status": "pending-hitl",
+  "currentPr": {
+    "number": 2,
+    "branch": "codex/inventory-reconstruction-clone",
+    "url": "https://github.com/vsillah/ReversR/pull/2"
+  },
+  "releaseStatus": {
+    "pass": 36,
+    "pending": 3,
+    "blocked": 0,
+    "warn": 0,
+    "pendingGates": [
+      "native-qa-evidence",
+      "store-console-records",
+      "native-screenshots"
+    ]
+  },
+  "activeBrowserState": {
+    "appStoreConnect": {
+      "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+      "screen": "iOS App Version 1.0 Prepare for Submission",
+      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json. Chrome automation verified product metadata from docs/store-console-copy.md is present on the iOS version page, Sign-in required is unchecked, manual release is selected, Save is disabled, and Add for Review is visible. The App Store Connect tab is left open at the iOS App Version 1.0 Prepare for Submission page. No public review submission was started.",
+      "fields": {
+        "appleId": "6777091538",
+        "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
+        "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+        "supportUrl": "https://reversr.vercel.app/support",
+        "marketingUrl": "https://reversr.vercel.app",
+        "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z"
+      },
+      "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete.",
+      "copyBackAfterSuccess": ""
+    },
+    "googlePlayConsole": {
+      "url": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/app-dashboard",
+      "screen": "Store settings / default store listing editor",
+      "state": "Google Play is authenticated for ReversR Rebuild. Setup progress last showed 6 of 11 complete after draft-saving privacy policy, sign-in details, ads, government apps, financial features, and health. Store settings category was saved as Productivity, creating a draft change in Publishing overview. Store listing text was entered earlier, but store listing remains incomplete because required asset uploads/contact gates remain. Chrome automation reached the default store listing asset-library drawer but could not complete the file chooser path, so no asset upload was verified.",
+      "openTasks": [
+        "Content rating",
+        "Target audience",
+        "Data safety",
+        "Provide public support contact details",
+        "Set up your store listing"
+      ],
+      "copySource": "docs/store-console-copy.md",
+      "taskAnswerSource": "docs/store-console-task-answers.md",
+      "taskAnswerJson": "docs/store-console-task-answers.json",
+      "nextHumanAction": "Confirm the public support email for Google Play contact details, complete content rating, target audience, data safety, required store listing asset uploads, and internal testing setup. Do not click Send for review until all native QA/store evidence and signoff are complete."
+    },
+    "easCredentials": {
+      "command": "npx eas-cli@20.0.0 credentials --platform ios",
+      "profileSelected": "preview",
+      "nextPrompt": "Press any key if you've already finished device registration.",
+      "lastCheckedAt": "2026-06-05T14:37:12Z",
+      "lastProductionAttemptAt": "2026-06-05T16:01:31.192Z",
+      "productionAttemptCommand": "npx eas-cli@20.0.0 build --platform ios --profile production --non-interactive --no-wait --json",
+      "state": "Apple login/2FA succeeded earlier, bundle identifier linkage succeeded, and an Apple distribution certificate was created during the preview credentials flow. No iOS device is available for internal distribution. A later non-interactive iOS production/TestFlight build attempt detected remote iOS credentials but failed because EAS will not validate the distribution certificate non-interactively. EAS incremented the remote iOS build number from 4 to 5 before failing. No iOS build started.",
+      "nextHumanAction": "Run the interactive iOS production/TestFlight EAS build command so EAS can validate or repair Apple credentials. If prompted, complete Apple login and 2FA, then copy back the Expo build URL once the build starts. Stop before any App Store public submission or Add for Review action."
+    }
+  },
+  "lastStrictFailures": {
+    "iosPreviewBuild": [
+      "npx eas-cli@20.0.0 build --platform ios --profile preview --non-interactive --no-wait failed because no credentials suitable for internal distribution were available in non-interactive mode.",
+      "EAS iOS preview credential setup advanced through Apple login/2FA and certificate creation, then paused at device registration.",
+      "No iOS device is available, so the internal preview path is not viable right now. A production/TestFlight credential flow is the recommended iOS path."
+    ],
+    "nativeQaPreflight": [
+      "No Android tested device or tester evidence.",
+      "No iOS preview build URL, tested device, tester, or completedAt evidence.",
+      "Android preview QA and Android native screenshots are recorded; remaining native QA and screenshot blockers are iOS build/screenshot evidence, unverified Android edge checks, and final QA signoff."
+    ],
+    "storeConsolePreflight": [
+      "Google Play privacy policy URL, metadata, data safety, app content, internal testing, and signoff remain incomplete.",
+      "Final native screenshots and native QA signoff remain incomplete.",
+      "Google Play public support contact details remain incomplete because the public support email needs confirmation.",
+      "Google Play store listing asset upload remains incomplete because Chrome automation could not complete the file chooser/file-input path."
+    ]
+  },
+  "verifiedLocalConstraints": {
+    "easWhoami": "vsillah / vsillah@gmail.com",
+    "androidPreviewBuild": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+    "adbDevices": "Android wireless device was paired and QA evidence was captured earlier. The phone is not required for current cloud build/store-console work and can be disconnected until another live Android QA pass is needed.",
+    "androidEmulator": "emulator command not found.",
+    "sdkmanager": "sdkmanager not found.",
+    "xcode": "Only /Library/Developer/CommandLineTools is active; full Xcode/simctl is unavailable.",
+    "androidPreviewApk": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+    "androidPreviewApkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35"
+  },
+  "resumeInstructionsForVambah": [
+    "For Android USB: unlock the phone, enable Developer options, turn on USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex to retry Android QA.",
+    "For Android wireless later: reconnect only if another live Android QA pass or visual regression check is needed. The current Android Pixel screenshot evidence is already recorded.",
+    "For Google Play: Chrome is authenticated. Privacy policy, sign-in details, ads, government apps, financial features, health, and app category Productivity are draft-saved. Remaining HITL tasks are public support contact details, content rating, target audience, data safety, store listing asset upload, and testing/release setup.",
+    "For iOS: from /Users/vambahsillah/Documents/ReversR/original-ReversR run EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait. Complete Apple credential validation/login/2FA if prompted, then send the Expo build URL back to Codex."
+  ],
+  "preparedAutomation": [
+    {
+      "name": "Store console task answers",
+      "script": "scripts/generate-store-console-task-answers.js",
+      "npmScript": "npm run store:console:tasks",
+      "purpose": "Generate task-by-task App Store Connect and Google Play Console field answers from docs/store-submission-packet.json.",
+      "commands": [
+        "npm run store:console:tasks"
+      ],
+      "currentValidation": "Generated 11 Google Play task groups and 5 App Store Connect task groups."
+    },
+    {
+      "name": "App Store Connect record helper",
+      "script": "scripts/record-app-store-connect.js",
+      "npmScript": "npm run store:appstore:record",
+      "purpose": "After the App Store Connect app record is created, record the Apple ID and app URL into eas.json, store evidence, and handoff files.",
+      "commands": [
+        "npm run store:appstore:record -- --apple-id 1234567890 --record-url https://appstoreconnect.apple.com/apps/1234567890/appstore"
+      ],
+      "currentValidation": "Validated with real Apple ID 6777091538 and App Store Connect URL; strict native preflight passes."
+    },
+    {
+      "name": "Native Android QA helper",
+      "script": "scripts/native-android-qa-helper.js",
+      "npmScript": "npm run native:android:qa",
+      "purpose": "Probe a connected adb device, launch the Android preview app, capture the five required Android native screenshots, and update docs/native-qa-evidence.json.",
+      "commands": [
+        "npm run native:android:qa -- --probe",
+        "npm run native:android:qa -- --launch",
+        "npm run native:android:qa -- --capture welcome",
+        "npm run native:android:qa -- --capture scan",
+        "npm run native:android:qa -- --capture inventory-validation",
+        "npm run native:android:qa -- --capture design-match",
+        "npm run native:android:qa -- --capture build-handoff"
+      ],
+      "currentValidation": "Help and syntax pass. Probe fails cleanly because no adb device is currently attached."
+    }
+  ],
+  "androidMirroring": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "tool": "scrcpy",
+    "version": "4.0",
+    "path": "/opt/homebrew/bin/scrcpy",
+    "status": "ready-but-no-adb-device",
+    "lastError": "ERROR: Could not find any ADB device",
+    "nextOptions": [
+      "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+      "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+    ]
+  },
+  "activeTerminalState": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "cwd": "/Users/vambahsillah/Documents/ReversR/original-ReversR",
+    "state": "shell prompt returned; previous EAS iOS internal device-registration prompt is no longer active"
+  },
+  "androidWirelessAdb": {
+    "status": "paired-connected",
+    "pairedAt": "2026-06-05T15:01:45.812Z",
+    "serial": "192.168.4.96:33423",
+    "device": "Google Pixel 10 Pro Android 16",
+    "scrcpy": "started successfully with scrcpy 4.0",
+    "disconnectedAt": "2026-06-05T15:03:28.217Z",
+    "disconnectStatus": "adb devices empty after explicit adb disconnect of host:port and mdns alias"
+  },
+  "androidRun": {
+    "checkedAt": "2026-06-05T15:01:45.812Z",
+    "device": "Google Pixel 10 Pro Android 16",
+    "serial": "192.168.4.96:33423",
+    "appPackage": "com.vsillah.reversrrebuild",
+    "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+    "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+    "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+    "screenshots": [
+      "docs/store-screenshots/native/android-01-welcome.png",
+      "docs/store-screenshots/native/android-02-scan.png",
+      "docs/store-screenshots/native/android-03-inventory-validation.png",
+      "docs/store-screenshots/native/android-04-design-match.png",
+      "docs/store-screenshots/native/android-05-build-handoff.png"
+    ],
+    "notes": [
+      "Wireless ADB paired and connected successfully.",
+      "Preview APK installed and launched on Pixel 10 Pro.",
+      "Sample scan path advanced through inventory validation, design match, and build handoff.",
+      "BOM generation produced itemized inventory-matched parts.",
+      "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+      "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+    ]
+  }
+}

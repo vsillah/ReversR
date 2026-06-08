@@ -1,0 +1,638 @@
+{
+  "schemaVersion": "2026-06-05",
+  "status": "partial-pass-store-signoff-pending",
+  "releaseCandidate": {
+    "appName": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "easProjectId": "700c2107-2639-4a27-b374-59ed5edd54fc",
+    "apiBaseUrl": "https://reversr.vercel.app",
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support"
+  },
+  "builds": {
+    "androidPreview": {
+      "status": "pass",
+      "profile": "preview",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/4f9547f6-2ad9-4e81-b268-51e419fb5e28",
+      "artifactUrl": "https://expo.dev/artifacts/eas/aPYV9JcwtD7AwaADakrJjU.apk",
+      "artifactType": "apk",
+      "versionCode": 15,
+      "device": "Google Pixel 10 Pro Android 16",
+      "osVersion": "16",
+      "tester": "vambahsillah",
+      "completedAt": "2026-06-05T11:36:35.941Z",
+      "notes": "Android EAS preview build finished and produced an APK artifact. Device install QA and core Android native screenshot capture are complete; remaining Android checks are scoped to camera permission, policy links, error handling, and vendor draft send boundaries. APK artifact downloaded and SHA-256 verified at 2026-06-05T14:44:55.285Z; install was later completed over wireless ADB. Android device probe captured at 2026-06-05T14:54:18.455Z. Android device probe captured at 2026-06-05T14:54:44.438Z. Android device probe captured at 2026-06-05T14:55:02.531Z. Android device probe captured at 2026-06-05T14:55:23.799Z. Android device probe captured at 2026-06-05T14:55:46.393Z. Android device probe captured at 2026-06-05T14:56:37.512Z. Android device probe captured at 2026-06-05T14:56:49.635Z. Android device probe captured at 2026-06-05T14:57:31.157Z. Android device probe captured at 2026-06-05T14:57:59.698Z. Android device probe captured at 2026-06-05T14:58:42.997Z. Android device probe captured at 2026-06-05T14:59:53.783Z. Installed and launched on Google Pixel 10 Pro Android 16 via wireless ADB at 2026-06-05T15:01:45.812Z. Android device probe captured at 2026-06-05T22:53:34.901Z. Live Android QA resumed over wireless ADB and advanced camera-permission, manual-description, inventory validation, machine match, design, build, pricing, BOM, and vendor-control checks at 2026-06-05T22:58:30Z. Android live QA resumed at 2026-06-05T23:06:19.988Z: Settings exposed clickable Privacy Policy, Terms of Service, and Support controls in the Camera & Data Use panel; Save Credential Ref with an empty admin token produced the expected local validation message without sending a secret. Android offline API outage check remains pending as of 2026-06-05T23:09:34.837Z; no device network or production hosted API disruption was performed.",
+      "localArtifact": {
+        "localPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+        "sha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+        "size": "103M",
+        "downloadedAt": "2026-06-05T14:44:55.285Z",
+        "installCommand": "adb install -r /tmp/reversr-native-artifacts/reversr-rebuild-preview.apk"
+      },
+      "installStatus": "pass",
+      "adbProbe": {
+        "checkedAt": "2026-06-05T23:06:19.988Z",
+        "adbState": "wireless-adb-mdns-connected",
+        "status": "live-android-qa-pass-partial",
+        "device": "Google Pixel 10 Pro Android 16",
+        "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
+        "endpoint": "192.168.4.96:37165",
+        "note": "ADB remained connected over wireless debugging. Policy-link and missing-admin-token credential handling checks were performed."
+      }
+    },
+    "iosPreview": {
+      "status": "pass",
+      "profile": "local-development-build",
+      "buildUrl": "",
+      "artifactType": "simulator-app",
+      "buildNumber": "local-debug",
+      "device": "iPhone 17 Pro Simulator iOS 26.5",
+      "osVersion": "26.5",
+      "tester": "codex-local-simulator",
+      "completedAt": "2026-06-06T09:08:47.209Z",
+      "notes": "Local Expo run:ios succeeded after Xcode license acceptance: Expo prebuild completed, CocoaPods installed, Xcode build succeeded, ReversRRebuild.app installed, and com.vsillah.reversrrebuild launched on iPhone 17 Pro Simulator iOS 26.5. This verifies local iOS install/launch and screenshot QA, but it does not replace TestFlight install QA on a real iOS device."
+    }
+  },
+  "productionBuilds": {
+    "android": {
+      "status": "pass",
+      "profile": "production",
+      "distribution": "store",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/11c47edd-6dfc-4d81-8aee-3be563006d49",
+      "artifactUrl": "https://expo.dev/artifacts/eas/3cfEuq2oZkZKhkEzGHEHhD.aab",
+      "artifactType": "aab",
+      "versionCode": 17,
+      "completedAt": "2026-06-05T16:42:53.309Z",
+      "notes": "Android production/store AAB exists for Google Play upload but is not approved for production submission."
+    },
+    "ios": {
+      "status": "pass",
+      "profile": "production",
+      "distribution": "store",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/815a726d-7dfc-4cfa-a38d-e9757b5aafb1",
+      "artifactUrl": "https://expo.dev/artifacts/eas/gYrv6C7dKH9CufRX2aXitF.ipa",
+      "artifactType": "ipa",
+      "buildNumber": "6",
+      "completedAt": "2026-06-05T18:47:24.731Z",
+      "notes": "iOS production/store IPA exists for the TestFlight/App Store path. EAS scheduled iOS submission a2ab0113-c95d-432e-bc0f-0fdf44b1d1c0 for build 1.0.0 (6), and App Store Connect/TestFlight processing is verified: build 1.0.0 (6) is Ready to Submit with Binary State Validated. iOS install QA, screenshot capture, TestFlight tester setup, build selection for public review, and App Review submission are not verified or approved."
+    }
+  },
+  "checks": [
+    {
+      "id": "install-launch",
+      "label": "Install and launch preview build",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "Preview APK launched into com.vsillah.reversrrebuild/.MainActivity on Google Pixel 10 Pro Android 16; uiautomator confirmed the ReversR welcome screen and New Reconstruction button. On iPhone 17 Pro Simulator iOS 26.5, EXPO_NO_TELEMETRY=1 npx expo run:ios built, installed, and opened com.vsillah.reversrrebuild on simulator A5E30E83-9A15-44AE-A98F-1F0626D96331 at 2026-06-06T09:08:47.209Z."
+    },
+    {
+      "id": "camera-permission",
+      "label": "Camera permission prompt and scan screen",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pending",
+      "evidence": "On Google Pixel 10 Pro Android 16, Scan mode exposed the Android permission dialog: \"Allow ReversR Rebuild to take pictures and record video?\" with While using the app, Only this time, and Don't allow options. Camera access was denied to avoid granting persistent permission; the app responded with its own \"Permission needed\" dialog explaining camera access is required to scan machines."
+    },
+    {
+      "id": "manual-description",
+      "label": "Manual machine description fallback",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Type mode accepted a manual CNC-router description, enabled Start Machine Scan, and advanced to Phase 2 with a READY TO MATCH scan summary and expected components. On iPhone 17 Pro Simulator iOS 26.5, Type mode accepted the desktop CNC router description, enabled Initiate machine scan, and advanced to Phase 2 Inventory with READY TO MATCH scan summary."
+    },
+    {
+      "id": "inventory-validation",
+      "label": "Admin inventory connector validation",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, the Demo Machine Inventory connector validated successfully and displayed 2 records, including Desktop FDM 3D Printer and Desktop CNC Router. On iPhone 17 Pro Simulator iOS 26.5, the Demo Machine Inventory connector validated successfully and displayed 2 records including Desktop CNC Router."
+    },
+    {
+      "id": "machine-match",
+      "label": "Machine match evidence from inventory",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Match Machine & Build Plan advanced from the validated demo inventory to Phase 3 Design with matched-machine reconstruction constraints and design/reference tooling. On iPhone 17 Pro Simulator iOS 26.5, Match machine and build reconstruction plan advanced to Phase 3 Design with Desktop CNC Router inventory match evidence."
+    },
+    {
+      "id": "bom-generation",
+      "label": "BOM generation with pricing ranges",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Generate BOM produced Desktop CNC Router Reconstruction Package v0.1-review with 9 inventory-matched items, quantities, cost ranges, supplier guidance, and lead-time fields. On iPhone 17 Pro Simulator iOS 26.5, the Build phase showed inventory-matched parts, assembly sequence, and pricing estimates for the Desktop CNC Router reconstruction package."
+    },
+    {
+      "id": "assembly-steps",
+      "label": "Assembly steps and reconstruction plan",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Build phase showed assembly sequence steps, QC notes, and pricing estimates: parts $420-$780, 3D modeling $300-$900, fabrication $500-$1,600, assembly labor $240-$640, total $1,460-$3,920. On iPhone 17 Pro Simulator iOS 26.5, the Build phase showed assembly steps, QC notes, and the same pricing ranges observed on Android: parts $420-$780, 3D modeling $300-$900, fabrication $500-$1,600, assembly labor $240-$640, total $1,460-$3,920."
+    },
+    {
+      "id": "quote-packet-export",
+      "label": "Manufacturer quote packet export",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "On Google Pixel 10 Pro Android 16, Build phase displayed Export BOM (CSV), Export All (JSON), and Export Quote Packet controls, plus the Manufacturer Handoff section. External upload/share was not started. On iPhone 17 Pro Simulator iOS 26.5, the lower Build phase exposed vendor quote target controls and instructed the reviewer to export/upload the quote packet, BOM, assembly sequence, and generated files; no external upload/share was started."
+    },
+    {
+      "id": "vendor-request-draft",
+      "label": "Vendor request email draft",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pending",
+      "ios": "pending",
+      "evidence": "On Google Pixel 10 Pro Android 16, Vendor Request Draft controls were visible with Xometry and Protolabs target options, recipient email field, admin notes field, and Prepare Request Email button. The draft was not prepared because creating a third-party vendor email draft remains a communication boundary."
+    },
+    {
+      "id": "policy-links",
+      "label": "Privacy, terms, and support links",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pending",
+      "evidence": "On Google Pixel 10 Pro Android 16, Settings > Camera & Data Use exposed clickable Privacy Policy, Terms of Service, and Support controls. The release candidate is configured for https://reversr.vercel.app/privacy, https://reversr.vercel.app/terms, and https://reversr.vercel.app/support; hosted policy route smoke evidence remains recorded separately."
+    },
+    {
+      "id": "accessibility",
+      "label": "Screen-reader labels and tap targets",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "Android uiautomator exposed accessible labels/content descriptions for primary controls including Start new machine reconstruction, settings/history, scan mode, camera mode, connector validation, match/build, export packet, and vendor request controls. Local accessibility preflight also covers app-level labels. iOS runtime snapshots exposed accessible button/text-field labels for primary controls including Start new machine reconstruction, text scan, inventory connector, validate connector, match/build, design tools, build phase, and vendor quote controls."
+    },
+    {
+      "id": "offline-api-error",
+      "label": "Hosted API outage/error handling",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pending",
+      "evidence": "On Google Pixel 10 Pro Android 16, Codex installed internal Android preview build d90e9595-56f1-49a7-8348-6541fa500edb after temporarily setting EAS preview EXPO_PUBLIC_API_BASE_URL to https://invalid.reversr.invalid. The APK app config embedded that invalid host, Settings displayed \"API host: https://invalid.reversr.invalid\", and a manual Phase 1 machine scan displayed \"Network error. Check your internet connection and try again.\" Device network settings and the production API were not changed. Screenshots: /tmp/reversr-native-artifacts/android-invalid-api-settings.png and /tmp/reversr-native-artifacts/android-invalid-api-network-error.png."
+    },
+    {
+      "id": "connector-auth-error",
+      "label": "Missing or invalid connector credential handling",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pending",
+      "evidence": "On Google Pixel 10 Pro Android 16, the Admin Connector Credentials panel rejected Save Credential Ref with an empty admin token and displayed: \"Enter the API admin token to manage backend credential references.\" No API key, OAuth token, or raw connector secret was entered or transmitted."
+    },
+    {
+      "id": "native-screenshots",
+      "label": "Final native screenshots captured",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": "pass",
+      "ios": "pass",
+      "evidence": "Five Android native screenshots and five iOS simulator screenshots are captured under docs/store-screenshots/native/. iOS files were captured from iPhone 17 Pro Simulator iOS 26.5 at 2026-06-06T09:08:47.209Z."
+    }
+  ],
+  "screenshots": [
+    {
+      "id": "welcome",
+      "label": "Welcome screen with the four reconstruction phases",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/android-01-welcome.png",
+        "device": "Google Pixel 10 Pro Android 16",
+        "capturedAt": "2026-06-05T14:54:44.438Z",
+        "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
+      },
+      "ios": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/ios-01-welcome.png",
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
+      }
+    },
+    {
+      "id": "scan",
+      "label": "Scan screen with camera or description mode",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/android-02-scan.png",
+        "device": "Google Pixel 10 Pro Android 16",
+        "capturedAt": "2026-06-05T14:55:02.531Z",
+        "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
+      },
+      "ios": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/ios-02-scan.png",
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
+      }
+    },
+    {
+      "id": "inventory-validation",
+      "label": "Inventory connector validation preview",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/android-03-inventory-validation.png",
+        "device": "Google Pixel 10 Pro Android 16",
+        "capturedAt": "2026-06-05T14:56:37.512Z",
+        "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
+      },
+      "ios": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/ios-03-inventory-validation.png",
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
+      }
+    },
+    {
+      "id": "design-match",
+      "label": "Design screen with machine match evidence",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/android-04-design-match.png",
+        "device": "Google Pixel 10 Pro Android 16",
+        "capturedAt": "2026-06-05T14:57:31.157Z",
+        "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
+      },
+      "ios": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/ios-04-design-match.png",
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
+      }
+    },
+    {
+      "id": "build-handoff",
+      "label": "Build screen with assembly steps, pricing, BOM, quote packet, and vendor draft controls",
+      "requiredPlatforms": [
+        "android",
+        "ios"
+      ],
+      "android": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/android-05-build-handoff.png",
+        "device": "Google Pixel 10 Pro Android 16",
+        "capturedAt": "2026-06-05T14:59:53.783Z",
+        "notes": "Captured from connected Android preview build with adb screencap. Verified during Android wireless ADB QA run at 2026-06-05T15:01:45.812Z."
+      },
+      "ios": {
+        "status": "pass",
+        "file": "docs/store-screenshots/native/ios-05-build-handoff.png",
+        "device": "iPhone 17 Pro Simulator iOS 26.5",
+        "capturedAt": "2026-06-06T09:08:47.209Z",
+        "notes": "Captured from local Expo development build installed and launched on iPhone 17 Pro Simulator iOS 26.5 after Xcode 26.5, iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 setup."
+      }
+    }
+  ],
+  "blockers": [
+    "No physical iOS test device is available, so TestFlight install QA on real hardware remains unverified even though local iOS simulator QA and screenshots now pass.",
+    "Vendor request draft remains visible but unprepared because creating a third-party communication draft remains a communication boundary.",
+    "Apple App Review submission, App Privacy publish, tester invitations, and Google Play public review/production actions remain gated by explicit final approval."
+  ],
+  "signoff": {
+    "releaseOwner": "",
+    "qaReviewer": "",
+    "approvedForTestFlight": false,
+    "approvedForPlayInternalTesting": false,
+    "approvedForProductionSubmission": false,
+    "signedAt": ""
+  },
+  "generatedAt": "2026-06-06T09:08:47.209Z",
+  "nextActions": [
+    "Keep Android vendor request draft pending until explicit approval is given to prepare a third-party vendor email draft.",
+    "Use the processed TestFlight build 1.0.0 (6) for real iOS install QA when an iOS device or tester is available; local iOS simulator QA is now captured.",
+    "Continue remaining Apple/Google console setup without clicking irreversible public review or production submission actions until explicitly approved.",
+    "Only mark production submission signoff after store-console tasks, native QA review, and release-owner approval are complete."
+  ],
+  "androidMirroring": {
+    "checkedAt": "2026-06-05T14:47:28.658Z",
+    "tool": "scrcpy",
+    "version": "4.0",
+    "path": "/opt/homebrew/bin/scrcpy",
+    "status": "ready-but-no-adb-device",
+    "lastError": "ERROR: Could not find any ADB device",
+    "nextOptions": [
+      "USB: enable USB debugging, set USB mode to File transfer / Android Auto, accept RSA prompt, then run scrcpy.",
+      "Wireless: on Android open Developer options > Wireless debugging > Pair device with pairing code, then provide the IP:port and pairing code for adb pair."
+    ]
+  },
+  "androidRun": {
+    "checkedAt": "2026-06-06T00:38:39.640Z",
+    "device": "Google Pixel 10 Pro Android 16",
+    "serial": "192.168.4.96:33423",
+    "appPackage": "com.vsillah.reversrrebuild",
+    "appFocus": "com.vsillah.reversrrebuild/.MainActivity",
+    "apkPath": "/tmp/reversr-native-artifacts/reversr-rebuild-preview.apk",
+    "apkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35",
+    "screenshots": [
+      "docs/store-screenshots/native/android-01-welcome.png",
+      "docs/store-screenshots/native/android-02-scan.png",
+      "docs/store-screenshots/native/android-03-inventory-validation.png",
+      "docs/store-screenshots/native/android-04-design-match.png",
+      "docs/store-screenshots/native/android-05-build-handoff.png"
+    ],
+    "notes": [
+      "Wireless ADB paired and connected successfully.",
+      "Preview APK installed and launched on Pixel 10 Pro.",
+      "Sample scan path advanced through inventory validation, design match, and build handoff.",
+      "BOM generation produced itemized inventory-matched parts.",
+      "Quote packet export generated a review file and opened Android Drive upload sheet; Upload was not pressed and Drive was force-stopped to avoid external upload.",
+      "Google Play privacy policy URL was saved as a draft change in Publishing overview; no review submission was started."
+    ],
+    "controlledInvalidApiBuild": {
+      "status": "pass",
+      "buildId": "d90e9595-56f1-49a7-8348-6541fa500edb",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/d90e9595-56f1-49a7-8348-6541fa500edb",
+      "artifactUrl": "https://expo.dev/artifacts/eas/sNzGmqUBfzZ6Wv4uNa2bqc.apk",
+      "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview-env.apk",
+      "apkSha256": "a33edb213bbe248ee223da83c29623cf35ee8d5afae4af49d4ccd6a68aeea271",
+      "completedAt": "2026-06-06T00:35:46.067Z",
+      "installedAt": "2026-06-06T00:38:39.640Z",
+      "profile": "preview",
+      "distribution": "internal",
+      "apiBaseUrl": "https://invalid.reversr.invalid",
+      "appConfigProof": "assets/app.config extra.apiBaseUrl was https://invalid.reversr.invalid before install.",
+      "temporaryEasPreviewEnv": {
+        "variableName": "EXPO_PUBLIC_API_BASE_URL",
+        "value": "https://invalid.reversr.invalid",
+        "createdBeforeBuild": true,
+        "deletedAfterBuild": true,
+        "postDeleteVerification": "npx eas-cli@20.0.0 env:list preview --format long returned no variables for preview."
+      },
+      "device": "Google Pixel 10 Pro Android 16",
+      "settingsScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+      "networkErrorScreenshot": "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png",
+      "observedSettingsText": "API host: https://invalid.reversr.invalid",
+      "observedErrorText": "Network error. Check your internet connection and try again.",
+      "externalNetworkChanged": false,
+      "purpose": "Controlled offline/API error handling QA without touching production API or device network settings."
+    },
+    "priorInvalidApiBuildAttempt": {
+      "status": "config-drift-not-used-for-pass",
+      "buildId": "737d558f-9742-469a-8bf6-2842ff7cb3a6",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/737d558f-9742-469a-8bf6-2842ff7cb3a6",
+      "artifactUrl": "https://expo.dev/artifacts/eas/fg9uPKcRBNba9NBqdu7j7j.apk",
+      "localArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+      "apkSha256": "9954f8800d6492913de8ef0c93fda6bec88abd103a1586bcecf1d73e0740c8cf",
+      "completedAt": "2026-06-06T00:15:43.549Z",
+      "finding": "The APK installed successfully, but Settings and assets/app.config still showed https://reversr.vercel.app because no EAS preview environment variable existed; local shell env alone did not bake into the remote build."
+    },
+    "deviceRestoration": {
+      "restoredAt": "2026-06-06T00:39:16.572Z",
+      "restoredFromLocalArtifact": "/tmp/reversr-native-artifacts/reversr-rebuild-invalid-api-preview.apk",
+      "restoredHostObserved": "API host: https://reversr.vercel.app",
+      "reason": "After controlled invalid-host QA, Codex restored the connected Pixel to a live-host preview APK so the device was not left in the intentionally broken state."
+    }
+  },
+  "liveAndroidQa": {
+    "status": "partial-pass-vendor-boundary-only",
+    "checkedAt": "2026-06-06T00:38:39.640Z",
+    "device": "Google Pixel 10 Pro Android 16",
+    "adb": {
+      "initialDevices": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp device product:blazer model:Pixel_10_Pro device:blazer",
+      "mdnsEndpoint": "192.168.4.96:37165",
+      "oldEndpoint": "192.168.4.96:33423 refused connection"
+    },
+    "completedAndroidChecks": [
+      "install-launch",
+      "camera-permission",
+      "manual-description",
+      "inventory-validation",
+      "machine-match",
+      "bom-generation",
+      "assembly-steps",
+      "quote-packet-export",
+      "accessibility",
+      "native-screenshots",
+      "offline-api-error"
+    ],
+    "remainingAndroidChecks": [
+      "vendor-request-draft remains pending because Prepare Request Email was not clicked to avoid creating a third-party communication draft."
+    ],
+    "screenshotsObserved": [
+      "/tmp/reversr-native-artifacts/android-camera-permission-check.png",
+      "/tmp/reversr-native-artifacts/android-camera-permission-denied.png",
+      "/tmp/reversr-native-artifacts/android-after-manual-scan.png",
+      "/tmp/reversr-native-artifacts/android-connector-validated-live.png",
+      "/tmp/reversr-native-artifacts/android-after-match-live.png",
+      "/tmp/reversr-native-artifacts/android-build-phase-live.png",
+      "/tmp/reversr-native-artifacts/android-bom-live.png",
+      "/tmp/reversr-native-artifacts/android-vendor-draft-live.png",
+      "/tmp/reversr-native-artifacts/android-invalid-api-settings.png",
+      "/tmp/reversr-native-artifacts/android-invalid-api-network-error.png"
+    ]
+  },
+  "tooling": {
+    "iosSimulator": {
+      "status": "pass-local-simulator-run",
+      "checkedAt": "2026-06-06T09:08:47.209Z",
+      "xcodeSelectPath": "/Applications/Xcode.app/Contents/Developer",
+      "xcodeVersion": "Xcode 26.5",
+      "xcodeBuildVersion": "17F42",
+      "iosRuntime": "iOS 26.5 (26.5 - 23F77)",
+      "iosRuntimeIdentifier": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+      "cocoaPodsVersion": "1.16.2",
+      "cocoaPodsPath": "/opt/homebrew/bin/pod",
+      "firstBootSimulator": "iPhone 17 Pro (A5E30E83-9A15-44AE-A98F-1F0626D96331)",
+      "simctlAvailable": true,
+      "licenseAccepted": true,
+      "expoRunIosAttempt": {
+        "status": "pass-build-install-launch",
+        "attemptedAt": "2026-06-06T09:08:47.209Z",
+        "command": "EXPO_NO_TELEMETRY=1 npx expo run:ios",
+        "completedSteps": [
+          "Created temporary ios/ native directory",
+          "Ran Expo prebuild",
+          "Installed CocoaPods",
+          "Built ReversRRebuild.app with Xcode",
+          "Installed com.vsillah.reversrrebuild on iPhone 17 Pro Simulator",
+          "Opened the app through the Expo development client URL",
+          "Captured five iOS simulator screenshots"
+        ],
+        "cleanup": "Temporary ios/ directory and Expo-mutated package.json scripts should be removed from the worktree after evidence capture because the project remains managed Expo.",
+        "finding": "CoreSimulator recovered after Xcode license acceptance; local Expo run:ios completed build, install, launch, and screenshot QA on iPhone 17 Pro Simulator iOS 26.5."
+      },
+      "finding": "Xcode 26.5 (17F42), the iOS 26.5 Simulator runtime, and CocoaPods 1.16.2 are installed. Local iOS simulator build/install/launch and screenshot QA passed on iPhone 17 Pro Simulator."
+    },
+    "androidAdb": {
+      "status": "connected",
+      "checkedAt": "2026-06-05T23:57:22.000Z",
+      "device": "Google Pixel 10 Pro Android 16",
+      "serial": "adb-57221FDCH007BA-Snz65Z._adb-tls-connect._tcp",
+      "note": "adb devices -l still lists the Pixel in device state over wireless debugging, but Android QA and screenshots are already recorded; remaining native gate is iOS QA/screenshots plus gated Android vendor/offline checks."
+    }
+  },
+  "iosTestFlight": {
+    "verifiedAt": "2026-06-06T00:23:50.346Z",
+    "appName": "ReversR Rebuild",
+    "appAppleId": "6777091538",
+    "bundleId": "com.vsillah.reversrrebuild",
+    "testFlightUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+    "buildDetailUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios/114ac3cb-f26b-4384-82d6-d661adf05dff",
+    "version": "1.0.0",
+    "build": "6",
+    "buildStatus": "Ready to Submit",
+    "binaryState": "Validated",
+    "expiresIn": "90 days",
+    "uploadDate": "Jun 5, 2026 at 8:09 PM",
+    "originalFileName": "38f358ce-2600-4ce9-bb3a-7fea08181900.ipa",
+    "buildUuid": "114ac3cb-f26b-4384-82d6-d661adf05dff",
+    "buildSdk": "23A339",
+    "buildPlatform": "23A339",
+    "bundleShortVersionString": "1.0.0",
+    "bundleVersionString": "6",
+    "includesSymbols": true,
+    "usesNonExemptEncryption": false,
+    "onDemandResources": false,
+    "siriKit": false,
+    "watchOnlyApp": false,
+    "iMessageApp": {
+      "includesIMessageApp": false,
+      "includesStickers": false,
+      "appIconHidden": false
+    },
+    "deviceRequirements": {
+      "minimumIosVersion": "15.1",
+      "minimumMacosVersion": "12.0",
+      "minimumVisionosVersion": "1.0",
+      "lsMinimumSystemVersion": "12.0",
+      "supportedArchitectures": [
+        "arm64"
+      ],
+      "deviceProtocols": "-",
+      "deviceFamily": [
+        "iPhone",
+        "iPad"
+      ],
+      "requiredCapabilities": [
+        "arm64"
+      ]
+    },
+    "storeInformation": {
+      "localizations": [
+        "English"
+      ],
+      "entitlements": {
+        "application-identifier": "2388NUMA3J.com.vsillah.reversrrebuild",
+        "get-task-allow": false,
+        "beta-reports-active": true,
+        "com.apple.developer.team-identifier": "2388NUMA3J"
+      },
+      "newsstandApp": false,
+      "prerenderedIconFlag": true
+    },
+    "testing": {
+      "groupsCount": 0,
+      "individualTestersCount": 0,
+      "whatToTestEmpty": true,
+      "saveButtonDisabled": true,
+      "testersAdded": false,
+      "testInfoSaved": false
+    },
+    "actionsNotTaken": [
+      "No TestFlight group was created.",
+      "No tester was invited.",
+      "What to Test was not saved because tester-facing copy needs explicit content/action approval.",
+      "Add for Review was not clicked.",
+      "App Privacy Publish was not clicked.",
+      "Public App Review submission was not started."
+    ]
+  },
+  "iosSimulatorRun": {
+    "status": "pass-local-simulator-qa",
+    "checkedAt": "2026-06-06T09:08:47.209Z",
+    "device": "iPhone 17 Pro Simulator iOS 26.5",
+    "simulatorId": "A5E30E83-9A15-44AE-A98F-1F0626D96331",
+    "appBundleId": "com.vsillah.reversrrebuild",
+    "command": "EXPO_NO_TELEMETRY=1 npx expo run:ios",
+    "xcodeVersion": "Xcode 26.5",
+    "xcodeBuildVersion": "17F42",
+    "iosRuntime": "iOS 26.5 (26.5 - 23F77)",
+    "cocoaPodsVersion": "1.16.2",
+    "workflowVerified": [
+      "welcome screen",
+      "manual machine description scan fallback",
+      "demo inventory connector validation",
+      "Desktop CNC Router inventory match",
+      "design/reconstruction package screen",
+      "build phase assembly/pricing/vendor handoff controls"
+    ],
+    "screenshots": [
+      "docs/store-screenshots/native/ios-01-welcome.png",
+      "docs/store-screenshots/native/ios-02-scan.png",
+      "docs/store-screenshots/native/ios-03-inventory-validation.png",
+      "docs/store-screenshots/native/ios-04-design-match.png",
+      "docs/store-screenshots/native/ios-05-build-handoff.png"
+    ],
+    "externalActionsAvoided": [
+      "No TestFlight tester invite was created.",
+      "No App Review/Add for Review action was clicked.",
+      "No vendor email draft was prepared or sent.",
+      "No external quote packet upload was started."
+    ]
+  }
+}

@@ -10,23 +10,19 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/useStorage';
-import { SIT_PATTERN_LABELS, SITPattern } from '../hooks/useGemini';
+import { MACHINE_WORKFLOW_LABELS, MachineWorkflowKey } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 
-const LABEL_TO_PATTERN: Record<string, SITPattern> = {
-  'Subtraction': 'subtraction',
-  'Task Unification': 'task_unification',
-  'Multiplication': 'multiplication',
-  'Division': 'division',
-  'Attribute Dependency': 'attribute_dependency',
+const LABEL_TO_WORKFLOW: Record<string, MachineWorkflowKey> = {
+  'Inventory Match': 'inventory_match',
 };
 
 const getPatternLabel = (pattern: string | null | undefined): string | null => {
   if (!pattern) return null;
-  if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
-    return SIT_PATTERN_LABELS[pattern as SITPattern];
+  if (MACHINE_WORKFLOW_LABELS[pattern as MachineWorkflowKey]) {
+    return MACHINE_WORKFLOW_LABELS[pattern as MachineWorkflowKey];
   }
-  if (LABEL_TO_PATTERN[pattern]) {
+  if (LABEL_TO_WORKFLOW[pattern]) {
     return pattern;
   }
   return null;
@@ -42,13 +38,13 @@ const getItemPattern = (item: SavedInnovation): string | null => {
   return null;
 };
 
-const normalizePatternKey = (pattern: string | null): SITPattern | null => {
+const normalizePatternKey = (pattern: string | null): MachineWorkflowKey | null => {
   if (!pattern) return null;
-  if (SIT_PATTERN_LABELS[pattern as SITPattern]) {
-    return pattern as SITPattern;
+  if (MACHINE_WORKFLOW_LABELS[pattern as MachineWorkflowKey]) {
+    return pattern as MachineWorkflowKey;
   }
-  if (LABEL_TO_PATTERN[pattern]) {
-    return LABEL_TO_PATTERN[pattern];
+  if (LABEL_TO_WORKFLOW[pattern]) {
+    return LABEL_TO_WORKFLOW[pattern];
   }
   return null;
 };
@@ -64,17 +60,13 @@ const SORT_OPTIONS: { key: SortOption; label: string; icon: string }[] = [
 
 const PHASE_FILTERS = [
   { key: 1, label: 'Scan' },
-  { key: 2, label: 'Reverse' },
+  { key: 2, label: 'Inventory' },
   { key: 3, label: 'Design' },
   { key: 4, label: 'Build' },
 ];
 
-const PATTERN_FILTERS: { key: SITPattern; label: string }[] = [
-  { key: 'subtraction', label: 'Subtraction' },
-  { key: 'task_unification', label: 'Task Unification' },
-  { key: 'multiplication', label: 'Multiplication' },
-  { key: 'division', label: 'Division' },
-  { key: 'attribute_dependency', label: 'Attribute Dep.' },
+const PATTERN_FILTERS: { key: MachineWorkflowKey; label: string }[] = [
+  { key: 'inventory_match', label: 'Inventory Match' },
 ];
 
 interface Props {
@@ -97,7 +89,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPhases, setSelectedPhases] = useState<number[]>([]);
-  const [selectedPatterns, setSelectedPatterns] = useState<SITPattern[]>([]);
+  const [selectedPatterns, setSelectedPatterns] = useState<MachineWorkflowKey[]>([]);
 
   useEffect(() => {
     loadInnovations();
@@ -113,7 +105,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   const handleDelete = (id: string, name: string) => {
     setDeleteAlert({
       visible: true,
-      title: 'Delete Innovation',
+      title: 'Delete Reconstruction',
       message: `Are you sure you want to delete "${name}"?`,
       onConfirm: async () => {
         setDeleteAlert(null);
@@ -123,7 +115,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     });
   };
 
-  const PHASE_LABELS = ['Scan', 'Reverse', 'Design', 'Build'];
+  const PHASE_LABELS = ['Scan', 'Inventory', 'Design', 'Build'];
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -150,7 +142,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     if (item.input) {
       return item.input.substring(0, 30) + (item.input.length > 30 ? '...' : '');
     }
-    return 'Untitled Innovation';
+    return 'Untitled Reconstruction';
   };
 
   const getSearchableText = (item: SavedInnovation): string => {
@@ -170,7 +162,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     );
   };
 
-  const togglePatternFilter = (pattern: SITPattern) => {
+  const togglePatternFilter = (pattern: MachineWorkflowKey) => {
     setSelectedPatterns(prev =>
       prev.includes(pattern)
         ? prev.filter(p => p !== pattern)
@@ -233,11 +225,11 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
           <Ionicons name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <View style={styles.headerText}>
-          <Text style={styles.title}>Innovation History</Text>
+          <Text style={styles.title}>Reconstruction History</Text>
           <Text style={styles.subtitle}>
             {filteredAndSortedInnovations.length === innovations.length 
-              ? `${innovations.length} saved innovations`
-              : `${filteredAndSortedInnovations.length} of ${innovations.length} innovations`
+              ? `${innovations.length} saved reconstructions`
+              : `${filteredAndSortedInnovations.length} of ${innovations.length} reconstructions`
             }
           </Text>
         </View>
@@ -249,7 +241,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
             <Ionicons name="search" size={18} color={Colors.gray[500]} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search innovations..."
+              placeholder="Search reconstructions..."
               placeholderTextColor={Colors.gray[600]}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -324,7 +316,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
               </View>
 
               <View style={styles.filterGroup}>
-                <Text style={styles.filterGroupLabel}>Pattern</Text>
+                <Text style={styles.filterGroupLabel}>Match Type</Text>
                 <View style={styles.filterChips}>
                   {PATTERN_FILTERS.map((pattern) => (
                     <TouchableOpacity
@@ -365,12 +357,12 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
         ) : innovations.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="cube-outline" size={64} color={Colors.gray[700]} />
-            <Text style={styles.emptyTitle}>No innovations yet</Text>
+            <Text style={styles.emptyTitle}>No reconstructions yet</Text>
             <Text style={styles.emptyText}>
-              Start analyzing products to build your innovation history
+              Start scanning machines to build your reconstruction history
             </Text>
             <TouchableOpacity style={styles.startButton} onPress={onBack}>
-              <Text style={styles.startButtonText}>Start Innovating</Text>
+              <Text style={styles.startButtonText}>Start Scanning</Text>
             </TouchableOpacity>
           </View>
         ) : filteredAndSortedInnovations.length === 0 ? (

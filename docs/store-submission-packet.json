@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "2026-06-05",
+  "sourceNotes": [
+    "Prepared for App Store Connect and Google Play Console copy/paste setup.",
+    "Hosted policy, support, and API URLs are configured on the ReversR Vercel production deployment.",
+    "Final screenshots must be captured from native preview builds, not web preview screenshots."
+  ],
+  "appIdentity": {
+    "name": "ReversR Rebuild",
+    "version": "1.0.0",
+    "iosBundleId": "com.vsillah.reversrrebuild",
+    "androidPackage": "com.vsillah.reversrrebuild",
+    "primaryLanguage": "en-US",
+    "sku": "reversr-rebuild-001",
+    "category": {
+      "applePrimary": "Productivity",
+      "appleSecondary": "Business",
+      "googleCategory": "Productivity"
+    },
+    "ageRatingTarget": "4+ / Everyone, pending final store questionnaire review"
+  },
+  "urls": {
+    "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
+    "termsUrl": "https://reversr.vercel.app/terms",
+    "supportUrl": "https://reversr.vercel.app/support",
+    "apiBaseUrl": "https://reversr.vercel.app"
+  },
+  "supportContact": {
+    "email": "vambah@amadutown.com",
+    "location": "Boston, Massachusetts, USA"
+  },
+  "appStoreConnect": {
+    "name": "ReversR Rebuild",
+    "subtitle": "Machine rebuild packages",
+    "promotionalText": "Scan or describe a machine, match it to an approved inventory record, and prepare a reviewable reconstruction package.",
+    "description": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nThe workflow is designed for human review. Inventory matches, procurement decisions, fabrication files, and assembly steps should be checked by a qualified person before parts are ordered or machines are rebuilt.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. It prepares reviewable handoff materials so users can make controlled decisions.",
+    "keywords": "machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D",
+    "reviewNotes": "Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.",
+    "testFlightWhatToTest": "Please focus on the core reconstruction workflow:\n- Start a new reconstruction using Type mode and a machine description.\n- Validate the demo or approved inventory connector.\n- Confirm the app matches the machine to an inventory record.\n- Generate the BOM and review parts, quantities, pricing ranges, and supplier guidance.\n- Review assembly steps, quote packet controls, policy links, and error handling.\n\nDo not submit real purchase orders or send vendor requests from this build. Treat generated BOMs and assembly steps as review drafts that require qualified human validation before use.",
+    "appPrivacy": {
+      "tracking": false,
+      "dataUsedForAdvertising": false,
+      "contactInfoCollected": false,
+      "identifiersCollected": false,
+      "diagnosticsCollected": false,
+      "userContentProcessed": [
+        "Machine images",
+        "Machine descriptions",
+        "Inventory connector metadata",
+        "Reconstruction outputs"
+      ],
+      "dataLinkedToUser": "Not by default in the prototype. Revisit if accounts, analytics, crash reporting, or server-side reconstruction storage are added.",
+      "thirdPartyProcessing": [
+        "Configured AI provider processing when enabled",
+        "User-initiated export or vendor handoff only"
+      ]
+    }
+  },
+  "googlePlay": {
+    "title": "ReversR Rebuild",
+    "shortDescription": "Scan machines and create BOM, assembly, pricing, and fabrication packets.",
+    "fullDescription": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild is designed for review-driven workflows. Inventory matching, procurement, fabrication, and vendor handoff should be checked by a qualified human before parts are ordered or machines are rebuilt.\n\nThe app does not automatically order parts, submit manufacturing jobs, transmit files to vendors, or purchase services. It prepares reviewable handoff materials so users can make controlled decisions.",
+    "dataSafety": {
+      "dataCollected": [
+        "Machine photos or descriptions when submitted for reconstruction planning",
+        "Inventory connector metadata",
+        "Generated reconstruction package content"
+      ],
+      "dataShared": [
+        "Configured AI provider processing when enabled",
+        "Vendor handoff only when the user explicitly exports or shares a packet"
+      ],
+      "purposes": [
+        "App functionality",
+        "Inventory matching",
+        "Reconstruction package generation",
+        "Support and troubleshooting if diagnostics are added later"
+      ],
+      "encryptedInTransit": true,
+      "tracking": false,
+      "ads": false,
+      "accountDeletionRequired": "Not applicable until account/server-side user storage is added.",
+      "requiredPermissions": [
+        "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
+      ]
+    }
+  },
+  "screenshots": {
+    "nativeRequired": true,
+    "webPreviewOnly": "docs/store-screenshots/generated/",
+    "googlePlayFeatureGraphic": "docs/store-assets/google-play-feature-graphic.png",
+    "requiredSet": [
+      "Welcome screen showing the four reconstruction phases",
+      "Scan screen with camera or description mode",
+      "Inventory connector validation preview",
+      "Design screen with machine match evidence",
+      "Build screen with assembly steps, pricing, BOM, quote packet, and vendor draft controls"
+    ]
+  },
+  "releaseNotes": {
+    "initialRelease": "Initial ReversR Rebuild release for scan-to-inventory machine reconstruction planning, BOM generation, pricing estimates, and reviewable fabrication handoff."
+  },
+  "openGates": [
+    "Deploy API behind HTTPS and run npm run api:preflight.",
+    "Deploy hosted privacy, terms, and support routes.",
+    "Set EAS production environment URLs.",
+    "Run eas init for the clone identity.",
+    "Set eas.json submit.production.ios.ascAppId after the App Store Connect record exists.",
+    "Configure App Store Connect and Play Console records.",
+    "Run native Android and iOS preview builds.",
+    "Capture final native screenshots.",
+    "Complete native camera, accessibility, and export QA.",
+    "Submit to TestFlight and Google Play Internal Testing before production review."
+  ]
+}

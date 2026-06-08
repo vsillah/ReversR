@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-05T10:38:20.216Z",
+  "outputFile": "public/inventory/farmbot-genesis-v1.8.json",
+  "sourcePartCount": 147,
+  "selectedPartCount": 24,
+  "machineId": "FARMBOT-GENESIS-V1-8",
+  "machineName": "FarmBot Genesis v1.8",
+  "partsSubtotal": "$2,556",
+  "sourceLinks": {
+    "product": "https://farm.bot/pages/genesis",
+    "openSource": "https://farm.bot/pages/open-source",
+    "documentation": "https://genesis.farm.bot/v1.8",
+    "bom": "https://genesis.farm.bot/v1.8/bom",
+    "github": "https://github.com/FarmBot-Docs/farmbot-genesis"
+  },
+  "sourceCategories": [
+    "drivetrain",
+    "electronics-and-wiring",
+    "extrusions",
+    "fasteners-and-hardware",
+    "plastic-parts",
+    "plates-and-brackets",
+    "tubing"
+  ]
+}

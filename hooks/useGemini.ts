@@ -1,8 +1,13 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const API_BASE = Platform.OS === 'web' 
-  ? (window.location.origin.includes('localhost') ? 'http://localhost:3001' : 'https://reversr-vsillah.replit.app')
-  : 'https://reversr-vsillah.replit.app';
+import Constants from 'expo-constants';
+
+const configuredApiBase = process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl;
+const API_BASE = Platform.OS === 'web' && window.location.origin.includes('localhost')
+  ? 'http://localhost:3001'
+  : configuredApiBase || 'https://reversr-rebuild-api.example.com';
+
+export const getApiBase = () => API_BASE;
 
 export const getAiConfig = async () => {
   try {
@@ -35,26 +40,85 @@ export interface AnalysisResult {
   rawAnalysis: string;
 }
 
-export type SITPattern = 'subtraction' | 'task_unification' | 'multiplication' | 'division' | 'attribute_dependency';
+export type MachineWorkflowKey = 'inventory_match';
 
-export const SIT_PATTERN_LABELS: Record<SITPattern, string> = {
-  'subtraction': 'Subtraction',
-  'task_unification': 'Task Unification',
-  'multiplication': 'Multiplication',
-  'division': 'Division',
-  'attribute_dependency': 'Attribute Dependency',
+export const MACHINE_WORKFLOW_LABELS: Record<MachineWorkflowKey, string> = {
+  'inventory_match': 'Inventory Match',
 };
 
-export const SIT_PATTERNS: SITPattern[] = [
-  'subtraction',
-  'task_unification',
-  'multiplication',
-  'division',
-  'attribute_dependency',
+export const MACHINE_WORKFLOWS: MachineWorkflowKey[] = [
+  'inventory_match',
 ];
 
+export interface InventoryConnector {
+  sourceName: string;
+  sourceUrl: string;
+  connectorType: 'demo' | 'csv' | 'api' | 'erp';
+  authMode: 'none' | 'api_key' | 'oauth' | 'private_network';
+  credentialRef?: string;
+  notes?: string;
+}
+
+export interface InventoryValidationResult {
+  status: 'ok' | 'error';
+  sourceName: string;
+  sourceUrl: string;
+  authMode?: InventoryConnector['authMode'];
+  credentialStatus?: 'not_required' | 'configured' | 'missing' | 'disabled';
+  recordCount: number;
+  requiredFields: string[];
+  sampleMachines: Array<{
+    machineId: string;
+    machineName: string;
+    revision?: string;
+    partCount: number;
+  }>;
+  error?: string;
+}
+
+export interface AdminCredentialSummary {
+  credentialRef: string;
+  authModes: string[];
+  headerNames: string[];
+  hasSecret: boolean;
+  source?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdminCredentialListResponse {
+  status: 'ok';
+  registryEnabled: boolean;
+  credentials: AdminCredentialSummary[];
+}
+
+export interface AssemblyStep {
+  stepNumber: number;
+  title: string;
+  instructions: string;
+  parts: string[];
+  estimatedTime: string;
+  qualityCheck: string;
+}
+
+export interface PricingSnapshot {
+  partsSubtotal: string;
+  modelingEstimate: string;
+  fabricationEstimate: string;
+  assemblyLaborEstimate: string;
+  totalEstimate: string;
+  confidence: 'low' | 'medium' | 'high';
+}
+
+export interface FulfillmentOption {
+  vendorName: string;
+  serviceType: string;
+  url: string;
+  packageRequired: string[];
+}
+
 export interface InnovationResult {
-  patternUsed: SITPattern;
+  patternUsed: MachineWorkflowKey;
   conceptName: string;
   conceptDescription: string;
   marketGap: string;
@@ -62,6 +126,14 @@ export interface InnovationResult {
   noveltyScore: number;
   viabilityScore: number;
   marketBenefit: string;
+  machineId?: string;
+  machineName?: string;
+  inventorySource?: string;
+  confidenceScore?: number;
+  evidence?: string;
+  assemblySteps?: AssemblyStep[];
+  pricing?: PricingSnapshot;
+  fulfillmentOptions?: FulfillmentOption[];
 }
 
 export interface TechnicalSpec {
@@ -200,23 +272,72 @@ export const analyzeProduct = async (input: string, imageBase64?: string): Promi
   });
 };
 
-export const applySITPattern = async (
+export const identifyMachineFromInventory = async (
   analysis: AnalysisResult, 
-  pattern: SITPattern,
-  selectedComponents?: number[],
-  selectedResources?: number[]
+  connector: InventoryConnector,
+  capturedImage?: string | null
 ): Promise<InnovationResult> => {
   const config = await getAiConfig();
-  return fetchWithRetry(`${API_BASE}/api/gemini/apply-pattern`, {
+  return fetchWithRetry(`${API_BASE}/api/gemini/match-machine`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
       analysis, 
-      pattern,
-      selectedComponents,
-      selectedResources,
+      connector,
+      image: capturedImage,
       ...config
     })
+  });
+};
+
+export const validateInventoryConnector = async (
+  connector: InventoryConnector
+): Promise<InventoryValidationResult> => {
+  return fetchWithRetry(`${API_BASE}/api/inventory/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ connector })
+  });
+};
+
+const adminHeaders = (adminToken: string) => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${adminToken}`,
+});
+
+export const listInventoryCredentials = async (
+  adminToken: string
+): Promise<AdminCredentialListResponse> => {
+  return fetchWithRetry(`${API_BASE}/api/admin/inventory/credentials`, {
+    method: 'GET',
+    headers: adminHeaders(adminToken),
+  });
+};
+
+export const saveInventoryCredential = async (
+  adminToken: string,
+  payload: {
+    credentialRef: string;
+    headerName?: string;
+    value?: string;
+    accessToken?: string;
+    scheme?: string;
+  }
+): Promise<{ status: 'ok'; credential: AdminCredentialSummary }> => {
+  return fetchWithRetry(`${API_BASE}/api/admin/inventory/credentials`, {
+    method: 'POST',
+    headers: adminHeaders(adminToken),
+    body: JSON.stringify(payload),
+  });
+};
+
+export const deleteInventoryCredential = async (
+  adminToken: string,
+  credentialRef: string
+): Promise<{ status: 'ok'; credentialRef: string; deleted: boolean }> => {
+  return fetchWithRetry(`${API_BASE}/api/admin/inventory/credentials/${encodeURIComponent(credentialRef)}`, {
+    method: 'DELETE',
+    headers: adminHeaders(adminToken),
   });
 };
 

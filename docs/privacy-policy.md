@@ -1,74 +1,90 @@
-# Privacy Policy for ReversR
+# Privacy Policy for ReversR Rebuild
 
-**Last Updated:** January 26, 2025
+**Last Updated:** June 5, 2026
 
 ## Introduction
 
-ReversR ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.
+ReversR Rebuild ("we," "our," or "us") helps users scan machines, match them against an approved machine inventory, and prepare reconstruction packages with parts, assembly steps, pricing estimates, and fabrication handoff materials.
 
-## Information We Collect
+This Privacy Policy explains what information the app handles and how it is used.
+
+## Information We Collect or Process
 
 ### Information You Provide
-- **Product Images**: Photos you capture or upload for analysis
-- **Product Descriptions**: Text descriptions you provide about products
-- **Usage Data**: Information about how you interact with the app
 
-### Automatically Collected Information
-- **Device Information**: Device type, operating system, and app version
-- **Analytics Data**: App performance metrics and crash reports
+- **Machine images:** Photos captured with the camera for machine identification.
+- **Machine descriptions:** Text descriptions, visible part notes, model names, and other scan context.
+- **Inventory connector metadata:** Source name, connector URI, connector type, auth mode selection, and admin notes.
+- **Reconstruction outputs:** Machine match results, assembly steps, bill of materials, pricing estimates, and export packages.
 
-## How We Use Your Information
+### Device and Usage Information
 
-We use the collected information to:
-- Analyze product images using AI to identify components and attributes
-- Generate systematic inventive thinking analyses
-- Improve app functionality and user experience
-- Provide technical support
+If analytics or crash reporting is enabled in a future release, the app may process device type, operating system, app version, crash logs, and performance events. This prototype does not add a new analytics SDK.
 
-## Data Processing
+## How We Use Information
 
-- **Image Analysis**: Product images are processed using Google's Gemini AI API
-- **Storage**: Analysis results are stored locally on your device
-- **Third-Party Services**: We use Google Gemini API for AI processing
+We use information to:
 
-## Data Retention
+- Identify machines from images or descriptions.
+- Validate and read approved machine inventory sources.
+- Match scans to machine records.
+- Generate reconstruction plans, BOMs, assembly steps, pricing estimates, and handoff packages.
+- Save reconstruction history locally on the device.
+- Improve reliability and support troubleshooting.
 
-- Images and analyses are stored locally on your device
-- You can delete your data at any time by clearing app data or uninstalling the app
-- We do not retain your images or analyses on our servers
+## Data Storage
+
+- Reconstruction history is stored locally on the device.
+- Large base64 images are not stored in long-term local history by default.
+- Inventory connector metadata may be saved locally so admins do not need to re-enter it.
+- Exported sketches, specs, BOMs, and reconstruction packages are written to app-controlled storage before the user chooses whether to share them.
+
+## Third-Party Processing
+
+The app may use AI providers such as Google Gemini or local models such as Ollama to analyze machine input and generate reconstruction outputs. If a cloud AI provider is configured, machine descriptions and images may be sent to that provider for processing.
+
+Manufacturer links such as Xometry, Protolabs, Shapeways, or JLCPCB are provided as handoff destinations. The app can export a quote packet and prepare a user-reviewed email draft for handoff, but it does not automatically submit files or orders to those vendors.
 
 ## Data Sharing
 
-We do not sell, rent, or share your personal information with third parties except:
-- When required by law
-- To process images through Google Gemini API (subject to Google's privacy policy)
+We do not sell personal information.
 
-## Your Rights
+Information may be shared only when:
 
-You have the right to:
-- Access your data stored in the app
-- Delete your data at any time
-- Opt-out of analytics (if implemented)
+- Required to process a scan through a configured AI provider.
+- The user or admin explicitly exports or shares a reconstruction package.
+- Required by law.
+
+## Camera Access
+
+Camera access is used only to capture machine images for inventory matching and reconstruction planning. Camera access is not used for advertising, marketing, or unrelated data mining.
+
+The app does not request broad photo library or media library access in the current release path. Generated visual references are exported through app storage and the system share sheet instead of being saved directly to the user's photo library.
+
+## Your Choices
+
+You can:
+
+- Delete app data by clearing app storage or uninstalling the app.
+- Avoid camera capture by entering a machine description manually.
+- Avoid cloud AI processing by configuring a supported local model where available.
 
 ## Security
 
-We implement reasonable security measures to protect your information. However, no method of transmission over the internet is 100% secure.
+We use reasonable safeguards for app data and recommend using HTTPS inventory connectors. Authenticated ERP/API connector secrets are not stored in the mobile app; production connector credentials should be managed in a backend secret store.
 
 ## Children's Privacy
 
-ReversR is not intended for children under 13. We do not knowingly collect information from children under 13.
+ReversR Rebuild is not intended for children under 13. We do not knowingly collect information from children under 13.
 
 ## Changes to This Policy
 
-We may update this Privacy Policy from time to time. Changes will be posted within the app with an updated "Last Updated" date.
+We may update this Privacy Policy. Updates will include a new "Last Updated" date.
 
 ## Contact Us
 
-If you have questions about this Privacy Policy, please contact us at:
-vsillah@gmail.com
+For questions, contact:
+
+vambah@amadutown.com
 
 **Location:** Boston, Massachusetts, USA
-
----
-
-By using ReversR, you agree to this Privacy Policy.
