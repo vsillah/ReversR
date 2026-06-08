@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ import {
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+import ManufacturingStudio from './ManufacturingStudio';
+import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
 
 const BUILD_STEPS: LoadingStep[] = [
   { id: 'analyzing', label: 'Analyzing specifications' },
@@ -116,6 +118,7 @@ type ManufacturerQuotePacket = {
     has3DScene: boolean;
     expectedFileTypes: string[];
   };
+  manufacturingHandoff: ManufacturingHandoff;
   vendorTargets: QuoteVendor[];
   quoteRouting: {
     selectedVendor?: QuoteVendor;
@@ -152,6 +155,19 @@ export default function PhaseFour({
   const [selectedVendorName, setSelectedVendorName] = useState('');
   const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('');
   const [quoteAdminNotes, setQuoteAdminNotes] = useState('');
+  const angleLabels = useMemo(() => (
+    multiAngleImages
+      .filter(image => !!image.imageData)
+      .map(image => image.label)
+  ), [multiAngleImages]);
+  const manufacturingHandoff = useMemo(() => buildManufacturingHandoff({
+    innovation,
+    spec,
+    bom: localBom,
+    scene: threeDScene,
+    has2D,
+    angleLabels,
+  }), [innovation, spec, localBom, threeDScene, has2D, angleLabels]);
 
   useEffect(() => {
     // Scroll to top on mount
@@ -212,10 +228,6 @@ export default function PhaseFour({
   const buildQuotePacket = (bomForPacket: BillOfMaterials): ManufacturerQuotePacket => {
     const vendorTargets = getVendorTargets();
     const selectedVendor = getSelectedVendor();
-    const angleLabels = multiAngleImages
-      .filter(image => !!image.imageData)
-      .map(image => image.label);
-
     return {
       packetType: 'manufacturer_quote_request',
       packetVersion: '0.1-review',
@@ -242,8 +254,9 @@ export default function PhaseFour({
         has2D,
         angleLabels,
         has3DScene: has3D,
-        expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'OBJ/STL if generated', 'PNG visual references if generated'],
+        expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'STEP/native CAD', 'PDF detail drawings', 'OBJ/STL if generated', 'PNG visual references if generated'],
       },
+      manufacturingHandoff,
       vendorTargets,
       quoteRouting: {
         selectedVendor,
@@ -303,6 +316,7 @@ export default function PhaseFour({
         innovation,
         specifications: spec,
         billOfMaterials: localBom,
+        manufacturingHandoff,
         manufacturerQuotePacket: quotePacket,
         exportedAt: new Date().toISOString(),
       };
@@ -391,7 +405,10 @@ export default function PhaseFour({
       innovation.pricing ? `- Fabrication: ${innovation.pricing.fabricationEstimate}` : '',
       innovation.pricing ? `- Total estimate: ${innovation.pricing.totalEstimate}` : '',
       '',
-      'Please confirm required source files, manufacturability concerns, lead time, and quote assumptions before any fabrication begins.',
+      'Manufacturing review requirements:',
+      `- Nominal envelope: ${manufacturingHandoff.envelope.widthMm} x ${manufacturingHandoff.envelope.depthMm} x ${manufacturingHandoff.envelope.heightMm} mm`,
+      `- Datum scheme: ${manufacturingHandoff.datumScheme.map(datum => datum.datum).join(', ')}`,
+      '- Confirm STEP/native CAD, PDF detail drawings, tolerance stack, material selection, DfM concerns, lead time, and quote assumptions before any fabrication begins.',
     ].filter(Boolean).join('\n');
 
     const recipient = quoteRecipientEmail.trim();
@@ -464,6 +481,8 @@ export default function PhaseFour({
           </View>
         </View>
       )}
+
+      <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} />
 
       <View style={styles.bomPanel}>
         <TouchableOpacity 
@@ -608,6 +627,7 @@ export default function PhaseFour({
             <Text style={styles.exportInfoItem}>• Technical specifications</Text>
             <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
             <Text style={styles.exportInfoItem}>• Manufacturer quote request packet</Text>
+            <Text style={styles.exportInfoItem}>• Manufacturing studio dimensions, datums, and DfM gates</Text>
             <Text style={styles.exportInfoItem}>• 2D sketches (PNG)</Text>
             <Text style={styles.exportInfoItem}>• 3D scene descriptor</Text>
             <Text style={styles.exportInfoItem}>• Export timestamp</Text>
@@ -819,7 +839,7 @@ export default function PhaseFour({
           ))}
         </View>
         <Text style={styles.manufacturerNote}>
-          Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, and any generated OBJ/STL or visual references to request quotes.
+          Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, and any generated CAD, OBJ/STL, or visual references to request review and quotes.
         </Text>
       </View>
 

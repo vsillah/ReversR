@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T05:01:45.082Z",
+  "generatedAt": "2026-06-08T10:00:52.207Z",
   "appUrl": "http://localhost:5001",
   "apiUrl": "http://localhost:3001",
   "viewport": {
@@ -33,7 +33,15 @@
       "authenticatedConnectorsEnabled": false,
       "credentialRegistryEnabled": false,
       "credentialCount": 0,
-      "privateNetworkConnectorsEnabled": false
+      "privateNetworkConnectorsEnabled": false,
+      "runtimeConfig": {
+        "corsMode": "open",
+        "allowedCorsOriginCount": 0,
+        "requestBodyLimit": "50mb",
+        "adminRoutesEnabled": false,
+        "registryWritesEnabled": false,
+        "privateNetworkConnectorsEnabled": false
+      }
     },
     "retiredSitRouteStatus": 404
   },
