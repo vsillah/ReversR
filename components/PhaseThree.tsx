@@ -428,7 +428,7 @@ export default function PhaseThree({
 
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (status === 'generating_visual') {
       setGenerationTime(0);
       interval = setInterval(() => {

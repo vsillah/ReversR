@@ -27,6 +27,13 @@ const isPlaceholder = (value = '') => (
 const appConfig = readJson('app.json').expo;
 const easConfig = readJson('eas.json');
 const packet = readJson('docs/store-submission-packet.json');
+const getPluginOptions = (pluginName) => {
+  const plugin = (appConfig.plugins || []).find(entry => (
+    entry === pluginName || (Array.isArray(entry) && entry[0] === pluginName)
+  ));
+  return Array.isArray(plugin) ? plugin[1] || {} : {};
+};
+const splashImage = appConfig.splash?.image || getPluginOptions('expo-splash-screen').image;
 
 const gates = [];
 const addGate = (group, id, title, status, evidence, nextStep = '') => {
@@ -296,7 +303,7 @@ addGate(
 const assetsOk = [
   appConfig.icon,
   appConfig.android?.adaptiveIcon?.foregroundImage,
-  appConfig.splash?.image,
+  splashImage,
   appConfig.web?.favicon,
 ].every(pngIs1024);
 addGate(

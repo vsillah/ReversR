@@ -34,6 +34,13 @@ const runCheck = (label, command, args) => {
 const appConfig = readJson('app.json').expo;
 const easConfig = readJson('eas.json');
 const pkg = readJson('package.json');
+const getPluginOptions = (pluginName) => {
+  const plugin = (appConfig.plugins || []).find(entry => (
+    entry === pluginName || (Array.isArray(entry) && entry[0] === pluginName)
+  ));
+  return Array.isArray(plugin) ? plugin[1] || {} : {};
+};
+const splashImage = appConfig.splash?.image || getPluginOptions('expo-splash-screen').image;
 
 const expected = {
   name: 'ReversR Rebuild',
@@ -117,7 +124,7 @@ runCheck('Store assets preflight', process.execPath, ['scripts/store-assets-pref
 const requiredPngAssets = [
   ['expo.icon', appConfig.icon, 1024, 1024],
   ['android.adaptiveIcon.foregroundImage', appConfig.android?.adaptiveIcon?.foregroundImage, 1024, 1024],
-  ['splash.image', appConfig.splash?.image, 1024, 1024],
+  ['splash.image', splashImage, 1024, 1024],
   ['web.favicon', appConfig.web?.favicon, 1024, 1024],
 ];
 

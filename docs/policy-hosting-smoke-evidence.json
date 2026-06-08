@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T09:42:55.772Z",
+  "generatedAt": "2026-06-08T10:41:06.997Z",
   "outputDir": "/var/folders/q2/spyh50y9083bsnp9059ttv400000gn/T/reversr-policy-web-export",
   "urls": {
     "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
@@ -12,8 +12,8 @@
   "hostedChecksEnabled": true,
   "hostedChecks": {
     "privacyPolicyUrl": "pass",
-    "termsUrl": "pass",
-    "supportUrl": "pass"
+    "supportUrl": "pass",
+    "termsUrl": "pass"
   },
   "routeFiles": {
     "privacy": "app/privacy.tsx",
@@ -36,7 +36,7 @@
     }
   },
   "bundle": {
-    "bundleCount": 1,
+    "bundleCount": 3,
     "expectedTextFound": {
       "Privacy Policy": true,
       "Terms of Service": true,
