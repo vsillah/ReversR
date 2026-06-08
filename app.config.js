@@ -2,7 +2,9 @@ const appJson = require('./app.json');
 
 module.exports = ({ config }) => ({
   ...config,
+  ...appJson.expo,
   extra: {
+    ...appJson.expo.extra,
     ...config.extra,
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || config.extra?.apiBaseUrl || appJson.expo.extra.apiBaseUrl,
     privacyPolicyUrl: process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL || config.extra?.privacyPolicyUrl || appJson.expo.extra.privacyPolicyUrl,
