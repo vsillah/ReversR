@@ -168,6 +168,8 @@ Then verify the hosted backend:
 EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 ```
 
+This hosted preflight must report at least one configured Gemini key. Tester and review builds should use Gemini-backed analysis and design generation, not fallback-only content. Keep the Gemini key on the API host as `AI_INTEGRATIONS_GEMINI_API_KEY` or `GEMINI_API_KEYS`; do not place it in EAS mobile environment variables.
+
 Then verify the hosted inventory connector:
 
 ```bash

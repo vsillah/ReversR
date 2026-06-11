@@ -602,7 +602,7 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>MACHINE RECONSTRUCTION</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.historyButton}
             onPress={() => setShowSettings(true)}
@@ -840,8 +840,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
@@ -852,6 +854,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.md,
+    flexShrink: 1,
+    minWidth: 0,
   },
   headerLogo: {
     width: 56,
@@ -871,9 +875,21 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.dim,
     letterSpacing: 3,
+    flexShrink: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    justifyContent: 'flex-end',
+    flexShrink: 0,
   },
   historyButton: {
     padding: Spacing.sm,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   progressBar: {
     flexDirection: "row",
