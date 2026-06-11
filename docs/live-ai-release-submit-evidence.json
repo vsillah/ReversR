@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "status": "submitted-with-apple-console-login-gate",
+  "generatedAt": "2026-06-11T10:16:00.000Z",
+  "scope": "Managed Gemini tester rebuild submissions after PR #7 merged to main and Vercel production deployed commit 13e285d66d040be5cc2985816526270a3595b94e.",
+  "hostedApi": {
+    "baseUrl": "https://reversr.vercel.app",
+    "preflightEvidence": "docs/api-hosted-preflight-evidence.json",
+    "geminiManagedCloudRequired": true
+  },
+  "easBuilds": {
+    "evidence": "docs/eas-production-build-sync-evidence.json",
+    "android": {
+      "buildId": "e781ec85-1b7d-4db1-a51a-efa3da44fd10",
+      "version": "1.0.0",
+      "versionCode": "18",
+      "platform": "ANDROID",
+      "profile": "production",
+      "artifactType": "aab",
+      "gitCommitHash": "13e285d66d040be5cc2985816526270a3595b94e"
+    },
+    "ios": {
+      "buildId": "aed448ab-37ab-42f8-b508-9ac17bf37064",
+      "version": "1.0.0",
+      "buildNumber": "7",
+      "platform": "IOS",
+      "profile": "production",
+      "artifactType": "ipa",
+      "gitCommitHash": "13e285d66d040be5cc2985816526270a3595b94e"
+    }
+  },
+  "submissions": {
+    "android": {
+      "status": "success",
+      "track": "internal",
+      "submissionId": "c741ff51-c03b-486d-a207-e6a5791a75ff",
+      "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/c741ff51-c03b-486d-a207-e6a5791a75ff",
+      "command": "npx eas-cli@20.0.0 submit --platform android --profile production --id e781ec85-1b7d-4db1-a51a-efa3da44fd10 --non-interactive --no-wait --verbose",
+      "easVerification": {
+        "status": "success",
+        "submittedAt": "2026-06-11T10:11:00.000Z",
+        "visibleMessage": "Expo submission details showed Android Play Store submission Success for build 1.0.0 (18)."
+      },
+      "playConsoleVerification": {
+        "status": "visible",
+        "checkedAt": "2026-06-11T10:15:00.000Z",
+        "screen": "Google Play Console > ReversR Rebuild > Internal testing > Releases",
+        "visibleRelease": "1.0.0",
+        "visibleVersionCodeCount": "1 version code",
+        "visibleAvailability": "Available to internal testers",
+        "visibleReleasedAt": "Released on Jun 11 6:10 AM",
+        "visibleReviewStatus": "Not reviewed"
+      }
+    },
+    "ios": {
+      "status": "success-pending-testflight-console-verification",
+      "destination": "App Store Connect/TestFlight",
+      "submissionId": "50d70ef6-b1e5-4827-8664-d595b9316bb7",
+      "submissionDetailsUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/50d70ef6-b1e5-4827-8664-d595b9316bb7",
+      "command": "npx eas-cli@20.0.0 submit --platform ios --profile production --id aed448ab-37ab-42f8-b508-9ac17bf37064 --non-interactive --no-wait --verbose",
+      "easVerification": {
+        "status": "success",
+        "submittedAt": "2026-06-11T09:56:00.000Z",
+        "visibleMessage": "Expo submission details showed iOS App Store submission Success for build 1.0.0 (7)."
+      },
+      "appStoreConnectVerification": {
+        "status": "valid-build-assigned-to-internal-qa-only",
+        "checkedAt": "2026-06-11T10:38:00.000Z",
+        "attemptedUrl": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/ios",
+        "buildId": "2dd2e85b-6a94-416f-80af-63222deadd48",
+        "apiVerification": {
+          "buildNumber": "7",
+          "uploadedDate": "2026-06-11T02:57:02-07:00",
+          "processingState": "VALID",
+          "expired": false,
+          "usesNonExemptEncryption": false
+        },
+        "testDetails": {
+          "status": "saved",
+          "checkedAt": "2026-06-11T10:44:00.000Z",
+          "locale": "en-US",
+          "whatToTestSource": "docs/store-submission-packet.json:appStoreConnect.testFlightWhatToTest",
+          "whatToTestLength": 592,
+          "whatToTestMatchesSource": true
+        },
+        "groupVerification": {
+          "ReversR External Beta": {
+            "groupId": "355ad927-f5a9-4ec5-81c7-3fb54f12ce62",
+            "includesBuild7": true,
+            "currentBuilds": ["7", "6"],
+            "testerCount": 1,
+            "authorizedExternalTesterAdded": true
+          },
+          "ReversR Internal QA": {
+            "groupId": "0e95a925-c6fa-4a5d-beda-a8311ec15785",
+            "includesBuild7": true,
+            "currentBuilds": ["7", "6"],
+            "testerCount": 0
+          }
+        },
+        "authorizedAction": "Added build 1.0.0 (7) to ReversR Internal QA only through the App Store Connect API.",
+        "internalTesterAttempt": {
+          "status": "blocked",
+          "attemptedAt": "2026-06-11T10:50:00.000Z",
+          "authorizedTesterCount": 1,
+          "rawTesterEmailsCommitted": false,
+          "appleStatusCode": 409,
+          "appleErrorCode": "STATE_ERROR",
+          "appleErrorTitle": "The request cannot be fulfilled because of the state of another resource.",
+          "appleErrorDetail": "Tester(s) cannot be assigned",
+          "finding": "The authorized email was not an existing App Store Connect user/tester eligible for an internal TestFlight group. Internal QA remains at zero testers."
+        },
+        "externalBetaAttempt": {
+          "status": "blocked-by-existing-beta-review",
+          "attemptedAt": "2026-06-11T10:57:00.000Z",
+          "authorizedTesterCount": 1,
+          "rawTesterEmailsCommitted": false,
+          "actionsCompleted": [
+            "Added build 1.0.0 (7) to ReversR External Beta.",
+            "Created/added the authorized external beta tester to ReversR External Beta."
+          ],
+          "betaReviewSubmissionAttempt": {
+            "status": "blocked",
+            "appleStatusCode": 422,
+            "appleErrorCode": "ENTITY_UNPROCESSABLE.ANOTHER_BUILD_IN_REVIEW",
+            "appleErrorDetail": "Another build in the same train is already in beta review. Please submit it again once it gets completed."
+          },
+          "activeReviewGate": {
+            "buildNumber": "6",
+            "buildId": "114ac3cb-f26b-4384-82d6-d661adf05dff",
+            "betaReviewState": "WAITING_FOR_REVIEW",
+            "submittedDate": "2026-06-08T05:39:53-07:00"
+          }
+        },
+        "nextHumanAction": "Wait for beta review of build 1.0.0 (6) to complete, or explicitly authorize clearing/replacing that review path before submitting build 1.0.0 (7) for external beta review."
+      }
+    }
+  },
+  "credentialHandling": {
+    "onePasswordUsed": true,
+    "localCredentialFilesCommitted": false,
+    "easJsonRestoredAfterSubmit": true,
+    "secretValuesPrinted": false,
+    "notes": [
+      "Temporary submit credential paths were added to eas.json only while scheduling EAS Submit jobs.",
+      "eas.json was restored to the public committed submit profile after scheduling.",
+      "EAS CLI 20.0.0 does not expose a submission status command in this environment; processing was verified through EAS submission detail pages and Google Play Console where available."
+    ]
+  },
+  "safetyBoundary": {
+    "googlePlayTrack": "internal",
+    "publicAppReviewSubmitted": false,
+    "productionRolloutStarted": false,
+    "appleAddForReviewClicked": false,
+    "remainingGate": "Build 1.0.0 (7) is assigned to External Beta with one authorized tester, but Apple blocks beta-review submission while build 1.0.0 (6) is WAITING_FOR_REVIEW. Wait for Apple review completion or authorize an App Store Connect action to clear/replace the existing beta review path."
+  }
+}
