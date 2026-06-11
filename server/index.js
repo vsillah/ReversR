@@ -327,6 +327,19 @@ const createErrorResponse = (error, fallbackMessage = 'An error occurred') => {
   };
 };
 
+const shouldUseDeterministicAiFallback = (error) => {
+  const errorMessage = error?.message || '';
+  const statusCode = error?.status || error?.code || 0;
+
+  return (
+    statusCode === 404 ||
+    errorMessage.includes('default credentials') ||
+    errorMessage.includes('"code":404') ||
+    errorMessage.includes('"status":"Not Found"') ||
+    errorMessage.includes('model is not found')
+  );
+};
+
 // ============================================
 // SYSTEM INSTRUCTION
 // ============================================
@@ -1133,7 +1146,7 @@ app.post('/api/gemini/analyze', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Analyze error:', error);
-    if ((error.message || '').includes('default credentials')) {
+    if (shouldUseDeterministicAiFallback(error)) {
       return res.json(buildFallbackAnalysis(req.body?.input || '', req.body?.image || null));
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to analyze product');
@@ -1390,7 +1403,7 @@ app.post('/api/gemini/match-machine', async (req, res) => {
     });
   } catch (error) {
     console.error('Inventory match error:', error);
-    if ((error.message || '').includes('default credentials')) {
+    if (shouldUseDeterministicAiFallback(error)) {
       return res.json(buildFallbackReconstruction(req.body?.analysis, req.body?.connector));
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to match machine from inventory');
@@ -1453,7 +1466,7 @@ app.post('/api/gemini/technical-spec', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Generate spec error:', error);
-    if ((error.message || '').includes('default credentials')) {
+    if (shouldUseDeterministicAiFallback(error)) {
       return res.json(buildFallbackSpec(req.body?.innovation || {}));
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate specifications');
@@ -1529,7 +1542,7 @@ app.post('/api/gemini/generate-3d', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Generate 3D error:', error);
-    if ((error.message || '').includes('default credentials')) {
+    if (shouldUseDeterministicAiFallback(error)) {
       return res.json(buildFallbackScene());
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate 3D scene');
@@ -1823,7 +1836,7 @@ app.post('/api/gemini/generate-bom', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Generate BOM error:', error);
-    if ((error.message || '').includes('default credentials')) {
+    if (shouldUseDeterministicAiFallback(error)) {
       return res.json(buildFallbackBom(req.body?.innovation || {}, req.body?.analysis));
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate Bill of Materials');
