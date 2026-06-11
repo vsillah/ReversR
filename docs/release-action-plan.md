@@ -64,6 +64,8 @@ The smoke uses the `x-vercel-protection-bypass` header and records only that a b
 EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 ```
 
+   - Confirm the preflight output shows at least one Gemini key available. Do not treat TestFlight or Play Internal builds as tester-ready when the hosted API is running fallback-only generation.
+
 2. Deploy policy/support pages.
    - Run `npm run policy:preflight:local` and confirm `docs/policy-hosting-smoke-evidence.json` is updated.
    - Follow `docs/external-release-setup-runbook.md` section 5 for hosted API and policy URL sequencing.
