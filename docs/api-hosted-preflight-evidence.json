@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-05T10:00:07.092Z",
-  "startedAt": "2026-06-05T10:00:06.660Z",
+  "generatedAt": "2026-06-11T09:32:02.474Z",
+  "startedAt": "2026-06-11T09:32:02.098Z",
   "apiBaseUrl": "https://reversr.vercel.app",
   "localApi": false,
   "allowOpenCors": false,
@@ -23,6 +23,8 @@
         "registryWritesEnabled": false,
         "privateNetworkConnectorsEnabled": false
       },
+      "geminiKeyCount": 1,
+      "availableGeminiKeyCount": 1,
       "authenticatedConnectorsEnabled": false,
       "credentialRegistryEnabled": false
     },
