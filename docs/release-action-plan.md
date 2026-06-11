@@ -55,7 +55,7 @@ The smoke uses the `x-vercel-protection-bypass` header and records only that a b
    - Follow `docs/external-release-setup-runbook.md` section 5 for hosted API and policy URL sequencing.
    - Copy `docs/production-api-env.example` into the host provider's environment settings.
    - Set `API_CORS_ORIGINS` to hosted app origins, not `*`.
-   - Set `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, `API_REQUEST_BODY_LIMIT`, and connector-secret settings on the API host.
+   - Store the Gemini key in 1Password, then set `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, `API_REQUEST_BODY_LIMIT`, and connector-secret settings on the API host.
    - Run `npm run api:deployment-smoke` locally and confirm `docs/api-deployment-smoke-evidence.json` is updated.
    - Deploy the Dockerfile.
    - Confirm success with:
@@ -65,6 +65,7 @@ EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 ```
 
    - Confirm the preflight output shows at least one Gemini key available. Do not treat TestFlight or Play Internal builds as tester-ready when the hosted API is running fallback-only generation.
+   - Set `EXPO_PUBLIC_API_BASE_URL` and `EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS=true` in both EAS `preview` and `production`, then rebuild tester artifacts so Settings shows managed Gemini status instead of local-provider controls.
 
 2. Deploy policy/support pages.
    - Run `npm run policy:preflight:local` and confirm `docs/policy-hosting-smoke-evidence.json` is updated.
