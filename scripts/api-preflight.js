@@ -3,6 +3,7 @@ const path = require('path');
 
 const args = new Set(process.argv.slice(2));
 const allowOpenCors = args.has('--allow-open-cors');
+const allowMissingGemini = args.has('--allow-missing-gemini');
 const apiBase = (process.env.EXPO_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || '').replace(/\/$/, '');
 const isLocalApi = /:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::|\/|$)/.test(apiBase);
 const vercelBypassSecret = (
@@ -69,6 +70,11 @@ const run = async () => {
   if (!health.runtimeConfig.requestBodyLimit) {
     throw new Error('/api/health runtimeConfig is missing requestBodyLimit.');
   }
+  const geminiKeyCount = Number(health.apiKeys?.total || 0);
+  const availableGeminiKeyCount = Number(health.apiKeys?.available || 0);
+  if (!isLocalApi && !allowMissingGemini && geminiKeyCount < 1) {
+    throw new Error('Hosted API reports zero configured Gemini keys. Set AI_INTEGRATIONS_GEMINI_API_KEY or GEMINI_API_KEYS before TestFlight, Play Internal, or production review builds.');
+  }
 
   const { response, parsed } = await postJson(`${apiBase}/api/inventory/validate`, {
     connector: {
@@ -104,6 +110,8 @@ const run = async () => {
         httpStatus: healthResponse.status,
         service: health.service || '',
         runtimeConfig: health.runtimeConfig,
+        geminiKeyCount,
+        availableGeminiKeyCount,
         authenticatedConnectorsEnabled: Boolean(health.authenticatedConnectorsEnabled),
         credentialRegistryEnabled: Boolean(health.credentialRegistryEnabled),
       },
@@ -120,7 +128,7 @@ const run = async () => {
 
   console.log(`API preflight passed for ${apiBase}`);
   console.log(`Service: ${health.service || 'unknown'} | authenticated connectors: ${health.authenticatedConnectorsEnabled ? 'configured' : 'not configured'}`);
-  console.log(`Runtime: CORS ${health.runtimeConfig.corsMode} | body limit ${health.runtimeConfig.requestBodyLimit} | admin routes ${health.runtimeConfig.adminRoutesEnabled ? 'enabled' : 'disabled'}`);
+  console.log(`Runtime: CORS ${health.runtimeConfig.corsMode} | body limit ${health.runtimeConfig.requestBodyLimit} | admin routes ${health.runtimeConfig.adminRoutesEnabled ? 'enabled' : 'disabled'} | Gemini keys ${availableGeminiKeyCount}/${geminiKeyCount} available`);
 
   const adminToken = process.env.ADMIN_API_TOKEN;
   if (adminToken) {

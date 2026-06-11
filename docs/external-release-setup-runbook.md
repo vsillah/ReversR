@@ -165,15 +165,25 @@ Confirm `app.json` has a clone-specific project ID:
 }
 ```
 
-Set production EAS public values after hosted URLs exist:
+Set preview and production EAS public values after hosted URLs exist. These are safe public build-time values; Gemini keys stay in 1Password and the hosted API secret manager.
 
 ```bash
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_PRIVACY_POLICY_URL --value https://your-domain.example/privacy --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_TERMS_URL --value https://your-domain.example/terms --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_SUPPORT_URL --value https://your-domain.example/support --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS --value true --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:list --environment preview
+
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_PRIVACY_POLICY_URL --value https://your-domain.example/privacy --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_TERMS_URL --value https://your-domain.example/terms --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_SUPPORT_URL --value https://your-domain.example/support --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS --value true --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:list --environment production
 ```
+
+Leave `EXPO_PUBLIC_ENABLE_LOCAL_PROVIDER_SETTINGS` and `EXPO_PUBLIC_ENABLE_ADMIN_CREDENTIAL_SETTINGS` unset or `false` for TestFlight, Google Play internal, and production review builds. Those controls are for controlled development/admin builds only.
 
 Configure credentials:
 
@@ -200,6 +210,7 @@ Server-only values belong on the API host:
 - `API_CORS_ORIGINS`
 - `API_REQUEST_BODY_LIMIT`
 - `AI_INTEGRATIONS_GEMINI_API_KEY`
+- `GEMINI_API_KEYS`
 - `ADMIN_API_TOKEN`
 - `INVENTORY_CONNECTOR_SECRETS_JSON` or `INVENTORY_CONNECTOR_SECRETS_FILE`
 

@@ -8,14 +8,14 @@ The container is a production-host bootstrap. It is suitable for review, demos, 
 
 ## Required Environment
 
-Use `docs/production-api-env.example` as the non-secret template. Copy the values into the hosting provider's environment manager and keep filled secrets out of git.
+Use `docs/production-api-env.example` as the non-secret template. Copy the values into the hosting provider's environment manager and keep filled secrets out of git. Persist Gemini keys in 1Password, then copy them into the API host secret manager.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `API_PORT` | Yes | Port the API listens on. The Docker image defaults to `3001`. |
 | `API_CORS_ORIGINS` | Yes for production | Comma-separated HTTPS origins allowed to call the API from browser contexts. Leave open only for local prototype checks. |
 | `API_REQUEST_BODY_LIMIT` | Recommended | Express JSON body limit for scan/image payloads. Defaults to `50mb`. |
-| `AI_INTEGRATIONS_GEMINI_API_KEY` | Recommended | Primary Gemini key for AI-backed analysis, matching, design generation, and BOM generation. |
+| `AI_INTEGRATIONS_GEMINI_API_KEY` | Required for tester/review builds | Primary Gemini key for AI-backed analysis, matching, design generation, and BOM generation. Without this or `GEMINI_API_KEYS`, hosted preflight fails so TestFlight and Play Internal testers do not see fallback-only behavior. |
 | `GEMINI_API_KEYS` | Optional | Comma-separated backup Gemini keys for rate-limit rotation. |
 | `AI_INTEGRATIONS_GEMINI_BASE_URL` | Optional | Alternate Gemini-compatible base URL. Leave empty for the default provider. |
 | `OLLAMA_HOST` | Optional | Local model endpoint for controlled non-production tests. Do not rely on localhost Ollama for store builds. |
@@ -96,6 +96,7 @@ The preflight checks:
 
 - `GET /api/health`
 - hardened runtime config from `/api/health`
+- at least one configured Gemini key on hosted APIs, unless `--allow-missing-gemini` is explicitly passed for a controlled prototype check
 - demo inventory validation through `POST /api/inventory/validate`
 - admin credential registry listing when `ADMIN_API_TOKEN` is present
 
@@ -104,6 +105,23 @@ For a hosted production API, `npm run api:preflight` fails if `/api/health` repo
 ```bash
 EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight -- --allow-open-cors
 ```
+
+For controlled prototype checks without Gemini, `--allow-missing-gemini` is available. Do not use it for TestFlight, Play Internal, or production review candidates.
+
+## Tester Build Binding
+
+After the hosted API preflight passes, bind the public API URL and managed AI flag into both EAS environments before rebuilding tester artifacts:
+
+```bash
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS --value true --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS --value true --visibility plaintext --non-interactive
+```
+
+Tester builds should show managed Gemini status and no local Ollama provider switch. Rebuild Android internal and iOS TestFlight binaries after these values change.
+
+Keep `EXPO_PUBLIC_ENABLE_LOCAL_PROVIDER_SETTINGS` and `EXPO_PUBLIC_ENABLE_ADMIN_CREDENTIAL_SETTINGS` unset or `false` for tester/review builds so testers do not see local model controls or backend credential forms.
 
 ## Hosted Connector Smoke
 
@@ -175,6 +193,7 @@ The production API gate is not complete until:
 - `/api/health` passes from an external network,
 - `npm run api:preflight` passes against the hosted URL,
 - `npm run connector:smoke` passes against the real inventory connector,
-- EAS production has the same `EXPO_PUBLIC_API_BASE_URL`,
+- EAS preview and production have the same `EXPO_PUBLIC_API_BASE_URL`,
+- EAS preview and production set `EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS=true`,
 - connector secrets are managed server-side,
 - native Android and iOS builds can complete the scan, inventory match, BOM, quote packet, and vendor draft flow against the hosted API.

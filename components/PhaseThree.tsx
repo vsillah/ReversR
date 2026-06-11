@@ -10,6 +10,7 @@ import {
   Dimensions,
   Animated,
   PanResponder,
+  Platform,
   Image as RNImage,
 } from 'react-native';
 // Note: expo-image doesn't work with base64 data URIs in Expo Go SDK 54
@@ -207,7 +208,7 @@ export default function PhaseThree({
     }
   }, [cachedFileUris]);
 
-  // State for displayable file URIs
+  const [displayImageUri, setDisplayImageUri] = useState<string | null>(null);
 
   // Derive the best available image from props or local state
   const derivedImageUri = useMemo(() => {
@@ -240,11 +241,45 @@ export default function PhaseThree({
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
 
-  // Get the display URI directly from the current angle image or derived image
-  // RNImage handles base64 data URIs natively (expo-image doesn't work in Expo Go)
-  const displayImageUri = useMemo(() => {
+  const rawDisplayImageUri = useMemo(() => {
     return normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
   }, [currentAngleImage, derivedImageUri]);
+
+  // Android's native Image view can fail on large base64 data URIs. Use a
+  // temporary file for display, while keeping the original data URI for export.
+  useEffect(() => {
+    let cancelled = false;
+
+    const prepareDisplayImage = async () => {
+      if (!rawDisplayImageUri) {
+        setDisplayImageUri(null);
+        return;
+      }
+
+      const shouldCacheForAndroid =
+        Platform.OS === 'android' &&
+        rawDisplayImageUri.startsWith('data:image/') &&
+        rawDisplayImageUri.length > 64 * 1024;
+
+      if (!shouldCacheForAndroid) {
+        setDisplayImageUri(rawDisplayImageUri);
+        return;
+      }
+
+      const cacheKey = currentAngleImage?.id || 'design';
+      const fileUri = await cacheBase64ToFile(rawDisplayImageUri, cacheKey);
+      if (!cancelled) {
+        setDisplayImageUri(fileUri || rawDisplayImageUri);
+      }
+    };
+
+    setImageLoadError(false);
+    prepareDisplayImage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rawDisplayImageUri, currentAngleImage?.id, cacheBase64ToFile]);
   
   const scale = useRef(new Animated.Value(1)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -444,10 +479,11 @@ export default function PhaseThree({
     setError(null);
 
     try {
-      const base64 = await generate2DImage(innovation);
-      setLocalImageBase64(base64);
+      const imageData = await generate2DImage(innovation);
+      const imageUri = normalizeImageUri(imageData);
+      setLocalImageBase64(imageData);
       setStatus('complete');
-      onComplete(spec, threeDScene, `data:image/png;base64,${base64}`);
+      onComplete(spec, threeDScene, imageUri);
     } catch (err: unknown) {
       console.error('Error generating 2D:', err);
       setError(formatError(err));

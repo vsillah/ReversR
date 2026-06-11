@@ -9,13 +9,104 @@ const API_BASE = Platform.OS === 'web' && window.location.origin.includes('local
 
 export const getApiBase = () => API_BASE;
 
+type AiProvider = 'gemini' | 'ollama';
+
+const appExtra = (Constants.expoConfig?.extra || {}) as Record<string, unknown>;
+
+const readBooleanFlag = (value: unknown) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') return value.toLowerCase() === 'true';
+  return false;
+};
+
+export const isLocalProviderSettingsEnabled = () => {
+  const forceManagedCloud = readBooleanFlag(
+    process.env.EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS || appExtra.forceManagedAiSettings
+  );
+  if (forceManagedCloud) return false;
+
+  const explicitLocalProvider = readBooleanFlag(
+    process.env.EXPO_PUBLIC_ENABLE_LOCAL_PROVIDER_SETTINGS || appExtra.enableLocalProviderSettings
+  );
+  if (explicitLocalProvider) return true;
+
+  return typeof __DEV__ !== 'undefined' && __DEV__;
+};
+
+export const isAdminCredentialSettingsEnabled = () => {
+  const explicitAdminCredentialSettings = readBooleanFlag(
+    process.env.EXPO_PUBLIC_ENABLE_ADMIN_CREDENTIAL_SETTINGS || appExtra.enableAdminCredentialSettings
+  );
+  if (explicitAdminCredentialSettings) return true;
+
+  return isLocalProviderSettingsEnabled();
+};
+
 export const getAiConfig = async () => {
+  if (!isLocalProviderSettingsEnabled()) {
+    return { provider: 'gemini' as AiProvider, ollamaModel: 'qwen3.5:0.8b' };
+  }
+
   try {
-    const provider = await AsyncStorage.getItem('ai_provider') || 'gemini';
+    const savedProvider = await AsyncStorage.getItem('ai_provider');
+    const provider: AiProvider = savedProvider === 'ollama' ? 'ollama' : 'gemini';
     const ollamaModel = await AsyncStorage.getItem('ollama_model') || 'qwen3.5:0.8b';
     return { provider, ollamaModel };
   } catch (e) {
-    return { provider: 'gemini', ollamaModel: 'qwen3.5:0.8b' };
+    return { provider: 'gemini' as AiProvider, ollamaModel: 'qwen3.5:0.8b' };
+  }
+};
+
+export interface AiRuntimeStatus {
+  status: 'connected' | 'unavailable';
+  apiBaseUrl: string;
+  service?: string;
+  geminiConfigured: boolean;
+  geminiKeyCount: number;
+  availableGeminiKeyCount: number;
+  message: string;
+}
+
+export const getAiRuntimeStatus = async (): Promise<AiRuntimeStatus> => {
+  try {
+    const response = await fetch(`${API_BASE}/api/health`);
+    if (!response.ok) {
+      return {
+        status: 'unavailable',
+        apiBaseUrl: API_BASE,
+        geminiConfigured: false,
+        geminiKeyCount: 0,
+        availableGeminiKeyCount: 0,
+        message: `Health check failed with ${response.status}`,
+      };
+    }
+
+    const health = await response.json();
+    const geminiKeyCount = Number(health.apiKeys?.total || 0);
+    const availableGeminiKeyCount = Number(health.apiKeys?.available || 0);
+    const geminiConfigured = Boolean(health.runtimeConfig?.geminiConfigured || geminiKeyCount > 0);
+    const connected = health.status === 'ok' && geminiConfigured && availableGeminiKeyCount > 0;
+
+    return {
+      status: connected ? 'connected' : 'unavailable',
+      apiBaseUrl: API_BASE,
+      service: health.service || '',
+      geminiConfigured,
+      geminiKeyCount,
+      availableGeminiKeyCount,
+      message: connected
+        ? 'Live AI connected.'
+        : 'Live AI unavailable. Contact ReversR admin.',
+    };
+  } catch (error: any) {
+    return {
+      status: 'unavailable',
+      apiBaseUrl: API_BASE,
+      geminiConfigured: false,
+      geminiKeyCount: 0,
+      availableGeminiKeyCount: 0,
+      message: error?.message || 'Live AI unavailable. Contact ReversR admin.',
+    };
   }
 };
 

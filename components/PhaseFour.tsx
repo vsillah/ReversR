@@ -1605,18 +1605,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     marginBottom: Spacing.sm,
+    maxWidth: '100%',
   },
   actionContent: {
     flex: 1,
+    minWidth: 0,
   },
   actionButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.white,
     fontWeight: 'bold',
+    flexShrink: 1,
   },
   actionButtonSubtext: {
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
     marginTop: 2,
+    flexShrink: 1,
   },
 });
