@@ -5,9 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Colors } from '../constants/theme';
 import {
+  AiRuntimeStatus,
   AdminCredentialSummary,
   deleteInventoryCredential,
+  getAiRuntimeStatus,
   getApiBase,
+  isAdminCredentialSettingsEnabled,
+  isLocalProviderSettingsEnabled,
   listInventoryCredentials,
   saveInventoryCredential,
 } from '../hooks/useGemini';
@@ -30,6 +34,10 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const [credentialValue, setCredentialValue] = useState('');
   const [credentialHeaderName, setCredentialHeaderName] = useState('X-API-Key');
   const appExtra = (Constants.expoConfig?.extra || {}) as Record<string, string | undefined>;
+  const localProviderSettingsEnabled = isLocalProviderSettingsEnabled();
+  const adminCredentialSettingsEnabled = isAdminCredentialSettingsEnabled();
+  const [aiRuntimeStatus, setAiRuntimeStatus] = useState<AiRuntimeStatus | null>(null);
+  const [aiStatusLoading, setAiStatusLoading] = useState(false);
 
   const policyLinks = [
     {
@@ -52,6 +60,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   useEffect(() => {
     if (visible) {
       loadSettings();
+      loadAiRuntimeStatus();
     } else {
       setCredentialValue('');
     }
@@ -61,17 +70,35 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     try {
       const savedProvider = await AsyncStorage.getItem('ai_provider');
       const savedModel = await AsyncStorage.getItem('ollama_model');
-      if (savedProvider) setProvider(savedProvider as 'gemini' | 'ollama');
+      if (localProviderSettingsEnabled && savedProvider) {
+        setProvider(savedProvider === 'ollama' ? 'ollama' : 'gemini');
+      } else {
+        setProvider('gemini');
+      }
       if (savedModel) setOllamaModel(savedModel);
     } catch (e) {
       console.error('Failed to load settings', e);
     }
   };
 
+  const loadAiRuntimeStatus = async () => {
+    setAiStatusLoading(true);
+    try {
+      setAiRuntimeStatus(await getAiRuntimeStatus());
+    } finally {
+      setAiStatusLoading(false);
+    }
+  };
+
   const saveSettings = async () => {
     try {
-      await AsyncStorage.setItem('ai_provider', provider);
-      await AsyncStorage.setItem('ollama_model', ollamaModel);
+      if (localProviderSettingsEnabled) {
+        await AsyncStorage.setItem('ai_provider', provider);
+        await AsyncStorage.setItem('ollama_model', ollamaModel);
+      } else {
+        await AsyncStorage.setItem('ai_provider', 'gemini');
+        await AsyncStorage.removeItem('ollama_model');
+      }
       onClose();
     } catch (e) {
       console.error('Failed to save settings', e);
@@ -183,170 +210,210 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
           </View>
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-            <Text style={styles.label}>AI Provider</Text>
-            <View style={styles.providerRow}>
-              <TouchableOpacity
-                style={[styles.providerButton, provider === 'gemini' && styles.providerButtonActive]}
-                onPress={() => setProvider('gemini')}
-                accessibilityRole="button"
-                accessibilityLabel="Use Gemini cloud AI provider"
-                accessibilityState={{ selected: provider === 'gemini' }}
-              >
-                <Text style={[styles.providerButtonText, provider === 'gemini' && styles.providerButtonTextActive]}>Gemini (Cloud)</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.providerButton, provider === 'ollama' && styles.providerButtonActive]}
-                onPress={() => setProvider('ollama')}
-                accessibilityRole="button"
-                accessibilityLabel="Use Ollama local AI provider"
-                accessibilityState={{ selected: provider === 'ollama' }}
-              >
-                <Text style={[styles.providerButtonText, provider === 'ollama' && styles.providerButtonTextActive]}>Ollama (Local)</Text>
-              </TouchableOpacity>
-            </View>
+            {localProviderSettingsEnabled ? (
+              <>
+                <Text style={styles.label}>AI Provider</Text>
+                <View style={styles.providerRow}>
+                  <TouchableOpacity
+                    style={[styles.providerButton, provider === 'gemini' && styles.providerButtonActive]}
+                    onPress={() => setProvider('gemini')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Use Gemini cloud AI provider"
+                    accessibilityState={{ selected: provider === 'gemini' }}
+                  >
+                    <Text style={[styles.providerButtonText, provider === 'gemini' && styles.providerButtonTextActive]}>Gemini (Cloud)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.providerButton, provider === 'ollama' && styles.providerButtonActive]}
+                    onPress={() => setProvider('ollama')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Use Ollama local AI provider"
+                    accessibilityState={{ selected: provider === 'ollama' }}
+                  >
+                    <Text style={[styles.providerButtonText, provider === 'ollama' && styles.providerButtonTextActive]}>Ollama (Local)</Text>
+                  </TouchableOpacity>
+                </View>
 
-            {provider === 'ollama' && (
-              <View style={styles.ollamaSettings}>
-                <Text style={styles.label}>Ollama Model</Text>
-                <TextInput
-                  style={styles.input}
-                  value={ollamaModel}
-                  onChangeText={setOllamaModel}
-                  placeholder="e.g. llama3, mistral"
-                  placeholderTextColor={Colors.gray[500]}
-                />
+                {provider === 'ollama' && (
+                  <View style={styles.ollamaSettings}>
+                    <Text style={styles.label}>Ollama Model</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={ollamaModel}
+                      onChangeText={setOllamaModel}
+                      placeholder="e.g. llama3, mistral"
+                      placeholderTextColor={Colors.gray[500]}
+                    />
+                    <Text style={styles.helpText}>
+                      Note: Local image generation is not supported by Ollama. Image analysis requires a vision model like 'llava'. Ensure Ollama is running on localhost:11434.
+                    </Text>
+                  </View>
+                )}
+              </>
+            ) : (
+              <View style={styles.liveAiPanel}>
+                <View style={styles.policyHeader}>
+                  <Ionicons
+                    name={aiRuntimeStatus?.status === 'connected' ? 'cloud-done-outline' : 'cloud-offline-outline'}
+                    size={18}
+                    color={aiRuntimeStatus?.status === 'connected' ? Colors.accent : Colors.orange[300]}
+                  />
+                  <Text style={styles.policyTitle}>Managed Gemini</Text>
+                </View>
+                <View style={styles.liveAiStatusRow}>
+                  <View style={[
+                    styles.liveAiBadge,
+                    aiRuntimeStatus?.status === 'connected' ? styles.liveAiBadgeConnected : styles.liveAiBadgeWarn,
+                  ]}>
+                    <Text style={styles.liveAiBadgeText}>
+                      {aiStatusLoading ? 'Checking live AI' : aiRuntimeStatus?.message || 'Live AI unavailable. Contact ReversR admin.'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.refreshAiButton}
+                    onPress={loadAiRuntimeStatus}
+                    disabled={aiStatusLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Refresh live AI status"
+                  >
+                    <Ionicons name="refresh-outline" size={15} color={Colors.accent} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
                 <Text style={styles.helpText}>
-                  Note: Local image generation is not supported by Ollama. Image analysis requires a vision model like 'llava'. Ensure Ollama is running on localhost:11434.
+                  Gemini runs through the hosted ReversR API. No model keys are stored in this app.
                 </Text>
               </View>
             )}
 
-            <View style={styles.adminPanel}>
-              <View style={styles.policyHeader}>
-                <Ionicons name="server-outline" size={18} color={Colors.accent} />
-                <Text style={styles.policyTitle}>Admin Connector Credentials</Text>
-              </View>
-              <Text style={styles.policyText}>
-                Register API-key or OAuth credential references on the backend. The workflow stores only the reference name in the app.
-              </Text>
-              <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
+            {adminCredentialSettingsEnabled && (
+              <View style={styles.adminPanel}>
+                <View style={styles.policyHeader}>
+                  <Ionicons name="server-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Admin Connector Credentials</Text>
+                </View>
+                <Text style={styles.policyText}>
+                  Register API-key or OAuth credential references on the backend. The workflow stores only the reference name in the app.
+                </Text>
+                <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
 
-              <Text style={styles.compactLabel}>Admin token</Text>
-              <TextInput
-                style={styles.input}
-                value={adminToken}
-                onChangeText={setAdminToken}
-                placeholder="Session-only API admin token"
-                placeholderTextColor={Colors.gray[500]}
-                autoCapitalize="none"
-                secureTextEntry
-              />
+                <Text style={styles.compactLabel}>Admin token</Text>
+                <TextInput
+                  style={styles.input}
+                  value={adminToken}
+                  onChangeText={setAdminToken}
+                  placeholder="Session-only API admin token"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
 
-              <View style={styles.adminActionRow}>
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                    onPress={loadCredentials}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Load backend credential references"
+                  >
+                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>{adminLoading ? 'Working...' : 'Load Refs'}</Text>
+                  </TouchableOpacity>
+                  <View style={[styles.registryBadge, registryEnabled === false && styles.registryBadgeWarn]}>
+                    <Text style={styles.registryBadgeText}>
+                      {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.compactLabel}>Credential reference</Text>
+                <TextInput
+                  style={styles.input}
+                  value={credentialRef}
+                  onChangeText={setCredentialRef}
+                  placeholder="partsledger-prod-api-key"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                />
+
+                <View style={styles.providerRow}>
+                  {(['api_key', 'oauth'] as const).map(mode => (
+                    <TouchableOpacity
+                      key={mode}
+                      style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
+                      onPress={() => setCredentialMode(mode)}
+                      accessibilityRole="button"
+                      accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
+                      accessibilityState={{ selected: credentialMode === mode }}
+                    >
+                      <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
+                        {mode === 'api_key' ? 'API Key' : 'OAuth'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {credentialMode === 'api_key' && (
+                  <>
+                    <Text style={styles.compactLabel}>Header name</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={credentialHeaderName}
+                      onChangeText={setCredentialHeaderName}
+                      placeholder="X-API-Key"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                    />
+                  </>
+                )}
+
+                <Text style={styles.compactLabel}>{credentialMode === 'api_key' ? 'API key value' : 'OAuth bearer token'}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={credentialValue}
+                  onChangeText={setCredentialValue}
+                  placeholder="Sent to backend, then cleared from this form"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
+
                 <TouchableOpacity
-                  style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                  onPress={loadCredentials}
+                  style={[styles.saveCredentialButton, adminLoading && styles.disabledButton]}
+                  onPress={handleSaveCredential}
                   disabled={adminLoading}
                   accessibilityRole="button"
-                  accessibilityLabel="Load backend credential references"
+                  accessibilityLabel="Save backend credential reference"
                 >
-                  <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                  <Text style={styles.adminButtonText}>{adminLoading ? 'Working...' : 'Load Refs'}</Text>
+                  <Ionicons name="key-outline" size={17} color={Colors.black} />
+                  <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
                 </TouchableOpacity>
-                <View style={[styles.registryBadge, registryEnabled === false && styles.registryBadgeWarn]}>
-                  <Text style={styles.registryBadgeText}>
-                    {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
-                  </Text>
+
+                {adminStatus && <Text style={styles.adminStatusText}>{adminStatus}</Text>}
+
+                <View style={styles.credentialList}>
+                  {credentials.map(item => (
+                    <View key={item.credentialRef} style={styles.credentialCard}>
+                      <View style={styles.credentialInfo}>
+                        <Text style={styles.credentialRefText}>{item.credentialRef}</Text>
+                        <Text style={styles.credentialMetaText}>
+                          {(item.authModes || []).join(', ') || 'credential'} | {(item.headerNames || []).join(', ') || 'headers hidden'} | {item.source || 'backend'}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteCredentialButton}
+                        onPress={() => handleDeleteCredential(item.credentialRef)}
+                        disabled={adminLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
+                      >
+                        <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
                 </View>
               </View>
-
-              <Text style={styles.compactLabel}>Credential reference</Text>
-              <TextInput
-                style={styles.input}
-                value={credentialRef}
-                onChangeText={setCredentialRef}
-                placeholder="partsledger-prod-api-key"
-                placeholderTextColor={Colors.gray[500]}
-                autoCapitalize="none"
-              />
-
-              <View style={styles.providerRow}>
-                {(['api_key', 'oauth'] as const).map(mode => (
-                  <TouchableOpacity
-                    key={mode}
-                    style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
-                    onPress={() => setCredentialMode(mode)}
-                    accessibilityRole="button"
-                    accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
-                    accessibilityState={{ selected: credentialMode === mode }}
-                  >
-                    <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
-                      {mode === 'api_key' ? 'API Key' : 'OAuth'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {credentialMode === 'api_key' && (
-                <>
-                  <Text style={styles.compactLabel}>Header name</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={credentialHeaderName}
-                    onChangeText={setCredentialHeaderName}
-                    placeholder="X-API-Key"
-                    placeholderTextColor={Colors.gray[500]}
-                    autoCapitalize="none"
-                  />
-                </>
-              )}
-
-              <Text style={styles.compactLabel}>{credentialMode === 'api_key' ? 'API key value' : 'OAuth bearer token'}</Text>
-              <TextInput
-                style={styles.input}
-                value={credentialValue}
-                onChangeText={setCredentialValue}
-                placeholder="Sent to backend, then cleared from this form"
-                placeholderTextColor={Colors.gray[500]}
-                autoCapitalize="none"
-                secureTextEntry
-              />
-
-              <TouchableOpacity
-                style={[styles.saveCredentialButton, adminLoading && styles.disabledButton]}
-                onPress={handleSaveCredential}
-                disabled={adminLoading}
-                accessibilityRole="button"
-                accessibilityLabel="Save backend credential reference"
-              >
-                <Ionicons name="key-outline" size={17} color={Colors.black} />
-                <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
-              </TouchableOpacity>
-
-              {adminStatus && <Text style={styles.adminStatusText}>{adminStatus}</Text>}
-
-              <View style={styles.credentialList}>
-                {credentials.map(item => (
-                  <View key={item.credentialRef} style={styles.credentialCard}>
-                    <View style={styles.credentialInfo}>
-                      <Text style={styles.credentialRefText}>{item.credentialRef}</Text>
-                      <Text style={styles.credentialMetaText}>
-                        {(item.authModes || []).join(', ') || 'credential'} | {(item.headerNames || []).join(', ') || 'headers hidden'} | {item.source || 'backend'}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.deleteCredentialButton}
-                      onPress={() => handleDeleteCredential(item.credentialRef)}
-                      disabled={adminLoading}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
-                    >
-                      <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </View>
+            )}
 
             <View style={styles.policyPanel}>
               <View style={styles.policyHeader}>
@@ -452,6 +519,43 @@ const styles = StyleSheet.create({
   },
   ollamaSettings: {
     marginBottom: 24,
+  },
+  liveAiPanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 24,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  liveAiStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  liveAiBadge: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  liveAiBadgeConnected: {
+    backgroundColor: Colors.green[900],
+  },
+  liveAiBadgeWarn: {
+    backgroundColor: Colors.orange[900],
+  },
+  liveAiBadgeText: {
+    color: Colors.gray[300],
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  refreshAiButton: {
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    padding: 8,
   },
   input: {
     backgroundColor: Colors.gray[800],

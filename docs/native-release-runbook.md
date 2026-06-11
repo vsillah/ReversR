@@ -87,16 +87,24 @@ EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support \
 npm run policy:preflight -- --check-hosted
 ```
 
-Then set EAS production environment variables:
+Then set EAS preview and production environment variables. These are public build-time values only; do not add Gemini keys to EAS:
 
 ```bash
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_PRIVACY_POLICY_URL --value https://your-domain.example/privacy --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_TERMS_URL --value https://your-domain.example/terms --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_SUPPORT_URL --value https://your-domain.example/support --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment preview --name EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS --value true --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://api.your-domain.example --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_PRIVACY_POLICY_URL --value https://your-domain.example/privacy --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_TERMS_URL --value https://your-domain.example/terms --visibility plaintext --non-interactive
 npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_SUPPORT_URL --value https://your-domain.example/support --visibility plaintext --non-interactive
+npx eas-cli@20.0.0 env:create --environment production --name EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS --value true --visibility plaintext --non-interactive
 ```
 
 Server-side API settings and secrets such as `API_CORS_ORIGINS`, `API_REQUEST_BODY_LIMIT`, `AI_INTEGRATIONS_GEMINI_API_KEY`, `ADMIN_API_TOKEN`, and inventory connector credentials belong on the API host, not in the mobile EAS environment.
+
+Keep `EXPO_PUBLIC_ENABLE_LOCAL_PROVIDER_SETTINGS` and `EXPO_PUBLIC_ENABLE_ADMIN_CREDENTIAL_SETTINGS` unset or `false` for tester/review builds. Enable them only for controlled development or admin builds.
 
 ## 5. Configure Store Credentials
 
@@ -168,7 +176,7 @@ Then verify the hosted backend:
 EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight
 ```
 
-This hosted preflight must report at least one configured Gemini key. Tester and review builds should use Gemini-backed analysis and design generation, not fallback-only content. Keep the Gemini key on the API host as `AI_INTEGRATIONS_GEMINI_API_KEY` or `GEMINI_API_KEYS`; do not place it in EAS mobile environment variables.
+This hosted preflight must report at least one configured Gemini key. Tester and review builds should use Gemini-backed analysis and design generation, not fallback-only content. Keep the Gemini key in 1Password and on the API host as `AI_INTEGRATIONS_GEMINI_API_KEY` or `GEMINI_API_KEYS`; do not place it in EAS mobile environment variables. Rebuild TestFlight and Google Play internal artifacts after changing EAS env values so the native apps embed the correct API URL and managed-AI setting.
 
 Then verify the hosted inventory connector:
 

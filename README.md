@@ -84,7 +84,9 @@ Run the local readiness check with the placeholder API allowed:
 npm run store:preflight:local
 ```
 
-Before real store builds, set `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, and `EXPO_PUBLIC_SUPPORT_URL` to hosted HTTPS URLs and run:
+Before TestFlight, Google Play internal, or real store builds, set `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_URL`, `EXPO_PUBLIC_SUPPORT_URL`, and `EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS=true` in the EAS `preview` and `production` environments. Keep `EXPO_PUBLIC_ENABLE_LOCAL_PROVIDER_SETTINGS` and `EXPO_PUBLIC_ENABLE_ADMIN_CREDENTIAL_SETTINGS` unset or `false` for tester builds. Keep Gemini keys only in 1Password and the hosted API secret manager as `AI_INTEGRATIONS_GEMINI_API_KEY` or `GEMINI_API_KEYS`; do not put model keys in EAS public env vars.
+
+Then run:
 
 ```bash
 npm run api:preflight
