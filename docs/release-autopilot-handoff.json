@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T16:11:30.815Z",
-  "status": "pending-hitl",
+  "generatedAt": "2026-06-08T12:41:51Z",
+  "status": "partial-apple-testflight-beta-review-waiting",
   "currentPr": {
     "number": 2,
     "branch": "codex/inventory-reconstruction-clone",
@@ -20,9 +20,9 @@
   },
   "activeBrowserState": {
     "appStoreConnect": {
-      "url": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
-      "screen": "iOS App Version 1.0 Prepare for Submission",
-      "state": "App Store Connect app record exists; Apple ID 6777091538 is recorded in eas.json and docs/store-console-evidence.json. Chrome automation verified product metadata from docs/store-console-copy.md is present on the iOS version page, Sign-in required is unchecked, manual release is selected, Save is disabled, and Add for Review is visible. The App Store Connect tab is left open at the iOS App Version 1.0 Prepare for Submission page. No public review submission was started.",
+      "url": "https://appstoreconnect.apple.com/teams/d4e5bef0-4168-4aad-b41e-fcd8079e9bfc/apps/6777091538/testflight/groups/355ad927-f5a9-4ec5-81c7-3fb54f12ce62/builds",
+      "screen": "ReversR External Beta > Builds",
+      "state": "App Store Connect shows ReversR External Beta with 0 testers and 1 build. Build 1.0.0 (6) is Waiting for Review after Apple TestFlight Beta App Review submission. No public App Review/Add for Review or production release action was clicked.",
       "fields": {
         "appleId": "6777091538",
         "recordUrl": "https://appstoreconnect.apple.com/apps/6777091538/distribution/ios/version/inflight",
@@ -31,7 +31,7 @@
         "marketingUrl": "https://reversr.vercel.app",
         "metadataDraftSavedAt": "2026-06-05T15:54:31.264Z"
       },
-      "nextHumanAction": "Complete App Privacy, age rating, TestFlight/build selection, contact information, and native screenshot upload tasks manually using docs/store-console-task-answers.md. Do not click Add for Review until all native QA/store evidence and signoff are complete.",
+      "nextHumanAction": "Wait for Apple TestFlight Beta App Review approval, then authorize tester rollout if desired. Keep public App Review/Add for Review and production release gated behind explicit final approval.",
       "copyBackAfterSuccess": ""
     },
     "googlePlayConsole": {
@@ -90,10 +90,10 @@
     "androidPreviewApkSha256": "fcd8eb699cccc082c7779930ffcf4d4a40d4a0ae9ba20dfafd434ab4a6887d35"
   },
   "resumeInstructionsForVambah": [
+    "For Apple TestFlight: build 1.0.0 (6) is submitted to Apple TestFlight Beta App Review and App Store Connect shows Waiting for Review. Next action is to wait for Apple approval, then authorize tester invites/groups if desired.",
     "For Android USB: unlock the phone, enable Developer options, turn on USB debugging, set USB mode to File transfer / Android Auto, accept the RSA prompt, then tell Codex to retry Android QA.",
     "For Android wireless later: reconnect only if another live Android QA pass or visual regression check is needed. The current Android Pixel screenshot evidence is already recorded.",
-    "For Google Play: Chrome is authenticated. Privacy policy, sign-in details, ads, government apps, financial features, health, and app category Productivity are draft-saved. Remaining HITL tasks are public support contact details, content rating, target audience, data safety, store listing asset upload, and testing/release setup.",
-    "For iOS: from /Users/vambahsillah/Documents/ReversR/original-ReversR run EAS_BUILD_NO_EXPO_GO_WARNING=true npx eas-cli@20.0.0 build --platform ios --profile production --no-wait. Complete Apple credential validation/login/2FA if prompted, then send the Expo build URL back to Codex."
+    "For Google Play: Chrome is authenticated. Privacy policy, sign-in details, ads, government apps, financial features, health, and app category Productivity are draft-saved. Remaining HITL tasks are public support contact details, content rating, target audience, data safety, store listing asset upload, and testing/release setup."
   ],
   "preparedAutomation": [
     {
