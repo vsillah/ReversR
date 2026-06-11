@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-11T10:09:31.687Z",
+  "generatedAt": "2026-06-11T16:28:22.984Z",
   "dryRun": false,
   "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
   "buildsChecked": 8,
@@ -22,7 +22,7 @@
       "gitCommitHash": "13e285d66d040be5cc2985816526270a3595b94e",
       "gitCommitMessage": "feat: add managed Gemini tester mode\n\nMerge managed Gemini tester mode and hosted preflight evidence.",
       "createdAt": "2026-06-11T09:41:42.037Z",
-      "updatedAt": "2026-06-11T10:08:50.362Z",
+      "updatedAt": "2026-06-11T14:00:14.293Z",
       "completedAt": "2026-06-11T10:08:50.194Z",
       "expirationDate": "2026-07-11T09:41:42.063Z"
     },
@@ -41,7 +41,7 @@
       "gitCommitHash": "13e285d66d040be5cc2985816526270a3595b94e",
       "gitCommitMessage": "feat: add managed Gemini tester mode\n\nMerge managed Gemini tester mode and hosted preflight evidence.",
       "createdAt": "2026-06-11T09:41:54.844Z",
-      "updatedAt": "2026-06-11T09:46:02.209Z",
+      "updatedAt": "2026-06-11T13:01:07.640Z",
       "completedAt": "2026-06-11T09:45:57.900Z",
       "expirationDate": "2026-07-11T09:41:54.865Z"
     }
