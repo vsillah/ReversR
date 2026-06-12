@@ -27,6 +27,7 @@ const INVENTORY_STEPS: LoadingStep[] = [
 ];
 
 const CONNECTOR_STORAGE_KEY = 'reversr_inventory_connector';
+const FARMBOT_PUBLIC_INVENTORY_URL = 'https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/farmbot-genesis-v1.8.json';
 
 interface Props {
   analysis: AnalysisResult;
@@ -39,12 +40,18 @@ interface Props {
 }
 
 const defaultConnector: InventoryConnector = {
-  sourceName: 'Demo Machine Inventory',
-  sourceUrl: 'demo://sample-machines',
-  connectorType: 'demo',
+  sourceName: 'FarmBot Genesis Public Inventory',
+  sourceUrl: FARMBOT_PUBLIC_INVENTORY_URL,
+  connectorType: 'api',
   authMode: 'none',
   credentialRef: '',
-  notes: 'Use this demo source until an ERP, spreadsheet, or parts database connector is available.',
+  notes: 'Public FarmBot Genesis v1.8 machine inventory generated from FarmBot hardware documentation and BOM sources. Human review is required before procurement, fabrication, or assembly.',
+};
+
+const migrateSavedConnector = (savedConnector: Partial<InventoryConnector>): InventoryConnector => {
+  const merged = { ...defaultConnector, ...savedConnector };
+  const isLegacyDemo = merged.sourceUrl === 'demo://sample-machines' || merged.sourceName === 'Demo Machine Inventory';
+  return isLegacyDemo ? defaultConnector : merged;
 };
 
 export default function PhaseTwo({
@@ -65,7 +72,11 @@ export default function PhaseTwo({
       try {
         const saved = await AsyncStorage.getItem(CONNECTOR_STORAGE_KEY);
         if (saved) {
-          setConnector({ ...defaultConnector, ...JSON.parse(saved) });
+          const migratedConnector = migrateSavedConnector(JSON.parse(saved));
+          setConnector(migratedConnector);
+          if (migratedConnector.sourceUrl === FARMBOT_PUBLIC_INVENTORY_URL) {
+            await AsyncStorage.setItem(CONNECTOR_STORAGE_KEY, JSON.stringify(migratedConnector));
+          }
         }
       } catch (e) {
         console.error('Failed to load inventory connector:', e);

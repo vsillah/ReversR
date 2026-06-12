@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const APP_URL = process.env.STORE_SCREENSHOT_URL || 'http://localhost:5001';
 const OUT_DIR = process.env.STORE_SCREENSHOT_DIR || path.join('docs', 'store-screenshots', 'generated');
 const EVIDENCE_FILE = process.env.STORE_SCREENSHOT_EVIDENCE_FILE || path.join('docs', 'store-screenshots', 'planning-evidence.json');
-const MACHINE_DESCRIPTION = 'A desktop FDM 3D printer with aluminum frame, heated bed, extruder, belts, rails, control board, power supply, and display.';
+const MACHINE_DESCRIPTION = 'A FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry beam, z-axis, Farmduino, Raspberry Pi, motors, encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.';
 
 const viewports = [
   { name: 'phone', width: 390, height: 844 },

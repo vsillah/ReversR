@@ -30,14 +30,16 @@ const inferConnectorType = (sourceUrl = '') => {
 };
 
 const defaultAnalysis = {
-  productName: process.env.CONNECTOR_SMOKE_PRODUCT_NAME || 'Desktop FDM 3D Printer',
-  rawAnalysis: process.env.CONNECTOR_SMOKE_RAW_ANALYSIS || 'The scan shows a desktop FDM 3D printer with a frame, heated bed, extruder, rails, belts, stepper motors, control board, display, and power supply.',
+  productName: process.env.CONNECTOR_SMOKE_PRODUCT_NAME || 'FarmBot Genesis v1.8',
+  rawAnalysis: process.env.CONNECTOR_SMOKE_RAW_ANALYSIS || 'The scan shows a FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry main beam, gantry columns, cross-slide plate, z-axis extrusion, Farmduino, Raspberry Pi, motors, encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.',
   components: parseJsonEnv('CONNECTOR_SMOKE_COMPONENTS_JSON', [
-    { name: 'Frame', description: 'Machine frame or chassis.', isEssential: true },
-    { name: 'Heated Bed', description: 'Build platform or heated machine bed.', isEssential: true },
-    { name: 'Extruder', description: 'Toolhead or material feed assembly.', isEssential: true },
-    { name: 'Stepper Motors', description: 'Motion control motors.', isEssential: true },
-    { name: 'Control Board', description: 'Primary control electronics.', isEssential: true },
+    { name: 'Track Extrusion', description: 'FarmBot track rail extrusion.', isEssential: true },
+    { name: 'Gantry Main Beam', description: 'Primary gantry structure.', isEssential: true },
+    { name: 'Farmduino', description: 'FarmBot control electronics.', isEssential: true },
+    { name: 'Raspberry Pi', description: 'FarmBot controller computer.', isEssential: true },
+    { name: 'UTM PCB', description: 'Universal tool mount electronics.', isEssential: true },
+    { name: 'Solenoid Valve', description: 'Watering control valve.', isEssential: true },
+    { name: 'Vacuum Pump', description: 'Seeder vacuum system.', isEssential: true },
     { name: 'Power Supply', description: 'Power conversion module.', isEssential: true },
   ]),
 };

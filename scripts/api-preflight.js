@@ -78,7 +78,7 @@ const run = async () => {
 
   const { response, parsed } = await postJson(`${apiBase}/api/inventory/validate`, {
     connector: {
-      sourceName: 'Demo Machine Inventory',
+      sourceName: 'FarmBot Genesis Public Inventory',
       sourceUrl: 'demo://sample-machines',
       connectorType: 'demo',
       authMode: 'none',
@@ -89,7 +89,7 @@ const run = async () => {
     throw new Error(`/api/inventory/validate failed with ${response.status}: ${JSON.stringify(parsed)}`);
   }
   if (parsed.status !== 'ok' || parsed.recordCount < 1) {
-    throw new Error(`Demo inventory validation returned an unexpected payload: ${JSON.stringify(parsed)}`);
+    throw new Error(`FarmBot inventory validation returned an unexpected payload: ${JSON.stringify(parsed)}`);
   }
 
   const evidence = {
@@ -115,7 +115,7 @@ const run = async () => {
         authenticatedConnectorsEnabled: Boolean(health.authenticatedConnectorsEnabled),
         credentialRegistryEnabled: Boolean(health.credentialRegistryEnabled),
       },
-      demoInventoryValidation: {
+      bundledFarmBotInventoryValidation: {
         status: 'pass',
         httpStatus: response.status,
         recordCount: parsed.recordCount,

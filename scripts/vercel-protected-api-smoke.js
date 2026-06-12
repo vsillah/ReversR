@@ -81,7 +81,7 @@ try {
     '--data',
     JSON.stringify({
       connector: {
-        sourceName: 'Demo Machine Inventory',
+        sourceName: 'FarmBot Genesis Public Inventory',
         sourceUrl: 'demo://sample-machines',
         connectorType: 'demo',
         authMode: 'none',
@@ -107,7 +107,7 @@ try {
         authenticatedConnectorsEnabled: Boolean(health.authenticatedConnectorsEnabled),
         credentialRegistryEnabled: Boolean(health.credentialRegistryEnabled),
       },
-      demoInventoryValidation: {
+      bundledFarmBotInventoryValidation: {
         status: 'pass',
         recordCount: validation.recordCount,
         sampleMachineIds: (validation.sampleMachines || []).map(machine => machine.machineId),

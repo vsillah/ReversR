@@ -145,15 +145,15 @@ const run = async () => {
 
   const validation = await postJson(`${apiBase}/api/inventory/validate`, {
     connector: {
-      sourceName: 'Demo Machine Inventory',
+      sourceName: 'FarmBot Genesis Public Inventory',
       sourceUrl: 'demo://sample-machines',
       connectorType: 'demo',
       authMode: 'none',
     },
   });
-  assert(validation.response.ok, `Demo inventory validation failed with ${validation.response.status}.`);
-  assert(validation.body.status === 'ok', 'Demo inventory validation should return ok.');
-  assert(validation.body.recordCount >= 1, 'Demo inventory validation should return at least one record.');
+  assert(validation.response.ok, `FarmBot inventory validation failed with ${validation.response.status}.`);
+  assert(validation.body.status === 'ok', 'FarmBot inventory validation should return ok.');
+  assert(validation.body.recordCount >= 1, 'FarmBot inventory validation should return at least one record.');
 
   const adminRegistry = await fetch(`${apiBase}/api/admin/inventory/credentials`, {
     headers: { Authorization: `Bearer ${adminToken}` },
@@ -176,7 +176,7 @@ const run = async () => {
       deniedOriginRejected: true,
       requestBodyLimit: bodyLimit,
       retiredSitRouteStatus: retiredSit.status,
-      demoInventoryValidation: {
+      bundledFarmBotInventoryValidation: {
         status: validation.body.status,
         recordCount: validation.body.recordCount,
       },

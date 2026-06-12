@@ -115,7 +115,7 @@ Request:
 ```json
 {
   "connector": {
-    "sourceName": "Demo Machine Inventory",
+    "sourceName": "FarmBot Genesis Public Inventory",
     "sourceUrl": "demo://sample-machines",
     "connectorType": "demo",
     "authMode": "none",
@@ -131,13 +131,13 @@ Response:
   "status": "ok",
   "authMode": "none",
   "credentialStatus": "not_required",
-  "recordCount": 2,
+  "recordCount": 1,
   "sampleMachines": [
     {
-      "machineId": "DEMO-FDM-PRINTER-001",
-      "machineName": "Desktop FDM 3D Printer",
-      "revision": "A",
-      "partCount": 10
+      "machineId": "FARMBOT-GENESIS-V1-8",
+      "machineName": "FarmBot Genesis v1.8",
+      "revision": "v1.8",
+      "partCount": 24
     }
   ]
 }
