@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-12T09:30:16.111Z",
+  "generatedAt": "2026-06-12T15:24:38.446Z",
   "appUrl": "http://localhost:5001",
   "apiUrl": "http://localhost:3001",
   "viewport": {
     "width": 390,
     "height": 844
   },
-  "machineDescription": "A desktop FDM 3D printer with aluminum extrusion frame, heated bed, extruder, belts, rails, stepper motors, control board, power supply, nozzle, and display.",
+  "machineDescription": "A FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry main beam, gantry columns, cross-slide plate, z-axis extrusion, Farmduino, Raspberry Pi, motors, encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.",
   "api": {
     "healthStatus": 200,
     "healthOk": true,
@@ -58,7 +58,7 @@
     "manufacturingReadiness": true
   },
   "observed": {
-    "matchedMachineName": "Desktop FDM 3D Printer",
+    "matchedMachineName": "FarmBot Genesis v1.8",
     "flow": "scan -> inventory validation -> machine match -> BOM -> quote packet/vendor draft"
   },
   "errors": {

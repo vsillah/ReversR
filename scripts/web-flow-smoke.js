@@ -6,8 +6,9 @@ const APP_URL = process.env.WEB_SMOKE_APP_URL || process.env.APP_URL || 'http://
 const API_URL = process.env.WEB_SMOKE_API_URL || 'http://localhost:3001';
 const EVIDENCE_FILE = process.env.WEB_SMOKE_EVIDENCE_FILE || 'docs/web-flow-smoke-evidence.json';
 const MACHINE_DESCRIPTION = process.env.WEB_SMOKE_MACHINE_DESCRIPTION || [
-  'A desktop FDM 3D printer with aluminum extrusion frame, heated bed, extruder, belts, rails,',
-  'stepper motors, control board, power supply, nozzle, and display.',
+  'A FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry main beam,',
+  'gantry columns, cross-slide plate, z-axis extrusion, Farmduino, Raspberry Pi, motors,',
+  'encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.',
 ].join(' ');
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -107,12 +108,12 @@ const checkApi = async () => {
     await assertTextPresent(page, 'Admin Inventory Connector');
     await clickText(page, 'Validate Connector');
     await waitForText(page, 'Inventory Preview', 30000);
-    await assertTextPresent(page, 'Desktop FDM 3D Printer');
+    await assertTextPresent(page, 'FarmBot Genesis v1.8');
     verified.inventoryValidation = true;
 
     await clickText(page, 'Match Machine & Build Plan');
     await waitForText(page, 'Phase 3: Design', 45000);
-    await assertTextPresent(page, 'Desktop FDM 3D Printer');
+    await assertTextPresent(page, 'FarmBot Genesis v1.8');
     await assertTextPresent(page, 'Inventory Match');
     await clickText(page, 'Continue to Build');
     verified.machineMatch = true;
@@ -144,7 +145,7 @@ const checkApi = async () => {
       api: apiEvidence,
       verified,
       observed: {
-        matchedMachineName: 'Desktop FDM 3D Printer',
+        matchedMachineName: 'FarmBot Genesis v1.8',
         flow: 'scan -> inventory validation -> machine match -> BOM -> quote packet/vendor draft',
       },
       errors: {

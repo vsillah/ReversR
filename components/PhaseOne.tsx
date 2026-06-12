@@ -30,8 +30,8 @@ interface Props {
 }
 
 const PRODUCT_PRESETS = [
-  "A desktop FDM 3D printer with aluminum extrusion frame, heated bed, extruder, belts, rails, stepper motors, control board, power supply, nozzle, and display.",
-  "A desktop CNC router with aluminum frame, spindle, gantry, stepper motors, control board, power supply, linear rails, lead screws, and wasteboard.",
+  "A FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry main beam, gantry columns, cross-slide plate, z-axis extrusion, Farmduino, Raspberry Pi, motors, encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.",
+  "A FarmBot Genesis gantry farming robot with aluminum tracks, gantry beam, z-axis, universal tool mount, Farmduino electronics, Raspberry Pi controller, motors, encoders, solenoid valve, vacuum pump, seeder, watering nozzle, camera, and power supply.",
   "A benchtop drill press with cast base, column, quill, chuck, belt drive, motor, depth stop, table, and safety guard.",
   "A small conveyor sorting machine with frame, belt, rollers, drive motor, sensors, controller, power supply, and diverter gate.",
   "A compact injection molding machine with clamp frame, heated barrel, screw drive, hopper, hydraulic unit, controller, and mold platen.",
@@ -261,7 +261,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
                 value={input}
                 onChangeText={setInput}
                 accessibilityLabel="Machine description"
-                placeholder="e.g., A desktop FDM 3D printer with aluminum frame, heated bed, extruder, belts, rails, and display..."
+                placeholder="e.g., A FarmBot Genesis gantry farming robot with tracks, gantry beam, z-axis, Farmduino, Raspberry Pi, motors, camera, tools, and power supply..."
                 placeholderTextColor={Colors.gray[600]}
                 multiline
                 numberOfLines={4}

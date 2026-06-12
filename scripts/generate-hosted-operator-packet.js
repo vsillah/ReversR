@@ -96,7 +96,7 @@ const commandSequence = [
   {
     id: 'api-hosted-preflight',
     command: 'EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight',
-    purpose: 'Prove the deployed API health, restricted CORS, demo inventory validation, and optional admin registry access.',
+    purpose: 'Prove the deployed API health, restricted CORS, bundled FarmBot inventory validation, and optional admin registry access.',
   },
   {
     id: 'policy-hosted-preflight',

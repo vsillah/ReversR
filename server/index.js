@@ -4,6 +4,7 @@ const fs = require('fs/promises');
 const crypto = require('crypto');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
 const { Ollama } = require('ollama');
+const farmBotInventory = require('../public/inventory/farmbot-genesis-v1.8.json');
 
 const ollama = new Ollama({ host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434' });
 const app = express();
@@ -570,66 +571,6 @@ const normalizeMachineRecord = (record = {}, index = 0) => {
   };
 };
 
-const DEMO_MACHINE_RECORDS = [
-  normalizeMachineRecord({
-    machineId: 'DEMO-FDM-PRINTER-001',
-    machineName: 'Desktop FDM 3D Printer',
-    revision: 'A',
-    aliases: '3d printer|fdm printer|desktop printer|filament printer',
-    parts: 'Frame|Heated Bed|Extruder|Stepper Motors|Control Board|Power Supply|Belts|Rails|Nozzle|Display',
-    materials: 'aluminum extrusion|borosilicate glass|NEMA steppers|GT2 belts|hardened steel nozzle',
-    assemblySteps: JSON.stringify([
-      {
-        stepNumber: 1,
-        title: 'Verify inventory record',
-        instructions: 'Confirm printer revision, bed size, firmware family, and required subassemblies.',
-        parts: ['Frame', 'Heated Bed', 'Extruder'],
-        estimatedTime: '20 min',
-        qualityCheck: 'Machine ID and revision match the inventory record.',
-      },
-      {
-        stepNumber: 2,
-        title: 'Build frame and motion system',
-        instructions: 'Square the frame, install rails, belts, steppers, and bed motion hardware.',
-        parts: ['Frame', 'Rails', 'Belts', 'Stepper Motors', 'Heated Bed'],
-        estimatedTime: '1-2 hr',
-        qualityCheck: 'Axes move freely and frame is square.',
-      },
-      {
-        stepNumber: 3,
-        title: 'Install toolhead and electronics',
-        instructions: 'Mount extruder, nozzle, power supply, control board, display, and wiring harness.',
-        parts: ['Extruder', 'Nozzle', 'Power Supply', 'Control Board', 'Display'],
-        estimatedTime: '1 hr',
-        qualityCheck: 'Continuity, polarity, and thermal protections pass before power-on.',
-      },
-      {
-        stepNumber: 4,
-        title: 'Calibrate rebuild',
-        instructions: 'Run bed leveling, PID tuning, extrusion calibration, and a first-layer test.',
-        parts: ['Heated Bed', 'Nozzle', 'Display'],
-        estimatedTime: '45 min',
-        qualityCheck: 'Calibration report and test print are attached.',
-      },
-    ]),
-    pricing: JSON.stringify({
-      partsSubtotal: '$420-$780',
-      modelingEstimate: '$300-$900',
-      fabricationEstimate: '$500-$1,600',
-      assemblyLaborEstimate: '$240-$640',
-      totalEstimate: '$1,460-$3,920',
-      confidence: 'medium',
-    }),
-  }, 0),
-  normalizeMachineRecord({
-    machineId: 'DEMO-CNC-ROUTER-002',
-    machineName: 'Desktop CNC Router',
-    aliases: 'cnc router|desktop mill|gantry router',
-    parts: 'Frame|Spindle|Gantry|Stepper Motors|Control Board|Power Supply|Linear Rails|Lead Screws|Wasteboard',
-    materials: 'aluminum extrusion|steel rails|MDF wasteboard',
-  }, 1),
-];
-
 const recordsFromPayload = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.machines)) return payload.machines;
@@ -637,6 +578,22 @@ const recordsFromPayload = (payload) => {
   if (Array.isArray(payload?.records)) return payload.records;
   if (Array.isArray(payload?.data)) return payload.data;
   return [];
+};
+
+const PUBLIC_FARMBOT_SOURCE_NAME = farmBotInventory.sourceName || 'FarmBot Genesis public hardware documentation';
+const DEMO_MACHINE_RECORDS = recordsFromPayload(farmBotInventory)
+  .map(normalizeMachineRecord)
+  .filter(record => record.machineName && record.machineId);
+
+if (DEMO_MACHINE_RECORDS.length === 0) {
+  throw new Error('Bundled FarmBot inventory did not contain any machine records.');
+}
+
+const resolveInventorySourceName = (connector = {}) => {
+  if (!connector.sourceUrl || connector.sourceUrl.startsWith('demo://')) {
+    return PUBLIC_FARMBOT_SOURCE_NAME;
+  }
+  return connector.sourceName || 'Inventory';
 };
 
 const normalizeCredentialRef = (value = '') => String(value).trim();
@@ -935,7 +892,7 @@ const buildFallbackAnalysis = (input = '', imageBase64 = null) => {
 
 const buildFallbackReconstruction = (analysis, connector = {}) => {
   const machineName = analysis?.productName || 'Matched Machine';
-  const sourceName = connector.sourceName || 'Demo Machine Inventory';
+  const sourceName = resolveInventorySourceName(connector);
   const components = analysis?.components?.length ? analysis.components : inferComponents(machineName);
   const coreParts = components.slice(0, 8).map(component => component.name);
   return {
@@ -1015,7 +972,7 @@ const buildInventoryReconstruction = (analysis, connector = {}, match) => {
   if (!match?.record) return buildFallbackReconstruction(analysis, connector);
 
   const { record, score, partHits, aliasHits, materialHits } = match;
-  const sourceName = connector.sourceName || 'Inventory';
+  const sourceName = resolveInventorySourceName(connector);
   const evidenceParts = [
     partHits.length ? `parts: ${partHits.join(', ')}` : '',
     aliasHits.length ? `aliases: ${aliasHits.join(', ')}` : '',
@@ -1205,9 +1162,10 @@ app.post('/api/inventory/validate', async (req, res) => {
     const { connector } = req.body;
     const records = await loadInventoryRecords(connector || {});
     const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
+    const sourceName = resolveInventorySourceName(connector || {});
     res.json({
       status: 'ok',
-      sourceName: connector?.sourceName || 'Inventory',
+      sourceName,
       sourceUrl: connector?.sourceUrl || 'demo://sample-machines',
       authMode: connector?.authMode || 'none',
       credentialStatus,
@@ -1445,7 +1403,7 @@ app.post('/api/gemini/match-machine', async (req, res) => {
     res.json({
       ...result,
       patternUsed: 'inventory_match',
-      inventorySource: result.inventorySource || connector?.sourceName || 'Inventory',
+      inventorySource: result.inventorySource || resolveInventorySourceName(connector),
     });
   } catch (error) {
     console.error('Inventory match error:', error);

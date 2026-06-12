@@ -37,6 +37,25 @@ const majorParts = [
   'V-Wheel',
 ];
 
+const referenceImages = [
+  {
+    id: 'farmbot-genesis-v1-8-official-product-render',
+    label: 'Official FarmBot Genesis v1.8 product reference',
+    url: 'https://cdn.shopify.com/s/files/1/2040/0289/files/FarmBot_Genesis_v1.8_Beta.png?v=1732328603',
+    sourceUrl: 'https://farm.bot/pages/genesis',
+    kind: 'official-product-reference',
+    licenseNote: 'FarmBot publishes open-source hardware documentation. Verify current license and purchasing terms before reuse outside connector smoke.',
+  },
+  {
+    id: 'farmbot-genesis-v1-8-official-field-photo',
+    label: 'Official FarmBot Genesis installed reference',
+    url: 'https://farm.bot/cdn/shop/files/DSC00260_2400x_87666fa7-02d0-41eb-9a12-0cc5938f39be_1349x630.jpg?v=1600237043',
+    sourceUrl: 'https://farm.bot/pages/genesis',
+    kind: 'official-product-photo',
+    licenseNote: 'FarmBot publishes open-source hardware documentation. Verify current license and purchasing terms before reuse outside connector smoke.',
+  },
+];
+
 const assemblySteps = [
   {
     stepNumber: 1,
@@ -288,6 +307,7 @@ const run = async () => {
       bom: 'https://genesis.farm.bot/v1.8/bom',
       github: 'https://github.com/FarmBot-Docs/farmbot-genesis',
     },
+    referenceImages,
     sourceParts,
     notes: 'Generated from public FarmBot Genesis v1.8 documentation for ReversR hosted connector smoke. Human review is required before procurement, fabrication, or assembly.',
   };

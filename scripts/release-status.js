@@ -117,8 +117,8 @@ addGate(
 );
 
 const machineScanExamples = allFilesContain([
-  ['components/PhaseOne.tsx', 'desktop FDM 3D printer'],
-  ['components/PhaseOne.tsx', 'desktop CNC router'],
+  ['components/PhaseOne.tsx', 'FarmBot Genesis v1.8'],
+  ['components/PhaseOne.tsx', 'gantry farming robot'],
   ['components/PhaseOne.tsx', 'Point at a machine, model plate, or visible assembly'],
   ['components/PhaseOne.tsx', 'Sample machine'],
 ]);
@@ -166,6 +166,7 @@ addGate(
 );
 
 const apiDeploymentSmoke = readOptionalJson('docs/api-deployment-smoke-evidence.json');
+const apiDeploymentInventoryValidation = apiDeploymentSmoke?.checks?.bundledFarmBotInventoryValidation || apiDeploymentSmoke?.checks?.demoInventoryValidation;
 const apiDeploymentSmokeOk = (
   apiDeploymentSmoke?.status === 'pass' &&
   apiDeploymentSmoke?.health?.runtimeConfig?.corsMode === 'restricted' &&
@@ -173,7 +174,7 @@ const apiDeploymentSmokeOk = (
   apiDeploymentSmoke?.checks?.allowedOriginAccepted === true &&
   apiDeploymentSmoke?.checks?.deniedOriginRejected === true &&
   apiDeploymentSmoke?.checks?.retiredSitRouteStatus === 404 &&
-  apiDeploymentSmoke?.checks?.demoInventoryValidation?.status === 'ok'
+  apiDeploymentInventoryValidation?.status === 'ok'
 );
 addGate(
   'store-local',
@@ -181,7 +182,7 @@ addGate(
   'Production-style API smoke evidence is recorded before hosted deployment',
   apiDeploymentSmokeOk ? 'pass' : 'pending',
   apiDeploymentSmokeOk
-    ? `docs/api-deployment-smoke-evidence.json proves restricted CORS, body limit, retired SIT route, and demo inventory validation at ${apiDeploymentSmoke.generatedAt}.`
+    ? `docs/api-deployment-smoke-evidence.json proves restricted CORS, body limit, retired SIT route, and bundled FarmBot inventory validation at ${apiDeploymentSmoke.generatedAt}.`
     : 'docs/api-deployment-smoke-evidence.json is missing or incomplete.',
   apiDeploymentSmokeOk ? '' : 'Run npm run api:deployment-smoke before deploying the API container.'
 );
@@ -799,6 +800,7 @@ const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || packet.urls?.apiBaseU
 const hostedApiOk = !isPlaceholder(apiBaseUrl) && isHttpsUrl(apiBaseUrl);
 const hostedApiPreflight = readOptionalJson('docs/api-hosted-preflight-evidence.json');
 const vercelProtectedApiSmoke = readOptionalJson('docs/vercel-protected-api-smoke-evidence.json');
+const hostedApiInventoryValidation = hostedApiPreflight?.checks?.bundledFarmBotInventoryValidation || hostedApiPreflight?.checks?.demoInventoryValidation;
 const hostedApiPreflightOk = (
   hostedApiPreflight?.schemaVersion === 1 &&
   hostedApiPreflight?.status === 'pass' &&
@@ -807,8 +809,8 @@ const hostedApiPreflightOk = (
   isHttpsUrl(hostedApiPreflight?.apiBaseUrl) &&
   hostedApiPreflight?.checks?.health?.status === 'pass' &&
   hostedApiPreflight?.checks?.health?.runtimeConfig?.corsMode === 'restricted' &&
-  hostedApiPreflight?.checks?.demoInventoryValidation?.status === 'pass' &&
-  Number(hostedApiPreflight?.checks?.demoInventoryValidation?.recordCount || 0) > 0
+  hostedApiInventoryValidation?.status === 'pass' &&
+  Number(hostedApiInventoryValidation?.recordCount || 0) > 0
 );
 const webFlowEvidence = readOptionalJson('docs/web-flow-smoke-evidence.json');
 const requiredWebFlowChecks = [
@@ -873,7 +875,7 @@ addGate(
   'Hosted HTTPS API URL is configured for native builds',
   hostedApiPreflightOk ? 'pass' : 'pending',
   hostedApiPreflightOk
-    ? `docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at ${hostedApiPreflight.generatedAt}.`
+    ? `docs/api-hosted-preflight-evidence.json proves hosted API health and bundled FarmBot inventory validation at ${hostedApiPreflight.generatedAt}.`
     : vercelProtectedApiSmoke?.status === 'pass'
       ? `Protected Vercel preview API works via authenticated CLI at ${vercelProtectedApiSmoke.generatedAt}; public/native API access is still required.`
       : hostedApiOk

@@ -195,7 +195,7 @@ const actionPlan = {
       'Run EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight.',
     ],
     evidence: [
-      'docs/api-deployment-smoke-evidence.json records restricted CORS, body limit, and demo inventory validation.',
+      'docs/api-deployment-smoke-evidence.json records restricted CORS, body limit, and bundled FarmBot inventory validation.',
       'Hosted /api/health returns status ok.',
       'Runtime config reports restricted CORS.',
       'npm run api:preflight passes against the hosted URL.',
