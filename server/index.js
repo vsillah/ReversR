@@ -1595,6 +1595,10 @@ Generate a clean, professional machine reconstruction sketch with:
     res.json(result);
   } catch (error) {
     console.error('Generate 2D error:', error);
+
+    if (shouldUseDeterministicAiFallback(error)) {
+      return res.json({ imageData: FALLBACK_IMAGE_BASE64 });
+    }
     
     // For image generation, provide a fallback option
     const { statusCode, body } = createErrorResponse(error, 'Image generation temporarily unavailable');
@@ -1675,6 +1679,13 @@ Generate a clean, professional machine reconstruction sketch with:
     });
   } catch (error) {
     console.error(`Generate single angle error:`, error.message);
+    if (shouldUseDeterministicAiFallback(error)) {
+      return res.json({
+        id: req.body?.angleId || 'front',
+        label: ANGLES.find(angle => angle.id === req.body?.angleId)?.label || 'Front View',
+        imageData: FALLBACK_IMAGE_BASE64,
+      });
+    }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate angle view');
     res.status(statusCode).json(body);
   }
@@ -1745,8 +1756,8 @@ Generate a clean, professional machine reconstruction sketch with:
         results.push({
           id: angle.id,
           label: angle.label,
-          imageData: null,
-          error: 'Failed to generate this view',
+          imageData: shouldUseDeterministicAiFallback(angleError) ? FALLBACK_IMAGE_BASE64 : null,
+          error: shouldUseDeterministicAiFallback(angleError) ? undefined : 'Failed to generate this view',
         });
       }
     }
