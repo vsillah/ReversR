@@ -1001,6 +1001,32 @@ const buildInventoryReconstruction = (analysis, connector = {}, match) => {
   };
 };
 
+const applyDeterministicInventoryMatch = (result = {}, analysis, connector = {}, match) => {
+  if (!match?.record) return result;
+
+  const deterministic = buildInventoryReconstruction(analysis, connector, match);
+  const modelConfidence = Number(result.confidenceScore || 0);
+
+  return {
+    ...result,
+    machineId: deterministic.machineId,
+    machineName: deterministic.machineName,
+    inventorySource: deterministic.inventorySource,
+    confidenceScore: Math.max(modelConfidence, deterministic.confidenceScore),
+    evidence: deterministic.evidence,
+    assemblySteps: deterministic.assemblySteps,
+    pricing: deterministic.pricing,
+    fulfillmentOptions: deterministic.fulfillmentOptions,
+    sourceLinks: deterministic.sourceLinks,
+    referenceImages: deterministic.referenceImages,
+    constraint: deterministic.constraint,
+    marketBenefit: result.marketBenefit || deterministic.marketBenefit,
+    conceptName: result.conceptName || deterministic.conceptName,
+    conceptDescription: result.conceptDescription || deterministic.conceptDescription,
+    patternUsed: 'inventory_match',
+  };
+};
+
 const buildFallbackSpec = (innovation) => ({
   promptLogic: `Use the matched inventory record (${innovation.machineId || 'pending ID'}) as the source of truth, then verify visible assemblies against the scan evidence before procurement.`,
   componentStructure: `${innovation.machineName || innovation.conceptName} rebuild structure includes frame, motion/power/control subassemblies, fasteners, calibration references, and vendor-ready model files.`,
@@ -1294,10 +1320,11 @@ app.delete('/api/admin/inventory/credentials/:credentialRef', async (req, res) =
 
 // Match machine against inventory connector
 app.post('/api/gemini/match-machine', async (req, res) => {
+  let deterministicMatch;
   try {
     const { analysis, connector, image, provider, ollamaModel } = req.body;
     const inventoryRecords = await loadInventoryRecords(connector || {});
-    const deterministicMatch = findBestInventoryMatch(analysis, inventoryRecords);
+    deterministicMatch = findBestInventoryMatch(analysis, inventoryRecords);
     const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
 
     const prompt = `
@@ -1400,6 +1427,8 @@ app.post('/api/gemini/match-machine', async (req, res) => {
       }, { type: 'match-machine', analysis, connector });
     }
 
+    result = applyDeterministicInventoryMatch(result, analysis, connector, deterministicMatch);
+
     res.json({
       ...result,
       patternUsed: 'inventory_match',
@@ -1408,7 +1437,8 @@ app.post('/api/gemini/match-machine', async (req, res) => {
   } catch (error) {
     console.error('Inventory match error:', error);
     if (shouldUseDeterministicAiFallback(error)) {
-      return res.json(buildFallbackReconstruction(req.body?.analysis, req.body?.connector));
+      const fallback = buildFallbackReconstruction(req.body?.analysis, req.body?.connector);
+      return res.json(applyDeterministicInventoryMatch(fallback, req.body?.analysis, req.body?.connector, deterministicMatch));
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to match machine from inventory');
     res.status(statusCode).json(body);
