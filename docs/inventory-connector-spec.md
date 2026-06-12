@@ -1,6 +1,6 @@
 # ReversR Rebuild Inventory Connector Spec
 
-Last updated: June 5, 2026
+Last updated: June 12, 2026
 
 ## Purpose
 
@@ -40,6 +40,8 @@ Recommended:
 - `assemblySteps`: JSON array.
 - `pricing`: JSON object.
 - `modelingVendors`: JSON array.
+- `sourceLinks`: JSON object of source URLs such as product, documentation, BOM, and CAD repositories.
+- `referenceImages`: JSON array of source-backed visual references.
 - `notes`
 
 See [sample-machine-inventory.csv](./sample-machine-inventory.csv).
@@ -73,11 +75,36 @@ The API accepts a top-level array or an object with `machines`, `items`, `record
         "assemblyLaborEstimate": "$240-$640",
         "totalEstimate": "$1,470-$3,960",
         "confidence": "medium"
-      }
+      },
+      "sourceLinks": {
+        "product": "https://example.com/machines/inv-fdm-100",
+        "documentation": "https://example.com/docs/inv-fdm-100"
+      },
+      "referenceImages": [
+        {
+          "id": "inv-fdm-100-product-reference",
+          "label": "Official product reference",
+          "url": "https://example.com/images/inv-fdm-100.png",
+          "sourceUrl": "https://example.com/machines/inv-fdm-100",
+          "kind": "official-product-reference",
+          "licenseNote": "Verify reuse terms before public export or vendor transmission."
+        }
+      ]
     }
   ]
 }
 ```
+
+## Reference Visuals
+
+Rebuild visuals should be deterministic and source-backed whenever possible. The app should use this priority order:
+
+1. `referenceImages` from the matched inventory record.
+2. A public source image found through approved `sourceLinks`.
+3. AI-generated sketch only when no database or public reference is available.
+4. Built-in placeholder image when external image services are unavailable.
+
+AI-generated images are convenience previews. They are not source truth and should not be treated as professional-grade reconstruction evidence without human review.
 
 ## Validation Endpoint
 

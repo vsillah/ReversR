@@ -208,6 +208,17 @@ export interface FulfillmentOption {
   packageRequired: string[];
 }
 
+export interface ReferenceImage {
+  id?: string;
+  label: string;
+  url: string;
+  sourceUrl?: string;
+  licenseNote?: string;
+  kind?: string;
+  contentType?: string;
+  sourceType?: string;
+}
+
 export interface InnovationResult {
   patternUsed: MachineWorkflowKey;
   conceptName: string;
@@ -225,6 +236,8 @@ export interface InnovationResult {
   assemblySteps?: AssemblyStep[];
   pricing?: PricingSnapshot;
   fulfillmentOptions?: FulfillmentOption[];
+  sourceLinks?: Record<string, string>;
+  referenceImages?: ReferenceImage[];
 }
 
 export interface TechnicalSpec {
@@ -452,7 +465,7 @@ export const generate3DScene = async (innovation: InnovationResult): Promise<Thr
 
 export const generate2DImage = async (innovation: InnovationResult): Promise<string> => {
   const config = await getAiConfig();
-  const response = await fetchWithRetry<{ imageData: string }>(`${API_BASE}/api/gemini/generate-2d`, {
+  const response = await fetchWithRetry<{ imageData: string; imageSource?: ReferenceImage }>(`${API_BASE}/api/gemini/generate-2d`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ innovation, ...config })
@@ -473,6 +486,7 @@ export interface AngleImage {
   id: string;
   label: string;
   imageData: string | null;
+  imageSource?: ReferenceImage;
   error?: string;
 }
 

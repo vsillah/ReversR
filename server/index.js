@@ -501,6 +501,46 @@ const normalizeFulfillmentOptions = (value) => {
   ];
 };
 
+const normalizeSourceLinks = (value) => {
+  const parsed = safeJsonParse(value, null);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+
+  return Object.entries(parsed).reduce((links, [key, url]) => {
+    const normalizedUrl = normalizeName(url);
+    if (normalizedUrl) links[key] = normalizedUrl;
+    return links;
+  }, {});
+};
+
+const normalizeReferenceImages = (value) => {
+  const parsed = safeJsonParse(value, null);
+  const imageRecords = Array.isArray(parsed) ? parsed : [parsed].filter(Boolean);
+
+  return imageRecords
+    .map((image, index) => {
+      if (typeof image === 'string') {
+        return {
+          id: `reference-image-${index + 1}`,
+          label: `Reference image ${index + 1}`,
+          url: normalizeName(image),
+          kind: 'source-reference',
+        };
+      }
+
+      if (!image || typeof image !== 'object') return null;
+
+      return {
+        id: normalizeName(image.id || `reference-image-${index + 1}`),
+        label: normalizeName(image.label || image.title || `Reference image ${index + 1}`),
+        url: normalizeName(image.url || image.imageUrl || image.src || ''),
+        sourceUrl: normalizeName(image.sourceUrl || image.pageUrl || ''),
+        licenseNote: normalizeName(image.licenseNote || image.license || ''),
+        kind: normalizeName(image.kind || 'source-reference'),
+      };
+    })
+    .filter(image => image?.url);
+};
+
 const normalizeMachineRecord = (record = {}, index = 0) => {
   const machineId = normalizeName(record.machineId || record.id || record.sku || record.assetId || `INV-${String(index + 1).padStart(4, '0')}`);
   const machineName = normalizeName(record.machineName || record.name || record.title || record.model || 'Unnamed Machine');
@@ -510,6 +550,8 @@ const normalizeMachineRecord = (record = {}, index = 0) => {
   const vendors = normalizeFulfillmentOptions(record.fulfillmentOptions || record.modelingVendors || record.vendors);
   const assemblySteps = normalizeAssemblySteps(record.assemblySteps || record.steps, parts);
   const pricing = normalizePricing(record.pricing || record.pricingSnapshot);
+  const sourceLinks = normalizeSourceLinks(record.sourceLinks || record.links || record.sources);
+  const referenceImages = normalizeReferenceImages(record.referenceImages || record.referenceImage || record.imageUrl || record.images);
 
   return {
     machineId,
@@ -521,6 +563,8 @@ const normalizeMachineRecord = (record = {}, index = 0) => {
     assemblySteps,
     pricing,
     fulfillmentOptions: vendors,
+    sourceLinks,
+    referenceImages,
     notes: normalizeName(record.notes || record.description || ''),
     sourceRow: index + 1,
   };
@@ -995,6 +1039,8 @@ const buildInventoryReconstruction = (analysis, connector = {}, match) => {
     assemblySteps: record.assemblySteps,
     pricing: record.pricing,
     fulfillmentOptions: record.fulfillmentOptions,
+    sourceLinks: record.sourceLinks,
+    referenceImages: record.referenceImages,
   };
 };
 
@@ -1474,6 +1520,129 @@ app.post('/api/gemini/technical-spec', async (req, res) => {
   }
 });
 
+const extractPublicReferenceImageUrl = (html = '', pageUrl = '') => {
+  const patterns = [
+    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["'][^>]*>/i,
+    /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["'][^>]*>/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (!match?.[1]) continue;
+
+    try {
+      return new URL(match[1], pageUrl).toString();
+    } catch {
+      return '';
+    }
+  }
+
+  return '';
+};
+
+const getSourceBackedImage = async (innovation = {}) => {
+  const references = Array.isArray(innovation.referenceImages) ? innovation.referenceImages : [];
+
+  for (const reference of references) {
+    const url = normalizeName(reference?.url);
+    if (!url) continue;
+
+    if (url.startsWith('data:image/')) {
+      const match = url.match(/^data:(image\/[a-z0-9.+-]+);base64,(.+)$/i);
+      if (!match) continue;
+      return {
+        imageData: match[2],
+        imageSource: {
+          ...reference,
+          url,
+          contentType: match[1],
+          sourceType: reference.sourceType || (reference.kind === 'public-source-reference' ? 'public_source_reference' : 'inventory_reference'),
+        },
+      };
+    }
+
+    if (!/^https?:\/\//i.test(url)) continue;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          Accept: 'image/*,*/*;q=0.8',
+          'User-Agent': 'ReversR-Rebuild/1.0 deterministic-reference-fetch',
+        },
+      });
+
+      if (!response.ok) continue;
+
+      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+      if (!contentType.toLowerCase().startsWith('image/')) continue;
+
+      const arrayBuffer = await response.arrayBuffer();
+      return {
+        imageData: Buffer.from(arrayBuffer).toString('base64'),
+        imageSource: {
+          ...reference,
+          url,
+          contentType,
+          sourceType: reference.sourceType || (reference.kind === 'public-source-reference' ? 'public_source_reference' : 'inventory_reference'),
+        },
+      };
+    } catch (error) {
+      console.warn(`Reference image fetch failed for ${url}:`, error.message);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  const sourceLinks = innovation.sourceLinks && typeof innovation.sourceLinks === 'object'
+    ? Object.values(innovation.sourceLinks).filter(url => /^https?:\/\//i.test(String(url)))
+    : [];
+
+  for (const pageUrl of sourceLinks.slice(0, 4)) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(pageUrl, {
+        signal: controller.signal,
+        headers: {
+          Accept: 'text/html,*/*;q=0.8',
+          'User-Agent': 'ReversR-Rebuild/1.0 deterministic-public-reference-discovery',
+        },
+      });
+
+      if (!response.ok) continue;
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.toLowerCase().includes('text/html')) continue;
+
+      const imageUrl = extractPublicReferenceImageUrl(await response.text(), pageUrl);
+      if (!imageUrl) continue;
+
+      const publicImage = await getSourceBackedImage({
+        referenceImages: [{
+          id: 'public-source-reference',
+          label: 'Public source reference image',
+          url: imageUrl,
+          sourceUrl: pageUrl,
+          kind: 'public-source-reference',
+        }],
+      });
+
+      if (publicImage) return publicImage;
+    } catch (error) {
+      console.warn(`Public reference discovery failed for ${pageUrl}:`, error.message);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  return null;
+};
+
 // Generate 3D scene
 app.post('/api/gemini/generate-3d', async (req, res) => {
   try {
@@ -1555,8 +1724,19 @@ app.post('/api/gemini/generate-2d', async (req, res) => {
   try {
     const { innovation } = req.body;
 
+    const sourceBackedImage = await getSourceBackedImage(innovation);
+    if (sourceBackedImage) {
+      return res.json(sourceBackedImage);
+    }
+
     if (!hasConfiguredGeminiKey()) {
-      return res.json({ imageData: FALLBACK_IMAGE_BASE64 });
+      return res.json({
+        imageData: FALLBACK_IMAGE_BASE64,
+        imageSource: {
+          sourceType: 'built_in_placeholder',
+          label: 'Built-in placeholder reconstruction sketch',
+        },
+      });
     }
     
     const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
@@ -1595,6 +1775,16 @@ Generate a clean, professional machine reconstruction sketch with:
     res.json(result);
   } catch (error) {
     console.error('Generate 2D error:', error);
+
+    if (shouldUseDeterministicAiFallback(error)) {
+      return res.json({
+        imageData: FALLBACK_IMAGE_BASE64,
+        imageSource: {
+          sourceType: 'built_in_placeholder',
+          label: 'Built-in placeholder reconstruction sketch',
+        },
+      });
+    }
     
     // For image generation, provide a fallback option
     const { statusCode, body } = createErrorResponse(error, 'Image generation temporarily unavailable');
@@ -1622,6 +1812,15 @@ app.post('/api/gemini/generate-2d-single-angle', async (req, res) => {
     const angle = ANGLES.find(a => a.id === angleId);
     if (!angle) {
       return res.status(400).json({ error: 'Invalid angle ID' });
+    }
+
+    const sourceBackedImage = await getSourceBackedImage(innovation);
+    if (sourceBackedImage) {
+      return res.json({
+        id: angle.id,
+        label: `${angle.label} Reference`,
+        ...sourceBackedImage,
+      });
     }
 
     if (!hasConfiguredGeminiKey()) {
@@ -1675,6 +1874,13 @@ Generate a clean, professional machine reconstruction sketch with:
     });
   } catch (error) {
     console.error(`Generate single angle error:`, error.message);
+    if (shouldUseDeterministicAiFallback(error)) {
+      return res.json({
+        id: req.body?.angleId || 'front',
+        label: ANGLES.find(angle => angle.id === req.body?.angleId)?.label || 'Front View',
+        imageData: FALLBACK_IMAGE_BASE64,
+      });
+    }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate angle view');
     res.status(statusCode).json(body);
   }
@@ -1685,6 +1891,17 @@ app.post('/api/gemini/generate-2d-angles', async (req, res) => {
     const { innovation, angles = ['front', 'side', 'iso'] } = req.body;
     
     const selectedAngles = ANGLES.filter(a => angles.includes(a.id));
+    const sourceBackedImage = await getSourceBackedImage(innovation);
+    if (sourceBackedImage) {
+      return res.json({
+        images: selectedAngles.map(angle => ({
+          id: angle.id,
+          label: `${angle.label} Reference`,
+          ...sourceBackedImage,
+        })),
+      });
+    }
+
     if (!hasConfiguredGeminiKey()) {
       return res.json({
         images: selectedAngles.map(angle => ({
@@ -1745,8 +1962,8 @@ Generate a clean, professional machine reconstruction sketch with:
         results.push({
           id: angle.id,
           label: angle.label,
-          imageData: null,
-          error: 'Failed to generate this view',
+          imageData: shouldUseDeterministicAiFallback(angleError) ? FALLBACK_IMAGE_BASE64 : null,
+          error: shouldUseDeterministicAiFallback(angleError) ? undefined : 'Failed to generate this view',
         });
       }
     }
