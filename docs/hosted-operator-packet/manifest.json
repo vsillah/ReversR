@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-06T10:10:59.724Z",
+  "generatedAt": "2026-06-13T03:43:58.838Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-06T10:10:59.720Z",
+    "generatedAt": "2026-06-13T03:43:58.832Z",
     "summary": {
-      "pass": 38,
-      "pending": 1
+      "pass": 37,
+      "pending": 2
     }
   },
   "appIdentity": {
@@ -29,7 +29,7 @@
       "group": "hosted",
       "status": "pass",
       "title": "Hosted HTTPS API URL is configured for native builds",
-      "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
+      "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and bundled FarmBot inventory validation at 2026-06-13T03:39:29.253Z.",
       "nextStep": ""
     },
     {
@@ -37,7 +37,7 @@
       "group": "hosted",
       "status": "pass",
       "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-      "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
+      "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-08T10:41:06.997Z.",
       "nextStep": ""
     },
     {
@@ -149,7 +149,7 @@
     {
       "id": "api-hosted-preflight",
       "command": "EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight",
-      "purpose": "Prove the deployed API health, restricted CORS, demo inventory validation, and optional admin registry access."
+      "purpose": "Prove the deployed API health, restricted CORS, bundled FarmBot inventory validation, and optional admin registry access."
     },
     {
       "id": "policy-hosted-preflight",

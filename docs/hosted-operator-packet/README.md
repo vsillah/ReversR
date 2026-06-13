@@ -1,6 +1,6 @@
 # ReversR Rebuild Hosted Operator Packet
 
-Generated at: 2026-06-06T10:10:59.724Z
+Generated at: 2026-06-13T03:43:58.838Z
 
 This folder is the hosted API, policy URL, preview smoke, and real inventory connector handoff packet. It prepares the hosted lane for native builds and store-console metadata. It does not prove that the API, policy pages, or real inventory connector are already deployed.
 
@@ -38,7 +38,7 @@ This folder is the hosted API, policy URL, preview smoke, and real inventory con
 2. `npm run api:deployment-smoke`
    - Refresh local production-style API smoke evidence before deploying the container.
 3. `EXPO_PUBLIC_API_BASE_URL=https://api.your-domain.example npm run api:preflight`
-   - Prove the deployed API health, restricted CORS, demo inventory validation, and optional admin registry access.
+   - Prove the deployed API health, restricted CORS, bundled FarmBot inventory validation, and optional admin registry access.
 4. `EXPO_PUBLIC_PRIVACY_POLICY_URL=https://your-domain.example/privacy EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms EXPO_PUBLIC_SUPPORT_URL=https://your-domain.example/support npm run policy:preflight -- --check-hosted`
    - Prove hosted privacy, terms, and support URLs are reachable over public HTTPS.
 5. `npm run inventory:farmbot:validate`

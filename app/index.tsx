@@ -695,6 +695,7 @@ export default function HomeScreen() {
             setIsLoading={setIsLoading}
             onBack={handleBack}
             onReset={handleReset}
+            onOpenSettings={() => setShowSettings(true)}
           />
         )}
         {context.phase === 3 && context.innovation && (

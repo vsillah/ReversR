@@ -164,6 +164,15 @@ export interface InventoryValidationResult {
     revision?: string;
     partCount: number;
   }>;
+  matchCandidates?: Array<{
+    machineId: string;
+    machineName: string;
+    revision?: string;
+    partCount: number;
+    confidenceScore: number;
+    matchPercent: number;
+    evidence: string;
+  }>;
   error?: string;
 }
 
@@ -379,7 +388,8 @@ export const analyzeProduct = async (input: string, imageBase64?: string): Promi
 export const identifyMachineFromInventory = async (
   analysis: AnalysisResult, 
   connector: InventoryConnector,
-  capturedImage?: string | null
+  capturedImage?: string | null,
+  selectedMachineId?: string
 ): Promise<InnovationResult> => {
   const config = await getAiConfig();
   return fetchWithRetry(`${API_BASE}/api/gemini/match-machine`, {
@@ -389,18 +399,20 @@ export const identifyMachineFromInventory = async (
       analysis, 
       connector,
       image: capturedImage,
+      selectedMachineId,
       ...config
     })
   });
 };
 
 export const validateInventoryConnector = async (
-  connector: InventoryConnector
+  connector: InventoryConnector,
+  analysis?: AnalysisResult
 ): Promise<InventoryValidationResult> => {
   return fetchWithRetry(`${API_BASE}/api/inventory/validate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ connector })
+    body: JSON.stringify({ connector, analysis })
   });
 };
 

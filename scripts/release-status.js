@@ -90,17 +90,20 @@ addGate(
 );
 
 const inventoryUi = allFilesContain([
-  ['components/PhaseTwo.tsx', 'Inventory connector URL'],
-  ['components/PhaseTwo.tsx', 'credentialRef'],
-  ['components/PhaseTwo.tsx', 'Validate inventory connector'],
+  ['components/SettingsModal.tsx', 'Inventory Source'],
+  ['components/SettingsModal.tsx', 'Inventory connector URL'],
+  ['components/SettingsModal.tsx', 'Inventory backend credential reference'],
+  ['components/SettingsModal.tsx', 'Authentication'],
+  ['components/PhaseTwo.tsx', 'Open settings to change inventory source'],
+  ['components/PhaseTwo.tsx', 'Recheck inventory matches'],
 ]);
 addGate(
   'clone',
   'inventory-admin-connector',
-  'Admin inventory connector form supports URL, auth mode, credentialRef, and validation',
+  'Admin inventory connector settings support URL, auth mode, credentialRef, and validation',
   inventoryUi ? 'pass' : 'blocked',
-  inventoryUi ? 'components/PhaseTwo.tsx exposes connector URL, credentialRef, and validation controls.' : 'Inventory connector controls are incomplete.',
-  inventoryUi ? '' : 'Restore the Phase 2 connector controls before release testing.'
+  inventoryUi ? 'Settings owns connector source URL, auth, and credentialRef controls; Phase 2 links to Settings and supports match recheck.' : 'Inventory connector controls are incomplete.',
+  inventoryUi ? '' : 'Restore the Settings inventory source controls and Phase 2 settings handoff before release testing.'
 );
 
 const inventorySourceValidator = allFilesContain([

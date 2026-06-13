@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-11T09:37:47.045Z",
-  "startedAt": "2026-06-11T09:37:46.610Z",
+  "generatedAt": "2026-06-13T03:39:29.253Z",
+  "startedAt": "2026-06-13T03:39:27.880Z",
   "apiBaseUrl": "https://reversr.vercel.app",
   "localApi": false,
   "allowOpenCors": false,
@@ -29,10 +29,10 @@
       "authenticatedConnectorsEnabled": false,
       "credentialRegistryEnabled": false
     },
-    "demoInventoryValidation": {
+    "bundledFarmBotInventoryValidation": {
       "status": "pass",
       "httpStatus": 200,
-      "recordCount": 2
+      "recordCount": 1
     },
     "adminCredentialRegistry": {
       "status": "skipped"

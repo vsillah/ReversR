@@ -835,8 +835,14 @@ const scoreInventoryRecord = (analysis, record) => {
   const partHits = recordParts.filter(part => componentTokens.has(part) || analysisText.includes(part));
   const aliasHits = recordAliases.filter(alias => alias && analysisText.includes(alias));
   const materialHits = record.materials.map(normalizeToken).filter(material => material && analysisText.includes(material));
-  const denominator = Math.max(recordParts.length, 1);
-  const score = Math.min(0.98, (partHits.length / denominator) * 0.7 + Math.min(aliasHits.length, 2) * 0.18 + Math.min(materialHits.length, 2) * 0.07);
+  const analysisComponentCount = Math.max(componentTokens.size, 1);
+  const partScore = Math.min(partHits.length / analysisComponentCount, 1) * 0.3;
+  const aliasScore = aliasHits.length > 0 ? 0.6 : 0;
+  const materialScore = Math.min(materialHits.length, 2) * 0.05;
+  const hasExactMachineName = normalizeToken(record.machineName) && analysisText.includes(normalizeToken(record.machineName));
+  const hasRevision = record.revision && analysisText.includes(normalizeToken(record.revision));
+  const exactBonus = hasExactMachineName ? (hasRevision || partHits.length > 0 ? 0.1 : 0.05) : 0;
+  const score = Math.min(1, partScore + aliasScore + materialScore + exactBonus);
 
   return {
     score: Number(score.toFixed(2)),
@@ -853,6 +859,38 @@ const findBestInventoryMatch = (analysis, records) => {
   })).sort((a, b) => b.score - a.score);
 
   return scored[0] || null;
+};
+
+const buildMatchEvidence = (match = {}) => {
+  const evidence = [
+    match.aliasHits?.length ? `name/alias: ${match.aliasHits.join(', ')}` : '',
+    match.partHits?.length ? `parts: ${match.partHits.join(', ')}` : '',
+    match.materialHits?.length ? `materials: ${match.materialHits.join(', ')}` : '',
+  ].filter(Boolean);
+  return evidence.join('; ') || 'No strong inventory signals matched the scan.';
+};
+
+const findInventoryMatchCandidates = (analysis, records) => {
+  if (!analysis || !records?.length) return [];
+  const scored = records.map(record => ({
+    record,
+    ...scoreInventoryRecord(analysis, record),
+  })).sort((a, b) => b.score - a.score);
+
+  const top = scored[0];
+  const candidates = top?.score === 1
+    ? [top]
+    : scored.filter(match => match.score >= 0.8);
+
+  return candidates.map(match => ({
+    machineId: match.record.machineId,
+    machineName: match.record.machineName,
+    revision: match.record.revision,
+    partCount: match.record.parts.length,
+    confidenceScore: match.score,
+    matchPercent: Math.round(match.score * 100),
+    evidence: buildMatchEvidence(match),
+  }));
 };
 
 const inferComponents = (input = '') => {
@@ -1185,10 +1223,11 @@ app.post('/api/gemini/analyze', async (req, res) => {
 
 app.post('/api/inventory/validate', async (req, res) => {
   try {
-    const { connector } = req.body;
+    const { connector, analysis } = req.body;
     const records = await loadInventoryRecords(connector || {});
     const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
     const sourceName = resolveInventorySourceName(connector || {});
+    const matchCandidates = findInventoryMatchCandidates(analysis, records);
     res.json({
       status: 'ok',
       sourceName,
@@ -1203,6 +1242,7 @@ app.post('/api/inventory/validate', async (req, res) => {
         revision: record.revision,
         partCount: record.parts.length,
       })),
+      matchCandidates,
     });
   } catch (error) {
     console.error('Inventory validation error:', error);
@@ -1322,9 +1362,14 @@ app.delete('/api/admin/inventory/credentials/:credentialRef', async (req, res) =
 app.post('/api/gemini/match-machine', async (req, res) => {
   let deterministicMatch;
   try {
-    const { analysis, connector, image, provider, ollamaModel } = req.body;
+    const { analysis, connector, image, provider, ollamaModel, selectedMachineId } = req.body;
     const inventoryRecords = await loadInventoryRecords(connector || {});
-    deterministicMatch = findBestInventoryMatch(analysis, inventoryRecords);
+    const selectedRecord = selectedMachineId
+      ? inventoryRecords.find(record => record.machineId === selectedMachineId)
+      : null;
+    deterministicMatch = selectedRecord
+      ? { record: selectedRecord, ...scoreInventoryRecord(analysis, selectedRecord) }
+      : findBestInventoryMatch(analysis, inventoryRecords);
     const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
 
     const prompt = `

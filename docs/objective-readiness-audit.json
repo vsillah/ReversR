@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-06T10:10:45.677Z",
+  "generatedAt": "2026-06-13T03:44:00.114Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -21,7 +21,7 @@
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-06T10:10:45.654Z",
+    "generatedAt": "2026-06-13T03:44:00.087Z",
     "summary": {
       "pass": 37,
       "pending": 2
@@ -33,8 +33,8 @@
       "requirement": "Use the original ReversR codebase from GitHub as the starting point.",
       "status": "pass",
       "evidence": [
-        "git.remote.origin=https://github.com/vsillah/ReversR.git",
-        "git.branch=codex/inventory-reconstruction-clone"
+        "git.remote.origin=https://github.com/vsillah/ReversR-Rebuild.git",
+        "git.branch=codex/inventory-match-selection"
       ],
       "gates": [],
       "nextStep": ""
@@ -83,8 +83,8 @@
         {
           "id": "inventory-admin-connector",
           "status": "pass",
-          "title": "Admin inventory connector form supports URL, auth mode, credentialRef, and validation",
-          "evidence": "components/PhaseTwo.tsx exposes connector URL, credentialRef, and validation controls.",
+          "title": "Admin inventory connector settings support URL, auth mode, credentialRef, and validation",
+          "evidence": "Settings owns connector source URL, auth, and credentialRef controls; Phase 2 links to Settings and supports match recheck.",
           "nextStep": ""
         },
         {
@@ -117,7 +117,7 @@
           "id": "web-flow-smoke",
           "status": "pass",
           "title": "Local web preview can complete the machine reconstruction happy path",
-          "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+          "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-12T15:24:38.446Z.",
           "nextStep": ""
         },
         {
@@ -151,7 +151,7 @@
           "id": "web-flow-smoke",
           "status": "pass",
           "title": "Local web preview can complete the machine reconstruction happy path",
-          "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-05T05:01:45.082Z.",
+          "evidence": "docs/web-flow-smoke-evidence.json proves 9 checkpoints at 2026-06-12T15:24:38.446Z.",
           "nextStep": ""
         }
       ],
@@ -170,14 +170,14 @@
           "id": "store-submission-packet-smoke",
           "status": "pass",
           "title": "Store submission metadata and privacy packet evidence is recorded",
-          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-06T10:10:43.109Z.",
+          "evidence": "docs/store-submission-smoke-evidence.json proves App Store and Google Play packet constraints at 2026-06-13T03:43:57.309Z.",
           "nextStep": ""
         },
         {
           "id": "store-review-safety-packet",
           "status": "pass",
           "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
-          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-06T10:10:43.212Z.",
+          "evidence": "docs/store-review-safety-evidence.json proves 8 phrases and 12 field checks at 2026-06-13T03:43:57.463Z.",
           "nextStep": ""
         },
         {
@@ -198,7 +198,7 @@
           "id": "release-evidence-bundle",
           "status": "pass",
           "title": "Consolidated release evidence bundle is generated for external operators",
-          "evidence": "docs/release-evidence-bundle.json packages local proofs and 1 external gates at 2026-06-06T10:10:20.656Z.",
+          "evidence": "docs/release-evidence-bundle.json packages local proofs and 1 external gates at 2026-06-06T10:11:00.382Z.",
           "nextStep": ""
         },
         {
@@ -226,21 +226,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-06T10:10:43.913Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-13T03:43:58.226Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-06T10:10:44.478Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-13T03:43:58.838Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-06T10:10:45.076Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-13T03:43:59.479Z.",
           "nextStep": ""
         },
         {
@@ -254,14 +254,14 @@
           "id": "native-release-config-evidence",
           "status": "pass",
           "title": "Native release config evidence is recorded with current EAS linkage state",
-          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-06T10:04:41.692Z.",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-11T16:28:22.822Z.",
           "nextStep": ""
         },
         {
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-06T10:10:18.597Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-11T16:48:17.678Z.",
           "nextStep": ""
         }
       ],
@@ -298,14 +298,14 @@
           "id": "hosted-api",
           "status": "pass",
           "title": "Hosted HTTPS API URL is configured for native builds",
-          "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and demo inventory validation at 2026-06-05T10:00:07.092Z.",
+          "evidence": "docs/api-hosted-preflight-evidence.json proves hosted API health and bundled FarmBot inventory validation at 2026-06-13T03:39:29.253Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-policy-urls",
           "status": "pass",
           "title": "Privacy, terms, and support URLs are hosted and ready for store metadata",
-          "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-06T09:42:55.772Z.",
+          "evidence": "docs/policy-hosting-smoke-evidence.json proves hosted policy/support URLs at 2026-06-08T10:41:06.997Z.",
           "nextStep": ""
         },
         {
