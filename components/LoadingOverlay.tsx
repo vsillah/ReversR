@@ -8,7 +8,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export type LoadingPhase = 'scan' | 'reverse' | 'design' | 'build';
 
@@ -25,14 +26,17 @@ interface Props {
   steps?: LoadingStep[];
 }
 
-const PHASE_CONFIG: Record<LoadingPhase, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+const getPhaseConfig = (Colors: AppColors): Record<LoadingPhase, { icon: keyof typeof Ionicons.glyphMap; color: string }> => ({
   scan: { icon: 'scan-outline', color: Colors.blue[500] },
   reverse: { icon: 'repeat-sharp', color: Colors.secondary },
-  design: { icon: 'color-palette-outline', color: '#10B981' },
-  build: { icon: 'construct-outline', color: '#F59E0B' },
-};
+  design: { icon: 'color-palette-outline', color: Colors.green[400] },
+  build: { icon: 'construct-outline', color: Colors.orange[300] },
+});
 
 export default function LoadingOverlay({ visible, phase, currentStep, steps }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
+  const PHASE_CONFIG = getPhaseConfig(Colors);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -186,7 +190,7 @@ export default function LoadingOverlay({ visible, phase, currentStep, steps }: P
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.85)',

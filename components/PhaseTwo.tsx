@@ -6,7 +6,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import {
   AnalysisResult,
   InnovationResult,
@@ -54,6 +55,8 @@ export default function PhaseTwo({
   onBack,
   onOpenSettings,
 }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const [connector, setConnector] = useState<InventoryConnector>(defaultConnector);
   const [error, setError] = useState<string | null>(null);
   const [validation, setValidation] = useState<InventoryValidationResult | null>(null);
@@ -321,7 +324,7 @@ export default function PhaseTwo({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     paddingVertical: Spacing.lg,
     gap: Spacing.lg,

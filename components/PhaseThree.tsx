@@ -18,7 +18,8 @@ import {
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import {
   InnovationResult,
   TechnicalSpec,
@@ -76,6 +77,8 @@ export default function PhaseThree({
   onReset,
   onTryAnotherPattern,
 }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const [spec, setSpec] = useState<TechnicalSpec | null>(existingSpec || null);
   const [localImageBase64, setLocalImageBase64] = useState<string | null>(null);
   const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(existingThreeDScene || null);
@@ -1153,7 +1156,7 @@ export default function PhaseThree({
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: Spacing.lg,

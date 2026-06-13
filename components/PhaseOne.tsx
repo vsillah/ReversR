@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { analyzeProduct, AnalysisResult } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
@@ -43,6 +44,8 @@ const PRODUCT_PRESETS = [
 type InputMode = 'type' | 'scan' | 'lucky';
 
 export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialInput, initialImage }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const [inputMode, setInputMode] = useState<InputMode>(initialImage ? 'scan' : 'type');
   const [input, setInput] = useState(initialInput || '');
   const [luckyProduct, setLuckyProduct] = useState<string>('');
@@ -390,7 +393,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     paddingVertical: Spacing.lg,
   },

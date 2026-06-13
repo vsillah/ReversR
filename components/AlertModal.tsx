@@ -7,7 +7,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface AlertModalProps {
   visible: boolean;
@@ -30,6 +31,8 @@ export default function AlertModal({
   buttons = [{ text: 'OK', onPress: () => {}, style: 'default' }],
   onClose,
 }: AlertModalProps) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const iconMap = {
     info: 'information-circle-outline',
     error: 'alert-circle-outline',
@@ -99,7 +102,7 @@ export default function AlertModal({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',

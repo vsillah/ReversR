@@ -12,7 +12,8 @@ import {
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import {
   InnovationResult,
   TechnicalSpec,
@@ -141,6 +142,8 @@ export default function PhaseFour({
   onBack,
   onReset,
 }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
@@ -879,7 +882,7 @@ export default function PhaseFour({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: Spacing.lg,

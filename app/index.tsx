@@ -9,7 +9,8 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors, Spacing, FontSizes } from "../constants/theme";
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
@@ -78,6 +79,8 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
 };
 
 export default function HomeScreen() {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const [started, setStarted] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
@@ -834,7 +837,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark,

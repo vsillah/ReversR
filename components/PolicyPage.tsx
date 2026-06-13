@@ -2,7 +2,8 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { AppColors, FontSizes, Spacing } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 type PolicySection = {
   title: string;
@@ -18,6 +19,9 @@ interface PolicyPageProps {
 }
 
 export default function PolicyPage({ title, updated, intro, sections }: PolicyPageProps) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -52,7 +56,7 @@ export default function PolicyPage({ title, updated, intro, sections }: PolicyPa
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark,

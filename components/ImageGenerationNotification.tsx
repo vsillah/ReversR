@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export type ImageGenStatus = 'idle' | 'generating' | 'complete' | 'error';
 
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export default function ImageGenerationNotification({ status, onPress, onDismiss }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const slideAnim = useRef(new Animated.Value(100)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -178,6 +181,8 @@ export default function ImageGenerationNotification({ status, onPress, onDismiss
 }
 
 function AnimatedDots() {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const dot1 = useRef(new Animated.Value(0)).current;
   const dot2 = useRef(new Animated.Value(0)).current;
   const dot3 = useRef(new Animated.Value(0)).current;
@@ -223,7 +228,7 @@ function AnimatedDots() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 20,
