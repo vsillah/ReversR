@@ -130,7 +130,7 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings }: Welcom
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark,
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -180,7 +180,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.md,
   },
   phaseCard: {
-    backgroundColor: 'rgba(26, 26, 26, 0.5)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -216,7 +216,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.mode === 'dark' ? 'transparent' : Colors.surface,
     borderWidth: 2,
     borderColor: Colors.accent,
     paddingHorizontal: Spacing.xl,
@@ -243,6 +243,10 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: Spacing.xs,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    backgroundColor: Colors.surface,
     minWidth: 104,
   },
   secondaryButtonText: {

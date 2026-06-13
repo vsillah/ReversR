@@ -1263,7 +1263,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   artifactItem: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.gray[800],
     borderRadius: 8,
@@ -1493,7 +1493,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: 'bold',
   },
   bomNotesSection: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.surface,
     padding: Spacing.md,
     borderRadius: 8,
   },
@@ -1572,7 +1572,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.surface,
     padding: Spacing.md,
     borderRadius: 8,
     borderWidth: 1,
@@ -1611,7 +1611,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   assemblyStep: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -1767,7 +1767,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 8,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: Colors.surface,
     maxWidth: '48%',
   },
   vendorChoiceButtonActive: {
@@ -1791,7 +1791,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: 8,
     padding: Spacing.sm,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: Colors.surface,
   },
   approvalChoiceButtonActive: {
     borderColor: Colors.orange[300],
@@ -1853,7 +1853,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 8,
     padding: Spacing.sm,
     marginTop: Spacing.sm,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: Colors.surface,
   },
   reviewHistoryTitle: {
     color: Colors.gray[300],
@@ -1865,7 +1865,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   reviewHistoryItem: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopColor: Colors.border,
     paddingTop: Spacing.xs,
     marginTop: Spacing.xs,
   },
@@ -1902,11 +1902,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     lineHeight: 16,
   },
   quoteInput: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.input,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.sm,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
@@ -1945,7 +1945,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   manufacturerCard: {
     width: '48%',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -1995,7 +1995,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.surface,
     padding: Spacing.md,
     borderRadius: 8,
     borderWidth: 1,

@@ -438,7 +438,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.gray[800],
     borderRadius: 8,
     padding: Spacing.sm,
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    backgroundColor: Colors.surface,
     gap: Spacing.xs,
     marginBottom: Spacing.md,
   },
@@ -516,10 +516,10 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   candidateCard: {
     borderWidth: 1,
-    borderColor: Colors.gray[700],
+    borderColor: Colors.border,
     borderRadius: 8,
     padding: Spacing.md,
-    backgroundColor: Colors.dark,
+    backgroundColor: Colors.surface,
   },
   candidateCardSelected: {
     borderColor: Colors.accent,

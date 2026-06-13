@@ -1017,7 +1017,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     borderRadius: 8,
-    backgroundColor: Colors.dark,
+    backgroundColor: Colors.surface,
     marginBottom: Spacing.sm,
   },
   phaseActionButtonText: {
