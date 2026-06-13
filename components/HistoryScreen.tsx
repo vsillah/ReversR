@@ -8,7 +8,8 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/useStorage';
 import { MACHINE_WORKFLOW_LABELS, MachineWorkflowKey } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
@@ -76,6 +77,8 @@ interface Props {
 }
 
 export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const [innovations, setInnovations] = useState<SavedInnovation[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteAlert, setDeleteAlert] = useState<{
@@ -497,7 +500,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark,

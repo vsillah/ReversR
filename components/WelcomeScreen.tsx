@@ -8,7 +8,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -44,6 +45,9 @@ const phases = [
 ];
 
 export default function WelcomeScreen({ onStart, onHistory, onSettings }: WelcomeScreenProps) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
+
   return (
     <ScrollView 
       style={styles.container}
@@ -123,7 +127,7 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings }: Welcom
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark,

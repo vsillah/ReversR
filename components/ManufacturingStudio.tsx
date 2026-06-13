@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { AppColors, FontSizes, Spacing } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { ThreeDSceneDescriptor } from '../hooks/useGemini';
 import {
   ManufacturingHandoff,
@@ -203,6 +204,8 @@ function ThreeManufacturingViewer({ scene }: { scene: ThreeDSceneDescriptor }) {
 }
 
 function NativeSchematicFallback({ measurements }: { measurements: ManufacturingSceneMeasurement[] }) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const topItems = measurements.slice(0, 4);
   return (
     <View style={styles.nativeSchematic} testID="manufacturing-native-schematic">
@@ -230,6 +233,9 @@ function NativeSchematicFallback({ measurements }: { measurements: Manufacturing
 }
 
 function MeasurementRow({ item }: { item: ManufacturingPartMeasurement }) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
+
   return (
     <View style={styles.measurementRow}>
       <View style={styles.measurementMain}>
@@ -245,6 +251,8 @@ function MeasurementRow({ item }: { item: ManufacturingPartMeasurement }) {
 }
 
 export default function ManufacturingStudio({ handoff, scene }: Props) {
+  const { colors: Colors } = useAppTheme();
+  const styles = createStyles(Colors);
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
   const selectedPart = handoff.partMeasurements[selectedPartIndex] || handoff.partMeasurements[0];
   const primarySceneMeasurements = useMemo(
@@ -371,7 +379,7 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   panel: {
     backgroundColor: Colors.panel,
     borderRadius: 12,

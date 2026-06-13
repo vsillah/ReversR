@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, Sc
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { Colors } from '../constants/theme';
+import { AppColors } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import {
   AiRuntimeStatus,
   AdminCredentialSummary,
@@ -33,6 +34,8 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
+  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
+  const styles = createStyles(Colors);
   const [provider, setProvider] = useState<'gemini' | 'ollama'>('gemini');
   const [ollamaModel, setOllamaModel] = useState('qwen3.5:0.8b');
   const [inventoryConnector, setInventoryConnector] = useState<InventoryConnector>(defaultConnector);
@@ -307,6 +310,34 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
           </View>
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+            <View style={styles.appearancePanel}>
+              <View style={styles.policyHeader}>
+                <Ionicons name="contrast-outline" size={18} color={Colors.accent} />
+                <Text style={styles.policyTitle}>Appearance</Text>
+              </View>
+              <View style={styles.themeToggleRow}>
+                {(['light', 'dark'] as const).map(mode => (
+                  <TouchableOpacity
+                    key={mode}
+                    style={[styles.themeToggleButton, themeMode === mode && styles.themeToggleButtonActive]}
+                    onPress={() => setThemeMode(mode)}
+                    accessibilityRole="button"
+                    accessibilityLabel={mode === 'light' ? 'Use light mode' : 'Use dark mode'}
+                    accessibilityState={{ selected: themeMode === mode }}
+                  >
+                    <Ionicons
+                      name={mode === 'light' ? 'sunny-outline' : 'moon-outline'}
+                      size={16}
+                      color={themeMode === mode ? Colors.black : Colors.gray[400]}
+                    />
+                    <Text style={[styles.themeToggleText, themeMode === mode && styles.themeToggleTextActive]}>
+                      {mode === 'light' ? 'Light' : 'Dark'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             {localProviderSettingsEnabled ? (
               <>
                 <Text style={styles.label}>AI Provider</Text>
@@ -630,7 +661,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: AppColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
@@ -668,6 +699,44 @@ const styles = StyleSheet.create({
     color: Colors.gray[300],
     marginBottom: 12,
   },
+  appearancePanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 24,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  themeToggleRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  themeToggleButton: {
+    flex: 1,
+    minHeight: 42,
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.input,
+  },
+  themeToggleButtonActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  themeToggleText: {
+    color: Colors.gray[400],
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  themeToggleTextActive: {
+    color: Colors.black,
+  },
   providerRow: {
     flexDirection: 'row',
     gap: 12,
@@ -702,7 +771,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     marginBottom: 24,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
   liveAiStatusRow: {
     flexDirection: 'row',
@@ -811,7 +880,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     marginBottom: 24,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
   apiHostText: {
     color: Colors.gray[500],
@@ -928,7 +997,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     marginBottom: 24,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
   policyHeader: {
     flexDirection: 'row',
