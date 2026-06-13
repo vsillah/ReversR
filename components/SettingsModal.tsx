@@ -7,6 +7,7 @@ import { Colors } from '../constants/theme';
 import {
   AiRuntimeStatus,
   AdminCredentialSummary,
+  InventoryConnector,
   deleteInventoryCredential,
   getAiRuntimeStatus,
   getApiBase,
@@ -15,6 +16,16 @@ import {
   listInventoryCredentials,
   saveInventoryCredential,
 } from '../hooks/useGemini';
+import {
+  AUTH_MODE_OPTIONS,
+  CONNECTOR_TYPE_OPTIONS,
+  defaultAuthModeForConnectorType,
+  defaultConnector,
+  getAuthModeLabel,
+  getConnectorTypeLabel,
+  loadInventoryConnector,
+  saveInventoryConnector,
+} from '../utils/inventoryConnector';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -24,6 +35,8 @@ interface SettingsModalProps {
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const [provider, setProvider] = useState<'gemini' | 'ollama'>('gemini');
   const [ollamaModel, setOllamaModel] = useState('qwen3.5:0.8b');
+  const [inventoryConnector, setInventoryConnector] = useState<InventoryConnector>(defaultConnector);
+  const [inventoryDropdown, setInventoryDropdown] = useState<'connectorType' | 'authMode' | null>(null);
   const [adminToken, setAdminToken] = useState('');
   const [adminStatus, setAdminStatus] = useState<string | null>(null);
   const [adminLoading, setAdminLoading] = useState(false);
@@ -70,6 +83,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     try {
       const savedProvider = await AsyncStorage.getItem('ai_provider');
       const savedModel = await AsyncStorage.getItem('ollama_model');
+      const savedConnector = await loadInventoryConnector();
+      setInventoryConnector(savedConnector);
       if (localProviderSettingsEnabled && savedProvider) {
         setProvider(savedProvider === 'ollama' ? 'ollama' : 'gemini');
       } else {
@@ -99,10 +114,92 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
         await AsyncStorage.setItem('ai_provider', 'gemini');
         await AsyncStorage.removeItem('ollama_model');
       }
+      await saveInventoryConnector({
+        ...inventoryConnector,
+        sourceName: inventoryConnector.sourceName.trim() || defaultConnector.sourceName,
+        sourceUrl: inventoryConnector.sourceUrl.trim() || defaultConnector.sourceUrl,
+        credentialRef: inventoryConnector.credentialRef?.trim() || '',
+        notes: inventoryConnector.notes?.trim() || '',
+      });
       onClose();
     } catch (e) {
       console.error('Failed to save settings', e);
     }
+  };
+
+  const updateInventoryConnector = (patch: Partial<InventoryConnector>) => {
+    setInventoryConnector(prev => ({ ...prev, ...patch }));
+  };
+
+  const handleConnectorTypeChange = (connectorType: InventoryConnector['connectorType']) => {
+    setInventoryConnector(prev => ({
+      ...prev,
+      connectorType,
+      authMode: defaultAuthModeForConnectorType(connectorType),
+      credentialRef: connectorType === 'demo' || connectorType === 'csv' ? '' : prev.credentialRef,
+    }));
+    setInventoryDropdown(null);
+  };
+
+  const handleAuthModeChange = (authMode: InventoryConnector['authMode']) => {
+    setInventoryConnector(prev => ({
+      ...prev,
+      authMode,
+      credentialRef: authMode === 'none' ? '' : prev.credentialRef,
+    }));
+    setInventoryDropdown(null);
+  };
+
+  const renderDropdown = <T extends string>({
+    id,
+    label,
+    value,
+    options,
+    getLabel,
+    onChange,
+  }: {
+    id: 'connectorType' | 'authMode';
+    label: string;
+    value: T;
+    options: Array<{ value: T; label: string; detail: string }>;
+    getLabel: (value: T) => string;
+    onChange: (value: T) => void;
+  }) => {
+    const isOpen = inventoryDropdown === id;
+    return (
+      <View style={styles.dropdownBlock}>
+        <Text style={styles.compactLabel}>{label}</Text>
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          onPress={() => setInventoryDropdown(isOpen ? null : id)}
+          accessibilityRole="button"
+          accessibilityLabel={`Choose ${label.toLowerCase()}`}
+          accessibilityState={{ expanded: isOpen }}
+        >
+          <Text style={styles.dropdownButtonText}>{getLabel(value)}</Text>
+          <Ionicons name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.gray[400]} />
+        </TouchableOpacity>
+        {isOpen && (
+          <View style={styles.dropdownMenu}>
+            {options.map(option => (
+              <TouchableOpacity
+                key={option.value}
+                style={[styles.dropdownOption, option.value === value && styles.dropdownOptionActive]}
+                onPress={() => onChange(option.value)}
+                accessibilityRole="button"
+                accessibilityLabel={`Set ${label.toLowerCase()} to ${option.label}`}
+                accessibilityState={{ selected: option.value === value }}
+              >
+                <Text style={[styles.dropdownOptionLabel, option.value === value && styles.dropdownOptionLabelActive]}>
+                  {option.label}
+                </Text>
+                <Text style={styles.dropdownOptionDetail}>{option.detail}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
+    );
   };
 
   const requireAdminToken = () => {
@@ -285,6 +382,85 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 </Text>
               </View>
             )}
+
+            <View style={styles.adminPanel}>
+              <View style={styles.policyHeader}>
+                <Ionicons name="settings-outline" size={18} color={Colors.accent} />
+                <Text style={styles.policyTitle}>Inventory Source</Text>
+              </View>
+              <Text style={styles.policyText}>
+                Advanced admin settings for the preconfigured inventory source used during Phase 2 matching.
+              </Text>
+
+              <Text style={styles.compactLabel}>Source name</Text>
+              <TextInput
+                style={styles.input}
+                value={inventoryConnector.sourceName}
+                onChangeText={(sourceName) => updateInventoryConnector({ sourceName })}
+                accessibilityLabel="Inventory source name"
+                placeholder="FarmBot Genesis Public Inventory"
+                placeholderTextColor={Colors.gray[500]}
+              />
+
+              {inventoryConnector.connectorType !== 'demo' && (
+                <>
+                  <Text style={styles.compactLabel}>Inventory URL or connector URI</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={inventoryConnector.sourceUrl}
+                    onChangeText={(sourceUrl) => updateInventoryConnector({ sourceUrl })}
+                    accessibilityLabel="Inventory connector URL"
+                    placeholder="https://example.com/inventory.json"
+                    placeholderTextColor={Colors.gray[500]}
+                    autoCapitalize="none"
+                  />
+                </>
+              )}
+
+              {renderDropdown<InventoryConnector['connectorType']>({
+                id: 'connectorType',
+                label: 'Connector type',
+                value: inventoryConnector.connectorType,
+                options: CONNECTOR_TYPE_OPTIONS,
+                getLabel: getConnectorTypeLabel,
+                onChange: handleConnectorTypeChange,
+              })}
+
+              {inventoryConnector.connectorType !== 'demo' && renderDropdown<InventoryConnector['authMode']>({
+                id: 'authMode',
+                label: 'Authentication',
+                value: inventoryConnector.authMode,
+                options: AUTH_MODE_OPTIONS,
+                getLabel: getAuthModeLabel,
+                onChange: handleAuthModeChange,
+              })}
+
+              {inventoryConnector.authMode !== 'none' && (
+                <>
+                  <Text style={styles.compactLabel}>Backend credential reference</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={inventoryConnector.credentialRef || ''}
+                    onChangeText={(credentialRef) => updateInventoryConnector({ credentialRef })}
+                    accessibilityLabel="Inventory backend credential reference"
+                    placeholder="partsledger-prod-api-key"
+                    placeholderTextColor={Colors.gray[500]}
+                    autoCapitalize="none"
+                  />
+                </>
+              )}
+
+              <Text style={styles.compactLabel}>Admin notes</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={inventoryConnector.notes || ''}
+                onChangeText={(notes) => updateInventoryConnector({ notes })}
+                accessibilityLabel="Inventory admin notes"
+                placeholder="Notes for admins reviewing this connector"
+                placeholderTextColor={Colors.gray[500]}
+                multiline
+              />
+            </View>
 
             {adminCredentialSettingsEnabled && (
               <View style={styles.adminPanel}>
@@ -566,6 +742,63 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
     marginBottom: 8,
+  },
+  textArea: {
+    minHeight: 88,
+    textAlignVertical: 'top',
+  },
+  dropdownBlock: {
+    marginBottom: 10,
+  },
+  dropdownButton: {
+    minHeight: 46,
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    borderRadius: 8,
+    backgroundColor: Colors.gray[800],
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  dropdownButtonText: {
+    flex: 1,
+    color: Colors.white,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    borderRadius: 8,
+    marginTop: 6,
+    overflow: 'hidden',
+    backgroundColor: Colors.gray[900],
+  },
+  dropdownOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray[800],
+  },
+  dropdownOptionActive: {
+    backgroundColor: Colors.accent + '18',
+  },
+  dropdownOptionLabel: {
+    color: Colors.gray[300],
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  dropdownOptionLabelActive: {
+    color: Colors.accent,
+  },
+  dropdownOptionDetail: {
+    color: Colors.gray[500],
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 2,
   },
   helpText: {
     color: Colors.gray[500],

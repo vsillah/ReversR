@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
-  TextInput,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSizes } from '../constants/theme';
 import {
@@ -18,16 +15,22 @@ import {
   identifyMachineFromInventory,
   validateInventoryConnector,
 } from '../hooks/useGemini';
+import {
+  defaultConnector,
+  getAuthModeLabel,
+  getConnectorTypeLabel,
+  loadInventoryConnector,
+  saveInventoryConnector,
+} from '../utils/inventoryConnector';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
 const INVENTORY_STEPS: LoadingStep[] = [
-  { id: 'connect', label: 'Checking inventory connector...' },
-  { id: 'match', label: 'Matching machine profile...' },
-  { id: 'plan', label: 'Preparing reconstruction plan...' },
+  { id: 'connect', label: 'Checking inventory source...' },
+  { id: 'match', label: 'Preparing selected match...' },
+  { id: 'plan', label: 'Building reconstruction plan...' },
 ];
 
-const CONNECTOR_STORAGE_KEY = 'reversr_inventory_connector';
-const FARMBOT_PUBLIC_INVENTORY_URL = 'https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/farmbot-genesis-v1.8.json';
+type MatchCandidate = NonNullable<InventoryValidationResult['matchCandidates']>[number];
 
 interface Props {
   analysis: AnalysisResult;
@@ -37,22 +40,10 @@ interface Props {
   setIsLoading: (loading: boolean) => void;
   onBack: () => void;
   onReset: () => void;
+  onOpenSettings: () => void;
 }
 
-const defaultConnector: InventoryConnector = {
-  sourceName: 'FarmBot Genesis Public Inventory',
-  sourceUrl: FARMBOT_PUBLIC_INVENTORY_URL,
-  connectorType: 'api',
-  authMode: 'none',
-  credentialRef: '',
-  notes: 'Public FarmBot Genesis v1.8 machine inventory generated from FarmBot hardware documentation and BOM sources. Human review is required before procurement, fabrication, or assembly.',
-};
-
-const migrateSavedConnector = (savedConnector: Partial<InventoryConnector>): InventoryConnector => {
-  const merged = { ...defaultConnector, ...savedConnector };
-  const isLegacyDemo = merged.sourceUrl === 'demo://sample-machines' || merged.sourceName === 'Demo Machine Inventory';
-  return isLegacyDemo ? defaultConnector : merged;
-};
+const percentLabel = (value: number) => `${Math.round(value)}% match`;
 
 export default function PhaseTwo({
   analysis,
@@ -60,30 +51,41 @@ export default function PhaseTwo({
   onComplete,
   isLoading,
   setIsLoading,
+  onBack,
+  onOpenSettings,
 }: Props) {
   const [connector, setConnector] = useState<InventoryConnector>(defaultConnector);
   const [error, setError] = useState<string | null>(null);
   const [validation, setValidation] = useState<InventoryValidationResult | null>(null);
+  const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('connect');
 
+  const candidates = useMemo(() => validation?.matchCandidates || [], [validation]);
+  const selectedCandidate = candidates.find(candidate => candidate.machineId === selectedMachineId) || null;
+
   useEffect(() => {
-    const loadConnector = async () => {
+    const loadAndValidate = async () => {
+      setIsValidating(true);
+      setError(null);
       try {
-        const saved = await AsyncStorage.getItem(CONNECTOR_STORAGE_KEY);
-        if (saved) {
-          const migratedConnector = migrateSavedConnector(JSON.parse(saved));
-          setConnector(migratedConnector);
-          if (migratedConnector.sourceUrl === FARMBOT_PUBLIC_INVENTORY_URL) {
-            await AsyncStorage.setItem(CONNECTOR_STORAGE_KEY, JSON.stringify(migratedConnector));
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load inventory connector:', e);
+        const nextConnector = await loadInventoryConnector();
+        setConnector(nextConnector);
+        const result = await validateInventoryConnector(nextConnector, analysis);
+        setValidation(result);
+        setSelectedMachineId(result.matchCandidates?.[0]?.machineId || null);
+      } catch (e: any) {
+        console.error('Inventory validation failed:', e);
+        setValidation(null);
+        setSelectedMachineId(null);
+        setError(e?.message || 'Inventory match check failed. Confirm the inventory source in Settings and try again.');
+      } finally {
+        setIsValidating(false);
       }
     };
-    loadConnector();
-  }, []);
+
+    loadAndValidate();
+  }, [analysis]);
 
   useEffect(() => {
     if (isLoading) {
@@ -97,46 +99,79 @@ export default function PhaseTwo({
     }
   }, [isLoading]);
 
-  const updateConnector = (key: keyof InventoryConnector, value: string) => {
-    setConnector(prev => ({ ...prev, [key]: value }));
-    setValidation(null);
-  };
-
-  const saveConnector = async () => {
-    await AsyncStorage.setItem(CONNECTOR_STORAGE_KEY, JSON.stringify(connector));
-  };
-
-  const handleValidate = async () => {
+  const handleRecheck = async () => {
     setIsValidating(true);
     setError(null);
     try {
-      await saveConnector();
-      const result = await validateInventoryConnector(connector);
+      const nextConnector = await loadInventoryConnector();
+      setConnector(nextConnector);
+      await saveInventoryConnector(nextConnector);
+      const result = await validateInventoryConnector(nextConnector, analysis);
       setValidation(result);
+      setSelectedMachineId(result.matchCandidates?.[0]?.machineId || null);
     } catch (e: any) {
       console.error('Inventory validation failed:', e);
       setValidation(null);
-      setError(e?.message || 'Inventory validation failed. Check the connector URL and data format.');
+      setSelectedMachineId(null);
+      setError(e?.message || 'Inventory match check failed. Confirm the inventory source in Settings and try again.');
     } finally {
       setIsValidating(false);
     }
   };
 
-  const handleMatch = async () => {
+  const handleContinue = async () => {
+    if (!selectedMachineId) {
+      setError('Select a machine match before continuing.');
+      return;
+    }
+
     setIsLoading(true);
     setLoadingStep('connect');
     setError(null);
 
     try {
-      await saveConnector();
-      const result = await identifyMachineFromInventory(analysis, connector, capturedImage);
+      await saveInventoryConnector(connector);
+      const result = await identifyMachineFromInventory(analysis, connector, capturedImage, selectedMachineId);
       onComplete(result);
     } catch (e: any) {
       console.error('Inventory match failed:', e);
-      setError(e?.message || 'Inventory match failed. Check the connector and try again.');
+      setError(e?.message || 'Inventory match failed. Select a machine or restart the scan.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderCandidate = (candidate: MatchCandidate) => {
+    const isSelected = candidate.machineId === selectedMachineId;
+    return (
+      <TouchableOpacity
+        key={candidate.machineId}
+        style={[styles.candidateCard, isSelected && styles.candidateCardSelected]}
+        onPress={() => setSelectedMachineId(candidate.machineId)}
+        accessibilityRole="button"
+        accessibilityLabel={`Select ${candidate.machineName} at ${candidate.matchPercent} percent match`}
+        accessibilityState={{ selected: isSelected }}
+      >
+        <View style={styles.candidateHeader}>
+          <View style={styles.candidateNameBlock}>
+            <Text style={styles.candidateName}>{candidate.machineName}</Text>
+            <Text style={styles.candidateMeta}>
+              {candidate.machineId}{candidate.revision ? ` | Rev ${candidate.revision}` : ''} | {candidate.partCount} parts
+            </Text>
+          </View>
+          <View style={[styles.percentBadge, isSelected && styles.percentBadgeSelected]}>
+            <Text style={styles.percentBadgeText}>{percentLabel(candidate.matchPercent)}</Text>
+          </View>
+        </View>
+        <Text style={styles.candidateEvidence}>{candidate.evidence}</Text>
+        {isSelected && (
+          <View style={styles.selectedRow}>
+            <Ionicons name="checkmark-circle" size={16} color={Colors.accent} />
+            <Text style={styles.selectedText}>Selected for reconstruction</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
   };
 
   return (
@@ -147,7 +182,7 @@ export default function PhaseTwo({
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 2: Inventory</Text>
             <Text style={styles.description}>
-              Connect the machine inventory, match the scan, then prepare a reconstruction plan.
+              Review the inventory matches from your scan and choose the machine to rebuild.
             </Text>
           </View>
         </View>
@@ -177,150 +212,103 @@ export default function PhaseTwo({
 
       <View style={styles.panel}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Admin Inventory Connector</Text>
-          <Ionicons name="lock-closed-outline" size={16} color={Colors.gray[500]} />
+          <Text style={styles.sectionTitle}>Inventory Match</Text>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleRecheck}
+            disabled={isValidating || isLoading}
+            accessibilityRole="button"
+            accessibilityLabel="Recheck inventory matches"
+          >
+            <Ionicons name="refresh-outline" size={17} color={Colors.accent} />
+          </TouchableOpacity>
         </View>
 
-        <Text style={styles.fieldLabel}>Source name</Text>
-        <TextInput
-          style={styles.input}
-          value={connector.sourceName}
-          onChangeText={value => updateConnector('sourceName', value)}
-          accessibilityLabel="Inventory source name"
-          placeholder="e.g., PartsLedger, Airtable, NetSuite, MaintenanceDB"
-          placeholderTextColor={Colors.gray[600]}
-        />
-
-        <Text style={styles.fieldLabel}>Inventory URL or connector URI</Text>
-        <TextInput
-          style={styles.input}
-          value={connector.sourceUrl}
-          onChangeText={value => updateConnector('sourceUrl', value)}
-          accessibilityLabel="Inventory connector URL"
-          placeholder="https://.../machines.csv or api://inventory/machines"
-          placeholderTextColor={Colors.gray[600]}
-          autoCapitalize="none"
-        />
-
-        <View style={styles.optionRow}>
-          {(['demo', 'csv', 'api', 'erp'] as InventoryConnector['connectorType'][]).map(option => (
-            <TouchableOpacity
-              key={option}
-              style={[styles.optionButton, connector.connectorType === option && styles.optionButtonActive]}
-              onPress={() => updateConnector('connectorType', option)}
-              accessibilityRole="button"
-              accessibilityLabel={`Use ${option.toUpperCase()} inventory connector type`}
-              accessibilityState={{ selected: connector.connectorType === option }}
-            >
-              <Text style={[styles.optionText, connector.connectorType === option && styles.optionTextActive]}>
-                {option.toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.sourceNotice}>
+          <Ionicons name="information-circle-outline" size={17} color={Colors.gray[400]} />
+          <Text style={styles.sourceNoticeText}>
+            Using {connector.sourceName}. To change the preconfigured inventory source, open the gear settings at the top.
+          </Text>
+          <TouchableOpacity
+            style={styles.settingsLink}
+            onPress={onOpenSettings}
+            accessibilityRole="button"
+            accessibilityLabel="Open settings to change inventory source"
+          >
+            <Ionicons name="settings-outline" size={15} color={Colors.accent} />
+            <Text style={styles.settingsLinkText}>Settings</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.optionRow}>
-          {(['none', 'api_key', 'oauth', 'private_network'] as InventoryConnector['authMode'][]).map(option => (
-            <TouchableOpacity
-              key={option}
-              style={[styles.optionButton, connector.authMode === option && styles.optionButtonActive]}
-              onPress={() => updateConnector('authMode', option)}
-              accessibilityRole="button"
-              accessibilityLabel={`Use ${option.replace(/_/g, ' ')} inventory authentication`}
-              accessibilityState={{ selected: connector.authMode === option }}
-            >
-              <Text style={[styles.optionText, connector.authMode === option && styles.optionTextActive]}>
-                {option.replace(/_/g, ' ')}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {connector.authMode !== 'none' && (
-          <>
-            <Text style={styles.fieldLabel}>Backend credential reference</Text>
-            <TextInput
-              style={styles.input}
-              value={connector.credentialRef}
-              onChangeText={value => updateConnector('credentialRef', value)}
-              accessibilityLabel="Backend credential reference"
-              placeholder="e.g., partsledger-prod-api-key"
-              placeholderTextColor={Colors.gray[600]}
-              autoCapitalize="none"
-            />
-            <Text style={styles.helperText}>
-              Store only a reference here. API keys, OAuth tokens, and private-network headers must be configured on the backend.
+        <View style={styles.sourceSummary}>
+          <View style={styles.inventorySummaryIcon}>
+            <Ionicons name="cube-outline" size={18} color={Colors.accent} />
+          </View>
+          <View style={styles.sourceSummaryText}>
+            <Text style={styles.sourceName}>{connector.sourceName}</Text>
+            <Text style={styles.sourceMeta}>
+              {getConnectorTypeLabel(connector.connectorType)} | {getAuthModeLabel(connector.authMode)}
+              {validation?.recordCount ? ` | ${validation.recordCount} records checked` : ''}
             </Text>
+          </View>
+        </View>
+
+        {isValidating && (
+          <View style={styles.statePanel}>
+            <Ionicons name="sync-outline" size={18} color={Colors.accent} />
+            <Text style={styles.stateText}>Checking inventory matches...</Text>
+          </View>
+        )}
+
+        {!isValidating && candidates.length > 0 && (
+          <>
+            <Text style={styles.matchGuidance}>
+              {candidates.length === 1 && candidates[0].matchPercent === 100
+                ? 'The scan produced one exact inventory match.'
+                : 'Select the best matching machine. Showing matches above 80% match confidence.'}
+            </Text>
+            <View style={styles.candidateList}>
+              {candidates.map(renderCandidate)}
+            </View>
           </>
         )}
 
-        <Text style={styles.fieldLabel}>Admin notes</Text>
-        <TextInput
-          style={[styles.input, styles.notesInput]}
-          value={connector.notes}
-          onChangeText={value => updateConnector('notes', value)}
-          accessibilityLabel="Inventory connector admin notes"
-          placeholder="Map required columns, access notes, or connector owner."
-          placeholderTextColor={Colors.gray[600]}
-          multiline
-        />
-
-        <View style={styles.validationRow}>
-          <TouchableOpacity
-            style={[styles.validateButton, isValidating && styles.disabledButton]}
-            onPress={handleValidate}
-            disabled={isValidating || isLoading}
-            accessibilityRole="button"
-            accessibilityLabel="Validate inventory connector"
-            accessibilityState={{ disabled: isValidating || isLoading }}
-          >
-            <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
-            <Text style={styles.validateButtonText}>
-              {isValidating ? 'Validating...' : 'Validate Connector'}
+        {!isValidating && validation?.status === 'ok' && candidates.length === 0 && (
+          <View style={styles.noMatchPanel}>
+            <Ionicons name="alert-circle-outline" size={24} color={Colors.orange[300]} />
+            <Text style={styles.noMatchTitle}>No strong machine match found</Text>
+            <Text style={styles.noMatchText}>
+              No inventory records matched the Phase 1 scan above 80%. Add clearer model names, visible assemblies, or part details and scan again.
             </Text>
-          </TouchableOpacity>
-          {validation?.status === 'ok' && (
-            <View style={styles.validationBadge}>
-              <Ionicons name="checkmark-circle" size={14} color={Colors.green[400]} />
-              <Text style={styles.validationBadgeText}>
-                {validation.recordCount} records
-                {validation.credentialStatus === 'configured' ? ' | credential configured' : ''}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {validation?.status === 'ok' && (
-          <View style={styles.validationPanel}>
-            <Text style={styles.validationTitle}>Inventory Preview</Text>
-            {validation.sampleMachines.map(machine => (
-              <View key={machine.machineId} style={styles.machinePreviewRow}>
-                <View style={styles.machinePreviewText}>
-                  <Text style={styles.machinePreviewName}>{machine.machineName}</Text>
-                  <Text style={styles.machinePreviewMeta}>
-                    {machine.machineId}{machine.revision ? ` | Rev ${machine.revision}` : ''} | {machine.partCount} parts
-                  </Text>
-                </View>
-              </View>
-            ))}
+            <TouchableOpacity
+              style={styles.restartButton}
+              onPress={onBack}
+              accessibilityRole="button"
+              accessibilityLabel="Restart Phase 1 scan"
+            >
+              <Ionicons name="arrow-back" size={17} color={Colors.black} />
+              <Text style={styles.restartButtonText}>Restart Phase 1</Text>
+            </TouchableOpacity>
           </View>
         )}
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <TouchableOpacity
-          style={styles.applyButton}
-          onPress={handleMatch}
-          disabled={isLoading}
-          accessibilityRole="button"
-          accessibilityLabel="Match machine and build reconstruction plan"
-          accessibilityState={{ disabled: isLoading }}
-        >
-          <View style={styles.buttonContent}>
-            <Text style={styles.applyButtonText}>Match Machine & Build Plan</Text>
-            <Ionicons name="construct" size={18} color={Colors.white} />
-          </View>
-        </TouchableOpacity>
+        {selectedCandidate && (
+          <TouchableOpacity
+            style={[styles.applyButton, (isLoading || isValidating) && styles.disabledButton]}
+            onPress={handleContinue}
+            disabled={isLoading || isValidating}
+            accessibilityRole="button"
+            accessibilityLabel={`Use ${selectedCandidate.machineName} and continue to design`}
+            accessibilityState={{ disabled: isLoading || isValidating }}
+          >
+            <View style={styles.buttonContent}>
+              <Text style={styles.applyButtonText}>Use Selected Machine</Text>
+              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
 
       <LoadingOverlay
@@ -382,6 +370,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.white,
   },
+  iconButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+  },
   matchBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -433,139 +430,184 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textTransform: 'uppercase',
   },
-  fieldLabel: {
-    color: Colors.gray[300],
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-    marginBottom: Spacing.xs,
-    marginTop: Spacing.sm,
-  },
-  input: {
-    backgroundColor: Colors.dark,
+  sourceNotice: {
     borderWidth: 1,
-    borderColor: Colors.gray[700],
+    borderColor: Colors.gray[800],
     borderRadius: 8,
-    padding: Spacing.md,
-    color: Colors.white,
-    fontSize: FontSizes.md,
-    marginBottom: Spacing.sm,
+    padding: Spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.22)',
+    gap: Spacing.xs,
+    marginBottom: Spacing.md,
   },
-  notesInput: {
-    minHeight: 72,
-    textAlignVertical: 'top',
-  },
-  helperText: {
-    color: Colors.gray[500],
+  sourceNoticeText: {
+    color: Colors.gray[400],
     fontSize: FontSizes.xs,
-    lineHeight: 16,
-    marginTop: -Spacing.xs,
-    marginBottom: Spacing.sm,
+    lineHeight: 17,
   },
-  validationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.sm,
-    flexWrap: 'wrap',
-  },
-  validateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.accent,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  validateButtonText: {
-    color: Colors.accent,
-    fontSize: FontSizes.sm,
-    fontWeight: 'bold',
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  validationBadge: {
+  settingsLink: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: 'rgba(34, 197, 94, 0.12)',
-    borderWidth: 1,
-    borderColor: Colors.green[600],
-    borderRadius: 8,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    alignSelf: 'flex-start',
+    paddingTop: Spacing.xs,
   },
-  validationBadgeText: {
-    color: Colors.green[400],
+  settingsLinkText: {
+    color: Colors.accent,
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
-    textTransform: 'uppercase',
   },
-  validationPanel: {
-    backgroundColor: 'rgba(0,0,0,0.28)',
+  sourceSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
     padding: Spacing.md,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
-  validationTitle: {
-    color: Colors.gray[300],
-    fontSize: FontSizes.xs,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: Spacing.sm,
+  inventorySummaryIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderWidth: 1,
+    borderColor: Colors.accent,
   },
-  machinePreviewRow: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: Spacing.sm,
-    marginTop: Spacing.sm,
-  },
-  machinePreviewText: {
+  sourceSummaryText: {
     flex: 1,
   },
-  machinePreviewName: {
+  sourceName: {
     color: Colors.white,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
   },
-  machinePreviewMeta: {
+  sourceMeta: {
     color: Colors.gray[500],
     fontSize: FontSizes.xs,
     marginTop: 2,
   },
-  optionRow: {
+  statePanel: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     gap: Spacing.sm,
-    marginVertical: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: Spacing.md,
   },
-  optionButton: {
+  stateText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.sm,
+  },
+  matchGuidance: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+    marginBottom: Spacing.md,
+  },
+  candidateList: {
+    gap: Spacing.sm,
+  },
+  candidateCard: {
     borderWidth: 1,
     borderColor: Colors.gray[700],
     borderRadius: 8,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    minWidth: 84,
-    alignItems: 'center',
+    padding: Spacing.md,
+    backgroundColor: Colors.dark,
   },
-  optionButtonActive: {
-    backgroundColor: Colors.secondary + '20',
-    borderColor: Colors.secondary,
+  candidateCardSelected: {
+    borderColor: Colors.accent,
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
   },
-  optionText: {
+  candidateHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  candidateNameBlock: {
+    flex: 1,
+  },
+  candidateName: {
+    color: Colors.white,
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+  },
+  candidateMeta: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    marginTop: 3,
+  },
+  percentBadge: {
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    borderRadius: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  percentBadgeSelected: {
+    borderColor: Colors.accent,
+    backgroundColor: 'rgba(16, 185, 129, 0.16)',
+  },
+  percentBadgeText: {
+    color: Colors.accent,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+  },
+  candidateEvidence: {
     color: Colors.gray[400],
     fontSize: FontSizes.xs,
-    fontWeight: 'bold',
-    textTransform: 'capitalize',
+    lineHeight: 17,
+    marginTop: Spacing.sm,
   },
-  optionTextActive: {
+  selectedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.sm,
+  },
+  selectedText: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  noMatchPanel: {
+    borderWidth: 1,
+    borderColor: Colors.orange[300],
+    borderRadius: 8,
+    padding: Spacing.md,
+    backgroundColor: 'rgba(251, 146, 60, 0.08)',
+  },
+  noMatchTitle: {
     color: Colors.white,
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    marginTop: Spacing.sm,
+  },
+  noMatchText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  restartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+  },
+  restartButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
   },
   errorText: {
     color: Colors.red[500],
@@ -577,6 +619,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     alignItems: 'center',
     marginTop: Spacing.md,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   buttonContent: {
     flexDirection: 'row',
