@@ -1,6 +1,6 @@
 # Privacy Policy for ReversR Rebuild
 
-**Last Updated:** June 5, 2026
+**Last Updated:** June 13, 2026
 
 ## Introduction
 
@@ -14,8 +14,10 @@ This Privacy Policy explains what information the app handles and how it is used
 
 - **Machine images:** Photos captured with the camera for machine identification.
 - **Machine descriptions:** Text descriptions, visible part notes, model names, and other scan context.
+- **Repair shop profile details:** Name, work email, shop name, role, plan, and monthly reconstruction credit usage.
 - **Inventory connector metadata:** Source name, connector URI, connector type, auth mode selection, and admin notes.
 - **Reconstruction outputs:** Machine match results, assembly steps, bill of materials, pricing estimates, and export packages.
+- **Billing metadata:** Stripe customer IDs, subscription IDs, subscription status, plan, and billing period dates when a shop uses hosted web billing.
 
 ### Device and Usage Information
 
@@ -29,12 +31,15 @@ We use information to:
 - Validate and read approved machine inventory sources.
 - Match scans to machine records.
 - Generate reconstruction plans, BOMs, assembly steps, pricing estimates, and handoff packages.
+- Meter monthly AI reconstruction credits and enforce plan entitlements.
 - Save reconstruction history locally on the device.
+- Support repair shop account, subscription, and billing management.
 - Improve reliability and support troubleshooting.
 
 ## Data Storage
 
-- Reconstruction history is stored locally on the device.
+- Reconstruction history is stored locally on the device by default.
+- Shop profiles, entitlements, billing identifiers, and credit usage may be stored by the hosted ReversR API when account features are enabled.
 - Large base64 images are not stored in long-term local history by default.
 - Inventory connector metadata may be saved locally so admins do not need to re-enter it.
 - Exported sketches, specs, BOMs, and reconstruction packages are written to app-controlled storage before the user chooses whether to share them.
@@ -42,6 +47,8 @@ We use information to:
 ## Third-Party Processing
 
 The app may use AI providers such as Google Gemini or local models such as Ollama to analyze machine input and generate reconstruction outputs. If a cloud AI provider is configured, machine descriptions and images may be sent to that provider for processing.
+
+Stripe may process payment details when a shop manages billing through the hosted web account page. ReversR stores billing identifiers and subscription status, not full card numbers.
 
 Manufacturer links such as Xometry, Protolabs, Shapeways, or JLCPCB are provided as handoff destinations. The app can export a quote packet and prepare a user-reviewed email draft for handoff, but it does not automatically submit files or orders to those vendors.
 
@@ -66,6 +73,7 @@ The app does not request broad photo library or media library access in the curr
 You can:
 
 - Delete app data by clearing app storage or uninstalling the app.
+- Request account or shop profile deletion by contacting support until self-service deletion is available.
 - Avoid camera capture by entering a machine description manually.
 - Avoid cloud AI processing by configuring a supported local model where available.
 

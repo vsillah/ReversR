@@ -13,6 +13,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   InnovationResult,
@@ -190,6 +191,7 @@ export default function PhaseFour({
   onReset,
 }: Props) {
   const { colors: Colors } = useAppTheme();
+  const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
@@ -232,7 +234,19 @@ export default function PhaseFour({
   const savedVendorApprovalRecord = useMemo(() => (
     getLatestSavedVendorApproval(savedReviewRecords)
   ), [savedReviewRecords]);
-  const canPrepareVendorRequest = !!localBom && !!savedVendorApprovalRecord;
+  const canExportQuotePacket = account?.entitlements.canExportQuotePacket ?? false;
+  const canPrepareVendorRequest = !!localBom && !!savedVendorApprovalRecord && canExportQuotePacket;
+
+  const requirePaidExport = () => {
+    if (canExportQuotePacket) return true;
+    setAlert({
+      visible: true,
+      title: 'Pro Export Required',
+      message: 'Complete reconstruction packages, manufacturer quote packets, and vendor request drafts require Pro Shop or Team. BOM CSV remains available on the Free plan.',
+      type: 'info',
+    });
+    return false;
+  };
 
   useEffect(() => {
     setSavedReviewRecords(reviewerApprovalRecords);
@@ -444,6 +458,8 @@ export default function PhaseFour({
   };
 
   const handleExportAll = async () => {
+    if (!requirePaidExport()) return;
+
     try {
       const quotePacket = localBom ? buildQuotePacket(localBom) : null;
       const exportData: Record<string, unknown> = {
@@ -488,6 +504,8 @@ export default function PhaseFour({
   };
 
   const handleExportQuotePacket = async () => {
+    if (!requirePaidExport()) return;
+
     if (!localBom) {
       setAlert({visible: true, title: 'BOM Required', message: 'Generate the Bill of Materials before exporting a manufacturer quote packet.', type: 'info'});
       return;
@@ -511,6 +529,8 @@ export default function PhaseFour({
   };
 
   const handlePrepareQuoteEmail = async () => {
+    if (!requirePaidExport()) return;
+
     if (!localBom) {
       setAlert({visible: true, title: 'BOM Required', message: 'Generate the Bill of Materials before preparing a vendor quote request.', type: 'info'});
       return;

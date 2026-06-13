@@ -1,13 +1,10 @@
-import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { getCommercialRequestHeaders } from './useCommercialization';
+import { getApiBase } from '../utils/apiBase';
 
-const configuredApiBase = process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl;
-const API_BASE = Platform.OS === 'web' && window.location.origin.includes('localhost')
-  ? 'http://localhost:3001'
-  : configuredApiBase || 'https://reversr-rebuild-api.example.com';
-
-export const getApiBase = () => API_BASE;
+const API_BASE = getApiBase();
+export { getApiBase };
 
 type AiProvider = 'gemini' | 'ollama';
 
@@ -378,9 +375,10 @@ async function fetchWithRetry<T>(url: string, options: RequestInit, retries = 2)
 
 export const analyzeProduct = async (input: string, imageBase64?: string): Promise<AnalysisResult> => {
   const config = await getAiConfig();
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
   return fetchWithRetry(`${API_BASE}/api/gemini/analyze`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ input, image: imageBase64, ...config })
   });
 };
@@ -392,9 +390,10 @@ export const identifyMachineFromInventory = async (
   selectedMachineId?: string
 ): Promise<InnovationResult> => {
   const config = await getAiConfig();
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
   return fetchWithRetry(`${API_BASE}/api/gemini/match-machine`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ 
       analysis, 
       connector,
@@ -459,27 +458,30 @@ export const deleteInventoryCredential = async (
 
 export const generateTechnicalSpec = async (innovation: InnovationResult): Promise<TechnicalSpec> => {
   const config = await getAiConfig();
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
   return fetchWithRetry(`${API_BASE}/api/gemini/technical-spec`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ innovation, ...config })
   });
 };
 
 export const generate3DScene = async (innovation: InnovationResult): Promise<ThreeDSceneDescriptor> => {
   const config = await getAiConfig();
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
   return fetchWithRetry(`${API_BASE}/api/gemini/generate-3d`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ innovation, ...config })
   });
 };
 
 export const generate2DImage = async (innovation: InnovationResult): Promise<string> => {
   const config = await getAiConfig();
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
   const response = await fetchWithRetry<{ imageData: string; imageSource?: ReferenceImage }>(`${API_BASE}/api/gemini/generate-2d`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ innovation, ...config })
   });
   return response.imageData;
@@ -487,9 +489,10 @@ export const generate2DImage = async (innovation: InnovationResult): Promise<str
 
 export const generateBOM = async (innovation: InnovationResult, analysis?: AnalysisResult): Promise<BillOfMaterials> => {
   const config = await getAiConfig();
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
   return fetchWithRetry(`${API_BASE}/api/gemini/generate-bom`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ innovation, analysis, ...config })
   });
 };
@@ -506,9 +509,10 @@ export const useGemini = () => {
   const generate2DVisualization = async (conceptName: string, conceptDescription: string): Promise<string | null> => {
     try {
       const config = await getAiConfig();
+      const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
       const response = await fetchWithRetry<{ imageData: string }>(`${API_BASE}/api/gemini/generate-2d`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           innovation: {
             conceptName,
@@ -527,9 +531,10 @@ export const useGemini = () => {
   const generate2DMultiAngle = async (innovation: InnovationResult, angles: string[] = ['front', 'side', 'iso']): Promise<AngleImage[]> => {
     try {
       const config = await getAiConfig();
+      const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
       const response = await fetchWithRetry<{ images: AngleImage[] }>(`${API_BASE}/api/gemini/generate-2d-angles`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ innovation, angles, ...config })
       });
       return response.images || [];
@@ -548,9 +553,10 @@ export const useGemini = () => {
 export const generate2DMultiAngleImages = async (innovation: InnovationResult, angles: string[] = ['front', 'side', 'iso']): Promise<AngleImage[]> => {
   try {
     const config = await getAiConfig();
+    const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
     const response = await fetchWithRetry<{ images: AngleImage[] }>(`${API_BASE}/api/gemini/generate-2d-angles`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ innovation, angles, ...config })
     });
     return response.images || [];
@@ -564,9 +570,10 @@ export const generate2DSingleAngle = async (innovation: InnovationResult, angleI
   try {
     console.log(`[DEBUG] generate2DSingleAngle: Starting for ${angleId}`);
     const config = await getAiConfig();
+    const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
     const response = await fetchWithRetry<AngleImage>(`${API_BASE}/api/gemini/generate-2d-single-angle`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ innovation, angleId, ...config })
     });
     console.log(`[DEBUG] generate2DSingleAngle: Response for ${angleId}:`, {

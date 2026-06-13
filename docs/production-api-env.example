@@ -21,3 +21,14 @@ ADMIN_API_TOKEN=replace-with-long-random-token
 INVENTORY_CONNECTOR_SECRETS_JSON={}
 INVENTORY_CONNECTOR_SECRETS_FILE=
 INVENTORY_PRIVATE_NETWORK_ENABLED=false
+
+# Commercialization MVP. Leave Stripe keys unset to keep billing endpoints disabled.
+# COMMERCIAL_STORE_FILE is optional for local/dev persistence; use managed database storage before public scale.
+COMMERCIAL_STORE_FILE=
+PUBLIC_APP_URL=https://reversr.vercel.app
+BILLING_RETURN_URL=https://reversr.vercel.app/account
+BILLING_CANCEL_URL=https://reversr.vercel.app/account?checkout=cancelled
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRICE_PRO_SHOP=
+STRIPE_PRICE_TEAM=
