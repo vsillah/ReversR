@@ -559,7 +559,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.sm,
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.26)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -649,7 +649,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   measurementRow: {
     flexDirection: 'row',
     gap: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.24)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -741,7 +741,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.md,
   },
   treatmentItem: {
-    backgroundColor: 'rgba(0,0,0,0.24)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -769,7 +769,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: Spacing.sm,
   },
   processRow: {
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
