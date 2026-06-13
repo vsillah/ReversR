@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-13T13:27:07.988Z",
+  "warnings": [],
+  "gateStatuses": [
+    "ready_for_cad_draft",
+    "needs_dimensions",
+    "route_to_scan_to_cad_vendor",
+    "visual_reference_only",
+    "blocked_safety_review"
+  ],
+  "contractChecks": {
+    "manufacturingHandoffVersion": "0.3-review",
+    "aiCadGateExported": true,
+    "materialTreatmentGuidanceExported": true,
+    "reviewerApprovalExported": true,
+    "reviewerApprovalRecordsSaved": true,
+    "vendorRequestGatedByReviewerApproval": true,
+    "vendorRequestGatedBySavedReviewerApproval": true,
+    "visualReferenceLanguagePresent": true,
+    "finalReleaseBoundaryPresent": true
+  },
+  "cadqueryProof": {
+    "status": "passed",
+    "cadqueryVersion": "2.5.2",
+    "artifactFiles": {
+      "spec": "/Users/vambahsillah/Documents/ReversR/original-ReversR/.local/cadquery-proof/sample-bracket-spec.json",
+      "cadquerySource": "/Users/vambahsillah/Documents/ReversR/original-ReversR/.local/cadquery-proof/sample-bracket.cq.py",
+      "step": "/Users/vambahsillah/Documents/ReversR/original-ReversR/.local/cadquery-proof/sample-bracket.step",
+      "stl": "/Users/vambahsillah/Documents/ReversR/original-ReversR/.local/cadquery-proof/sample-bracket.stl",
+      "threeMf": "/Users/vambahsillah/Documents/ReversR/original-ReversR/.local/cadquery-proof/sample-bracket.3mf",
+      "preview": "/Users/vambahsillah/Documents/ReversR/original-ReversR/.local/cadquery-proof/sample-bracket-preview.json"
+    },
+    "releaseBoundary": "CAD proof output requires qualified CAD/manufacturing review before fabrication or vendor submission."
+  },
+  "sampleCompletePackage": {
+    "exportedAt": "2026-06-13T13:27:07.988Z",
+    "reviewerApproval": {
+      "status": "approved_for_vendor_review",
+      "reviewerName": "Sample CAD Reviewer",
+      "reviewerRole": "CAD reviewer",
+      "reviewedAt": "2026-06-13T13:27:07.987Z",
+      "notes": "Approved for vendor quote review only. Fabrication remains blocked.",
+      "approvalScope": "Reviewer approval is limited to vendor quote/request readiness. It does not approve fabrication, production ordering, machine operation, or safety-critical release.",
+      "approvedForVendorSubmission": true,
+      "approvedForFabrication": false,
+      "requiredBeforeRelease": [
+        "Qualified CAD review confirms source dimensions and CAD editability.",
+        "Material treatment compatibility and tolerance impact are confirmed.",
+        "DfM/vendor review accepts process, finish, lead time, and inspection assumptions.",
+        "First-article inspection plan is accepted before fabrication or machine operation."
+      ]
+    },
+    "reviewerApprovalRecords": [
+      {
+        "status": "approved_for_vendor_review",
+        "reviewerName": "Sample CAD Reviewer",
+        "reviewerRole": "CAD reviewer",
+        "reviewedAt": "2026-06-13T13:27:07.987Z",
+        "notes": "Approved for vendor quote review only. Fabrication remains blocked.",
+        "approvalScope": "Reviewer approval is limited to vendor quote/request readiness. It does not approve fabrication, production ordering, machine operation, or safety-critical release.",
+        "approvedForVendorSubmission": true,
+        "approvedForFabrication": false,
+        "requiredBeforeRelease": [
+          "Qualified CAD review confirms source dimensions and CAD editability.",
+          "Material treatment compatibility and tolerance impact are confirmed.",
+          "DfM/vendor review accepts process, finish, lead time, and inspection assumptions.",
+          "First-article inspection plan is accepted before fabrication or machine operation."
+        ],
+        "recordType": "cad_reviewer_approval",
+        "recordVersion": "0.1-review",
+        "recordId": "review-sample-approved",
+        "reconstructionId": "sample-reconstruction",
+        "savedAt": "2026-06-13T13:27:07.988Z",
+        "machine": {
+          "machineId": "FARMBOT-GENESIS-V1-8",
+          "machineName": "FarmBot Genesis v1.8",
+          "inventorySource": "public FarmBot inventory",
+          "confidenceScore": 0.92
+        },
+        "packageContext": {
+          "conceptName": "FarmBot-class gantry mounting plate proof",
+          "quotePacketVersion": "0.2-review",
+          "manufacturingHandoffVersion": "0.3-review"
+        },
+        "cadGateSnapshot": {
+          "status": "ready_for_cad_draft",
+          "confidence": "medium",
+          "recommendedCadLane": "cadquery"
+        },
+        "materialTreatmentSnapshot": [
+          "FarmBot-class gantry mounting plate proof: Type II clear anodize or powder coat after fit review; vendor confirmation required"
+        ],
+        "releaseBoundary": "AI may draft, route, inspect, and reject CAD readiness. Qualified CAD/manufacturing review is required before fabrication, vendor submission, production ordering, or machine operation."
+      }
+    ],
+    "latestReviewerApprovalRecord": {
+      "status": "approved_for_vendor_review",
+      "reviewerName": "Sample CAD Reviewer",
+      "reviewerRole": "CAD reviewer",
+      "reviewedAt": "2026-06-13T13:27:07.987Z",
+      "notes": "Approved for vendor quote review only. Fabrication remains blocked.",
+      "approvalScope": "Reviewer approval is limited to vendor quote/request readiness. It does not approve fabrication, production ordering, machine operation, or safety-critical release.",
+      "approvedForVendorSubmission": true,
+      "approvedForFabrication": false,
+      "requiredBeforeRelease": [
+        "Qualified CAD review confirms source dimensions and CAD editability.",
+        "Material treatment compatibility and tolerance impact are confirmed.",
+        "DfM/vendor review accepts process, finish, lead time, and inspection assumptions.",
+        "First-article inspection plan is accepted before fabrication or machine operation."
+      ],
+      "recordType": "cad_reviewer_approval",
+      "recordVersion": "0.1-review",
+      "recordId": "review-sample-approved",
+      "reconstructionId": "sample-reconstruction",
+      "savedAt": "2026-06-13T13:27:07.988Z",
+      "machine": {
+        "machineId": "FARMBOT-GENESIS-V1-8",
+        "machineName": "FarmBot Genesis v1.8",
+        "inventorySource": "public FarmBot inventory",
+        "confidenceScore": 0.92
+      },
+      "packageContext": {
+        "conceptName": "FarmBot-class gantry mounting plate proof",
+        "quotePacketVersion": "0.2-review",
+        "manufacturingHandoffVersion": "0.3-review"
+      },
+      "cadGateSnapshot": {
+        "status": "ready_for_cad_draft",
+        "confidence": "medium",
+        "recommendedCadLane": "cadquery"
+      },
+      "materialTreatmentSnapshot": [
+        "FarmBot-class gantry mounting plate proof: Type II clear anodize or powder coat after fit review; vendor confirmation required"
+      ],
+      "releaseBoundary": "AI may draft, route, inspect, and reject CAD readiness. Qualified CAD/manufacturing review is required before fabrication, vendor submission, production ordering, or machine operation."
+    },
+    "manufacturingHandoff": {
+      "packetType": "manufacturing_review_handoff",
+      "packetVersion": "0.3-review",
+      "humanReviewRequired": true,
+      "aiCadGate": {
+        "status": "ready_for_cad_draft",
+        "confidence": "medium",
+        "recommendedCadLane": "cadquery",
+        "sourceEvidence": [
+          "Machine ID: FARMBOT-GENESIS-V1-8",
+          "Approved inventory source: public FarmBot inventory",
+          "BOM with material line items",
+          "Reference images/source links present"
+        ],
+        "missingInputs": [],
+        "riskFlags": [
+          "Outdoor environment affects treatment choice.",
+          "CAD draft requires qualified review before fabrication."
+        ],
+        "reviewerActions": [
+          "Confirm source dimensions against approved inventory revision.",
+          "Confirm material grade, finish, and treatment compatibility.",
+          "Confirm treatment impact on holes, flatness, fit surfaces, and lead time."
+        ],
+        "materialTreatmentNotes": [
+          "Gantry mounting plate: Type II clear anodize or powder coat after fit review."
+        ],
+        "finalReleaseBoundary": "AI may draft, route, inspect, and reject CAD readiness. Qualified CAD/manufacturing review is required before fabrication, vendor submission, production ordering, or machine operation."
+      },
+      "materialTreatmentGuidance": [
+        {
+          "partNumber": "FARMBOT-GANTRY-PLATE-P001",
+          "partName": "FarmBot-class gantry mounting plate proof",
+          "baseMaterial": "6061-T6 aluminum",
+          "expectedEnvironment": "outdoor agricultural exposure with moisture, soil, UV, and washdown risk",
+          "surfaceFinish": "deburr and bead-blasted or machined finish",
+          "treatment": "Type II clear anodize or powder coat after fit review",
+          "treatmentPurpose": "corrosion resistance, cleaner handling surface, and outdoor durability",
+          "toleranceImpact": "confirm hole sizes, flatness, and coating buildup after treatment",
+          "vendorConfirmationRequired": true,
+          "inspectionNotes": [
+            "Confirm material grade and treatment compatibility before quoting.",
+            "Inspect critical dimensions after treatment or post-processing."
+          ]
+        }
+      ],
+      "drawingPackage": {
+        "requiredFiles": [
+          "CAD draft source or KCL/CadQuery script",
+          "STEP assembly",
+          "PDF detail drawings",
+          "material treatment notes",
+          "inspection plan"
+        ],
+        "missingBeforeMachining": [
+          "source CAD dimensions verified against inventory revision",
+          "CAD draft qualified in CAD software",
+          "material treatment compatibility confirmed by vendor",
+          "first-article inspection signoff"
+        ]
+      }
+    },
+    "manufacturerQuotePacket": {
+      "packetType": "manufacturer_quote_request",
+      "packetVersion": "0.2-review",
+      "humanReviewRequired": true,
+      "visualReferences": {
+        "has2D": true,
+        "angleLabels": [
+          "front"
+        ],
+        "has3DScene": true,
+        "expectedFileTypes": [
+          "CAD draft source when generated",
+          "STEP/native CAD after CAD qualification",
+          "material treatment notes",
+          "PNG visual references if generated"
+        ]
+      },
+      "aiCadGate": {
+        "status": "ready_for_cad_draft",
+        "confidence": "medium",
+        "recommendedCadLane": "cadquery",
+        "sourceEvidence": [
+          "Machine ID: FARMBOT-GENESIS-V1-8",
+          "Approved inventory source: public FarmBot inventory",
+          "BOM with material line items",
+          "Reference images/source links present"
+        ],
+        "missingInputs": [],
+        "riskFlags": [
+          "Outdoor environment affects treatment choice.",
+          "CAD draft requires qualified review before fabrication."
+        ],
+        "reviewerActions": [
+          "Confirm source dimensions against approved inventory revision.",
+          "Confirm material grade, finish, and treatment compatibility.",
+          "Confirm treatment impact on holes, flatness, fit surfaces, and lead time."
+        ],
+        "materialTreatmentNotes": [
+          "Gantry mounting plate: Type II clear anodize or powder coat after fit review."
+        ],
+        "finalReleaseBoundary": "AI may draft, route, inspect, and reject CAD readiness. Qualified CAD/manufacturing review is required before fabrication, vendor submission, production ordering, or machine operation."
+      },
+      "materialTreatmentGuidance": [
+        {
+          "partNumber": "FARMBOT-GANTRY-PLATE-P001",
+          "partName": "FarmBot-class gantry mounting plate proof",
+          "baseMaterial": "6061-T6 aluminum",
+          "expectedEnvironment": "outdoor agricultural exposure with moisture, soil, UV, and washdown risk",
+          "surfaceFinish": "deburr and bead-blasted or machined finish",
+          "treatment": "Type II clear anodize or powder coat after fit review",
+          "treatmentPurpose": "corrosion resistance, cleaner handling surface, and outdoor durability",
+          "toleranceImpact": "confirm hole sizes, flatness, and coating buildup after treatment",
+          "vendorConfirmationRequired": true,
+          "inspectionNotes": [
+            "Confirm material grade and treatment compatibility before quoting.",
+            "Inspect critical dimensions after treatment or post-processing."
+          ]
+        }
+      ],
+      "reviewerApproval": {
+        "status": "approved_for_vendor_review",
+        "reviewerName": "Sample CAD Reviewer",
+        "reviewerRole": "CAD reviewer",
+        "reviewedAt": "2026-06-13T13:27:07.987Z",
+        "notes": "Approved for vendor quote review only. Fabrication remains blocked.",
+        "approvalScope": "Reviewer approval is limited to vendor quote/request readiness. It does not approve fabrication, production ordering, machine operation, or safety-critical release.",
+        "approvedForVendorSubmission": true,
+        "approvedForFabrication": false,
+        "requiredBeforeRelease": [
+          "Qualified CAD review confirms source dimensions and CAD editability.",
+          "Material treatment compatibility and tolerance impact are confirmed.",
+          "DfM/vendor review accepts process, finish, lead time, and inspection assumptions.",
+          "First-article inspection plan is accepted before fabrication or machine operation."
+        ]
+      },
+      "latestReviewerApprovalRecord": {
+        "status": "approved_for_vendor_review",
+        "reviewerName": "Sample CAD Reviewer",
+        "reviewerRole": "CAD reviewer",
+        "reviewedAt": "2026-06-13T13:27:07.987Z",
+        "notes": "Approved for vendor quote review only. Fabrication remains blocked.",
+        "approvalScope": "Reviewer approval is limited to vendor quote/request readiness. It does not approve fabrication, production ordering, machine operation, or safety-critical release.",
+        "approvedForVendorSubmission": true,
+        "approvedForFabrication": false,
+        "requiredBeforeRelease": [
+          "Qualified CAD review confirms source dimensions and CAD editability.",
+          "Material treatment compatibility and tolerance impact are confirmed.",
+          "DfM/vendor review accepts process, finish, lead time, and inspection assumptions.",
+          "First-article inspection plan is accepted before fabrication or machine operation."
+        ],
+        "recordType": "cad_reviewer_approval",
+        "recordVersion": "0.1-review",
+        "recordId": "review-sample-approved",
+        "reconstructionId": "sample-reconstruction",
+        "savedAt": "2026-06-13T13:27:07.988Z",
+        "machine": {
+          "machineId": "FARMBOT-GENESIS-V1-8",
+          "machineName": "FarmBot Genesis v1.8",
+          "inventorySource": "public FarmBot inventory",
+          "confidenceScore": 0.92
+        },
+        "packageContext": {
+          "conceptName": "FarmBot-class gantry mounting plate proof",
+          "quotePacketVersion": "0.2-review",
+          "manufacturingHandoffVersion": "0.3-review"
+        },
+        "cadGateSnapshot": {
+          "status": "ready_for_cad_draft",
+          "confidence": "medium",
+          "recommendedCadLane": "cadquery"
+        },
+        "materialTreatmentSnapshot": [
+          "FarmBot-class gantry mounting plate proof: Type II clear anodize or powder coat after fit review; vendor confirmation required"
+        ],
+        "releaseBoundary": "AI may draft, route, inspect, and reject CAD readiness. Qualified CAD/manufacturing review is required before fabrication, vendor submission, production ordering, or machine operation."
+      },
+      "reviewerApprovalRecords": [
+        {
+          "status": "approved_for_vendor_review",
+          "reviewerName": "Sample CAD Reviewer",
+          "reviewerRole": "CAD reviewer",
+          "reviewedAt": "2026-06-13T13:27:07.987Z",
+          "notes": "Approved for vendor quote review only. Fabrication remains blocked.",
+          "approvalScope": "Reviewer approval is limited to vendor quote/request readiness. It does not approve fabrication, production ordering, machine operation, or safety-critical release.",
+          "approvedForVendorSubmission": true,
+          "approvedForFabrication": false,
+          "requiredBeforeRelease": [
+            "Qualified CAD review confirms source dimensions and CAD editability.",
+            "Material treatment compatibility and tolerance impact are confirmed.",
+            "DfM/vendor review accepts process, finish, lead time, and inspection assumptions.",
+            "First-article inspection plan is accepted before fabrication or machine operation."
+          ],
+          "recordType": "cad_reviewer_approval",
+          "recordVersion": "0.1-review",
+          "recordId": "review-sample-approved",
+          "reconstructionId": "sample-reconstruction",
+          "savedAt": "2026-06-13T13:27:07.988Z",
+          "machine": {
+            "machineId": "FARMBOT-GENESIS-V1-8",
+            "machineName": "FarmBot Genesis v1.8",
+            "inventorySource": "public FarmBot inventory",
+            "confidenceScore": 0.92
+          },
+          "packageContext": {
+            "conceptName": "FarmBot-class gantry mounting plate proof",
+            "quotePacketVersion": "0.2-review",
+            "manufacturingHandoffVersion": "0.3-review"
+          },
+          "cadGateSnapshot": {
+            "status": "ready_for_cad_draft",
+            "confidence": "medium",
+            "recommendedCadLane": "cadquery"
+          },
+          "materialTreatmentSnapshot": [
+            "FarmBot-class gantry mounting plate proof: Type II clear anodize or powder coat after fit review; vendor confirmation required"
+          ],
+          "releaseBoundary": "AI may draft, route, inspect, and reject CAD readiness. Qualified CAD/manufacturing review is required before fabrication, vendor submission, production ordering, or machine operation."
+        }
+      ],
+      "quoteRequestMessage": "AI CAD gate: ready_for_cad_draft. Recommended lane: cadquery.\n\nMaterial/treatment review: confirm material choice, treatment compatibility, finish requirements, tolerance impact after treatment, lead time impact, and inspection needs.\n\nReviewer approval: approved_for_vendor_review. Vendor submission approved: yes.\n\nLatest saved review record: review-sample-approved; approved_for_vendor_review; saved 2026-06-13T00:00:00.000Z.\n\nDo not fabricate, print, submit to production, or order parts until a qualified reviewer confirms machine identity, source dimensions, CAD editability, tolerances, material treatments, safety constraints, and revision compatibility."
+    }
+  }
+}

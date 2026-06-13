@@ -255,6 +255,9 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
   const styles = createStyles(Colors);
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
   const selectedPart = handoff.partMeasurements[selectedPartIndex] || handoff.partMeasurements[0];
+  const selectedTreatment = selectedPart
+    ? handoff.materialTreatmentGuidance.find(item => item.partNumber === selectedPart.partNumber)
+    : undefined;
   const primarySceneMeasurements = useMemo(
     () => handoff.sceneMeasurements.slice(0, 6),
     [handoff.sceneMeasurements]
@@ -268,7 +271,7 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
         </View>
         <View style={styles.headerText}>
           <Text style={styles.title}>Manufacturing Studio</Text>
-          <Text style={styles.subtitle}>3D schematic, datum plan, nominal dimensions, and DfM gates</Text>
+          <Text style={styles.subtitle}>Visual references, CAD readiness, material treatments, datums, and DfM gates</Text>
         </View>
       </View>
 
@@ -296,6 +299,21 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
 
       <Text style={styles.sourceNote}>{handoff.envelope.source}</Text>
 
+      <View style={styles.cadGatePanel}>
+        <View style={styles.cadGateHeader}>
+          <Text style={styles.sectionLabel}>AI CAD Gate</Text>
+          <Text style={styles.cadGateStatus}>{handoff.aiCadGate.status.replace(/_/g, ' ')}</Text>
+        </View>
+        <Text style={styles.cadGateText}>Lane: {handoff.aiCadGate.recommendedCadLane.replace(/_/g, ' ')}</Text>
+        <Text style={styles.cadGateText}>Confidence: {handoff.aiCadGate.confidence}</Text>
+        {handoff.aiCadGate.missingInputs.length > 0 && (
+          <Text style={styles.cadGateWarning}>Missing: {handoff.aiCadGate.missingInputs.join(', ')}</Text>
+        )}
+        {handoff.aiCadGate.riskFlags.length > 0 && (
+          <Text style={styles.cadGateWarning}>Risks: {handoff.aiCadGate.riskFlags.slice(0, 2).join(' | ')}</Text>
+        )}
+      </View>
+
       <View style={styles.datumGrid}>
         {handoff.datumScheme.map(datum => (
           <View key={datum.datum} style={styles.datumItem}>
@@ -318,6 +336,11 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
           <Text style={styles.selectedPartMeasurement}>{dimensionText(selectedPart.nominalDimensionsMm)}</Text>
           <Text style={styles.selectedPartCopy}>{selectedPart.process}</Text>
           <Text style={styles.selectedPartCopy}>Datums: {selectedPart.datumReferences.join(', ')} | {selectedPart.toleranceClass}</Text>
+          {selectedTreatment && (
+            <Text style={styles.selectedPartCopy}>
+              Treatment: {selectedTreatment.treatment} | {selectedTreatment.toleranceImpact}
+            </Text>
+          )}
         </View>
       )}
 
@@ -359,6 +382,18 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
             </View>
           ))}
         </View>
+      </View>
+
+      <View style={styles.treatmentSection}>
+        <Text style={styles.sectionLabel}>Material Treatment Review</Text>
+        {handoff.materialTreatmentGuidance.slice(0, 4).map(item => (
+          <View key={`${item.partNumber}-treatment`} style={styles.treatmentItem}>
+            <Text style={styles.treatmentTitle}>{item.partName}</Text>
+            <Text style={styles.treatmentText}>Material: {item.baseMaterial}</Text>
+            <Text style={styles.treatmentText}>Treatment: {item.treatment}</Text>
+            <Text style={styles.treatmentPurpose}>{item.treatmentPurpose}</Text>
+          </View>
+        ))}
       </View>
 
       <View style={styles.processSection}>
@@ -451,6 +486,37 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xs,
     marginTop: Spacing.sm,
     marginBottom: Spacing.md,
+  },
+  cadGatePanel: {
+    backgroundColor: 'rgba(0, 255, 157, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 157, 0.26)',
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  cadGateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.xs,
+  },
+  cadGateStatus: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  cadGateText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    marginTop: 2,
+  },
+  cadGateWarning: {
+    color: Colors.orange[300],
+    fontSize: FontSizes.xs,
+    marginTop: Spacing.xs,
   },
   nativeSchematic: {
     height: 300,
@@ -670,6 +736,33 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   featureTolerance: {
     color: Colors.blue[500],
     fontSize: FontSizes.xs,
+  },
+  treatmentSection: {
+    marginBottom: Spacing.md,
+  },
+  treatmentItem: {
+    backgroundColor: 'rgba(0,0,0,0.24)',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  treatmentTitle: {
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  treatmentText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    marginTop: 2,
+  },
+  treatmentPurpose: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    marginTop: Spacing.xs,
   },
   processSection: {
     marginBottom: Spacing.md,

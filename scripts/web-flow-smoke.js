@@ -105,13 +105,12 @@ const checkApi = async () => {
     verified.scan = true;
 
     await waitForText(page, 'Phase 2: Inventory', 45000);
-    await assertTextPresent(page, 'Admin Inventory Connector');
-    await clickText(page, 'Validate Connector');
-    await waitForText(page, 'Inventory Preview', 30000);
+    await assertTextPresent(page, 'Inventory Match');
+    await assertTextPresent(page, 'Using');
     await assertTextPresent(page, 'FarmBot Genesis v1.8');
     verified.inventoryValidation = true;
 
-    await clickText(page, 'Match Machine & Build Plan');
+    await clickText(page, 'Use Selected Machine');
     await waitForText(page, 'Phase 3: Design', 45000);
     await assertTextPresent(page, 'FarmBot Genesis v1.8');
     await assertTextPresent(page, 'Inventory Match');
@@ -126,7 +125,8 @@ const checkApi = async () => {
     await assertTextPresent(page, 'Manufacturer Handoff');
     verified.quotePacket = true;
     await assertTextPresent(page, 'Vendor Request Draft');
-    await assertTextPresent(page, 'Prepare Request Email');
+    await assertTextPresent(page, 'Reviewer Approval');
+    await assertTextPresent(page, 'Saved Approval Required');
     verified.vendorRequestDraft = true;
     await assertTextPresent(page, 'Manufacturing Readiness');
     verified.manufacturingReadiness = true;

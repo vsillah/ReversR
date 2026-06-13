@@ -897,6 +897,10 @@ const inferComponents = (input = '') => {
   const lower = input.toLowerCase();
   const knownParts = [
     'frame', 'heated bed', 'extruder', 'stepper motors', 'control board', 'power supply',
+    'track extrusion', 'gantry main beam', 'gantry column', 'cross-slide plate',
+    'z-axis extrusion', 'farmduino', 'raspberry pi', 'encoder', 'utm pcb',
+    'solenoid valve', 'vacuum pump', 'watering nozzle top', 'watering nozzle bottom',
+    'seeder', 'camera', 'belt clip', 'pulley', 'v-wheel',
     'belts', 'rails', 'nozzle', 'display', 'motor', 'pump', 'gearbox', 'sensor',
     'battery', 'housing', 'valve', 'fan', 'bearing', 'shaft', 'controller'
   ];

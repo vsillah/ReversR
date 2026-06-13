@@ -37,6 +37,8 @@
     "inventory:farmbot:validate": "npm run inventory:farmbot:generate && npm run inventory:source:validate -- public/inventory/farmbot-genesis-v1.8.json",
     "inventory:source:validate": "node scripts/validate-machine-inventory.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
+    "cadquery:proof": "node scripts/generate-cadquery-proof.js",
+    "cad:qualification:smoke": "node scripts/cad-qualification-export-smoke.js",
     "connector:smoke": "node scripts/hosted-connector-smoke.js",
     "hosted:operator-packet": "node scripts/generate-hosted-operator-packet.js",
     "api:docker:build": "docker build -t reversr-rebuild-api .",
