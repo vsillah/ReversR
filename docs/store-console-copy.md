@@ -55,6 +55,7 @@ The workflow is designed for human review. Inventory matches, procurement decisi
 
 Core capabilities:
 - Machine scan or manual description intake
+- Repair shop profile and monthly AI reconstruction credit status
 - Admin inventory connector validation
 - Machine matching against approved records
 - Bill of materials generation
@@ -75,7 +76,7 @@ machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D
 ### Review Notes
 
 ```text
-Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
+Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Repair shop profiles and monthly reconstruction credit status are used for app functionality. Paid billing is managed on the hosted web account page; mobile tester builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
 ```
 
 ### TestFlight What To Test
@@ -87,6 +88,7 @@ Please focus on the core reconstruction workflow:
 - Confirm the app matches the machine to an inventory record.
 - Generate the BOM and review parts, quantities, pricing ranges, and supplier guidance.
 - Review assembly steps, quote packet controls, policy links, and error handling.
+- Open Settings and confirm the Repair Shop Account panel shows profile, plan, and monthly AI reconstruction credits.
 
 Do not submit real purchase orders or send vendor requests from this build. Treat generated BOMs and assembly steps as review drafts that require qualified human validation before use.
 ```
@@ -95,8 +97,8 @@ Do not submit real purchase orders or send vendor requests from this build. Trea
 
 - Tracking: false
 - Data used for advertising: false
-- Contact info collected: false
-- Identifiers collected: false
+- Contact info collected: true, when a user enters a repair shop profile or billing account email
+- Identifiers collected: true, for account, shop, billing, subscription, and monthly usage records
 - Diagnostics collected: false
 
 User content processed:
@@ -110,7 +112,7 @@ Data linked to user:
 
 
 ```text
-Not by default in the prototype. Revisit if accounts, analytics, crash reporting, or server-side reconstruction storage are added.
+Repair shop profile, shop account, billing status, and reconstruction credit usage are linked to the account or shop when commercial account features are enabled.
 ```
 
 Third-party processing:
@@ -141,6 +143,7 @@ Capture or describe a machine, connect an approved inventory source, and match t
 
 Core capabilities:
 - Machine scan or manual description intake
+- Repair shop profile and monthly AI reconstruction credit status
 - Admin inventory connector validation
 - Machine matching against approved records
 - Bill of materials generation
@@ -159,6 +162,8 @@ The app does not automatically order parts, submit manufacturing jobs, transmit 
 Data collected:
 
 - Machine photos or descriptions when submitted for reconstruction planning
+- Repair shop profile details when entered
+- Account/shop identifiers, subscription status, and monthly reconstruction credit usage
 - Inventory connector metadata
 - Generated reconstruction package content
 
@@ -172,12 +177,13 @@ Purposes:
 - App functionality
 - Inventory matching
 - Reconstruction package generation
+- Subscription entitlement and monthly credit metering
 - Support and troubleshooting if diagnostics are added later
 
 - Encrypted in transit: true
 - Tracking: false
 - Ads: false
-- Account deletion required: Not applicable until account/server-side user storage is added.
+- Account deletion required: Yes. Until self-service deletion is implemented, users request deletion through support.
 
 Required permissions:
 

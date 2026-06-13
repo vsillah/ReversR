@@ -5,6 +5,11 @@ const crypto = require('crypto');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
 const { Ollama } = require('ollama');
 const farmBotInventory = require('../public/inventory/farmbot-genesis-v1.8.json');
+const {
+  chargeCommercialCredits,
+  handleStripeWebhook,
+  registerCommercialRoutes,
+} = require('./commercialization');
 
 const ollama = new Ollama({ host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434' });
 const app = express();
@@ -24,9 +29,19 @@ app.use(cors({
     }
     callback(new Error(`Origin ${origin} is not allowed by API_CORS_ORIGINS.`));
   },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Token'],
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Admin-Token',
+    'X-ReversR-Client-Id',
+    'X-ReversR-Profile-Email',
+    'X-ReversR-Profile-Name',
+    'X-ReversR-Shop-Name',
+    'X-ReversR-Idempotency-Key',
+  ],
 }));
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
 app.use(express.json({ limit: apiRequestBodyLimit }));
 
 // API KEY POOL & RATE LIMIT HANDLING
@@ -1122,9 +1137,14 @@ const buildFallbackBom = (innovation, analysis) => {
 // API ROUTES - WITH /api/gemini PREFIX FOR MOBILE APP
 // ============================================
 
+registerCommercialRoutes(app);
+
 // Analyze product
 app.post('/api/gemini/analyze', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'analyze');
+    if (!charge.ok) return;
+
     const { input, image, provider, ollamaModel } = req.body;
     const imageBase64 = image;
     
@@ -1366,6 +1386,9 @@ app.delete('/api/admin/inventory/credentials/:credentialRef', async (req, res) =
 app.post('/api/gemini/match-machine', async (req, res) => {
   let deterministicMatch;
   try {
+    const charge = await chargeCommercialCredits(req, res, 'match-machine');
+    if (!charge.ok) return;
+
     const { analysis, connector, image, provider, ollamaModel, selectedMachineId } = req.body;
     const inventoryRecords = await loadInventoryRecords(connector || {});
     const selectedRecord = selectedMachineId
@@ -1497,6 +1520,9 @@ app.post('/api/gemini/match-machine', async (req, res) => {
 // Generate technical spec
 app.post('/api/gemini/technical-spec', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'technical-spec');
+    if (!charge.ok) return;
+
     const { innovation, provider, ollamaModel } = req.body;
     
     const prompt = `
@@ -1683,6 +1709,9 @@ const getSourceBackedImage = async (innovation = {}) => {
 // Generate 3D scene
 app.post('/api/gemini/generate-3d', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'generate-3d');
+    if (!charge.ok) return;
+
     const { innovation, provider, ollamaModel } = req.body;
     
     const prompt = `
@@ -1759,6 +1788,9 @@ app.post('/api/gemini/generate-3d', async (req, res) => {
 // Generate 2D image - WITH FALLBACK
 app.post('/api/gemini/generate-2d', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'generate-2d');
+    if (!charge.ok) return;
+
     const { innovation } = req.body;
 
     const sourceBackedImage = await getSourceBackedImage(innovation);
@@ -1844,6 +1876,9 @@ const ANGLES = [
 // Generate single angle - for progressive loading
 app.post('/api/gemini/generate-2d-single-angle', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'generate-2d-single-angle');
+    if (!charge.ok) return;
+
     const { innovation, angleId } = req.body;
     
     const angle = ANGLES.find(a => a.id === angleId);
@@ -1925,6 +1960,9 @@ Generate a clean, professional machine reconstruction sketch with:
 
 app.post('/api/gemini/generate-2d-angles', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'generate-2d-angles');
+    if (!charge.ok) return;
+
     const { innovation, angles = ['front', 'side', 'iso'] } = req.body;
     
     const selectedAngles = ANGLES.filter(a => angles.includes(a.id));
@@ -2016,6 +2054,9 @@ Generate a clean, professional machine reconstruction sketch with:
 // Generate Bill of Materials
 app.post('/api/gemini/generate-bom', async (req, res) => {
   try {
+    const charge = await chargeCommercialCredits(req, res, 'generate-bom');
+    if (!charge.ok) return;
+
     const { innovation, analysis, provider, ollamaModel } = req.body;
     
     const prompt = `

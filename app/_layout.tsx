@@ -4,11 +4,14 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '../constants/theme';
 import { AppThemeProvider, useAppTheme } from '../hooks/useAppTheme';
+import { CommercialProvider } from '../hooks/useCommercialization';
 
 export default function RootLayout() {
   return (
     <AppThemeProvider>
-      <ThemedRootLayout />
+      <CommercialProvider>
+        <ThemedRootLayout />
+      </CommercialProvider>
     </AppThemeProvider>
   );
 }

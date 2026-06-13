@@ -5,7 +5,7 @@ export default function SupportRoute() {
   return (
     <PolicyPage
       title="Support"
-      updated="June 5, 2026"
+      updated="June 13, 2026"
       intro="Use this page to route ReversR Rebuild support, privacy, deletion, and store-review questions."
       sections={[
         {
@@ -27,7 +27,11 @@ export default function SupportRoute() {
         },
         {
           title: 'Privacy and Data Requests',
-          body: 'For deletion or privacy requests, include the email address or account identifier used with the app if production accounts are enabled. The current prototype stores reconstruction history locally unless a configured backend stores it later.',
+          body: 'For deletion or privacy requests, include the email address or shop account identifier used with the app. Local reconstruction history can also be cleared by deleting app data or uninstalling the app.',
+        },
+        {
+          title: 'Billing Support',
+          body: 'Paid shop billing is managed through the hosted ReversR web account page and Stripe customer portal when configured. Include the shop name and billing email for subscription, invoice, cancellation, or refund questions.',
         },
         {
           title: 'Safety Boundary',

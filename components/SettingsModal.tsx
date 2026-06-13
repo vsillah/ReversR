@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { AppColors } from '../constants/theme';
+import { CommercialProfile, useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   AiRuntimeStatus,
@@ -35,6 +36,17 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
+  const {
+    account,
+    profile,
+    loading: accountLoading,
+    error: accountError,
+    isWebBillingAvailable,
+    refreshAccount,
+    saveProfile,
+    beginCheckout,
+    openBillingPortal,
+  } = useCommercialization();
   const styles = createStyles(Colors);
   const [provider, setProvider] = useState<'gemini' | 'ollama'>('gemini');
   const [ollamaModel, setOllamaModel] = useState('qwen3.5:0.8b');
@@ -52,8 +64,11 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const appExtra = (Constants.expoConfig?.extra || {}) as Record<string, string | undefined>;
   const localProviderSettingsEnabled = isLocalProviderSettingsEnabled();
   const adminCredentialSettingsEnabled = isAdminCredentialSettingsEnabled();
+  const canUseInventoryConnectors = account?.entitlements.canUseInventoryConnectors ?? false;
   const [aiRuntimeStatus, setAiRuntimeStatus] = useState<AiRuntimeStatus | null>(null);
   const [aiStatusLoading, setAiStatusLoading] = useState(false);
+  const [commercialProfile, setCommercialProfile] = useState<CommercialProfile>(profile);
+  const [commercialStatus, setCommercialStatus] = useState<string | null>(null);
 
   const policyLinks = [
     {
@@ -77,10 +92,15 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     if (visible) {
       loadSettings();
       loadAiRuntimeStatus();
+      refreshAccount();
     } else {
       setCredentialValue('');
     }
   }, [visible]);
+
+  useEffect(() => {
+    setCommercialProfile(profile);
+  }, [profile, visible]);
 
   const loadSettings = async () => {
     try {
@@ -135,6 +155,11 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   };
 
   const handleConnectorTypeChange = (connectorType: InventoryConnector['connectorType']) => {
+    if (connectorType !== 'demo' && !canUseInventoryConnectors) {
+      setCommercialStatus('CSV, API, and ERP inventory connectors are a Team plan entitlement. The public demo inventory remains available.');
+      setInventoryDropdown(null);
+      return;
+    }
     setInventoryConnector(prev => ({
       ...prev,
       connectorType,
@@ -294,6 +319,29 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     }
   };
 
+  const handleSaveCommercialProfile = async () => {
+    setCommercialStatus(null);
+    try {
+      await saveProfile(commercialProfile);
+      setCommercialStatus('Saved repair shop profile and refreshed plan usage.');
+    } catch (e: any) {
+      setCommercialStatus(e?.message || 'Unable to save repair shop profile.');
+    }
+  };
+
+  const handleCommercialAction = async (action: () => Promise<void>) => {
+    setCommercialStatus(null);
+    try {
+      await action();
+    } catch (e: any) {
+      setCommercialStatus(e?.message || 'Billing action is not available yet.');
+    }
+  };
+
+  const usagePercent = account?.usage.monthlyCredits
+    ? Math.min(100, Math.round((account.usage.usedCredits / account.usage.monthlyCredits) * 100))
+    : 0;
+
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -336,6 +384,132 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   </TouchableOpacity>
                 ))}
               </View>
+            </View>
+
+            <View style={styles.accountPanel}>
+              <View style={styles.policyHeader}>
+                <Ionicons name="briefcase-outline" size={18} color={Colors.accent} />
+                <Text style={styles.policyTitle}>Repair Shop Account</Text>
+              </View>
+              <Text style={styles.policyText}>
+                Profiles power monthly reconstruction credits, shop entitlements, and future cloud history. Billing is managed on the ReversR web account page.
+              </Text>
+
+              <View style={styles.planSummaryRow}>
+                <View style={styles.planBadge}>
+                  <Text style={styles.planBadgeLabel}>{account?.billing.planLabel || 'Free'}</Text>
+                  <Text style={styles.planBadgeMeta}>
+                    {account?.billing.subscriptionStatus && account.billing.subscriptionStatus !== 'none'
+                      ? account.billing.subscriptionStatus
+                      : 'local trial'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.refreshAiButton}
+                  onPress={refreshAccount}
+                  disabled={accountLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Refresh account and credit usage"
+                >
+                  <Ionicons name="refresh-outline" size={15} color={Colors.accent} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.usageMeterBlock}>
+                <View style={styles.usageMeterHeader}>
+                  <Text style={styles.usageMeterLabel}>AI reconstruction credits</Text>
+                  <Text style={styles.usageMeterCount}>
+                    {account?.usage.remainingCredits ?? 3} / {account?.usage.monthlyCredits ?? 3} left
+                  </Text>
+                </View>
+                <View style={styles.usageTrack}>
+                  <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
+                </View>
+                <Text style={styles.helpText}>
+                  Phase 1 scans use 1 credit. Specs and BOMs use 1 credit. 2D/3D visual generation uses 2 credits.
+                </Text>
+              </View>
+
+              <Text style={styles.compactLabel}>Your name</Text>
+              <TextInput
+                style={styles.input}
+                value={commercialProfile.name}
+                onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
+                accessibilityLabel="Commercial profile name"
+                placeholder="Repair shop owner"
+                placeholderTextColor={Colors.gray[500]}
+              />
+
+              <Text style={styles.compactLabel}>Work email</Text>
+              <TextInput
+                style={styles.input}
+                value={commercialProfile.email}
+                onChangeText={(email) => setCommercialProfile(prev => ({ ...prev, email }))}
+                accessibilityLabel="Commercial profile email"
+                placeholder="owner@example.com"
+                placeholderTextColor={Colors.gray[500]}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <Text style={styles.compactLabel}>Shop name</Text>
+              <TextInput
+                style={styles.input}
+                value={commercialProfile.shopName}
+                onChangeText={(shopName) => setCommercialProfile(prev => ({ ...prev, shopName }))}
+                accessibilityLabel="Repair shop name"
+                placeholder="Precision Repair Shop"
+                placeholderTextColor={Colors.gray[500]}
+              />
+
+              <View style={styles.commercialActionRow}>
+                <TouchableOpacity
+                  style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                  onPress={handleSaveCommercialProfile}
+                  disabled={accountLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save repair shop profile"
+                >
+                  <Ionicons name="save-outline" size={16} color={Colors.accent} />
+                  <Text style={styles.adminButtonText}>{accountLoading ? 'Saving...' : 'Save Profile'}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                  onPress={() => handleCommercialAction(openBillingPortal)}
+                  disabled={accountLoading || !isWebBillingAvailable}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open web billing portal"
+                >
+                  <Ionicons name="card-outline" size={16} color={Colors.accent} />
+                  <Text style={styles.adminButtonText}>Billing</Text>
+                </TouchableOpacity>
+              </View>
+
+              {Platform.OS === 'web' ? (
+                <View style={styles.webPlanRow}>
+                  {account?.plans.filter(plan => plan.id !== 'free').map(plan => (
+                    <TouchableOpacity
+                      key={plan.id}
+                      style={styles.webPlanButton}
+                      onPress={() => handleCommercialAction(() => beginCheckout(plan.id))}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Start ${plan.label} checkout`}
+                    >
+                      <Text style={styles.webPlanButtonTitle}>{plan.label}</Text>
+                      <Text style={styles.webPlanButtonMeta}>${plan.priceMonthly}/mo</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.helpText}>
+                  Mobile tester builds show plan and credit status only. Stripe checkout stays on the hosted web account page for store review safety.
+                </Text>
+              )}
+
+              {(commercialStatus || accountError) && (
+                <Text style={styles.adminStatusText}>{commercialStatus || accountError}</Text>
+              )}
             </View>
 
             {localProviderSettingsEnabled ? (
@@ -420,7 +594,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 <Text style={styles.policyTitle}>Inventory Source</Text>
               </View>
               <Text style={styles.policyText}>
-                Advanced admin settings for the preconfigured inventory source used during Phase 2 matching.
+                Advanced admin settings for the preconfigured inventory source used during Phase 2 matching. Team plans can connect CSV, API, or ERP inventory sources.
               </Text>
 
               <Text style={styles.compactLabel}>Source name</Text>
@@ -736,6 +910,104 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   themeToggleTextActive: {
     color: Colors.black,
+  },
+  accountPanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 24,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  planSummaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  planBadge: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.accent + '14',
+  },
+  planBadgeLabel: {
+    color: Colors.accent,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  planBadgeMeta: {
+    color: Colors.gray[400],
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  usageMeterBlock: {
+    marginBottom: 12,
+  },
+  usageMeterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 6,
+  },
+  usageMeterLabel: {
+    color: Colors.gray[300],
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  usageMeterCount: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  usageTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: Colors.gray[800],
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  usageFill: {
+    height: '100%',
+    backgroundColor: Colors.accent,
+  },
+  commercialActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 4,
+    marginBottom: 10,
+  },
+  webPlanRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  webPlanButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: Colors.accent + '12',
+  },
+  webPlanButtonTitle: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  webPlanButtonMeta: {
+    color: Colors.gray[400],
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 3,
   },
   providerRow: {
     flexDirection: 'row',

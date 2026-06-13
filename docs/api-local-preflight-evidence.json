@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-13T19:39:12.336Z",
+  "startedAt": "2026-06-13T19:39:12.294Z",
+  "apiBaseUrl": "http://localhost:3001",
+  "localApi": true,
+  "allowOpenCors": false,
+  "automationBypass": {
+    "vercelBypassConfigured": false,
+    "setBypassCookie": ""
+  },
+  "checks": {
+    "health": {
+      "status": "pass",
+      "httpStatus": 200,
+      "service": "reversr-rebuild-api",
+      "runtimeConfig": {
+        "corsMode": "open",
+        "allowedCorsOriginCount": 0,
+        "requestBodyLimit": "50mb",
+        "adminRoutesEnabled": false,
+        "registryWritesEnabled": false,
+        "geminiConfigured": false,
+        "privateNetworkConnectorsEnabled": false
+      },
+      "geminiKeyCount": 0,
+      "availableGeminiKeyCount": 0,
+      "authenticatedConnectorsEnabled": false,
+      "credentialRegistryEnabled": false
+    },
+    "bundledFarmBotInventoryValidation": {
+      "status": "pass",
+      "httpStatus": 200,
+      "recordCount": 1
+    },
+    "adminCredentialRegistry": {
+      "status": "skipped"
+    }
+  }
+}
