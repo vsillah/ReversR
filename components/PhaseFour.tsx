@@ -26,6 +26,15 @@ import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 import ManufacturingStudio from './ManufacturingStudio';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
+import {
+  ReviewerApproval,
+  ReviewerApprovalRecord,
+  ReviewerApprovalStatus,
+  buildReviewerApproval,
+  createReviewerApprovalRecord,
+  getLatestReviewerApprovalRecord,
+  getLatestSavedVendorApproval,
+} from '../utils/reviewerApprovalRecords';
 
 const BUILD_STEPS: LoadingStep[] = [
   { id: 'analyzing', label: 'Analyzing specifications' },
@@ -40,7 +49,10 @@ interface Props {
   imageUrl: string | null;
   multiAngleImages?: AngleImage[];
   threeDScene: ThreeDSceneDescriptor | null;
+  reconstructionId: string;
+  reviewerApprovalRecords?: ReviewerApprovalRecord[];
   onBOMGenerated: (bom: BillOfMaterials) => void;
+  onReviewerApprovalRecordSaved: (record: ReviewerApprovalRecord) => void | Promise<void>;
   onGoToDesign: () => void;
   onBack: () => void;
   onReset: () => void;
@@ -84,6 +96,33 @@ const MANUFACTURERS = [
   },
 ];
 
+const REVIEWER_APPROVAL_OPTIONS: Array<{
+  status: ReviewerApprovalStatus;
+  label: string;
+  description: string;
+}> = [
+  {
+    status: 'pending_review',
+    label: 'Pending',
+    description: 'Packet is not approved for vendor submission.',
+  },
+  {
+    status: 'approved_for_vendor_review',
+    label: 'Approve Vendor Review',
+    description: 'Qualified reviewer allows a quote/request draft, not fabrication.',
+  },
+  {
+    status: 'changes_requested',
+    label: 'Changes Requested',
+    description: 'Reviewer needs edits before vendor submission.',
+  },
+  {
+    status: 'blocked',
+    label: 'Blocked',
+    description: 'Safety, source, CAD, or treatment issue blocks release.',
+  },
+];
+
 type QuoteVendor = {
   vendorName: string;
   serviceType: string;
@@ -119,6 +158,11 @@ type ManufacturerQuotePacket = {
     has3DScene: boolean;
     expectedFileTypes: string[];
   };
+  aiCadGate: ManufacturingHandoff['aiCadGate'];
+  materialTreatmentGuidance: ManufacturingHandoff['materialTreatmentGuidance'];
+  reviewerApproval: ReviewerApproval;
+  latestReviewerApprovalRecord?: ReviewerApprovalRecord;
+  reviewerApprovalRecords: ReviewerApprovalRecord[];
   manufacturingHandoff: ManufacturingHandoff;
   vendorTargets: QuoteVendor[];
   quoteRouting: {
@@ -137,7 +181,10 @@ export default function PhaseFour({
   imageUrl,
   multiAngleImages = [],
   threeDScene,
+  reconstructionId,
+  reviewerApprovalRecords = [],
   onBOMGenerated,
+  onReviewerApprovalRecordSaved,
   onGoToDesign,
   onBack,
   onReset,
@@ -158,6 +205,11 @@ export default function PhaseFour({
   const [selectedVendorName, setSelectedVendorName] = useState('');
   const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('');
   const [quoteAdminNotes, setQuoteAdminNotes] = useState('');
+  const [reviewerApprovalStatus, setReviewerApprovalStatus] = useState<ReviewerApprovalStatus>('pending_review');
+  const [reviewerName, setReviewerName] = useState('');
+  const [reviewerRole, setReviewerRole] = useState('');
+  const [reviewerNotes, setReviewerNotes] = useState('');
+  const [savedReviewRecords, setSavedReviewRecords] = useState<ReviewerApprovalRecord[]>(reviewerApprovalRecords);
   const angleLabels = useMemo(() => (
     multiAngleImages
       .filter(image => !!image.imageData)
@@ -171,6 +223,20 @@ export default function PhaseFour({
     has2D,
     angleLabels,
   }), [innovation, spec, localBom, threeDScene, has2D, angleLabels]);
+  const reviewerApproval = useMemo<ReviewerApproval>(() => (
+    buildReviewerApproval(reviewerApprovalStatus, reviewerName, reviewerRole, reviewerNotes)
+  ), [reviewerApprovalStatus, reviewerName, reviewerRole, reviewerNotes]);
+  const latestReviewRecord = useMemo(() => (
+    getLatestReviewerApprovalRecord(savedReviewRecords)
+  ), [savedReviewRecords]);
+  const savedVendorApprovalRecord = useMemo(() => (
+    getLatestSavedVendorApproval(savedReviewRecords)
+  ), [savedReviewRecords]);
+  const canPrepareVendorRequest = !!localBom && !!savedVendorApprovalRecord;
+
+  useEffect(() => {
+    setSavedReviewRecords(reviewerApprovalRecords);
+  }, [reviewerApprovalRecords]);
 
   useEffect(() => {
     // Scroll to top on mount
@@ -219,13 +285,73 @@ export default function PhaseFour({
     return vendorTargets.find(vendor => vendor.vendorName === selectedVendorName) || vendorTargets[0];
   };
 
+  const getReviewStatusLabel = (statusValue: ReviewerApprovalStatus) => (
+    REVIEWER_APPROVAL_OPTIONS.find(option => option.status === statusValue)?.label || statusValue
+  );
+
+  const formatReviewDate = (dateString?: string): string => {
+    if (!dateString) return 'unsaved';
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return dateString;
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const handleSaveReviewerApprovalRecord = async () => {
+    const trimmedName = reviewerName.trim();
+    const trimmedRole = reviewerRole.trim();
+    const trimmedNotes = reviewerNotes.trim();
+
+    if (reviewerApprovalStatus === 'approved_for_vendor_review' && (!trimmedName || !trimmedRole)) {
+      setAlert({
+        visible: true,
+        title: 'Reviewer Identity Required',
+        message: 'Add reviewer name and role before saving an approval record for vendor review.',
+        type: 'info',
+      });
+      return;
+    }
+
+    if ((reviewerApprovalStatus === 'changes_requested' || reviewerApprovalStatus === 'blocked') && !trimmedNotes) {
+      setAlert({
+        visible: true,
+        title: 'Reviewer Notes Required',
+        message: 'Add notes explaining the requested changes or blocker before saving this review record.',
+        type: 'info',
+      });
+      return;
+    }
+
+    const record = createReviewerApprovalRecord({
+      reconstructionId,
+      innovation,
+      manufacturingHandoff,
+      approval: buildReviewerApproval(reviewerApprovalStatus, reviewerName, reviewerRole, reviewerNotes, new Date().toISOString()),
+    });
+
+    const nextRecords = [record, ...savedReviewRecords];
+    setSavedReviewRecords(nextRecords);
+    await onReviewerApprovalRecordSaved(record);
+    setAlert({
+      visible: true,
+      title: 'Review Record Saved',
+      message: reviewerApprovalStatus === 'approved_for_vendor_review'
+        ? 'Saved approval now unlocks vendor request preparation. Fabrication remains blocked.'
+        : 'Reviewer decision saved to the reconstruction record.',
+      type: 'success',
+    });
+  };
+
   const getQuoteRequestMessage = (selectedVendor?: QuoteVendor) => [
     `Please review the attached reconstruction package for ${innovation.machineName || innovation.conceptName}.`,
     `Requested service: ${selectedVendor?.serviceType || '3D modeling, fabrication feasibility, and quote review'}.`,
-    `We need a quote for 3D modeling, fabrication feasibility, expected lead time, and any missing source files required before production.`,
+    `We need a quote for CAD draft qualification, 3D modeling, fabrication feasibility, expected lead time, and any missing source files required before production.`,
     `Use the BOM, assembly sequence, technical spec, pricing envelope, and inventory match evidence as review inputs.`,
+    `AI CAD gate: ${manufacturingHandoff.aiCadGate.status}. Recommended lane: ${manufacturingHandoff.aiCadGate.recommendedCadLane}.`,
+    `Material/treatment review: confirm material choice, treatment compatibility, finish requirements, tolerance impact after treatment, lead time impact, and inspection needs.`,
+    `Reviewer approval: ${reviewerApproval.status}. Vendor submission approved: ${reviewerApproval.approvedForVendorSubmission ? 'yes' : 'no'}.`,
+    latestReviewRecord ? `Latest saved review record: ${latestReviewRecord.recordId}; ${latestReviewRecord.status}; saved ${latestReviewRecord.savedAt}.` : 'Latest saved review record: none.',
     quoteAdminNotes.trim() ? `Additional notes from the admin:\n${quoteAdminNotes.trim()}` : '',
-    `Do not fabricate or order parts until a qualified reviewer confirms machine identity, tolerances, safety constraints, and revision compatibility.`,
+    `Do not fabricate, print, submit to production, or order parts until a qualified reviewer confirms machine identity, source dimensions, CAD editability, tolerances, material treatments, safety constraints, and revision compatibility.`,
   ].filter(Boolean).join('\n\n');
 
   const buildQuotePacket = (bomForPacket: BillOfMaterials): ManufacturerQuotePacket => {
@@ -233,7 +359,7 @@ export default function PhaseFour({
     const selectedVendor = getSelectedVendor();
     return {
       packetType: 'manufacturer_quote_request',
-      packetVersion: '0.1-review',
+      packetVersion: '0.2-review',
       generatedAt: new Date().toISOString(),
       humanReviewRequired: true,
       machine: {
@@ -257,8 +383,13 @@ export default function PhaseFour({
         has2D,
         angleLabels,
         has3DScene: has3D,
-        expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'STEP/native CAD', 'PDF detail drawings', 'OBJ/STL if generated', 'PNG visual references if generated'],
+        expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'CAD draft source when generated', 'STEP/native CAD after CAD qualification', 'PDF detail drawings', 'material treatment notes', 'STL/3MF CAD draft if generated', 'PNG visual references if generated'],
       },
+      aiCadGate: manufacturingHandoff.aiCadGate,
+      materialTreatmentGuidance: manufacturingHandoff.materialTreatmentGuidance,
+      reviewerApproval,
+      latestReviewerApprovalRecord: latestReviewRecord || undefined,
+      reviewerApprovalRecords: savedReviewRecords,
       manufacturingHandoff,
       vendorTargets,
       quoteRouting: {
@@ -321,6 +452,9 @@ export default function PhaseFour({
         billOfMaterials: localBom,
         manufacturingHandoff,
         manufacturerQuotePacket: quotePacket,
+        reviewerApproval,
+        reviewerApprovalRecords: savedReviewRecords,
+        latestReviewerApprovalRecord: latestReviewRecord,
         exportedAt: new Date().toISOString(),
       };
 
@@ -381,6 +515,10 @@ export default function PhaseFour({
       setAlert({visible: true, title: 'BOM Required', message: 'Generate the Bill of Materials before preparing a vendor quote request.', type: 'info'});
       return;
     }
+    if (!savedVendorApprovalRecord) {
+      setAlert({visible: true, title: 'Saved Reviewer Approval Required', message: 'Save an Approved for vendor review record before preparing a vendor request email.', type: 'info'});
+      return;
+    }
 
     const selectedVendor = getSelectedVendor();
     const subject = `Quote request: ${innovation.machineName || innovation.conceptName}`;
@@ -392,8 +530,11 @@ export default function PhaseFour({
       '- BOM CSV',
       '- Assembly sequence',
       '- Technical specifications',
+      '- AI CAD gate and CAD draft readiness notes',
+      '- Material treatment guidance',
+      '- Reviewer approval record',
       has2D ? '- 2D visual references' : '- 2D visual references: pending',
-      has3D ? '- OBJ/STL or 3D scene reference' : '- OBJ/STL or 3D scene reference: pending',
+      has3D ? '- 3D scene visual reference' : '- 3D scene visual reference: pending',
       '',
       'Inventory match:',
       `- Machine: ${innovation.machineName || innovation.conceptName}`,
@@ -411,7 +552,9 @@ export default function PhaseFour({
       'Manufacturing review requirements:',
       `- Nominal envelope: ${manufacturingHandoff.envelope.widthMm} x ${manufacturingHandoff.envelope.depthMm} x ${manufacturingHandoff.envelope.heightMm} mm`,
       `- Datum scheme: ${manufacturingHandoff.datumScheme.map(datum => datum.datum).join(', ')}`,
-      '- Confirm STEP/native CAD, PDF detail drawings, tolerance stack, material selection, DfM concerns, lead time, and quote assumptions before any fabrication begins.',
+      `- AI CAD gate: ${manufacturingHandoff.aiCadGate.status}; recommended lane: ${manufacturingHandoff.aiCadGate.recommendedCadLane}`,
+      `- Saved reviewer approval: ${savedVendorApprovalRecord.recordId}; ${savedVendorApprovalRecord.status}; saved ${savedVendorApprovalRecord.savedAt}`,
+      '- Confirm CAD draft source, STEP/native CAD, PDF detail drawings, tolerance stack, material selection, treatment compatibility, finish requirements, DfM concerns, lead time, and quote assumptions before any fabrication begins.',
     ].filter(Boolean).join('\n');
 
     const recipient = quoteRecipientEmail.trim();
@@ -630,9 +773,10 @@ export default function PhaseFour({
             <Text style={styles.exportInfoItem}>• Technical specifications</Text>
             <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
             <Text style={styles.exportInfoItem}>• Manufacturer quote request packet</Text>
-            <Text style={styles.exportInfoItem}>• Manufacturing studio dimensions, datums, and DfM gates</Text>
-            <Text style={styles.exportInfoItem}>• 2D sketches (PNG)</Text>
-            <Text style={styles.exportInfoItem}>• 3D scene descriptor</Text>
+            <Text style={styles.exportInfoItem}>• AI CAD gate, dimensions, datums, and DfM gates</Text>
+            <Text style={styles.exportInfoItem}>• Material treatment review assumptions</Text>
+            <Text style={styles.exportInfoItem}>• 2D visual references (PNG)</Text>
+            <Text style={styles.exportInfoItem}>• 3D scene descriptor as visual reference</Text>
             <Text style={styles.exportInfoItem}>• Export timestamp</Text>
           </View>
         </View>
@@ -742,13 +886,115 @@ export default function PhaseFour({
           <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
           <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
         </View>
+        <View style={styles.reviewerApprovalCard}>
+          <View style={styles.quotePacketHeader}>
+            <Ionicons name="shield-checkmark-outline" size={20} color={Colors.orange[300]} />
+            <Text style={styles.quotePacketTitle}>Reviewer Approval</Text>
+          </View>
+          <Text style={styles.quotePacketText}>
+            Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass.
+          </Text>
+          <View style={styles.approvalChoiceGrid}>
+            {REVIEWER_APPROVAL_OPTIONS.map(option => {
+              const isSelected = reviewerApprovalStatus === option.status;
+              return (
+                <TouchableOpacity
+                  key={option.status}
+                  style={[styles.approvalChoiceButton, isSelected && styles.approvalChoiceButtonActive]}
+                  onPress={() => setReviewerApprovalStatus(option.status)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Set reviewer approval status to ${option.label}`}
+                  accessibilityState={{ selected: isSelected }}
+                >
+                  <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
+                    {option.label}
+                  </Text>
+                  <Text style={styles.approvalChoiceDescription}>{option.description}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={styles.quoteFieldLabel}>Reviewer name</Text>
+          <TextInput
+            style={styles.quoteInput}
+            value={reviewerName}
+            onChangeText={setReviewerName}
+            accessibilityLabel="Reviewer name"
+            placeholder="Reviewer name"
+            placeholderTextColor={Colors.gray[600]}
+          />
+          <Text style={styles.quoteFieldLabel}>Reviewer role</Text>
+          <TextInput
+            style={styles.quoteInput}
+            value={reviewerRole}
+            onChangeText={setReviewerRole}
+            accessibilityLabel="Reviewer role"
+            placeholder="CAD reviewer, machinist, engineer, or vendor"
+            placeholderTextColor={Colors.gray[600]}
+          />
+          <Text style={styles.quoteFieldLabel}>Reviewer notes</Text>
+          <TextInput
+            style={[styles.quoteInput, styles.quoteNotesInput]}
+            value={reviewerNotes}
+            onChangeText={setReviewerNotes}
+            accessibilityLabel="Reviewer approval notes"
+            placeholder="Record source-dimension, CAD, material treatment, DfM, or release concerns."
+            placeholderTextColor={Colors.gray[600]}
+            multiline
+          />
+          <TouchableOpacity
+            style={styles.saveReviewButton}
+            onPress={handleSaveReviewerApprovalRecord}
+            accessibilityRole="button"
+            accessibilityLabel="Save reviewer approval record"
+          >
+            <Ionicons name="save-outline" size={18} color={Colors.black} />
+            <Text style={styles.saveReviewButtonText}>Save Review Record</Text>
+          </TouchableOpacity>
+          <View style={[styles.approvalStatusBox, !!savedVendorApprovalRecord && styles.approvalStatusBoxApproved]}>
+            <Ionicons
+              name={savedVendorApprovalRecord ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+              size={16}
+              color={savedVendorApprovalRecord ? Colors.accent : Colors.orange[300]}
+            />
+            <Text style={styles.approvalStatusText}>
+              {savedVendorApprovalRecord
+                ? `Vendor request preparation is enabled by saved review ${savedVendorApprovalRecord.recordId}. Fabrication is still not approved.`
+                : 'Vendor request preparation remains locked until an Approved for vendor review record is saved.'}
+            </Text>
+          </View>
+          {latestReviewRecord ? (
+            <View style={styles.reviewHistoryBox}>
+              <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
+              {savedReviewRecords.slice(0, 3).map(record => (
+                <View key={record.recordId} style={styles.reviewHistoryItem}>
+                  <View style={styles.reviewHistoryItemHeader}>
+                    <Text style={styles.reviewHistoryStatus}>{getReviewStatusLabel(record.status)}</Text>
+                    <Text style={styles.reviewHistoryDate}>{formatReviewDate(record.savedAt)}</Text>
+                  </View>
+                  <Text style={styles.reviewHistoryMeta} numberOfLines={2}>
+                    {record.reviewerName || 'Unnamed reviewer'}{record.reviewerRole ? ` | ${record.reviewerRole}` : ''} | {record.recordId}
+                  </Text>
+                  {record.notes ? (
+                    <Text style={styles.reviewHistoryNotes} numberOfLines={2}>{record.notes}</Text>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.reviewHistoryBox}>
+              <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
+              <Text style={styles.reviewHistoryEmpty}>No saved reviewer decision yet.</Text>
+            </View>
+          )}
+        </View>
         <View style={styles.quotePacketCard}>
           <View style={styles.quotePacketHeader}>
             <Ionicons name="send-outline" size={20} color={Colors.accent} />
             <Text style={styles.quotePacketTitle}>Quote Packet</Text>
           </View>
           <Text style={styles.quotePacketText}>
-            Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, required files, and a vendor request message.
+            Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
           </Text>
           <TouchableOpacity
             style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
@@ -769,7 +1015,7 @@ export default function PhaseFour({
             <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
           </View>
           <Text style={styles.quotePacketText}>
-            Select a vendor target and prepare a reviewable email draft. Attach the exported packet and files before sending.
+            Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
           </Text>
           <Text style={styles.quoteFieldLabel}>Vendor target</Text>
           <View style={styles.vendorChoiceGrid}>
@@ -813,15 +1059,15 @@ export default function PhaseFour({
             multiline
           />
           <TouchableOpacity
-            style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
+            style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
             onPress={handlePrepareQuoteEmail}
-            disabled={!localBom}
+            disabled={!canPrepareVendorRequest}
             accessibilityRole="button"
             accessibilityLabel="Prepare vendor quote request email"
-            accessibilityState={{ disabled: !localBom }}
+            accessibilityState={{ disabled: !canPrepareVendorRequest }}
           >
             <Text style={styles.quotePacketButtonText}>
-              {localBom ? 'Prepare Request Email' : 'Generate BOM First'}
+              {!localBom ? 'Generate BOM First' : canPrepareVendorRequest ? 'Prepare Request Email' : 'Saved Approval Required'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -842,7 +1088,7 @@ export default function PhaseFour({
           ))}
         </View>
         <Text style={styles.manufacturerNote}>
-          Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, and any generated CAD, OBJ/STL, or visual references to request review and quotes.
+          Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
         </Text>
       </View>
 
@@ -1462,6 +1708,14 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
   },
+  reviewerApprovalCard: {
+    backgroundColor: 'rgba(251, 191, 36, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.3)',
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
   quotePacketHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1507,6 +1761,125 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   vendorChoiceTextActive: {
     color: Colors.accent,
+  },
+  approvalChoiceGrid: {
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  approvalChoiceButton: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  approvalChoiceButtonActive: {
+    borderColor: Colors.orange[300],
+    backgroundColor: 'rgba(251, 191, 36, 0.12)',
+  },
+  approvalChoiceLabel: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  approvalChoiceLabelActive: {
+    color: Colors.orange[300],
+  },
+  approvalChoiceDescription: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+  },
+  approvalStatusBox: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(251, 191, 36, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.25)',
+    borderRadius: 8,
+    padding: Spacing.sm,
+  },
+  approvalStatusBoxApproved: {
+    backgroundColor: 'rgba(0, 255, 157, 0.08)',
+    borderColor: 'rgba(0, 255, 157, 0.25)',
+  },
+  approvalStatusText: {
+    flex: 1,
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+  },
+  saveReviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.orange[300],
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  saveReviewButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+  },
+  reviewHistoryBox: {
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.2)',
+    borderRadius: 8,
+    padding: Spacing.sm,
+    marginTop: Spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  reviewHistoryTitle: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    marginBottom: Spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  reviewHistoryItem: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingTop: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  reviewHistoryItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+    marginBottom: 2,
+  },
+  reviewHistoryStatus: {
+    flex: 1,
+    color: Colors.orange[300],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+  },
+  reviewHistoryDate: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+  },
+  reviewHistoryMeta: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+  },
+  reviewHistoryNotes: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  reviewHistoryEmpty: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
   },
   quoteInput: {
     backgroundColor: 'rgba(0,0,0,0.3)',

@@ -5,6 +5,13 @@ import {
   TechnicalSpec,
   ThreeDSceneDescriptor,
 } from '../hooks/useGemini';
+import {
+  AiCadGate,
+  MaterialTreatmentGuidance,
+  buildAiCadGate,
+  buildMaterialTreatmentGuidance,
+  inferCadExpectedEnvironment,
+} from './cadQualification';
 
 export type ManufacturingEnvelope = {
   widthMm: number;
@@ -65,6 +72,8 @@ export type ManufacturingHandoff = {
     tolerance: string;
     inspectionMethod: string;
   }>;
+  aiCadGate: AiCadGate;
+  materialTreatmentGuidance: MaterialTreatmentGuidance[];
   drawingPackage: {
     requiredFiles: string[];
     availableReferences: string[];
@@ -334,13 +343,27 @@ export const buildManufacturingHandoff = ({
   const envelope = inferEnvelope(innovation, scene);
   const partMeasurements = buildPartMeasurements(bom, innovation, envelope);
   const sceneMeasurements = buildSceneMeasurements(scene, envelope);
+  const expectedEnvironment = inferCadExpectedEnvironment(innovation);
+  const materialTreatmentGuidance = buildMaterialTreatmentGuidance(partMeasurements, expectedEnvironment);
+  const aiCadGate = buildAiCadGate({
+    innovation,
+    spec,
+    bom,
+    partMeasurements,
+    referenceImages: innovation.referenceImages,
+    sourceLinks: innovation.sourceLinks,
+    has3DScene: !!scene,
+    envelopeSource: envelope.source,
+    expectedEnvironment,
+    materialTreatmentGuidance,
+  });
 
   return {
     packetType: 'manufacturing_review_handoff',
-    packetVersion: '0.2-review',
+    packetVersion: '0.3-review',
     generatedAt: new Date().toISOString(),
     humanReviewRequired: true,
-    safetyBoundary: 'Nominal dimensions, tolerances, and process notes are for manufacturer review. Qualified CAD, DfM, safety, and first-article inspection signoff are required before machining or fabrication.',
+    safetyBoundary: 'AI may draft, route, inspect, and reject CAD readiness. Nominal dimensions, tolerances, material treatments, and process notes are for manufacturer review. Qualified CAD, DfM, safety, and first-article inspection signoff are required before machining, printing, vendor submission, ordering, or machine operation.',
     envelope,
     datumScheme: [
       { datum: 'A', reference: 'base or primary mounting plane', purpose: 'sets vertical stack-up and flatness inspection' },
@@ -350,24 +373,32 @@ export const buildManufacturingHandoff = ({
     partMeasurements,
     sceneMeasurements,
     criticalFeatures: buildCriticalFeatures(innovation),
+    aiCadGate,
+    materialTreatmentGuidance,
     drawingPackage: {
-      requiredFiles: ['STEP assembly', 'native CAD or Parasolid export', 'PDF detail drawings', 'BOM CSV', 'inspection plan', 'quote packet JSON'],
+      requiredFiles: ['CAD draft source or KCL/CadQuery script', 'STEP assembly', 'native CAD or Parasolid export', 'PDF detail drawings', 'BOM CSV', 'material treatment notes', 'inspection plan', 'quote packet JSON'],
       availableReferences: [
         has2D ? `2D views: ${angleLabels.length ? angleLabels.join(', ') : 'single generated view'}` : '2D views pending',
-        scene ? `3D scene descriptor with ${scene.objects.length} objects` : '3D scene pending',
+        scene ? `3D scene descriptor with ${scene.objects.length} visual-reference objects` : '3D scene pending',
         bom ? `BOM v${bom.version} with ${bom.items.length} line items` : 'BOM pending',
+        `AI CAD gate: ${aiCadGate.status}`,
       ],
-      missingBeforeMachining: ['source CAD dimensions verified against inventory revision', 'material certificates where required', 'critical-to-function tolerance approval', 'first-article inspection signoff'],
+      missingBeforeMachining: ['source CAD dimensions verified against inventory revision', 'CAD draft qualified in CAD software', 'material treatment compatibility confirmed by vendor', 'material certificates where required', 'critical-to-function tolerance approval after treatment', 'first-article inspection signoff'],
     },
     processPlan: [
-      { stage: 'CAD reconstruction', output: 'validated STEP/native assembly and per-part drawings', acceptanceGate: 'admin confirms machine ID, revision, and source dimensions' },
-      { stage: 'DfM review', output: 'process, material, tolerance, and quote assumptions', acceptanceGate: 'manufacturer flags missing files or impossible tolerances' },
+      { stage: 'AI CAD readiness gate', output: 'draft, reject, or route recommendation for CAD work', acceptanceGate: 'AI gate has source evidence, missing inputs, risk flags, and recommended lane' },
+      { stage: 'CAD draft', output: 'CadQuery/Zoo/vendor draft source plus STEP/STL/3MF where available', acceptanceGate: 'draft dimensions, units, material, and treatment assumptions are present' },
+      { stage: 'CAD qualification', output: 'validated STEP/native assembly and per-part drawings', acceptanceGate: 'qualified reviewer confirms machine ID, revision, source dimensions, and CAD editability' },
+      { stage: 'Material and treatment review', output: 'confirmed base material, finish, coating/plating/anodize/passivation/heat-treatment plan', acceptanceGate: 'vendor confirms treatment compatibility, tolerance impact, inspection method, and lead time' },
+      { stage: 'DfM review', output: 'process, material, tolerance, treatment, and quote assumptions', acceptanceGate: 'manufacturer flags missing files, impossible tolerances, or treatment conflicts' },
       { stage: 'prototype fabrication', output: 'first article or fit-check batch', acceptanceGate: 'critical features pass inspection plan' },
       { stage: 'assembly and calibration', output: 'reconstructed machine with calibration evidence', acceptanceGate: 'functional and safety checks pass before operation' },
     ],
     reviewChecklist: [
       'Confirm the scanned machine and inventory record are the same revision.',
       'Replace nominal dimensions with source CAD or measured dimensions before machining.',
+      'Confirm material grade, surface finish, and any heat treatment, coating, plating, anodize, powder coat, passivation, UV treatment, or post-processing.',
+      'Confirm treatment effects on fit surfaces, holes, flatness, corrosion resistance, wear resistance, and lead time.',
       'Confirm safety-critical loads, motion limits, electrical ratings, and guarding.',
       'Request manufacturer DfM feedback before ordering production quantities.',
       'Attach inspection evidence to the final reconstruction packet.',

@@ -34,6 +34,9 @@ yarn-error.*
 # Local connector credential registry
 .reversr-connector-secrets.json
 
+# Local CAD proof artifacts
+.local/
+
 # Generated store review screenshots
 docs/store-screenshots/generated/
 

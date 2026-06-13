@@ -36,6 +36,7 @@ import {
   saveInnovation,
   createNewInnovation,
 } from "../hooks/useStorage";
+import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
 
 interface MutationContext {
   id: string;
@@ -50,6 +51,7 @@ interface MutationContext {
   threeDScene: ThreeDSceneDescriptor | null;
   imageUrl: string | null;
   bom: BillOfMaterials | null;
+  reviewerApprovalRecords: ReviewerApprovalRecord[];
 }
 
 const createEmptyContext = (): MutationContext => {
@@ -67,6 +69,7 @@ const createEmptyContext = (): MutationContext => {
     threeDScene: null,
     imageUrl: null,
     bom: null,
+    reviewerApprovalRecords: [],
   };
 };
 
@@ -118,6 +121,7 @@ export default function HomeScreen() {
         threeDScene: ctx.threeDScene,
         imageUrl: ctx.imageUrl,
         bom: ctx.bom,
+        reviewerApprovalRecords: ctx.reviewerApprovalRecords,
       };
       await saveInnovation(toSave);
     }
@@ -264,6 +268,15 @@ export default function HomeScreen() {
     await autoSave(newContext);
   };
 
+  const handleReviewerApprovalRecordSaved = async (record: ReviewerApprovalRecord) => {
+    const newContext = {
+      ...context,
+      reviewerApprovalRecords: [record, ...context.reviewerApprovalRecords],
+    };
+    setContext(newContext);
+    await autoSave(newContext);
+  };
+
   const handleGoToDesign = async () => {
     const newContext = {
       ...context,
@@ -288,6 +301,7 @@ export default function HomeScreen() {
           threeDScene: null,
           imageUrl: null,
           bom: null,
+          reviewerApprovalRecords: [],
         };
         setImageGenStatus('idle');
         setGeneratedImageBase64(null);
@@ -300,6 +314,7 @@ export default function HomeScreen() {
           threeDScene: null,
           imageUrl: null,
           bom: null,
+          reviewerApprovalRecords: [],
         };
         setImageGenStatus('idle');
         setGeneratedImageBase64(null);
@@ -372,6 +387,7 @@ export default function HomeScreen() {
       threeDScene: null,
       imageUrl: null,
       bom: null,
+      reviewerApprovalRecords: [],
     };
     setContext(newContext);
     setImageGenStatus('idle');
@@ -430,6 +446,7 @@ export default function HomeScreen() {
         threeDScene: null,
         imageUrl: null,
         bom: null,
+        reviewerApprovalRecords: [],
       };
       setImageGenStatus('idle');
       setGeneratedImageBase64(null);
@@ -442,6 +459,7 @@ export default function HomeScreen() {
         threeDScene: null,
         imageUrl: null,
         bom: null,
+        reviewerApprovalRecords: [],
       };
       setImageGenStatus('idle');
       setGeneratedImageBase64(null);
@@ -484,6 +502,7 @@ export default function HomeScreen() {
                 threeDScene: null,
                 imageUrl: null,
                 bom: null,
+                reviewerApprovalRecords: [],
               };
               setContext(freshContext);
               setImageGenStatus('idle');
@@ -510,6 +529,7 @@ export default function HomeScreen() {
                 threeDScene: null,
                 imageUrl: null,
                 bom: null,
+                reviewerApprovalRecords: [],
               };
               setContext(freshContext);
               setImageGenStatus('idle');
@@ -552,6 +572,7 @@ export default function HomeScreen() {
       threeDScene: saved.threeDScene,
       imageUrl: saved.imageUrl,
       bom: saved.bom,
+      reviewerApprovalRecords: saved.reviewerApprovalRecords || [],
     });
     setShowHistory(false);
     setStarted(true);
@@ -725,7 +746,10 @@ export default function HomeScreen() {
               imageUrl={context.imageUrl}
               multiAngleImages={generatedMultiAngleImages}
               threeDScene={context.threeDScene}
+              reconstructionId={context.id}
+              reviewerApprovalRecords={context.reviewerApprovalRecords}
               onBOMGenerated={handleBOMGenerated}
+              onReviewerApprovalRecordSaved={handleReviewerApprovalRecordSaved}
               onGoToDesign={handleGoToDesign}
               onBack={handleBack}
               onReset={handleReset}

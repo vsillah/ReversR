@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnalysisResult, InnovationResult, TechnicalSpec, ThreeDSceneDescriptor, BillOfMaterials, MachineWorkflowKey } from './useGemini';
+import { ReviewerApprovalRecord } from '../utils/reviewerApprovalRecords';
 
 const STORAGE_KEY = 'reversr_innovations';
 const MAX_HISTORY = 50;
@@ -18,6 +19,7 @@ export interface SavedInnovation {
   threeDScene: ThreeDSceneDescriptor | null;
   imageUrl: string | null;
   bom: BillOfMaterials | null;
+  reviewerApprovalRecords: ReviewerApprovalRecord[];
 }
 
 export const generateId = (): string => {
@@ -107,5 +109,6 @@ export const createNewInnovation = (input: string = ''): SavedInnovation => {
     threeDScene: null,
     imageUrl: null,
     bom: null,
+    reviewerApprovalRecords: [],
   };
 };
