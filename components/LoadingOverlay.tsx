@@ -134,7 +134,7 @@ export default function LoadingOverlay({ visible, phase, currentStep, steps }: P
                       ]}
                     >
                       {isComplete && (
-                        <Ionicons name="checkmark" size={10} color={Colors.white} />
+                        <Ionicons name="checkmark" size={10} color={Colors.mode === 'dark' ? Colors.white : '#ffffff'} />
                       )}
                     </View>
                     <Text
@@ -193,14 +193,20 @@ export default function LoadingOverlay({ visible, phase, currentStep, steps }: P
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0, 0, 0, 0.85)' : 'rgba(248, 250, 252, 0.92)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: Spacing.lg,
   },
   content: {
     alignItems: 'center',
     padding: Spacing.xl,
+    width: '100%',
     maxWidth: 300,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    backgroundColor: Colors.panel,
   },
   iconContainer: {
     width: 100,
@@ -209,7 +215,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderWidth: 3,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0, 0, 0, 0.5)' : Colors.surface,
     marginBottom: Spacing.lg,
   },
   stepText: {
@@ -232,7 +238,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: Colors.gray[600],
+    borderColor: Colors.inputBorder,
     marginRight: Spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
@@ -241,19 +247,19 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderWidth: 0,
   },
   stepDotComplete: {
-    backgroundColor: Colors.gray[500],
-    borderColor: Colors.gray[500],
+    backgroundColor: Colors.success,
+    borderColor: Colors.success,
   },
   stepLabel: {
     fontSize: FontSizes.sm,
-    color: Colors.gray[500],
+    color: Colors.dimText,
   },
   stepLabelActive: {
-    color: Colors.white,
+    color: Colors.text,
     fontWeight: '600',
   },
   stepLabelComplete: {
-    color: Colors.gray[400],
+    color: Colors.mutedText,
   },
   dotsContainer: {
     flexDirection: 'row',
