@@ -338,9 +338,15 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     }
   };
 
-  const usagePercent = account?.usage.monthlyCredits
+  const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
+  const usagePercent = usageIsUnlimited
+    ? 100
+    : account?.usage.monthlyCredits
     ? Math.min(100, Math.round((account.usage.usedCredits / account.usage.monthlyCredits) * 100))
     : 0;
+  const usageLabel = usageIsUnlimited
+    ? `${account?.usage.usedCredits ?? 0} used / Unlimited`
+    : `${account?.usage.remainingCredits ?? 3} / ${account?.usage.monthlyCredits ?? 3} left`;
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
@@ -419,7 +425,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 <View style={styles.usageMeterHeader}>
                   <Text style={styles.usageMeterLabel}>AI reconstruction credits</Text>
                   <Text style={styles.usageMeterCount}>
-                    {account?.usage.remainingCredits ?? 3} / {account?.usage.monthlyCredits ?? 3} left
+                    {usageLabel}
                   </Text>
                 </View>
                 <View style={styles.usageTrack}>

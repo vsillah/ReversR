@@ -11,6 +11,7 @@ import {
   Animated,
   PanResponder,
   Platform,
+  Linking,
   Image as RNImage,
 } from 'react-native';
 // Note: expo-image doesn't work with base64 data URIs in Expo Go SDK 54
@@ -27,6 +28,8 @@ import {
   generateTechnicalSpec,
   generate2DImage,
   generate3DScene,
+  formatAiRequestError,
+  getCommercialUpgradeUrlFromError,
   AngleImage,
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
@@ -92,6 +95,7 @@ export default function PhaseThree({
     'generating_specs' | 'specs_ready' | 'generating_visual' | 'complete'
   >(initialStatus);
   const [error, setError] = useState<string | null>(null);
+  const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<VisualTab>('2d');
   const [specsExpanded, setSpecsExpanded] = useState(false);
   const [generationTime, setGenerationTime] = useState(0);
@@ -431,13 +435,9 @@ export default function PhaseThree({
     }
   };
 
-  const formatError = (e: unknown) => {
-    const err = e as { message?: string };
-    const msg = err.message || 'Unknown error occurred.';
-    if (msg.includes('429') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
-      return 'System is at capacity. Please wait and try again.';
-    }
-    return msg;
+  const applyRequestError = (e: unknown) => {
+    setCreditUpgradeUrl(getCommercialUpgradeUrlFromError(e));
+    setError(formatAiRequestError(e));
   };
 
   const fetchSpecs = useCallback(async () => {
@@ -448,6 +448,7 @@ export default function PhaseThree({
       return;
     }
     setError(null);
+    setCreditUpgradeUrl(null);
     setStatus('generating_specs');
     try {
       const result = await generateTechnicalSpec(innovation);
@@ -456,7 +457,7 @@ export default function PhaseThree({
       onComplete(result, existingThreeDScene ?? null, existingImageUrl ?? null);
     } catch (err: unknown) {
       console.error('Error generating specs:', err);
-      setError(formatError(err));
+      applyRequestError(err);
     }
   }, [innovation, existingSpec, existingImageUrl, existingThreeDScene, onComplete]);
 
@@ -480,6 +481,7 @@ export default function PhaseThree({
     if (!spec) return;
     setStatus('generating_visual');
     setError(null);
+    setCreditUpgradeUrl(null);
 
     try {
       const imageData = await generate2DImage(innovation);
@@ -489,7 +491,7 @@ export default function PhaseThree({
       onComplete(spec, threeDScene, imageUri);
     } catch (err: unknown) {
       console.error('Error generating 2D:', err);
-      setError(formatError(err));
+      applyRequestError(err);
       setStatus('specs_ready');
     }
   };
@@ -498,6 +500,7 @@ export default function PhaseThree({
     if (!spec) return;
     setStatus('generating_visual');
     setError(null);
+    setCreditUpgradeUrl(null);
 
     try {
       const scene = await generate3DScene(innovation);
@@ -507,7 +510,7 @@ export default function PhaseThree({
       setAlert({visible: true, title: '3D Scene Generated', message: `Created ${scene.objects.length} objects. Export to view in desktop apps.`, type: 'success'});
     } catch (err: unknown) {
       console.error('Error generating 3D:', err);
-      setError(formatError(err));
+      applyRequestError(err);
       setStatus('specs_ready');
     }
   };
@@ -576,6 +579,17 @@ export default function PhaseThree({
       <View style={styles.errorContainer}>
         <Text style={styles.errorTitle}>Connection Error</Text>
         <Text style={styles.errorMessage}>{error}</Text>
+        {creditUpgradeUrl && (
+          <TouchableOpacity
+            style={styles.upgradeButton}
+            onPress={() => Linking.openURL(creditUpgradeUrl)}
+            accessibilityRole="link"
+            accessibilityLabel="Open ReversR account billing page"
+          >
+            <Ionicons name="open-outline" size={16} color={Colors.black} />
+            <Text style={styles.upgradeButtonText}>Open Account</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.retryButton} onPress={fetchSpecs}>
           <Ionicons name="refresh" size={16} color={Colors.white} />
           <Text style={styles.retryButtonText}>Retry</Text>
@@ -945,7 +959,22 @@ export default function PhaseThree({
           )}
         </View>
 
-        {error && <Text style={styles.inlineError}>{error}</Text>}
+        {error && (
+          <View style={styles.inlineErrorPanel}>
+            <Text style={styles.inlineError}>{error}</Text>
+            {creditUpgradeUrl && (
+              <TouchableOpacity
+                style={styles.inlineUpgradeButton}
+                onPress={() => Linking.openURL(creditUpgradeUrl)}
+                accessibilityRole="link"
+                accessibilityLabel="Open ReversR account billing page"
+              >
+                <Ionicons name="open-outline" size={14} color={Colors.accent} />
+                <Text style={styles.inlineUpgradeButtonText}>Open Account</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
 
       {spec && (
@@ -1191,6 +1220,21 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.red[500],
     textAlign: 'center',
     marginBottom: Spacing.lg,
+  },
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: 8,
+    marginBottom: Spacing.sm,
+  },
+  upgradeButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   retryButton: {
     flexDirection: 'row',
@@ -1628,10 +1672,29 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.accent,
   },
   inlineError: {
-    padding: Spacing.md,
     fontSize: FontSizes.sm,
     color: Colors.red[500],
     textAlign: 'center',
+  },
+  inlineErrorPanel: {
+    padding: Spacing.md,
+    gap: Spacing.sm,
+    alignItems: 'center',
+  },
+  inlineUpgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  inlineUpgradeButtonText: {
+    color: Colors.accent,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   specPanel: {
     backgroundColor: Colors.black,

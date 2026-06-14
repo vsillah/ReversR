@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { getCommercialRequestHeaders } from './useCommercialization';
+import { CommercialBillingLinks, CommercialEntitlements, CommercialUsage, getCommercialRequestHeaders } from './useCommercialization';
 import { getApiBase } from '../utils/apiBase';
 
 const API_BASE = getApiBase();
@@ -296,16 +296,24 @@ interface APIErrorResponse {
   code?: string;
   retryAfter?: number;
   canRetry?: boolean;
+  upgradeRequired?: boolean;
+  billing?: CommercialBillingLinks;
+  usage?: CommercialUsage;
+  entitlements?: CommercialEntitlements;
   fallback?: {
     message: string;
     suggestion: string;
   };
 }
 
-class APIError extends Error {
+export class APIError extends Error {
   code: string;
   retryAfter: number;
   canRetry: boolean;
+  upgradeRequired: boolean;
+  billing?: CommercialBillingLinks;
+  usage?: CommercialUsage;
+  entitlements?: CommercialEntitlements;
   fallback?: { message: string; suggestion: string };
 
   constructor(response: APIErrorResponse) {
@@ -313,9 +321,34 @@ class APIError extends Error {
     this.code = response.code || 'UNKNOWN_ERROR';
     this.retryAfter = response.retryAfter || 0;
     this.canRetry = response.canRetry ?? true;
+    this.upgradeRequired = response.upgradeRequired ?? false;
+    this.billing = response.billing;
+    this.usage = response.usage;
+    this.entitlements = response.entitlements;
     this.fallback = response.fallback;
   }
 }
+
+export const isCommercialCreditsExhaustedError = (error: unknown): error is APIError => (
+  error instanceof APIError && error.code === 'COMMERCIAL_CREDITS_EXHAUSTED'
+);
+
+export const getCommercialUpgradeUrlFromError = (error: unknown): string | null => {
+  if (!isCommercialCreditsExhaustedError(error)) return null;
+  return error.billing?.upgradeUrl || error.billing?.accountUrl || null;
+};
+
+export const formatAiRequestError = (error: unknown, prefix?: string) => {
+  const err = error as { message?: string };
+  const msg = err.message || 'Unknown error occurred.';
+  if (isCommercialCreditsExhaustedError(error)) {
+    return prefix ? `${prefix}: ${msg}` : msg;
+  }
+  if (msg.includes('429') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
+    return 'System is at capacity. Please wait and try again.';
+  }
+  return prefix ? `${prefix}: ${msg}` : msg;
+};
 
 async function fetchWithRetry<T>(url: string, options: RequestInit, retries = 2): Promise<T> {
   let lastError: Error | null = null;

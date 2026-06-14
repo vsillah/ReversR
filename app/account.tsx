@@ -31,9 +31,15 @@ export default function AccountScreen() {
   }, [profile]);
 
   const plans = account?.plans || [];
-  const usagePercent = account?.usage.monthlyCredits
+  const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
+  const usagePercent = usageIsUnlimited
+    ? 100
+    : account?.usage.monthlyCredits
     ? Math.min(100, Math.round((account.usage.usedCredits / account.usage.monthlyCredits) * 100))
     : 0;
+  const usageLabel = usageIsUnlimited
+    ? `${account?.usage.usedCredits ?? 0} used / Unlimited`
+    : `${account?.usage.remainingCredits ?? 3} / ${account?.usage.monthlyCredits ?? 3} left`;
 
   const handleSaveProfile = async () => {
     setStatus(null);
@@ -93,7 +99,7 @@ export default function AccountScreen() {
         <View style={styles.usageHeader}>
           <Text style={styles.label}>AI reconstruction credits</Text>
           <Text style={styles.usageText}>
-            {account?.usage.remainingCredits ?? 3} / {account?.usage.monthlyCredits ?? 3} left
+            {usageLabel}
           </Text>
         </View>
         <View style={styles.usageTrack}>
@@ -160,7 +166,9 @@ export default function AccountScreen() {
                   {plan.priceMonthly === 0 ? 'Free' : `$${plan.priceMonthly}/mo`}
                 </Text>
               </View>
-              <Text style={styles.mutedText}>{plan.monthlyCredits} credits/month | {plan.seats} seat{plan.seats === 1 ? '' : 's'}</Text>
+              <Text style={styles.mutedText}>
+                {plan.monthlyCredits === null ? 'Unlimited' : `${plan.monthlyCredits} credits/month`} | {plan.seats} seat{plan.seats === 1 ? '' : 's'}
+              </Text>
               <View style={styles.featureList}>
                 {plan.features.map(feature => (
                   <View key={feature} style={styles.featureRow}>

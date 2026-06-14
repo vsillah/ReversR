@@ -3,14 +3,16 @@ import { Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApiBase } from '../utils/apiBase';
 
-export type CommercialPlanId = 'free' | 'pro_shop' | 'team';
+export type CommercialPlanId = 'free' | 'pro_shop' | 'team' | 'tester';
 
 export interface CommercialPlan {
   id: CommercialPlanId;
   label: string;
-  monthlyCredits: number;
+  monthlyCredits: number | null;
   seats: number;
   priceMonthly: number;
+  internal?: boolean;
+  unlimitedCredits?: boolean;
   features: string[];
 }
 
@@ -25,7 +27,8 @@ export interface CommercialProfile {
 export interface CommercialEntitlements {
   planId: CommercialPlanId;
   planLabel: string;
-  monthlyCredits: number;
+  monthlyCredits: number | null;
+  unlimitedCredits?: boolean;
   seats: number;
   canExportQuotePacket: boolean;
   canUseInventoryConnectors: boolean;
@@ -37,8 +40,9 @@ export interface CommercialEntitlements {
 export interface CommercialUsage {
   month: string;
   usedCredits: number;
-  remainingCredits: number;
-  monthlyCredits: number;
+  remainingCredits: number | null;
+  monthlyCredits: number | null;
+  unlimitedCredits?: boolean;
   events: Array<{
     id: string;
     feature: string;
@@ -62,15 +66,30 @@ export interface CommercialAccount {
   };
   billing: {
     planId: CommercialPlanId;
+    basePlanId?: CommercialPlanId;
     planLabel: string;
     subscriptionStatus: string;
     currentPeriodEnd: string;
     hasStripeCustomer: boolean;
+    billingLinks?: CommercialBillingLinks;
   };
   entitlements: CommercialEntitlements;
   usage: CommercialUsage;
   plans: CommercialPlan[];
   creditCosts: Record<string, number>;
+}
+
+export interface CommercialBillingLinks {
+  accountUrl: string;
+  upgradeUrl: string;
+  canManageOnWeb: boolean;
+  plans: Array<{
+    id: CommercialPlanId;
+    label: string;
+    priceMonthly: number;
+    monthlyCredits: number | null;
+    seats: number;
+  }>;
 }
 
 interface CommercialContextValue {
@@ -124,7 +143,6 @@ export const getCommercialRequestHeaders = async (extraHeaders: Record<string, s
     'X-ReversR-Profile-Name': profile.name || defaultProfile.name,
     'X-ReversR-Profile-Email': profile.email || '',
     'X-ReversR-Shop-Name': profile.shopName || defaultProfile.shopName,
-    'X-ReversR-Idempotency-Key': `${clientId}:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`,
   };
 };
 

@@ -22,6 +22,8 @@ import {
   ThreeDSceneDescriptor,
   AngleImage,
   generateBOM,
+  formatAiRequestError,
+  getCommercialUpgradeUrlFromError,
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
@@ -201,6 +203,7 @@ export default function PhaseFour({
     bom ? 'complete' : 'idle'
   );
   const [error, setError] = useState<string | null>(null);
+  const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
   const [bomExpanded, setBomExpanded] = useState(true);
   const [loadingStep, setLoadingStep] = useState<string>('analyzing');
@@ -271,15 +274,6 @@ export default function PhaseFour({
       return () => clearInterval(interval);
     }
   }, [status]);
-
-  const formatError = (e: unknown) => {
-    const err = e as { message?: string };
-    const msg = err.message || 'Unknown error occurred.';
-    if (msg.includes('429') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
-      return 'System is at capacity. Please wait and try again.';
-    }
-    return msg;
-  };
 
   const getVendorTargets = (): QuoteVendor[] => {
     if (innovation.fulfillmentOptions && innovation.fulfillmentOptions.length > 0) {
@@ -419,6 +413,7 @@ export default function PhaseFour({
   const handleGenerateBOM = async () => {
     setStatus('generating');
     setError(null);
+    setCreditUpgradeUrl(null);
 
     try {
       const bomResult = await generateBOM(innovation);
@@ -427,7 +422,8 @@ export default function PhaseFour({
       onBOMGenerated(bomResult);
     } catch (err: unknown) {
       console.error('Error generating BOM:', err);
-      setError(formatError(err));
+      setCreditUpgradeUrl(getCommercialUpgradeUrlFromError(err));
+      setError(formatAiRequestError(err));
       setStatus('idle');
     }
   };
@@ -752,7 +748,22 @@ export default function PhaseFour({
           </View>
         )}
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {error && (
+          <View style={styles.errorPanel}>
+            <Text style={styles.errorText}>{error}</Text>
+            {creditUpgradeUrl && (
+              <TouchableOpacity
+                style={styles.errorActionButton}
+                onPress={() => Linking.openURL(creditUpgradeUrl)}
+                accessibilityRole="link"
+                accessibilityLabel="Open ReversR account billing page"
+              >
+                <Ionicons name="open-outline" size={15} color={Colors.accent} />
+                <Text style={styles.errorActionText}>Open Account</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
 
       {localBom && (
@@ -1544,10 +1555,29 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.black,
   },
   errorText: {
-    padding: Spacing.md,
     fontSize: FontSizes.sm,
     color: Colors.red[500],
     textAlign: 'center',
+  },
+  errorPanel: {
+    padding: Spacing.md,
+    gap: Spacing.sm,
+    alignItems: 'center',
+  },
+  errorActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  errorActionText: {
+    color: Colors.accent,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   exportPanel: {
     backgroundColor: Colors.panel,

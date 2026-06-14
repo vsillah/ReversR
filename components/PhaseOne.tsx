@@ -7,12 +7,18 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { analyzeProduct, AnalysisResult } from '../hooks/useGemini';
+import {
+  analyzeProduct,
+  AnalysisResult,
+  formatAiRequestError,
+  getCommercialUpgradeUrlFromError,
+} from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
@@ -50,6 +56,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   const [input, setInput] = useState(initialInput || '');
   const [luckyProduct, setLuckyProduct] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(initialImage || null);
   const [facing, setFacing] = useState<CameraType>('back');
@@ -88,18 +95,20 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     setIsLoading(true);
     setLoadingStep('capture');
     setError(null);
+    setCreditUpgradeUrl(null);
     try {
       const imageToUse = inputMode === 'scan' ? capturedImage : undefined;
       const result = await analyzeProduct(activeInput, imageToUse || undefined);
       onComplete(activeInput, result, imageToUse);
     } catch (e: any) {
+      setCreditUpgradeUrl(getCommercialUpgradeUrlFromError(e));
       const errorMsg = e?.message || 'Unknown error';
       if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {
         setError("Network error. Check your internet connection and try again.");
       } else if (errorMsg.includes('timeout') || errorMsg.includes('Timeout')) {
         setError("Request timed out. Try with a simpler description.");
       } else {
-        setError(`Analysis failed: ${errorMsg}`);
+        setError(formatAiRequestError(e, 'Analysis failed'));
       }
       console.error('Analysis error:', e);
     } finally {
@@ -348,7 +357,22 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           )}
         </View>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {error && (
+          <View style={styles.errorPanel}>
+            <Text style={styles.errorText}>{error}</Text>
+            {creditUpgradeUrl && (
+              <TouchableOpacity
+                style={styles.errorActionButton}
+                onPress={() => Linking.openURL(creditUpgradeUrl)}
+                accessibilityRole="link"
+                accessibilityLabel="Open ReversR account billing page"
+              >
+                <Ionicons name="open-outline" size={15} color={Colors.accent} />
+                <Text style={styles.errorActionText}>Open Account</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         <TouchableOpacity
           style={[
@@ -590,7 +614,27 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   errorText: {
     color: Colors.red[500],
     fontSize: FontSizes.sm,
+    textAlign: 'center',
+  },
+  errorPanel: {
+    gap: Spacing.sm,
     marginTop: Spacing.sm,
+    alignItems: 'center',
+  },
+  errorActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  errorActionText: {
+    color: Colors.accent,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   submitButton: {
     backgroundColor: Colors.blue[600],
