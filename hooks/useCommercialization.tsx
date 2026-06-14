@@ -9,6 +9,7 @@ export interface CommercialPlan {
   id: CommercialPlanId;
   label: string;
   monthlyCredits: number | null;
+  creditPeriod?: 'day' | 'week' | 'month';
   seats: number;
   priceMonthly: number;
   internal?: boolean;
@@ -28,6 +29,7 @@ export interface CommercialEntitlements {
   planId: CommercialPlanId;
   planLabel: string;
   monthlyCredits: number | null;
+  creditPeriod?: 'day' | 'week' | 'month';
   unlimitedCredits?: boolean;
   seats: number;
   canExportQuotePacket: boolean;
@@ -35,10 +37,13 @@ export interface CommercialEntitlements {
   canUseCloudHistory: boolean;
   canManageTeam: boolean;
   canUseCadReviewQueue: boolean;
+  canUseAdminConsole?: boolean;
 }
 
 export interface CommercialUsage {
   month: string;
+  period?: 'day' | 'week' | 'month';
+  periodKey?: string;
   usedCredits: number;
   remainingCredits: number | null;
   monthlyCredits: number | null;
@@ -82,6 +87,7 @@ export interface CommercialAccount {
   access: {
     type: string;
     grantId: string;
+    role?: string;
     requiresPasswordReset: boolean;
   } | null;
 }
@@ -95,7 +101,15 @@ export interface CommercialBillingLinks {
     label: string;
     priceMonthly: number;
     monthlyCredits: number | null;
+    creditPeriod?: 'day' | 'week' | 'month';
     seats: number;
+  }>;
+}
+
+export interface CommercialCreditConfig {
+  planCreditRules: Record<string, {
+    credits: number | null;
+    period: 'day' | 'week' | 'month';
   }>;
 }
 
@@ -106,6 +120,7 @@ export interface CommercialAccessGrantSummary {
   profileName: string;
   shopName: string;
   planId: CommercialPlanId;
+  role?: 'tester' | 'super_admin';
   active: boolean;
   mustResetPassword: boolean;
   createdAt: string;
@@ -118,6 +133,7 @@ export interface CommercialAccessGrantPayload {
   email?: string;
   profileName?: string;
   shopName?: string;
+  role?: 'tester' | 'super_admin';
   startingPassword: string;
 }
 
@@ -143,6 +159,12 @@ export interface CommercialTesterInviteCreatePayload {
   email: string;
   platform?: TesterInvitePlatform;
   expiresInDays?: number;
+}
+
+export interface CommercialCreditConfigPayload {
+  planId: CommercialPlanId;
+  credits: number;
+  period: 'day' | 'week' | 'month';
 }
 
 interface CommercialContextValue {
@@ -299,6 +321,32 @@ export const revokeCommercialTesterInvite = async (
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to revoke tester invite.');
+  return data;
+};
+
+export const loadCommercialCreditConfig = async (
+  adminToken: string
+): Promise<{ status: 'ok'; config: CommercialCreditConfig; plans: CommercialPlan[] }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/credit-config`, {
+    method: 'GET',
+    headers: adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to load journey credit configuration.');
+  return data;
+};
+
+export const saveCommercialCreditConfig = async (
+  adminToken: string,
+  payload: CommercialCreditConfigPayload
+): Promise<{ status: 'ok'; config: CommercialCreditConfig; plans: CommercialPlan[] }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/credit-config`, {
+    method: 'POST',
+    headers: adminHeaders(adminToken),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to save journey credit configuration.');
   return data;
 };
 

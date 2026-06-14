@@ -6,15 +6,20 @@ import Constants from 'expo-constants';
 import { AppColors } from '../constants/theme';
 import {
   CommercialAccessGrantSummary,
+  CommercialPlan,
+  CommercialPlanId,
   CommercialProfile,
+  CommercialCreditConfig,
   CommercialTesterInviteSummary,
   TesterInvitePlatform,
   createCommercialTesterInvite,
+  loadCommercialCreditConfig,
   listCommercialAccessGrants,
   listCommercialTesterInvites,
   revokeCommercialAccessGrant,
   revokeCommercialTesterInvite,
   saveCommercialAccessGrant,
+  saveCommercialCreditConfig,
   useCommercialization,
 } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -30,7 +35,7 @@ import {
   listInventoryCredentials,
   saveInventoryCredential,
 } from '../hooks/useGemini';
-import { formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
+import { formatCreditPeriod, formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
 import {
   AUTH_MODE_OPTIONS,
   CONNECTOR_TYPE_OPTIONS,
@@ -46,6 +51,38 @@ interface SettingsModalProps {
   visible: boolean;
   onClose: () => void;
 }
+
+type SettingsSection = 'account' | 'inventory' | 'admin' | 'legal';
+
+const FALLBACK_COMMERCIAL_PLANS: CommercialPlan[] = [
+  {
+    id: 'free',
+    label: 'Free',
+    monthlyCredits: 5,
+    creditPeriod: 'week',
+    seats: 1,
+    priceMonthly: 0,
+    features: ['Five reconstruction journeys/week', 'Demo/public inventory', 'Basic preview exports'],
+  },
+  {
+    id: 'pro_shop',
+    label: 'Pro Shop',
+    monthlyCredits: 100,
+    creditPeriod: 'month',
+    seats: 1,
+    priceMonthly: 49,
+    features: ['Full BOM/spec export', 'Quote packet export', 'Cloud-ready shop history', 'Reviewer approval records'],
+  },
+  {
+    id: 'team',
+    label: 'Team',
+    monthlyCredits: 500,
+    creditPeriod: 'month',
+    seats: 3,
+    priceMonthly: 149,
+    features: ['Shared shop history', 'Inventory connectors', 'Admin controls', 'Team seat management'],
+  },
+];
 
 export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
@@ -89,17 +126,26 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const [accessPassword, setAccessPassword] = useState('');
   const [newAccessPassword, setNewAccessPassword] = useState('');
   const [testerInviteCode, setTesterInviteCode] = useState('');
+  const [accessMethod, setAccessMethod] = useState<'invite' | 'password'>('invite');
+  const [passwordResetOpen, setPasswordResetOpen] = useState(false);
   const [accessStatus, setAccessStatus] = useState<string | null>(null);
   const [accessGrants, setAccessGrants] = useState<CommercialAccessGrantSummary[]>([]);
   const [testerInvites, setTesterInvites] = useState<CommercialTesterInviteSummary[]>([]);
+  const [creditConfig, setCreditConfig] = useState<CommercialCreditConfig | null>(null);
+  const [creditPlanId, setCreditPlanId] = useState<CommercialPlanId>('free');
+  const [creditAllowance, setCreditAllowance] = useState('5');
+  const [creditPeriod, setCreditPeriod] = useState<'day' | 'week' | 'month'>('week');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePlatform, setInvitePlatform] = useState<TesterInvitePlatform>('both');
   const [grantClientId, setGrantClientId] = useState('');
   const [grantEmail, setGrantEmail] = useState('');
   const [grantProfileName, setGrantProfileName] = useState('');
   const [grantShopName, setGrantShopName] = useState('');
+  const [grantRole, setGrantRole] = useState<'tester' | 'super_admin'>('tester');
   const [grantStartingPassword, setGrantStartingPassword] = useState('');
   const [countdownNow, setCountdownNow] = useState(Date.now());
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>('account');
+  const [inventoryEditing, setInventoryEditing] = useState(false);
 
   const policyLinks = [
     {
@@ -137,6 +183,13 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     const timer = setInterval(() => setCountdownNow(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (account?.access?.requiresPasswordReset) {
+      setAccessMethod('password');
+      setPasswordResetOpen(true);
+    }
+  }, [account?.access?.requiresPasswordReset]);
 
   const loadSettings = async () => {
     try {
@@ -188,6 +241,12 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
   const updateInventoryConnector = (patch: Partial<InventoryConnector>) => {
     setInventoryConnector(prev => ({ ...prev, ...patch }));
+  };
+
+  const handleCancelInventoryEdit = async () => {
+    setInventoryConnector(await loadInventoryConnector());
+    setInventoryDropdown(null);
+    setInventoryEditing(false);
   };
 
   const handleConnectorTypeChange = (connectorType: InventoryConnector['connectorType']) => {
@@ -359,6 +418,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     setAccessStatus(null);
     try {
       await activateAccessPassword(accessPassword);
+      setPasswordResetOpen(true);
       setAccessStatus('Access activated. Reset the starter password before continuing QA.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to activate access password.');
@@ -371,6 +431,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
       await resetAccessPassword(accessPassword, newAccessPassword);
       setAccessPassword(newAccessPassword);
       setNewAccessPassword('');
+      setPasswordResetOpen(false);
       setAccessStatus('Access password reset. Future requests will use the new password on this device.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to reset access password.');
@@ -383,6 +444,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
       await clearAccessPassword();
       setAccessPassword('');
       setNewAccessPassword('');
+      setPasswordResetOpen(false);
+      setAccessMethod('invite');
       setAccessStatus('Access password cleared. This profile is now showing the normal guest/free experience.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to clear access password.');
@@ -391,11 +454,17 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
   const handleRedeemTesterInvite = async () => {
     setAccessStatus(null);
+    const cleanCode = testerInviteCode.trim();
+    if (!cleanCode) {
+      setAccessStatus('Paste the activation code from your ReversR admin, then tap Redeem Code.');
+      return;
+    }
     try {
-      await redeemTesterInvite(testerInviteCode);
+      await redeemTesterInvite(cleanCode);
       setTesterInviteCode('');
       setAccessPassword('');
       setNewAccessPassword('');
+      setPasswordResetOpen(false);
       setAccessStatus('Tester access activated on this device. No starter password is needed.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to redeem tester invite.');
@@ -506,6 +575,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
         email: grantEmail.trim(),
         profileName: grantProfileName.trim(),
         shopName: grantShopName.trim(),
+        role: grantRole,
         startingPassword: grantStartingPassword.trim(),
       });
       setGrantStartingPassword('');
@@ -513,7 +583,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
         const others = prev.filter(item => item.grantId !== result.grant.grantId);
         return [result.grant, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
       });
-      setAdminStatus(`Saved tester grant for ${result.grant.clientId || result.grant.email || result.grant.profileName || result.grant.shopName}. Give the starting password to the tester and have them reset it.`);
+      setAdminStatus(`Saved ${result.grant.role === 'super_admin' ? 'super admin' : 'tester'} grant for ${result.grant.clientId || result.grant.email || result.grant.profileName || result.grant.shopName}. Give the starting password to the user and have them reset it.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to save commercial access grant.');
     } finally {
@@ -559,6 +629,84 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     }
   };
 
+  const periodLabel = (period?: string | null) => `per ${formatCreditPeriod(period)}`;
+
+  const planCreditLabel = (plan: Pick<CommercialPlan, 'monthlyCredits' | 'creditPeriod'>) => {
+    if (plan.monthlyCredits === null) return 'Unlimited journey credits';
+    return `${plan.monthlyCredits} journey ${plan.monthlyCredits === 1 ? 'credit' : 'credits'} ${periodLabel(plan.creditPeriod)}`;
+  };
+
+  const openWebUpgrade = async (planId: CommercialPlanId) => {
+    const accountUrl = account?.billing.billingLinks?.accountUrl || 'https://reversr.vercel.app/account';
+    const separator = accountUrl.includes('?') ? '&' : '?';
+    await Linking.openURL(`${accountUrl}${separator}upgrade=${encodeURIComponent(planId)}`);
+  };
+
+  const handlePlanAction = (plan: CommercialPlan) => {
+    const isCurrentPlan = plan.id === (account?.billing.planId || 'free');
+    if (Platform.OS === 'web' && account && !isCurrentPlan && plan.id !== 'free') {
+      return handleCommercialAction(() => beginCheckout(plan.id));
+    }
+    return handleCommercialAction(() => openWebUpgrade(plan.id));
+  };
+
+  const syncCreditConfigForm = (config: CommercialCreditConfig, planId: CommercialPlanId = creditPlanId) => {
+    const rule = config.planCreditRules?.[planId] || config.planCreditRules?.free;
+    setCreditConfig(config);
+    setCreditAllowance(String(rule?.credits ?? 5));
+    setCreditPeriod(rule?.period || 'week');
+  };
+
+  const loadJourneyCreditConfig = async () => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await loadCommercialCreditConfig(token);
+      syncCreditConfigForm(result.config);
+      setAdminStatus('Loaded journey credit configuration.');
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to load journey credit configuration.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleCreditPlanChange = (planId: CommercialPlanId) => {
+    setCreditPlanId(planId);
+    if (creditConfig) syncCreditConfigForm(creditConfig, planId);
+  };
+
+  const saveJourneyCreditConfig = async () => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    const credits = Number(creditAllowance);
+    if (!Number.isFinite(credits) || credits < 0) {
+      setAdminStatus('Journey credit allowance must be zero or greater.');
+      return;
+    }
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await saveCommercialCreditConfig(token, {
+        planId: creditPlanId,
+        credits: Math.floor(credits),
+        period: creditPeriod,
+      });
+      syncCreditConfigForm(result.config, creditPlanId);
+      await refreshAccount();
+      setAdminStatus(`Saved ${creditPlanId.replace('_', ' ')} journey credits: ${Math.floor(credits)} ${periodLabel(creditPeriod)}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to save journey credit configuration.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
   const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
   const usagePercent = usageIsUnlimited
     ? 100
@@ -569,8 +717,16 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     ? formatJourneyCreditLabel(account?.usage)
     : formatJourneyCreditLabel(account?.usage);
   const resetLabel = usageIsUnlimited
-    ? 'No monthly reset limit'
+    ? 'No credit reset limit'
     : formatResetCountdown(account?.usage.resetAt, countdownNow);
+  const canUseAdminConsole = Boolean(adminCredentialSettingsEnabled || account?.entitlements.canUseAdminConsole || account?.access?.role === 'super_admin');
+  const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
+  const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
+    { id: 'account', label: 'Account', icon: 'person-circle-outline' },
+    { id: 'inventory', label: 'Inventory', icon: 'git-branch-outline' },
+    ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
+    { id: 'legal', label: 'Legal', icon: 'document-text-outline' },
+  ];
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
@@ -587,7 +743,31 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+          <View style={styles.settingsSectionTabs}>
+            {settingsSections.map(section => (
+              <TouchableOpacity
+                key={section.id}
+                style={[styles.settingsSectionTab, settingsSection === section.id && styles.settingsSectionTabActive]}
+                onPress={() => setSettingsSection(section.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`Show ${section.label} settings`}
+                accessibilityState={{ selected: settingsSection === section.id }}
+              >
+                <Ionicons
+                  name={section.icon}
+                  size={15}
+                  color={settingsSection === section.id ? Colors.black : Colors.gray[400]}
+                />
+                <Text style={[styles.settingsSectionTabText, settingsSection === section.id && styles.settingsSectionTabTextActive]}>
+                  {section.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
+            {settingsSection === 'account' && (
+              <>
             <View style={styles.appearancePanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="contrast-outline" size={18} color={Colors.accent} />
@@ -619,10 +799,10 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
             <View style={styles.accountPanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="briefcase-outline" size={18} color={Colors.accent} />
-                <Text style={styles.policyTitle}>Repair Shop Account</Text>
+                <Text style={styles.policyTitle}>Billing Plan Tier</Text>
               </View>
               <Text style={styles.policyText}>
-                Profiles power monthly reconstruction credits, shop entitlements, and future cloud history. Billing is managed on the ReversR web account page.
+                Review the current tier, journey credits, and upgrade options. Billing changes are completed on the ReversR web account page.
               </Text>
 
               <View style={styles.planSummaryRow}>
@@ -660,15 +840,57 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 </Text>
               </View>
 
-              <Text style={styles.compactLabel}>Your name</Text>
-              <TextInput
-                style={styles.input}
-                value={commercialProfile.name}
-                onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
-                accessibilityLabel="Commercial profile name"
-                placeholder="Repair shop owner"
-                placeholderTextColor={Colors.gray[500]}
-              />
+              <View style={styles.planListHeader}>
+                <Text style={styles.planListTitle}>Plans</Text>
+                <Text style={styles.planListMeta}>Upgrade options open on web.</Text>
+              </View>
+              <View style={styles.planCardsGrid}>
+                {visiblePlans.map(plan => {
+                  const isCurrentPlan = plan.id === (account?.billing.planId || 'free');
+                  return (
+                    <View key={plan.id} style={[styles.planCard, isCurrentPlan && styles.planCardActive]}>
+                      <View style={styles.planCardHeader}>
+                        <View style={styles.planCardTitleBlock}>
+                          <Text style={styles.planCardTitle}>{plan.label}</Text>
+                          <Text style={styles.planCardPrice}>
+                            {plan.priceMonthly === 0 ? 'Free' : `$${plan.priceMonthly}/mo`}
+                          </Text>
+                        </View>
+                        {isCurrentPlan && (
+                          <View style={styles.currentPlanBadge}>
+                            <Text style={styles.currentPlanBadgeText}>Current</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={styles.planCardCredits}>{planCreditLabel(plan)}</Text>
+                      <View style={styles.planFeatureList}>
+                        {plan.features.slice(0, 4).map(feature => (
+                          <View key={feature} style={styles.planFeatureRow}>
+                            <Ionicons name="checkmark-circle-outline" size={13} color={Colors.success} />
+                            <Text style={styles.planFeatureText}>{feature}</Text>
+                          </View>
+                        ))}
+                      </View>
+                      <TouchableOpacity
+                        style={[styles.planActionButton, isCurrentPlan && styles.planActionButtonMuted]}
+                        onPress={() => handlePlanAction(plan)}
+                        disabled={accountLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel={isCurrentPlan ? `Manage ${plan.label} plan on web` : `Upgrade to ${plan.label} on web`}
+                      >
+                        <Ionicons
+                          name={Platform.OS === 'web' && plan.id !== 'free' && !isCurrentPlan ? 'card-outline' : 'open-outline'}
+                          size={15}
+                          color={Colors.accent}
+                        />
+                        <Text style={styles.planActionButtonText}>
+                          {isCurrentPlan ? 'Manage on Web' : Platform.OS === 'web' && plan.id !== 'free' ? 'Start Checkout' : 'Continue on Web'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
 
               <Text style={styles.compactLabel}>Work email</Text>
               <TextInput
@@ -682,113 +904,156 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 keyboardType="email-address"
               />
 
-              <Text style={styles.compactLabel}>Shop name</Text>
-              <TextInput
-                style={styles.input}
-                value={commercialProfile.shopName}
-                onChangeText={(shopName) => setCommercialProfile(prev => ({ ...prev, shopName }))}
-                accessibilityLabel="Repair shop name"
-                placeholder="Precision Repair Shop"
-                placeholderTextColor={Colors.gray[500]}
-              />
-
               <View style={styles.accessPanel}>
                 <View style={styles.policyHeader}>
                   <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Access Password</Text>
+                  <Text style={styles.policyTitle}>Tester Activation</Text>
                 </View>
                 <Text style={styles.helpText}>
-                  Client ID: {account?.profile.id || 'loading'}
+                  Use an invite code first. Starter passwords are only for legacy tester or super-admin grants.
                 </Text>
-                <Text style={styles.helpText}>
-                  Use a tester invite code from ReversR admin to activate this device without sharing a client ID. Starter passwords remain available for legacy tester grants.
-                </Text>
+                {account?.access?.role === 'super_admin' && (
+                  <Text style={styles.adminStatusText}>Super admin access is active on this device.</Text>
+                )}
                 {account?.access?.requiresPasswordReset && (
                   <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
                 )}
 
-                <Text style={styles.compactLabel}>Tester invite code</Text>
-                <TextInput
-                  style={styles.input}
-                  value={testerInviteCode}
-                  onChangeText={setTesterInviteCode}
-                  accessibilityLabel="Tester invite code"
-                  placeholder="Paste activation code"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                />
-
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
-                    onPress={handleRedeemTesterInvite}
-                    disabled={accountLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Redeem tester invite code"
-                  >
-                    <Ionicons name="ticket-outline" size={17} color={Colors.black} />
-                    <Text style={styles.saveCredentialButtonText}>Redeem Invite</Text>
-                  </TouchableOpacity>
+                <View style={styles.accessMethodRow}>
+                  {(['invite', 'password'] as const).map(method => (
+                    <TouchableOpacity
+                      key={method}
+                      style={[styles.accessMethodButton, accessMethod === method && styles.accessMethodButtonActive]}
+                      onPress={() => {
+                        setAccessMethod(method);
+                        setPasswordResetOpen(method === 'password' && Boolean(account?.access?.requiresPasswordReset));
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={method === 'invite' ? 'Use tester invite code' : 'Use starter password'}
+                      accessibilityState={{ selected: accessMethod === method }}
+                    >
+                      <Ionicons
+                        name={method === 'invite' ? 'ticket-outline' : 'key-outline'}
+                        size={15}
+                        color={accessMethod === method ? Colors.black : Colors.gray[400]}
+                      />
+                      <Text style={[styles.accessMethodText, accessMethod === method && styles.accessMethodTextActive]}>
+                        {method === 'invite' ? 'Invite Code' : 'Starter Password'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
 
-                <View style={styles.superAdminDivider} />
+                {accessMethod === 'invite' ? (
+                  <>
+                    <Text style={styles.compactLabel}>Activation code</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={testerInviteCode}
+                      onChangeText={setTesterInviteCode}
+                      accessibilityLabel="Tester invite code"
+                      placeholder="Paste tester activation code"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                    />
 
-                <Text style={styles.compactLabel}>Current or starter password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={accessPassword}
-                  onChangeText={setAccessPassword}
-                  accessibilityLabel="Commercial access password"
-                  placeholder="Access password"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
+                    <View style={styles.adminActionRow}>
+                      <TouchableOpacity
+                        style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
+                        onPress={handleRedeemTesterInvite}
+                        disabled={accountLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Redeem tester invite code"
+                      >
+                        <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+                        <Text style={styles.saveCredentialButtonText}>Redeem Code</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.compactLabel}>Current or starter password</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={accessPassword}
+                      onChangeText={setAccessPassword}
+                      accessibilityLabel="Commercial access password"
+                      placeholder="Access password"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      secureTextEntry
+                    />
 
-                <Text style={styles.compactLabel}>New password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={newAccessPassword}
-                  onChangeText={setNewAccessPassword}
-                  accessibilityLabel="New commercial access password"
-                  placeholder="Reset after first activation"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
+                    <View style={styles.adminActionRow}>
+                      <TouchableOpacity
+                        style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                        onPress={handleActivateAccessPassword}
+                        disabled={accountLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Activate commercial access password"
+                      >
+                        <Ionicons name="key-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Activate</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                        onPress={() => setPasswordResetOpen(prev => !prev)}
+                        disabled={accountLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Show password reset fields"
+                        accessibilityState={{ expanded: passwordResetOpen }}
+                      >
+                        <Ionicons name={passwordResetOpen ? 'chevron-up-outline' : 'refresh-outline'} size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Reset</Text>
+                      </TouchableOpacity>
+                      {account?.access && (
+                        <TouchableOpacity
+                          style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                          onPress={handleClearAccessPassword}
+                          disabled={accountLoading}
+                          accessibilityRole="button"
+                          accessibilityLabel="Clear commercial access password"
+                        >
+                          <Ionicons name="person-outline" size={16} color={Colors.accent} />
+                          <Text style={styles.adminButtonText}>Guest</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
 
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                    onPress={handleActivateAccessPassword}
-                    disabled={accountLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Activate commercial access password"
-                  >
-                    <Ionicons name="key-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Activate</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                    onPress={handleResetAccessPassword}
-                    disabled={accountLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Reset commercial access password"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Reset</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                    onPress={handleClearAccessPassword}
-                    disabled={accountLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Clear commercial access password"
-                  >
-                    <Ionicons name="person-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Guest</Text>
-                  </TouchableOpacity>
+                    {passwordResetOpen && (
+                      <>
+                        <Text style={styles.compactLabel}>New password</Text>
+                        <TextInput
+                          style={styles.input}
+                          value={newAccessPassword}
+                          onChangeText={setNewAccessPassword}
+                          accessibilityLabel="New commercial access password"
+                          placeholder="Set your replacement password"
+                          placeholderTextColor={Colors.gray[500]}
+                          autoCapitalize="none"
+                          secureTextEntry
+                        />
+                        <View style={styles.adminActionRow}>
+                          <TouchableOpacity
+                            style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
+                            onPress={handleResetAccessPassword}
+                            disabled={accountLoading}
+                            accessibilityRole="button"
+                            accessibilityLabel="Confirm commercial access password reset"
+                          >
+                            <Ionicons name="checkmark-circle-outline" size={17} color={Colors.black} />
+                            <Text style={styles.saveCredentialButtonText}>Save New Password</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
+                  </>
+                )}
+
+                <View style={styles.clientIdRow}>
+                  <Text style={styles.clientIdText}>Device client ID: {account?.profile.id || 'loading'}</Text>
                 </View>
+
                 {accessStatus && <Text style={styles.adminStatusText}>{accessStatus}</Text>}
               </View>
 
@@ -798,10 +1063,10 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   onPress={handleSaveCommercialProfile}
                   disabled={accountLoading}
                   accessibilityRole="button"
-                  accessibilityLabel="Save repair shop profile"
+                  accessibilityLabel="Save repair shop account email"
                 >
                   <Ionicons name="save-outline" size={16} color={Colors.accent} />
-                  <Text style={styles.adminButtonText}>{accountLoading ? 'Saving...' : 'Save Profile'}</Text>
+                  <Text style={styles.adminButtonText}>{accountLoading ? 'Saving...' : 'Save Email'}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -816,74 +1081,76 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 </TouchableOpacity>
               </View>
 
-              {Platform.OS === 'web' ? (
-                <View style={styles.webPlanRow}>
-                  {account?.plans.filter(plan => plan.id !== 'free').map(plan => (
-                    <TouchableOpacity
-                      key={plan.id}
-                      style={styles.webPlanButton}
-                      onPress={() => handleCommercialAction(() => beginCheckout(plan.id))}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Start ${plan.label} checkout`}
-                    >
-                      <Text style={styles.webPlanButtonTitle}>{plan.label}</Text>
-                      <Text style={styles.webPlanButtonMeta}>${plan.priceMonthly}/mo</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ) : (
-                <Text style={styles.helpText}>
-                  Mobile tester builds show plan and credit status only. Stripe checkout stays on the hosted web account page for store review safety.
-                </Text>
-              )}
+              <Text style={styles.helpText}>
+                Upgrade actions open the hosted ReversR account page. Stripe checkout and billing changes are completed on web.
+              </Text>
 
               {(commercialStatus || accountError) && (
                 <Text style={styles.adminStatusText}>{commercialStatus || accountError}</Text>
               )}
             </View>
-
-            {localProviderSettingsEnabled ? (
-              <>
-                <Text style={styles.label}>AI Provider</Text>
-                <View style={styles.providerRow}>
-                  <TouchableOpacity
-                    style={[styles.providerButton, provider === 'gemini' && styles.providerButtonActive]}
-                    onPress={() => setProvider('gemini')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Use Gemini cloud AI provider"
-                    accessibilityState={{ selected: provider === 'gemini' }}
-                  >
-                    <Text style={[styles.providerButtonText, provider === 'gemini' && styles.providerButtonTextActive]}>Gemini (Cloud)</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.providerButton, provider === 'ollama' && styles.providerButtonActive]}
-                    onPress={() => setProvider('ollama')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Use Ollama local AI provider"
-                    accessibilityState={{ selected: provider === 'ollama' }}
-                  >
-                    <Text style={[styles.providerButtonText, provider === 'ollama' && styles.providerButtonTextActive]}>Ollama (Local)</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {provider === 'ollama' && (
-                  <View style={styles.ollamaSettings}>
-                    <Text style={styles.label}>Ollama Model</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={ollamaModel}
-                      onChangeText={setOllamaModel}
-                      placeholder="e.g. llama3, mistral"
-                      placeholderTextColor={Colors.gray[500]}
-                    />
-                    <Text style={styles.helpText}>
-                      Note: Local image generation is not supported by Ollama. Image analysis requires a vision model like 'llava'. Ensure Ollama is running on localhost:11434.
-                    </Text>
-                  </View>
-                )}
               </>
-            ) : (
-              <View style={styles.liveAiPanel}>
+            )}
+
+            {settingsSection === 'inventory' && (
+              <>
+            <View style={styles.liveAiPanel}>
+              <View style={styles.policyHeader}>
+                <Ionicons name="hardware-chip-outline" size={18} color={Colors.accent} />
+                <Text style={styles.policyTitle}>AI Runtime</Text>
+              </View>
+              <Text style={styles.policyText}>
+                Tester builds use managed Gemini by default. Local AI is available for admin or local development workflows.
+              </Text>
+              <View style={styles.providerOptionList}>
+                <TouchableOpacity
+                  style={[styles.providerOptionCard, provider === 'gemini' && styles.providerOptionCardActive]}
+                  onPress={() => setProvider('gemini')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Use Gemini cloud AI provider"
+                  accessibilityState={{ selected: provider === 'gemini' }}
+                >
+                  <View style={styles.providerOptionHeader}>
+                    <Ionicons name="cloud-done-outline" size={17} color={provider === 'gemini' ? Colors.accent : Colors.gray[400]} />
+                    <Text style={[styles.providerOptionTitle, provider === 'gemini' && styles.providerOptionTitleActive]}>Gemini</Text>
+                    <Text style={styles.providerOptionBadge}>{provider === 'gemini' ? 'Selected' : 'Cloud'}</Text>
+                  </View>
+                  <Text style={styles.providerOptionDetail}>Managed cloud analysis, reconstruction, and design generation.</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.providerOptionCard, provider === 'ollama' && styles.providerOptionCardActive]}
+                  onPress={() => localProviderSettingsEnabled && setProvider('ollama')}
+                  disabled={!localProviderSettingsEnabled}
+                  accessibilityRole="button"
+                  accessibilityLabel="Use local AI provider"
+                  accessibilityState={{ selected: provider === 'ollama', disabled: !localProviderSettingsEnabled }}
+                >
+                  <View style={styles.providerOptionHeader}>
+                    <Ionicons name="desktop-outline" size={17} color={provider === 'ollama' ? Colors.accent : Colors.gray[400]} />
+                    <Text style={[styles.providerOptionTitle, provider === 'ollama' && styles.providerOptionTitleActive]}>Local AI</Text>
+                    <Text style={styles.providerOptionBadge}>{localProviderSettingsEnabled ? 'Available' : 'Admin'}</Text>
+                  </View>
+                  <Text style={styles.providerOptionDetail}>Ollama/local model routing for development or private network deployments.</Text>
+                </TouchableOpacity>
+              </View>
+
+              {provider === 'ollama' && localProviderSettingsEnabled ? (
+                <View style={styles.ollamaSettings}>
+                  <Text style={styles.label}>Ollama Model</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={ollamaModel}
+                    onChangeText={setOllamaModel}
+                    placeholder="e.g. llama3, mistral"
+                    placeholderTextColor={Colors.gray[500]}
+                  />
+                  <Text style={styles.helpText}>
+                    Local image generation is not supported by Ollama. Image analysis requires a vision model like 'llava'. Ensure Ollama is running on localhost:11434.
+                  </Text>
+                </View>
+              ) : (
+                <>
                 <View style={styles.policyHeader}>
                   <Ionicons
                     name={aiRuntimeStatus?.status === 'connected' ? 'cloud-done-outline' : 'cloud-offline-outline'}
@@ -915,8 +1182,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 <Text style={styles.helpText}>
                   Gemini runs through the hosted ReversR API. No model keys are stored in this app.
                 </Text>
-              </View>
-            )}
+                </>
+              )}
+            </View>
 
             <View style={styles.adminPanel}>
               <View style={styles.policyHeader}>
@@ -924,80 +1192,132 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 <Text style={styles.policyTitle}>Inventory Source</Text>
               </View>
               <Text style={styles.policyText}>
-                Advanced admin settings for the preconfigured inventory source used during Phase 2 matching. Team plans can connect CSV, API, or ERP inventory sources.
+                Phase 2 uses this active inventory source for matching. Keep it locked unless you need to change the source or connector settings.
               </Text>
+              <View style={styles.inventoryLockHeader}>
+                <View style={styles.inventoryLockBadge}>
+                  <Ionicons name={inventoryEditing ? 'create-outline' : 'lock-closed-outline'} size={15} color={Colors.accent} />
+                  <Text style={styles.inventoryLockText}>{inventoryEditing ? 'Editing source' : 'Active source locked'}</Text>
+                </View>
+                {inventoryEditing ? (
+                  <TouchableOpacity
+                    style={styles.smallOutlineButton}
+                    onPress={handleCancelInventoryEdit}
+                    accessibilityRole="button"
+                    accessibilityLabel="Cancel inventory source changes"
+                  >
+                    <Text style={styles.smallOutlineButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.smallOutlineButton}
+                    onPress={() => setInventoryEditing(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Change inventory source"
+                  >
+                    <Text style={styles.smallOutlineButtonText}>Change Source</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
 
-              <Text style={styles.compactLabel}>Source name</Text>
-              <TextInput
-                style={styles.input}
-                value={inventoryConnector.sourceName}
-                onChangeText={(sourceName) => updateInventoryConnector({ sourceName })}
-                accessibilityLabel="Inventory source name"
-                placeholder="FarmBot Genesis Public Inventory"
-                placeholderTextColor={Colors.gray[500]}
-              />
-
-              {inventoryConnector.connectorType !== 'demo' && (
+              {!inventoryEditing ? (
+                <View style={styles.inventorySummaryList}>
+                  <View style={styles.inventorySummaryRow}>
+                    <Text style={styles.inventorySummaryLabel}>Source</Text>
+                    <Text style={styles.inventorySummaryValue}>{inventoryConnector.sourceName || defaultConnector.sourceName}</Text>
+                  </View>
+                  <View style={styles.inventorySummaryRow}>
+                    <Text style={styles.inventorySummaryLabel}>Connector</Text>
+                    <Text style={styles.inventorySummaryValue}>{getConnectorTypeLabel(inventoryConnector.connectorType)}</Text>
+                  </View>
+                  <View style={styles.inventorySummaryRow}>
+                    <Text style={styles.inventorySummaryLabel}>Authentication</Text>
+                    <Text style={styles.inventorySummaryValue}>{getAuthModeLabel(inventoryConnector.authMode)}</Text>
+                  </View>
+                  {inventoryConnector.connectorType !== 'demo' && (
+                    <View style={styles.inventorySummaryRow}>
+                      <Text style={styles.inventorySummaryLabel}>URI</Text>
+                      <Text style={styles.inventorySummaryValue}>{inventoryConnector.sourceUrl || 'Not configured'}</Text>
+                    </View>
+                  )}
+                </View>
+              ) : (
                 <>
-                  <Text style={styles.compactLabel}>Inventory URL or connector URI</Text>
+                  <Text style={styles.compactLabel}>Source name</Text>
                   <TextInput
                     style={styles.input}
-                    value={inventoryConnector.sourceUrl}
-                    onChangeText={(sourceUrl) => updateInventoryConnector({ sourceUrl })}
-                    accessibilityLabel="Inventory connector URL"
-                    placeholder="https://example.com/inventory.json"
+                    value={inventoryConnector.sourceName}
+                    onChangeText={(sourceName) => updateInventoryConnector({ sourceName })}
+                    accessibilityLabel="Inventory source name"
+                    placeholder="FarmBot Genesis Public Inventory"
                     placeholderTextColor={Colors.gray[500]}
-                    autoCapitalize="none"
+                  />
+
+                  {inventoryConnector.connectorType !== 'demo' && (
+                    <>
+                      <Text style={styles.compactLabel}>Inventory URL or connector URI</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={inventoryConnector.sourceUrl}
+                        onChangeText={(sourceUrl) => updateInventoryConnector({ sourceUrl })}
+                        accessibilityLabel="Inventory connector URL"
+                        placeholder="https://example.com/inventory.json"
+                        placeholderTextColor={Colors.gray[500]}
+                        autoCapitalize="none"
+                      />
+                    </>
+                  )}
+
+                  {renderDropdown<InventoryConnector['connectorType']>({
+                    id: 'connectorType',
+                    label: 'Connector type',
+                    value: inventoryConnector.connectorType,
+                    options: CONNECTOR_TYPE_OPTIONS,
+                    getLabel: getConnectorTypeLabel,
+                    onChange: handleConnectorTypeChange,
+                  })}
+
+                  {inventoryConnector.connectorType !== 'demo' && renderDropdown<InventoryConnector['authMode']>({
+                    id: 'authMode',
+                    label: 'Authentication',
+                    value: inventoryConnector.authMode,
+                    options: AUTH_MODE_OPTIONS,
+                    getLabel: getAuthModeLabel,
+                    onChange: handleAuthModeChange,
+                  })}
+
+                  {inventoryConnector.authMode !== 'none' && (
+                    <>
+                      <Text style={styles.compactLabel}>Backend credential reference</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={inventoryConnector.credentialRef || ''}
+                        onChangeText={(credentialRef) => updateInventoryConnector({ credentialRef })}
+                        accessibilityLabel="Inventory backend credential reference"
+                        placeholder="partsledger-prod-api-key"
+                        placeholderTextColor={Colors.gray[500]}
+                        autoCapitalize="none"
+                      />
+                    </>
+                  )}
+
+                  <Text style={styles.compactLabel}>Admin notes</Text>
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
+                    value={inventoryConnector.notes || ''}
+                    onChangeText={(notes) => updateInventoryConnector({ notes })}
+                    accessibilityLabel="Inventory admin notes"
+                    placeholder="Notes for admins reviewing this connector"
+                    placeholderTextColor={Colors.gray[500]}
+                    multiline
                   />
                 </>
               )}
-
-              {renderDropdown<InventoryConnector['connectorType']>({
-                id: 'connectorType',
-                label: 'Connector type',
-                value: inventoryConnector.connectorType,
-                options: CONNECTOR_TYPE_OPTIONS,
-                getLabel: getConnectorTypeLabel,
-                onChange: handleConnectorTypeChange,
-              })}
-
-              {inventoryConnector.connectorType !== 'demo' && renderDropdown<InventoryConnector['authMode']>({
-                id: 'authMode',
-                label: 'Authentication',
-                value: inventoryConnector.authMode,
-                options: AUTH_MODE_OPTIONS,
-                getLabel: getAuthModeLabel,
-                onChange: handleAuthModeChange,
-              })}
-
-              {inventoryConnector.authMode !== 'none' && (
-                <>
-                  <Text style={styles.compactLabel}>Backend credential reference</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={inventoryConnector.credentialRef || ''}
-                    onChangeText={(credentialRef) => updateInventoryConnector({ credentialRef })}
-                    accessibilityLabel="Inventory backend credential reference"
-                    placeholder="partsledger-prod-api-key"
-                    placeholderTextColor={Colors.gray[500]}
-                    autoCapitalize="none"
-                  />
-                </>
-              )}
-
-              <Text style={styles.compactLabel}>Admin notes</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={inventoryConnector.notes || ''}
-                onChangeText={(notes) => updateInventoryConnector({ notes })}
-                accessibilityLabel="Inventory admin notes"
-                placeholder="Notes for admins reviewing this connector"
-                placeholderTextColor={Colors.gray[500]}
-                multiline
-              />
             </View>
+              </>
+            )}
 
-            {adminCredentialSettingsEnabled && (
+            {settingsSection === 'admin' && canUseAdminConsole && (
               <View style={styles.adminPanel}>
                 <View style={styles.policyHeader}>
                   <Ionicons name="server-outline" size={18} color={Colors.accent} />
@@ -1035,6 +1355,85 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                       {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
                     </Text>
                   </View>
+                </View>
+
+                <View style={styles.superAdminDivider} />
+                <View style={styles.policyHeader}>
+                  <Ionicons name="speedometer-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Journey Credit Rules</Text>
+                </View>
+                <Text style={styles.policyText}>
+                  Configure the credit allowance and reset frequency without shipping a new app build. Default Free is 5 credits per week.
+                </Text>
+
+                <Text style={styles.compactLabel}>Plan</Text>
+                <View style={styles.themeToggleRow}>
+                  {(account?.plans || []).map(plan => (
+                    <TouchableOpacity
+                      key={plan.id}
+                      style={[styles.themeToggleButton, creditPlanId === plan.id && styles.themeToggleButtonActive]}
+                      onPress={() => handleCreditPlanChange(plan.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Configure ${plan.label} journey credits`}
+                      accessibilityState={{ selected: creditPlanId === plan.id }}
+                    >
+                      <Text style={[styles.themeToggleText, creditPlanId === plan.id && styles.themeToggleTextActive]}>
+                        {plan.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.compactLabel}>Journey credits</Text>
+                <TextInput
+                  style={styles.input}
+                  value={creditAllowance}
+                  onChangeText={setCreditAllowance}
+                  accessibilityLabel="Journey credit allowance"
+                  placeholder="5"
+                  placeholderTextColor={Colors.gray[500]}
+                  keyboardType="number-pad"
+                />
+
+                <Text style={styles.compactLabel}>Reset frequency</Text>
+                <View style={styles.themeToggleRow}>
+                  {(['day', 'week', 'month'] as const).map(period => (
+                    <TouchableOpacity
+                      key={period}
+                      style={[styles.themeToggleButton, creditPeriod === period && styles.themeToggleButtonActive]}
+                      onPress={() => setCreditPeriod(period)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Reset journey credits per ${period}`}
+                      accessibilityState={{ selected: creditPeriod === period }}
+                    >
+                      <Text style={[styles.themeToggleText, creditPeriod === period && styles.themeToggleTextActive]}>
+                        {period === 'day' ? 'Daily' : period === 'week' ? 'Weekly' : 'Monthly'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                    onPress={saveJourneyCreditConfig}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Save journey credit rule"
+                  >
+                    <Ionicons name="save-outline" size={17} color={Colors.black} />
+                    <Text style={styles.saveCredentialButtonText}>Save Credit Rule</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                    onPress={loadJourneyCreditConfig}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Load journey credit rules"
+                  >
+                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Load Rules</Text>
+                  </TouchableOpacity>
                 </View>
 
                 <Text style={styles.compactLabel}>Credential reference</Text>
@@ -1266,6 +1665,29 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   placeholderTextColor={Colors.gray[500]}
                 />
 
+                <Text style={styles.compactLabel}>Access role</Text>
+                <View style={styles.themeToggleRow}>
+                  {(['tester', 'super_admin'] as const).map(role => (
+                    <TouchableOpacity
+                      key={role}
+                      style={[styles.themeToggleButton, grantRole === role && styles.themeToggleButtonActive]}
+                      onPress={() => setGrantRole(role)}
+                      accessibilityRole="button"
+                      accessibilityLabel={role === 'super_admin' ? 'Create a super admin grant' : 'Create a tester grant'}
+                      accessibilityState={{ selected: grantRole === role }}
+                    >
+                      <Ionicons
+                        name={role === 'super_admin' ? 'shield-checkmark-outline' : 'flask-outline'}
+                        size={16}
+                        color={grantRole === role ? Colors.black : Colors.gray[400]}
+                      />
+                      <Text style={[styles.themeToggleText, grantRole === role && styles.themeToggleTextActive]}>
+                        {role === 'super_admin' ? 'Super Admin' : 'Tester'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
                 <Text style={styles.compactLabel}>Starting password</Text>
                 <TextInput
                   style={styles.input}
@@ -1309,7 +1731,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                           {grant.clientId || grant.email || grant.profileName || grant.shopName}
                         </Text>
                         <Text style={styles.credentialMetaText}>
-                          {grant.active ? 'active' : 'revoked'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
+                          {grant.active ? 'active' : 'revoked'} | {grant.role === 'super_admin' ? 'super admin' : 'tester'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
                         </Text>
                       </View>
                       <TouchableOpacity
@@ -1327,6 +1749,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
               </View>
             )}
 
+            {settingsSection === 'legal' && (
             <View style={styles.policyPanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="camera-outline" size={18} color={Colors.accent} />
@@ -1350,6 +1773,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 ))}
               </View>
             </View>
+            )}
           </ScrollView>
 
           <TouchableOpacity
@@ -1369,20 +1793,27 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: Colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: Colors.gray[900],
+    backgroundColor: Colors.panel,
     borderRadius: 16,
     padding: 24,
     width: '100%',
     maxWidth: 400,
     maxHeight: '88%',
     borderWidth: 1,
-    borderColor: Colors.gray[800],
+    borderColor: Colors.border,
+    shadowColor: Colors.mode === 'dark' ? '#000000' : '#0f172a',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: Colors.mode === 'dark' ? 0.45 : 0.18,
+    shadowRadius: 24,
+    elevation: 16,
+    zIndex: 1001,
   },
   header: {
     flexDirection: 'row',
@@ -1397,6 +1828,42 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   body: {
     maxHeight: 440,
+  },
+  bodyContent: {
+    paddingBottom: 72,
+  },
+  settingsSectionTabs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  settingsSectionTab: {
+    flexGrow: 1,
+    minWidth: 92,
+    minHeight: 38,
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: Colors.input,
+  },
+  settingsSectionTabActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent,
+  },
+  settingsSectionTabText: {
+    color: Colors.gray[400],
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  settingsSectionTabTextActive: {
+    color: Colors.black,
   },
   label: {
     fontSize: 16,
@@ -1507,6 +1974,111 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   usageFill: {
     height: '100%',
     backgroundColor: Colors.accent,
+  },
+  planListHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 8,
+  },
+  planListTitle: {
+    color: Colors.white,
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  planListMeta: {
+    color: Colors.gray[500],
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  planCardsGrid: {
+    gap: 10,
+    marginBottom: 14,
+  },
+  planCard: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: Colors.surface,
+  },
+  planCardActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent + '10',
+  },
+  planCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 8,
+  },
+  planCardTitleBlock: {
+    flex: 1,
+    minWidth: 0,
+  },
+  planCardTitle: {
+    color: Colors.white,
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  planCardPrice: {
+    color: Colors.gray[400],
+    fontSize: 12,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  currentPlanBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: Colors.accent,
+  },
+  currentPlanBadgeText: {
+    color: Colors.black,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  planCardCredits: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+  planFeatureList: {
+    gap: 5,
+    marginBottom: 10,
+  },
+  planFeatureRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+  },
+  planFeatureText: {
+    flex: 1,
+    color: Colors.gray[400],
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  planActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 9,
+  },
+  planActionButtonMuted: {
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(255,255,255,0.03)' : Colors.panel,
+  },
+  planActionButtonText: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: '900',
   },
   commercialActionRow: {
     flexDirection: 'row',
@@ -1692,7 +2264,50 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: 12,
     marginTop: 10,
     marginBottom: 14,
-    backgroundColor: Colors.gray[900],
+    backgroundColor: Colors.mode === 'dark' ? Colors.gray[900] : Colors.panel,
+  },
+  accessMethodRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  accessMethodButton: {
+    flex: 1,
+    minHeight: 40,
+    borderWidth: 1,
+    borderColor: Colors.gray[700],
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    backgroundColor: Colors.input,
+  },
+  accessMethodButtonActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent,
+  },
+  accessMethodText: {
+    color: Colors.gray[400],
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  accessMethodTextActive: {
+    color: Colors.black,
+  },
+  clientIdRow: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray[800],
+    paddingTop: 10,
+    marginTop: 2,
+  },
+  clientIdText: {
+    color: Colors.gray[500],
+    fontSize: 10,
+    lineHeight: 14,
   },
   apiHostText: {
     color: Colors.gray[500],
@@ -1729,6 +2344,113 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.55,
+  },
+  providerOptionList: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  providerOptionCard: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 11,
+    backgroundColor: Colors.surface,
+  },
+  providerOptionCardActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent + '10',
+  },
+  providerOptionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginBottom: 5,
+  },
+  providerOptionTitle: {
+    flex: 1,
+    color: Colors.gray[300],
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  providerOptionTitleActive: {
+    color: Colors.white,
+  },
+  providerOptionBadge: {
+    color: Colors.accent,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  providerOptionDetail: {
+    color: Colors.gray[500],
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  inventoryLockHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 12,
+  },
+  inventoryLockBadge: {
+    flex: 1,
+    minHeight: 34,
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    backgroundColor: Colors.surface,
+  },
+  inventoryLockText: {
+    color: Colors.gray[300],
+    fontSize: 11,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  smallOutlineButton: {
+    minHeight: 34,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+  },
+  smallOutlineButtonText: {
+    color: Colors.accent,
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  inventorySummaryList: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+  },
+  inventorySummaryRow: {
+    paddingVertical: 10,
+    paddingHorizontal: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray[800],
+  },
+  inventorySummaryLabel: {
+    color: Colors.gray[500],
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 3,
+  },
+  inventorySummaryValue: {
+    color: Colors.white,
+    fontSize: 13,
+    fontWeight: '800',
   },
   registryBadge: {
     borderRadius: 999,
