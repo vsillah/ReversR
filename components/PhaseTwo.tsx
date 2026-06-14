@@ -178,7 +178,7 @@ export default function PhaseTwo({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="reversr-tour-inventory">
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Ionicons name="git-branch-outline" size={28} color={Colors.secondary} />
@@ -188,28 +188,6 @@ export default function PhaseTwo({
               Review the inventory matches from your scan and choose the machine to rebuild.
             </Text>
           </View>
-        </View>
-      </View>
-
-      <View style={styles.panel}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Scan Summary</Text>
-          <View style={styles.matchBadge}>
-            <Ionicons name="search" size={14} color={Colors.accent} />
-            <Text style={styles.matchBadgeText}>Ready to match</Text>
-          </View>
-        </View>
-
-        <Text style={styles.machineName}>{analysis.productName}</Text>
-        <Text style={styles.summaryText}>{analysis.rawAnalysis}</Text>
-
-        <View style={styles.componentsGrid}>
-          {analysis.components.map((component, index) => (
-            <View key={`${component.name}-${index}`} style={styles.componentChip}>
-              <Text style={styles.componentName}>{component.name}</Text>
-              {component.isEssential && <Text style={styles.componentMeta}>core</Text>}
-            </View>
-          ))}
         </View>
       </View>
 
@@ -312,6 +290,28 @@ export default function PhaseTwo({
             </View>
           </TouchableOpacity>
         )}
+      </View>
+
+      <View style={styles.panel}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Scan Summary</Text>
+          <View style={styles.matchBadge}>
+            <Ionicons name="search" size={14} color={Colors.accent} />
+            <Text style={styles.matchBadgeText}>Ready to match</Text>
+          </View>
+        </View>
+
+        <Text style={styles.machineName}>{analysis.productName}</Text>
+        <Text style={styles.summaryText}>{analysis.rawAnalysis}</Text>
+
+        <View style={styles.componentsGrid}>
+          {analysis.components.map((component, index) => (
+            <View key={`${component.name}-${index}`} style={styles.componentChip}>
+              <Text style={styles.componentName}>{component.name}</Text>
+              {component.isEssential && <Text style={styles.componentMeta}>core</Text>}
+            </View>
+          ))}
+        </View>
       </View>
 
       <LoadingOverlay

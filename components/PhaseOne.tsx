@@ -192,7 +192,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="reversr-tour-scan">
       <View style={styles.header}>
         <Ionicons name="search" size={28} color={Colors.blue[500]} />
         <View style={styles.headerText}>

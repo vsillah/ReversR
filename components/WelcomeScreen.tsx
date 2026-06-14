@@ -15,6 +15,7 @@ interface WelcomeScreenProps {
   onStart: () => void;
   onHistory?: () => void;
   onSettings?: () => void;
+  onTour?: () => void;
 }
 
 const phases = [
@@ -44,7 +45,7 @@ const phases = [
   },
 ];
 
-export default function WelcomeScreen({ onStart, onHistory, onSettings }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }: WelcomeScreenProps) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
 
@@ -55,7 +56,7 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings }: Welcom
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.content}>
-        <View style={styles.logoSection}>
+        <View style={styles.logoSection} testID="reversr-tour-welcome">
           <Image
             source={require('../assets/logo-transparent.png')}
             style={styles.logo}
@@ -119,6 +120,19 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings }: Welcom
             >
               <Ionicons name="settings-outline" size={20} color={Colors.gray[400]} />
               <Text style={styles.secondaryButtonText}>Settings</Text>
+            </TouchableOpacity>
+          )}
+
+          {onTour && (
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={onTour}
+              accessibilityRole="button"
+              accessibilityLabel="Start guided tour"
+              testID="reversr-tour-start"
+            >
+              <Ionicons name="compass-outline" size={20} color={Colors.gray[400]} />
+              <Text style={styles.secondaryButtonText}>Tour</Text>
             </TouchableOpacity>
           )}
         </View>

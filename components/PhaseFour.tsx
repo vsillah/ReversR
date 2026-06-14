@@ -594,7 +594,7 @@ export default function PhaseFour({
   };
 
   return (
-    <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-build">
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Ionicons name="hammer-outline" size={28} color={Colors.orange[300]} />

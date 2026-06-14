@@ -585,7 +585,7 @@ export default function PhaseThree({
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-design">
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Ionicons name="pencil" size={28} color={Colors.accent} />
