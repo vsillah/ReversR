@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-14T18:23:58.842Z",
+  "generatedAt": "2026-06-14T22:16:21.693Z",
   "mode": {
     "allowPlaceholder": false,
     "allowMissingCli": false,
@@ -14,9 +14,9 @@
     "slug": "reversr-rebuild",
     "version": "1.0.0",
     "iosBundleId": "com.vsillah.reversrrebuild",
-    "iosBuildNumber": "1",
+    "iosBuildNumber": "13",
     "androidPackage": "com.vsillah.reversrrebuild",
-    "androidVersionCode": 15,
+    "androidVersionCode": 28,
     "easProjectLinked": true
   },
   "permissions": {
