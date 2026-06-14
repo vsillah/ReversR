@@ -65,25 +65,33 @@ const run = async () => {
   try {
     const initial = await fetch(`${baseUrl}/api/me`, { headers: headersFor('guest-smoke') }).then(res => res.json());
     assert.equal(initial.billing.planId, 'free');
-    assert.equal(initial.usage.remainingCredits, 4);
+    assert.equal(initial.usage.remainingCredits, 1);
+    assert.match(initial.usage.resetAt, /^\d{4}-\d{2}-\d{2}T/);
+    assert.equal(typeof initial.usage.resetInSeconds, 'number');
 
     let first = await charge('guest-smoke', 'analyze', 'guest-analyze-1');
     assert.equal(first.response.status, 200);
     assert.equal(first.body.usage.usedCredits, 1);
+    assert.equal(first.body.usage.remainingCredits, 0);
 
     const duplicate = await charge('guest-smoke', 'analyze', 'guest-analyze-1');
     assert.equal(duplicate.response.status, 200);
     assert.equal(duplicate.body.usage.usedCredits, 1);
+    assert.equal(duplicate.body.usage.remainingCredits, 0);
 
     const spec = await charge('guest-smoke', 'technical-spec', 'guest-spec-1');
     assert.equal(spec.response.status, 200);
-    assert.equal(spec.body.usage.remainingCredits, 2);
+    assert.equal(spec.body.credits, 0);
 
     const sketch = await charge('guest-smoke', 'generate-2d', 'guest-sketch-1');
     assert.equal(sketch.response.status, 200);
-    assert.equal(sketch.body.usage.remainingCredits, 0);
+    assert.equal(sketch.body.credits, 0);
 
-    const exhausted = await charge('guest-smoke', 'generate-bom', 'guest-bom-1');
+    const bom = await charge('guest-smoke', 'generate-bom', 'guest-bom-1');
+    assert.equal(bom.response.status, 200);
+    assert.equal(bom.body.credits, 0);
+
+    const exhausted = await charge('guest-smoke', 'analyze', 'guest-analyze-2');
     assert.equal(exhausted.response.status, 402);
     assert.equal(exhausted.body.code, 'COMMERCIAL_CREDITS_EXHAUSTED');
     assert.equal(exhausted.body.upgradeRequired, true);
@@ -104,7 +112,7 @@ const run = async () => {
     const guestViewAfterTester = await fetch(`${baseUrl}/api/me`, { headers: headersFor('tester-smoke', 'Repair shop user') }).then(res => res.json());
     assert.equal(guestViewAfterTester.billing.planId, 'free');
     assert.equal(guestViewAfterTester.usage.usedCredits, 0);
-    assert.equal(guestViewAfterTester.usage.remainingCredits, 4);
+    assert.equal(guestViewAfterTester.usage.remainingCredits, 1);
 
     const grantResponse = await fetch(`${baseUrl}/api/admin/commercial/access-grants`, {
       method: 'POST',
@@ -161,7 +169,7 @@ const run = async () => {
 
     const passwordGuest = await fetch(`${baseUrl}/api/me`, { headers: headersFor('password-smoke', 'Password Smoke') }).then(res => res.json());
     assert.equal(passwordGuest.billing.planId, 'free');
-    assert.equal(passwordGuest.usage.remainingCredits, 4);
+    assert.equal(passwordGuest.usage.remainingCredits, 1);
 
     console.log('Commercial credit gate smoke passed.');
   } finally {

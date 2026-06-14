@@ -43,6 +43,8 @@ export interface CommercialUsage {
   remainingCredits: number | null;
   monthlyCredits: number | null;
   unlimitedCredits?: boolean;
+  resetAt: string;
+  resetInSeconds: number;
   events: Array<{
     id: string;
     feature: string;

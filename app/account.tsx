@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '../constants/theme';
 import { CommercialPlanId, useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
+import { formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
 
 export default function AccountScreen() {
   const { colors: Colors } = useAppTheme();
@@ -23,12 +24,18 @@ export default function AccountScreen() {
   const [email, setEmail] = useState(profile.email);
   const [shopName, setShopName] = useState(profile.shopName);
   const [status, setStatus] = useState<string | null>(null);
+  const [countdownNow, setCountdownNow] = useState(Date.now());
 
   useEffect(() => {
     setName(profile.name);
     setEmail(profile.email);
     setShopName(profile.shopName);
   }, [profile]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCountdownNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const plans = account?.plans || [];
   const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
@@ -38,8 +45,11 @@ export default function AccountScreen() {
     ? Math.min(100, Math.round((account.usage.usedCredits / account.usage.monthlyCredits) * 100))
     : 0;
   const usageLabel = usageIsUnlimited
-    ? `${account?.usage.usedCredits ?? 0} used / Unlimited`
-    : `${account?.usage.remainingCredits ?? 4} / ${account?.usage.monthlyCredits ?? 4} left`;
+    ? formatJourneyCreditLabel(account?.usage)
+    : formatJourneyCreditLabel(account?.usage);
+  const resetLabel = usageIsUnlimited
+    ? 'No monthly reset limit'
+    : formatResetCountdown(account?.usage.resetAt, countdownNow);
 
   const handleSaveProfile = async () => {
     setStatus(null);
@@ -81,7 +91,7 @@ export default function AccountScreen() {
             <Text style={styles.mutedText}>
               {account?.billing.subscriptionStatus && account.billing.subscriptionStatus !== 'none'
                 ? account.billing.subscriptionStatus
-                : 'Free scan-to-sketch trial'}
+                : 'Free journey trial'}
             </Text>
           </View>
           <TouchableOpacity
@@ -97,7 +107,7 @@ export default function AccountScreen() {
         </View>
 
         <View style={styles.usageHeader}>
-          <Text style={styles.label}>AI reconstruction credits</Text>
+          <Text style={styles.label}>Reconstruction journey credits</Text>
           <Text style={styles.usageText}>
             {usageLabel}
           </Text>
@@ -106,7 +116,7 @@ export default function AccountScreen() {
           <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
         </View>
         <Text style={styles.helpText}>
-          Free includes one scan-to-sketch path. BOMs and additional visual generation are metered by the hosted API. Usage resets monthly.
+          One journey credit starts a reconstruction. Specs, sketches, BOMs, and exports in that journey do not spend additional credits. {resetLabel}.
         </Text>
       </View>
 
@@ -167,7 +177,7 @@ export default function AccountScreen() {
                 </Text>
               </View>
               <Text style={styles.mutedText}>
-                {plan.monthlyCredits === null ? 'Unlimited' : `${plan.monthlyCredits} credits/month`} | {plan.seats} seat{plan.seats === 1 ? '' : 's'}
+                {plan.monthlyCredits === null ? 'Unlimited journey credits' : `${plan.monthlyCredits} journey ${plan.monthlyCredits === 1 ? 'credit' : 'credits'}/month`} | {plan.seats} seat{plan.seats === 1 ? '' : 's'}
               </Text>
               <View style={styles.featureList}>
                 {plan.features.map(feature => (

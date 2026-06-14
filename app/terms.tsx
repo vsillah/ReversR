@@ -15,7 +15,7 @@ export default function TermsRoute() {
             'Validate an admin-approved machine inventory connector.',
             'Match a scan to a machine record.',
             'Generate a reconstruction package with BOM, assembly steps, pricing estimates, and fabrication or 3D modeling handoff information.',
-            'Manage repair shop profiles, monthly AI reconstruction credits, and paid shop entitlements.',
+            'Manage repair shop profiles, monthly reconstruction journey credits, and paid shop entitlements.',
           ],
         },
         {

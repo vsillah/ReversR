@@ -25,6 +25,7 @@ import {
   listInventoryCredentials,
   saveInventoryCredential,
 } from '../hooks/useGemini';
+import { formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
 import {
   AUTH_MODE_OPTIONS,
   CONNECTOR_TYPE_OPTIONS,
@@ -88,6 +89,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const [grantProfileName, setGrantProfileName] = useState('');
   const [grantShopName, setGrantShopName] = useState('');
   const [grantStartingPassword, setGrantStartingPassword] = useState('');
+  const [countdownNow, setCountdownNow] = useState(Date.now());
 
   const policyLinks = [
     {
@@ -120,6 +122,11 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   useEffect(() => {
     setCommercialProfile(profile);
   }, [profile, visible]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCountdownNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const loadSettings = async () => {
     try {
@@ -466,8 +473,11 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     ? Math.min(100, Math.round((account.usage.usedCredits / account.usage.monthlyCredits) * 100))
     : 0;
   const usageLabel = usageIsUnlimited
-    ? `${account?.usage.usedCredits ?? 0} used / Unlimited`
-    : `${account?.usage.remainingCredits ?? 4} / ${account?.usage.monthlyCredits ?? 4} left`;
+    ? formatJourneyCreditLabel(account?.usage)
+    : formatJourneyCreditLabel(account?.usage);
+  const resetLabel = usageIsUnlimited
+    ? 'No monthly reset limit'
+    : formatResetCountdown(account?.usage.resetAt, countdownNow);
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
@@ -528,7 +538,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   <Text style={styles.planBadgeMeta}>
                     {account?.billing.subscriptionStatus && account.billing.subscriptionStatus !== 'none'
                       ? account.billing.subscriptionStatus
-                      : 'scan-to-sketch trial'}
+                      : 'journey trial'}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -544,7 +554,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
               <View style={styles.usageMeterBlock}>
                 <View style={styles.usageMeterHeader}>
-                  <Text style={styles.usageMeterLabel}>AI reconstruction credits</Text>
+                  <Text style={styles.usageMeterLabel}>Reconstruction journey credits</Text>
                   <Text style={styles.usageMeterCount}>
                     {usageLabel}
                   </Text>
@@ -553,7 +563,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
                 </View>
                 <Text style={styles.helpText}>
-                  Free includes one scan-to-sketch path. Phase 1 scans use 1 credit, specs use 1 credit, and 2D/3D visual generation uses 2 credits.
+                  One journey credit starts a reconstruction. Specs, sketches, BOMs, and exports in that journey do not spend additional credits. {resetLabel}.
                 </Text>
               </View>
 
