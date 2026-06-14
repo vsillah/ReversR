@@ -1137,7 +1137,7 @@ const buildFallbackBom = (innovation, analysis) => {
 // API ROUTES - WITH /api/gemini PREFIX FOR MOBILE APP
 // ============================================
 
-registerCommercialRoutes(app);
+registerCommercialRoutes(app, { requireAdmin });
 
 // Analyze product
 app.post('/api/gemini/analyze', async (req, res) => {

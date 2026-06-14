@@ -77,6 +77,11 @@ export interface CommercialAccount {
   usage: CommercialUsage;
   plans: CommercialPlan[];
   creditCosts: Record<string, number>;
+  access: {
+    type: string;
+    grantId: string;
+    requiresPasswordReset: boolean;
+  } | null;
 }
 
 export interface CommercialBillingLinks {
@@ -92,6 +97,28 @@ export interface CommercialBillingLinks {
   }>;
 }
 
+export interface CommercialAccessGrantSummary {
+  grantId: string;
+  clientId: string;
+  email: string;
+  profileName: string;
+  shopName: string;
+  planId: CommercialPlanId;
+  active: boolean;
+  mustResetPassword: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastActivatedAt: string;
+}
+
+export interface CommercialAccessGrantPayload {
+  clientId?: string;
+  email?: string;
+  profileName?: string;
+  shopName?: string;
+  startingPassword: string;
+}
+
 interface CommercialContextValue {
   account: CommercialAccount | null;
   profile: CommercialProfile;
@@ -102,10 +129,14 @@ interface CommercialContextValue {
   saveProfile: (profile: CommercialProfile) => Promise<void>;
   beginCheckout: (planId: CommercialPlanId) => Promise<void>;
   openBillingPortal: () => Promise<void>;
+  activateAccessPassword: (password: string) => Promise<void>;
+  resetAccessPassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  clearAccessPassword: () => Promise<void>;
 }
 
 const PROFILE_STORAGE_KEY = 'reversr_commercial_profile';
 const CLIENT_ID_STORAGE_KEY = 'reversr_commercial_client_id';
+const ACCESS_PASSWORD_STORAGE_KEY = 'reversr_commercial_access_password';
 
 const defaultProfile: CommercialProfile = {
   name: 'Repair shop user',
@@ -136,14 +167,22 @@ export const loadCommercialProfile = async (): Promise<CommercialProfile> => {
 };
 
 export const getCommercialRequestHeaders = async (extraHeaders: Record<string, string> = {}) => {
-  const [clientId, profile] = await Promise.all([getCommercialClientId(), loadCommercialProfile()]);
-  return {
+  const [clientId, profile, accessPassword] = await Promise.all([
+    getCommercialClientId(),
+    loadCommercialProfile(),
+    AsyncStorage.getItem(ACCESS_PASSWORD_STORAGE_KEY),
+  ]);
+  const headers: Record<string, string> = {
     ...extraHeaders,
     'X-ReversR-Client-Id': clientId,
     'X-ReversR-Profile-Name': profile.name || defaultProfile.name,
     'X-ReversR-Profile-Email': profile.email || '',
     'X-ReversR-Shop-Name': profile.shopName || defaultProfile.shopName,
   };
+  if (accessPassword) {
+    headers['X-ReversR-Access-Password'] = accessPassword;
+  }
+  return headers;
 };
 
 const buildBillingReturnUrl = () => {
@@ -151,6 +190,50 @@ const buildBillingReturnUrl = () => {
     return `${window.location.origin}/account`;
   }
   return 'https://reversr.vercel.app/account';
+};
+
+const adminHeaders = (adminToken: string) => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${adminToken}`,
+});
+
+export const listCommercialAccessGrants = async (
+  adminToken: string
+): Promise<{ status: 'ok'; grants: CommercialAccessGrantSummary[] }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/access-grants`, {
+    method: 'GET',
+    headers: adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to load commercial access grants.');
+  return data;
+};
+
+export const saveCommercialAccessGrant = async (
+  adminToken: string,
+  payload: CommercialAccessGrantPayload
+): Promise<{ status: 'ok'; grant: CommercialAccessGrantSummary }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/access-grants`, {
+    method: 'POST',
+    headers: adminHeaders(adminToken),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to save commercial access grant.');
+  return data;
+};
+
+export const revokeCommercialAccessGrant = async (
+  adminToken: string,
+  grantId: string
+): Promise<{ status: 'ok'; grantId: string; revoked: boolean }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/access-grants/${encodeURIComponent(grantId)}`, {
+    method: 'DELETE',
+    headers: adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to revoke commercial access grant.');
+  return data;
 };
 
 export function CommercialProvider({ children }: { children: React.ReactNode }) {
@@ -251,6 +334,49 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
     await Linking.openURL(data.url);
   }, []);
 
+  const activateAccessPassword = useCallback(async (password: string) => {
+    const cleanPassword = password.trim();
+    if (!cleanPassword) throw new Error('Enter the access password from the ReversR admin.');
+    const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
+    headers['X-ReversR-Access-Password'] = cleanPassword;
+    const response = await fetch(`${getApiBase()}/api/commercial/access/activate`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ accessPassword: cleanPassword }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.account) throw new Error(data.error || 'Unable to activate commercial access.');
+    await AsyncStorage.setItem(ACCESS_PASSWORD_STORAGE_KEY, cleanPassword);
+    setAccount(data.account);
+    setError(null);
+  }, []);
+
+  const resetAccessPassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    const cleanCurrentPassword = currentPassword.trim();
+    const cleanNewPassword = newPassword.trim();
+    if (!cleanCurrentPassword || !cleanNewPassword) throw new Error('Enter the current and new access passwords.');
+    const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
+    headers['X-ReversR-Access-Password'] = cleanCurrentPassword;
+    const response = await fetch(`${getApiBase()}/api/commercial/access/reset-password`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        currentPassword: cleanCurrentPassword,
+        newPassword: cleanNewPassword,
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.account) throw new Error(data.error || 'Unable to reset access password.');
+    await AsyncStorage.setItem(ACCESS_PASSWORD_STORAGE_KEY, cleanNewPassword);
+    setAccount(data.account);
+    setError(null);
+  }, []);
+
+  const clearAccessPassword = useCallback(async () => {
+    await AsyncStorage.removeItem(ACCESS_PASSWORD_STORAGE_KEY);
+    await refreshAccount();
+  }, [refreshAccount]);
+
   const value = useMemo<CommercialContextValue>(() => ({
     account,
     profile,
@@ -261,7 +387,10 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
     saveProfile,
     beginCheckout,
     openBillingPortal,
-  }), [account, profile, loading, error, refreshAccount, saveProfile, beginCheckout, openBillingPortal]);
+    activateAccessPassword,
+    resetAccessPassword,
+    clearAccessPassword,
+  }), [account, profile, loading, error, refreshAccount, saveProfile, beginCheckout, openBillingPortal, activateAccessPassword, resetAccessPassword, clearAccessPassword]);
 
   return (
     <CommercialContext.Provider value={value}>

@@ -4,7 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { AppColors } from '../constants/theme';
-import { CommercialProfile, useCommercialization } from '../hooks/useCommercialization';
+import {
+  CommercialAccessGrantSummary,
+  CommercialProfile,
+  listCommercialAccessGrants,
+  revokeCommercialAccessGrant,
+  saveCommercialAccessGrant,
+  useCommercialization,
+} from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   AiRuntimeStatus,
@@ -46,6 +53,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     saveProfile,
     beginCheckout,
     openBillingPortal,
+    activateAccessPassword,
+    resetAccessPassword,
+    clearAccessPassword,
   } = useCommercialization();
   const styles = createStyles(Colors);
   const [provider, setProvider] = useState<'gemini' | 'ollama'>('gemini');
@@ -69,6 +79,15 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const [aiStatusLoading, setAiStatusLoading] = useState(false);
   const [commercialProfile, setCommercialProfile] = useState<CommercialProfile>(profile);
   const [commercialStatus, setCommercialStatus] = useState<string | null>(null);
+  const [accessPassword, setAccessPassword] = useState('');
+  const [newAccessPassword, setNewAccessPassword] = useState('');
+  const [accessStatus, setAccessStatus] = useState<string | null>(null);
+  const [accessGrants, setAccessGrants] = useState<CommercialAccessGrantSummary[]>([]);
+  const [grantClientId, setGrantClientId] = useState('');
+  const [grantEmail, setGrantEmail] = useState('');
+  const [grantProfileName, setGrantProfileName] = useState('');
+  const [grantShopName, setGrantShopName] = useState('');
+  const [grantStartingPassword, setGrantStartingPassword] = useState('');
 
   const policyLinks = [
     {
@@ -233,7 +252,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const requireAdminToken = () => {
     const token = adminToken.trim();
     if (!token) {
-      setAdminStatus('Enter the API admin token to manage backend credential references.');
+      setAdminStatus('Enter the API admin token to manage backend credentials and commercial access grants.');
       return null;
     }
     return token;
@@ -314,6 +333,108 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
       setAdminStatus(result.deleted ? `Deleted backend credential reference "${ref}".` : `No registry-file credential existed for "${ref}".`);
     } catch (e: any) {
       setAdminStatus(e?.message || `Unable to delete backend credential reference "${ref}".`);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleActivateAccessPassword = async () => {
+    setAccessStatus(null);
+    try {
+      await activateAccessPassword(accessPassword);
+      setAccessStatus('Access activated. Reset the starter password before continuing QA.');
+    } catch (e: any) {
+      setAccessStatus(e?.message || 'Unable to activate access password.');
+    }
+  };
+
+  const handleResetAccessPassword = async () => {
+    setAccessStatus(null);
+    try {
+      await resetAccessPassword(accessPassword, newAccessPassword);
+      setAccessPassword(newAccessPassword);
+      setNewAccessPassword('');
+      setAccessStatus('Access password reset. Future requests will use the new password on this device.');
+    } catch (e: any) {
+      setAccessStatus(e?.message || 'Unable to reset access password.');
+    }
+  };
+
+  const handleClearAccessPassword = async () => {
+    setAccessStatus(null);
+    try {
+      await clearAccessPassword();
+      setAccessPassword('');
+      setNewAccessPassword('');
+      setAccessStatus('Access password cleared. This profile is now showing the normal guest/free experience.');
+    } catch (e: any) {
+      setAccessStatus(e?.message || 'Unable to clear access password.');
+    }
+  };
+
+  const loadAccessGrants = async () => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await listCommercialAccessGrants(token);
+      setAccessGrants(result.grants || []);
+      setAdminStatus(`Loaded ${result.grants?.length || 0} commercial access grant${result.grants?.length === 1 ? '' : 's'}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to load commercial access grants.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleSaveAccessGrant = async () => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    if (!grantStartingPassword.trim()) {
+      setAdminStatus('Starting password is required for a commercial access grant.');
+      return;
+    }
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await saveCommercialAccessGrant(token, {
+        clientId: grantClientId.trim(),
+        email: grantEmail.trim(),
+        profileName: grantProfileName.trim(),
+        shopName: grantShopName.trim(),
+        startingPassword: grantStartingPassword.trim(),
+      });
+      setGrantStartingPassword('');
+      setAccessGrants(prev => {
+        const others = prev.filter(item => item.grantId !== result.grant.grantId);
+        return [result.grant, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+      });
+      setAdminStatus(`Saved tester grant for ${result.grant.clientId || result.grant.email || result.grant.profileName || result.grant.shopName}. Give the starting password to the tester and have them reset it.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to save commercial access grant.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleRevokeAccessGrant = async (grantId: string) => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await revokeCommercialAccessGrant(token, grantId);
+      setAccessGrants(prev => prev.map(item => (
+        item.grantId === grantId ? { ...item, active: false, updatedAt: new Date().toISOString() } : item
+      )));
+      setAdminStatus(result.revoked ? `Revoked commercial access grant ${grantId}.` : `No active grant existed for ${grantId}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to revoke commercial access grant.');
     } finally {
       setAdminLoading(false);
     }
@@ -467,6 +588,80 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 placeholder="Precision Repair Shop"
                 placeholderTextColor={Colors.gray[500]}
               />
+
+              <View style={styles.accessPanel}>
+                <View style={styles.policyHeader}>
+                  <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Access Password</Text>
+                </View>
+                <Text style={styles.helpText}>
+                  Client ID: {account?.profile.id || 'loading'}
+                </Text>
+                <Text style={styles.helpText}>
+                  Use a starter password from the ReversR admin to activate tester access, then reset it before continuing.
+                </Text>
+                {account?.access?.requiresPasswordReset && (
+                  <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
+                )}
+
+                <Text style={styles.compactLabel}>Current or starter password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={accessPassword}
+                  onChangeText={setAccessPassword}
+                  accessibilityLabel="Commercial access password"
+                  placeholder="Access password"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
+
+                <Text style={styles.compactLabel}>New password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={newAccessPassword}
+                  onChangeText={setNewAccessPassword}
+                  accessibilityLabel="New commercial access password"
+                  placeholder="Reset after first activation"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleActivateAccessPassword}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Activate commercial access password"
+                  >
+                    <Ionicons name="key-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Activate</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleResetAccessPassword}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Reset commercial access password"
+                  >
+                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Reset</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleClearAccessPassword}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear commercial access password"
+                  >
+                    <Ionicons name="person-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Guest</Text>
+                  </TouchableOpacity>
+                </View>
+                {accessStatus && <Text style={styles.adminStatusText}>{accessStatus}</Text>}
+              </View>
 
               <View style={styles.commercialActionRow}>
                 <TouchableOpacity
@@ -795,6 +990,117 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                         accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
                       >
                         <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.superAdminDivider} />
+                <View style={styles.policyHeader}>
+                  <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
+                </View>
+                <Text style={styles.policyText}>
+                  Grant tester access by client ID, email, profile name, or shop name. The starting password is hashed on the backend and must be reset by the tester.
+                </Text>
+
+                <Text style={styles.compactLabel}>Client ID</Text>
+                <TextInput
+                  style={styles.input}
+                  value={grantClientId}
+                  onChangeText={setGrantClientId}
+                  accessibilityLabel="Commercial access grant client ID"
+                  placeholder="client_..."
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                />
+
+                <Text style={styles.compactLabel}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  value={grantEmail}
+                  onChangeText={setGrantEmail}
+                  accessibilityLabel="Commercial access grant email"
+                  placeholder="tester@example.com"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+
+                <Text style={styles.compactLabel}>Profile name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={grantProfileName}
+                  onChangeText={setGrantProfileName}
+                  accessibilityLabel="Commercial access grant profile name"
+                  placeholder="test3r"
+                  placeholderTextColor={Colors.gray[500]}
+                />
+
+                <Text style={styles.compactLabel}>Shop name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={grantShopName}
+                  onChangeText={setGrantShopName}
+                  accessibilityLabel="Commercial access grant shop name"
+                  placeholder="QA Repair Shop"
+                  placeholderTextColor={Colors.gray[500]}
+                />
+
+                <Text style={styles.compactLabel}>Starting password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={grantStartingPassword}
+                  onChangeText={setGrantStartingPassword}
+                  accessibilityLabel="Commercial access grant starting password"
+                  placeholder="Give this to the tester once"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                    onPress={handleSaveAccessGrant}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Save commercial tester access grant"
+                  >
+                    <Ionicons name="person-add-outline" size={17} color={Colors.black} />
+                    <Text style={styles.saveCredentialButtonText}>Grant Tester Access</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                    onPress={loadAccessGrants}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Load commercial tester access grants"
+                  >
+                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Load Grants</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.credentialList}>
+                  {accessGrants.map(grant => (
+                    <View key={grant.grantId} style={styles.credentialCard}>
+                      <View style={styles.credentialInfo}>
+                        <Text style={styles.credentialRefText}>
+                          {grant.clientId || grant.email || grant.profileName || grant.shopName}
+                        </Text>
+                        <Text style={styles.credentialMetaText}>
+                          {grant.active ? 'active' : 'revoked'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteCredentialButton}
+                        onPress={() => handleRevokeAccessGrant(grant.grantId)}
+                        disabled={adminLoading || !grant.active}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Revoke commercial tester access grant ${grant.grantId}`}
+                      >
+                        <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -1160,6 +1466,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
+  accessPanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 10,
+    marginBottom: 14,
+    backgroundColor: Colors.gray[900],
+  },
   apiHostText: {
     color: Colors.gray[500],
     fontSize: 11,
@@ -1220,6 +1535,10 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingVertical: 12,
     marginTop: 4,
   },
+  grantButton: {
+    flex: 1,
+    marginTop: 0,
+  },
   saveCredentialButtonText: {
     color: Colors.black,
     fontSize: 13,
@@ -1234,6 +1553,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   credentialList: {
     gap: 8,
     marginTop: 12,
+  },
+  superAdminDivider: {
+    height: 1,
+    backgroundColor: Colors.gray[800],
+    marginVertical: 18,
   },
   credentialCard: {
     flexDirection: 'row',

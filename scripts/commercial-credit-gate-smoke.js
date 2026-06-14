@@ -9,12 +9,23 @@ const run = async () => {
   process.env.COMMERCIAL_STORE_FILE = path.join(tempDir, 'commercial-store.json');
   process.env.BILLING_RETURN_URL = 'https://reversr-rebuild.example.com/account';
   process.env.COMMERCIAL_TESTER_PROFILE_NAMES = 'test3r';
+  const adminToken = 'credit-gate-smoke-admin-token';
 
   const { chargeCommercialCredits, registerCommercialRoutes } = require('../server/commercialization');
 
   const app = express();
   app.use(express.json({ limit: '1mb' }));
-  registerCommercialRoutes(app);
+  registerCommercialRoutes(app, {
+    requireAdmin: (req, res) => {
+      const header = req.get('authorization') || '';
+      const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+      if (token !== adminToken) {
+        res.status(401).json({ status: 'error', error: 'Admin token is required.' });
+        return false;
+      }
+      return true;
+    },
+  });
   app.post('/test/charge/:feature', async (req, res) => {
     const charge = await chargeCommercialCredits(req, res, req.params.feature);
     if (!charge.ok) return;
@@ -32,6 +43,11 @@ const run = async () => {
     'X-ReversR-Profile-Name': name,
     'X-ReversR-Shop-Name': 'Smoke Test Shop',
   });
+
+  const grantHeaders = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${adminToken}`,
+  };
 
   const charge = async (clientId, key, name = 'Repair shop user') => {
     const response = await fetch(`${baseUrl}/test/charge/analyze`, {
@@ -83,6 +99,63 @@ const run = async () => {
     assert.equal(guestViewAfterTester.billing.planId, 'free');
     assert.equal(guestViewAfterTester.usage.usedCredits, 0);
     assert.equal(guestViewAfterTester.usage.remainingCredits, 3);
+
+    const grantResponse = await fetch(`${baseUrl}/api/admin/commercial/access-grants`, {
+      method: 'POST',
+      headers: grantHeaders,
+      body: JSON.stringify({
+        clientId: 'password-smoke',
+        profileName: 'Password Smoke',
+        startingPassword: 'StartPass123',
+      }),
+    });
+    const grantBody = await grantResponse.json();
+    assert.equal(grantResponse.status, 200);
+    assert.equal(grantBody.grant.clientId, 'password-smoke');
+    assert.equal(grantBody.grant.mustResetPassword, true);
+    assert.equal(grantBody.grant.passwordHash, undefined);
+
+    const activateResponse = await fetch(`${baseUrl}/api/commercial/access/activate`, {
+      method: 'POST',
+      headers: headersFor('password-smoke', 'Password Smoke'),
+      body: JSON.stringify({ accessPassword: 'StartPass123' }),
+    });
+    const activateBody = await activateResponse.json();
+    assert.equal(activateResponse.status, 200);
+    assert.equal(activateBody.account.billing.planId, 'tester');
+    assert.equal(activateBody.account.access.requiresPasswordReset, true);
+
+    const resetResponse = await fetch(`${baseUrl}/api/commercial/access/reset-password`, {
+      method: 'POST',
+      headers: headersFor('password-smoke', 'Password Smoke'),
+      body: JSON.stringify({
+        currentPassword: 'StartPass123',
+        newPassword: 'ResetPass123',
+      }),
+    });
+    const resetBody = await resetResponse.json();
+    assert.equal(resetResponse.status, 200);
+    assert.equal(resetBody.account.billing.planId, 'tester');
+    assert.equal(resetBody.account.access.requiresPasswordReset, false);
+
+    const oldPasswordResponse = await fetch(`${baseUrl}/api/commercial/access/activate`, {
+      method: 'POST',
+      headers: headersFor('password-smoke', 'Password Smoke'),
+      body: JSON.stringify({ accessPassword: 'StartPass123' }),
+    });
+    assert.equal(oldPasswordResponse.status, 401);
+
+    const resetPasswordHeaders = {
+      ...headersFor('password-smoke', 'Password Smoke'),
+      'X-ReversR-Access-Password': 'ResetPass123',
+    };
+    const passwordTester = await fetch(`${baseUrl}/api/me`, { headers: resetPasswordHeaders }).then(res => res.json());
+    assert.equal(passwordTester.billing.planId, 'tester');
+    assert.equal(passwordTester.usage.unlimitedCredits, true);
+
+    const passwordGuest = await fetch(`${baseUrl}/api/me`, { headers: headersFor('password-smoke', 'Password Smoke') }).then(res => res.json());
+    assert.equal(passwordGuest.billing.planId, 'free');
+    assert.equal(passwordGuest.usage.remainingCredits, 3);
 
     console.log('Commercial credit gate smoke passed.');
   } finally {
