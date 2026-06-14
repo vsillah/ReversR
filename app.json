@@ -61,6 +61,8 @@
     "scheme": "reversr-rebuild",
     "extra": {
       "apiBaseUrl": "https://reversr.vercel.app",
+      "releaseDate": "2026-06-14",
+      "releaseManifestUrl": "https://reversr.vercel.app/release.json",
       "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
       "termsUrl": "https://reversr.vercel.app/terms",
       "supportUrl": "https://reversr.vercel.app/support",
