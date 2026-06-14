@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-13T03:44:02.047Z",
+  "generatedAt": "2026-06-14T18:23:58.842Z",
   "mode": {
-    "allowPlaceholder": true,
-    "allowMissingCli": true,
-    "allowUnlinkedEas": true,
-    "allowNotLoggedIn": true
+    "allowPlaceholder": false,
+    "allowMissingCli": false,
+    "allowUnlinkedEas": false,
+    "allowNotLoggedIn": false
   },
   "warnings": [],
   "appIdentity": {
