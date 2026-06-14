@@ -538,6 +538,36 @@ export interface AngleImage {
   error?: string;
 }
 
+export interface MockTourFixture {
+  schemaVersion: number;
+  fixtureId: string;
+  generatedAt: string;
+  machineId: string;
+  machineName: string;
+  revision?: string;
+  inventorySource: string;
+  sourceLinks?: Record<string, string>;
+  referenceImages?: ReferenceImage[];
+  validation?: InventoryValidationResult;
+  innovation?: Partial<InnovationResult>;
+  images: AngleImage[];
+  primaryImageUrl?: string | null;
+  cachePolicy?: {
+    clientStorageKey?: string;
+    source?: string;
+    creditFree?: boolean;
+  };
+}
+
+export const fetchMockTourFarmBotFixture = async (): Promise<MockTourFixture> => {
+  return fetchWithRetry<MockTourFixture>(`${API_BASE}/api/mock-tour/farmbot-genesis-v1.8`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+};
+
 export const useGemini = () => {
   const generate2DVisualization = async (conceptName: string, conceptDescription: string): Promise<string | null> => {
     try {

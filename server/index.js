@@ -1706,6 +1706,12 @@ const getSourceBackedImage = async (innovation = {}) => {
   return null;
 };
 
+const getDataUrlFromSourceBackedImage = (sourceBackedImage) => {
+  if (!sourceBackedImage?.imageData) return null;
+  const contentType = sourceBackedImage.imageSource?.contentType || 'image/png';
+  return `data:${contentType};base64,${sourceBackedImage.imageData}`;
+};
+
 // Generate 3D scene
 app.post('/api/gemini/generate-3d', async (req, res) => {
   try {
@@ -1872,6 +1878,136 @@ const ANGLES = [
   { id: 'top', label: 'Top View', prompt: 'top-down birds eye view, looking straight down' },
   { id: 'iso', label: 'Isometric', prompt: 'isometric 3D perspective view, 45-degree angle showing depth' },
 ];
+
+const MOCK_TOUR_FARMBOT_CACHE_KEY = {
+  type: 'mock-tour-fixture',
+  fixture: 'farmbot-genesis-v1.8',
+  schemaVersion: 1,
+};
+
+const MOCK_TOUR_AI_FALLBACK_SOURCE = {
+  id: 'farmbot-genesis-v1-8-cached-ai-fallback',
+  label: 'Cached AI-generated fallback mock reference',
+  url: 'api://mock-tour/farmbot-genesis-v1.8/cached-ai-fallback',
+  kind: 'mock-tour-ai-fallback',
+  contentType: 'image/png',
+  sourceType: 'ai_generated_fallback',
+  licenseNote: 'Cached fallback for guided-tour expectation setting only; not a source-backed schematic.',
+};
+
+const buildMockTourFarmBotFixture = async () => {
+  const cached = responseCache.get(MOCK_TOUR_FARMBOT_CACHE_KEY);
+  if (cached) return cached;
+
+  const record = DEMO_MACHINE_RECORDS.find(machine => machine.machineId === 'FARMBOT-GENESIS-V1-8') || DEMO_MACHINE_RECORDS[0];
+  const sourceName = PUBLIC_FARMBOT_SOURCE_NAME;
+  const referenceImages = record.referenceImages || [];
+  const sourceLinks = record.sourceLinks || {};
+
+  const hydratedReferences = [];
+  for (const reference of referenceImages.slice(0, 2)) {
+    const sourceBackedImage = await getSourceBackedImage({ referenceImages: [reference] });
+    hydratedReferences.push({
+      reference,
+      sourceBackedImage,
+      dataUrl: getDataUrlFromSourceBackedImage(sourceBackedImage),
+    });
+  }
+
+  const hasSourceBackedImage = hydratedReferences.some(reference => reference.dataUrl);
+  const aiFallbackDataUrl = hasSourceBackedImage ? null : `data:image/png;base64,${FALLBACK_IMAGE_BASE64}`;
+  const aiFallbackSource = hasSourceBackedImage ? null : MOCK_TOUR_AI_FALLBACK_SOURCE;
+
+  const imageForIndex = (index) => hydratedReferences[index] || hydratedReferences[0];
+  const selectedAngles = ['front', 'side', 'iso']
+    .map(angleId => ANGLES.find(angle => angle.id === angleId))
+    .filter(Boolean);
+
+  const images = selectedAngles.map((angle, index) => {
+    const hydrated = imageForIndex(index === 1 ? 1 : 0);
+    const fallbackReference = referenceImages[index === 1 ? 1 : 0] || referenceImages[0];
+    return {
+      id: angle.id,
+      label: aiFallbackDataUrl && !hydrated?.dataUrl
+        ? `${angle.label} AI Fallback`
+        : `${angle.label} Source Reference`,
+      imageData: hydrated?.dataUrl || aiFallbackDataUrl || fallbackReference?.url || null,
+      imageSource: hydrated?.sourceBackedImage?.imageSource || aiFallbackSource || fallbackReference || null,
+    };
+  });
+
+  const fixture = {
+    schemaVersion: 1,
+    fixtureId: 'farmbot-genesis-v1.8',
+    generatedAt: new Date().toISOString(),
+    machineId: record.machineId,
+    machineName: record.machineName,
+    revision: record.revision,
+    inventorySource: sourceName,
+    sourceLinks,
+    referenceImages,
+    validation: {
+      status: 'ok',
+      sourceName,
+      sourceUrl: 'demo://farmbot-genesis-v1.8',
+      authMode: 'none',
+      credentialStatus: 'not_required',
+      recordCount: 1,
+      requiredFields: ['machineId', 'machineName', 'revision', 'parts', 'referenceImages'],
+      sampleMachines: [{
+        machineId: record.machineId,
+        machineName: record.machineName,
+        revision: record.revision,
+        partCount: record.parts.length,
+      }],
+      matchCandidates: [{
+        machineId: record.machineId,
+        machineName: record.machineName,
+        revision: record.revision,
+        partCount: record.parts.length,
+        confidenceScore: 0.96,
+        matchPercent: 96,
+        evidence: 'Mock scan matches FarmBot aliases plus track, gantry, z-axis, controller, camera, UTM, seeder, and watering assemblies.',
+      }],
+    },
+    innovation: {
+      machineId: record.machineId,
+      machineName: record.machineName,
+      inventorySource: sourceName,
+      confidenceScore: 0.96,
+      sourceLinks,
+      referenceImages,
+      assemblySteps: record.assemblySteps,
+      pricing: record.pricing,
+      fulfillmentOptions: record.fulfillmentOptions,
+      evidence: 'Mock scan matches FarmBot aliases plus track, gantry, z-axis, controller, camera, UTM, seeder, and watering assemblies.',
+    },
+    images,
+    primaryImageUrl: images.find(image => image.imageData)?.imageData || null,
+    cachePolicy: {
+      clientStorageKey: 'reversr-rebuild-mock-tour:farmbot-genesis-v1.8:v1',
+      source: hasSourceBackedImage
+        ? 'bundled-public-inventory-reference-images'
+        : aiFallbackDataUrl
+          ? 'cached-ai-generated-fallback'
+          : 'source-url-metadata-fallback',
+      creditFree: true,
+    },
+  };
+
+  responseCache.set(MOCK_TOUR_FARMBOT_CACHE_KEY, fixture);
+  return fixture;
+};
+
+app.get('/api/mock-tour/farmbot-genesis-v1.8', async (req, res) => {
+  try {
+    res.json(await buildMockTourFarmBotFixture());
+  } catch (error) {
+    console.error('Mock tour fixture error:', error);
+    const { statusCode, body } = createErrorResponse(error, 'Failed to load mock tour fixture');
+    res.status(statusCode).json(body);
+  }
+});
 
 // Generate single angle - for progressive loading
 app.post('/api/gemini/generate-2d-single-angle', async (req, res) => {
