@@ -37,10 +37,11 @@ const run = async () => {
   });
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
-  const headersFor = (clientId, name = 'Repair shop user') => ({
+  const headersFor = (clientId, name = 'Repair shop user', email = '') => ({
     'Content-Type': 'application/json',
     'X-ReversR-Client-Id': clientId,
     'X-ReversR-Profile-Name': name,
+    'X-ReversR-Profile-Email': email,
     'X-ReversR-Shop-Name': 'Smoke Test Shop',
   });
 
@@ -170,6 +171,59 @@ const run = async () => {
     const passwordGuest = await fetch(`${baseUrl}/api/me`, { headers: headersFor('password-smoke', 'Password Smoke') }).then(res => res.json());
     assert.equal(passwordGuest.billing.planId, 'free');
     assert.equal(passwordGuest.usage.remainingCredits, 1);
+
+    const inviteResponse = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
+      method: 'POST',
+      headers: grantHeaders,
+      body: JSON.stringify({
+        email: 'invite-smoke@example.com',
+        platform: 'both',
+      }),
+    });
+    const inviteBody = await inviteResponse.json();
+    assert.equal(inviteResponse.status, 200);
+    assert.equal(inviteBody.invite.email, 'invite-smoke@example.com');
+    assert.equal(inviteBody.invite.status, 'pending');
+    assert.equal(inviteBody.invite.tokenHash, undefined);
+    assert.equal(typeof inviteBody.invite.activationCode, 'string');
+    assert.ok(inviteBody.invite.activationCode.length > 12);
+
+    const redeemResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/redeem`, {
+      method: 'POST',
+      headers: headersFor('invite-smoke-client', 'Invite Smoke', 'invite-smoke@example.com'),
+      body: JSON.stringify({ token: inviteBody.invite.activationCode }),
+    });
+    const redeemBody = await redeemResponse.json();
+    assert.equal(redeemResponse.status, 200);
+    assert.equal(redeemBody.account.billing.planId, 'tester');
+    assert.equal(redeemBody.account.usage.unlimitedCredits, true);
+    assert.equal(redeemBody.invite.status, 'redeemed');
+    assert.equal(redeemBody.invite.tokenHash, undefined);
+
+    const inviteTester = await fetch(`${baseUrl}/api/me`, {
+      headers: headersFor('invite-smoke-client', 'Invite Smoke'),
+    }).then(res => res.json());
+    assert.equal(inviteTester.billing.planId, 'tester');
+    assert.equal(inviteTester.access.requiresPasswordReset, false);
+
+    const inviteSameEmailDifferentClient = await fetch(`${baseUrl}/api/me`, {
+      headers: headersFor('invite-other-client', 'Invite Smoke', 'invite-smoke@example.com'),
+    }).then(res => res.json());
+    assert.equal(inviteSameEmailDifferentClient.billing.planId, 'free');
+
+    const inviteReuseResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/redeem`, {
+      method: 'POST',
+      headers: headersFor('invite-other-client', 'Invite Smoke', 'invite-smoke@example.com'),
+      body: JSON.stringify({ token: inviteBody.invite.activationCode }),
+    });
+    assert.equal(inviteReuseResponse.status, 409);
+
+    const inviteList = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
+      headers: grantHeaders,
+    }).then(res => res.json());
+    assert.equal(inviteList.invites.length, 1);
+    assert.equal(inviteList.invites[0].status, 'redeemed');
+    assert.equal(inviteList.invites[0].tokenHash, undefined);
 
     console.log('Commercial credit gate smoke passed.');
   } finally {

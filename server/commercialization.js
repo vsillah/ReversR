@@ -68,6 +68,7 @@ const DEFAULT_STORE = {
   usageEvents: {},
   subscriptions: {},
   commercialAccessGrants: {},
+  testerInvites: {},
 };
 
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -103,6 +104,29 @@ const verifyPassword = (password, credential = {}) => {
 };
 
 const normalizeAccessValue = (value = '') => String(value).trim().toLowerCase();
+const normalizeInvitePlatform = (value = 'both') => {
+  const platform = normalizeAccessValue(value || 'both');
+  return ['ios', 'android', 'both', 'web'].includes(platform) ? platform : 'both';
+};
+
+const testerInviteTtlDays = () => Math.max(1, Math.min(90, Number(process.env.TESTER_INVITE_TTL_DAYS || 14)));
+
+const buildTesterInviteExpiry = (days = testerInviteTtlDays()) => (
+  new Date(Date.now() + (Math.max(1, Math.min(90, Number(days) || testerInviteTtlDays())) * 24 * 60 * 60 * 1000)).toISOString()
+);
+
+const generateTesterInviteToken = () => crypto.randomBytes(18).toString('base64url');
+const hashTesterInviteToken = (token = '') => crypto.createHash('sha256').update(String(token).trim()).digest('hex');
+const buildTesterInviteId = ({ email = '', tokenHash = '', createdAt = '' }) => (
+  `invite_${hashId([email, tokenHash, createdAt].map(normalizeAccessValue).join('|'))}`
+);
+
+const buildTesterInviteUrl = (token = '') => {
+  const baseUrl = process.env.TESTER_INVITE_BASE_URL || process.env.PUBLIC_APP_URL || BILLING_RETURN_URL;
+  if (!baseUrl) return '';
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  return `${baseUrl}${separator}testerInvite=${encodeURIComponent(token)}`;
+};
 
 const requestAccessPassword = (req) => String(
   req.get('x-reversr-access-password') ||
@@ -120,9 +144,25 @@ const redactAccessGrant = (grant = {}) => ({
   planId: grant.planId || 'tester',
   active: grant.active !== false,
   mustResetPassword: grant.mustResetPassword !== false,
+  createdByInviteId: grant.createdByInviteId || '',
+  inviteEmail: grant.inviteEmail || '',
   createdAt: grant.createdAt || '',
   updatedAt: grant.updatedAt || '',
   lastActivatedAt: grant.lastActivatedAt || '',
+});
+
+const redactTesterInvite = (invite = {}) => ({
+  inviteId: invite.inviteId,
+  email: invite.email || '',
+  platform: invite.platform || 'both',
+  status: invite.status || 'pending',
+  active: invite.active !== false,
+  expiresAt: invite.expiresAt || '',
+  createdAt: invite.createdAt || '',
+  updatedAt: invite.updatedAt || '',
+  redeemedAt: invite.redeemedAt || '',
+  redeemedClientId: invite.redeemedClientId || '',
+  grantId: invite.grantId || '',
 });
 
 const findMatchingStoredGrant = (store, profile) => {
@@ -137,6 +177,14 @@ const findMatchingStoredGrant = (store, profile) => {
     );
   }) || null;
 };
+
+const isClientBoundInviteGrant = (grant = {}, profile = {}) => (
+  grant.active !== false &&
+  grant.createdByInviteId &&
+  grant.mustResetPassword === false &&
+  grant.clientId &&
+  normalizeAccessValue(grant.clientId) === normalizeAccessValue(profile.clientId)
+);
 
 const getCommercialAccessGrant = (profile, store = DEFAULT_STORE, accessPassword = '') => {
   const testerEmails = listFromEnv('COMMERCIAL_TESTER_EMAILS', 'REVERSR_TESTER_EMAILS');
@@ -159,6 +207,17 @@ const getCommercialAccessGrant = (profile, store = DEFAULT_STORE, accessPassword
   }
 
   const storedGrant = findMatchingStoredGrant(store, profile);
+  if (storedGrant && isClientBoundInviteGrant(storedGrant, profile)) {
+    return {
+      type: 'tester',
+      planId: storedGrant.planId || 'tester',
+      role: 'tester',
+      grantId: storedGrant.grantId,
+      subscriptionStatus: 'tester_grant',
+      requiresPasswordReset: false,
+    };
+  }
+
   if (storedGrant && verifyPassword(accessPassword, storedGrant)) {
     return {
       type: 'tester',
@@ -416,8 +475,18 @@ const validateGrantTarget = ({ clientId = '', email = '', profileName = '', shop
   return null;
 };
 
+const validateInviteEmail = (email = '') => {
+  if (!email) return 'Tester email is required.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Tester email must be a valid email address.';
+  return null;
+};
+
 const buildGrantId = ({ clientId = '', email = '', profileName = '', shopName = '' }) => (
   `grant_${hashId([clientId, email, profileName, shopName].map(normalizeAccessValue).join('|'))}`
+);
+
+const buildClientInviteGrantId = ({ clientId = '', email = '' }) => (
+  `grant_${hashId(['invite', clientId, email].map(normalizeAccessValue).join('|'))}`
 );
 
 const resolveAuthenticatedGrant = async (req) => {
@@ -650,6 +719,206 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
         status: 'error',
         error: error.message || 'Failed to revoke commercial access grant.',
         canRetry: true,
+      });
+    }
+  });
+
+  app.get('/api/admin/commercial/tester-invites', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const store = await loadStore();
+      res.json({
+        status: 'ok',
+        invites: Object.values(store.testerInvites || {})
+          .map(redactTesterInvite)
+          .sort((left, right) => String(right.updatedAt).localeCompare(String(left.updatedAt))),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to list tester invites.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/admin/commercial/tester-invites', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const requestedInvites = Array.isArray(req.body?.testers) && req.body.testers.length > 0
+        ? req.body.testers
+        : [req.body || {}];
+      if (requestedInvites.length > 50) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Create 50 tester invites or fewer at a time.',
+          canRetry: false,
+        });
+      }
+
+      const store = await loadStore();
+      store.testerInvites = store.testerInvites || {};
+      const now = new Date().toISOString();
+      const invites = [];
+
+      for (const requestedInvite of requestedInvites) {
+        const email = String(requestedInvite?.email || '').trim().toLowerCase();
+        const validationError = validateInviteEmail(email);
+        if (validationError) {
+          return res.status(400).json({ status: 'error', error: validationError, canRetry: false });
+        }
+
+        const token = generateTesterInviteToken();
+        const tokenHash = hashTesterInviteToken(token);
+        const invite = {
+          inviteId: buildTesterInviteId({ email, tokenHash, createdAt: now }),
+          email,
+          platform: normalizeInvitePlatform(requestedInvite?.platform || req.body?.platform || 'both'),
+          status: 'pending',
+          active: true,
+          tokenHash,
+          expiresAt: buildTesterInviteExpiry(requestedInvite?.expiresInDays || req.body?.expiresInDays),
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        store.testerInvites[invite.inviteId] = invite;
+        invites.push({
+          ...redactTesterInvite(invite),
+          activationCode: token,
+          inviteUrl: buildTesterInviteUrl(token),
+        });
+      }
+
+      await saveStore(store);
+      res.json({ status: 'ok', invite: invites[0], invites });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to create tester invite.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.delete('/api/admin/commercial/tester-invites/:inviteId', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const inviteId = String(req.params.inviteId || '').trim();
+      const store = await loadStore();
+      const invite = store.testerInvites?.[inviteId];
+      if (!invite) {
+        return res.json({ status: 'ok', inviteId, revoked: false });
+      }
+      invite.active = false;
+      invite.status = invite.status === 'redeemed' ? 'redeemed' : 'revoked';
+      invite.updatedAt = new Date().toISOString();
+      store.testerInvites[inviteId] = invite;
+      await saveStore(store);
+      res.json({ status: 'ok', inviteId, revoked: true, invite: redactTesterInvite(invite) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to revoke tester invite.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/commercial/tester-invites/redeem', async (req, res) => {
+    try {
+      const token = String(req.body?.token || req.body?.activationCode || '').trim();
+      if (!token) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Tester invite code is required.',
+          canRetry: false,
+        });
+      }
+
+      const store = await loadStore();
+      const profile = requestProfile(req);
+      const tokenHash = hashTesterInviteToken(token);
+      const invite = Object.values(store.testerInvites || {}).find(item => item.tokenHash === tokenHash);
+      if (!invite || invite.active === false || invite.status !== 'pending') {
+        return res.status(409).json({
+          status: 'error',
+          error: 'Tester invite code is invalid, expired, or already used.',
+          canRetry: false,
+        });
+      }
+      if (invite.expiresAt && new Date(invite.expiresAt).getTime() < Date.now()) {
+        invite.active = false;
+        invite.status = 'expired';
+        invite.updatedAt = new Date().toISOString();
+        store.testerInvites[invite.inviteId] = invite;
+        await saveStore(store);
+        return res.status(409).json({
+          status: 'error',
+          error: 'Tester invite code has expired.',
+          canRetry: false,
+        });
+      }
+
+      const now = new Date().toISOString();
+      const grantId = buildClientInviteGrantId({ clientId: profile.clientId, email: invite.email });
+      const existingGrant = store.commercialAccessGrants?.[grantId] || {};
+      const grant = {
+        ...existingGrant,
+        grantId,
+        clientId: profile.clientId,
+        email: invite.email,
+        profileName: profile.name,
+        shopName: profile.shopName,
+        planId: 'tester',
+        active: true,
+        mustResetPassword: false,
+        createdByInviteId: invite.inviteId,
+        inviteEmail: invite.email,
+        createdAt: existingGrant.createdAt || now,
+        updatedAt: now,
+        lastActivatedAt: now,
+      };
+
+      invite.status = 'redeemed';
+      invite.active = false;
+      invite.redeemedAt = now;
+      invite.redeemedClientId = profile.clientId;
+      invite.grantId = grantId;
+      invite.updatedAt = now;
+
+      store.commercialAccessGrants = {
+        ...(store.commercialAccessGrants || {}),
+        [grantId]: grant,
+      };
+      store.testerInvites = {
+        ...(store.testerInvites || {}),
+        [invite.inviteId]: invite,
+      };
+      await saveStore(store);
+
+      const accountReq = {
+        ...req,
+        get: (name) => {
+          const lowerName = String(name).toLowerCase();
+          if (lowerName === 'x-reversr-client-id') return profile.clientId;
+          if (lowerName === 'x-reversr-profile-email') return profile.email;
+          if (lowerName === 'x-reversr-profile-name') return profile.name;
+          if (lowerName === 'x-reversr-shop-name') return profile.shopName;
+          return req.get(name);
+        },
+      };
+      const { store: accountStore, user, shop, accessGrant } = await ensureAccount(accountReq);
+      res.json({
+        status: 'ok',
+        invite: redactTesterInvite(invite),
+        account: buildAccountResponse(accountStore, user, shop, accessGrant),
+      });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({
+        status: 'error',
+        error: error.message || 'Failed to redeem tester invite.',
+        canRetry: false,
       });
     }
   });

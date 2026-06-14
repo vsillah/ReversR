@@ -121,6 +121,30 @@ export interface CommercialAccessGrantPayload {
   startingPassword: string;
 }
 
+export type TesterInvitePlatform = 'ios' | 'android' | 'both' | 'web';
+
+export interface CommercialTesterInviteSummary {
+  inviteId: string;
+  email: string;
+  platform: TesterInvitePlatform;
+  status: 'pending' | 'redeemed' | 'revoked' | 'expired';
+  active: boolean;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+  redeemedAt: string;
+  redeemedClientId: string;
+  grantId: string;
+  activationCode?: string;
+  inviteUrl?: string;
+}
+
+export interface CommercialTesterInviteCreatePayload {
+  email: string;
+  platform?: TesterInvitePlatform;
+  expiresInDays?: number;
+}
+
 interface CommercialContextValue {
   account: CommercialAccount | null;
   profile: CommercialProfile;
@@ -132,6 +156,7 @@ interface CommercialContextValue {
   beginCheckout: (planId: CommercialPlanId) => Promise<void>;
   openBillingPortal: () => Promise<void>;
   activateAccessPassword: (password: string) => Promise<void>;
+  redeemTesterInvite: (token: string) => Promise<void>;
   resetAccessPassword: (currentPassword: string, newPassword: string) => Promise<void>;
   clearAccessPassword: () => Promise<void>;
 }
@@ -235,6 +260,45 @@ export const revokeCommercialAccessGrant = async (
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to revoke commercial access grant.');
+  return data;
+};
+
+export const listCommercialTesterInvites = async (
+  adminToken: string
+): Promise<{ status: 'ok'; invites: CommercialTesterInviteSummary[] }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites`, {
+    method: 'GET',
+    headers: adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to load tester invites.');
+  return data;
+};
+
+export const createCommercialTesterInvite = async (
+  adminToken: string,
+  payload: CommercialTesterInviteCreatePayload
+): Promise<{ status: 'ok'; invite: CommercialTesterInviteSummary; invites: CommercialTesterInviteSummary[] }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites`, {
+    method: 'POST',
+    headers: adminHeaders(adminToken),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to create tester invite.');
+  return data;
+};
+
+export const revokeCommercialTesterInvite = async (
+  adminToken: string,
+  inviteId: string
+): Promise<{ status: 'ok'; inviteId: string; revoked: boolean; invite?: CommercialTesterInviteSummary }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites/${encodeURIComponent(inviteId)}`, {
+    method: 'DELETE',
+    headers: adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to revoke tester invite.');
   return data;
 };
 
@@ -374,6 +438,22 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
     setError(null);
   }, []);
 
+  const redeemTesterInvite = useCallback(async (token: string) => {
+    const cleanToken = token.trim();
+    if (!cleanToken) throw new Error('Enter the tester invite code from ReversR admin.');
+    const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
+    const response = await fetch(`${getApiBase()}/api/commercial/tester-invites/redeem`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ token: cleanToken }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.account) throw new Error(data.error || 'Unable to redeem tester invite.');
+    await AsyncStorage.removeItem(ACCESS_PASSWORD_STORAGE_KEY);
+    setAccount(data.account);
+    setError(null);
+  }, []);
+
   const clearAccessPassword = useCallback(async () => {
     await AsyncStorage.removeItem(ACCESS_PASSWORD_STORAGE_KEY);
     await refreshAccount();
@@ -390,9 +470,10 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
     beginCheckout,
     openBillingPortal,
     activateAccessPassword,
+    redeemTesterInvite,
     resetAccessPassword,
     clearAccessPassword,
-  }), [account, profile, loading, error, refreshAccount, saveProfile, beginCheckout, openBillingPortal, activateAccessPassword, resetAccessPassword, clearAccessPassword]);
+  }), [account, profile, loading, error, refreshAccount, saveProfile, beginCheckout, openBillingPortal, activateAccessPassword, redeemTesterInvite, resetAccessPassword, clearAccessPassword]);
 
   return (
     <CommercialContext.Provider value={value}>
