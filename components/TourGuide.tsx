@@ -26,6 +26,7 @@ export type TourStep = {
   checks: Array<{
     id: string;
     label: string;
+    completion?: 'manual' | 'auto';
   }>;
 };
 
@@ -83,6 +84,10 @@ export default function TourGuide({
 
   const isCompact = width < 760;
   const isLastStep = stepIndex === stepCount - 1;
+  const manualChecks = step.checks.filter(check => check.completion !== 'auto');
+  const manualCheckCount = manualChecks.length;
+  const areManualChecksComplete = manualCheckCount > 0
+    && manualChecks.every(check => completedChecks.has(tourCheckKey(stepIndex, check.id)));
   const stepCompleteCount = step.checks.filter(check => completedChecks.has(tourCheckKey(stepIndex, check.id))).length;
   const isStepComplete = stepCompleteCount === step.checks.length;
   const remainingActionCount = Math.max(0, step.checks.length - stepCompleteCount);
@@ -174,55 +179,72 @@ export default function TourGuide({
 
       <View style={styles.manualHeader}>
         <Text style={styles.manualTitle}>Actions for you</Text>
-        <Text style={styles.manualHelp}>Tap each item after you actually do it.</Text>
+        <Text style={styles.manualHelp}>
+          Auto-detected items complete themselves. Tap manual items after you actually do them.
+        </Text>
       </View>
 
       <View style={styles.checkList}>
         {step.checks.map(check => {
           const isComplete = completedChecks.has(tourCheckKey(stepIndex, check.id));
+          const isAutoCheck = check.completion === 'auto';
           return (
             <TouchableOpacity
               key={check.id}
               style={[
                 styles.checkButton,
                 isComplete && styles.checkButtonComplete,
-                !canFocusStep && styles.checkButtonDisabled,
+                isAutoCheck && !isComplete && styles.checkButtonAutoPending,
+                (!canFocusStep || isAutoCheck) && styles.checkButtonDisabled,
               ]}
               onPress={() => onToggleCheck(stepIndex, check.id)}
-              disabled={!canFocusStep}
+              disabled={!canFocusStep || isAutoCheck}
               accessibilityRole="button"
-              accessibilityLabel={`${isComplete ? 'Clear' : 'Mark complete'} manual tour action ${check.label}`}
-              accessibilityState={{ selected: isComplete, disabled: !canFocusStep }}
+              accessibilityLabel={
+                isAutoCheck
+                  ? `${isComplete ? 'Detected' : 'Waiting to detect'} tour action ${check.label}`
+                  : `${isComplete ? 'Clear' : 'Mark complete'} manual tour action ${check.label}`
+              }
+              accessibilityState={{ selected: isComplete, disabled: !canFocusStep || isAutoCheck }}
             >
               <Ionicons
-                name={isComplete ? 'checkmark-circle' : 'ellipse-outline'}
+                name={isComplete ? 'checkmark-circle' : isAutoCheck ? 'radio-button-off-outline' : 'ellipse-outline'}
                 size={16}
                 color={isComplete && canFocusStep ? Colors.black : Colors.gray[400]}
               />
               <Text style={[styles.checkText, isComplete && styles.checkTextComplete]}>{check.label}</Text>
+              {isAutoCheck ? (
+                <View style={[styles.autoBadge, isComplete && styles.autoBadgeComplete]}>
+                  <Text style={[styles.autoBadgeText, isComplete && styles.autoBadgeTextComplete]}>
+                    {isComplete ? 'Auto' : 'Detects'}
+                  </Text>
+                </View>
+              ) : null}
             </TouchableOpacity>
           );
         })}
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity
-          style={[styles.actionButton, !canFocusStep && styles.actionButtonDisabled]}
-          onPress={() => onToggleStepDone(stepIndex)}
-          disabled={!canFocusStep}
-          accessibilityRole="button"
-          accessibilityLabel={isStepComplete ? 'Undo all manual actions for this tour step' : 'Mark all manual actions for this tour step complete'}
-          accessibilityState={{ disabled: !canFocusStep }}
-        >
-          <Ionicons
-            name={isStepComplete ? 'close-circle-outline' : 'checkmark-done-outline'}
-            size={15}
-            color={canFocusStep ? Colors.accent : Colors.gray[500]}
-          />
-          <Text style={[styles.actionButtonText, !canFocusStep && styles.actionButtonTextDisabled]}>
-            {isStepComplete ? 'Undo all' : 'Mark all done'}
-          </Text>
-        </TouchableOpacity>
+        {manualCheckCount > 0 ? (
+          <TouchableOpacity
+            style={[styles.actionButton, !canFocusStep && styles.actionButtonDisabled]}
+            onPress={() => onToggleStepDone(stepIndex)}
+            disabled={!canFocusStep}
+            accessibilityRole="button"
+            accessibilityLabel={areManualChecksComplete ? 'Undo all manual actions for this tour step' : 'Mark all manual actions for this tour step complete'}
+            accessibilityState={{ disabled: !canFocusStep }}
+          >
+            <Ionicons
+              name={areManualChecksComplete ? 'close-circle-outline' : 'checkmark-done-outline'}
+              size={15}
+              color={canFocusStep ? Colors.accent : Colors.gray[500]}
+            />
+            <Text style={[styles.actionButtonText, !canFocusStep && styles.actionButtonTextDisabled]}>
+              {areManualChecksComplete ? 'Undo manual' : 'Mark manual'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         <TouchableOpacity
           style={[styles.actionButton, stepIndex === 0 && styles.actionButtonDisabled]}
@@ -467,8 +489,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.accent,
     backgroundColor: Colors.accent,
   },
+  checkButtonAutoPending: {
+    borderStyle: 'dashed',
+  },
   checkButtonDisabled: {
-    opacity: 0.55,
+    opacity: 0.72,
   },
   checkText: {
     color: Colors.gray[300],
@@ -476,6 +501,26 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '700',
   },
   checkTextComplete: {
+    color: Colors.black,
+  },
+  autoBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: Colors.panel,
+  },
+  autoBadgeComplete: {
+    borderColor: Colors.black,
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  autoBadgeText: {
+    color: Colors.gray[400],
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  autoBadgeTextComplete: {
     color: Colors.black,
   },
   actions: {

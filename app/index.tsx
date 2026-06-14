@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -118,7 +118,7 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-settings',
     opensSettings: true,
     checks: [
-      { id: 'account', label: 'Review account credits' },
+      { id: 'account', label: 'Open account settings', completion: 'auto' },
       { id: 'ai', label: 'Review AI status' },
       { id: 'inventory', label: 'Review inventory source' },
     ],
@@ -130,7 +130,7 @@ const TOUR_STEPS: TourStep[] = [
     body: 'The phase rail shows progress through Scan, Inventory, Design, and Build. Completed earlier phases can be reopened from the rail with save/reset safeguards.',
     structureId: 'reversr-tour-phase-nav',
     checks: [
-      { id: 'current', label: 'Identify the current phase' },
+      { id: 'current', label: 'Open the phase rail', completion: 'auto' },
       { id: 'complete', label: 'Notice completed phases' },
       { id: 'safeguards', label: 'Open a completed phase prompt' },
     ],
@@ -143,9 +143,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-scan',
     phase: 1,
     checks: [
-      { id: 'modes', label: 'Compare Type, Scan, Sample' },
-      { id: 'notes', label: 'Enter or inspect machine notes' },
-      { id: 'action', label: 'Locate Start Machine Scan' },
+      { id: 'modes', label: 'Open scan input modes', completion: 'auto' },
+      { id: 'notes', label: 'Enter or inspect machine notes', completion: 'auto' },
+      { id: 'action', label: 'Complete machine scan', completion: 'auto' },
     ],
   },
   {
@@ -156,9 +156,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-inventory',
     phase: 2,
     checks: [
-      { id: 'summary', label: 'Review scan summary' },
-      { id: 'source', label: 'Review source details' },
-      { id: 'candidate', label: 'Select a candidate match' },
+      { id: 'summary', label: 'Open scan summary', completion: 'auto' },
+      { id: 'source', label: 'Load source details', completion: 'auto' },
+      { id: 'candidate', label: 'Select a candidate match', completion: 'auto' },
     ],
   },
   {
@@ -169,9 +169,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-design',
     phase: 3,
     checks: [
-      { id: 'specs', label: 'Review generated specs' },
-      { id: 'visuals', label: 'Inspect visual tabs' },
-      { id: 'build', label: 'Locate Continue to Build' },
+      { id: 'specs', label: 'Generate or load specs', completion: 'auto' },
+      { id: 'visuals', label: 'Load visual reference data', completion: 'auto' },
+      { id: 'build', label: 'Locate Continue to Build', completion: 'auto' },
     ],
   },
   {
@@ -182,8 +182,8 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-build',
     phase: 4,
     checks: [
-      { id: 'bom', label: 'Generate or review BOM' },
-      { id: 'approval', label: 'Review approval gate' },
+      { id: 'bom', label: 'Generate or load BOM', completion: 'auto' },
+      { id: 'approval', label: 'Save reviewer approval', completion: 'auto' },
       { id: 'packet', label: 'Prepare handoff packet' },
     ],
   },
@@ -195,8 +195,8 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-history',
     opensHistory: true,
     checks: [
-      { id: 'list', label: 'Review saved reconstructions' },
-      { id: 'resume', label: 'Locate a resume action' },
+      { id: 'list', label: 'Open saved reconstructions', completion: 'auto' },
+      { id: 'resume', label: 'Resume a reconstruction', completion: 'auto' },
       { id: 'boundary', label: 'Confirm saved work stays local' },
     ],
   },
@@ -204,6 +204,12 @@ const TOUR_STEPS: TourStep[] = [
 
 const guidedTourCheckKeysForStep = (stepIndex: number) => (
   TOUR_STEPS[stepIndex].checks.map(check => tourCheckKey(stepIndex, check.id))
+);
+
+const guidedTourManualCheckKeysForStep = (stepIndex: number) => (
+  TOUR_STEPS[stepIndex].checks
+    .filter(check => check.completion !== 'auto')
+    .map(check => tourCheckKey(stepIndex, check.id))
 );
 
 const allGuidedTourCheckKeys = () => new Set(
@@ -502,6 +508,7 @@ export default function HomeScreen() {
   const [tourCompletedChecks, setTourCompletedChecks] = useState<Set<string>>(() => new Set());
   const [tourCompletedAt, setTourCompletedAt] = useState<string | null>(null);
   const [tourStateLoaded, setTourStateLoaded] = useState(false);
+  const [tourHistoryResumeDetected, setTourHistoryResumeDetected] = useState(false);
   const [mockJourneyActive, setMockJourneyActive] = useState(false);
   const [mockTourFixture, setMockTourFixture] = useState<MockTourFixture | null>(null);
   
@@ -538,6 +545,79 @@ export default function HomeScreen() {
   const focusBlockedReason = !mockJourneyActive && tourStep.phase && context.phase < tourStep.phase
     ? `This scene opens after Phase ${context.phase}. Complete the current phase to unlock ${PHASE_LABELS[tourStep.phase - 1]}.`
     : undefined;
+  const detectedTourCheckKeys = useMemo(() => {
+    const detected = new Set<string>();
+    const mark = (stepId: TourStep['id'], checkId: string) => {
+      const stepIndex = TOUR_STEPS.findIndex(step => step.id === stepId);
+      if (stepIndex >= 0) detected.add(tourCheckKey(stepIndex, checkId));
+    };
+
+    if (showSettings && settingsInitialSection === 'account') {
+      mark('settings', 'account');
+    }
+    if (started && !showSettings && !showHistory) {
+      mark('phase-nav', 'current');
+    }
+
+    if (started && context.phase === 1 && !showSettings && !showHistory) {
+      mark('scan', 'modes');
+    }
+    if (context.input.trim().length > 0 || mockJourneyActive) {
+      mark('scan', 'notes');
+    }
+    if (context.analysis || context.phase > 1) {
+      mark('scan', 'action');
+    }
+
+    if (context.analysis && context.phase >= 2) {
+      mark('inventory', 'summary');
+      mark('inventory', 'source');
+    }
+    if (context.innovation || context.phase >= 3) {
+      mark('inventory', 'candidate');
+    }
+
+    if (context.spec) {
+      mark('design', 'specs');
+      mark('design', 'build');
+    }
+    if (context.imageUrl || context.threeDScene || generatedMultiAngleImages.some(image => image.imageData)) {
+      mark('design', 'visuals');
+    }
+
+    if (context.bom) {
+      mark('build', 'bom');
+    }
+    if (context.reviewerApprovalRecords.length > 0) {
+      mark('build', 'approval');
+    }
+
+    if (showHistory) {
+      mark('history', 'list');
+    }
+    if (tourHistoryResumeDetected) {
+      mark('history', 'resume');
+    }
+
+    return detected;
+  }, [
+    context.analysis,
+    context.bom,
+    context.imageUrl,
+    context.input,
+    context.innovation,
+    context.phase,
+    context.reviewerApprovalRecords.length,
+    context.spec,
+    context.threeDScene,
+    generatedMultiAngleImages,
+    mockJourneyActive,
+    settingsInitialSection,
+    showHistory,
+    showSettings,
+    started,
+    tourHistoryResumeDetected,
+  ]);
 
   useEffect(() => {
     const loadTourState = async () => {
@@ -591,6 +671,22 @@ export default function HomeScreen() {
     saveTourState();
   }, [tourActive, tourStepIndex, tourCompletedChecks, tourCompletedAt, tourStateLoaded]);
 
+  useEffect(() => {
+    if (!tourStateLoaded || detectedTourCheckKeys.size === 0) return;
+
+    setTourCompletedChecks(current => {
+      let changed = false;
+      const next = new Set(current);
+      detectedTourCheckKeys.forEach(key => {
+        if (!next.has(key)) {
+          next.add(key);
+          changed = true;
+        }
+      });
+      return changed ? next : current;
+    });
+  }, [detectedTourCheckKeys, tourStateLoaded]);
+
   const toggleTourCheck = useCallback((stepIndex: number, checkId: string) => {
     setTourCompletedChecks(current => {
       const next = new Set(current);
@@ -607,7 +703,7 @@ export default function HomeScreen() {
   const toggleTourStepDone = useCallback((stepIndex: number) => {
     setTourCompletedChecks(current => {
       const next = new Set(current);
-      const stepKeys = guidedTourCheckKeysForStep(stepIndex);
+      const stepKeys = guidedTourManualCheckKeysForStep(stepIndex);
       const isStepComplete = stepKeys.every(key => next.has(key));
       stepKeys.forEach(key => {
         if (isStepComplete) {
@@ -622,6 +718,7 @@ export default function HomeScreen() {
 
   const startTour = useCallback(() => {
     setTourStepIndex(0);
+    setTourHistoryResumeDetected(false);
     setTourActive(true);
     setTourCompletedAt(null);
   }, []);
@@ -652,6 +749,7 @@ export default function HomeScreen() {
     setTourActive(true);
     setTourStepIndex(3);
     setTourCompletedAt(null);
+    setTourHistoryResumeDetected(false);
   }, []);
 
   const stopMockJourney = useCallback(() => {
@@ -667,6 +765,7 @@ export default function HomeScreen() {
     setGeneratedMultiAngleImages([]);
     imageGenInnovationId.current = null;
     setTourStepIndex(0);
+    setTourHistoryResumeDetected(false);
   }, []);
 
   const applyTourStepFocus = useCallback((stepIndex: number) => {
@@ -958,6 +1057,7 @@ export default function HomeScreen() {
   const executeReset = () => {
     setMockJourneyActive(false);
     setMockTourFixture(null);
+    setTourHistoryResumeDetected(false);
     setContext(createEmptyContext());
     setImageGenStatus('idle');
     setGeneratedImageBase64(null);
@@ -1183,6 +1283,7 @@ export default function HomeScreen() {
   const handleStartNew = () => {
     setMockJourneyActive(false);
     setMockTourFixture(null);
+    setTourHistoryResumeDetected(false);
     setContext(createEmptyContext());
     setShowHistory(false);
     setStarted(true);
@@ -1195,6 +1296,7 @@ export default function HomeScreen() {
   const handleResume = (saved: SavedInnovation) => {
     setMockJourneyActive(false);
     setMockTourFixture(null);
+    setTourHistoryResumeDetected(true);
     setContext({
       id: saved.id,
       createdAt: saved.createdAt,
