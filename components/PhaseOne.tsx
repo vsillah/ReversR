@@ -36,6 +36,8 @@ interface Props {
   setIsLoading: (loading: boolean) => void;
   initialInput?: string;
   initialImage?: string | null;
+  mockAnalysis?: AnalysisResult | null;
+  mockInput?: string;
 }
 
 const PRODUCT_PRESETS = [
@@ -51,7 +53,15 @@ const PRODUCT_PRESETS = [
 
 type InputMode = 'type' | 'scan' | 'lucky';
 
-export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialInput, initialImage }: Props) {
+export default function PhaseOne({
+  onComplete,
+  isLoading,
+  setIsLoading,
+  initialInput,
+  initialImage,
+  mockAnalysis,
+  mockInput,
+}: Props) {
   const { colors: Colors } = useAppTheme();
   const { account, refreshAccount } = useCommercialization();
   const styles = createStyles(Colors);
@@ -99,8 +109,15 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   };
 
   const handleAnalyze = async () => {
-    const activeInput = getActiveInput();
+    const activeInput = getActiveInput() || mockInput || '';
     if (!activeInput.trim() && !capturedImage) return;
+    if (mockAnalysis) {
+      setError(null);
+      setCreditUpgradeUrl(null);
+      onComplete(activeInput, mockAnalysis, capturedImage);
+      return;
+    }
+
     setIsLoading(true);
     setLoadingStep('capture');
     setError(null);
@@ -409,13 +426,13 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
         <TouchableOpacity
           style={[
             styles.submitButton,
-            !hasValidInput() && styles.submitButtonDisabled,
+            (!hasValidInput() || !!mockAnalysis) && styles.submitButtonDisabled,
           ]}
           onPress={handleAnalyze}
-          disabled={isLoading || !hasValidInput()}
+          disabled={isLoading || !hasValidInput() || !!mockAnalysis}
           accessibilityRole="button"
-          accessibilityLabel="Initiate machine scan"
-          accessibilityState={{ disabled: isLoading || !hasValidInput() }}
+          accessibilityLabel={mockAnalysis ? 'Mock scan result is preloaded' : 'Initiate machine scan'}
+          accessibilityState={{ disabled: isLoading || !hasValidInput() || !!mockAnalysis }}
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -424,7 +441,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
             </View>
           ) : (
             <View style={styles.buttonContent}>
-              <Text style={styles.submitButtonText}>Start Machine Scan</Text>
+              <Text style={styles.submitButtonText}>{mockAnalysis ? 'Mock Scan Preloaded' : 'Start Machine Scan'}</Text>
               <Ionicons name="flash" size={18} color={Colors.white} />
             </View>
           )}

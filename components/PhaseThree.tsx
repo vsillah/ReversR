@@ -54,6 +54,7 @@ interface Props {
   existingThreeDScene?: ThreeDSceneDescriptor | null;
   imageGenerating?: boolean;
   multiAngleImages?: AngleImage[];
+  mockMode?: boolean;
   onComplete: (
     spec: TechnicalSpec,
     scene: ThreeDSceneDescriptor | null,
@@ -74,6 +75,7 @@ export default function PhaseThree({
   existingThreeDScene,
   imageGenerating = false,
   multiAngleImages = [],
+  mockMode = false,
   onComplete,
   onContinueToBuild,
   onBack,
@@ -144,6 +146,13 @@ export default function PhaseThree({
   };
 
   // Auto-select first available angle when it loads
+  useEffect(() => {
+    if (mockMode) {
+      setError(null);
+      setCreditUpgradeUrl(null);
+    }
+  }, [mockMode]);
+
   useEffect(() => {
     if (availableAngles.length > 0 && !selectedAngleId) {
       setSelectedAngleId(availableAngles[0].id);
@@ -247,6 +256,9 @@ export default function PhaseThree({
   const currentAngleImage = availableAngles.find(img => img.id === selectedAngleId) || availableAngles[0] || null;
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
+  const activeImageSource = currentAngleImage?.imageSource || innovation.referenceImages?.[0] || null;
+  const activeImageSourceType = activeImageSource?.sourceType || activeImageSource?.kind || '';
+  const isAiFallbackImage = activeImageSourceType === 'ai_generated_fallback' || activeImageSourceType === 'mock-tour-ai-fallback';
 
   const rawDisplayImageUri = useMemo(() => {
     return normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
@@ -479,6 +491,18 @@ export default function PhaseThree({
 
   const handleGenerate2D = async () => {
     if (!spec) return;
+    if (mockMode) {
+      setError(null);
+      setCreditUpgradeUrl(null);
+      setAlert({
+        visible: true,
+        title: 'Mock tour visual',
+        message: 'Mock journey uses local fixture data only. No 2D image generation endpoint was called.',
+        type: 'info',
+      });
+      return;
+    }
+
     setStatus('generating_visual');
     setError(null);
     setCreditUpgradeUrl(null);
@@ -498,6 +522,18 @@ export default function PhaseThree({
 
   const handleGenerate3D = async () => {
     if (!spec) return;
+    if (mockMode) {
+      setError(null);
+      setCreditUpgradeUrl(null);
+      setAlert({
+        visible: true,
+        title: 'Mock tour wireframe',
+        message: 'The mock 3D scene is already loaded from local fixture data.',
+        type: 'info',
+      });
+      return;
+    }
+
     setStatus('generating_visual');
     setError(null);
     setCreditUpgradeUrl(null);
@@ -780,6 +816,21 @@ export default function PhaseThree({
                     </TouchableOpacity>
                   );
                 })()}
+
+                {mockMode && activeImageSource ? (
+                  <View style={[styles.mockSourceNotice, isAiFallbackImage && styles.mockFallbackNotice]}>
+                    <Ionicons
+                      name={isAiFallbackImage ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+                      size={15}
+                      color={isAiFallbackImage ? Colors.orange[300] : Colors.accent}
+                    />
+                    <Text style={styles.mockSourceNoticeText}>
+                      {isAiFallbackImage
+                        ? 'AI-generated fallback mock reference. Not a source-backed schematic.'
+                        : 'Source-backed FarmBot reference loaded from the mock API fixture.'}
+                    </Text>
+                  </View>
+                ) : null}
                 
                 {availableAngles.length > 1 && (
                   <View style={styles.angleNavigation}>
@@ -860,6 +911,31 @@ export default function PhaseThree({
                   <View style={styles.bgGenProgressBar} />
                 </View>
               </View>
+            ) : mockMode ? (
+              <View style={styles.mockVisualPanel}>
+                <View style={styles.mockSheetHeader}>
+                  <View>
+                    <Text style={styles.mockVisualTitle}>Source-backed 2D reference unavailable</Text>
+                    <Text style={styles.mockVisualDesc}>
+                      The mock tour expected cached FarmBot reference files from the API. Restart the mock journey to reload the fixture; no image generation endpoint or credit will be used.
+                    </Text>
+                  </View>
+                  <View style={styles.mockFixtureBadge}>
+                    <Ionicons name="alert-circle-outline" size={14} color={Colors.orange[300]} />
+                    <Text style={[styles.mockFixtureBadgeText, { color: Colors.orange[300] }]}>Missing</Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.mockVisualButton}
+                  onPress={() => setActiveTab('3d')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Show mock 3D wireframe"
+                >
+                  <Ionicons name="cube-outline" size={16} color={Colors.black} />
+                  <Text style={styles.mockVisualButtonText}>View Mock 3D</Text>
+                </TouchableOpacity>
+              </View>
             ) : (
               <View style={styles.generatePrompt}>
                 <Ionicons name="image-outline" size={48} color={Colors.gray[600]} />
@@ -932,11 +1008,15 @@ export default function PhaseThree({
                 </View>
 
                 <TouchableOpacity 
-                  style={styles.regenerateButton}
+                  style={[styles.regenerateButton, mockMode && styles.disabledActionButton]}
                   onPress={handleGenerate3D}
+                  disabled={mockMode}
+                  accessibilityRole="button"
+                  accessibilityLabel={mockMode ? 'Mock 3D scene is preloaded' : 'Regenerate 3D wireframe'}
+                  accessibilityState={{ disabled: mockMode }}
                 >
                   <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
-                  <Text style={styles.regenerateText}>Regenerate</Text>
+                  <Text style={styles.regenerateText}>{mockMode ? 'Mock scene preloaded' : 'Regenerate'}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -1466,6 +1546,86 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.black,
   },
+  mockVisualPanel: {
+    alignItems: 'stretch',
+    padding: Spacing.lg,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent + '10',
+  },
+  mockSheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  mockVisualTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: '800',
+    color: Colors.white,
+    marginBottom: Spacing.xs,
+  },
+  mockVisualDesc: {
+    fontSize: FontSizes.sm,
+    color: Colors.gray[400],
+    lineHeight: 20,
+  },
+  mockFixtureBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 5,
+    backgroundColor: Colors.mode === 'dark' ? '#101816' : Colors.gray[50],
+  },
+  mockFixtureBadgeText: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: '900',
+  },
+  mockSourceNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.accent + '12',
+    borderWidth: 1,
+    borderColor: Colors.accent + '38',
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  mockFallbackNotice: {
+    backgroundColor: Colors.orange[300] + '18',
+    borderColor: Colors.orange[300] + '45',
+  },
+  mockSourceNoticeText: {
+    flex: 1,
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  mockVisualButton: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: 8,
+  },
+  mockVisualButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
+  },
   generatedImageContainer: {
     alignItems: 'center',
   },
@@ -1484,6 +1644,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 6,
+  },
+  disabledActionButton: {
+    opacity: 0.55,
   },
   regenerateText: {
     fontSize: FontSizes.xs,

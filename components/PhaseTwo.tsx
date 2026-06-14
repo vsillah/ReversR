@@ -42,6 +42,9 @@ interface Props {
   onBack: () => void;
   onReset: () => void;
   onOpenSettings: () => void;
+  mockMode?: boolean;
+  mockValidation?: InventoryValidationResult | null;
+  mockInnovation?: InnovationResult | null;
 }
 
 const percentLabel = (value: number) => `${Math.round(value)}% match`;
@@ -54,6 +57,9 @@ export default function PhaseTwo({
   setIsLoading,
   onBack,
   onOpenSettings,
+  mockMode = false,
+  mockValidation,
+  mockInnovation,
 }: Props) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
@@ -68,6 +74,20 @@ export default function PhaseTwo({
   const selectedCandidate = candidates.find(candidate => candidate.machineId === selectedMachineId) || null;
 
   useEffect(() => {
+    if (mockMode && mockValidation) {
+      setConnector({
+        sourceName: mockValidation.sourceName,
+        sourceUrl: mockValidation.sourceUrl,
+        connectorType: 'demo',
+        authMode: mockValidation.authMode || 'none',
+      });
+      setValidation(mockValidation);
+      setSelectedMachineId(mockValidation.matchCandidates?.[0]?.machineId || null);
+      setIsValidating(false);
+      setError(null);
+      return;
+    }
+
     const loadAndValidate = async () => {
       setIsValidating(true);
       setError(null);
@@ -88,7 +108,7 @@ export default function PhaseTwo({
     };
 
     loadAndValidate();
-  }, [analysis]);
+  }, [analysis, mockMode, mockValidation]);
 
   useEffect(() => {
     if (isLoading) {
@@ -103,6 +123,13 @@ export default function PhaseTwo({
   }, [isLoading]);
 
   const handleRecheck = async () => {
+    if (mockMode && mockValidation) {
+      setValidation(mockValidation);
+      setSelectedMachineId(mockValidation.matchCandidates?.[0]?.machineId || null);
+      setError(null);
+      return;
+    }
+
     setIsValidating(true);
     setError(null);
     try {
@@ -133,6 +160,11 @@ export default function PhaseTwo({
     setError(null);
 
     try {
+      if (mockMode && mockInnovation) {
+        onComplete(mockInnovation);
+        return;
+      }
+
       await saveInventoryConnector(connector);
       const result = await identifyMachineFromInventory(analysis, connector, capturedImage, selectedMachineId);
       onComplete(result);

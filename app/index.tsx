@@ -29,8 +29,11 @@ import {
   ThreeDSceneDescriptor,
   MachineWorkflowKey,
   BillOfMaterials,
+  InventoryValidationResult,
   useGemini,
   AngleImage,
+  MockTourFixture,
+  fetchMockTourFarmBotFixture,
   generate2DAnglesProgressive,
 } from "../hooks/useGemini";
 import {
@@ -85,6 +88,7 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
 };
 
 const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v1';
+const MOCK_TOUR_FIXTURE_CACHE_KEY = 'reversr-rebuild-mock-tour:farmbot-genesis-v1.8:v1';
 
 type TourSavedState = {
   active: boolean;
@@ -101,9 +105,9 @@ const TOUR_STEPS: TourStep[] = [
     body: 'The welcome screen shows the full path: scan a machine, match inventory, design the reconstruction, then prepare build artifacts.',
     structureId: 'reversr-tour-welcome',
     checks: [
-      { id: 'map', label: 'Read four-phase map' },
-      { id: 'start', label: 'Find new reconstruction' },
-      { id: 'settings', label: 'Find settings' },
+      { id: 'map', label: 'Read the four-phase map' },
+      { id: 'start', label: 'Locate New Reconstruction' },
+      { id: 'settings', label: 'Locate Settings' },
     ],
   },
   {
@@ -114,9 +118,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-settings',
     opensSettings: true,
     checks: [
-      { id: 'account', label: 'Check account panel' },
-      { id: 'ai', label: 'Check AI runtime' },
-      { id: 'inventory', label: 'Check inventory source' },
+      { id: 'account', label: 'Review account credits' },
+      { id: 'ai', label: 'Review AI status' },
+      { id: 'inventory', label: 'Review inventory source' },
     ],
   },
   {
@@ -126,9 +130,9 @@ const TOUR_STEPS: TourStep[] = [
     body: 'The phase rail shows progress through Scan, Inventory, Design, and Build. Completed earlier phases can be reopened from the rail with save/reset safeguards.',
     structureId: 'reversr-tour-phase-nav',
     checks: [
-      { id: 'current', label: 'Identify current phase' },
-      { id: 'complete', label: 'Find completed phases' },
-      { id: 'safeguards', label: 'Note save/reset prompts' },
+      { id: 'current', label: 'Identify the current phase' },
+      { id: 'complete', label: 'Notice completed phases' },
+      { id: 'safeguards', label: 'Open a completed phase prompt' },
     ],
   },
   {
@@ -139,9 +143,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-scan',
     phase: 1,
     checks: [
-      { id: 'modes', label: 'Review input modes' },
-      { id: 'notes', label: 'Find machine notes' },
-      { id: 'action', label: 'Find scan action' },
+      { id: 'modes', label: 'Compare Type, Scan, Sample' },
+      { id: 'notes', label: 'Enter or inspect machine notes' },
+      { id: 'action', label: 'Locate Start Machine Scan' },
     ],
   },
   {
@@ -153,8 +157,8 @@ const TOUR_STEPS: TourStep[] = [
     phase: 2,
     checks: [
       { id: 'summary', label: 'Review scan summary' },
-      { id: 'source', label: 'Check source' },
-      { id: 'candidate', label: 'Select a match' },
+      { id: 'source', label: 'Review source details' },
+      { id: 'candidate', label: 'Select a candidate match' },
     ],
   },
   {
@@ -165,9 +169,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-design',
     phase: 3,
     checks: [
-      { id: 'specs', label: 'Find specs' },
-      { id: 'visuals', label: 'Find visual tabs' },
-      { id: 'build', label: 'Find continue to build' },
+      { id: 'specs', label: 'Review generated specs' },
+      { id: 'visuals', label: 'Inspect visual tabs' },
+      { id: 'build', label: 'Locate Continue to Build' },
     ],
   },
   {
@@ -178,9 +182,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-build',
     phase: 4,
     checks: [
-      { id: 'bom', label: 'Find BOM' },
-      { id: 'approval', label: 'Find reviewer gate' },
-      { id: 'packet', label: 'Find handoff packet' },
+      { id: 'bom', label: 'Generate or review BOM' },
+      { id: 'approval', label: 'Review approval gate' },
+      { id: 'packet', label: 'Prepare handoff packet' },
     ],
   },
   {
@@ -191,9 +195,9 @@ const TOUR_STEPS: TourStep[] = [
     structureId: 'reversr-tour-history',
     opensHistory: true,
     checks: [
-      { id: 'list', label: 'Open history' },
-      { id: 'resume', label: 'Find resume action' },
-      { id: 'boundary', label: 'Confirm saved work remains local' },
+      { id: 'list', label: 'Review saved reconstructions' },
+      { id: 'resume', label: 'Locate a resume action' },
+      { id: 'boundary', label: 'Confirm saved work stays local' },
     ],
   },
 ];
@@ -205,6 +209,282 @@ const guidedTourCheckKeysForStep = (stepIndex: number) => (
 const allGuidedTourCheckKeys = () => new Set(
   TOUR_STEPS.flatMap((_, stepIndex) => guidedTourCheckKeysForStep(stepIndex))
 );
+
+const MOCK_TOUR_INPUT = 'Mock tour: FarmBot Genesis v1.8 gantry farming robot with tracks, gantry beam, z-axis, Farmduino, Raspberry Pi, motors, camera, UTM, seeder, watering nozzle, and power supply.';
+
+const MOCK_TOUR_ANALYSIS: AnalysisResult = {
+  productName: 'FarmBot Genesis v1.8 gantry farming robot',
+  components: [
+    { name: 'Track extrusions', description: 'Parallel rail structure for X-axis movement.', isEssential: true },
+    { name: 'Gantry main beam', description: 'Cross beam that rides on the tracks.', isEssential: true },
+    { name: 'Z-axis extrusion', description: 'Vertical tool axis for planting and watering tools.', isEssential: true },
+    { name: 'Farmduino controller', description: 'Main electronics board for motors and peripherals.', isEssential: true },
+    { name: 'Universal Tool Mount', description: 'Interchangeable mount for seeder, watering nozzle, and camera.', isEssential: true },
+  ],
+  neighborhoodResources: ['Public FarmBot inventory fixture', 'Mock reconstruction tour data'],
+  attributes: [
+    { name: 'Machine class', value: 'Open-source CNC farming robot', type: 'Qualitative' },
+    { name: 'Approximate assembly groups', value: '5', type: 'Quantitative' },
+  ],
+  closedWorldBoundary: 'Mock journey uses local fixture data only. No AI request, inventory API lookup, credit charge, or vendor submission is performed.',
+  rawAnalysis: 'Mock scan identifies a FarmBot Genesis v1.8-style gantry robot with track, gantry, z-axis, controller, UTM, camera, seeder, watering, and power assemblies.',
+};
+
+const MOCK_TOUR_VALIDATION: InventoryValidationResult = {
+  status: 'ok',
+  sourceName: 'Mock Tour Inventory',
+  sourceUrl: 'local://mock-tour/farmbot-genesis-v1.8',
+  authMode: 'none',
+  credentialStatus: 'not_required',
+  recordCount: 1,
+  requiredFields: ['machineId', 'machineName', 'revision', 'parts'],
+  sampleMachines: [
+    {
+      machineId: 'farmbot-genesis-v1.8',
+      machineName: 'FarmBot Genesis',
+      revision: 'v1.8',
+      partCount: 5,
+    },
+  ],
+  matchCandidates: [
+    {
+      machineId: 'farmbot-genesis-v1.8',
+      machineName: 'FarmBot Genesis',
+      revision: 'v1.8',
+      partCount: 5,
+      confidenceScore: 0.96,
+      matchPercent: 96,
+      evidence: 'Mock scan mentions tracks, gantry beam, z-axis, Farmduino, Raspberry Pi, UTM, camera, seeder, and watering assemblies.',
+    },
+  ],
+};
+
+const MOCK_TOUR_INNOVATION: InnovationResult = {
+  patternUsed: 'inventory_match',
+  conceptName: 'FarmBot Genesis v1.8 Reconstruction Package',
+  conceptDescription: 'A fixture-backed reconstruction package for a FarmBot-style gantry farming robot, including matched machine identity, core assemblies, and build handoff artifacts.',
+  marketGap: 'Repair teams need a low-risk way to learn the ReversR workflow before spending AI credits on a real machine.',
+  constraint: 'Mock data is for training only and should not be submitted to a fabricator.',
+  noveltyScore: 72,
+  viabilityScore: 88,
+  marketBenefit: 'Shows the complete reconstruction path without requiring paid generation.',
+  machineId: 'farmbot-genesis-v1.8',
+  machineName: 'FarmBot Genesis',
+  inventorySource: 'Mock Tour Inventory',
+  confidenceScore: 0.96,
+  evidence: MOCK_TOUR_VALIDATION.matchCandidates?.[0]?.evidence,
+  assemblySteps: [
+    {
+      stepNumber: 1,
+      title: 'Square the track frame',
+      instructions: 'Lay out the track extrusions, verify spacing, and confirm fasteners are aligned before gantry placement.',
+      parts: ['Track extrusions', 'Frame fasteners'],
+      estimatedTime: '30 min',
+      qualityCheck: 'Track spacing is parallel and gantry wheels roll without binding.',
+    },
+    {
+      stepNumber: 2,
+      title: 'Install gantry and z-axis',
+      instructions: 'Mount gantry columns, main beam, cross-slide, and z-axis extrusion using the matched inventory layout.',
+      parts: ['Gantry main beam', 'Gantry columns', 'Z-axis extrusion'],
+      estimatedTime: '45 min',
+      qualityCheck: 'Gantry moves smoothly across both tracks and z-axis remains plumb.',
+    },
+    {
+      stepNumber: 3,
+      title: 'Fit electronics and tool mount',
+      instructions: 'Mount controller, Raspberry Pi, UTM, camera, seeder, and watering components for review.',
+      parts: ['Farmduino', 'Raspberry Pi', 'Universal Tool Mount', 'Camera'],
+      estimatedTime: '50 min',
+      qualityCheck: 'All electronics and tool leads are routed without strain.',
+    },
+  ],
+  pricing: {
+    partsSubtotal: '$1,250 - $1,650',
+    modelingEstimate: '$350 - $600',
+    fabricationEstimate: '$900 - $1,400',
+    assemblyLaborEstimate: '$500 - $800',
+    totalEstimate: '$3,000 - $4,450',
+    confidence: 'medium',
+  },
+  fulfillmentOptions: [
+    {
+      vendorName: 'Mock CNC Vendor',
+      serviceType: 'CNC and extrusion prep',
+      url: 'https://example.com/mock-cnc',
+      packageRequired: ['BOM', 'Assembly sequence', 'Technical specifications'],
+    },
+  ],
+  sourceLinks: {
+    inventory: 'local://mock-tour/farmbot-genesis-v1.8',
+  },
+  referenceImages: [],
+};
+
+const MOCK_TOUR_SPEC: TechnicalSpec = {
+  promptLogic: 'Use the matched FarmBot inventory record as the source of truth, then organize reconstruction around track, gantry, z-axis, electronics, and UTM assemblies.',
+  componentStructure: 'Frame and tracks -> gantry beam and columns -> z-axis carriage -> Farmduino/Raspberry Pi electronics -> UTM, camera, seeder, and watering tools.',
+  implementationNotes: 'This is mock tour data. Treat measurements, pricing, and vendor readiness as training examples, not fabrication-approved output.',
+};
+
+const MOCK_TOUR_SCENE: ThreeDSceneDescriptor = {
+  objects: [
+    { id: 'track-left', type: 'box', position: [-2, 0, 0], rotation: [0, 0, 0], scale: [0.12, 0.12, 4], color: '#7dd3fc', material: 'standard', name: 'Left track' },
+    { id: 'track-right', type: 'box', position: [2, 0, 0], rotation: [0, 0, 0], scale: [0.12, 0.12, 4], color: '#7dd3fc', material: 'standard', name: 'Right track' },
+    { id: 'gantry-beam', type: 'box', position: [0, 1.4, 0], rotation: [0, 0, 0], scale: [4.2, 0.16, 0.16], color: '#00ff9d', material: 'standard', name: 'Gantry beam' },
+    { id: 'z-axis', type: 'box', position: [0, 0.75, 0], rotation: [0, 0, 0], scale: [0.18, 1.35, 0.18], color: '#a855f7', material: 'standard', name: 'Z-axis' },
+  ],
+};
+
+const MOCK_TOUR_BOM: BillOfMaterials = {
+  projectName: 'FarmBot Genesis v1.8 Mock Reconstruction',
+  version: 'mock-tour-v1',
+  dateGenerated: '2026-06-14',
+  totalEstimatedCost: '$1,250 - $1,650',
+  manufacturingNotes: 'Mock BOM for guided tour only. Human review is required before vendor contact or fabrication.',
+  items: [
+    {
+      partNumber: 'MOCK-TRACK-001',
+      partName: 'Track extrusion set',
+      description: 'Matched track rail pair for gantry movement.',
+      quantity: 2,
+      material: 'Aluminum extrusion',
+      estimatedCost: '$220',
+      supplier: 'Mock inventory',
+      leadTime: 'Fixture',
+      notes: 'Tour data only.',
+    },
+    {
+      partNumber: 'MOCK-GANTRY-002',
+      partName: 'Gantry beam assembly',
+      description: 'Main beam and column assembly.',
+      quantity: 1,
+      material: 'Aluminum extrusion and fasteners',
+      estimatedCost: '$310',
+      supplier: 'Mock inventory',
+      leadTime: 'Fixture',
+      notes: 'Verify dimensions against a real machine before fabrication.',
+    },
+    {
+      partNumber: 'MOCK-ELEC-003',
+      partName: 'Controller and compute kit',
+      description: 'Farmduino-style controller, Raspberry Pi, wiring, and enclosure.',
+      quantity: 1,
+      material: 'Electronics',
+      estimatedCost: '$420',
+      supplier: 'Mock inventory',
+      leadTime: 'Fixture',
+      notes: 'No real electronics order is prepared.',
+    },
+  ],
+};
+
+const getValidMockTourFixtureImages = (fixture?: MockTourFixture | null): AngleImage[] => (
+  fixture?.images?.filter(image => image?.imageData) || []
+);
+
+const createStorableMockTourFixture = (fixture: MockTourFixture): MockTourFixture => {
+  const images = (fixture.images || []).map(image => {
+    const sourceUrl = image.imageSource?.url;
+    const isSourceBackedUrl = sourceUrl && /^https?:\/\//i.test(sourceUrl);
+    const shouldStoreSourceUrl = typeof image.imageData === 'string'
+      && image.imageData.startsWith('data:image/')
+      && isSourceBackedUrl
+      && image.imageSource?.sourceType !== 'ai_generated_fallback';
+
+    return {
+      ...image,
+      imageData: shouldStoreSourceUrl ? sourceUrl : image.imageData,
+    };
+  });
+  const firstImage = images.find(image => image.imageData)?.imageData || null;
+
+  return {
+    ...fixture,
+    images,
+    primaryImageUrl: firstImage,
+  };
+};
+
+const readCachedMockTourFixture = async (): Promise<MockTourFixture | null> => {
+  try {
+    const raw = await AsyncStorage.getItem(MOCK_TOUR_FIXTURE_CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as {
+      cachedAt?: string;
+      fixture?: MockTourFixture;
+    };
+    if (
+      parsed.fixture?.schemaVersion === 1 &&
+      parsed.fixture.fixtureId === 'farmbot-genesis-v1.8' &&
+      getValidMockTourFixtureImages(parsed.fixture).length > 0
+    ) {
+      return parsed.fixture;
+    }
+  } catch (error) {
+    console.warn('Failed to read mock tour fixture cache', error);
+  }
+  return null;
+};
+
+const loadMockTourFixture = async (): Promise<MockTourFixture | null> => {
+  const cachedFixture = await readCachedMockTourFixture();
+  if (cachedFixture) return cachedFixture;
+
+  try {
+    const fixture = await fetchMockTourFarmBotFixture();
+    if (getValidMockTourFixtureImages(fixture).length > 0) {
+      const storableFixture = createStorableMockTourFixture(fixture);
+      try {
+        await AsyncStorage.setItem(MOCK_TOUR_FIXTURE_CACHE_KEY, JSON.stringify({
+          cachedAt: new Date().toISOString(),
+          fixture: storableFixture,
+        }));
+      } catch (storageError) {
+        console.warn('Failed to store mock tour fixture cache', storageError);
+      }
+    }
+    return fixture;
+  } catch (error) {
+    console.warn('Failed to load mock tour fixture', error);
+    return null;
+  }
+};
+
+const createMockTourContext = (fixture?: MockTourFixture | null): MutationContext => {
+  const mockInnovation = createNewInnovation();
+  const fixtureInnovation = fixture?.innovation || {};
+  const fixtureValidation = fixture?.validation;
+  const fixtureImages = getValidMockTourFixtureImages(fixture);
+  const primaryFixtureImage = fixture?.primaryImageUrl || fixtureImages[0]?.imageData || null;
+  const mergedInnovation: InnovationResult = {
+    ...MOCK_TOUR_INNOVATION,
+    ...fixtureInnovation,
+    machineId: fixtureInnovation.machineId || fixture?.machineId || MOCK_TOUR_INNOVATION.machineId,
+    machineName: fixtureInnovation.machineName || fixture?.machineName || MOCK_TOUR_INNOVATION.machineName,
+    inventorySource: fixtureInnovation.inventorySource || fixture?.inventorySource || MOCK_TOUR_INNOVATION.inventorySource,
+    sourceLinks: fixtureInnovation.sourceLinks || fixture?.sourceLinks || MOCK_TOUR_INNOVATION.sourceLinks,
+    referenceImages: fixtureInnovation.referenceImages || fixture?.referenceImages || MOCK_TOUR_INNOVATION.referenceImages,
+    evidence: fixtureInnovation.evidence || fixtureValidation?.matchCandidates?.[0]?.evidence || MOCK_TOUR_INNOVATION.evidence,
+  };
+
+  return {
+    id: mockInnovation.id,
+    createdAt: mockInnovation.createdAt,
+    phase: 1,
+    input: MOCK_TOUR_INPUT,
+    capturedImage: null,
+    analysis: MOCK_TOUR_ANALYSIS,
+    selectedPattern: 'inventory_match',
+    innovation: mergedInnovation,
+    spec: MOCK_TOUR_SPEC,
+    threeDScene: MOCK_TOUR_SCENE,
+    imageUrl: primaryFixtureImage,
+    bom: MOCK_TOUR_BOM,
+    reviewerApprovalRecords: [],
+  };
+};
 
 export default function HomeScreen() {
   const { colors: Colors } = useAppTheme();
@@ -222,6 +502,8 @@ export default function HomeScreen() {
   const [tourCompletedChecks, setTourCompletedChecks] = useState<Set<string>>(() => new Set());
   const [tourCompletedAt, setTourCompletedAt] = useState<string | null>(null);
   const [tourStateLoaded, setTourStateLoaded] = useState(false);
+  const [mockJourneyActive, setMockJourneyActive] = useState(false);
+  const [mockTourFixture, setMockTourFixture] = useState<MockTourFixture | null>(null);
   
   const [imageGenStatus, setImageGenStatus] = useState<ImageGenStatus>('idle');
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
@@ -252,9 +534,9 @@ export default function HomeScreen() {
     return count + step.checks.filter(check => tourCompletedChecks.has(tourCheckKey(stepIndex, check.id))).length;
   }, 0);
   const totalTourCheckCount = TOUR_STEPS.reduce((count, step) => count + step.checks.length, 0);
-  const canFocusTourStep = !tourStep.phase || context.phase >= tourStep.phase;
-  const focusBlockedReason = tourStep.phase && context.phase < tourStep.phase
-    ? `Complete Phase ${context.phase} first to unlock ${PHASE_LABELS[tourStep.phase - 1]}.`
+  const canFocusTourStep = mockJourneyActive || !tourStep.phase || context.phase >= tourStep.phase;
+  const focusBlockedReason = !mockJourneyActive && tourStep.phase && context.phase < tourStep.phase
+    ? `This scene opens after Phase ${context.phase}. Complete the current phase to unlock ${PHASE_LABELS[tourStep.phase - 1]}.`
     : undefined;
 
   useEffect(() => {
@@ -309,14 +591,6 @@ export default function HomeScreen() {
     saveTourState();
   }, [tourActive, tourStepIndex, tourCompletedChecks, tourCompletedAt, tourStateLoaded]);
 
-  const markTourCheck = useCallback((stepIndex: number, checkId: string) => {
-    setTourCompletedChecks(current => {
-      const next = new Set(current);
-      next.add(tourCheckKey(stepIndex, checkId));
-      return next;
-    });
-  }, []);
-
   const toggleTourCheck = useCallback((stepIndex: number, checkId: string) => {
     setTourCompletedChecks(current => {
       const next = new Set(current);
@@ -361,44 +635,91 @@ export default function HomeScreen() {
     setTourActive(false);
   }, []);
 
-  const moveToTourStep = useCallback((nextStepIndex: number) => {
-    const nextStep = TOUR_STEPS[nextStepIndex];
-    if (!nextStep.opensSettings) {
-      setShowSettings(false);
-    }
-    if (!nextStep.opensHistory) {
-      setShowHistory(false);
-    }
-    if (nextStep.id !== 'welcome' && !nextStep.opensSettings && !nextStep.opensHistory) {
-      setStarted(true);
-    }
-    setTourStepIndex(nextStepIndex);
+  const startMockJourney = useCallback(async () => {
+    const fixture = await loadMockTourFixture();
+    const fixtureImages = getValidMockTourFixtureImages(fixture);
+    setMockTourFixture(fixture);
+    setContext(createMockTourContext(fixture));
+    setMockJourneyActive(true);
+    setStarted(true);
+    setShowSettings(false);
+    setShowHistory(false);
+    setPhaseActionModal(null);
+    setImageGenStatus('idle');
+    setGeneratedImageBase64(fixture?.primaryImageUrl || fixtureImages[0]?.imageData || null);
+    setGeneratedMultiAngleImages(fixtureImages);
+    imageGenInnovationId.current = null;
+    setTourActive(true);
+    setTourStepIndex(3);
+    setTourCompletedAt(null);
   }, []);
 
-  const focusTourStep = useCallback(() => {
-    const step = TOUR_STEPS[tourStepIndex];
-    if (step.phase && context.phase < step.phase) return;
+  const stopMockJourney = useCallback(() => {
+    setMockJourneyActive(false);
+    setMockTourFixture(null);
+    setContext(createEmptyContext());
+    setStarted(false);
+    setShowSettings(false);
+    setShowHistory(false);
+    setPhaseActionModal(null);
+    setImageGenStatus('idle');
+    setGeneratedImageBase64(null);
+    setGeneratedMultiAngleImages([]);
+    imageGenInnovationId.current = null;
+    setTourStepIndex(0);
+  }, []);
 
-    setShowSettings(step.opensSettings === true);
-    setShowHistory(step.opensHistory === true);
+  const applyTourStepFocus = useCallback((stepIndex: number) => {
+    const step = TOUR_STEPS[stepIndex];
+    setPhaseActionModal(null);
 
-    if (step.phase && step.phase === context.phase) {
-      setStarted(true);
-    } else if (step.phase && step.phase < context.phase) {
-      setStarted(true);
-      setPhaseActionModal(step.phase);
-    } else if (step.opensHistory) {
-      setHistoryRefreshKey(prev => prev + 1);
-      setStarted(true);
-    } else if (!step.opensSettings && step.id !== 'welcome') {
-      setStarted(true);
-    }
-
-    markTourCheck(tourStepIndex, step.checks[0]?.id || 'open');
     if (step.id === 'welcome') {
-      markTourCheck(tourStepIndex, 'map');
+      setShowSettings(false);
+      setShowHistory(false);
+      setStarted(false);
+      return;
     }
-  }, [context.phase, markTourCheck, tourStepIndex]);
+
+    if (step.opensSettings) {
+      setShowHistory(false);
+      openSettings('account');
+      return;
+    }
+
+    if (step.opensHistory) {
+      setShowSettings(false);
+      setHistoryRefreshKey(prev => prev + 1);
+      setShowHistory(true);
+      setStarted(true);
+      return;
+    }
+
+    setShowSettings(false);
+    setShowHistory(false);
+    setStarted(true);
+
+    if (mockJourneyActive && step.phase) {
+      setContext(prev => ({ ...prev, phase: step.phase || prev.phase }));
+      return;
+    }
+
+    if (step.phase && context.phase < step.phase) {
+      return;
+    }
+
+    if (step.phase && step.phase < context.phase) {
+      setPhaseActionModal(step.phase);
+    }
+  }, [context.phase, mockJourneyActive, openSettings]);
+
+  useEffect(() => {
+    if (!tourActive || !tourStateLoaded) return;
+    applyTourStepFocus(tourStepIndex);
+  }, [applyTourStepFocus, tourActive, tourStateLoaded, tourStepIndex]);
+
+  const moveToTourStep = useCallback((nextStepIndex: number) => {
+    setTourStepIndex(nextStepIndex);
+  }, []);
 
   const goToNextTourStep = useCallback(() => {
     if (tourStepIndex >= TOUR_STEPS.length - 1) {
@@ -635,9 +956,12 @@ export default function HomeScreen() {
   };
 
   const executeReset = () => {
+    setMockJourneyActive(false);
+    setMockTourFixture(null);
     setContext(createEmptyContext());
     setImageGenStatus('idle');
     setGeneratedImageBase64(null);
+    setGeneratedMultiAngleImages([]);
     imageGenInnovationId.current = null;
   };
 
@@ -857,15 +1181,20 @@ export default function HomeScreen() {
   };
 
   const handleStartNew = () => {
+    setMockJourneyActive(false);
+    setMockTourFixture(null);
     setContext(createEmptyContext());
     setShowHistory(false);
     setStarted(true);
     setImageGenStatus('idle');
     setGeneratedImageBase64(null);
+    setGeneratedMultiAngleImages([]);
     imageGenInnovationId.current = null;
   };
 
   const handleResume = (saved: SavedInnovation) => {
+    setMockJourneyActive(false);
+    setMockTourFixture(null);
     setContext({
       id: saved.id,
       createdAt: saved.createdAt,
@@ -902,7 +1231,10 @@ export default function HomeScreen() {
       totalCount={totalTourCheckCount}
       canFocusStep={canFocusTourStep}
       focusBlockedReason={focusBlockedReason}
-      onFocusStep={focusTourStep}
+      placement={tourStep.phase ? 'top-right' : 'bottom-left'}
+      mockJourneyActive={mockJourneyActive}
+      onStartMockJourney={startMockJourney}
+      onStopMockJourney={stopMockJourney}
       onToggleCheck={toggleTourCheck}
       onToggleStepDone={toggleTourStepDone}
       onBack={goToPreviousTourStep}
@@ -1075,6 +1407,8 @@ export default function HomeScreen() {
             setIsLoading={setIsLoading}
             initialInput={context.input}
             initialImage={context.capturedImage}
+            mockAnalysis={mockJourneyActive ? MOCK_TOUR_ANALYSIS : null}
+            mockInput={mockJourneyActive ? MOCK_TOUR_INPUT : undefined}
           />
         )}
         {context.phase === 2 && context.analysis && (
@@ -1087,6 +1421,9 @@ export default function HomeScreen() {
             onBack={handleBack}
             onReset={handleReset}
             onOpenSettings={() => openSettings('inventory')}
+            mockMode={mockJourneyActive}
+            mockValidation={mockJourneyActive ? (mockTourFixture?.validation || MOCK_TOUR_VALIDATION) : null}
+            mockInnovation={mockJourneyActive ? (context.innovation || MOCK_TOUR_INNOVATION) : null}
           />
         )}
         {context.phase === 3 && context.innovation && (
@@ -1097,6 +1434,7 @@ export default function HomeScreen() {
             existingThreeDScene={context.threeDScene}
             imageGenerating={imageGenStatus === 'generating'}
             multiAngleImages={generatedMultiAngleImages}
+            mockMode={mockJourneyActive}
             onComplete={handlePhaseThreeComplete}
             onContinueToBuild={handleContinueToBuild}
             onBack={handleBack}
