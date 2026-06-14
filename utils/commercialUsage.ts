@@ -2,18 +2,27 @@ interface UsageSummary {
   usedCredits?: number;
   remainingCredits?: number | null;
   monthlyCredits?: number | null;
+  creditPeriod?: string | null;
+  period?: string | null;
   unlimitedCredits?: boolean;
   resetAt?: string;
 }
 
 const pluralize = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
+export const formatCreditPeriod = (period?: string | null) => {
+  if (period === 'day') return 'day';
+  if (period === 'week') return 'week';
+  return 'month';
+};
+
 export const formatJourneyCreditLabel = (usage?: UsageSummary | null, fallbackCredits = 1) => {
   if (usage?.unlimitedCredits) return `${usage.usedCredits ?? 0} used / Unlimited`;
 
   const remainingCredits = usage?.remainingCredits ?? fallbackCredits;
   const monthlyCredits = usage?.monthlyCredits ?? fallbackCredits;
-  return `${remainingCredits} / ${monthlyCredits} journey ${monthlyCredits === 1 ? 'credit' : 'credits'} left`;
+  const period = formatCreditPeriod(usage?.creditPeriod || usage?.period);
+  return `${remainingCredits} / ${monthlyCredits} journey ${monthlyCredits === 1 ? 'credit' : 'credits'} left this ${period}`;
 };
 
 export const formatJourneyCreditShortLabel = (usage?: UsageSummary | null, fallbackCredits = 1) => {

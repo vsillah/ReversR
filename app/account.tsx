@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '../constants/theme';
 import { CommercialPlanId, useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
+import { formatCreditPeriod, formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
 
 export default function AccountScreen() {
   const { colors: Colors } = useAppTheme();
@@ -48,8 +48,12 @@ export default function AccountScreen() {
     ? formatJourneyCreditLabel(account?.usage)
     : formatJourneyCreditLabel(account?.usage);
   const resetLabel = usageIsUnlimited
-    ? 'No monthly reset limit'
+    ? 'No credit reset limit'
     : formatResetCountdown(account?.usage.resetAt, countdownNow);
+  const planCreditLabel = (plan: { monthlyCredits: number | null; creditPeriod?: string | null }) => {
+    if (plan.monthlyCredits === null) return 'Unlimited journey credits';
+    return `${plan.monthlyCredits} journey ${plan.monthlyCredits === 1 ? 'credit' : 'credits'}/${formatCreditPeriod(plan.creditPeriod)}`;
+  };
 
   const handleSaveProfile = async () => {
     setStatus(null);
@@ -177,7 +181,7 @@ export default function AccountScreen() {
                 </Text>
               </View>
               <Text style={styles.mutedText}>
-                {plan.monthlyCredits === null ? 'Unlimited journey credits' : `${plan.monthlyCredits} journey ${plan.monthlyCredits === 1 ? 'credit' : 'credits'}/month`} | {plan.seats} seat{plan.seats === 1 ? '' : 's'}
+                {planCreditLabel(plan)} | {plan.seats} seat{plan.seats === 1 ? '' : 's'}
               </Text>
               <View style={styles.featureList}>
                 {plan.features.map(feature => (

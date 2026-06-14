@@ -66,19 +66,20 @@ const run = async () => {
   try {
     const initial = await fetch(`${baseUrl}/api/me`, { headers: headersFor('guest-smoke') }).then(res => res.json());
     assert.equal(initial.billing.planId, 'free');
-    assert.equal(initial.usage.remainingCredits, 1);
+    assert.equal(initial.usage.remainingCredits, 5);
+    assert.equal(initial.usage.period, 'week');
     assert.match(initial.usage.resetAt, /^\d{4}-\d{2}-\d{2}T/);
     assert.equal(typeof initial.usage.resetInSeconds, 'number');
 
     let first = await charge('guest-smoke', 'analyze', 'guest-analyze-1');
     assert.equal(first.response.status, 200);
     assert.equal(first.body.usage.usedCredits, 1);
-    assert.equal(first.body.usage.remainingCredits, 0);
+    assert.equal(first.body.usage.remainingCredits, 4);
 
     const duplicate = await charge('guest-smoke', 'analyze', 'guest-analyze-1');
     assert.equal(duplicate.response.status, 200);
     assert.equal(duplicate.body.usage.usedCredits, 1);
-    assert.equal(duplicate.body.usage.remainingCredits, 0);
+    assert.equal(duplicate.body.usage.remainingCredits, 4);
 
     const spec = await charge('guest-smoke', 'technical-spec', 'guest-spec-1');
     assert.equal(spec.response.status, 200);
@@ -92,7 +93,14 @@ const run = async () => {
     assert.equal(bom.response.status, 200);
     assert.equal(bom.body.credits, 0);
 
-    const exhausted = await charge('guest-smoke', 'analyze', 'guest-analyze-2');
+    for (let index = 2; index <= 5; index += 1) {
+      const includedCredit = await charge('guest-smoke', 'analyze', `guest-analyze-${index}`);
+      assert.equal(includedCredit.response.status, 200);
+      assert.equal(includedCredit.body.usage.usedCredits, index);
+      assert.equal(includedCredit.body.usage.remainingCredits, 5 - index);
+    }
+
+    const exhausted = await charge('guest-smoke', 'analyze', 'guest-analyze-6');
     assert.equal(exhausted.response.status, 402);
     assert.equal(exhausted.body.code, 'COMMERCIAL_CREDITS_EXHAUSTED');
     assert.equal(exhausted.body.upgradeRequired, true);
@@ -113,7 +121,7 @@ const run = async () => {
     const guestViewAfterTester = await fetch(`${baseUrl}/api/me`, { headers: headersFor('tester-smoke', 'Repair shop user') }).then(res => res.json());
     assert.equal(guestViewAfterTester.billing.planId, 'free');
     assert.equal(guestViewAfterTester.usage.usedCredits, 0);
-    assert.equal(guestViewAfterTester.usage.remainingCredits, 1);
+    assert.equal(guestViewAfterTester.usage.remainingCredits, 5);
 
     const grantResponse = await fetch(`${baseUrl}/api/admin/commercial/access-grants`, {
       method: 'POST',
@@ -170,7 +178,7 @@ const run = async () => {
 
     const passwordGuest = await fetch(`${baseUrl}/api/me`, { headers: headersFor('password-smoke', 'Password Smoke') }).then(res => res.json());
     assert.equal(passwordGuest.billing.planId, 'free');
-    assert.equal(passwordGuest.usage.remainingCredits, 1);
+    assert.equal(passwordGuest.usage.remainingCredits, 5);
 
     const inviteResponse = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
       method: 'POST',
