@@ -67,6 +67,7 @@ const DEFAULT_STORE = {
   shops: {},
   usageEvents: {},
   subscriptions: {},
+  commercialAccessGrants: {},
 };
 
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -88,7 +89,55 @@ const listFromEnv = (...names) => names
 
 const isAllowedValue = (value, allowed) => Boolean(value && allowed.includes(String(value).trim().toLowerCase()));
 
-const getCommercialAccessGrant = (profile) => {
+const hashPassword = (password, salt = crypto.randomBytes(16).toString('hex')) => ({
+  salt,
+  hash: crypto.pbkdf2Sync(String(password), salt, 120000, 32, 'sha256').toString('hex'),
+  algorithm: 'pbkdf2-sha256',
+});
+
+const verifyPassword = (password, credential = {}) => {
+  if (!password || !credential.passwordHash || !credential.passwordSalt) return false;
+  const candidate = hashPassword(password, credential.passwordSalt).hash;
+  return crypto.timingSafeEqual(Buffer.from(candidate, 'hex'), Buffer.from(credential.passwordHash, 'hex'));
+};
+
+const normalizeAccessValue = (value = '') => String(value).trim().toLowerCase();
+
+const requestAccessPassword = (req) => String(
+  req.get('x-reversr-access-password') ||
+  req.body?.accessPassword ||
+  req.body?.currentPassword ||
+  ''
+);
+
+const redactAccessGrant = (grant = {}) => ({
+  grantId: grant.grantId,
+  clientId: grant.clientId || '',
+  email: grant.email || '',
+  profileName: grant.profileName || '',
+  shopName: grant.shopName || '',
+  planId: grant.planId || 'tester',
+  active: grant.active !== false,
+  mustResetPassword: grant.mustResetPassword !== false,
+  createdAt: grant.createdAt || '',
+  updatedAt: grant.updatedAt || '',
+  lastActivatedAt: grant.lastActivatedAt || '',
+});
+
+const findMatchingStoredGrant = (store, profile) => {
+  const grants = Object.values(store.commercialAccessGrants || {});
+  return grants.find(grant => {
+    if (grant.active === false) return false;
+    return (
+      (grant.clientId && normalizeAccessValue(grant.clientId) === normalizeAccessValue(profile.clientId)) ||
+      (grant.email && normalizeAccessValue(grant.email) === normalizeAccessValue(profile.email)) ||
+      (grant.profileName && normalizeAccessValue(grant.profileName) === normalizeAccessValue(profile.name)) ||
+      (grant.shopName && normalizeAccessValue(grant.shopName) === normalizeAccessValue(profile.shopName))
+    );
+  }) || null;
+};
+
+const getCommercialAccessGrant = (profile, store = DEFAULT_STORE, accessPassword = '') => {
   const testerEmails = listFromEnv('COMMERCIAL_TESTER_EMAILS', 'REVERSR_TESTER_EMAILS');
   const testerClientIds = listFromEnv('COMMERCIAL_TESTER_CLIENT_IDS', 'REVERSR_TESTER_CLIENT_IDS');
   const testerProfileNames = listFromEnv('COMMERCIAL_TESTER_PROFILE_NAMES', 'REVERSR_TESTER_PROFILE_NAMES');
@@ -104,6 +153,19 @@ const getCommercialAccessGrant = (profile) => {
       planId: 'tester',
       role: 'tester',
       subscriptionStatus: 'tester_grant',
+      requiresPasswordReset: false,
+    };
+  }
+
+  const storedGrant = findMatchingStoredGrant(store, profile);
+  if (storedGrant && verifyPassword(accessPassword, storedGrant)) {
+    return {
+      type: 'tester',
+      planId: storedGrant.planId || 'tester',
+      role: 'tester',
+      grantId: storedGrant.grantId,
+      subscriptionStatus: storedGrant.mustResetPassword === false ? 'tester_grant' : 'starter_password_reset_required',
+      requiresPasswordReset: storedGrant.mustResetPassword !== false,
     };
   }
 
@@ -193,7 +255,7 @@ const ensureAccount = async (req) => {
   const shopId = existingUser.shopId || `shop_${hashId(profile.email || profile.clientId)}`;
   const existingShop = store.shops[shopId] || {};
   const existingPlanId = normalizeStoredPlanId(existingShop.planId || existingUser.planId || 'free');
-  const accessGrant = getCommercialAccessGrant(profile);
+  const accessGrant = getCommercialAccessGrant(profile, store, requestAccessPassword(req));
 
   const user = {
     id: userId,
@@ -275,6 +337,11 @@ const buildAccountResponse = (store, user, shop, accessGrant = null) => {
   usage: buildUsage(store, shop, monthKey(), accessGrant),
   plans: publicPlans(),
   creditCosts: CREDIT_COSTS,
+  access: accessGrant ? {
+    type: accessGrant.type,
+    grantId: accessGrant.grantId || '',
+    requiresPasswordReset: Boolean(accessGrant.requiresPasswordReset),
+  } : null,
   };
 };
 
@@ -335,7 +402,36 @@ const updateShopFromSubscription = async (subscription) => {
   return shop;
 };
 
-const registerCommercialRoutes = (app) => {
+const validateGrantTarget = ({ clientId = '', email = '', profileName = '', shopName = '' }) => {
+  if (!clientId && !email && !profileName && !shopName) {
+    return 'Provide at least one target: clientId, email, profileName, or shopName.';
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return 'Email target must be a valid email address.';
+  }
+  return null;
+};
+
+const buildGrantId = ({ clientId = '', email = '', profileName = '', shopName = '' }) => (
+  `grant_${hashId([clientId, email, profileName, shopName].map(normalizeAccessValue).join('|'))}`
+);
+
+const resolveAuthenticatedGrant = async (req) => {
+  const store = await loadStore();
+  const profile = requestProfile(req);
+  const grant = findMatchingStoredGrant(store, profile);
+  const accessPassword = requestAccessPassword(req);
+
+  if (!grant || !verifyPassword(accessPassword, grant)) {
+    const error = new Error('Access password is invalid for this profile.');
+    error.statusCode = 401;
+    throw error;
+  }
+
+  return { store, profile, grant };
+};
+
+const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
   app.get('/api/me', async (req, res) => {
     try {
       const { store, user, shop, accessGrant } = await ensureAccount(req);
@@ -373,6 +469,184 @@ const registerCommercialRoutes = (app) => {
       res.json(buildAccountResponse(store, user, shop, accessGrant));
     } catch (error) {
       res.status(500).json({ status: 'error', error: error.message || 'Failed to save commercial profile.' });
+    }
+  });
+
+  app.post('/api/commercial/access/activate', async (req, res) => {
+    try {
+      const { store, profile, grant } = await resolveAuthenticatedGrant(req);
+      const now = new Date().toISOString();
+      grant.lastActivatedAt = now;
+      grant.updatedAt = now;
+      store.commercialAccessGrants[grant.grantId] = grant;
+      await saveStore(store);
+
+      const accessGrant = getCommercialAccessGrant(profile, store, requestAccessPassword(req));
+      const accountReq = {
+        ...req,
+        get: (name) => {
+          const lowerName = String(name).toLowerCase();
+          if (lowerName === 'x-reversr-access-password') return requestAccessPassword(req);
+          return req.get(name);
+        },
+      };
+      const { store: accountStore, user, shop } = await ensureAccount(accountReq);
+      res.json({
+        status: 'ok',
+        account: buildAccountResponse(accountStore, user, shop, accessGrant),
+      });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({
+        status: 'error',
+        error: error.message || 'Failed to activate access grant.',
+        canRetry: false,
+      });
+    }
+  });
+
+  app.post('/api/commercial/access/reset-password', async (req, res) => {
+    try {
+      const newPassword = String(req.body?.newPassword || '');
+      if (newPassword.length < 8) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'New access password must be at least 8 characters.',
+          canRetry: false,
+        });
+      }
+
+      const { store, profile, grant } = await resolveAuthenticatedGrant(req);
+      const { salt, hash, algorithm } = hashPassword(newPassword);
+      const now = new Date().toISOString();
+      grant.passwordSalt = salt;
+      grant.passwordHash = hash;
+      grant.passwordAlgorithm = algorithm;
+      grant.mustResetPassword = false;
+      grant.updatedAt = now;
+      grant.lastActivatedAt = now;
+      store.commercialAccessGrants[grant.grantId] = grant;
+      await saveStore(store);
+
+      const accessGrant = getCommercialAccessGrant(profile, store, newPassword);
+      const accountReq = {
+        ...req,
+        get: (name) => {
+          const lowerName = String(name).toLowerCase();
+          if (lowerName === 'x-reversr-access-password') return newPassword;
+          return req.get(name);
+        },
+      };
+      const { store: accountStore, user, shop } = await ensureAccount(accountReq);
+      res.json({
+        status: 'ok',
+        account: buildAccountResponse(accountStore, user, shop, accessGrant),
+      });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({
+        status: 'error',
+        error: error.message || 'Failed to reset access password.',
+        canRetry: false,
+      });
+    }
+  });
+
+  app.get('/api/admin/commercial/access-grants', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const store = await loadStore();
+      res.json({
+        status: 'ok',
+        grants: Object.values(store.commercialAccessGrants || {})
+          .map(redactAccessGrant)
+          .sort((left, right) => String(right.updatedAt).localeCompare(String(left.updatedAt))),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to list commercial access grants.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/admin/commercial/access-grants', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const clientId = String(req.body?.clientId || '').trim();
+      const email = String(req.body?.email || '').trim().toLowerCase();
+      const profileName = String(req.body?.profileName || '').trim();
+      const shopName = String(req.body?.shopName || '').trim();
+      const startingPassword = String(req.body?.startingPassword || '');
+      const planId = 'tester';
+      const validationError = validateGrantTarget({ clientId, email, profileName, shopName });
+      if (validationError) {
+        return res.status(400).json({ status: 'error', error: validationError, canRetry: false });
+      }
+      if (startingPassword.length < 8) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Starting password must be at least 8 characters.',
+          canRetry: false,
+        });
+      }
+
+      const store = await loadStore();
+      const grantId = buildGrantId({ clientId, email, profileName, shopName });
+      const existing = store.commercialAccessGrants?.[grantId] || {};
+      const { salt, hash, algorithm } = hashPassword(startingPassword);
+      const now = new Date().toISOString();
+      const grant = {
+        ...existing,
+        grantId,
+        clientId,
+        email,
+        profileName,
+        shopName,
+        planId,
+        active: true,
+        mustResetPassword: true,
+        passwordSalt: salt,
+        passwordHash: hash,
+        passwordAlgorithm: algorithm,
+        createdAt: existing.createdAt || now,
+        updatedAt: now,
+      };
+
+      store.commercialAccessGrants = {
+        ...(store.commercialAccessGrants || {}),
+        [grantId]: grant,
+      };
+      await saveStore(store);
+      res.json({ status: 'ok', grant: redactAccessGrant(grant) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to save commercial access grant.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.delete('/api/admin/commercial/access-grants/:grantId', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const grantId = String(req.params.grantId || '').trim();
+      const store = await loadStore();
+      const grant = store.commercialAccessGrants?.[grantId];
+      if (!grant) {
+        return res.json({ status: 'ok', grantId, revoked: false });
+      }
+      grant.active = false;
+      grant.updatedAt = new Date().toISOString();
+      store.commercialAccessGrants[grantId] = grant;
+      await saveStore(store);
+      res.json({ status: 'ok', grantId, revoked: true });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to revoke commercial access grant.',
+        canRetry: true,
+      });
     }
   });
 
