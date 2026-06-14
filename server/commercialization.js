@@ -36,7 +36,19 @@ const PLAN_CATALOG = {
     stripePriceEnv: 'STRIPE_PRICE_TEAM',
     features: ['Shared shop history', 'Inventory connectors', 'Admin controls', 'Team seat management'],
   },
+  tester: {
+    id: 'tester',
+    label: 'Tester',
+    monthlyCredits: null,
+    unlimitedCredits: true,
+    seats: 1,
+    priceMonthly: 0,
+    internal: true,
+    features: ['Unlimited reconstruction QA credits', 'Hosted billing and guest-flow testing'],
+  },
 };
+
+const BILLABLE_PLAN_IDS = new Set(['free', 'pro_shop', 'team']);
 
 const CREDIT_COSTS = {
   analyze: 1,
@@ -66,6 +78,55 @@ const hashId = (value = '') => crypto.createHash('sha256').update(String(value))
 const monthKey = (date = new Date()) => `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
 
 const normalizePlanId = (value) => (PLAN_CATALOG[value] ? value : 'free');
+const normalizeStoredPlanId = (value) => (BILLABLE_PLAN_IDS.has(value) ? value : 'free');
+const publicPlans = () => Object.values(PLAN_CATALOG).filter(plan => !plan.internal);
+
+const listFromEnv = (...names) => names
+  .flatMap(name => String(process.env[name] || '').split(','))
+  .map(value => value.trim().toLowerCase())
+  .filter(Boolean);
+
+const isAllowedValue = (value, allowed) => Boolean(value && allowed.includes(String(value).trim().toLowerCase()));
+
+const getCommercialAccessGrant = (profile) => {
+  const testerEmails = listFromEnv('COMMERCIAL_TESTER_EMAILS', 'REVERSR_TESTER_EMAILS');
+  const testerClientIds = listFromEnv('COMMERCIAL_TESTER_CLIENT_IDS', 'REVERSR_TESTER_CLIENT_IDS');
+  const testerProfileNames = listFromEnv('COMMERCIAL_TESTER_PROFILE_NAMES', 'REVERSR_TESTER_PROFILE_NAMES');
+
+  if (
+    isAllowedValue(profile.email, testerEmails) ||
+    isAllowedValue(profile.clientId, testerClientIds) ||
+    isAllowedValue(profile.name, testerProfileNames) ||
+    isAllowedValue(profile.shopName, testerProfileNames)
+  ) {
+    return {
+      type: 'tester',
+      planId: 'tester',
+      role: 'tester',
+      subscriptionStatus: 'tester_grant',
+    };
+  }
+
+  return null;
+};
+
+const effectivePlanIdFor = (shop, accessGrant) => accessGrant?.planId || normalizeStoredPlanId(shop.planId);
+
+const buildBillingLinks = () => {
+  const separator = BILLING_RETURN_URL.includes('?') ? '&' : '?';
+  return {
+    accountUrl: BILLING_RETURN_URL,
+    upgradeUrl: `${BILLING_RETURN_URL}${separator}upgrade=credits`,
+    canManageOnWeb: true,
+    plans: publicPlans().filter(plan => plan.id !== 'free').map(plan => ({
+      id: plan.id,
+      label: plan.label,
+      priceMonthly: plan.priceMonthly,
+      monthlyCredits: plan.monthlyCredits,
+      seats: plan.seats,
+    })),
+  };
+};
 
 const getPlanFromPriceId = (priceId = '') => {
   if (!priceId) return 'free';
@@ -108,15 +169,17 @@ const requestProfile = (req) => {
 
 const buildEntitlements = (planId) => {
   const plan = PLAN_CATALOG[normalizePlanId(planId)];
+  const isInternalTester = plan.id === 'tester';
   return {
     planId: plan.id,
     planLabel: plan.label,
     monthlyCredits: plan.monthlyCredits,
+    unlimitedCredits: Boolean(plan.unlimitedCredits),
     seats: plan.seats,
     canExportQuotePacket: plan.id !== 'free',
-    canUseInventoryConnectors: plan.id === 'team',
+    canUseInventoryConnectors: plan.id === 'team' || isInternalTester,
     canUseCloudHistory: plan.id !== 'free',
-    canManageTeam: plan.id === 'team',
+    canManageTeam: plan.id === 'team' || isInternalTester,
     canUseCadReviewQueue: plan.id !== 'free',
   };
 };
@@ -129,13 +192,14 @@ const ensureAccount = async (req) => {
   const existingUser = store.users[userId] || {};
   const shopId = existingUser.shopId || `shop_${hashId(profile.email || profile.clientId)}`;
   const existingShop = store.shops[shopId] || {};
-  const existingPlanId = normalizePlanId(existingShop.planId || existingUser.planId || 'free');
+  const existingPlanId = normalizeStoredPlanId(existingShop.planId || existingUser.planId || 'free');
+  const accessGrant = getCommercialAccessGrant(profile);
 
   const user = {
     id: userId,
     name: profile.name || existingUser.name || 'Repair shop user',
     email: profile.email || existingUser.email || '',
-    role: existingUser.role || 'owner',
+    role: accessGrant?.role || existingUser.role || 'owner',
     activeShopId: shopId,
     shopId,
     createdAt: existingUser.createdAt || now,
@@ -159,23 +223,33 @@ const ensureAccount = async (req) => {
   store.shops[shopId] = shop;
   await saveStore(store);
 
-  return { store, user, shop };
+  return { store, user, shop, accessGrant };
 };
 
-const buildUsage = (store, shop, key = monthKey()) => {
-  const entitlements = buildEntitlements(shop.planId);
-  const events = Object.values(store.usageEvents || {}).filter(event => event.shopId === shop.id && event.month === key);
+const buildUsage = (store, shop, key = monthKey(), accessGrant = null) => {
+  const entitlements = buildEntitlements(effectivePlanIdFor(shop, accessGrant));
+  const includeTesterUsage = accessGrant?.type === 'tester';
+  const events = Object.values(store.usageEvents || {}).filter(event => (
+    event.shopId === shop.id &&
+    event.month === key &&
+    (includeTesterUsage ? event.accessGrantType === 'tester' : event.accessGrantType !== 'tester')
+  ));
   const usedCredits = events.reduce((sum, event) => sum + Number(event.credits || 0), 0);
+  const unlimitedCredits = Boolean(entitlements.unlimitedCredits);
   return {
     month: key,
     usedCredits,
-    remainingCredits: Math.max(entitlements.monthlyCredits - usedCredits, 0),
+    remainingCredits: unlimitedCredits ? null : Math.max(entitlements.monthlyCredits - usedCredits, 0),
     monthlyCredits: entitlements.monthlyCredits,
+    unlimitedCredits,
     events: events.slice(-25).reverse(),
   };
 };
 
-const buildAccountResponse = (store, user, shop) => ({
+const buildAccountResponse = (store, user, shop, accessGrant = null) => {
+  const effectivePlanId = effectivePlanIdFor(shop, accessGrant);
+  const effectivePlan = PLAN_CATALOG[effectivePlanId];
+  return {
   status: 'ok',
   profile: {
     id: user.id,
@@ -189,17 +263,20 @@ const buildAccountResponse = (store, user, shop) => ({
     billingOwnerUserId: shop.billingOwnerUserId,
   },
   billing: {
-    planId: normalizePlanId(shop.planId),
-    planLabel: PLAN_CATALOG[normalizePlanId(shop.planId)].label,
-    subscriptionStatus: shop.subscriptionStatus,
+    planId: effectivePlanId,
+    basePlanId: normalizeStoredPlanId(shop.planId),
+    planLabel: effectivePlan.label,
+    subscriptionStatus: accessGrant?.subscriptionStatus || shop.subscriptionStatus,
     currentPeriodEnd: shop.currentPeriodEnd,
     hasStripeCustomer: Boolean(shop.stripeCustomerId),
+    billingLinks: buildBillingLinks(),
   },
-  entitlements: buildEntitlements(shop.planId),
-  usage: buildUsage(store, shop),
-  plans: Object.values(PLAN_CATALOG),
+  entitlements: buildEntitlements(effectivePlanId),
+  usage: buildUsage(store, shop, monthKey(), accessGrant),
+  plans: publicPlans(),
   creditCosts: CREDIT_COSTS,
-});
+  };
+};
 
 const requireConfiguredStripe = () => {
   if (!stripe) {
@@ -261,8 +338,8 @@ const updateShopFromSubscription = async (subscription) => {
 const registerCommercialRoutes = (app) => {
   app.get('/api/me', async (req, res) => {
     try {
-      const { store, user, shop } = await ensureAccount(req);
-      res.json(buildAccountResponse(store, user, shop));
+      const { store, user, shop, accessGrant } = await ensureAccount(req);
+      res.json(buildAccountResponse(store, user, shop, accessGrant));
     } catch (error) {
       res.status(500).json({ status: 'error', error: error.message || 'Failed to load account.' });
     }
@@ -270,8 +347,8 @@ const registerCommercialRoutes = (app) => {
 
   app.get('/api/usage', async (req, res) => {
     try {
-      const { store, shop } = await ensureAccount(req);
-      res.json({ status: 'ok', usage: buildUsage(store, shop), creditCosts: CREDIT_COSTS });
+      const { store, shop, accessGrant } = await ensureAccount(req);
+      res.json({ status: 'ok', usage: buildUsage(store, shop, monthKey(), accessGrant), creditCosts: CREDIT_COSTS });
     } catch (error) {
       res.status(500).json({ status: 'error', error: error.message || 'Failed to load usage.' });
     }
@@ -279,8 +356,12 @@ const registerCommercialRoutes = (app) => {
 
   app.get('/api/entitlements', async (req, res) => {
     try {
-      const { shop } = await ensureAccount(req);
-      res.json({ status: 'ok', entitlements: buildEntitlements(shop.planId), plans: Object.values(PLAN_CATALOG) });
+      const { shop, accessGrant } = await ensureAccount(req);
+      res.json({
+        status: 'ok',
+        entitlements: buildEntitlements(effectivePlanIdFor(shop, accessGrant)),
+        plans: publicPlans(),
+      });
     } catch (error) {
       res.status(500).json({ status: 'error', error: error.message || 'Failed to load entitlements.' });
     }
@@ -288,8 +369,8 @@ const registerCommercialRoutes = (app) => {
 
   app.post('/api/commercial/profile', async (req, res) => {
     try {
-      const { store, user, shop } = await ensureAccount(req);
-      res.json(buildAccountResponse(store, user, shop));
+      const { store, user, shop, accessGrant } = await ensureAccount(req);
+      res.json(buildAccountResponse(store, user, shop, accessGrant));
     } catch (error) {
       res.status(500).json({ status: 'error', error: error.message || 'Failed to save commercial profile.' });
     }
@@ -297,7 +378,7 @@ const registerCommercialRoutes = (app) => {
 
   app.post('/api/billing/checkout-session', async (req, res) => {
     try {
-      const planId = normalizePlanId(req.body?.planId);
+      const planId = normalizeStoredPlanId(req.body?.planId);
       const plan = PLAN_CATALOG[planId];
       if (plan.id === 'free') {
         return res.status(400).json({ status: 'error', error: 'Free plan does not require checkout.', canRetry: false });
@@ -426,15 +507,16 @@ const chargeCommercialCredits = async (req, res, feature) => {
   const credits = CREDIT_COSTS[feature] ?? 0;
   if (credits <= 0) return { ok: true, credits: 0 };
 
-  const { store, user, shop } = await ensureAccount(req);
-  const entitlements = buildEntitlements(shop.planId);
-  const usage = buildUsage(store, shop);
+  const { store, user, shop, accessGrant } = await ensureAccount(req);
+  const effectivePlanId = effectivePlanIdFor(shop, accessGrant);
+  const entitlements = buildEntitlements(effectivePlanId);
+  const usage = buildUsage(store, shop, monthKey(), accessGrant);
   const idempotencyKey = String(req.get('x-reversr-idempotency-key') || '').trim();
   const eventKey = idempotencyKey || `${shop.id}:${feature}:${hashId(JSON.stringify(req.body || {}))}:${monthKey()}`;
   const existingEvent = store.usageEvents[eventKey];
   if (existingEvent) return { ok: true, credits: existingEvent.credits, usage, event: existingEvent };
 
-  if (usage.remainingCredits < credits) {
+  if (!usage.unlimitedCredits && usage.remainingCredits < credits) {
     res.status(402).json({
       error: `${entitlements.planLabel} credits reached. Upgrade or wait for the monthly reset to continue this reconstruction step.`,
       code: 'COMMERCIAL_CREDITS_EXHAUSTED',
@@ -444,6 +526,7 @@ const chargeCommercialCredits = async (req, res, feature) => {
       creditsRequired: credits,
       usage,
       entitlements,
+      billing: buildBillingLinks(),
     });
     return { ok: false };
   }
@@ -455,11 +538,12 @@ const chargeCommercialCredits = async (req, res, feature) => {
     feature,
     credits,
     month: monthKey(),
+    accessGrantType: accessGrant?.type || 'standard',
     createdAt: new Date().toISOString(),
   };
   store.usageEvents[eventKey] = event;
   await saveStore(store);
-  return { ok: true, credits, usage: buildUsage(store, shop), event };
+  return { ok: true, credits, usage: buildUsage(store, shop, monthKey(), accessGrant), event };
 };
 
 module.exports = {
