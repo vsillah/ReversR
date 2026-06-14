@@ -345,7 +345,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
+        <View style={styles.modalContent} testID="reversr-tour-settings">
           <View style={styles.header}>
             <Text style={styles.title}>Settings</Text>
             <TouchableOpacity

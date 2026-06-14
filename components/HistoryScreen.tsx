@@ -355,7 +355,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
   const approvedReviewCount = reviewQueueItems.filter(item => getReviewQueueStatus(item) === 'approved_vendor').length;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="reversr-tour-history">
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.white} />

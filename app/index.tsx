@@ -9,6 +9,7 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import AlertModal from "../components/AlertModal";
@@ -20,6 +21,7 @@ import PhaseFour from "../components/PhaseFour";
 import HistoryScreen from "../components/HistoryScreen";
 import SettingsModal from "../components/SettingsModal";
 import ImageGenerationNotification, { ImageGenStatus } from "../components/ImageGenerationNotification";
+import TourGuide, { TourStep, tourCheckKey } from "../components/TourGuide";
 import {
   AnalysisResult,
   InnovationResult,
@@ -81,6 +83,128 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   4: 'hammer-outline',
 };
 
+const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v1';
+
+type TourSavedState = {
+  active: boolean;
+  stepIndex: number;
+  completedChecks: string[];
+  completedAt: string | null;
+};
+
+const TOUR_STEPS: TourStep[] = [
+  {
+    id: 'welcome',
+    eyebrow: 'Orientation',
+    title: 'Start from the reconstruction map',
+    body: 'The welcome screen shows the full path: scan a machine, match inventory, design the reconstruction, then prepare build artifacts.',
+    structureId: 'reversr-tour-welcome',
+    checks: [
+      { id: 'map', label: 'Read four-phase map' },
+      { id: 'start', label: 'Find new reconstruction' },
+      { id: 'settings', label: 'Find settings' },
+    ],
+  },
+  {
+    id: 'settings',
+    eyebrow: 'Settings',
+    title: 'Review account, AI, and inventory settings',
+    body: 'Settings is where users confirm plan credits, managed AI status, inventory source configuration, policy links, and backend credential references.',
+    structureId: 'reversr-tour-settings',
+    opensSettings: true,
+    checks: [
+      { id: 'account', label: 'Check account panel' },
+      { id: 'ai', label: 'Check AI runtime' },
+      { id: 'inventory', label: 'Check inventory source' },
+    ],
+  },
+  {
+    id: 'phase-nav',
+    eyebrow: 'Navigation',
+    title: 'Use the phase rail as the workflow compass',
+    body: 'The phase rail shows progress through Scan, Inventory, Design, and Build. Completed earlier phases can be reopened from the rail with save/reset safeguards.',
+    structureId: 'reversr-tour-phase-nav',
+    checks: [
+      { id: 'current', label: 'Identify current phase' },
+      { id: 'complete', label: 'Find completed phases' },
+      { id: 'safeguards', label: 'Note save/reset prompts' },
+    ],
+  },
+  {
+    id: 'scan',
+    eyebrow: 'Phase 1',
+    title: 'Scan or describe the machine',
+    body: 'Scan supports typed descriptions, camera capture, and a sample machine mode so users can learn the flow before using a real asset.',
+    structureId: 'reversr-tour-scan',
+    phase: 1,
+    checks: [
+      { id: 'modes', label: 'Review input modes' },
+      { id: 'notes', label: 'Find machine notes' },
+      { id: 'action', label: 'Find scan action' },
+    ],
+  },
+  {
+    id: 'inventory',
+    eyebrow: 'Phase 2',
+    title: 'Match the scan to inventory',
+    body: 'Inventory shows the scan summary, the configured source, candidate matches, and the settings link used to change the source.',
+    structureId: 'reversr-tour-inventory',
+    phase: 2,
+    checks: [
+      { id: 'summary', label: 'Review scan summary' },
+      { id: 'source', label: 'Check source' },
+      { id: 'candidate', label: 'Select a match' },
+    ],
+  },
+  {
+    id: 'design',
+    eyebrow: 'Phase 3',
+    title: 'Generate specs and visual handoff',
+    body: 'Design turns the selected inventory match into technical specifications, 2D references, and optional 3D scene data for downstream fabrication work.',
+    structureId: 'reversr-tour-design',
+    phase: 3,
+    checks: [
+      { id: 'specs', label: 'Find specs' },
+      { id: 'visuals', label: 'Find visual tabs' },
+      { id: 'build', label: 'Find continue to build' },
+    ],
+  },
+  {
+    id: 'build',
+    eyebrow: 'Phase 4',
+    title: 'Prepare BOM and manufacturer handoff',
+    body: 'Build packages the reconstruction into BOM, material treatment guidance, reviewer approval records, quote routing, and manufacturer-ready handoff artifacts.',
+    structureId: 'reversr-tour-build',
+    phase: 4,
+    checks: [
+      { id: 'bom', label: 'Find BOM' },
+      { id: 'approval', label: 'Find reviewer gate' },
+      { id: 'packet', label: 'Find handoff packet' },
+    ],
+  },
+  {
+    id: 'history',
+    eyebrow: 'Continuity',
+    title: 'Resume prior reconstruction work',
+    body: 'History keeps saved reconstructions available so users can return to a scan, spec, BOM, or approval record instead of starting over.',
+    structureId: 'reversr-tour-history',
+    opensHistory: true,
+    checks: [
+      { id: 'list', label: 'Open history' },
+      { id: 'resume', label: 'Find resume action' },
+      { id: 'boundary', label: 'Confirm saved work remains local' },
+    ],
+  },
+];
+
+const guidedTourCheckKeysForStep = (stepIndex: number) => (
+  TOUR_STEPS[stepIndex].checks.map(check => tourCheckKey(stepIndex, check.id))
+);
+
+const allGuidedTourCheckKeys = () => new Set(
+  TOUR_STEPS.flatMap((_, stepIndex) => guidedTourCheckKeysForStep(stepIndex))
+);
+
 export default function HomeScreen() {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
@@ -90,6 +214,11 @@ export default function HomeScreen() {
   const [context, setContext] = useState<MutationContext>(createEmptyContext());
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [tourActive, setTourActive] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+  const [tourCompletedChecks, setTourCompletedChecks] = useState<Set<string>>(() => new Set());
+  const [tourCompletedAt, setTourCompletedAt] = useState<string | null>(null);
+  const [tourStateLoaded, setTourStateLoaded] = useState(false);
   
   const [imageGenStatus, setImageGenStatus] = useState<ImageGenStatus>('idle');
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
@@ -104,6 +233,170 @@ export default function HomeScreen() {
   } | null>(null);
   
   const { generate2DVisualization } = useGemini();
+  const tourStep = TOUR_STEPS[tourStepIndex];
+  const completedTourCheckCount = TOUR_STEPS.reduce((count, step, stepIndex) => {
+    return count + step.checks.filter(check => tourCompletedChecks.has(tourCheckKey(stepIndex, check.id))).length;
+  }, 0);
+  const totalTourCheckCount = TOUR_STEPS.reduce((count, step) => count + step.checks.length, 0);
+  const canFocusTourStep = !tourStep.phase || context.phase >= tourStep.phase;
+  const focusBlockedReason = tourStep.phase && context.phase < tourStep.phase
+    ? `Complete Phase ${context.phase} first to unlock ${PHASE_LABELS[tourStep.phase - 1]}.`
+    : undefined;
+
+  useEffect(() => {
+    const loadTourState = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(TOUR_STORAGE_KEY);
+        if (!raw) {
+          setTourStateLoaded(true);
+          return;
+        }
+
+        const parsed = JSON.parse(raw) as Partial<TourSavedState>;
+        const validKeys = allGuidedTourCheckKeys();
+        const stepIndex = Number.isInteger(parsed.stepIndex)
+          ? Math.min(Math.max(parsed.stepIndex ?? 0, 0), TOUR_STEPS.length - 1)
+          : 0;
+
+        setTourActive(parsed.active === true);
+        setTourStepIndex(stepIndex);
+        setTourCompletedChecks(new Set(
+          Array.isArray(parsed.completedChecks)
+            ? parsed.completedChecks.filter(key => typeof key === 'string' && validKeys.has(key))
+            : []
+        ));
+        setTourCompletedAt(typeof parsed.completedAt === 'string' ? parsed.completedAt : null);
+      } catch (error) {
+        console.warn('Failed to load guided tour state', error);
+      } finally {
+        setTourStateLoaded(true);
+      }
+    };
+
+    loadTourState();
+  }, []);
+
+  useEffect(() => {
+    if (!tourStateLoaded) return;
+
+    const saveTourState = async () => {
+      try {
+        await AsyncStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify({
+          active: tourActive,
+          stepIndex: tourStepIndex,
+          completedChecks: Array.from(tourCompletedChecks),
+          completedAt: tourCompletedAt,
+        }));
+      } catch (error) {
+        console.warn('Failed to save guided tour state', error);
+      }
+    };
+
+    saveTourState();
+  }, [tourActive, tourStepIndex, tourCompletedChecks, tourCompletedAt, tourStateLoaded]);
+
+  const markTourCheck = useCallback((stepIndex: number, checkId: string) => {
+    setTourCompletedChecks(current => {
+      const next = new Set(current);
+      next.add(tourCheckKey(stepIndex, checkId));
+      return next;
+    });
+  }, []);
+
+  const toggleTourCheck = useCallback((stepIndex: number, checkId: string) => {
+    setTourCompletedChecks(current => {
+      const next = new Set(current);
+      const key = tourCheckKey(stepIndex, checkId);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleTourStepDone = useCallback((stepIndex: number) => {
+    setTourCompletedChecks(current => {
+      const next = new Set(current);
+      const stepKeys = guidedTourCheckKeysForStep(stepIndex);
+      const isStepComplete = stepKeys.every(key => next.has(key));
+      stepKeys.forEach(key => {
+        if (isStepComplete) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  const startTour = useCallback(() => {
+    setTourStepIndex(0);
+    setTourActive(true);
+    setTourCompletedAt(null);
+  }, []);
+
+  const closeTour = useCallback(() => {
+    setTourActive(false);
+  }, []);
+
+  const finishTour = useCallback(() => {
+    setTourCompletedAt(new Date().toISOString());
+    setTourActive(false);
+  }, []);
+
+  const moveToTourStep = useCallback((nextStepIndex: number) => {
+    const nextStep = TOUR_STEPS[nextStepIndex];
+    if (!nextStep.opensSettings) {
+      setShowSettings(false);
+    }
+    if (!nextStep.opensHistory) {
+      setShowHistory(false);
+    }
+    if (nextStep.id !== 'welcome' && !nextStep.opensSettings && !nextStep.opensHistory) {
+      setStarted(true);
+    }
+    setTourStepIndex(nextStepIndex);
+  }, []);
+
+  const focusTourStep = useCallback(() => {
+    const step = TOUR_STEPS[tourStepIndex];
+    if (step.phase && context.phase < step.phase) return;
+
+    setShowSettings(step.opensSettings === true);
+    setShowHistory(step.opensHistory === true);
+
+    if (step.phase && step.phase === context.phase) {
+      setStarted(true);
+    } else if (step.phase && step.phase < context.phase) {
+      setStarted(true);
+      setPhaseActionModal(step.phase);
+    } else if (step.opensHistory) {
+      setHistoryRefreshKey(prev => prev + 1);
+      setStarted(true);
+    } else if (!step.opensSettings && step.id !== 'welcome') {
+      setStarted(true);
+    }
+
+    markTourCheck(tourStepIndex, step.checks[0]?.id || 'open');
+    if (step.id === 'welcome') {
+      markTourCheck(tourStepIndex, 'map');
+    }
+  }, [context.phase, markTourCheck, tourStepIndex]);
+
+  const goToNextTourStep = useCallback(() => {
+    if (tourStepIndex >= TOUR_STEPS.length - 1) {
+      finishTour();
+      return;
+    }
+    moveToTourStep(Math.min(TOUR_STEPS.length - 1, tourStepIndex + 1));
+  }, [finishTour, moveToTourStep, tourStepIndex]);
+
+  const goToPreviousTourStep = useCallback(() => {
+    moveToTourStep(Math.max(0, tourStepIndex - 1));
+  }, [moveToTourStep, tourStepIndex]);
 
   const autoSave = useCallback(async (ctx: MutationContext) => {
     if (ctx.phase > 1 || ctx.input) {
@@ -584,29 +877,54 @@ export default function HomeScreen() {
     setStarted(true);
   }, []);
 
+  const renderTourGuide = () => (
+    <TourGuide
+      active={tourActive}
+      step={tourStep}
+      stepIndex={tourStepIndex}
+      stepCount={TOUR_STEPS.length}
+      completedChecks={tourCompletedChecks}
+      completedCount={completedTourCheckCount}
+      totalCount={totalTourCheckCount}
+      canFocusStep={canFocusTourStep}
+      focusBlockedReason={focusBlockedReason}
+      onFocusStep={focusTourStep}
+      onToggleCheck={toggleTourCheck}
+      onToggleStepDone={toggleTourStepDone}
+      onBack={goToPreviousTourStep}
+      onNext={goToNextTourStep}
+      onExit={closeTour}
+    />
+  );
+
   if (!started) {
     return (
-      <>
+      <View style={styles.container}>
         <WelcomeScreen
           onStart={handleStartNew}
           onHistory={openHistory}
           onSettings={() => setShowSettings(true)}
+          onTour={startTour}
         />
         <SettingsModal
           visible={showSettings}
           onClose={() => setShowSettings(false)}
         />
-      </>
+        {renderTourGuide()}
+      </View>
     );
   }
 
   if (showHistory) {
     return (
-      <HistoryScreen
-        onBack={() => setShowHistory(false)}
-        onResume={handleResume}
-        refreshKey={historyRefreshKey}
-      />
+      <View style={styles.container}>
+        <HistoryScreen
+          onBack={() => setShowHistory(false)}
+          onResume={handleResume}
+          refreshKey={historyRefreshKey}
+        />
+        {renderTourGuide()}
+      </View>
     );
   }
 
@@ -632,6 +950,7 @@ export default function HomeScreen() {
             onPress={() => setShowSettings(true)}
             accessibilityRole="button"
             accessibilityLabel="Open settings"
+            testID="reversr-tour-settings-button"
           >
             <Ionicons name="settings-outline" size={24} color={Colors.gray[400]} />
           </TouchableOpacity>
@@ -640,13 +959,23 @@ export default function HomeScreen() {
             onPress={openHistory}
             accessibilityRole="button"
             accessibilityLabel="Open reconstruction history"
+            testID="reversr-tour-history-button"
           >
             <Ionicons name="time-outline" size={24} color={Colors.gray[400]} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.historyButton}
+            onPress={startTour}
+            accessibilityRole="button"
+            accessibilityLabel="Start guided tour"
+            testID="reversr-tour-start-header"
+          >
+            <Ionicons name="compass-outline" size={24} color={Colors.gray[400]} />
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.progressBar}>
+      <View style={styles.progressBar} testID="reversr-tour-phase-nav">
         {[1, 2, 3, 4].map((step, index) => (
           <React.Fragment key={step}>
             <TouchableOpacity 
@@ -700,7 +1029,11 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={tourActive ? styles.contentWithTour : undefined}
+        showsVerticalScrollIndicator={false}
+      >
         {context.phase === 1 && (
           <PhaseOne
             onComplete={handlePhaseOneComplete}
@@ -857,6 +1190,7 @@ export default function HomeScreen() {
         visible={showSettings} 
         onClose={() => setShowSettings(false)} 
       />
+      {renderTourGuide()}
     </View>
   );
 }
@@ -979,6 +1313,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
+  },
+  contentWithTour: {
+    paddingBottom: 300,
   },
   modalOverlay: {
     flex: 1,
