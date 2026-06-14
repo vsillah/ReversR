@@ -7,8 +7,13 @@ import { AppColors } from '../constants/theme';
 import {
   CommercialAccessGrantSummary,
   CommercialProfile,
+  CommercialTesterInviteSummary,
+  TesterInvitePlatform,
+  createCommercialTesterInvite,
   listCommercialAccessGrants,
+  listCommercialTesterInvites,
   revokeCommercialAccessGrant,
+  revokeCommercialTesterInvite,
   saveCommercialAccessGrant,
   useCommercialization,
 } from '../hooks/useCommercialization';
@@ -55,6 +60,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     beginCheckout,
     openBillingPortal,
     activateAccessPassword,
+    redeemTesterInvite,
     resetAccessPassword,
     clearAccessPassword,
   } = useCommercialization();
@@ -82,8 +88,12 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const [commercialStatus, setCommercialStatus] = useState<string | null>(null);
   const [accessPassword, setAccessPassword] = useState('');
   const [newAccessPassword, setNewAccessPassword] = useState('');
+  const [testerInviteCode, setTesterInviteCode] = useState('');
   const [accessStatus, setAccessStatus] = useState<string | null>(null);
   const [accessGrants, setAccessGrants] = useState<CommercialAccessGrantSummary[]>([]);
+  const [testerInvites, setTesterInvites] = useState<CommercialTesterInviteSummary[]>([]);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePlatform, setInvitePlatform] = useState<TesterInvitePlatform>('both');
   const [grantClientId, setGrantClientId] = useState('');
   const [grantEmail, setGrantEmail] = useState('');
   const [grantProfileName, setGrantProfileName] = useState('');
@@ -379,6 +389,19 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     }
   };
 
+  const handleRedeemTesterInvite = async () => {
+    setAccessStatus(null);
+    try {
+      await redeemTesterInvite(testerInviteCode);
+      setTesterInviteCode('');
+      setAccessPassword('');
+      setNewAccessPassword('');
+      setAccessStatus('Tester access activated on this device. No starter password is needed.');
+    } catch (e: any) {
+      setAccessStatus(e?.message || 'Unable to redeem tester invite.');
+    }
+  };
+
   const loadAccessGrants = async () => {
     const token = requireAdminToken();
     if (!token) return;
@@ -391,6 +414,76 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
       setAdminStatus(`Loaded ${result.grants?.length || 0} commercial access grant${result.grants?.length === 1 ? '' : 's'}.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to load commercial access grants.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const loadTesterInvites = async () => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await listCommercialTesterInvites(token);
+      setTesterInvites(result.invites || []);
+      setAdminStatus(`Loaded ${result.invites?.length || 0} tester invite${result.invites?.length === 1 ? '' : 's'}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to load tester invites.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleCreateTesterInvite = async () => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email) {
+      setAdminStatus('Tester email is required to create an invite code.');
+      return;
+    }
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await createCommercialTesterInvite(token, {
+        email,
+        platform: invitePlatform,
+      });
+      setInviteEmail('');
+      setTesterInvites(prev => {
+        const returnedInvites = result.invites || [result.invite];
+        const inviteIds = new Set(returnedInvites.map(invite => invite.inviteId));
+        const others = prev.filter(item => !inviteIds.has(item.inviteId));
+        return [...returnedInvites, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+      });
+      setAdminStatus(`Created tester invite for ${result.invite.email}. Copy this activation code now: ${result.invite.activationCode}`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to create tester invite.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleRevokeTesterInvite = async (inviteId: string) => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await revokeCommercialTesterInvite(token, inviteId);
+      setTesterInvites(prev => prev.map(item => (
+        item.inviteId === inviteId
+          ? { ...item, active: false, status: result.invite?.status || 'revoked', updatedAt: new Date().toISOString() }
+          : item
+      )));
+      setAdminStatus(result.revoked ? `Revoked tester invite ${inviteId}.` : `No active invite existed for ${inviteId}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to revoke tester invite.');
     } finally {
       setAdminLoading(false);
     }
@@ -608,11 +701,37 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   Client ID: {account?.profile.id || 'loading'}
                 </Text>
                 <Text style={styles.helpText}>
-                  Use a starter password from the ReversR admin to activate tester access, then reset it before continuing.
+                  Use a tester invite code from ReversR admin to activate this device without sharing a client ID. Starter passwords remain available for legacy tester grants.
                 </Text>
                 {account?.access?.requiresPasswordReset && (
                   <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
                 )}
+
+                <Text style={styles.compactLabel}>Tester invite code</Text>
+                <TextInput
+                  style={styles.input}
+                  value={testerInviteCode}
+                  onChangeText={setTesterInviteCode}
+                  accessibilityLabel="Tester invite code"
+                  placeholder="Paste activation code"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                />
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
+                    onPress={handleRedeemTesterInvite}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Redeem tester invite code"
+                  >
+                    <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+                    <Text style={styles.saveCredentialButtonText}>Redeem Invite</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.superAdminDivider} />
 
                 <Text style={styles.compactLabel}>Current or starter password</Text>
                 <TextInput
@@ -1012,6 +1131,96 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 </View>
                 <Text style={styles.policyText}>
                   Grant tester access by client ID, email, profile name, or shop name. The starting password is hashed on the backend and must be reset by the tester.
+                </Text>
+
+                <Text style={styles.compactLabel}>Tester invite email</Text>
+                <TextInput
+                  style={styles.input}
+                  value={inviteEmail}
+                  onChangeText={setInviteEmail}
+                  accessibilityLabel="Tester invite email"
+                  placeholder="tester@example.com"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+
+                <Text style={styles.compactLabel}>Tester path</Text>
+                <View style={styles.themeToggleRow}>
+                  {(['both', 'ios', 'android'] as const).map(platform => (
+                    <TouchableOpacity
+                      key={platform}
+                      style={[styles.themeToggleButton, invitePlatform === platform && styles.themeToggleButtonActive]}
+                      onPress={() => setInvitePlatform(platform)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Set tester invite path to ${platform}`}
+                      accessibilityState={{ selected: invitePlatform === platform }}
+                    >
+                      <Ionicons
+                        name={platform === 'ios' ? 'logo-apple' : platform === 'android' ? 'logo-android' : 'phone-portrait-outline'}
+                        size={16}
+                        color={invitePlatform === platform ? Colors.black : Colors.gray[400]}
+                      />
+                      <Text style={[styles.themeToggleText, invitePlatform === platform && styles.themeToggleTextActive]}>
+                        {platform === 'both' ? 'Both' : platform === 'ios' ? 'iOS' : 'Android'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                    onPress={handleCreateTesterInvite}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Create tester invite code"
+                  >
+                    <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+                    <Text style={styles.saveCredentialButtonText}>Create Invite</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                    onPress={loadTesterInvites}
+                    disabled={adminLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Load tester invites"
+                  >
+                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Load Invites</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.credentialList}>
+                  {testerInvites.map(invite => (
+                    <View key={invite.inviteId} style={styles.credentialCard}>
+                      <View style={styles.credentialInfo}>
+                        <Text style={styles.credentialRefText}>{invite.email}</Text>
+                        <Text style={styles.credentialMetaText}>
+                          {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
+                        </Text>
+                        {invite.activationCode && (
+                          <Text selectable style={styles.inviteCodeText}>
+                            Code: {invite.activationCode}
+                          </Text>
+                        )}
+                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteCredentialButton}
+                        onPress={() => handleRevokeTesterInvite(invite.inviteId)}
+                        disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                      >
+                        <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.superAdminDivider} />
+                <Text style={styles.policyText}>
+                  Legacy grants are still available when a tester cannot redeem an invite code.
                 </Text>
 
                 <Text style={styles.compactLabel}>Client ID</Text>
@@ -1594,6 +1803,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: 10,
     lineHeight: 14,
     marginTop: 2,
+  },
+  inviteCodeText: {
+    color: Colors.accent,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 4,
+    fontWeight: '800',
   },
   deleteCredentialButton: {
     width: 30,
