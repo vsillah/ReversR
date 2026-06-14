@@ -6,10 +6,26 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Linking,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
+
+const staticAppConfig = require('../app.json') as {
+  expo?: {
+    version?: string;
+    android?: {
+      versionCode?: number;
+    };
+    ios?: {
+      buildNumber?: string;
+    };
+    extra?: Record<string, unknown>;
+  };
+};
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -45,9 +61,175 @@ const phases = [
   },
 ];
 
+type ReleaseManifest = {
+  version?: string;
+  releaseDate?: string;
+  androidVersionCode?: number;
+  iosBuildNumber?: string;
+  message?: string;
+  updateUrl?: string;
+};
+
+const expoConfig = Constants.expoConfig;
+const releaseExtra = (expoConfig?.extra || {}) as Record<string, unknown>;
+const staticReleaseExtra = staticAppConfig.expo?.extra || {};
+const appVersion = expoConfig?.version || staticAppConfig.expo?.version || 'dev';
+const releaseDate = typeof releaseExtra.releaseDate === 'string'
+  ? releaseExtra.releaseDate
+  : typeof staticReleaseExtra.releaseDate === 'string'
+    ? staticReleaseExtra.releaseDate
+    : undefined;
+const configuredReleaseManifestUrl = typeof releaseExtra.releaseManifestUrl === 'string'
+  ? releaseExtra.releaseManifestUrl
+  : typeof staticReleaseExtra.releaseManifestUrl === 'string'
+    ? staticReleaseExtra.releaseManifestUrl
+    : 'https://reversr.vercel.app/release.json';
+const androidVersionCode = expoConfig?.android?.versionCode || staticAppConfig.expo?.android?.versionCode;
+const iosBuildNumber = expoConfig?.ios?.buildNumber || staticAppConfig.expo?.ios?.buildNumber;
+
+const getReleaseManifestUrl = () => {
+  if (
+    Platform.OS === 'web'
+    && typeof window !== 'undefined'
+    && window.location?.origin
+    && window.location.origin.includes('localhost')
+  ) {
+    return `${window.location.origin}/release.json`;
+  }
+
+  return configuredReleaseManifestUrl;
+};
+
+const parseBuildNumber = (value: number | string | undefined) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
+const formatReleaseDate = (dateValue?: string) => {
+  if (!dateValue) {
+    return 'date unavailable';
+  }
+
+  const normalizedDate = /^\d{4}-\d{2}-\d{2}$/.test(dateValue)
+    ? `${dateValue}T00:00:00Z`
+    : dateValue;
+  const parsedDate = new Date(normalizedDate);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return dateValue;
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(parsedDate);
+};
+
+const compareVersions = (latestVersion?: string, currentVersion?: string) => {
+  if (!latestVersion || !currentVersion) {
+    return false;
+  }
+
+  const latestParts = latestVersion.split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const currentParts = currentVersion.split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const maxLength = Math.max(latestParts.length, currentParts.length);
+
+  for (let index = 0; index < maxLength; index += 1) {
+    const latestPart = latestParts[index] || 0;
+    const currentPart = currentParts[index] || 0;
+
+    if (latestPart > currentPart) {
+      return true;
+    }
+
+    if (latestPart < currentPart) {
+      return false;
+    }
+  }
+
+  return false;
+};
+
+const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) => {
+  if (!latestRelease) {
+    return false;
+  }
+
+  if (Platform.OS === 'android') {
+    const latestAndroidBuild = parseBuildNumber(latestRelease.androidVersionCode);
+    const currentAndroidBuild = parseBuildNumber(androidVersionCode);
+
+    if (latestAndroidBuild && currentAndroidBuild) {
+      return latestAndroidBuild > currentAndroidBuild;
+    }
+  }
+
+  if (Platform.OS === 'ios') {
+    const latestIosBuild = parseBuildNumber(latestRelease.iosBuildNumber);
+    const currentIosBuild = parseBuildNumber(iosBuildNumber);
+
+    if (latestIosBuild && currentIosBuild) {
+      return latestIosBuild > currentIosBuild;
+    }
+  }
+
+  return compareVersions(latestRelease.version, appVersion);
+};
+
 export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }: WelcomeScreenProps) {
   const { colors: Colors } = useAppTheme();
+  const [latestRelease, setLatestRelease] = React.useState<ReleaseManifest | null>(null);
+  const isOutdated = React.useMemo(() => isCurrentBuildOutdated(latestRelease), [latestRelease]);
   const styles = createStyles(Colors);
+  const buildLabel = Platform.select({
+    android: androidVersionCode ? `Android ${androidVersionCode}` : undefined,
+    ios: iosBuildNumber ? `iOS ${iosBuildNumber}` : undefined,
+    default: undefined,
+  });
+  const footerLabel = [
+    `Version ${appVersion}`,
+    buildLabel,
+    `Released ${formatReleaseDate(releaseDate)}`,
+  ].filter(Boolean).join(' - ');
+
+  React.useEffect(() => {
+    const releaseManifestUrl = getReleaseManifestUrl();
+
+    if (!releaseManifestUrl) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    fetch(releaseManifestUrl, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((release: ReleaseManifest | null) => {
+        if (release) {
+          setLatestRelease(release);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const openUpdateUrl = React.useCallback(() => {
+    if (latestRelease?.updateUrl) {
+      Linking.openURL(latestRelease.updateUrl).catch(() => undefined);
+    }
+  }, [latestRelease?.updateUrl]);
 
   return (
     <ScrollView 
@@ -73,6 +255,32 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }
           {'\n\n'}
           An AI-assisted workflow for reconstruction packages, BOMs, pricing, and 3D modeling handoff.
         </Text>
+
+        {isOutdated && (
+          <View
+            style={styles.updateBanner}
+            accessibilityRole="alert"
+            testID="welcome-update-banner"
+          >
+            <Ionicons name="cloud-download-outline" size={22} color={Colors.warning} />
+            <View style={styles.updateBannerText}>
+              <Text style={styles.updateTitle}>Tester update available</Text>
+              <Text style={styles.updateDescription}>
+                This install is older than the latest tester release. Update before validating new changes.
+              </Text>
+              {latestRelease?.updateUrl && (
+                <TouchableOpacity
+                  style={styles.updateButton}
+                  onPress={openUpdateUrl}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open Google Play tester update link"
+                >
+                  <Text style={styles.updateButtonText}>Open tester link</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
 
         <View style={styles.phasesContainer}>
           {phases.map((phase) => (
@@ -136,6 +344,14 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }
             </TouchableOpacity>
           )}
         </View>
+
+        <Text
+          style={styles.releaseFooter}
+          accessibilityLabel={`Installed tester build ${footerLabel}`}
+          testID="welcome-release-footer"
+        >
+          {footerLabel}
+        </Text>
       </View>
     </ScrollView>
   );
@@ -187,6 +403,45 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.md,
     lineHeight: 20,
     opacity: 0.8,
+  },
+  updateBanner: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(253, 186, 116, 0.12)' : '#fff7ed',
+    borderWidth: 1,
+    borderColor: Colors.warning,
+    borderRadius: 8,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  updateBannerText: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  updateTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  updateDescription: {
+    fontSize: FontSizes.sm,
+    color: Colors.mutedText,
+    lineHeight: 18,
+  },
+  updateButton: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: Colors.warning,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  updateButtonText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
+    color: Colors.warning,
   },
   phasesContainer: {
     width: '100%',
@@ -266,5 +521,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   secondaryButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.gray[400],
+  },
+  releaseFooter: {
+    marginTop: Spacing.md,
+    fontSize: FontSizes.xs,
+    color: Colors.dim,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });
