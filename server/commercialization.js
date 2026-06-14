@@ -13,10 +13,10 @@ const PLAN_CATALOG = {
   free: {
     id: 'free',
     label: 'Free',
-    monthlyCredits: 3,
+    monthlyCredits: 1,
     seats: 1,
     priceMonthly: 0,
-    features: ['Local reconstruction history', 'Demo/public inventory', 'Basic preview exports'],
+    features: ['One reconstruction journey/month', 'Demo/public inventory', 'Basic preview exports'],
   },
   pro_shop: {
     id: 'pro_shop',
@@ -53,12 +53,12 @@ const BILLABLE_PLAN_IDS = new Set(['free', 'pro_shop', 'team']);
 const CREDIT_COSTS = {
   analyze: 1,
   'match-machine': 0,
-  'technical-spec': 1,
-  'generate-3d': 2,
-  'generate-2d': 2,
-  'generate-2d-single-angle': 2,
-  'generate-2d-angles': 2,
-  'generate-bom': 1,
+  'technical-spec': 0,
+  'generate-3d': 0,
+  'generate-2d': 0,
+  'generate-2d-single-angle': 0,
+  'generate-2d-angles': 0,
+  'generate-bom': 0,
   'export-packet': 0,
 };
 
@@ -77,6 +77,7 @@ const stripe = process.env.STRIPE_SECRET_KEY
 const hashId = (value = '') => crypto.createHash('sha256').update(String(value)).digest('hex').slice(0, 24);
 
 const monthKey = (date = new Date()) => `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+const nextMonthReset = (date = new Date()) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1, 0, 0, 0));
 
 const normalizePlanId = (value) => (PLAN_CATALOG[value] ? value : 'free');
 const normalizeStoredPlanId = (value) => (BILLABLE_PLAN_IDS.has(value) ? value : 'free');
@@ -290,6 +291,7 @@ const ensureAccount = async (req) => {
 
 const buildUsage = (store, shop, key = monthKey(), accessGrant = null) => {
   const entitlements = buildEntitlements(effectivePlanIdFor(shop, accessGrant));
+  const resetAt = nextMonthReset();
   const includeTesterUsage = accessGrant?.type === 'tester';
   const events = Object.values(store.usageEvents || {}).filter(event => (
     event.shopId === shop.id &&
@@ -304,6 +306,8 @@ const buildUsage = (store, shop, key = monthKey(), accessGrant = null) => {
     remainingCredits: unlimitedCredits ? null : Math.max(entitlements.monthlyCredits - usedCredits, 0),
     monthlyCredits: entitlements.monthlyCredits,
     unlimitedCredits,
+    resetAt: resetAt.toISOString(),
+    resetInSeconds: Math.max(0, Math.ceil((resetAt.getTime() - Date.now()) / 1000)),
     events: events.slice(-25).reverse(),
   };
 };
@@ -792,7 +796,7 @@ const chargeCommercialCredits = async (req, res, feature) => {
 
   if (!usage.unlimitedCredits && usage.remainingCredits < credits) {
     res.status(402).json({
-      error: `${entitlements.planLabel} credits reached. Upgrade or wait for the monthly reset to continue this reconstruction step.`,
+      error: `${entitlements.planLabel} journey credits reached. Upgrade or wait for the monthly reset to start another reconstruction.`,
       code: 'COMMERCIAL_CREDITS_EXHAUSTED',
       canRetry: false,
       upgradeRequired: true,

@@ -25,7 +25,7 @@ export default function PrivacyRoute() {
             'Identify machines from images or descriptions.',
             'Validate approved machine inventory sources.',
             'Generate reconstruction plans, BOMs, assembly steps, pricing estimates, and handoff packages.',
-            'Meter AI reconstruction credits and enforce plan entitlements.',
+            'Meter reconstruction journey credits and enforce plan entitlements.',
             'Save reconstruction history locally on the device.',
             'Support account, shop, and subscription management.',
             'Support troubleshooting and reliability review.',

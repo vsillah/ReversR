@@ -19,8 +19,10 @@ import {
   formatAiRequestError,
   getCommercialUpgradeUrlFromError,
 } from '../hooks/useGemini';
+import { useCommercialization } from '../hooks/useCommercialization';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+import { formatJourneyCreditShortLabel, formatResetCountdown } from '../utils/commercialUsage';
 
 const SCAN_STEPS: LoadingStep[] = [
   { id: 'capture', label: 'Capturing input...' },
@@ -51,6 +53,7 @@ type InputMode = 'type' | 'scan' | 'lucky';
 
 export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialInput, initialImage }: Props) {
   const { colors: Colors } = useAppTheme();
+  const { account, refreshAccount } = useCommercialization();
   const styles = createStyles(Colors);
   const [inputMode, setInputMode] = useState<InputMode>(initialImage ? 'scan' : 'type');
   const [input, setInput] = useState(initialInput || '');
@@ -64,6 +67,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
   const cameraRef = useRef<CameraView>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string} | null>(null);
   const [loadingStep, setLoadingStep] = useState<string>('capture');
+  const [countdownNow, setCountdownNow] = useState(Date.now());
 
   useEffect(() => {
     if (isLoading) {
@@ -76,6 +80,11 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
       };
     }
   }, [isLoading]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCountdownNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const getActiveInput = () => {
     if (inputMode === 'lucky') return luckyProduct;
@@ -99,6 +108,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     try {
       const imageToUse = inputMode === 'scan' ? capturedImage : undefined;
       const result = await analyzeProduct(activeInput, imageToUse || undefined);
+      await refreshAccount();
       onComplete(activeInput, result, imageToUse);
     } catch (e: any) {
       setCreditUpgradeUrl(getCommercialUpgradeUrlFromError(e));
@@ -111,6 +121,7 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
         setError(formatAiRequestError(e, 'Analysis failed'));
       }
       console.error('Analysis error:', e);
+      refreshAccount().catch(() => {});
     } finally {
       setIsLoading(false);
     }
@@ -162,6 +173,15 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   };
 
+  const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
+  const isGuestPlan = !account || account.billing.planId === 'free';
+  const journeyCreditLabel = formatJourneyCreditShortLabel(account?.usage);
+  const resetLabel = usageIsUnlimited
+    ? 'No monthly reset limit'
+    : account?.usage.resetAt
+      ? formatResetCountdown(account.usage.resetAt, countdownNow)
+      : 'Loading reset timer...';
+
   if (isCameraOpen) {
     return (
       <View style={styles.cameraContainer}>
@@ -208,6 +228,18 @@ export default function PhaseOne({ onComplete, isLoading, setIsLoading, initialI
           <Text style={styles.title}>Phase 1: Scan</Text>
           <Text style={styles.description}>
             Capture a machine or describe the visible assemblies and identifying marks.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.creditPanel}>
+        <View style={styles.creditIconCircle}>
+          <Ionicons name={usageIsUnlimited ? 'infinite-outline' : 'hourglass-outline'} size={18} color={Colors.accent} />
+        </View>
+        <View style={styles.creditPanelText}>
+          <Text style={styles.creditPanelTitle}>{isGuestPlan ? 'Guest journey credits' : 'Journey credits'}</Text>
+          <Text style={styles.creditPanelBody}>
+            {journeyCreditLabel}. {resetLabel}. One credit starts the journey; later reconstruction steps do not spend more.
           </Text>
         </View>
       </View>
@@ -445,6 +477,39 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     padding: Spacing.lg,
+  },
+  creditPanel: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  creditIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(234, 179, 8, 0.12)' : 'rgba(234, 179, 8, 0.18)',
+  },
+  creditPanelText: {
+    flex: 1,
+  },
+  creditPanelTitle: {
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  creditPanelBody: {
+    fontSize: FontSizes.xs,
+    color: Colors.dim,
+    lineHeight: FontSizes.xs * 1.45,
   },
   modeSelector: {
     flexDirection: 'row',
