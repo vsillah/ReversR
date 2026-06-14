@@ -13,10 +13,10 @@ const PLAN_CATALOG = {
   free: {
     id: 'free',
     label: 'Free',
-    monthlyCredits: 3,
+    monthlyCredits: 4,
     seats: 1,
     priceMonthly: 0,
-    features: ['Local reconstruction history', 'Demo/public inventory', 'Basic preview exports'],
+    features: ['One scan-to-sketch reconstruction path', 'Demo/public inventory', 'Basic preview exports'],
   },
   pro_shop: {
     id: 'pro_shop',

@@ -39,7 +39,7 @@ export default function AccountScreen() {
     : 0;
   const usageLabel = usageIsUnlimited
     ? `${account?.usage.usedCredits ?? 0} used / Unlimited`
-    : `${account?.usage.remainingCredits ?? 3} / ${account?.usage.monthlyCredits ?? 3} left`;
+    : `${account?.usage.remainingCredits ?? 4} / ${account?.usage.monthlyCredits ?? 4} left`;
 
   const handleSaveProfile = async () => {
     setStatus(null);
@@ -81,7 +81,7 @@ export default function AccountScreen() {
             <Text style={styles.mutedText}>
               {account?.billing.subscriptionStatus && account.billing.subscriptionStatus !== 'none'
                 ? account.billing.subscriptionStatus
-                : 'Free monthly scan trial'}
+                : 'Free scan-to-sketch trial'}
             </Text>
           </View>
           <TouchableOpacity
@@ -106,7 +106,7 @@ export default function AccountScreen() {
           <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
         </View>
         <Text style={styles.helpText}>
-          Scans, specs, BOMs, and visual generation are metered by the hosted API. Usage resets monthly.
+          Free includes one scan-to-sketch path. BOMs and additional visual generation are metered by the hosted API. Usage resets monthly.
         </Text>
       </View>
 

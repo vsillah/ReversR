@@ -467,7 +467,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     : 0;
   const usageLabel = usageIsUnlimited
     ? `${account?.usage.usedCredits ?? 0} used / Unlimited`
-    : `${account?.usage.remainingCredits ?? 3} / ${account?.usage.monthlyCredits ?? 3} left`;
+    : `${account?.usage.remainingCredits ?? 4} / ${account?.usage.monthlyCredits ?? 4} left`;
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
@@ -528,7 +528,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   <Text style={styles.planBadgeMeta}>
                     {account?.billing.subscriptionStatus && account.billing.subscriptionStatus !== 'none'
                       ? account.billing.subscriptionStatus
-                      : 'local trial'}
+                      : 'scan-to-sketch trial'}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -553,7 +553,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
                 </View>
                 <Text style={styles.helpText}>
-                  Phase 1 scans use 1 credit. Specs and BOMs use 1 credit. 2D/3D visual generation uses 2 credits.
+                  Free includes one scan-to-sketch path. Phase 1 scans use 1 credit, specs use 1 credit, and 2D/3D visual generation uses 2 credits.
                 </Text>
               </View>
 
