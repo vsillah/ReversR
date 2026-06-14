@@ -19,7 +19,7 @@ import PhaseTwo from "../components/PhaseTwo";
 import PhaseThree from "../components/PhaseThree";
 import PhaseFour from "../components/PhaseFour";
 import HistoryScreen from "../components/HistoryScreen";
-import SettingsModal from "../components/SettingsModal";
+import SettingsModal, { SettingsSection } from "../components/SettingsModal";
 import ImageGenerationNotification, { ImageGenStatus } from "../components/ImageGenerationNotification";
 import TourGuide, { TourStep, tourCheckKey } from "../components/TourGuide";
 import {
@@ -39,6 +39,7 @@ import {
   createNewInnovation,
 } from "../hooks/useStorage";
 import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
+import { useCommercialization } from "../hooks/useCommercialization";
 
 interface MutationContext {
   id: string;
@@ -207,6 +208,7 @@ const allGuidedTourCheckKeys = () => new Set(
 
 export default function HomeScreen() {
   const { colors: Colors } = useAppTheme();
+  const { account, profile } = useCommercialization();
   const styles = createStyles(Colors);
   const [started, setStarted] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -214,6 +216,7 @@ export default function HomeScreen() {
   const [context, setContext] = useState<MutationContext>(createEmptyContext());
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsInitialSection, setSettingsInitialSection] = useState<SettingsSection>('account');
   const [tourActive, setTourActive] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [tourCompletedChecks, setTourCompletedChecks] = useState<Set<string>>(() => new Set());
@@ -223,6 +226,17 @@ export default function HomeScreen() {
   const [imageGenStatus, setImageGenStatus] = useState<ImageGenStatus>('idle');
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
   const [generatedMultiAngleImages, setGeneratedMultiAngleImages] = useState<AngleImage[]>([]);
+  const userIsAuthenticated = Boolean(account?.access);
+  const savedDisplayName = profile.name?.trim();
+  const userDisplayName = userIsAuthenticated
+    ? (savedDisplayName && savedDisplayName !== 'Repair shop user' ? savedDisplayName : 'User')
+    : 'Guest';
+  const userChipIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
+
+  const openSettings = useCallback((section: SettingsSection = 'account') => {
+    setSettingsInitialSection(section);
+    setShowSettings(true);
+  }, []);
   const imageGenInnovationId = useRef<string | null>(null);
   const [phaseActionModal, setPhaseActionModal] = useState<number | null>(null);
   const [confirmAlert, setConfirmAlert] = useState<{
@@ -903,12 +917,13 @@ export default function HomeScreen() {
         <WelcomeScreen
           onStart={handleStartNew}
           onHistory={openHistory}
-          onSettings={() => setShowSettings(true)}
+          onSettings={() => openSettings('account')}
           onTour={startTour}
         />
         <SettingsModal
           visible={showSettings}
           onClose={() => setShowSettings(false)}
+          initialSection={settingsInitialSection}
         />
         {renderTourGuide()}
       </View>
@@ -944,10 +959,29 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>MACHINE RECONSTRUCTION</Text>
           </View>
         </View>
+        <TouchableOpacity
+          style={[styles.userChip, styles.userChipFloating, userIsAuthenticated && styles.userChipActive]}
+          onPress={() => openSettings('account')}
+          accessibilityRole="button"
+          accessibilityLabel={userIsAuthenticated ? `Open account settings for ${userDisplayName}` : 'Open account settings as guest'}
+          testID="reversr-user-chip"
+        >
+          <Ionicons
+            name={userChipIcon}
+            size={18}
+            color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+          />
+          <Text
+            style={[styles.userChipText, userIsAuthenticated && styles.userChipTextActive]}
+            numberOfLines={1}
+          >
+            {userDisplayName}
+          </Text>
+        </TouchableOpacity>
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.historyButton}
-            onPress={() => setShowSettings(true)}
+            onPress={() => openSettings('account')}
             accessibilityRole="button"
             accessibilityLabel="Open settings"
             testID="reversr-tour-settings-button"
@@ -1052,7 +1086,7 @@ export default function HomeScreen() {
             setIsLoading={setIsLoading}
             onBack={handleBack}
             onReset={handleReset}
-            onOpenSettings={() => setShowSettings(true)}
+            onOpenSettings={() => openSettings('inventory')}
           />
         )}
         {context.phase === 3 && context.innovation && (
@@ -1189,6 +1223,7 @@ export default function HomeScreen() {
       <SettingsModal 
         visible={showSettings} 
         onClose={() => setShowSettings(false)} 
+        initialSection={settingsInitialSection}
       />
       {renderTourGuide()}
     </View>
@@ -1211,6 +1246,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     backgroundColor: Colors.panel,
+    position: 'relative',
   },
   logoContainer: {
     flexDirection: "row",
@@ -1244,7 +1280,43 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.sm,
     justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    paddingRight: 116,
     flexShrink: 0,
+  },
+  userChip: {
+    minHeight: 36,
+    maxWidth: 132,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 999,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: Colors.surface,
+  },
+  userChipFloating: {
+    position: 'absolute',
+    right: Spacing.lg,
+    top: Spacing.sm,
+    zIndex: 2,
+  },
+  userChipActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent + '10',
+  },
+  userChipText: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: '800',
+    maxWidth: 86,
+  },
+  userChipTextActive: {
+    color: Colors.accent,
   },
   historyButton: {
     padding: Spacing.sm,

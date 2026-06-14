@@ -47,12 +47,14 @@ import {
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
 
+export type SettingsSection = 'account' | 'inventory' | 'admin' | 'legal';
+type SettingsTooltip = 'billing' | 'email' | 'invite' | 'password' | null;
+
 interface SettingsModalProps {
   visible: boolean;
   onClose: () => void;
+  initialSection?: SettingsSection;
 }
-
-type SettingsSection = 'account' | 'inventory' | 'admin' | 'legal';
 
 const FALLBACK_COMMERCIAL_PLANS: CommercialPlan[] = [
   {
@@ -84,7 +86,11 @@ const FALLBACK_COMMERCIAL_PLANS: CommercialPlan[] = [
   },
 ];
 
-export default function SettingsModal({ visible, onClose }: SettingsModalProps) {
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const normalizeEmail = (value = '') => value.trim().toLowerCase();
+const isValidEmail = (value = '') => EMAIL_PATTERN.test(normalizeEmail(value));
+
+export default function SettingsModal({ visible, onClose, initialSection = 'account' }: SettingsModalProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const {
     account,
@@ -129,6 +135,8 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const [accessMethod, setAccessMethod] = useState<'invite' | 'password'>('invite');
   const [passwordResetOpen, setPasswordResetOpen] = useState(false);
   const [accessStatus, setAccessStatus] = useState<string | null>(null);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<SettingsTooltip>(null);
   const [accessGrants, setAccessGrants] = useState<CommercialAccessGrantSummary[]>([]);
   const [testerInvites, setTesterInvites] = useState<CommercialTesterInviteSummary[]>([]);
   const [creditConfig, setCreditConfig] = useState<CommercialCreditConfig | null>(null);
@@ -167,13 +175,14 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
   useEffect(() => {
     if (visible) {
+      setSettingsSection(initialSection);
       loadSettings();
       loadAiRuntimeStatus();
       refreshAccount();
     } else {
       setCredentialValue('');
     }
-  }, [visible]);
+  }, [visible, initialSection]);
 
   useEffect(() => {
     setCommercialProfile(profile);
@@ -454,12 +463,19 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
   const handleRedeemTesterInvite = async () => {
     setAccessStatus(null);
+    setEmailTouched(true);
+    const email = normalizeEmail(commercialProfile.email);
+    if (!isValidEmail(email)) {
+      setAccessStatus('Enter a valid work email before redeeming an invite code.');
+      return;
+    }
     const cleanCode = testerInviteCode.trim();
     if (!cleanCode) {
-      setAccessStatus('Paste the activation code from your ReversR admin, then tap Redeem Code.');
+      setAccessStatus('Paste the admin-issued invite code, then tap Redeem Admin Code.');
       return;
     }
     try {
+      await saveProfile({ ...commercialProfile, email });
       await redeemTesterInvite(cleanCode);
       setTesterInviteCode('');
       setAccessPassword('');
@@ -509,9 +525,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     const token = requireAdminToken();
     if (!token) return;
 
-    const email = inviteEmail.trim().toLowerCase();
-    if (!email) {
-      setAdminStatus('Tester email is required to create an invite code.');
+    const email = normalizeEmail(inviteEmail);
+    if (!email || !isValidEmail(email)) {
+      setAdminStatus('Enter a valid tester email before creating an invite code.');
       return;
     }
 
@@ -612,18 +628,25 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
   const handleSaveCommercialProfile = async () => {
     setCommercialStatus(null);
+    setEmailTouched(true);
+    const email = normalizeEmail(commercialProfile.email);
+    if (!isValidEmail(email)) {
+      setCommercialStatus('Enter a valid work email before saving account access.');
+      return;
+    }
     try {
-      await saveProfile(commercialProfile);
-      setCommercialStatus('Saved repair shop profile and refreshed plan usage.');
+      await saveProfile({ ...commercialProfile, email, name: commercialProfile.name.trim() });
+      setCommercialStatus('Saved account profile and refreshed plan usage.');
     } catch (e: any) {
-      setCommercialStatus(e?.message || 'Unable to save repair shop profile.');
+      setCommercialStatus(e?.message || 'Unable to save account profile.');
     }
   };
 
-  const handleCommercialAction = async (action: () => Promise<void>) => {
+  const handleCommercialAction = async (action: () => Promise<void>, successMessage = 'Action completed.') => {
     setCommercialStatus(null);
     try {
       await action();
+      setCommercialStatus(successMessage);
     } catch (e: any) {
       setCommercialStatus(e?.message || 'Billing action is not available yet.');
     }
@@ -645,9 +668,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const handlePlanAction = (plan: CommercialPlan) => {
     const isCurrentPlan = plan.id === (account?.billing.planId || 'free');
     if (Platform.OS === 'web' && account && !isCurrentPlan && plan.id !== 'free') {
-      return handleCommercialAction(() => beginCheckout(plan.id));
+      return handleCommercialAction(() => beginCheckout(plan.id), `Opened ${plan.label} checkout on web.`);
     }
-    return handleCommercialAction(() => openWebUpgrade(plan.id));
+    return handleCommercialAction(() => openWebUpgrade(plan.id), `Opened ${plan.label} plan page on web.`);
   };
 
   const syncCreditConfigForm = (config: CommercialCreditConfig, planId: CommercialPlanId = creditPlanId) => {
@@ -719,6 +742,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
   const resetLabel = usageIsUnlimited
     ? 'No credit reset limit'
     : formatResetCountdown(account?.usage.resetAt, countdownNow);
+  const normalizedCommercialEmail = normalizeEmail(commercialProfile.email);
+  const commercialEmailIsValid = isValidEmail(normalizedCommercialEmail);
+  const showEmailError = emailTouched && !commercialEmailIsValid;
   const canUseAdminConsole = Boolean(adminCredentialSettingsEnabled || account?.entitlements.canUseAdminConsole || account?.access?.role === 'super_admin');
   const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
   const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
@@ -727,6 +753,30 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
     ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
     { id: 'legal', label: 'Legal', icon: 'document-text-outline' },
   ];
+
+  const toggleTooltip = (tooltip: Exclude<SettingsTooltip, null>) => {
+    setActiveTooltip(prev => (prev === tooltip ? null : tooltip));
+  };
+
+  const renderInfoButton = (tooltip: Exclude<SettingsTooltip, null>, label: string) => (
+    <TouchableOpacity
+      style={styles.infoButton}
+      onPress={() => toggleTooltip(tooltip)}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ expanded: activeTooltip === tooltip }}
+    >
+      <Ionicons name="information-circle-outline" size={17} color={Colors.accent} />
+    </TouchableOpacity>
+  );
+
+  const renderTooltip = (tooltip: Exclude<SettingsTooltip, null>, text: string) => (
+    activeTooltip === tooltip ? (
+      <View style={styles.tooltipBubble}>
+        <Text style={styles.tooltipText}>{text}</Text>
+      </View>
+    ) : null
+  );
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
@@ -800,10 +850,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
               <View style={styles.policyHeader}>
                 <Ionicons name="briefcase-outline" size={18} color={Colors.accent} />
                 <Text style={styles.policyTitle}>Billing Plan Tier</Text>
+                {renderInfoButton('billing', 'Show billing plan details')}
               </View>
-              <Text style={styles.policyText}>
-                Review the current tier, journey credits, and upgrade options. Billing changes are completed on the ReversR web account page.
-              </Text>
+              {renderTooltip('billing', 'Review the current tier, journey credits, and upgrade options. Billing changes are completed on the ReversR web account page.')}
 
               <View style={styles.planSummaryRow}>
                 <View style={styles.planBadge}>
@@ -892,26 +941,67 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                 })}
               </View>
 
-              <Text style={styles.compactLabel}>Work email</Text>
+              <Text style={styles.compactLabel}>Display name</Text>
               <TextInput
                 style={styles.input}
+                value={commercialProfile.name}
+                onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
+                accessibilityLabel="Commercial profile display name"
+                placeholder="Your name"
+                placeholderTextColor={Colors.gray[500]}
+              />
+
+              <View style={styles.labelWithInfo}>
+                <Text style={styles.compactLabel}>Work email</Text>
+                {renderInfoButton('email', 'Show work email details')}
+              </View>
+              {renderTooltip('email', 'Use the same email that a ReversR admin used when creating the tester invite. The app validates the format before saving or redeeming a code.')}
+              <TextInput
+                style={[styles.input, showEmailError && styles.inputError]}
                 value={commercialProfile.email}
                 onChangeText={(email) => setCommercialProfile(prev => ({ ...prev, email }))}
+                onBlur={() => setEmailTouched(true)}
                 accessibilityLabel="Commercial profile email"
                 placeholder="owner@example.com"
                 placeholderTextColor={Colors.gray[500]}
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
+              {commercialProfile.email.length > 0 && (
+                <Text style={showEmailError ? styles.validationErrorText : styles.validationSuccessText}>
+                  {showEmailError ? 'Enter a valid email address.' : 'Email format looks valid.'}
+                </Text>
+              )}
 
               <View style={styles.accessPanel}>
                 <View style={styles.policyHeader}>
                   <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
                   <Text style={styles.policyTitle}>Tester Activation</Text>
+                  {renderInfoButton('invite', 'Show invite code details')}
                 </View>
-                <Text style={styles.helpText}>
-                  Use an invite code first. Starter passwords are only for legacy tester or super-admin grants.
-                </Text>
+                {renderTooltip('invite', 'Invite codes are created by a ReversR admin outside the tester app. Enter your work email, paste the admin-issued code, then redeem it on this device.')}
+                <View style={styles.activationStepRow}>
+                  <View style={styles.activationStep}>
+                    <Ionicons
+                      name={commercialEmailIsValid ? 'checkmark-circle-outline' : 'ellipse-outline'}
+                      size={14}
+                      color={commercialEmailIsValid ? Colors.success : Colors.gray[500]}
+                    />
+                    <Text style={styles.activationStepText}>Email</Text>
+                  </View>
+                  <View style={styles.activationStep}>
+                    <Ionicons
+                      name={testerInviteCode.trim() ? 'checkmark-circle-outline' : 'ellipse-outline'}
+                      size={14}
+                      color={testerInviteCode.trim() ? Colors.success : Colors.gray[500]}
+                    />
+                    <Text style={styles.activationStepText}>Admin code</Text>
+                  </View>
+                  <View style={styles.activationStep}>
+                    <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.accent} />
+                    <Text style={styles.activationStepText}>Redeem</Text>
+                  </View>
+                </View>
                 {account?.access?.role === 'super_admin' && (
                   <Text style={styles.adminStatusText}>Super admin access is active on this device.</Text>
                 )}
@@ -927,6 +1017,9 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                       onPress={() => {
                         setAccessMethod(method);
                         setPasswordResetOpen(method === 'password' && Boolean(account?.access?.requiresPasswordReset));
+                        setAccessStatus(method === 'invite'
+                          ? 'Admin invite code selected. Enter a valid work email and paste the code you received.'
+                          : 'Starter password selected. Use this only if a ReversR admin gave you a starter password.');
                       }}
                       accessibilityRole="button"
                       accessibilityLabel={method === 'invite' ? 'Use tester invite code' : 'Use starter password'}
@@ -938,7 +1031,7 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                         color={accessMethod === method ? Colors.black : Colors.gray[400]}
                       />
                       <Text style={[styles.accessMethodText, accessMethod === method && styles.accessMethodTextActive]}>
-                        {method === 'invite' ? 'Invite Code' : 'Starter Password'}
+                        {method === 'invite' ? 'Admin Code' : 'Starter Password'}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -946,13 +1039,16 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
 
                 {accessMethod === 'invite' ? (
                   <>
-                    <Text style={styles.compactLabel}>Activation code</Text>
+                    <View style={styles.labelWithInfo}>
+                      <Text style={styles.compactLabel}>Admin-issued invite code</Text>
+                      {renderInfoButton('invite', 'Show invite code details')}
+                    </View>
                     <TextInput
                       style={styles.input}
                       value={testerInviteCode}
                       onChangeText={setTesterInviteCode}
                       accessibilityLabel="Tester invite code"
-                      placeholder="Paste tester activation code"
+                      placeholder="Paste code from ReversR admin"
                       placeholderTextColor={Colors.gray[500]}
                       autoCapitalize="none"
                     />
@@ -966,13 +1062,17 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                         accessibilityLabel="Redeem tester invite code"
                       >
                         <Ionicons name="ticket-outline" size={17} color={Colors.black} />
-                        <Text style={styles.saveCredentialButtonText}>Redeem Code</Text>
+                        <Text style={styles.saveCredentialButtonText}>Redeem Admin Code</Text>
                       </TouchableOpacity>
                     </View>
                   </>
                 ) : (
                   <>
-                    <Text style={styles.compactLabel}>Current or starter password</Text>
+                    <View style={styles.labelWithInfo}>
+                      <Text style={styles.compactLabel}>Current or starter password</Text>
+                      {renderInfoButton('password', 'Show starter password details')}
+                    </View>
+                    {renderTooltip('password', 'Starter passwords are for legacy tester or super-admin grants. If you have a normal tester invite, use Admin Code instead.')}
                     <TextInput
                       style={styles.input}
                       value={accessPassword}
@@ -1063,15 +1163,15 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   onPress={handleSaveCommercialProfile}
                   disabled={accountLoading}
                   accessibilityRole="button"
-                  accessibilityLabel="Save repair shop account email"
+                  accessibilityLabel="Save account profile"
                 >
                   <Ionicons name="save-outline" size={16} color={Colors.accent} />
-                  <Text style={styles.adminButtonText}>{accountLoading ? 'Saving...' : 'Save Email'}</Text>
+                  <Text style={styles.adminButtonText}>{accountLoading ? 'Saving...' : 'Save Account'}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                  onPress={() => handleCommercialAction(openBillingPortal)}
+                  onPress={() => handleCommercialAction(openBillingPortal, 'Opened the web billing portal.')}
                   disabled={accountLoading || !isWebBillingAvailable}
                   accessibilityRole="button"
                   accessibilityLabel="Open web billing portal"
@@ -1080,10 +1180,6 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
                   <Text style={styles.adminButtonText}>Billing</Text>
                 </TouchableOpacity>
               </View>
-
-              <Text style={styles.helpText}>
-                Upgrade actions open the hosted ReversR account page. Stripe checkout and billing changes are completed on web.
-              </Text>
 
               {(commercialStatus || accountError) && (
                 <Text style={styles.adminStatusText}>{commercialStatus || accountError}</Text>
@@ -1830,7 +1926,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     maxHeight: 440,
   },
   bodyContent: {
-    paddingBottom: 72,
+    paddingBottom: 144,
   },
   settingsSectionTabs: {
     flexDirection: 'row',
@@ -2187,6 +2283,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
+  inputError: {
+    borderColor: Colors.danger,
+  },
   textArea: {
     minHeight: 88,
     textAlignVertical: 'top',
@@ -2320,6 +2419,73 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     marginBottom: 6,
+  },
+  labelWithInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  infoButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 'auto',
+  },
+  tooltipBubble: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: Colors.mode === 'dark' ? Colors.gray[900] : Colors.panel,
+  },
+  tooltipText: {
+    color: Colors.gray[400],
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  validationErrorText: {
+    color: Colors.danger,
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: -2,
+    marginBottom: 8,
+  },
+  validationSuccessText: {
+    color: Colors.success,
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: -2,
+    marginBottom: 8,
+  },
+  activationStepRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 8,
+    marginBottom: 10,
+  },
+  activationStep: {
+    flex: 1,
+    minHeight: 34,
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: Colors.surface,
+  },
+  activationStepText: {
+    color: Colors.gray[400],
+    fontSize: 10,
+    fontWeight: '900',
   },
   adminActionRow: {
     flexDirection: 'row',
