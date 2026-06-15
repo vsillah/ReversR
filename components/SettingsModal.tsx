@@ -48,12 +48,17 @@ import {
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
 
-export type SettingsSection = 'account' | 'inventory' | 'admin' | 'legal';
+export type SettingsSection = 'account' | 'ai' | 'inventory' | 'admin' | 'legal';
 type SettingsTooltip =
   | 'billing'
   | 'email'
   | 'invite'
   | 'password'
+  | 'aiOverview'
+  | 'aiWorkflow'
+  | 'aiProvider'
+  | 'aiStatus'
+  | 'aiLocalModel'
   | 'connectorAdmin'
   | 'adminToken'
   | 'creditRules'
@@ -786,9 +791,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
   const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
     { id: 'account', label: 'Account', icon: 'person-circle-outline' },
+    { id: 'ai', label: 'AI', icon: 'hardware-chip-outline' },
     { id: 'inventory', label: 'Inventory', icon: 'git-branch-outline' },
     ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
     { id: 'legal', label: 'Legal', icon: 'document-text-outline' },
+  ];
+  const aiWorkflowUses = [
+    { phase: '1', label: 'Scan', activity: 'Analyze', icon: 'search-outline' as const },
+    { phase: '2', label: 'Inventory', activity: 'Match', icon: 'git-branch-outline' as const },
+    { phase: '3', label: 'Design', activity: 'Generate', icon: 'create-outline' as const },
+    { phase: '4', label: 'Build', activity: 'Package', icon: 'hammer-outline' as const },
   ];
 
   const toggleTooltip = (tooltip: Exclude<SettingsTooltip, null>) => {
@@ -1235,16 +1247,36 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
               </>
             )}
 
-            {settingsSection === 'inventory' && (
+            {settingsSection === 'ai' && (
               <>
             <View style={styles.liveAiPanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="hardware-chip-outline" size={18} color={Colors.accent} />
-                <Text style={styles.policyTitle}>AI Runtime</Text>
+                <Text style={styles.policyTitle}>AI Component</Text>
+                {renderInfoButton('aiOverview', 'Show AI component details')}
               </View>
-              <Text style={styles.policyText}>
-                Tester builds use managed Gemini by default. Local AI is available for admin or local development workflows.
-              </Text>
+              {renderTooltip('aiOverview', 'The AI component supports machine reconstruction work, not account billing or tester access. Tester builds use managed Gemini by default. Local AI is available only for admin or local development workflows when enabled.')}
+
+              <View style={styles.labelWithInfo}>
+                <Text style={styles.compactLabel}>Used in workflow</Text>
+                {renderInfoButton('aiWorkflow', 'Show AI workflow usage details')}
+              </View>
+              {renderTooltip('aiWorkflow', 'Phase 1 Scan: analyzes typed descriptions and captured images. Phase 2 Inventory: compares scan evidence against inventory candidates. Phase 3 Design: generates technical specs and design assets, while preferring source-backed reference images when available. Phase 4 Build: drafts BOMs, assembly sequencing, CAD readiness notes, and vendor handoff content.')}
+              <View style={styles.aiUsageGrid}>
+                {aiWorkflowUses.map(item => (
+                  <View key={item.phase} style={styles.aiUsageCard}>
+                    <Ionicons name={item.icon} size={16} color={Colors.accent} />
+                    <Text style={styles.aiUsagePhase}>{item.phase}. {item.label}</Text>
+                    <Text style={styles.aiUsageActivity}>{item.activity}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.labelWithInfo}>
+                <Text style={styles.compactLabel}>AI provider</Text>
+                {renderInfoButton('aiProvider', 'Show AI provider details')}
+              </View>
+              {renderTooltip('aiProvider', 'Gemini routes AI work through the hosted ReversR API, so model keys stay off the device. Local AI routes compatible text/model requests to a local provider for private network or development deployments.')}
               <View style={styles.providerOptionList}>
                 <TouchableOpacity
                   style={[styles.providerOptionCard, provider === 'gemini' && styles.providerOptionCardActive]}
@@ -1258,7 +1290,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     <Text style={[styles.providerOptionTitle, provider === 'gemini' && styles.providerOptionTitleActive]}>Gemini</Text>
                     <Text style={styles.providerOptionBadge}>{provider === 'gemini' ? 'Selected' : 'Cloud'}</Text>
                   </View>
-                  <Text style={styles.providerOptionDetail}>Managed cloud analysis, reconstruction, and design generation.</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1274,13 +1305,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     <Text style={[styles.providerOptionTitle, provider === 'ollama' && styles.providerOptionTitleActive]}>Local AI</Text>
                     <Text style={styles.providerOptionBadge}>{localProviderSettingsEnabled ? 'Available' : 'Admin'}</Text>
                   </View>
-                  <Text style={styles.providerOptionDetail}>Ollama/local model routing for development or private network deployments.</Text>
                 </TouchableOpacity>
               </View>
 
               {provider === 'ollama' && localProviderSettingsEnabled ? (
                 <View style={styles.ollamaSettings}>
-                  <Text style={styles.label}>Ollama Model</Text>
+                  <View style={styles.labelWithInfo}>
+                    <Text style={styles.compactLabel}>Ollama model</Text>
+                    {renderInfoButton('aiLocalModel', 'Show local AI model details')}
+                  </View>
+                  {renderTooltip('aiLocalModel', 'Use a local model name that is already installed and running in Ollama. Image analysis requires a vision-capable model. Local image generation is not supported in this tester workflow.')}
                   <TextInput
                     style={styles.input}
                     value={ollamaModel}
@@ -1288,9 +1322,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     placeholder="e.g. llama3, mistral"
                     placeholderTextColor={Colors.gray[500]}
                   />
-                  <Text style={styles.helpText}>
-                    Local image generation is not supported by Ollama. Image analysis requires a vision model like 'llava'. Ensure Ollama is running on localhost:11434.
-                  </Text>
                 </View>
               ) : (
                 <>
@@ -1301,7 +1332,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     color={aiRuntimeStatus?.status === 'connected' ? Colors.accent : Colors.orange[300]}
                   />
                   <Text style={styles.policyTitle}>Managed Gemini</Text>
+                  {renderInfoButton('aiStatus', 'Show managed Gemini status details')}
                 </View>
+                {renderTooltip('aiStatus', 'This checks whether the hosted ReversR API has usable Gemini capacity. If this is unavailable, AI-heavy steps may fall back to source-backed or cached results where possible, or ask the tester to contact an admin.')}
                 <View style={styles.liveAiStatusRow}>
                   <View style={[
                     styles.liveAiBadge,
@@ -1322,12 +1355,14 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
-                <Text style={styles.helpText}>
-                  Gemini runs through the hosted ReversR API. No model keys are stored in this app.
-                </Text>
                 </>
               )}
             </View>
+              </>
+            )}
+
+            {settingsSection === 'inventory' && (
+              <>
 
             <View style={styles.adminPanel}>
               <View style={styles.policyHeader}>
@@ -2270,6 +2305,36 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: 14,
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  aiUsageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  aiUsageCard: {
+    flexGrow: 1,
+    flexBasis: '46%',
+    minHeight: 72,
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    backgroundColor: Colors.panel,
+  },
+  aiUsagePhase: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: '900',
+    marginTop: 5,
+  },
+  aiUsageActivity: {
+    color: Colors.gray[400],
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: 2,
+    textTransform: 'uppercase',
   },
   liveAiStatusRow: {
     flexDirection: 'row',
