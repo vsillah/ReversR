@@ -154,6 +154,14 @@ export interface CommercialTesterInviteSummary {
   redeemedAt: string;
   redeemedClientId: string;
   grantId: string;
+  emailDelivery?: {
+    status: 'sent' | 'failed' | 'not_configured';
+    provider?: 'resend' | 'file' | 'manual' | string;
+    sentAt?: string;
+    updatedAt?: string;
+    message?: string;
+    messageId?: string;
+  };
   activationCode?: string;
   inviteUrl?: string;
 }
@@ -265,17 +273,23 @@ const buildBillingReturnUrl = () => {
   return 'https://reversr.vercel.app/account';
 };
 
-const adminHeaders = (adminToken: string) => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${adminToken}`,
-});
+const commercialAdminHeaders = async (adminToken: string) => {
+  const cleanToken = adminToken.trim();
+  if (cleanToken) {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${cleanToken}`,
+    };
+  }
+  return getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
+};
 
 export const listCommercialAccessGrants = async (
   adminToken: string
 ): Promise<{ status: 'ok'; grants: CommercialAccessGrantSummary[] }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/access-grants`, {
     method: 'GET',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to load commercial access grants.');
@@ -288,7 +302,7 @@ export const saveCommercialAccessGrant = async (
 ): Promise<{ status: 'ok'; grant: CommercialAccessGrantSummary }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/access-grants`, {
     method: 'POST',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));
@@ -302,7 +316,7 @@ export const revokeCommercialAccessGrant = async (
 ): Promise<{ status: 'ok'; grantId: string; revoked: boolean }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/access-grants/${encodeURIComponent(grantId)}`, {
     method: 'DELETE',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to revoke commercial access grant.');
@@ -314,7 +328,7 @@ export const listCommercialTesterInvites = async (
 ): Promise<{ status: 'ok'; invites: CommercialTesterInviteSummary[] }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites`, {
     method: 'GET',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to load tester invites.');
@@ -327,7 +341,7 @@ export const createCommercialTesterInvite = async (
 ): Promise<{ status: 'ok'; invite: CommercialTesterInviteSummary; invites: CommercialTesterInviteSummary[] }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites`, {
     method: 'POST',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));
@@ -341,10 +355,23 @@ export const revokeCommercialTesterInvite = async (
 ): Promise<{ status: 'ok'; inviteId: string; revoked: boolean; invite?: CommercialTesterInviteSummary }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites/${encodeURIComponent(inviteId)}`, {
     method: 'DELETE',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to revoke tester invite.');
+  return data;
+};
+
+export const sendCommercialTesterInviteEmail = async (
+  adminToken: string,
+  inviteId: string
+): Promise<{ status: 'ok'; invite: CommercialTesterInviteSummary }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites/${encodeURIComponent(inviteId)}/send`, {
+    method: 'POST',
+    headers: await commercialAdminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.invite) throw new Error(data.error || 'Unable to send tester invite email.');
   return data;
 };
 
@@ -367,7 +394,7 @@ export const loadCommercialCreditConfig = async (
 ): Promise<{ status: 'ok'; config: CommercialCreditConfig; plans: CommercialPlan[] }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/credit-config`, {
     method: 'GET',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to load journey credit configuration.');
@@ -380,7 +407,7 @@ export const saveCommercialCreditConfig = async (
 ): Promise<{ status: 'ok'; config: CommercialCreditConfig; plans: CommercialPlan[] }> => {
   const response = await fetch(`${getApiBase()}/api/admin/commercial/credit-config`, {
     method: 'POST',
-    headers: adminHeaders(adminToken),
+    headers: await commercialAdminHeaders(adminToken),
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));

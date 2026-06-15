@@ -9,6 +9,8 @@ const run = async () => {
   process.env.COMMERCIAL_STORE_FILE = path.join(tempDir, 'commercial-store.json');
   process.env.BILLING_RETURN_URL = 'https://reversr-rebuild.example.com/account';
   process.env.COMMERCIAL_TESTER_PROFILE_NAMES = 'test3r';
+  process.env.COMMERCIAL_SUPER_ADMIN_EMAILS = 'super-admin-smoke@example.com';
+  process.env.COMMERCIAL_SUPER_ADMIN_PASSWORD = 'super-admin-smoke-password';
   const adminToken = 'credit-gate-smoke-admin-token';
 
   const { chargeCommercialCredits, registerCommercialRoutes } = require('../server/commercialization');
@@ -48,6 +50,10 @@ const run = async () => {
   const grantHeaders = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${adminToken}`,
+  };
+  const superAdminHeaders = {
+    ...headersFor('super-admin-smoke-client', 'Super Admin Smoke', 'super-admin-smoke@example.com'),
+    'X-ReversR-Access-Password': process.env.COMMERCIAL_SUPER_ADMIN_PASSWORD,
   };
 
   const charge = async (clientId, feature, key, name = 'Repair shop user') => {
@@ -196,6 +202,19 @@ const run = async () => {
     assert.equal(typeof inviteBody.invite.activationCode, 'string');
     assert.ok(inviteBody.invite.activationCode.length > 12);
 
+    const superAdminInviteResponse = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
+      method: 'POST',
+      headers: superAdminHeaders,
+      body: JSON.stringify({
+        email: 'super-admin-created-invite@example.com',
+        platform: 'ios',
+      }),
+    });
+    const superAdminInviteBody = await superAdminInviteResponse.json();
+    assert.equal(superAdminInviteResponse.status, 200);
+    assert.equal(superAdminInviteBody.invite.email, 'super-admin-created-invite@example.com');
+    assert.equal(superAdminInviteBody.invite.status, 'pending');
+
     const lookupWithoutSavedEmailResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/lookup`, {
       method: 'POST',
       headers: headersFor('invite-smoke-client', 'Invite Smoke'),
@@ -254,9 +273,50 @@ const run = async () => {
     const inviteList = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
       headers: grantHeaders,
     }).then(res => res.json());
-    assert.equal(inviteList.invites.length, 1);
-    assert.equal(inviteList.invites[0].status, 'redeemed');
-    assert.equal(inviteList.invites[0].tokenHash, undefined);
+    assert.equal(inviteList.invites.length, 2);
+    const redeemedInvite = inviteList.invites.find(invite => invite.email === 'invite-smoke@example.com');
+    assert.equal(redeemedInvite.status, 'redeemed');
+    assert.equal(redeemedInvite.tokenHash, undefined);
+
+    process.env.TESTER_INVITE_EMAIL_FILE = path.join(tempDir, 'tester-invite-email-outbox.json');
+    const emailedInviteResponse = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
+      method: 'POST',
+      headers: grantHeaders,
+      body: JSON.stringify({
+        email: 'emailed-invite-smoke@example.com',
+        platform: 'android',
+      }),
+    });
+    const emailedInviteBody = await emailedInviteResponse.json();
+    assert.equal(emailedInviteResponse.status, 200);
+    assert.equal(emailedInviteBody.invite.emailDelivery.status, 'sent');
+    assert.equal(emailedInviteBody.invite.emailDelivery.provider, 'file');
+    assert.equal(emailedInviteBody.invite.activationCode, '');
+
+    const outbox = JSON.parse(await fs.readFile(process.env.TESTER_INVITE_EMAIL_FILE, 'utf8'));
+    assert.equal(outbox.emails.length, 1);
+    assert.equal(outbox.emails[0].to, 'emailed-invite-smoke@example.com');
+    assert.ok(outbox.emails[0].activationCode.length > 12);
+
+    const emailedLookupResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/lookup`, {
+      method: 'POST',
+      headers: headersFor('emailed-invite-smoke-client', 'Emailed Invite Smoke', 'emailed-invite-smoke@example.com'),
+      body: JSON.stringify({ email: 'emailed-invite-smoke@example.com' }),
+    });
+    const emailedLookupBody = await emailedLookupResponse.json();
+    assert.equal(emailedLookupResponse.status, 200);
+    assert.equal(emailedLookupBody.invite.emailDelivery.status, 'sent');
+    assert.equal(emailedLookupBody.invite.activationCode, '');
+
+    const emailedRedeemResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/redeem`, {
+      method: 'POST',
+      headers: headersFor('emailed-invite-smoke-client', 'Emailed Invite Smoke', 'emailed-invite-smoke@example.com'),
+      body: JSON.stringify({ token: outbox.emails[0].activationCode }),
+    });
+    const emailedRedeemBody = await emailedRedeemResponse.json();
+    assert.equal(emailedRedeemResponse.status, 200);
+    assert.equal(emailedRedeemBody.account.billing.planId, 'tester');
+    assert.equal(emailedRedeemBody.invite.status, 'redeemed');
 
     console.log('Commercial credit gate smoke passed.');
   } finally {
