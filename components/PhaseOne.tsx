@@ -339,7 +339,7 @@ export default function PhaseOne({
                 onChangeText={setInput}
                 accessibilityLabel="Machine description"
                 placeholder="e.g., A FarmBot Genesis gantry farming robot with tracks, gantry beam, z-axis, Farmduino, Raspberry Pi, motors, camera, tools, and power supply..."
-                placeholderTextColor={Colors.gray[600]}
+                placeholderTextColor={Colors.gray[500]}
                 multiline
                 numberOfLines={4}
                 editable={!isLoading}
@@ -392,7 +392,7 @@ export default function PhaseOne({
                 onChangeText={setInput}
                 accessibilityLabel="Optional machine scan notes"
                 placeholder="Optional: Add model number, visible assemblies, damage, or inventory clues..."
-                placeholderTextColor={Colors.gray[600]}
+                placeholderTextColor={Colors.gray[500]}
                 multiline
                 numberOfLines={2}
                 editable={!isLoading}
