@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -44,6 +45,7 @@ import {
 } from "../hooks/useStorage";
 import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
 import { useCommercialization } from "../hooks/useCommercialization";
+import { formatJourneyCreditShortLabel, formatResetCountdown } from "../utils/commercialUsage";
 
 interface MutationContext {
   id: string;
@@ -518,6 +520,7 @@ export default function HomeScreen() {
   const [tourHistoryResumeDetected, setTourHistoryResumeDetected] = useState(false);
   const [mockJourneyActive, setMockJourneyActive] = useState(false);
   const [mockTourFixture, setMockTourFixture] = useState<MockTourFixture | null>(null);
+  const [countdownNow, setCountdownNow] = useState(Date.now());
   
   const [imageGenStatus, setImageGenStatus] = useState<ImageGenStatus>('idle');
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
@@ -529,6 +532,17 @@ export default function HomeScreen() {
     : 'Guest';
   const userChipIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
   const userAvatarUri = profile.avatarUri || '';
+  const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
+  const isGuestPlan = !account || account.billing.planId === 'free';
+  const guestCreditLabel = formatJourneyCreditShortLabel(account?.usage, 4);
+  const guestResetLabel = usageIsUnlimited
+    ? 'No monthly reset limit'
+    : account?.usage.resetAt
+      ? formatResetCountdown(account.usage.resetAt, countdownNow)
+      : 'Loading reset timer...';
+  const guestUpgradeUrl = account?.billing.billingLinks?.upgradeUrl || 'https://reversr.vercel.app/account?upgrade=credits';
+  const guestCreditCopy = `${guestCreditLabel}. ${guestResetLabel}.`;
+  const guestCreditCopySegments = guestCreditCopy.split(/(\d+)/g);
 
   const openSettings = useCallback((section: SettingsSection = 'account') => {
     setSettingsInitialSection(section);
@@ -545,6 +559,17 @@ export default function HomeScreen() {
     setWorkflowMenuOpen(false);
     action();
   }, []);
+  const handleOpenGuestUpgrade = useCallback(() => {
+    const webWindow = typeof globalThis !== 'undefined' ? (globalThis as any).window : undefined;
+    if (webWindow?.location?.assign) {
+      webWindow.location.assign(guestUpgradeUrl);
+      return;
+    }
+
+    Linking.openURL(guestUpgradeUrl).catch(error => {
+      console.error('Failed to open ReversR upgrade page', error);
+    });
+  }, [guestUpgradeUrl]);
   const imageGenInnovationId = useRef<string | null>(null);
   const [phaseActionModal, setPhaseActionModal] = useState<number | null>(null);
   const [confirmAlert, setConfirmAlert] = useState<{
@@ -669,6 +694,11 @@ export default function HomeScreen() {
     };
 
     loadTourState();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCountdownNow(Date.now()), 60000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -1508,6 +1538,26 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {isGuestPlan && (
+        <View style={styles.guestCreditBar} testID="reversr-guest-credit-bar">
+          <Text style={styles.guestCreditText} numberOfLines={2}>
+            {guestCreditCopySegments.map((segment, index) => (
+              /^\d+$/.test(segment)
+                ? <Text key={`${segment}-${index}`} style={styles.guestCreditNumber}>{segment}</Text>
+                : segment
+            ))}
+          </Text>
+          <TouchableOpacity
+            style={styles.guestCreditLink}
+            onPress={handleOpenGuestUpgrade}
+            accessibilityRole="link"
+            accessibilityLabel="Upgrade ReversR plan"
+          >
+            <Text style={styles.guestCreditLinkText}>Upgrade Now</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.progressBar} testID="reversr-tour-phase-nav">
         {[1, 2, 3, 4].map((step, index) => (
           <React.Fragment key={step}>
@@ -1756,6 +1806,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderBottomColor: Colors.border,
     backgroundColor: Colors.panel,
     position: 'relative',
+    zIndex: 60,
+    elevation: 12,
   },
   logoContainer: {
     flexDirection: "row",
@@ -1874,6 +1926,46 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   userChipTextActive: {
     color: Colors.accent,
+  },
+  guestCreditBar: {
+    alignSelf: 'center',
+    maxWidth: 320,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  guestCreditText: {
+    color: Colors.text,
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  guestCreditNumber: {
+    color: Colors.accent,
+    fontFamily: 'monospace',
+    fontWeight: '900',
+  },
+  guestCreditLink: {
+    minHeight: 22,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  guestCreditLinkText: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: '800',
   },
   progressBar: {
     flexDirection: "row",
