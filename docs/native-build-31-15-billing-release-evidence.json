@@ -78,8 +78,29 @@
         "reversr_pro_shop_monthly",
         "reversr_team_monthly"
       ],
-      "apiListResult": "No subscriptions returned yet from Android Publisher subscriptions list.",
-      "remainingGate": "Create and activate the subscription products and at least one base plan for each product in Google Play Console before Android testers can complete an in-app purchase."
+      "apiListResult": "Android Publisher subscriptions list returned both required products with ACTIVE monthly base plans after authorized activation.",
+      "activatedAt": "2026-06-15T12:03:00Z",
+      "products": [
+        {
+          "productId": "reversr_pro_shop_monthly",
+          "name": "ReversR Pro Shop Monthly",
+          "basePlanId": "monthly",
+          "state": "ACTIVE",
+          "regionCode": "US",
+          "newSubscriberAvailability": true,
+          "price": "49 USD/month"
+        },
+        {
+          "productId": "reversr_team_monthly",
+          "name": "ReversR Team Monthly",
+          "basePlanId": "monthly",
+          "state": "ACTIVE",
+          "regionCode": "US",
+          "newSubscriberAvailability": true,
+          "price": "149 USD/month"
+        }
+      ],
+      "remainingGate": "Android testers can now load the configured Play Billing subscription products from a Google Play testing-track install; tester purchase QA remains pending."
     }
   },
   "iosTestFlight": {
@@ -130,25 +151,30 @@
     "androidTesterBuildAvailable": true,
     "iosTesterBuildAvailable": true
   },
-  "playConsoleHumanGate": {
+  "playConsoleProductActivation": {
     "subscriptionsUrl": "https://play.google.com/console/u/0/developers/8864864114913698241/app/4972956671966100551/monetize/products/subscriptions",
+    "status": "completed",
+    "method": "Android Publisher API",
     "requiredProducts": [
       {
         "productId": "reversr_pro_shop_monthly",
         "name": "ReversR Pro Shop Monthly",
+        "basePlanId": "monthly",
+        "state": "ACTIVE",
         "price": "49 USD/month"
       },
       {
         "productId": "reversr_team_monthly",
         "name": "ReversR Team Monthly",
+        "basePlanId": "monthly",
+        "state": "ACTIVE",
         "price": "149 USD/month"
       }
     ],
-    "note": "Google Play subscription products and active base plans are still required before the Android in-app purchase screen can return purchasable products."
+    "note": "Products are active for US new subscribers. No Google Play production app review or public release was started."
   },
   "remainingGates": [
-    "Tester install QA remains user/tester-owned: install from Google Play Internal Testing and TestFlight, then report any onboarding, focus, checklist, account activation, or billing-product availability issues.",
-    "Google Play subscription products and active base plans remain a Play Console gate; source, hosted API, and native binaries are ready for that configuration.",
+    "Tester install and purchase QA remains user/tester-owned: install from Google Play Internal Testing and TestFlight, then report any onboarding, focus, checklist, account activation, or billing checkout issues.",
     "No public App Review submission, App Store production rollout, Google Play production review, or public release was started in this sweep."
   ]
 }
