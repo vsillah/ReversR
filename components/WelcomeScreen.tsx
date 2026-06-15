@@ -82,7 +82,7 @@ export default function WelcomeScreen({
   userIsAuthenticated = false,
   userAvatarUri = '',
 }: WelcomeScreenProps) {
-  const { colors: Colors } = useAppTheme();
+  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const updateCoordinator = useLaunchUpdateCoordinator();
   const showUpdateBanner = [
@@ -121,6 +121,13 @@ export default function WelcomeScreen({
     action?.();
   }, []);
 
+  const nextThemeMode = themeMode === 'dark' ? 'light' : 'dark';
+  const handleToggleTheme = React.useCallback(() => {
+    setThemeMode(nextThemeMode).catch(error => {
+      console.error('Failed to update appearance theme', error);
+    });
+  }, [nextThemeMode, setThemeMode]);
+
   return (
     <ScrollView 
       style={styles.container}
@@ -156,6 +163,20 @@ export default function WelcomeScreen({
                   </Text>
                 </TouchableOpacity>
               )}
+
+              <TouchableOpacity
+                style={styles.menuButton}
+                onPress={handleToggleTheme}
+                accessibilityRole="button"
+                accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
+                testID="welcome-appearance-toggle"
+              >
+                <Ionicons
+                  name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+                  size={22}
+                  color={Colors.accent}
+                />
+              </TouchableOpacity>
 
               <View style={styles.menuHost}>
                 <TouchableOpacity

@@ -108,7 +108,7 @@ const normalizeEmail = (value = '') => value.trim().toLowerCase();
 const isValidEmail = (value = '') => EMAIL_PATTERN.test(normalizeEmail(value));
 
 export default function SettingsModal({ visible, onClose, initialSection = 'account' }: SettingsModalProps) {
-  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
+  const { colors: Colors } = useAppTheme();
   const {
     account,
     profile,
@@ -1172,34 +1172,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
             {settingsSection === 'account' && (
               <>
-            <View style={styles.appearancePanel}>
-              <View style={styles.policyHeader}>
-                <Ionicons name="contrast-outline" size={18} color={Colors.accent} />
-                <Text style={styles.policyTitle}>Appearance</Text>
-              </View>
-              <View style={styles.themeToggleRow}>
-                {(['light', 'dark'] as const).map(mode => (
-                  <TouchableOpacity
-                    key={mode}
-                    style={[styles.themeToggleButton, themeMode === mode && styles.themeToggleButtonActive]}
-                    onPress={() => setThemeMode(mode)}
-                    accessibilityRole="button"
-                    accessibilityLabel={mode === 'light' ? 'Use light mode' : 'Use dark mode'}
-                    accessibilityState={{ selected: themeMode === mode }}
-                  >
-                    <Ionicons
-                      name={mode === 'light' ? 'sunny-outline' : 'moon-outline'}
-                      size={16}
-                      color={themeMode === mode ? Colors.black : Colors.gray[400]}
-                    />
-                    <Text style={[styles.themeToggleText, themeMode === mode && styles.themeToggleTextActive]}>
-                      {mode === 'light' ? 'Light' : 'Dark'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
             <View style={styles.accountPanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="briefcase-outline" size={18} color={Colors.accent} />
@@ -2107,14 +2079,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '600',
     color: Colors.gray[300],
     marginBottom: 12,
-  },
-  appearancePanel: {
-    borderWidth: 1,
-    borderColor: Colors.gray[800],
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 24,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
   themeToggleRow: {
     flexDirection: 'row',
