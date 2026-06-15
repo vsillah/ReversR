@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Linking, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { ErrorCode, ProductSubscription, Purchase, useIAP } from 'expo-iap';
 import { getApiBase } from '../utils/apiBase';
 
 export type CommercialPlanId = 'free' | 'pro_shop' | 'team' | 'tester';
@@ -174,9 +176,13 @@ interface CommercialContextValue {
   loading: boolean;
   error: string | null;
   isWebBillingAvailable: boolean;
+  isAndroidInAppBillingAvailable: boolean;
+  androidInAppBillingStatus: AndroidInAppBillingStatus;
+  androidInAppBillingMessage: string;
   refreshAccount: () => Promise<void>;
   saveProfile: (profile: CommercialProfile) => Promise<void>;
   beginCheckout: (planId: CommercialPlanId) => Promise<void>;
+  beginAndroidInAppUpgrade: (planId: CommercialPlanId) => Promise<void>;
   openBillingPortal: () => Promise<void>;
   activateAccessPassword: (password: string) => Promise<void>;
   redeemTesterInvite: (token: string) => Promise<void>;
@@ -184,9 +190,25 @@ interface CommercialContextValue {
   clearAccessPassword: () => Promise<void>;
 }
 
+export type AndroidInAppBillingStatus = 'unavailable' | 'connecting' | 'ready' | 'processing' | 'success' | 'error';
+
+interface AndroidInAppBillingBridge {
+  beginUpgrade: (planId: CommercialPlanId) => Promise<void>;
+}
+
 const PROFILE_STORAGE_KEY = 'reversr_commercial_profile';
 const CLIENT_ID_STORAGE_KEY = 'reversr_commercial_client_id';
 const ACCESS_PASSWORD_STORAGE_KEY = 'reversr_commercial_access_password';
+const ANDROID_PLAY_SUBSCRIPTION_PRODUCT_IDS: Partial<Record<CommercialPlanId, string>> = {
+  pro_shop: String(Constants.expoConfig?.extra?.androidPlayProductProShop || 'reversr_pro_shop_monthly'),
+  team: String(Constants.expoConfig?.extra?.androidPlayProductTeam || 'reversr_team_monthly'),
+};
+const ANDROID_PLAY_PRODUCT_TO_PLAN = Object.entries(ANDROID_PLAY_SUBSCRIPTION_PRODUCT_IDS)
+  .reduce<Record<string, CommercialPlanId>>((result, [planId, productId]) => {
+    if (productId) result[productId] = planId as CommercialPlanId;
+    return result;
+  }, {});
+const ANDROID_PLAY_SUBSCRIPTION_SKUS = Object.values(ANDROID_PLAY_SUBSCRIPTION_PRODUCT_IDS).filter(Boolean) as string[];
 
 const defaultProfile: CommercialProfile = {
   name: 'Repair shop user',
@@ -366,11 +388,50 @@ export const saveCommercialCreditConfig = async (
   return data;
 };
 
+const verifyAndroidPlaySubscription = async ({
+  planId,
+  productId,
+  purchase,
+}: {
+  planId: CommercialPlanId;
+  productId: string;
+  purchase: Purchase;
+}): Promise<{ status: 'ok'; account: CommercialAccount }> => {
+  const purchaseToken = purchase.purchaseToken;
+  if (!purchaseToken) throw new Error('Google Play did not return a purchase token.');
+
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
+  const response = await fetch(`${getApiBase()}/api/billing/google-play/subscription`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      planId,
+      productId,
+      purchaseToken,
+      transactionId: purchase.transactionId,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.account) {
+    throw new Error(data.error || 'Unable to verify Google Play subscription.');
+  }
+  return data;
+};
+
 export function CommercialProvider({ children }: { children: React.ReactNode }) {
   const [account, setAccount] = useState<CommercialAccount | null>(null);
   const [profile, setProfileState] = useState<CommercialProfile>(defaultProfile);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [androidInAppBillingStatus, setAndroidInAppBillingStatus] = useState<AndroidInAppBillingStatus>(
+    Platform.OS === 'android' ? 'connecting' : 'unavailable'
+  );
+  const [androidInAppBillingMessage, setAndroidInAppBillingMessage] = useState(
+    Platform.OS === 'android'
+      ? 'Connecting to Google Play Billing.'
+      : 'Google Play in-app billing is available only in the Android app.'
+  );
+  const [androidBillingBridge, setAndroidBillingBridge] = useState<AndroidInAppBillingBridge | null>(null);
 
   const refreshAccount = useCallback(async () => {
     setLoading(true);
@@ -449,6 +510,16 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
     if (!response.ok || !data.url) throw new Error(data.error || 'Unable to start Stripe Checkout.');
     await Linking.openURL(data.url);
   }, []);
+
+  const beginAndroidInAppUpgrade = useCallback(async (planId: CommercialPlanId) => {
+    if (Platform.OS !== 'android') {
+      throw new Error('Google Play in-app upgrades are available only in the Android app.');
+    }
+    if (!androidBillingBridge) {
+      throw new Error(androidInAppBillingMessage || 'Google Play Billing is still connecting.');
+    }
+    await androidBillingBridge.beginUpgrade(planId);
+  }, [androidBillingBridge, androidInAppBillingMessage]);
 
   const openBillingPortal = useCallback(async () => {
     if (Platform.OS !== 'web') {
@@ -530,22 +601,180 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
     loading,
     error,
     isWebBillingAvailable: Platform.OS === 'web',
+    isAndroidInAppBillingAvailable: Platform.OS === 'android' && androidInAppBillingStatus === 'ready',
+    androidInAppBillingStatus,
+    androidInAppBillingMessage,
     refreshAccount,
     saveProfile,
     beginCheckout,
+    beginAndroidInAppUpgrade,
     openBillingPortal,
     activateAccessPassword,
     redeemTesterInvite,
     resetAccessPassword,
     clearAccessPassword,
-  }), [account, profile, loading, error, refreshAccount, saveProfile, beginCheckout, openBillingPortal, activateAccessPassword, redeemTesterInvite, resetAccessPassword, clearAccessPassword]);
+  }), [account, profile, loading, error, androidInAppBillingStatus, androidInAppBillingMessage, refreshAccount, saveProfile, beginCheckout, beginAndroidInAppUpgrade, openBillingPortal, activateAccessPassword, redeemTesterInvite, resetAccessPassword, clearAccessPassword]);
 
   return (
     <CommercialContext.Provider value={value}>
       {children}
+      {Platform.OS === 'android' && (
+        <AndroidInAppBillingBridgeHost
+          account={account}
+          setAccount={setAccount}
+          refreshAccount={refreshAccount}
+          setBridge={setAndroidBillingBridge}
+          setStatus={setAndroidInAppBillingStatus}
+          setMessage={setAndroidInAppBillingMessage}
+        />
+      )}
     </CommercialContext.Provider>
   );
 }
+
+function AndroidInAppBillingBridgeHost({
+  account,
+  setAccount,
+  refreshAccount,
+  setBridge,
+  setStatus,
+  setMessage,
+}: {
+  account: CommercialAccount | null;
+  setAccount: React.Dispatch<React.SetStateAction<CommercialAccount | null>>;
+  refreshAccount: () => Promise<void>;
+  setBridge: React.Dispatch<React.SetStateAction<AndroidInAppBillingBridge | null>>;
+  setStatus: React.Dispatch<React.SetStateAction<AndroidInAppBillingStatus>>;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const pendingPlanRef = React.useRef<CommercialPlanId | null>(null);
+  const finishTransactionRef = React.useRef<((args: { purchase: Purchase; isConsumable?: boolean }) => Promise<void>) | null>(null);
+
+  const iap = useIAP({
+    onPurchaseSuccess: async (purchase) => {
+      const planId = pendingPlanRef.current || ANDROID_PLAY_PRODUCT_TO_PLAN[purchase.productId];
+      const productId = purchase.productId;
+      if (!planId || !productId) {
+        setStatus('error');
+        setMessage('Google Play returned a purchase that does not map to a ReversR plan.');
+        return;
+      }
+
+      setStatus('processing');
+      setMessage('Verifying Google Play subscription with ReversR.');
+      try {
+        const result = await verifyAndroidPlaySubscription({ planId, productId, purchase });
+        setAccount(result.account);
+        await finishTransactionRef.current?.({ purchase, isConsumable: false });
+        await refreshAccount();
+        setStatus('success');
+        setMessage(`${result.account.billing.planLabel} is active through Google Play.`);
+      } catch (error: any) {
+        setStatus('error');
+        setMessage(error?.message || 'Google Play subscription verification failed.');
+      } finally {
+        pendingPlanRef.current = null;
+      }
+    },
+    onPurchaseError: (purchaseError) => {
+      if (purchaseError.code === ErrorCode.UserCancelled) {
+        setStatus('ready');
+        setMessage('Google Play purchase cancelled.');
+        return;
+      }
+      setStatus('error');
+      setMessage(purchaseError.message || 'Google Play purchase failed.');
+      pendingPlanRef.current = null;
+    },
+    onError: (billingError) => {
+      setStatus('error');
+      setMessage(billingError.message || 'Google Play Billing is not available.');
+    },
+  });
+
+  useEffect(() => {
+    finishTransactionRef.current = iap.finishTransaction;
+  }, [iap.finishTransaction]);
+
+  useEffect(() => {
+    if (!iap.connected) {
+      setStatus('connecting');
+      setMessage('Connecting to Google Play Billing.');
+      return;
+    }
+
+    if (ANDROID_PLAY_SUBSCRIPTION_SKUS.length === 0) {
+      setStatus('error');
+      setMessage('Google Play product IDs are not configured for ReversR plans.');
+      return;
+    }
+
+    iap.fetchProducts({ skus: ANDROID_PLAY_SUBSCRIPTION_SKUS, type: 'subs' })
+      .then(() => iap.getAvailablePurchases())
+      .then(() => iap.getActiveSubscriptions(ANDROID_PLAY_SUBSCRIPTION_SKUS))
+      .then(() => {
+        setStatus('ready');
+        setMessage('Google Play Billing is ready for in-app upgrades.');
+      })
+      .catch((error: any) => {
+        setStatus('error');
+        setMessage(error?.message || 'Unable to load Google Play subscriptions.');
+      });
+  }, [iap.connected]);
+
+  const beginUpgrade = useCallback(async (planId: CommercialPlanId) => {
+    const productId = ANDROID_PLAY_SUBSCRIPTION_PRODUCT_IDS[planId];
+    if (!productId) throw new Error('This plan is not configured as a Google Play subscription.');
+    if (!iap.connected) throw new Error('Google Play Billing is still connecting.');
+
+    const subscription = iap.subscriptions.find(item => item.id === productId);
+    if (!subscription) {
+      throw new Error('Google Play subscription product is not available yet. Confirm the product is active in Play Console and this build was installed from a testing track.');
+    }
+
+    const currentPurchase = iap.availablePurchases.find(purchase => (
+      purchase.productId !== productId && Boolean(ANDROID_PLAY_PRODUCT_TO_PLAN[purchase.productId])
+    ));
+    const subscriptionOffers = subscriptionOffersForPurchase(subscription);
+    if (subscriptionOffers.length === 0) {
+      throw new Error('Google Play subscription offer is missing. Add and activate a base plan or offer in Play Console.');
+    }
+
+    pendingPlanRef.current = planId;
+    setStatus('processing');
+    setMessage(`Opening Google Play checkout for ${account?.plans.find(plan => plan.id === planId)?.label || 'this plan'}.`);
+
+    await iap.requestPurchase({
+      request: {
+        google: {
+          skus: [productId],
+          subscriptionOffers,
+          ...(currentPurchase?.purchaseToken ? {
+            purchaseToken: currentPurchase.purchaseToken,
+            replacementMode: 1,
+          } : {}),
+        },
+      },
+      type: 'subs',
+    });
+  }, [account?.plans, iap]);
+
+  useEffect(() => {
+    setBridge({ beginUpgrade });
+    return () => setBridge(null);
+  }, [beginUpgrade, setBridge]);
+
+  return null;
+}
+
+const subscriptionOffersForPurchase = (subscription: ProductSubscription) => (
+  (subscription.subscriptionOffers || [])
+    .map(offer => ({
+      sku: subscription.id,
+      offerToken: offer.offerTokenAndroid || '',
+    }))
+    .filter(offer => Boolean(offer.offerToken))
+);
 
 export const useCommercialization = () => {
   const context = useContext(CommercialContext);

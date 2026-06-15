@@ -17,7 +17,7 @@ This Privacy Policy explains what information the app handles and how it is used
 - **Repair shop profile details:** Name, work email, shop name, role, plan, and monthly reconstruction credit usage.
 - **Inventory connector metadata:** Source name, connector URI, connector type, auth mode selection, and admin notes.
 - **Reconstruction outputs:** Machine match results, assembly steps, bill of materials, pricing estimates, and export packages.
-- **Billing metadata:** Stripe customer IDs, subscription IDs, subscription status, plan, and billing period dates when a shop uses hosted web billing.
+- **Billing metadata:** Stripe customer IDs, Google Play purchase token hashes, subscription IDs, subscription status, plan, and billing period dates when a shop uses hosted web billing or Android in-app subscriptions.
 
 ### Device and Usage Information
 
@@ -48,7 +48,7 @@ We use information to:
 
 The app may use AI providers such as Google Gemini or local models such as Ollama to analyze machine input and generate reconstruction outputs. If a cloud AI provider is configured, machine descriptions and images may be sent to that provider for processing.
 
-Stripe may process payment details when a shop manages billing through the hosted web account page. ReversR stores billing identifiers and subscription status, not full card numbers.
+Stripe may process payment details when a shop manages billing through the hosted web account page. Google Play may process Android in-app subscription payments. ReversR stores billing identifiers, Google Play purchase token hashes, and subscription status, not full card numbers.
 
 Manufacturer links such as Xometry, Protolabs, Shapeways, or JLCPCB are provided as handoff destinations. The app can export a quote packet and prepare a user-reviewed email draft for handoff, but it does not automatically submit files or orders to those vendors.
 

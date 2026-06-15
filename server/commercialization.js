@@ -93,6 +93,13 @@ const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: STRIPE_API_VERSION })
   : null;
 
+const GOOGLE_PLAY_PACKAGE_NAME = process.env.GOOGLE_PLAY_PACKAGE_NAME || 'com.vsillah.reversrrebuild';
+const GOOGLE_PLAY_PLAN_PRODUCTS = {
+  pro_shop: process.env.GOOGLE_PLAY_PRODUCT_PRO_SHOP || 'reversr_pro_shop_monthly',
+  team: process.env.GOOGLE_PLAY_PRODUCT_TEAM || 'reversr_team_monthly',
+};
+let googlePlayAccessTokenCache = null;
+
 const hashId = (value = '') => crypto.createHash('sha256').update(String(value)).digest('hex').slice(0, 24);
 
 const dateKey = (date = new Date()) => date.toISOString().slice(0, 10);
@@ -542,6 +549,116 @@ const requireConfiguredStripe = () => {
   }
   return stripe;
 };
+
+const googlePlayPlanFromProductId = (productId = '') => (
+  Object.entries(GOOGLE_PLAY_PLAN_PRODUCTS).find(([, configuredProductId]) => configuredProductId === productId)?.[0] || null
+);
+
+const requireGooglePlayServiceAccount = () => {
+  const rawJson = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON;
+  const credentials = rawJson
+    ? JSON.parse(rawJson)
+    : {
+      client_email: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_PRIVATE_KEY,
+    };
+
+  if (!credentials.client_email || !credentials.private_key) {
+    const error = new Error('Google Play billing verification is not configured. Set GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, or GOOGLE_PLAY_SERVICE_ACCOUNT_EMAIL and GOOGLE_PLAY_SERVICE_ACCOUNT_PRIVATE_KEY.');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  return {
+    clientEmail: credentials.client_email,
+    privateKey: String(credentials.private_key).replace(/\\n/g, '\n'),
+  };
+};
+
+const base64UrlJson = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+
+const getGooglePlayAccessToken = async () => {
+  if (googlePlayAccessTokenCache && googlePlayAccessTokenCache.expiresAt > Date.now() + 60000) {
+    return googlePlayAccessTokenCache.accessToken;
+  }
+
+  const credentials = requireGooglePlayServiceAccount();
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const assertionHeader = base64UrlJson({ alg: 'RS256', typ: 'JWT' });
+  const assertionBody = base64UrlJson({
+    iss: credentials.clientEmail,
+    scope: 'https://www.googleapis.com/auth/androidpublisher',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: nowSeconds + 3600,
+    iat: nowSeconds,
+  });
+  const signer = crypto.createSign('RSA-SHA256');
+  signer.update(`${assertionHeader}.${assertionBody}`);
+  signer.end();
+  const signature = signer.sign(credentials.privateKey, 'base64url');
+  const assertion = `${assertionHeader}.${assertionBody}.${signature}`;
+
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
+    }).toString(),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || !body.access_token) {
+    const error = new Error(body.error_description || body.error || 'Unable to authenticate Google Play service account.');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  googlePlayAccessTokenCache = {
+    accessToken: body.access_token,
+    expiresAt: Date.now() + Math.max(60, Number(body.expires_in || 3600)) * 1000,
+  };
+  return googlePlayAccessTokenCache.accessToken;
+};
+
+const getGooglePlaySubscriptionPurchase = async (purchaseToken) => {
+  const accessToken = await getGooglePlayAccessToken();
+  const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(GOOGLE_PLAY_PACKAGE_NAME)}/purchases/subscriptionsv2/tokens/${encodeURIComponent(purchaseToken)}`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(body.error?.message || body.error || 'Google Play subscription verification failed.');
+    error.statusCode = response.status === 404 ? 400 : 503;
+    throw error;
+  }
+  return body;
+};
+
+const googlePlayPurchaseHasEntitlement = (purchase = {}) => {
+  const entitledStates = new Set([
+    'SUBSCRIPTION_STATE_ACTIVE',
+    'SUBSCRIPTION_STATE_IN_GRACE_PERIOD',
+    'SUBSCRIPTION_STATE_CANCELED',
+  ]);
+  if (!entitledStates.has(purchase.subscriptionState)) return false;
+  const now = Date.now();
+  return (purchase.lineItems || []).some(item => {
+    const expiryTime = item.expiryTime ? Date.parse(item.expiryTime) : 0;
+    return !Number.isFinite(expiryTime) || expiryTime > now;
+  });
+};
+
+const googlePlayPurchaseExpiry = (purchase = {}) => (
+  (purchase.lineItems || [])
+    .map(item => Date.parse(item.expiryTime || ''))
+    .filter(value => Number.isFinite(value))
+    .sort((left, right) => right - left)[0] || 0
+);
+
+const googlePlayPurchaseProductIds = (purchase = {}) => (
+  (purchase.lineItems || []).map(item => item.productId).filter(Boolean)
+);
 
 const ensureStripeCustomer = async (store, user, shop) => {
   if (shop.stripeCustomerId) return shop.stripeCustomerId;
@@ -1170,6 +1287,94 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
       res.status(error.statusCode || 500).json({
         status: 'error',
         error: error.message || 'Failed to redeem tester invite.',
+        canRetry: false,
+      });
+    }
+  });
+
+  app.post('/api/billing/google-play/subscription', async (req, res) => {
+    try {
+      const requestedPlanId = normalizeStoredPlanId(req.body?.planId);
+      const productId = String(req.body?.productId || '').trim();
+      const purchaseToken = String(req.body?.purchaseToken || '').trim();
+      if (!purchaseToken || !productId) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Google Play product ID and purchase token are required.',
+          canRetry: false,
+        });
+      }
+      if (requestedPlanId === 'free') {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Free plan does not require Google Play checkout.',
+          canRetry: false,
+        });
+      }
+
+      const expectedProductId = GOOGLE_PLAY_PLAN_PRODUCTS[requestedPlanId];
+      const productPlanId = googlePlayPlanFromProductId(productId);
+      if (!expectedProductId || expectedProductId !== productId || productPlanId !== requestedPlanId) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Google Play product does not match the requested ReversR plan.',
+          canRetry: false,
+        });
+      }
+
+      const purchase = await getGooglePlaySubscriptionPurchase(purchaseToken);
+      const verifiedProductIds = googlePlayPurchaseProductIds(purchase);
+      if (!verifiedProductIds.includes(productId)) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Google Play purchase token does not include the selected ReversR plan.',
+          canRetry: false,
+        });
+      }
+      if (!googlePlayPurchaseHasEntitlement(purchase)) {
+        return res.status(402).json({
+          status: 'error',
+          error: `Google Play subscription is not active (${purchase.subscriptionState || 'unknown'}).`,
+          canRetry: true,
+        });
+      }
+
+      const { store, user, shop, accessGrant } = await ensureAccount(req);
+      const now = new Date().toISOString();
+      const subscriptionId = `google_play_${hashId(purchaseToken)}`;
+      const expiryTime = googlePlayPurchaseExpiry(purchase);
+      shop.planId = requestedPlanId;
+      shop.subscriptionStatus = 'google_play_active';
+      shop.currentPeriodEnd = expiryTime ? new Date(expiryTime).toISOString() : '';
+      shop.googlePlaySubscriptionId = subscriptionId;
+      shop.googlePlayPurchaseTokenHash = hashId(purchaseToken);
+      shop.updatedAt = now;
+      store.shops[shop.id] = shop;
+      store.subscriptions[subscriptionId] = {
+        id: subscriptionId,
+        provider: 'google_play',
+        shopId: shop.id,
+        userId: user.id,
+        planId: requestedPlanId,
+        productId,
+        packageName: GOOGLE_PLAY_PACKAGE_NAME,
+        status: purchase.subscriptionState,
+        purchaseTokenHash: hashId(purchaseToken),
+        transactionId: String(req.body?.transactionId || ''),
+        currentPeriodEnd: shop.currentPeriodEnd,
+        updatedAt: now,
+      };
+      await saveStore(store);
+
+      res.json({
+        status: 'ok',
+        provider: 'google_play',
+        account: buildAccountResponse(store, user, shop, accessGrant),
+      });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({
+        status: 'error',
+        error: error.message || 'Failed to verify Google Play subscription.',
         canRetry: false,
       });
     }

@@ -76,7 +76,7 @@ machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D
 ### Review Notes
 
 ```text
-Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Repair shop profiles and monthly reconstruction credit status are used for app functionality. Paid billing is managed on the hosted web account page; mobile tester builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
+Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Repair shop profiles and monthly reconstruction credit status are used for app functionality. Paid billing is managed on the hosted web account page for web/Stripe billing and through Google Play Billing for eligible Android in-app subscriptions; mobile builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
 ```
 
 ### TestFlight What To Test

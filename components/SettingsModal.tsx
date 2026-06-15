@@ -115,9 +115,13 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     loading: accountLoading,
     error: accountError,
     isWebBillingAvailable,
+    isAndroidInAppBillingAvailable,
+    androidInAppBillingStatus,
+    androidInAppBillingMessage,
     refreshAccount,
     saveProfile,
     beginCheckout,
+    beginAndroidInAppUpgrade,
     openBillingPortal,
     activateAccessPassword,
     redeemTesterInvite,
@@ -746,7 +750,28 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     if (Platform.OS === 'web' && account && !isCurrentPlan && plan.id !== 'free') {
       return handleCommercialAction(() => beginCheckout(plan.id), `Opened ${plan.label} checkout on web.`);
     }
+    if (Platform.OS === 'android' && account && !isCurrentPlan && plan.id !== 'free') {
+      return handleCommercialAction(
+        () => beginAndroidInAppUpgrade(plan.id),
+        `Opened Google Play checkout for ${plan.label}.`
+      );
+    }
     return handleCommercialAction(() => openWebUpgrade(plan.id), `Opened ${plan.label} plan page on web.`);
+  };
+
+  const planActionLabel = (plan: CommercialPlan, isCurrentPlan: boolean) => {
+    if (isCurrentPlan) return 'Manage on Web';
+    if (Platform.OS === 'android' && plan.id !== 'free') {
+      return isAndroidInAppBillingAvailable ? 'Upgrade in App' : 'Play Billing Setup';
+    }
+    if (Platform.OS === 'web' && plan.id !== 'free') return 'Start Checkout';
+    return 'Continue on Web';
+  };
+
+  const planActionIcon = (plan: CommercialPlan, isCurrentPlan: boolean): keyof typeof Ionicons.glyphMap => {
+    if (Platform.OS === 'android' && plan.id !== 'free' && !isCurrentPlan) return 'logo-google-playstore';
+    if (Platform.OS === 'web' && plan.id !== 'free' && !isCurrentPlan) return 'card-outline';
+    return 'open-outline';
   };
 
   const syncCreditConfigForm = (config: CommercialCreditConfig, planId: CommercialPlanId = creditPlanId) => {
@@ -1227,11 +1252,27 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
               <View style={styles.planListHeader}>
                 <Text style={styles.planListTitle}>Plans</Text>
-                <Text style={styles.planListMeta}>Upgrade options open on web.</Text>
+                <Text style={styles.planListMeta}>
+                  {Platform.OS === 'android' ? 'Android upgrades use Google Play.' : 'Upgrade options open on web.'}
+                </Text>
               </View>
+              {Platform.OS === 'android' && (
+                <View style={styles.androidBillingStatusCard}>
+                  <Ionicons
+                    name={isAndroidInAppBillingAvailable ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+                    size={16}
+                    color={isAndroidInAppBillingAvailable ? Colors.success : Colors.warning}
+                  />
+                  <Text style={styles.androidBillingStatusText}>
+                    {androidInAppBillingMessage || `Google Play Billing status: ${androidInAppBillingStatus}`}
+                  </Text>
+                </View>
+              )}
               <View style={styles.planCardsGrid}>
                 {visiblePlans.map(plan => {
                   const isCurrentPlan = plan.id === (account?.billing.planId || 'free');
+                  const disablePlanAction = accountLoading
+                    || (Platform.OS === 'android' && plan.id !== 'free' && !isCurrentPlan && !isAndroidInAppBillingAvailable);
                   return (
                     <View key={plan.id} style={[styles.planCard, isCurrentPlan && styles.planCardActive]}>
                       <View style={styles.planCardHeader}>
@@ -1259,17 +1300,19 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       <TouchableOpacity
                         style={[styles.planActionButton, isCurrentPlan && styles.planActionButtonMuted]}
                         onPress={() => handlePlanAction(plan)}
-                        disabled={accountLoading}
+                        disabled={disablePlanAction}
                         accessibilityRole="button"
-                        accessibilityLabel={isCurrentPlan ? `Manage ${plan.label} plan on web` : `Upgrade to ${plan.label} on web`}
+                        accessibilityLabel={Platform.OS === 'android' && plan.id !== 'free'
+                          ? `${isCurrentPlan ? 'Manage' : 'Upgrade to'} ${plan.label} with Google Play`
+                          : isCurrentPlan ? `Manage ${plan.label} plan on web` : `Upgrade to ${plan.label} on web`}
                       >
                         <Ionicons
-                          name={Platform.OS === 'web' && plan.id !== 'free' && !isCurrentPlan ? 'card-outline' : 'open-outline'}
+                          name={planActionIcon(plan, isCurrentPlan)}
                           size={15}
                           color={Colors.accent}
                         />
                         <Text style={styles.planActionButtonText}>
-                          {isCurrentPlan ? 'Manage on Web' : Platform.OS === 'web' && plan.id !== 'free' ? 'Start Checkout' : 'Continue on Web'}
+                          {planActionLabel(plan, isCurrentPlan)}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -2274,6 +2317,25 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   planCardsGrid: {
     gap: 10,
     marginBottom: 14,
+  },
+  androidBillingStatusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.mode === 'dark' ? Colors.gray[800] : Colors.border,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(255,255,255,0.03)' : Colors.panel,
+  },
+  androidBillingStatusText: {
+    flex: 1,
+    color: Colors.mutedText,
+    fontSize: 11,
+    fontWeight: '700',
+    lineHeight: 15,
   },
   planCard: {
     borderWidth: 1,
