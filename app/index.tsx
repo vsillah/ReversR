@@ -541,6 +541,8 @@ export default function HomeScreen() {
       ? formatResetCountdown(account.usage.resetAt, countdownNow)
       : 'Loading reset timer...';
   const guestUpgradeUrl = account?.billing.billingLinks?.upgradeUrl || 'https://reversr.vercel.app/account?upgrade=credits';
+  const guestCreditCopy = `${guestCreditLabel}. ${guestResetLabel}.`;
+  const guestCreditCopySegments = guestCreditCopy.split(/(\d+)/g);
 
   const openSettings = useCallback((section: SettingsSection = 'account') => {
     setSettingsInitialSection(section);
@@ -1539,7 +1541,11 @@ export default function HomeScreen() {
       {isGuestPlan && (
         <View style={styles.guestCreditBar} testID="reversr-guest-credit-bar">
           <Text style={styles.guestCreditText} numberOfLines={2}>
-            {guestCreditLabel}. {guestResetLabel}.
+            {guestCreditCopySegments.map((segment, index) => (
+              /^\d+$/.test(segment)
+                ? <Text key={`${segment}-${index}`} style={styles.guestCreditNumber}>{segment}</Text>
+                : segment
+            ))}
           </Text>
           <TouchableOpacity
             style={styles.guestCreditLink}
@@ -1945,6 +1951,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     flexShrink: 1,
+  },
+  guestCreditNumber: {
+    color: Colors.accent,
+    fontFamily: 'monospace',
+    fontWeight: '900',
   },
   guestCreditLink: {
     minHeight: 22,
