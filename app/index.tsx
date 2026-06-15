@@ -61,6 +61,10 @@ interface MutationContext {
   reviewerApprovalRecords: ReviewerApprovalRecord[];
 }
 
+const HEADER_CONTROL_SIZE = 44;
+const HEADER_CONTROL_TOP = Spacing.sm;
+const HEADER_TITLE_TOP_PADDING = HEADER_CONTROL_TOP + HEADER_CONTROL_SIZE + Spacing.md;
+
 const createEmptyContext = (): MutationContext => {
   const newInnovation = createNewInnovation();
   return {
@@ -494,7 +498,7 @@ const createMockTourContext = (fixture?: MockTourFixture | null): MutationContex
 };
 
 export default function HomeScreen() {
-  const { colors: Colors } = useAppTheme();
+  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const { account, profile } = useCommercialization();
   const safeAreaInsets = useSafeAreaInsets();
   const styles = createStyles(Colors);
@@ -505,6 +509,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [settingsInitialSection, setSettingsInitialSection] = useState<SettingsSection>('account');
+  const [workflowMenuOpen, setWorkflowMenuOpen] = useState(false);
   const [tourActive, setTourActive] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [tourCompletedChecks, setTourCompletedChecks] = useState<Set<string>>(() => new Set());
@@ -528,6 +533,17 @@ export default function HomeScreen() {
   const openSettings = useCallback((section: SettingsSection = 'account') => {
     setSettingsInitialSection(section);
     setShowSettings(true);
+  }, []);
+  const nextThemeMode = themeMode === 'dark' ? 'light' : 'dark';
+  const handleToggleTheme = useCallback(() => {
+    setWorkflowMenuOpen(false);
+    setThemeMode(nextThemeMode).catch(error => {
+      console.error('Failed to update appearance theme', error);
+    });
+  }, [nextThemeMode, setThemeMode]);
+  const handleWorkflowMenuAction = useCallback((action: () => void) => {
+    setWorkflowMenuOpen(false);
+    action();
   }, []);
   const imageGenInnovationId = useRef<string | null>(null);
   const [phaseActionModal, setPhaseActionModal] = useState<number | null>(null);
@@ -1401,57 +1417,94 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>MACHINE RECONSTRUCTION</Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={[styles.userChip, styles.userChipFloating, userIsAuthenticated && styles.userChipActive]}
-          onPress={() => openSettings('profile')}
-          accessibilityRole="button"
-          accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
-          testID="reversr-user-chip"
-        >
-          {userAvatarUri ? (
-            <Image source={{ uri: userAvatarUri }} style={styles.userChipAvatar} resizeMode="cover" />
-          ) : (
+        <View style={styles.headerControls}>
+          <TouchableOpacity
+            style={[styles.userChip, userIsAuthenticated && styles.userChipActive]}
+            onPress={() => openSettings('profile')}
+            accessibilityRole="button"
+            accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
+            testID="reversr-user-chip"
+          >
+            {userAvatarUri ? (
+              <Image source={{ uri: userAvatarUri }} style={styles.userChipAvatar} resizeMode="cover" />
+            ) : (
+              <Ionicons
+                name={userChipIcon}
+                size={18}
+                color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+              />
+            )}
+            <Text
+              style={[styles.userChipText, userIsAuthenticated && styles.userChipTextActive]}
+              numberOfLines={1}
+            >
+              {userDisplayName}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={handleToggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
+            testID="reversr-appearance-toggle"
+          >
             <Ionicons
-              name={userChipIcon}
-              size={18}
-              color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+              name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+              size={22}
+              color={Colors.accent}
             />
-          )}
-          <Text
-            style={[styles.userChipText, userIsAuthenticated && styles.userChipTextActive]}
-            numberOfLines={1}
-          >
-            {userDisplayName}
-          </Text>
-        </TouchableOpacity>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.historyButton}
-            onPress={() => openSettings('account')}
-            accessibilityRole="button"
-            accessibilityLabel="Open settings"
-            testID="reversr-tour-settings-button"
-          >
-            <Ionicons name="settings-outline" size={24} color={Colors.gray[400]} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.historyButton}
-            onPress={openHistory}
-            accessibilityRole="button"
-            accessibilityLabel="Open reconstruction history"
-            testID="reversr-tour-history-button"
-          >
-            <Ionicons name="time-outline" size={24} color={Colors.gray[400]} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.historyButton}
-            onPress={startTour}
-            accessibilityRole="button"
-            accessibilityLabel="Start guided tour"
-            testID="reversr-tour-start-header"
-          >
-            <Ionicons name="compass-outline" size={24} color={Colors.gray[400]} />
-          </TouchableOpacity>
+
+          <View style={styles.menuHost}>
+            <TouchableOpacity
+              style={[styles.menuButton, workflowMenuOpen && styles.menuButtonActive]}
+              onPress={() => setWorkflowMenuOpen(current => !current)}
+              accessibilityRole="button"
+              accessibilityLabel={workflowMenuOpen ? 'Close reconstruction menu' : 'Open reconstruction menu'}
+              accessibilityState={{ expanded: workflowMenuOpen }}
+              testID="reversr-actions-menu-button"
+            >
+              <Ionicons name={workflowMenuOpen ? 'close-outline' : 'menu-outline'} size={24} color={Colors.accent} />
+            </TouchableOpacity>
+
+            {workflowMenuOpen && (
+              <View style={styles.menuPanel} testID="reversr-actions-menu">
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleWorkflowMenuAction(() => openSettings('account'))}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open settings"
+                  testID="reversr-tour-settings-button"
+                >
+                  <Ionicons name="settings-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.menuItemText}>Settings</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleWorkflowMenuAction(openHistory)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open reconstruction history"
+                  testID="reversr-tour-history-button"
+                >
+                  <Ionicons name="time-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.menuItemText}>History</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleWorkflowMenuAction(startTour)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Start guided tour"
+                  testID="reversr-tour-start-header"
+                >
+                  <Ionicons name="compass-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.menuItemText}>Tour</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </View>
       </View>
 
@@ -1697,7 +1750,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: "center",
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingTop: HEADER_TITLE_TOP_PADDING,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     backgroundColor: Colors.panel,
@@ -1730,19 +1784,67 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     letterSpacing: 3,
     flexShrink: 1,
   },
-  headerActions: {
+  headerControls: {
+    position: 'absolute',
+    top: HEADER_CONTROL_TOP,
+    right: Spacing.lg,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    justifyContent: 'flex-end',
     alignItems: 'center',
-    marginLeft: 'auto',
-    paddingRight: 116,
-    flexShrink: 0,
+    justifyContent: 'flex-end',
+    gap: Spacing.sm,
+    zIndex: 40,
+  },
+  menuHost: {
+    position: 'relative',
+    alignItems: 'flex-end',
+  },
+  menuButton: {
+    width: HEADER_CONTROL_SIZE,
+    height: HEADER_CONTROL_SIZE,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.panel,
+  },
+  menuButtonActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
+  },
+  menuPanel: {
+    position: 'absolute',
+    top: HEADER_CONTROL_SIZE + Spacing.xs,
+    right: 0,
+    width: 184,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    backgroundColor: Colors.panel,
+    paddingVertical: Spacing.xs,
+    shadowColor: Colors.black,
+    shadowOpacity: Colors.mode === 'dark' ? 0.35 : 0.14,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+    zIndex: 30,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    minHeight: 44,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  menuItemText: {
+    color: Colors.text,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   userChip: {
     minHeight: 36,
-    maxWidth: 132,
+    maxWidth: 118,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 999,
@@ -1753,12 +1855,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: Colors.surface,
-  },
-  userChipFloating: {
-    position: 'absolute',
-    right: Spacing.lg,
-    top: Spacing.sm,
-    zIndex: 2,
   },
   userChipActive: {
     borderColor: Colors.accent,
@@ -1778,13 +1874,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   userChipTextActive: {
     color: Colors.accent,
-  },
-  historyButton: {
-    padding: Spacing.sm,
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   progressBar: {
     flexDirection: "row",
