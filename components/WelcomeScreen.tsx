@@ -6,23 +6,21 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { formatReleaseDate, useLaunchUpdateCoordinator } from '../hooks/useLaunchUpdateCoordinator';
+import {
+  formatReleaseDate,
+  getInstalledBuildLabel,
+  installedAppVersion,
+  useLaunchUpdateCoordinator,
+} from '../hooks/useLaunchUpdateCoordinator';
 
 const staticAppConfig = require('../app.json') as {
   expo?: {
     version?: string;
-    android?: {
-      versionCode?: number;
-    };
-    ios?: {
-      buildNumber?: string;
-    };
     extra?: Record<string, unknown>;
   };
 };
@@ -66,14 +64,11 @@ const phases = [
 const expoConfig = Constants.expoConfig;
 const releaseExtra = (expoConfig?.extra || {}) as Record<string, unknown>;
 const staticReleaseExtra = staticAppConfig.expo?.extra || {};
-const appVersion = expoConfig?.version || staticAppConfig.expo?.version || 'dev';
 const releaseDate = typeof releaseExtra.releaseDate === 'string'
   ? releaseExtra.releaseDate
   : typeof staticReleaseExtra.releaseDate === 'string'
     ? staticReleaseExtra.releaseDate
     : undefined;
-const androidVersionCode = expoConfig?.android?.versionCode || staticAppConfig.expo?.android?.versionCode;
-const iosBuildNumber = expoConfig?.ios?.buildNumber || staticAppConfig.expo?.ios?.buildNumber;
 
 export default function WelcomeScreen({
   onStart,
@@ -96,13 +91,9 @@ export default function WelcomeScreen({
   const styles = createStyles(Colors);
   const hasMenuActions = Boolean(onHistory || onSettings || onTour);
   const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
-  const buildLabel = Platform.select({
-    android: androidVersionCode ? `Android ${androidVersionCode}` : undefined,
-    ios: iosBuildNumber ? `iOS ${iosBuildNumber}` : undefined,
-    default: undefined,
-  });
+  const buildLabel = getInstalledBuildLabel();
   const footerLabel = [
-    `Version ${appVersion}`,
+    `Version ${installedAppVersion}`,
     buildLabel,
     `Released ${formatReleaseDate(releaseDate)}`,
   ].filter(Boolean).join(' - ');

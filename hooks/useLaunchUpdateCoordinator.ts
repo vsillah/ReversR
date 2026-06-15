@@ -1,5 +1,6 @@
 import React from 'react';
 import { Linking, Platform } from 'react-native';
+import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 import * as Updates from 'expo-updates';
 
@@ -75,6 +76,34 @@ const configuredReleaseManifestUrl = typeof releaseExtra.releaseManifestUrl === 
 
 const TESTFLIGHT_URL = 'https://testflight.apple.com/join/twj2dNQY';
 const PLAY_INTERNAL_TEST_URL = 'https://play.google.com/apps/internaltest/4700334027214849380';
+
+export const installedAppVersion = Application.nativeApplicationVersion || appVersion;
+
+export const getInstalledNativeBuildNumber = () => {
+  if (Platform.OS === 'web') {
+    return undefined;
+  }
+
+  return Application.nativeBuildVersion || undefined;
+};
+
+export const getInstalledBuildLabel = () => {
+  const installedBuildNumber = getInstalledNativeBuildNumber();
+
+  if (Platform.OS === 'android') {
+    return installedBuildNumber || androidVersionCode
+      ? `Android ${installedBuildNumber || androidVersionCode}`
+      : undefined;
+  }
+
+  if (Platform.OS === 'ios') {
+    return installedBuildNumber || iosBuildNumber
+      ? `iOS ${installedBuildNumber || iosBuildNumber}`
+      : undefined;
+  }
+
+  return undefined;
+};
 
 export const getReleaseManifestUrl = () => {
   if (
@@ -164,7 +193,7 @@ export const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) =>
     }
 
     const latestAndroidBuild = parseBuildNumber(latestRelease.androidVersionCode);
-    const currentAndroidBuild = parseBuildNumber(androidVersionCode);
+    const currentAndroidBuild = parseBuildNumber(getInstalledNativeBuildNumber() || androidVersionCode);
 
     if (latestAndroidBuild && currentAndroidBuild) {
       return latestAndroidBuild > currentAndroidBuild;
@@ -181,7 +210,7 @@ export const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) =>
     }
 
     const latestIosBuild = parseBuildNumber(latestRelease.iosBuildNumber);
-    const currentIosBuild = parseBuildNumber(iosBuildNumber);
+    const currentIosBuild = parseBuildNumber(getInstalledNativeBuildNumber() || iosBuildNumber);
 
     if (latestIosBuild && currentIosBuild) {
       return latestIosBuild > currentIosBuild;
@@ -192,7 +221,7 @@ export const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) =>
     return false;
   }
 
-  return compareVersions(latestRelease.version, appVersion);
+  return compareVersions(latestRelease.version, installedAppVersion);
 };
 
 const resolveNativeUpdateUrl = (latestRelease: ReleaseManifest | null) => {
