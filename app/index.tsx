@@ -152,13 +152,13 @@ const TOUR_STEPS: TourStep[] = [
     id: 'inventory',
     eyebrow: 'Phase 2',
     title: 'Match the scan to inventory',
-    body: 'Inventory shows the scan summary, the configured source, candidate matches, and the settings link used to change the source.',
+    body: 'Inventory opens on candidate matches first. Source details live behind the info control, and each match can expand to show the machine summary.',
     structureId: 'reversr-tour-inventory',
     phase: 2,
     checks: [
-      { id: 'summary', label: 'Open scan summary', completion: 'auto' },
-      { id: 'source', label: 'Load source details', completion: 'auto' },
       { id: 'candidate', label: 'Select a candidate match', completion: 'auto' },
+      { id: 'summary', label: 'Expand a match summary', completion: 'auto' },
+      { id: 'source', label: 'Open source details', completion: 'auto' },
     ],
   },
   {

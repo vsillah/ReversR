@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,11 +68,16 @@ export default function PhaseTwo({
   const [error, setError] = useState<string | null>(null);
   const [validation, setValidation] = useState<InventoryValidationResult | null>(null);
   const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
+  const [expandedMachineIds, setExpandedMachineIds] = useState<Set<string>>(new Set());
+  const [sourceHelpPinned, setSourceHelpPinned] = useState(false);
+  const [sourceHelpHovered, setSourceHelpHovered] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('connect');
 
   const candidates = useMemo(() => validation?.matchCandidates || [], [validation]);
   const selectedCandidate = candidates.find(candidate => candidate.machineId === selectedMachineId) || null;
+  const noQualifyingMatches = !isValidating && validation?.status === 'ok' && candidates.length === 0;
+  const showSourceHelp = noQualifyingMatches || sourceHelpPinned || sourceHelpHovered;
 
   useEffect(() => {
     if (mockMode && mockValidation) {
@@ -83,6 +89,7 @@ export default function PhaseTwo({
       });
       setValidation(mockValidation);
       setSelectedMachineId(mockValidation.matchCandidates?.[0]?.machineId || null);
+      setExpandedMachineIds(new Set());
       setIsValidating(false);
       setError(null);
       return;
@@ -97,6 +104,7 @@ export default function PhaseTwo({
         const result = await validateInventoryConnector(nextConnector, analysis);
         setValidation(result);
         setSelectedMachineId(result.matchCandidates?.[0]?.machineId || null);
+        setExpandedMachineIds(new Set());
       } catch (e: any) {
         console.error('Inventory validation failed:', e);
         setValidation(null);
@@ -126,6 +134,7 @@ export default function PhaseTwo({
     if (mockMode && mockValidation) {
       setValidation(mockValidation);
       setSelectedMachineId(mockValidation.matchCandidates?.[0]?.machineId || null);
+      setExpandedMachineIds(new Set());
       setError(null);
       return;
     }
@@ -139,6 +148,7 @@ export default function PhaseTwo({
       const result = await validateInventoryConnector(nextConnector, analysis);
       setValidation(result);
       setSelectedMachineId(result.matchCandidates?.[0]?.machineId || null);
+      setExpandedMachineIds(new Set());
     } catch (e: any) {
       console.error('Inventory validation failed:', e);
       setValidation(null);
@@ -176,36 +186,93 @@ export default function PhaseTwo({
     }
   };
 
+  const toggleCandidateSummary = (machineId: string) => {
+    setExpandedMachineIds(prev => {
+      const next = new Set(prev);
+
+      if (next.has(machineId)) {
+        next.delete(machineId);
+      } else {
+        next.add(machineId);
+      }
+
+      return next;
+    });
+  };
+
   const renderCandidate = (candidate: MatchCandidate) => {
     const isSelected = candidate.machineId === selectedMachineId;
+    const isExpanded = expandedMachineIds.has(candidate.machineId);
+
     return (
-      <TouchableOpacity
+      <View
         key={candidate.machineId}
         style={[styles.candidateCard, isSelected && styles.candidateCardSelected]}
-        onPress={() => setSelectedMachineId(candidate.machineId)}
-        accessibilityRole="button"
-        accessibilityLabel={`Select ${candidate.machineName} at ${candidate.matchPercent} percent match`}
-        accessibilityState={{ selected: isSelected }}
       >
-        <View style={styles.candidateHeader}>
-          <View style={styles.candidateNameBlock}>
-            <Text style={styles.candidateName}>{candidate.machineName}</Text>
-            <Text style={styles.candidateMeta}>
-              {candidate.machineId}{candidate.revision ? ` | Rev ${candidate.revision}` : ''} | {candidate.partCount} parts
-            </Text>
+        <TouchableOpacity
+          style={styles.candidateSelectArea}
+          onPress={() => setSelectedMachineId(candidate.machineId)}
+          accessibilityRole="button"
+          accessibilityLabel={`Select ${candidate.machineName} at ${candidate.matchPercent} percent match`}
+          accessibilityState={{ selected: isSelected }}
+        >
+          <View style={styles.candidateHeader}>
+            <View style={styles.candidateNameBlock}>
+              <Text style={styles.candidateName}>{candidate.machineName}</Text>
+              <Text style={styles.candidateMeta}>
+                {candidate.machineId}{candidate.revision ? ` | Rev ${candidate.revision}` : ''} | {candidate.partCount} parts
+              </Text>
+            </View>
+            <View style={[styles.percentBadge, isSelected && styles.percentBadgeSelected]}>
+              <Text style={styles.percentBadgeText}>{percentLabel(candidate.matchPercent)}</Text>
+            </View>
           </View>
-          <View style={[styles.percentBadge, isSelected && styles.percentBadgeSelected]}>
-            <Text style={styles.percentBadgeText}>{percentLabel(candidate.matchPercent)}</Text>
-          </View>
-        </View>
+        </TouchableOpacity>
+
         <Text style={styles.candidateEvidence}>{candidate.evidence}</Text>
-        {isSelected && (
-          <View style={styles.selectedRow}>
-            <Ionicons name="checkmark-circle" size={16} color={Colors.accent} />
-            <Text style={styles.selectedText}>Selected for reconstruction</Text>
+
+        <View style={styles.candidateActionRow}>
+          <TouchableOpacity
+            style={styles.summaryToggle}
+            onPress={() => toggleCandidateSummary(candidate.machineId)}
+            accessibilityRole="button"
+            accessibilityLabel={`${isExpanded ? 'Hide' : 'Show'} ${candidate.machineName} machine summary`}
+            accessibilityState={{ expanded: isExpanded }}
+          >
+            <Ionicons
+              name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'}
+              size={16}
+              color={Colors.accent}
+            />
+            <Text style={styles.summaryToggleText}>
+              {isExpanded ? 'Hide machine summary' : 'Show machine summary'}
+            </Text>
+          </TouchableOpacity>
+
+          {isSelected && (
+            <View style={styles.selectedRow}>
+              <Ionicons name="checkmark-circle" size={16} color={Colors.accent} />
+              <Text style={styles.selectedText}>Selected</Text>
+            </View>
+          )}
+        </View>
+
+        {isExpanded && (
+          <View style={styles.machineSummaryPanel}>
+            <Text style={styles.machineSummaryTitle}>{analysis.productName}</Text>
+            <Text style={styles.machineSummaryText}>{analysis.rawAnalysis}</Text>
+
+            <View style={styles.componentsGrid}>
+              {analysis.components.map((component, index) => (
+                <View key={`${candidate.machineId}-${component.name}-${index}`} style={styles.componentChip}>
+                  <Text style={styles.componentName}>{component.name}</Text>
+                  {component.isEssential && <Text style={styles.componentMeta}>core</Text>}
+                </View>
+              ))}
+            </View>
           </View>
         )}
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -225,7 +292,20 @@ export default function PhaseTwo({
 
       <View style={styles.panel}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Inventory Match</Text>
+          <View style={styles.sectionTitleRow}>
+            <Text style={styles.sectionTitle}>Inventory Match</Text>
+            <Pressable
+              style={[styles.helpButton, (showSourceHelp || sourceHelpPinned) && styles.helpButtonActive]}
+              onHoverIn={() => setSourceHelpHovered(true)}
+              onHoverOut={() => setSourceHelpHovered(false)}
+              onPress={() => setSourceHelpPinned(prev => !prev)}
+              accessibilityRole="button"
+              accessibilityLabel="Show inventory source details"
+              accessibilityState={{ expanded: showSourceHelp }}
+            >
+              <Ionicons name="information-circle-outline" size={17} color={Colors.accent} />
+            </Pressable>
+          </View>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={handleRecheck}
@@ -237,34 +317,30 @@ export default function PhaseTwo({
           </TouchableOpacity>
         </View>
 
-        <View style={styles.sourceNotice}>
-          <Ionicons name="information-circle-outline" size={17} color={Colors.gray[400]} />
-          <Text style={styles.sourceNoticeText}>
-            Using {connector.sourceName}. To change the preconfigured inventory source, open the gear settings at the top.
-          </Text>
-          <TouchableOpacity
-            style={styles.settingsLink}
-            onPress={onOpenSettings}
-            accessibilityRole="button"
-            accessibilityLabel="Open settings to change inventory source"
-          >
-            <Ionicons name="settings-outline" size={15} color={Colors.accent} />
-            <Text style={styles.settingsLinkText}>Settings</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.sourceSummary}>
-          <View style={styles.inventorySummaryIcon}>
-            <Ionicons name="cube-outline" size={18} color={Colors.accent} />
-          </View>
-          <View style={styles.sourceSummaryText}>
-            <Text style={styles.sourceName}>{connector.sourceName}</Text>
-            <Text style={styles.sourceMeta}>
+        {showSourceHelp && (
+          <View style={styles.sourceTooltip}>
+            <View style={styles.sourceTooltipHeader}>
+              <Ionicons name="cube-outline" size={16} color={Colors.accent} />
+              <Text style={styles.sourceTooltipTitle}>{connector.sourceName}</Text>
+            </View>
+            <Text style={styles.sourceTooltipText}>
+              Matching is using this preconfigured inventory source. Change it only from gear settings when the source or connector is wrong.
+            </Text>
+            <Text style={styles.sourceTooltipMeta}>
               {getConnectorTypeLabel(connector.connectorType)} | {getAuthModeLabel(connector.authMode)}
               {validation?.recordCount ? ` | ${validation.recordCount} records checked` : ''}
             </Text>
+            <TouchableOpacity
+              style={styles.settingsLink}
+              onPress={onOpenSettings}
+              accessibilityRole="button"
+              accessibilityLabel="Open settings to change inventory source"
+            >
+              <Ionicons name="settings-outline" size={15} color={Colors.accent} />
+              <Text style={styles.settingsLinkText}>Open inventory settings</Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        )}
 
         {isValidating && (
           <View style={styles.statePanel}>
@@ -322,28 +398,6 @@ export default function PhaseTwo({
             </View>
           </TouchableOpacity>
         )}
-      </View>
-
-      <View style={styles.panel}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Scan Summary</Text>
-          <View style={styles.matchBadge}>
-            <Ionicons name="search" size={14} color={Colors.accent} />
-            <Text style={styles.matchBadgeText}>Ready to match</Text>
-          </View>
-        </View>
-
-        <Text style={styles.machineName}>{analysis.productName}</Text>
-        <Text style={styles.summaryText}>{analysis.rawAnalysis}</Text>
-
-        <View style={styles.componentsGrid}>
-          {analysis.components.map((component, index) => (
-            <View key={`${component.name}-${index}`} style={styles.componentChip}>
-              <Text style={styles.componentName}>{component.name}</Text>
-              {component.isEssential && <Text style={styles.componentMeta}>core</Text>}
-            </View>
-          ))}
-        </View>
       </View>
 
       <LoadingOverlay
@@ -405,6 +459,26 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.white,
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    flex: 1,
+  },
+  helpButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+  },
+  helpButtonActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
+  },
   iconButton: {
     width: 34,
     height: 34,
@@ -414,33 +488,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.gray[700],
   },
-  matchBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    borderWidth: 1,
-    borderColor: Colors.accent,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-  },
-  matchBadgeText: {
-    color: Colors.accent,
-    fontSize: FontSizes.xs,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  machineName: {
-    color: Colors.white,
-    fontSize: FontSizes.xl,
-    fontWeight: 'bold',
-    marginBottom: Spacing.sm,
-  },
-  summaryText: {
-    color: Colors.gray[400],
-    lineHeight: 20,
-    marginBottom: Spacing.md,
-  },
   componentsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -448,14 +495,14 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   componentChip: {
     borderWidth: 1,
-    borderColor: Colors.gray[700],
+    borderColor: Colors.border,
     borderRadius: 8,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    backgroundColor: Colors.gray[900],
+    backgroundColor: Colors.surface,
   },
   componentName: {
-    color: Colors.gray[300],
+    color: Colors.text,
     fontSize: FontSizes.sm,
     fontWeight: '600',
   },
@@ -465,19 +512,35 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginTop: 2,
     textTransform: 'uppercase',
   },
-  sourceNotice: {
+  sourceTooltip: {
     borderWidth: 1,
-    borderColor: Colors.gray[800],
+    borderColor: Colors.accent,
     borderRadius: 8,
-    padding: Spacing.sm,
-    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.10)' : '#ecfdf5',
     gap: Spacing.xs,
     marginBottom: Spacing.md,
   },
-  sourceNoticeText: {
-    color: Colors.gray[400],
+  sourceTooltipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  sourceTooltipTitle: {
+    color: Colors.text,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  sourceTooltipText: {
+    color: Colors.mutedText,
     fontSize: FontSizes.xs,
     lineHeight: 17,
+  },
+  sourceTooltipMeta: {
+    color: Colors.dim,
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
   },
   settingsLink: {
     flexDirection: 'row',
@@ -490,39 +553,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.accent,
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
-  },
-  sourceSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  inventorySummaryIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderWidth: 1,
-    borderColor: Colors.accent,
-  },
-  sourceSummaryText: {
-    flex: 1,
-  },
-  sourceName: {
-    color: Colors.white,
-    fontSize: FontSizes.sm,
-    fontWeight: 'bold',
-  },
-  sourceMeta: {
-    color: Colors.gray[500],
-    fontSize: FontSizes.xs,
-    marginTop: 2,
   },
   statePanel: {
     flexDirection: 'row',
@@ -550,12 +580,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
-    padding: Spacing.md,
     backgroundColor: Colors.surface,
+    overflow: 'hidden',
   },
   candidateCardSelected: {
     borderColor: Colors.accent,
     backgroundColor: 'rgba(16, 185, 129, 0.08)',
+  },
+  candidateSelectArea: {
+    padding: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   candidateHeader: {
     flexDirection: 'row',
@@ -596,19 +630,56 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.gray[400],
     fontSize: FontSizes.xs,
     lineHeight: 17,
-    marginTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  candidateActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    paddingTop: Spacing.sm,
+  },
+  summaryToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    minHeight: 32,
+  },
+  summaryToggleText: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
   },
   selectedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    marginTop: Spacing.sm,
   },
   selectedText: {
     color: Colors.accent,
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+  },
+  machineSummaryPanel: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    padding: Spacing.md,
+    backgroundColor: Colors.panel,
+  },
+  machineSummaryTitle: {
+    color: Colors.text,
+    fontSize: FontSizes.md,
+    fontWeight: 'bold',
+    marginBottom: Spacing.xs,
+  },
+  machineSummaryText: {
+    color: Colors.mutedText,
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+    marginBottom: Spacing.md,
   },
   noMatchPanel: {
     borderWidth: 1,
