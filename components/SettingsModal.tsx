@@ -149,7 +149,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [accessPassword, setAccessPassword] = useState('');
   const [newAccessPassword, setNewAccessPassword] = useState('');
   const [testerInviteCode, setTesterInviteCode] = useState('');
-  const [accessMethod, setAccessMethod] = useState<'invite' | 'password'>('invite');
   const [passwordResetOpen, setPasswordResetOpen] = useState(false);
   const [accessStatus, setAccessStatus] = useState<string | null>(null);
   const [emailTouched, setEmailTouched] = useState(false);
@@ -240,7 +239,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   useEffect(() => {
     if (account?.access?.requiresPasswordReset) {
-      setAccessMethod('password');
       setPasswordResetOpen(true);
     }
   }, [account?.access?.requiresPasswordReset]);
@@ -506,7 +504,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       setAccessPassword('');
       setNewAccessPassword('');
       setPasswordResetOpen(false);
-      setAccessMethod('invite');
       setAccessStatus('Access password cleared. This profile is now showing the normal guest/free experience.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to clear access password.');
@@ -556,7 +553,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
         setAccessStatus('An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
         return;
       }
-      setAccessMethod('invite');
       setTesterInviteCode(activationCode);
       setAccessStatus('Admin code found and filled. Tap Redeem Admin Code to activate this device.');
     } catch (e: any) {
@@ -867,6 +863,90 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     ) : null
   );
 
+  const hasActivationContext = Boolean(account?.access || testerInviteCode.trim());
+  const renderTesterActivationPanel = () => hasActivationContext ? (
+    <View style={styles.accessPanel}>
+      <View style={styles.policyHeader}>
+        <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
+        <Text style={styles.policyTitle}>Tester Activation</Text>
+        {renderInfoButton('invite', 'Show invite code details')}
+      </View>
+      {renderTooltip('invite', 'A ReversR admin must create an invite for your work email first. Enter that email, tap Find Admin Code, then redeem the code on this device.')}
+      <View style={styles.activationStepRow}>
+        <View style={styles.activationStep}>
+          <Ionicons
+            name={commercialEmailIsValid ? 'checkmark-circle-outline' : 'ellipse-outline'}
+            size={14}
+            color={commercialEmailIsValid ? Colors.success : Colors.gray[500]}
+          />
+          <Text style={styles.activationStepText}>Email</Text>
+        </View>
+        <View style={styles.activationStep}>
+          <Ionicons
+            name={testerInviteCode.trim() ? 'checkmark-circle-outline' : 'ellipse-outline'}
+            size={14}
+            color={testerInviteCode.trim() ? Colors.success : Colors.gray[500]}
+          />
+          <Text style={styles.activationStepText}>Admin code</Text>
+        </View>
+        <View style={styles.activationStep}>
+          <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.accent} />
+          <Text style={styles.activationStepText}>Redeem</Text>
+        </View>
+      </View>
+      {account?.access?.role === 'super_admin' && (
+        <Text style={styles.adminStatusText}>Super admin access is active on this device.</Text>
+      )}
+      {account?.access?.role === 'tester' && (
+        <Text style={styles.adminStatusText}>Tester access is active on this device.</Text>
+      )}
+      {account?.access?.requiresPasswordReset && (
+        <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
+      )}
+
+      <View style={styles.labelWithInfo}>
+        <Text style={styles.compactLabel}>Admin-issued invite code</Text>
+        {renderInfoButton('invite', 'Show invite code details')}
+      </View>
+      <TextInput
+        style={styles.input}
+        value={testerInviteCode}
+        onChangeText={setTesterInviteCode}
+        accessibilityLabel="Tester invite code"
+        placeholder="Find or paste admin code"
+        placeholderTextColor={Colors.gray[500]}
+        autoCapitalize="none"
+      />
+
+      <View style={styles.adminActionRow}>
+        <TouchableOpacity
+          style={[styles.adminButton, styles.grantButton, accountLoading && styles.disabledButton]}
+          onPress={handleLookupTesterInvite}
+          disabled={accountLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Find tester admin code for this email"
+        >
+          <Ionicons name="search-outline" size={16} color={Colors.accent} />
+          <Text style={styles.adminButtonText}>Find Admin Code</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
+          onPress={handleRedeemTesterInvite}
+          disabled={accountLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Redeem tester invite code"
+        >
+          <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+          <Text style={styles.saveCredentialButtonText}>Redeem Admin Code</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.clientIdRow}>
+        <Text style={styles.clientIdText}>Device client ID: {account?.profile.id || 'loading'}</Text>
+      </View>
+    </View>
+  ) : null;
+
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -973,6 +1053,41 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   placeholderTextColor={Colors.gray[500]}
                 />
 
+                <View style={styles.labelWithInfo}>
+                  <Text style={styles.compactLabel}>Work email</Text>
+                  {renderInfoButton('email', 'Show work email details')}
+                </View>
+                {renderTooltip('email', 'Use the same email that a ReversR admin used when creating the tester invite. The app validates the format before saving or redeeming a code.')}
+                <TextInput
+                  style={[styles.input, showEmailError && styles.inputError]}
+                  value={commercialProfile.email}
+                  onChangeText={(email) => setCommercialProfile(prev => ({ ...prev, email }))}
+                  onBlur={() => setEmailTouched(true)}
+                  accessibilityLabel="Profile work email"
+                  placeholder="owner@example.com"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+                {commercialProfile.email.length > 0 && (
+                  <Text style={showEmailError ? styles.validationErrorText : styles.validationSuccessText}>
+                    {showEmailError ? 'Enter a valid email address.' : 'Email format looks valid.'}
+                  </Text>
+                )}
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleLookupTesterInvite}
+                    disabled={accountLoading || !commercialEmailIsValid}
+                    accessibilityRole="button"
+                    accessibilityLabel="Check work email for tester or admin activation"
+                  >
+                    <Ionicons name="search-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Check Access</Text>
+                  </TouchableOpacity>
+                </View>
+
                 <Text style={styles.compactLabel}>Password</Text>
                 <TextInput
                   style={styles.input}
@@ -1020,6 +1135,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     </TouchableOpacity>
                   )}
                 </View>
+
+                {renderTesterActivationPanel()}
 
                 {(passwordResetOpen || account?.access?.requiresPasswordReset) && (
                   <>
@@ -1176,222 +1293,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     </View>
                   );
                 })}
-              </View>
-
-              <View style={styles.labelWithInfo}>
-                <Text style={styles.compactLabel}>Work email</Text>
-                {renderInfoButton('email', 'Show work email details')}
-              </View>
-              {renderTooltip('email', 'Use the same email that a ReversR admin used when creating the tester invite. The app validates the format before saving or redeeming a code.')}
-              <TextInput
-                style={[styles.input, showEmailError && styles.inputError]}
-                value={commercialProfile.email}
-                onChangeText={(email) => setCommercialProfile(prev => ({ ...prev, email }))}
-                onBlur={() => setEmailTouched(true)}
-                accessibilityLabel="Commercial profile email"
-                placeholder="owner@example.com"
-                placeholderTextColor={Colors.gray[500]}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-              {commercialProfile.email.length > 0 && (
-                <Text style={showEmailError ? styles.validationErrorText : styles.validationSuccessText}>
-                  {showEmailError ? 'Enter a valid email address.' : 'Email format looks valid.'}
-                </Text>
-              )}
-
-              <View style={styles.accessPanel}>
-                <View style={styles.policyHeader}>
-                  <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Tester Activation</Text>
-                  {renderInfoButton('invite', 'Show invite code details')}
-                </View>
-                {renderTooltip('invite', 'A ReversR admin must create an invite for your work email first. Enter that email, tap Find Admin Code, then redeem the code on this device.')}
-                <View style={styles.activationStepRow}>
-                  <View style={styles.activationStep}>
-                    <Ionicons
-                      name={commercialEmailIsValid ? 'checkmark-circle-outline' : 'ellipse-outline'}
-                      size={14}
-                      color={commercialEmailIsValid ? Colors.success : Colors.gray[500]}
-                    />
-                    <Text style={styles.activationStepText}>Email</Text>
-                  </View>
-                  <View style={styles.activationStep}>
-                    <Ionicons
-                      name={testerInviteCode.trim() ? 'checkmark-circle-outline' : 'ellipse-outline'}
-                      size={14}
-                      color={testerInviteCode.trim() ? Colors.success : Colors.gray[500]}
-                    />
-                    <Text style={styles.activationStepText}>Admin code</Text>
-                  </View>
-                  <View style={styles.activationStep}>
-                    <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.accent} />
-                    <Text style={styles.activationStepText}>Redeem</Text>
-                  </View>
-                </View>
-                {account?.access?.role === 'super_admin' && (
-                  <Text style={styles.adminStatusText}>Super admin access is active on this device.</Text>
-                )}
-                {account?.access?.requiresPasswordReset && (
-                  <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
-                )}
-
-                <View style={styles.accessMethodRow}>
-                  {(['invite', 'password'] as const).map(method => (
-                    <TouchableOpacity
-                      key={method}
-                      style={[styles.accessMethodButton, accessMethod === method && styles.accessMethodButtonActive]}
-                      onPress={() => {
-                        setAccessMethod(method);
-                        setPasswordResetOpen(method === 'password' && Boolean(account?.access?.requiresPasswordReset));
-                        setAccessStatus(method === 'invite'
-                          ? 'Admin invite code selected. Enter a valid work email, find the admin code, then redeem it.'
-                          : 'Starter password selected. Use this only if a ReversR admin gave you a starter password.');
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={method === 'invite' ? 'Use tester invite code' : 'Use starter password'}
-                      accessibilityState={{ selected: accessMethod === method }}
-                    >
-                      <Ionicons
-                        name={method === 'invite' ? 'ticket-outline' : 'key-outline'}
-                        size={15}
-                        color={accessMethod === method ? Colors.black : Colors.gray[400]}
-                      />
-                      <Text style={[styles.accessMethodText, accessMethod === method && styles.accessMethodTextActive]}>
-                        {method === 'invite' ? 'Admin Code' : 'Starter Password'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {accessMethod === 'invite' ? (
-                  <>
-                    <View style={styles.labelWithInfo}>
-                      <Text style={styles.compactLabel}>Admin-issued invite code</Text>
-                      {renderInfoButton('invite', 'Show invite code details')}
-                    </View>
-                    <TextInput
-                      style={styles.input}
-                      value={testerInviteCode}
-                      onChangeText={setTesterInviteCode}
-                      accessibilityLabel="Tester invite code"
-                      placeholder="Find or paste admin code"
-                      placeholderTextColor={Colors.gray[500]}
-                      autoCapitalize="none"
-                    />
-
-                    <View style={styles.adminActionRow}>
-                      <TouchableOpacity
-                        style={[styles.adminButton, styles.grantButton, accountLoading && styles.disabledButton]}
-                        onPress={handleLookupTesterInvite}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Find tester admin code for this email"
-                      >
-                        <Ionicons name="search-outline" size={16} color={Colors.accent} />
-                        <Text style={styles.adminButtonText}>Find Admin Code</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
-                        onPress={handleRedeemTesterInvite}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Redeem tester invite code"
-                      >
-                        <Ionicons name="ticket-outline" size={17} color={Colors.black} />
-                        <Text style={styles.saveCredentialButtonText}>Redeem Admin Code</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    <View style={styles.labelWithInfo}>
-                      <Text style={styles.compactLabel}>Current or starter password</Text>
-                      {renderInfoButton('password', 'Show starter password details')}
-                    </View>
-                    {renderTooltip('password', 'Starter passwords are for legacy tester or super-admin grants. If you have a normal tester invite, use Admin Code instead.')}
-                    <TextInput
-                      style={styles.input}
-                      value={accessPassword}
-                      onChangeText={setAccessPassword}
-                      accessibilityLabel="Commercial access password"
-                      placeholder="Access password"
-                      placeholderTextColor={Colors.gray[500]}
-                      autoCapitalize="none"
-                      secureTextEntry
-                    />
-
-                    <View style={styles.adminActionRow}>
-                      <TouchableOpacity
-                        style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                        onPress={handleActivateAccessPassword}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Activate commercial access password"
-                      >
-                        <Ionicons name="key-outline" size={16} color={Colors.accent} />
-                        <Text style={styles.adminButtonText}>Activate</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                        onPress={() => setPasswordResetOpen(prev => !prev)}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Show password reset fields"
-                        accessibilityState={{ expanded: passwordResetOpen }}
-                      >
-                        <Ionicons name={passwordResetOpen ? 'chevron-up-outline' : 'refresh-outline'} size={16} color={Colors.accent} />
-                        <Text style={styles.adminButtonText}>Reset</Text>
-                      </TouchableOpacity>
-                      {account?.access && (
-                        <TouchableOpacity
-                          style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                          onPress={handleClearAccessPassword}
-                          disabled={accountLoading}
-                          accessibilityRole="button"
-                          accessibilityLabel="Clear commercial access password"
-                        >
-                          <Ionicons name="person-outline" size={16} color={Colors.accent} />
-                          <Text style={styles.adminButtonText}>Guest</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-
-                    {passwordResetOpen && (
-                      <>
-                        <Text style={styles.compactLabel}>New password</Text>
-                        <TextInput
-                          style={styles.input}
-                          value={newAccessPassword}
-                          onChangeText={setNewAccessPassword}
-                          accessibilityLabel="New commercial access password"
-                          placeholder="Set your replacement password"
-                          placeholderTextColor={Colors.gray[500]}
-                          autoCapitalize="none"
-                          secureTextEntry
-                        />
-                        <View style={styles.adminActionRow}>
-                          <TouchableOpacity
-                            style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
-                            onPress={handleResetAccessPassword}
-                            disabled={accountLoading}
-                            accessibilityRole="button"
-                            accessibilityLabel="Confirm commercial access password reset"
-                          >
-                            <Ionicons name="checkmark-circle-outline" size={17} color={Colors.black} />
-                            <Text style={styles.saveCredentialButtonText}>Save New Password</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </>
-                    )}
-                  </>
-                )}
-
-                <View style={styles.clientIdRow}>
-                  <Text style={styles.clientIdText}>Device client ID: {account?.profile.id || 'loading'}</Text>
-                </View>
-
-                {accessStatus && <Text style={styles.adminStatusText}>{accessStatus}</Text>}
               </View>
 
               <View style={styles.commercialActionRow}>
@@ -2676,38 +2577,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginTop: 10,
     marginBottom: 14,
     backgroundColor: Colors.mode === 'dark' ? Colors.gray[900] : Colors.panel,
-  },
-  accessMethodRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  accessMethodButton: {
-    flex: 1,
-    minHeight: 40,
-    borderWidth: 1,
-    borderColor: Colors.gray[700],
-    borderRadius: 8,
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    backgroundColor: Colors.input,
-  },
-  accessMethodButtonActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accent,
-  },
-  accessMethodText: {
-    color: Colors.gray[400],
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  accessMethodTextActive: {
-    color: Colors.black,
   },
   clientIdRow: {
     borderTopWidth: 1,
