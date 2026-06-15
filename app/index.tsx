@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import AlertModal from "../components/AlertModal";
@@ -495,6 +496,7 @@ const createMockTourContext = (fixture?: MockTourFixture | null): MutationContex
 export default function HomeScreen() {
   const { colors: Colors } = useAppTheme();
   const { account, profile } = useCommercialization();
+  const safeAreaInsets = useSafeAreaInsets();
   const styles = createStyles(Colors);
   const [started, setStarted] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -1345,6 +1347,7 @@ export default function HomeScreen() {
       onExit={closeTour}
     />
   );
+  const contentBottomPadding = safeAreaInsets.bottom + Spacing.xxl;
 
   if (!started) {
     return (
@@ -1508,7 +1511,10 @@ export default function HomeScreen() {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={tourActive ? styles.contentWithTour : undefined}
+        contentContainerStyle={[
+          { paddingBottom: contentBottomPadding },
+          tourActive && styles.contentWithTour,
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {context.phase === 1 && (
