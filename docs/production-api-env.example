@@ -34,3 +34,13 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 STRIPE_PRICE_PRO_SHOP=
 STRIPE_PRICE_TEAM=
+
+# Google Play Billing verification for Android in-app subscription upgrades.
+# Product IDs must match the active Google Play Console subscription products.
+GOOGLE_PLAY_PACKAGE_NAME=com.vsillah.reversrrebuild
+GOOGLE_PLAY_PRODUCT_PRO_SHOP=reversr_pro_shop_monthly
+GOOGLE_PLAY_PRODUCT_TEAM=reversr_team_monthly
+GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=
+# Alternative to GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:
+GOOGLE_PLAY_SERVICE_ACCOUNT_EMAIL=
+GOOGLE_PLAY_SERVICE_ACCOUNT_PRIVATE_KEY=

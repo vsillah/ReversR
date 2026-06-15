@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -16,6 +16,7 @@ import {
   loadCommercialCreditConfig,
   listCommercialAccessGrants,
   listCommercialTesterInvites,
+  lookupCommercialTesterInvite,
   revokeCommercialAccessGrant,
   revokeCommercialTesterInvite,
   saveCommercialAccessGrant,
@@ -47,8 +48,24 @@ import {
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
 
-export type SettingsSection = 'account' | 'inventory' | 'admin' | 'legal';
-type SettingsTooltip = 'billing' | 'email' | 'invite' | 'password' | null;
+export type SettingsSection = 'profile' | 'account' | 'ai' | 'inventory' | 'admin' | 'legal';
+type SettingsTooltip =
+  | 'profileImage'
+  | 'billing'
+  | 'email'
+  | 'invite'
+  | 'password'
+  | 'aiOverview'
+  | 'aiWorkflow'
+  | 'aiProvider'
+  | 'aiStatus'
+  | 'aiLocalModel'
+  | 'connectorAdmin'
+  | 'adminToken'
+  | 'creditRules'
+  | 'credentialReference'
+  | 'credentialAuth'
+  | null;
 
 interface SettingsModalProps {
   visible: boolean;
@@ -91,16 +108,20 @@ const normalizeEmail = (value = '') => value.trim().toLowerCase();
 const isValidEmail = (value = '') => EMAIL_PATTERN.test(normalizeEmail(value));
 
 export default function SettingsModal({ visible, onClose, initialSection = 'account' }: SettingsModalProps) {
-  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
+  const { colors: Colors } = useAppTheme();
   const {
     account,
     profile,
     loading: accountLoading,
     error: accountError,
     isWebBillingAvailable,
+    isAndroidInAppBillingAvailable,
+    androidInAppBillingStatus,
+    androidInAppBillingMessage,
     refreshAccount,
     saveProfile,
     beginCheckout,
+    beginAndroidInAppUpgrade,
     openBillingPortal,
     activateAccessPassword,
     redeemTesterInvite,
@@ -132,7 +153,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [accessPassword, setAccessPassword] = useState('');
   const [newAccessPassword, setNewAccessPassword] = useState('');
   const [testerInviteCode, setTesterInviteCode] = useState('');
-  const [accessMethod, setAccessMethod] = useState<'invite' | 'password'>('invite');
   const [passwordResetOpen, setPasswordResetOpen] = useState(false);
   const [accessStatus, setAccessStatus] = useState<string | null>(null);
   const [emailTouched, setEmailTouched] = useState(false);
@@ -145,15 +165,13 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [creditPeriod, setCreditPeriod] = useState<'day' | 'week' | 'month'>('week');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePlatform, setInvitePlatform] = useState<TesterInvitePlatform>('both');
-  const [grantClientId, setGrantClientId] = useState('');
   const [grantEmail, setGrantEmail] = useState('');
-  const [grantProfileName, setGrantProfileName] = useState('');
-  const [grantShopName, setGrantShopName] = useState('');
   const [grantRole, setGrantRole] = useState<'tester' | 'super_admin'>('tester');
   const [grantStartingPassword, setGrantStartingPassword] = useState('');
   const [countdownNow, setCountdownNow] = useState(Date.now());
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('account');
   const [inventoryEditing, setInventoryEditing] = useState(false);
+  const profileImageInputRef = React.useRef<any>(null);
 
   const policyLinks = [
     {
@@ -172,6 +190,36 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       icon: 'help-circle-outline' as const,
     },
   ];
+
+  const triggerProfileImageUpload = () => {
+    if (Platform.OS === 'web') {
+      profileImageInputRef.current?.click?.();
+      return;
+    }
+    setCommercialStatus('Profile image upload is available in the web preview. Native image picker support can be added to a future tester build.');
+  };
+
+  const handleProfileImageSelected = (event: any) => {
+    const file = event?.target?.files?.[0];
+    if (!file) return;
+    if (!String(file.type || '').startsWith('image/')) {
+      setCommercialStatus('Select an image file for the profile photo.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageData = typeof reader.result === 'string' ? reader.result : '';
+      if (!imageData) {
+        setCommercialStatus('Unable to read that profile image.');
+        return;
+      }
+      setCommercialProfile(prev => ({ ...prev, avatarUri: imageData }));
+      setCommercialStatus('Profile image selected. Save Profile to keep it on this device.');
+    };
+    reader.onerror = () => setCommercialStatus('Unable to read that profile image.');
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
 
   useEffect(() => {
     if (visible) {
@@ -195,7 +243,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   useEffect(() => {
     if (account?.access?.requiresPasswordReset) {
-      setAccessMethod('password');
       setPasswordResetOpen(true);
     }
   }, [account?.access?.requiresPasswordReset]);
@@ -228,6 +275,13 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   const saveSettings = async () => {
     try {
+      if (settingsSection === 'profile') {
+        await saveProfile({
+          ...commercialProfile,
+          name: commercialProfile.name.trim() || 'Repair shop user',
+          avatarUri: commercialProfile.avatarUri || '',
+        });
+      }
       if (localProviderSettingsEnabled) {
         await AsyncStorage.setItem('ai_provider', provider);
         await AsyncStorage.setItem('ollama_model', ollamaModel);
@@ -337,7 +391,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const requireAdminToken = () => {
     const token = adminToken.trim();
     if (!token) {
-      setAdminStatus('Enter the API admin token to manage backend credentials and commercial access grants.');
+      setAdminStatus('Enter the API admin token in Inventory settings before managing backend credentials or admin rules.');
       return null;
     }
     return token;
@@ -370,7 +424,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     const token = requireAdminToken();
     if (!token) return;
 
-    const ref = credentialRef.trim();
+    const ref = (credentialRef.trim() || inventoryConnector.credentialRef?.trim() || '');
     const secretValue = credentialValue.trim();
     if (!ref || !secretValue) {
       setAdminStatus('Credential ref and secret value are required.');
@@ -454,7 +508,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       setAccessPassword('');
       setNewAccessPassword('');
       setPasswordResetOpen(false);
-      setAccessMethod('invite');
       setAccessStatus('Access password cleared. This profile is now showing the normal guest/free experience.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to clear access password.');
@@ -471,7 +524,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     }
     const cleanCode = testerInviteCode.trim();
     if (!cleanCode) {
-      setAccessStatus('Paste the admin-issued invite code, then tap Redeem Admin Code.');
+      setAccessStatus('Tap Find Admin Code or paste an admin-issued invite code, then tap Redeem Admin Code.');
       return;
     }
     try {
@@ -484,6 +537,30 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       setAccessStatus('Tester access activated on this device. No starter password is needed.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to redeem tester invite.');
+    }
+  };
+
+  const handleLookupTesterInvite = async () => {
+    setAccessStatus(null);
+    setEmailTouched(true);
+    const email = normalizeEmail(commercialProfile.email);
+    if (!isValidEmail(email)) {
+      setAccessStatus('Enter a valid work email before finding an admin code.');
+      return;
+    }
+
+    try {
+      await saveProfile({ ...commercialProfile, email });
+      const result = await lookupCommercialTesterInvite(email);
+      const activationCode = result.invite.activationCode?.trim();
+      if (!activationCode) {
+        setAccessStatus('An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
+        return;
+      }
+      setTesterInviteCode(activationCode);
+      setAccessStatus('Admin code found and filled. Tap Redeem Admin Code to activate this device.');
+    } catch (e: any) {
+      setAccessStatus(e?.message || 'Unable to find an admin code for this email.');
     }
   };
 
@@ -545,7 +622,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
         const others = prev.filter(item => !inviteIds.has(item.inviteId));
         return [...returnedInvites, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
       });
-      setAdminStatus(`Created tester invite for ${result.invite.email}. Copy this activation code now: ${result.invite.activationCode}`);
+      setAdminStatus(`Created tester invite for ${result.invite.email}. The tester can now enter that work email and tap Find Admin Code.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to create tester invite.');
     } finally {
@@ -578,6 +655,12 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     const token = requireAdminToken();
     if (!token) return;
 
+    const email = normalizeEmail(grantEmail);
+    if (!email || !isValidEmail(email)) {
+      setAdminStatus('Enter a valid grant email before creating a fallback password grant.');
+      return;
+    }
+
     if (!grantStartingPassword.trim()) {
       setAdminStatus('Starting password is required for a commercial access grant.');
       return;
@@ -587,10 +670,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     setAdminStatus(null);
     try {
       const result = await saveCommercialAccessGrant(token, {
-        clientId: grantClientId.trim(),
-        email: grantEmail.trim(),
-        profileName: grantProfileName.trim(),
-        shopName: grantShopName.trim(),
+        email,
         role: grantRole,
         startingPassword: grantStartingPassword.trim(),
       });
@@ -670,7 +750,28 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     if (Platform.OS === 'web' && account && !isCurrentPlan && plan.id !== 'free') {
       return handleCommercialAction(() => beginCheckout(plan.id), `Opened ${plan.label} checkout on web.`);
     }
+    if (Platform.OS === 'android' && account && !isCurrentPlan && plan.id !== 'free') {
+      return handleCommercialAction(
+        () => beginAndroidInAppUpgrade(plan.id),
+        `Opened Google Play checkout for ${plan.label}.`
+      );
+    }
     return handleCommercialAction(() => openWebUpgrade(plan.id), `Opened ${plan.label} plan page on web.`);
+  };
+
+  const planActionLabel = (plan: CommercialPlan, isCurrentPlan: boolean) => {
+    if (isCurrentPlan) return 'Manage on Web';
+    if (Platform.OS === 'android' && plan.id !== 'free') {
+      return isAndroidInAppBillingAvailable ? 'Upgrade in App' : 'Play Billing Setup';
+    }
+    if (Platform.OS === 'web' && plan.id !== 'free') return 'Start Checkout';
+    return 'Continue on Web';
+  };
+
+  const planActionIcon = (plan: CommercialPlan, isCurrentPlan: boolean): keyof typeof Ionicons.glyphMap => {
+    if (Platform.OS === 'android' && plan.id !== 'free' && !isCurrentPlan) return 'logo-google-playstore';
+    if (Platform.OS === 'web' && plan.id !== 'free' && !isCurrentPlan) return 'card-outline';
+    return 'open-outline';
   };
 
   const syncCreditConfigForm = (config: CommercialCreditConfig, planId: CommercialPlanId = creditPlanId) => {
@@ -745,13 +846,22 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const normalizedCommercialEmail = normalizeEmail(commercialProfile.email);
   const commercialEmailIsValid = isValidEmail(normalizedCommercialEmail);
   const showEmailError = emailTouched && !commercialEmailIsValid;
+  const isSuperAdmin = account?.access?.role === 'super_admin';
   const canUseAdminConsole = Boolean(adminCredentialSettingsEnabled || account?.entitlements.canUseAdminConsole || account?.access?.role === 'super_admin');
   const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
   const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
-    { id: 'account', label: 'Account', icon: 'person-circle-outline' },
+    { id: 'profile', label: 'Profile', icon: 'person-circle-outline' },
+    { id: 'account', label: 'Plan', icon: 'briefcase-outline' },
+    { id: 'ai', label: 'AI', icon: 'hardware-chip-outline' },
     { id: 'inventory', label: 'Inventory', icon: 'git-branch-outline' },
     ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
     { id: 'legal', label: 'Legal', icon: 'document-text-outline' },
+  ];
+  const aiWorkflowUses = [
+    { phase: '1', label: 'Scan', activity: 'Analyze', icon: 'search-outline' as const },
+    { phase: '2', label: 'Inventory', activity: 'Match', icon: 'git-branch-outline' as const },
+    { phase: '3', label: 'Design', activity: 'Generate', icon: 'create-outline' as const },
+    { phase: '4', label: 'Build', activity: 'Package', icon: 'hammer-outline' as const },
   ];
 
   const toggleTooltip = (tooltip: Exclude<SettingsTooltip, null>) => {
@@ -777,6 +887,90 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       </View>
     ) : null
   );
+
+  const hasActivationContext = Boolean(account?.access || testerInviteCode.trim());
+  const renderTesterActivationPanel = () => hasActivationContext ? (
+    <View style={styles.accessPanel}>
+      <View style={styles.policyHeader}>
+        <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
+        <Text style={styles.policyTitle}>Tester Activation</Text>
+        {renderInfoButton('invite', 'Show invite code details')}
+      </View>
+      {renderTooltip('invite', 'A ReversR admin must create an invite for your work email first. Enter that email, tap Find Admin Code, then redeem the code on this device.')}
+      <View style={styles.activationStepRow}>
+        <View style={styles.activationStep}>
+          <Ionicons
+            name={commercialEmailIsValid ? 'checkmark-circle-outline' : 'ellipse-outline'}
+            size={14}
+            color={commercialEmailIsValid ? Colors.success : Colors.gray[500]}
+          />
+          <Text style={styles.activationStepText}>Email</Text>
+        </View>
+        <View style={styles.activationStep}>
+          <Ionicons
+            name={testerInviteCode.trim() ? 'checkmark-circle-outline' : 'ellipse-outline'}
+            size={14}
+            color={testerInviteCode.trim() ? Colors.success : Colors.gray[500]}
+          />
+          <Text style={styles.activationStepText}>Admin code</Text>
+        </View>
+        <View style={styles.activationStep}>
+          <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.accent} />
+          <Text style={styles.activationStepText}>Redeem</Text>
+        </View>
+      </View>
+      {account?.access?.role === 'super_admin' && (
+        <Text style={styles.adminStatusText}>Super admin access is active on this device.</Text>
+      )}
+      {account?.access?.role === 'tester' && (
+        <Text style={styles.adminStatusText}>Tester access is active on this device.</Text>
+      )}
+      {account?.access?.requiresPasswordReset && (
+        <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
+      )}
+
+      <View style={styles.labelWithInfo}>
+        <Text style={styles.compactLabel}>Admin-issued invite code</Text>
+        {renderInfoButton('invite', 'Show invite code details')}
+      </View>
+      <TextInput
+        style={styles.input}
+        value={testerInviteCode}
+        onChangeText={setTesterInviteCode}
+        accessibilityLabel="Tester invite code"
+        placeholder="Find or paste admin code"
+        placeholderTextColor={Colors.gray[500]}
+        autoCapitalize="none"
+      />
+
+      <View style={styles.adminActionRow}>
+        <TouchableOpacity
+          style={[styles.adminButton, styles.grantButton, accountLoading && styles.disabledButton]}
+          onPress={handleLookupTesterInvite}
+          disabled={accountLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Find tester admin code for this email"
+        >
+          <Ionicons name="search-outline" size={16} color={Colors.accent} />
+          <Text style={styles.adminButtonText}>Find Admin Code</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
+          onPress={handleRedeemTesterInvite}
+          disabled={accountLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Redeem tester invite code"
+        >
+          <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+          <Text style={styles.saveCredentialButtonText}>Redeem Admin Code</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.clientIdRow}>
+        <Text style={styles.clientIdText}>Device client ID: {account?.profile.id || 'loading'}</Text>
+      </View>
+    </View>
+  ) : null;
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
@@ -815,44 +1009,201 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             ))}
           </View>
 
+          {Platform.OS === 'web' && React.createElement('input', {
+            ref: profileImageInputRef,
+            type: 'file',
+            accept: 'image/*',
+            style: { display: 'none' },
+            onChange: handleProfileImageSelected,
+          })}
+
           <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
+            {settingsSection === 'profile' && (
+              <View style={styles.profilePanel}>
+                <View style={styles.policyHeader}>
+                  <Ionicons name="person-circle-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Profile</Text>
+                </View>
+
+                <View style={styles.profileAvatarRow}>
+                  <View style={styles.profileAvatarFrame}>
+                    {commercialProfile.avatarUri ? (
+                      <Image
+                        source={{ uri: commercialProfile.avatarUri }}
+                        style={styles.profileAvatarImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Ionicons name="person-outline" size={30} color={Colors.accent} />
+                    )}
+                  </View>
+                  <View style={styles.profileAvatarActions}>
+                    <View style={styles.labelWithInfo}>
+                      <Text style={styles.compactLabel}>Profile image</Text>
+                      {renderInfoButton('profileImage', 'Show profile image details')}
+                    </View>
+                    {renderTooltip('profileImage', 'Upload a local image to replace the person icon in the top-right profile chip. The image is stored on this device with the profile settings.')}
+                    <View style={styles.adminActionRow}>
+                      <TouchableOpacity
+                        style={[styles.adminButton, styles.grantButton]}
+                        onPress={triggerProfileImageUpload}
+                        accessibilityRole="button"
+                        accessibilityLabel="Upload profile image"
+                      >
+                        <Ionicons name="image-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Upload</Text>
+                      </TouchableOpacity>
+                      {commercialProfile.avatarUri ? (
+                        <TouchableOpacity
+                          style={[styles.adminButton, styles.grantButton]}
+                          onPress={() => setCommercialProfile(prev => ({ ...prev, avatarUri: '' }))}
+                          accessibilityRole="button"
+                          accessibilityLabel="Remove profile image"
+                        >
+                          <Ionicons name="trash-outline" size={16} color={Colors.accent} />
+                          <Text style={styles.adminButtonText}>Remove</Text>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  </View>
+                </View>
+
+                <Text style={styles.compactLabel}>Client name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={commercialProfile.name}
+                  onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
+                  accessibilityLabel="Profile client name"
+                  placeholder="Client name"
+                  placeholderTextColor={Colors.gray[500]}
+                />
+
+                <View style={styles.labelWithInfo}>
+                  <Text style={styles.compactLabel}>Work email</Text>
+                  {renderInfoButton('email', 'Show work email details')}
+                </View>
+                {renderTooltip('email', 'Use the same email that a ReversR admin used when creating the tester invite. The app validates the format before saving or redeeming a code.')}
+                <TextInput
+                  style={[styles.input, showEmailError && styles.inputError]}
+                  value={commercialProfile.email}
+                  onChangeText={(email) => setCommercialProfile(prev => ({ ...prev, email }))}
+                  onBlur={() => setEmailTouched(true)}
+                  accessibilityLabel="Profile work email"
+                  placeholder="owner@example.com"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+                {commercialProfile.email.length > 0 && (
+                  <Text style={showEmailError ? styles.validationErrorText : styles.validationSuccessText}>
+                    {showEmailError ? 'Enter a valid email address.' : 'Email format looks valid.'}
+                  </Text>
+                )}
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleLookupTesterInvite}
+                    disabled={accountLoading || !commercialEmailIsValid}
+                    accessibilityRole="button"
+                    accessibilityLabel="Check work email for tester or admin activation"
+                  >
+                    <Ionicons name="search-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Check Access</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.compactLabel}>Password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={accessPassword}
+                  onChangeText={setAccessPassword}
+                  accessibilityLabel="Profile access password"
+                  placeholder="Current or starter password"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleActivateAccessPassword}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Activate profile password"
+                  >
+                    <Ionicons name="key-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Activate</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={() => setPasswordResetOpen(prev => !prev)}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Show profile password reset fields"
+                    accessibilityState={{ expanded: passwordResetOpen }}
+                  >
+                    <Ionicons name={passwordResetOpen ? 'chevron-up-outline' : 'refresh-outline'} size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Reset</Text>
+                  </TouchableOpacity>
+                  {account?.access && (
+                    <TouchableOpacity
+                      style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                      onPress={handleClearAccessPassword}
+                      disabled={accountLoading}
+                      accessibilityRole="button"
+                      accessibilityLabel="Clear profile access password"
+                    >
+                      <Ionicons name="person-outline" size={16} color={Colors.accent} />
+                      <Text style={styles.adminButtonText}>Guest</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {renderTesterActivationPanel()}
+
+                {(passwordResetOpen || account?.access?.requiresPasswordReset) && (
+                  <>
+                    <Text style={styles.compactLabel}>New password</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={newAccessPassword}
+                      onChangeText={setNewAccessPassword}
+                      accessibilityLabel="Profile new password"
+                      placeholder="Set your replacement password"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      secureTextEntry
+                    />
+                    <TouchableOpacity
+                      style={[styles.saveCredentialButton, accountLoading && styles.disabledButton]}
+                      onPress={handleResetAccessPassword}
+                      disabled={accountLoading}
+                      accessibilityRole="button"
+                      accessibilityLabel="Save profile password reset"
+                    >
+                      <Ionicons name="checkmark-circle-outline" size={17} color={Colors.black} />
+                      <Text style={styles.saveCredentialButtonText}>Save New Password</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+
+                {(commercialStatus || accessStatus || accountError) && (
+                  <Text style={styles.adminStatusText}>{commercialStatus || accessStatus || accountError}</Text>
+                )}
+              </View>
+            )}
+
             {settingsSection === 'account' && (
               <>
-            <View style={styles.appearancePanel}>
-              <View style={styles.policyHeader}>
-                <Ionicons name="contrast-outline" size={18} color={Colors.accent} />
-                <Text style={styles.policyTitle}>Appearance</Text>
-              </View>
-              <View style={styles.themeToggleRow}>
-                {(['light', 'dark'] as const).map(mode => (
-                  <TouchableOpacity
-                    key={mode}
-                    style={[styles.themeToggleButton, themeMode === mode && styles.themeToggleButtonActive]}
-                    onPress={() => setThemeMode(mode)}
-                    accessibilityRole="button"
-                    accessibilityLabel={mode === 'light' ? 'Use light mode' : 'Use dark mode'}
-                    accessibilityState={{ selected: themeMode === mode }}
-                  >
-                    <Ionicons
-                      name={mode === 'light' ? 'sunny-outline' : 'moon-outline'}
-                      size={16}
-                      color={themeMode === mode ? Colors.black : Colors.gray[400]}
-                    />
-                    <Text style={[styles.themeToggleText, themeMode === mode && styles.themeToggleTextActive]}>
-                      {mode === 'light' ? 'Light' : 'Dark'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
             <View style={styles.accountPanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="briefcase-outline" size={18} color={Colors.accent} />
                 <Text style={styles.policyTitle}>Billing Plan Tier</Text>
                 {renderInfoButton('billing', 'Show billing plan details')}
               </View>
-              {renderTooltip('billing', 'Review the current tier, journey credits, and upgrade options. Billing changes are completed on the ReversR web account page.')}
+              {renderTooltip('billing', 'Review the current tier, journey credits, and upgrade options. One journey credit starts a reconstruction. Specs, sketches, BOMs, and exports in that journey do not spend additional credits. Billing changes are completed on the ReversR web account page.')}
 
               <View style={styles.planSummaryRow}>
                 <View style={styles.planBadge}>
@@ -884,18 +1235,44 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 <View style={styles.usageTrack}>
                   <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
                 </View>
-                <Text style={styles.helpText}>
-                  One journey credit starts a reconstruction. Specs, sketches, BOMs, and exports in that journey do not spend additional credits. {resetLabel}.
-                </Text>
+                <View style={styles.resetCountdownCard}>
+                  <View style={styles.resetCountdownIcon}>
+                    <Ionicons
+                      name={usageIsUnlimited ? 'infinite-outline' : 'timer-outline'}
+                      size={16}
+                      color={Colors.accent}
+                    />
+                  </View>
+                  <View style={styles.resetCountdownCopy}>
+                    <Text style={styles.resetCountdownLabel}>Credit reset</Text>
+                    <Text style={styles.resetCountdownValue}>{resetLabel}</Text>
+                  </View>
+                </View>
               </View>
 
               <View style={styles.planListHeader}>
                 <Text style={styles.planListTitle}>Plans</Text>
-                <Text style={styles.planListMeta}>Upgrade options open on web.</Text>
+                <Text style={styles.planListMeta}>
+                  {Platform.OS === 'android' ? 'Android upgrades use Google Play.' : 'Upgrade options open on web.'}
+                </Text>
               </View>
+              {Platform.OS === 'android' && (
+                <View style={styles.androidBillingStatusCard}>
+                  <Ionicons
+                    name={isAndroidInAppBillingAvailable ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+                    size={16}
+                    color={isAndroidInAppBillingAvailable ? Colors.success : Colors.warning}
+                  />
+                  <Text style={styles.androidBillingStatusText}>
+                    {androidInAppBillingMessage || `Google Play Billing status: ${androidInAppBillingStatus}`}
+                  </Text>
+                </View>
+              )}
               <View style={styles.planCardsGrid}>
                 {visiblePlans.map(plan => {
                   const isCurrentPlan = plan.id === (account?.billing.planId || 'free');
+                  const disablePlanAction = accountLoading
+                    || (Platform.OS === 'android' && plan.id !== 'free' && !isCurrentPlan && !isAndroidInAppBillingAvailable);
                   return (
                     <View key={plan.id} style={[styles.planCard, isCurrentPlan && styles.planCardActive]}>
                       <View style={styles.planCardHeader}>
@@ -923,238 +1300,24 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       <TouchableOpacity
                         style={[styles.planActionButton, isCurrentPlan && styles.planActionButtonMuted]}
                         onPress={() => handlePlanAction(plan)}
-                        disabled={accountLoading}
+                        disabled={disablePlanAction}
                         accessibilityRole="button"
-                        accessibilityLabel={isCurrentPlan ? `Manage ${plan.label} plan on web` : `Upgrade to ${plan.label} on web`}
+                        accessibilityLabel={Platform.OS === 'android' && plan.id !== 'free'
+                          ? `${isCurrentPlan ? 'Manage' : 'Upgrade to'} ${plan.label} with Google Play`
+                          : isCurrentPlan ? `Manage ${plan.label} plan on web` : `Upgrade to ${plan.label} on web`}
                       >
                         <Ionicons
-                          name={Platform.OS === 'web' && plan.id !== 'free' && !isCurrentPlan ? 'card-outline' : 'open-outline'}
+                          name={planActionIcon(plan, isCurrentPlan)}
                           size={15}
                           color={Colors.accent}
                         />
                         <Text style={styles.planActionButtonText}>
-                          {isCurrentPlan ? 'Manage on Web' : Platform.OS === 'web' && plan.id !== 'free' ? 'Start Checkout' : 'Continue on Web'}
+                          {planActionLabel(plan, isCurrentPlan)}
                         </Text>
                       </TouchableOpacity>
                     </View>
                   );
                 })}
-              </View>
-
-              <Text style={styles.compactLabel}>Display name</Text>
-              <TextInput
-                style={styles.input}
-                value={commercialProfile.name}
-                onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
-                accessibilityLabel="Commercial profile display name"
-                placeholder="Your name"
-                placeholderTextColor={Colors.gray[500]}
-              />
-
-              <View style={styles.labelWithInfo}>
-                <Text style={styles.compactLabel}>Work email</Text>
-                {renderInfoButton('email', 'Show work email details')}
-              </View>
-              {renderTooltip('email', 'Use the same email that a ReversR admin used when creating the tester invite. The app validates the format before saving or redeeming a code.')}
-              <TextInput
-                style={[styles.input, showEmailError && styles.inputError]}
-                value={commercialProfile.email}
-                onChangeText={(email) => setCommercialProfile(prev => ({ ...prev, email }))}
-                onBlur={() => setEmailTouched(true)}
-                accessibilityLabel="Commercial profile email"
-                placeholder="owner@example.com"
-                placeholderTextColor={Colors.gray[500]}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-              {commercialProfile.email.length > 0 && (
-                <Text style={showEmailError ? styles.validationErrorText : styles.validationSuccessText}>
-                  {showEmailError ? 'Enter a valid email address.' : 'Email format looks valid.'}
-                </Text>
-              )}
-
-              <View style={styles.accessPanel}>
-                <View style={styles.policyHeader}>
-                  <Ionicons name="lock-open-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Tester Activation</Text>
-                  {renderInfoButton('invite', 'Show invite code details')}
-                </View>
-                {renderTooltip('invite', 'Invite codes are created by a ReversR admin outside the tester app. Enter your work email, paste the admin-issued code, then redeem it on this device.')}
-                <View style={styles.activationStepRow}>
-                  <View style={styles.activationStep}>
-                    <Ionicons
-                      name={commercialEmailIsValid ? 'checkmark-circle-outline' : 'ellipse-outline'}
-                      size={14}
-                      color={commercialEmailIsValid ? Colors.success : Colors.gray[500]}
-                    />
-                    <Text style={styles.activationStepText}>Email</Text>
-                  </View>
-                  <View style={styles.activationStep}>
-                    <Ionicons
-                      name={testerInviteCode.trim() ? 'checkmark-circle-outline' : 'ellipse-outline'}
-                      size={14}
-                      color={testerInviteCode.trim() ? Colors.success : Colors.gray[500]}
-                    />
-                    <Text style={styles.activationStepText}>Admin code</Text>
-                  </View>
-                  <View style={styles.activationStep}>
-                    <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.accent} />
-                    <Text style={styles.activationStepText}>Redeem</Text>
-                  </View>
-                </View>
-                {account?.access?.role === 'super_admin' && (
-                  <Text style={styles.adminStatusText}>Super admin access is active on this device.</Text>
-                )}
-                {account?.access?.requiresPasswordReset && (
-                  <Text style={styles.adminStatusText}>Starter password reset required for this tester grant.</Text>
-                )}
-
-                <View style={styles.accessMethodRow}>
-                  {(['invite', 'password'] as const).map(method => (
-                    <TouchableOpacity
-                      key={method}
-                      style={[styles.accessMethodButton, accessMethod === method && styles.accessMethodButtonActive]}
-                      onPress={() => {
-                        setAccessMethod(method);
-                        setPasswordResetOpen(method === 'password' && Boolean(account?.access?.requiresPasswordReset));
-                        setAccessStatus(method === 'invite'
-                          ? 'Admin invite code selected. Enter a valid work email and paste the code you received.'
-                          : 'Starter password selected. Use this only if a ReversR admin gave you a starter password.');
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={method === 'invite' ? 'Use tester invite code' : 'Use starter password'}
-                      accessibilityState={{ selected: accessMethod === method }}
-                    >
-                      <Ionicons
-                        name={method === 'invite' ? 'ticket-outline' : 'key-outline'}
-                        size={15}
-                        color={accessMethod === method ? Colors.black : Colors.gray[400]}
-                      />
-                      <Text style={[styles.accessMethodText, accessMethod === method && styles.accessMethodTextActive]}>
-                        {method === 'invite' ? 'Admin Code' : 'Starter Password'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {accessMethod === 'invite' ? (
-                  <>
-                    <View style={styles.labelWithInfo}>
-                      <Text style={styles.compactLabel}>Admin-issued invite code</Text>
-                      {renderInfoButton('invite', 'Show invite code details')}
-                    </View>
-                    <TextInput
-                      style={styles.input}
-                      value={testerInviteCode}
-                      onChangeText={setTesterInviteCode}
-                      accessibilityLabel="Tester invite code"
-                      placeholder="Paste code from ReversR admin"
-                      placeholderTextColor={Colors.gray[500]}
-                      autoCapitalize="none"
-                    />
-
-                    <View style={styles.adminActionRow}>
-                      <TouchableOpacity
-                        style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
-                        onPress={handleRedeemTesterInvite}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Redeem tester invite code"
-                      >
-                        <Ionicons name="ticket-outline" size={17} color={Colors.black} />
-                        <Text style={styles.saveCredentialButtonText}>Redeem Admin Code</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    <View style={styles.labelWithInfo}>
-                      <Text style={styles.compactLabel}>Current or starter password</Text>
-                      {renderInfoButton('password', 'Show starter password details')}
-                    </View>
-                    {renderTooltip('password', 'Starter passwords are for legacy tester or super-admin grants. If you have a normal tester invite, use Admin Code instead.')}
-                    <TextInput
-                      style={styles.input}
-                      value={accessPassword}
-                      onChangeText={setAccessPassword}
-                      accessibilityLabel="Commercial access password"
-                      placeholder="Access password"
-                      placeholderTextColor={Colors.gray[500]}
-                      autoCapitalize="none"
-                      secureTextEntry
-                    />
-
-                    <View style={styles.adminActionRow}>
-                      <TouchableOpacity
-                        style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                        onPress={handleActivateAccessPassword}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Activate commercial access password"
-                      >
-                        <Ionicons name="key-outline" size={16} color={Colors.accent} />
-                        <Text style={styles.adminButtonText}>Activate</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                        onPress={() => setPasswordResetOpen(prev => !prev)}
-                        disabled={accountLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel="Show password reset fields"
-                        accessibilityState={{ expanded: passwordResetOpen }}
-                      >
-                        <Ionicons name={passwordResetOpen ? 'chevron-up-outline' : 'refresh-outline'} size={16} color={Colors.accent} />
-                        <Text style={styles.adminButtonText}>Reset</Text>
-                      </TouchableOpacity>
-                      {account?.access && (
-                        <TouchableOpacity
-                          style={[styles.adminButton, accountLoading && styles.disabledButton]}
-                          onPress={handleClearAccessPassword}
-                          disabled={accountLoading}
-                          accessibilityRole="button"
-                          accessibilityLabel="Clear commercial access password"
-                        >
-                          <Ionicons name="person-outline" size={16} color={Colors.accent} />
-                          <Text style={styles.adminButtonText}>Guest</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-
-                    {passwordResetOpen && (
-                      <>
-                        <Text style={styles.compactLabel}>New password</Text>
-                        <TextInput
-                          style={styles.input}
-                          value={newAccessPassword}
-                          onChangeText={setNewAccessPassword}
-                          accessibilityLabel="New commercial access password"
-                          placeholder="Set your replacement password"
-                          placeholderTextColor={Colors.gray[500]}
-                          autoCapitalize="none"
-                          secureTextEntry
-                        />
-                        <View style={styles.adminActionRow}>
-                          <TouchableOpacity
-                            style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
-                            onPress={handleResetAccessPassword}
-                            disabled={accountLoading}
-                            accessibilityRole="button"
-                            accessibilityLabel="Confirm commercial access password reset"
-                          >
-                            <Ionicons name="checkmark-circle-outline" size={17} color={Colors.black} />
-                            <Text style={styles.saveCredentialButtonText}>Save New Password</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </>
-                    )}
-                  </>
-                )}
-
-                <View style={styles.clientIdRow}>
-                  <Text style={styles.clientIdText}>Device client ID: {account?.profile.id || 'loading'}</Text>
-                </View>
-
-                {accessStatus && <Text style={styles.adminStatusText}>{accessStatus}</Text>}
               </View>
 
               <View style={styles.commercialActionRow}>
@@ -1188,16 +1351,36 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
               </>
             )}
 
-            {settingsSection === 'inventory' && (
+            {settingsSection === 'ai' && (
               <>
             <View style={styles.liveAiPanel}>
               <View style={styles.policyHeader}>
                 <Ionicons name="hardware-chip-outline" size={18} color={Colors.accent} />
-                <Text style={styles.policyTitle}>AI Runtime</Text>
+                <Text style={styles.policyTitle}>AI Component</Text>
+                {renderInfoButton('aiOverview', 'Show AI component details')}
               </View>
-              <Text style={styles.policyText}>
-                Tester builds use managed Gemini by default. Local AI is available for admin or local development workflows.
-              </Text>
+              {renderTooltip('aiOverview', 'The AI component supports machine reconstruction work, not account billing or tester access. Tester builds use managed Gemini by default. Local AI is available only for admin or local development workflows when enabled.')}
+
+              <View style={styles.labelWithInfo}>
+                <Text style={styles.compactLabel}>Used in workflow</Text>
+                {renderInfoButton('aiWorkflow', 'Show AI workflow usage details')}
+              </View>
+              {renderTooltip('aiWorkflow', 'Phase 1 Scan: analyzes typed descriptions and captured images. Phase 2 Inventory: compares scan evidence against inventory candidates. Phase 3 Design: generates technical specs and design assets, while preferring source-backed reference images when available. Phase 4 Build: drafts BOMs, assembly sequencing, CAD readiness notes, and vendor handoff content.')}
+              <View style={styles.aiUsageGrid}>
+                {aiWorkflowUses.map(item => (
+                  <View key={item.phase} style={styles.aiUsageCard}>
+                    <Ionicons name={item.icon} size={16} color={Colors.accent} />
+                    <Text style={styles.aiUsagePhase}>{item.phase}. {item.label}</Text>
+                    <Text style={styles.aiUsageActivity}>{item.activity}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.labelWithInfo}>
+                <Text style={styles.compactLabel}>AI provider</Text>
+                {renderInfoButton('aiProvider', 'Show AI provider details')}
+              </View>
+              {renderTooltip('aiProvider', 'Gemini routes AI work through the hosted ReversR API, so model keys stay off the device. Local AI routes compatible text/model requests to a local provider for private network or development deployments.')}
               <View style={styles.providerOptionList}>
                 <TouchableOpacity
                   style={[styles.providerOptionCard, provider === 'gemini' && styles.providerOptionCardActive]}
@@ -1211,7 +1394,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     <Text style={[styles.providerOptionTitle, provider === 'gemini' && styles.providerOptionTitleActive]}>Gemini</Text>
                     <Text style={styles.providerOptionBadge}>{provider === 'gemini' ? 'Selected' : 'Cloud'}</Text>
                   </View>
-                  <Text style={styles.providerOptionDetail}>Managed cloud analysis, reconstruction, and design generation.</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1227,13 +1409,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     <Text style={[styles.providerOptionTitle, provider === 'ollama' && styles.providerOptionTitleActive]}>Local AI</Text>
                     <Text style={styles.providerOptionBadge}>{localProviderSettingsEnabled ? 'Available' : 'Admin'}</Text>
                   </View>
-                  <Text style={styles.providerOptionDetail}>Ollama/local model routing for development or private network deployments.</Text>
                 </TouchableOpacity>
               </View>
 
               {provider === 'ollama' && localProviderSettingsEnabled ? (
                 <View style={styles.ollamaSettings}>
-                  <Text style={styles.label}>Ollama Model</Text>
+                  <View style={styles.labelWithInfo}>
+                    <Text style={styles.compactLabel}>Ollama model</Text>
+                    {renderInfoButton('aiLocalModel', 'Show local AI model details')}
+                  </View>
+                  {renderTooltip('aiLocalModel', 'Use a local model name that is already installed and running in Ollama. Image analysis requires a vision-capable model. Local image generation is not supported in this tester workflow.')}
                   <TextInput
                     style={styles.input}
                     value={ollamaModel}
@@ -1241,9 +1426,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     placeholder="e.g. llama3, mistral"
                     placeholderTextColor={Colors.gray[500]}
                   />
-                  <Text style={styles.helpText}>
-                    Local image generation is not supported by Ollama. Image analysis requires a vision model like 'llava'. Ensure Ollama is running on localhost:11434.
-                  </Text>
                 </View>
               ) : (
                 <>
@@ -1254,7 +1436,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     color={aiRuntimeStatus?.status === 'connected' ? Colors.accent : Colors.orange[300]}
                   />
                   <Text style={styles.policyTitle}>Managed Gemini</Text>
+                  {renderInfoButton('aiStatus', 'Show managed Gemini status details')}
                 </View>
+                {renderTooltip('aiStatus', 'This checks whether the hosted ReversR API has usable Gemini capacity. If this is unavailable, AI-heavy steps may fall back to source-backed or cached results where possible, or ask the tester to contact an admin.')}
                 <View style={styles.liveAiStatusRow}>
                   <View style={[
                     styles.liveAiBadge,
@@ -1275,12 +1459,14 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
-                <Text style={styles.helpText}>
-                  Gemini runs through the hosted ReversR API. No model keys are stored in this app.
-                </Text>
                 </>
               )}
             </View>
+              </>
+            )}
+
+            {settingsSection === 'inventory' && (
+              <>
 
             <View style={styles.adminPanel}>
               <View style={styles.policyHeader}>
@@ -1384,16 +1570,148 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
                   {inventoryConnector.authMode !== 'none' && (
                     <>
-                      <Text style={styles.compactLabel}>Backend credential reference</Text>
+                      <View style={styles.labelWithInfo}>
+                        <Text style={styles.compactLabel}>Backend credential reference</Text>
+                        {renderInfoButton('credentialReference', 'Show backend credential reference details')}
+                      </View>
+                      {renderTooltip('credentialReference', 'Create a short reference name for the external provider secret, for example partsledger-prod-api-key. After saving, use this same reference in Inventory Source. The app stores this name only; the raw secret stays on the backend.')}
                       <TextInput
                         style={styles.input}
                         value={inventoryConnector.credentialRef || ''}
-                        onChangeText={(credentialRef) => updateInventoryConnector({ credentialRef })}
+                        onChangeText={(nextCredentialRef) => {
+                          updateInventoryConnector({ credentialRef: nextCredentialRef });
+                          setCredentialRef(nextCredentialRef);
+                        }}
                         accessibilityLabel="Inventory backend credential reference"
                         placeholder="partsledger-prod-api-key"
                         placeholderTextColor={Colors.gray[500]}
                         autoCapitalize="none"
                       />
+
+                      <View style={styles.inlineAdminPanel}>
+                        <View style={styles.policyHeader}>
+                          <Ionicons name="server-outline" size={18} color={Colors.accent} />
+                          <Text style={styles.policyTitle}>Private Connector Credentials</Text>
+                          {renderInfoButton('connectorAdmin', 'Show connector credential source details')}
+                        </View>
+                        {renderTooltip('connectorAdmin', 'Use this only for private inventory connectors such as ERP, parts database, or spreadsheet APIs. Get the API admin token from the ReversR API deployment owner. Get API-key or OAuth credentials from the external inventory provider admin portal, save them here as backend references, then use that reference in Inventory Source.')}
+                        <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
+
+                        <View style={styles.labelWithInfo}>
+                          <Text style={styles.compactLabel}>API admin token</Text>
+                          {renderInfoButton('adminToken', 'Show API admin token details')}
+                        </View>
+                        {renderTooltip('adminToken', 'Get this from the hosted API environment value ADMIN_API_TOKEN, or from a ReversR super admin or deployment owner. It authorizes this Settings session to load or save backend credential references. It is not a tester invite code, account password, API key, or OAuth token. It is not saved in the app.')}
+                        <TextInput
+                          style={styles.input}
+                          value={adminToken}
+                          onChangeText={setAdminToken}
+                          placeholder="Session-only API admin token"
+                          placeholderTextColor={Colors.gray[500]}
+                          autoCapitalize="none"
+                          secureTextEntry
+                        />
+
+                        <View style={styles.adminActionRow}>
+                          <TouchableOpacity
+                            style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                            onPress={loadCredentials}
+                            disabled={adminLoading}
+                            accessibilityRole="button"
+                            accessibilityLabel="Load backend credential references"
+                          >
+                            <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                            <Text style={styles.adminButtonText}>{adminLoading ? 'Working...' : 'Load Refs'}</Text>
+                          </TouchableOpacity>
+                          <View style={[styles.registryBadge, registryEnabled === false && styles.registryBadgeWarn]}>
+                            <Text style={styles.registryBadgeText}>
+                              {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.labelWithInfo}>
+                          <Text style={styles.compactLabel}>Credential type</Text>
+                          {renderInfoButton('credentialAuth', 'Show API key and OAuth credential details')}
+                        </View>
+                        {renderTooltip('credentialAuth', 'Choose API Key when the inventory provider gives you a fixed key and header name. Choose OAuth when the provider gives you a bearer access token. These credentials come from the provider admin portal or the shop IT/admin owner, not from ReversR tester setup.')}
+                        <View style={styles.providerRow}>
+                          {(['api_key', 'oauth'] as const).map(mode => (
+                            <TouchableOpacity
+                              key={mode}
+                              style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
+                              onPress={() => setCredentialMode(mode)}
+                              accessibilityRole="button"
+                              accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
+                              accessibilityState={{ selected: credentialMode === mode }}
+                            >
+                              <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
+                                {mode === 'api_key' ? 'API Key' : 'OAuth'}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+
+                        {credentialMode === 'api_key' && (
+                          <>
+                            <Text style={styles.compactLabel}>Header name</Text>
+                            <TextInput
+                              style={styles.input}
+                              value={credentialHeaderName}
+                              onChangeText={setCredentialHeaderName}
+                              placeholder="X-API-Key"
+                              placeholderTextColor={Colors.gray[500]}
+                              autoCapitalize="none"
+                            />
+                          </>
+                        )}
+
+                        <Text style={styles.compactLabel}>{credentialMode === 'api_key' ? 'API key value' : 'OAuth bearer token'}</Text>
+                        <TextInput
+                          style={styles.input}
+                          value={credentialValue}
+                          onChangeText={setCredentialValue}
+                          placeholder="Sent to backend, then cleared from this form"
+                          placeholderTextColor={Colors.gray[500]}
+                          autoCapitalize="none"
+                          secureTextEntry
+                        />
+
+                        <TouchableOpacity
+                          style={[styles.saveCredentialButton, adminLoading && styles.disabledButton]}
+                          onPress={handleSaveCredential}
+                          disabled={adminLoading}
+                          accessibilityRole="button"
+                          accessibilityLabel="Save backend credential reference"
+                        >
+                          <Ionicons name="key-outline" size={17} color={Colors.black} />
+                          <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
+                        </TouchableOpacity>
+
+                        {adminStatus && <Text style={styles.adminStatusText}>{adminStatus}</Text>}
+
+                        <View style={styles.credentialList}>
+                          {credentials.map(item => (
+                            <View key={item.credentialRef} style={styles.credentialCard}>
+                              <View style={styles.credentialInfo}>
+                                <Text style={styles.credentialRefText}>{item.credentialRef}</Text>
+                                <Text style={styles.credentialMetaText}>
+                                  {(item.authModes || []).join(', ') || 'credential'} | {(item.headerNames || []).join(', ') || 'headers hidden'} | {item.source || 'backend'}
+                                </Text>
+                              </View>
+                              <TouchableOpacity
+                                style={styles.deleteCredentialButton}
+                                onPress={() => handleDeleteCredential(item.credentialRef)}
+                                disabled={adminLoading}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
+                              >
+                                <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
                     </>
                   )}
 
@@ -1416,51 +1734,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             {settingsSection === 'admin' && canUseAdminConsole && (
               <View style={styles.adminPanel}>
                 <View style={styles.policyHeader}>
-                  <Ionicons name="server-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Admin Connector Credentials</Text>
-                </View>
-                <Text style={styles.policyText}>
-                  Register API-key or OAuth credential references on the backend. The workflow stores only the reference name in the app.
-                </Text>
-                <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
-
-                <Text style={styles.compactLabel}>Admin token</Text>
-                <TextInput
-                  style={styles.input}
-                  value={adminToken}
-                  onChangeText={setAdminToken}
-                  placeholder="Session-only API admin token"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                    onPress={loadCredentials}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Load backend credential references"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>{adminLoading ? 'Working...' : 'Load Refs'}</Text>
-                  </TouchableOpacity>
-                  <View style={[styles.registryBadge, registryEnabled === false && styles.registryBadgeWarn]}>
-                    <Text style={styles.registryBadgeText}>
-                      {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.superAdminDivider} />
-                <View style={styles.policyHeader}>
                   <Ionicons name="speedometer-outline" size={18} color={Colors.accent} />
                   <Text style={styles.policyTitle}>Journey Credit Rules</Text>
+                  {renderInfoButton('creditRules', 'Show journey credit rule details')}
                 </View>
-                <Text style={styles.policyText}>
-                  Configure the credit allowance and reset frequency without shipping a new app build. Default Free is 5 credits per week.
-                </Text>
+                {renderTooltip('creditRules', 'Configure plan credit allowance and reset frequency without shipping a new app build. Default Free is 5 credits per week. Changes require the API admin token above.')}
 
                 <Text style={styles.compactLabel}>Plan</Text>
                 <View style={styles.themeToggleRow}>
@@ -1532,316 +1810,204 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </TouchableOpacity>
                 </View>
 
-                <Text style={styles.compactLabel}>Credential reference</Text>
-                <TextInput
-                  style={styles.input}
-                  value={credentialRef}
-                  onChangeText={setCredentialRef}
-                  placeholder="partsledger-prod-api-key"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                />
-
-                <View style={styles.providerRow}>
-                  {(['api_key', 'oauth'] as const).map(mode => (
-                    <TouchableOpacity
-                      key={mode}
-                      style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
-                      onPress={() => setCredentialMode(mode)}
-                      accessibilityRole="button"
-                      accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
-                      accessibilityState={{ selected: credentialMode === mode }}
-                    >
-                      <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
-                        {mode === 'api_key' ? 'API Key' : 'OAuth'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {credentialMode === 'api_key' && (
-                  <>
-                    <Text style={styles.compactLabel}>Header name</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={credentialHeaderName}
-                      onChangeText={setCredentialHeaderName}
-                      placeholder="X-API-Key"
-                      placeholderTextColor={Colors.gray[500]}
-                      autoCapitalize="none"
-                    />
-                  </>
-                )}
-
-                <Text style={styles.compactLabel}>{credentialMode === 'api_key' ? 'API key value' : 'OAuth bearer token'}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={credentialValue}
-                  onChangeText={setCredentialValue}
-                  placeholder="Sent to backend, then cleared from this form"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-
-                <TouchableOpacity
-                  style={[styles.saveCredentialButton, adminLoading && styles.disabledButton]}
-                  onPress={handleSaveCredential}
-                  disabled={adminLoading}
-                  accessibilityRole="button"
-                  accessibilityLabel="Save backend credential reference"
-                >
-                  <Ionicons name="key-outline" size={17} color={Colors.black} />
-                  <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
-                </TouchableOpacity>
-
                 {adminStatus && <Text style={styles.adminStatusText}>{adminStatus}</Text>}
 
-                <View style={styles.credentialList}>
-                  {credentials.map(item => (
-                    <View key={item.credentialRef} style={styles.credentialCard}>
-                      <View style={styles.credentialInfo}>
-                        <Text style={styles.credentialRefText}>{item.credentialRef}</Text>
-                        <Text style={styles.credentialMetaText}>
-                          {(item.authModes || []).join(', ') || 'credential'} | {(item.headerNames || []).join(', ') || 'headers hidden'} | {item.source || 'backend'}
-                        </Text>
-                      </View>
+                {isSuperAdmin && (
+                  <>
+                    <View style={styles.superAdminDivider} />
+                    <View style={styles.policyHeader}>
+                      <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
+                      <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
+                    </View>
+                    <Text style={styles.policyText}>
+                      Pre-authorize a tester by work email. The tester enters the same email in Settings, taps Find Admin Code, and redeems the code in the app.
+                    </Text>
+
+                    <Text style={styles.compactLabel}>Tester invite email</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={inviteEmail}
+                      onChangeText={setInviteEmail}
+                      accessibilityLabel="Tester invite email"
+                      placeholder="tester@example.com"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
+
+                    <Text style={styles.compactLabel}>Tester path</Text>
+                    <View style={styles.themeToggleRow}>
+                      {(['both', 'ios', 'android'] as const).map(platform => (
+                        <TouchableOpacity
+                          key={platform}
+                          style={[styles.themeToggleButton, invitePlatform === platform && styles.themeToggleButtonActive]}
+                          onPress={() => setInvitePlatform(platform)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Set tester invite path to ${platform}`}
+                          accessibilityState={{ selected: invitePlatform === platform }}
+                        >
+                          <Ionicons
+                            name={platform === 'ios' ? 'logo-apple' : platform === 'android' ? 'logo-android' : 'phone-portrait-outline'}
+                            size={16}
+                            color={invitePlatform === platform ? Colors.black : Colors.gray[400]}
+                          />
+                          <Text style={[styles.themeToggleText, invitePlatform === platform && styles.themeToggleTextActive]}>
+                            {platform === 'both' ? 'Both' : platform === 'ios' ? 'iOS' : 'Android'}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <View style={styles.adminActionRow}>
                       <TouchableOpacity
-                        style={styles.deleteCredentialButton}
-                        onPress={() => handleDeleteCredential(item.credentialRef)}
+                        style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                        onPress={handleCreateTesterInvite}
                         disabled={adminLoading}
                         accessibilityRole="button"
-                        accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
+                        accessibilityLabel="Create tester invite code"
                       >
-                        <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
+                        <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+                        <Text style={styles.saveCredentialButtonText}>Create Invite</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                        onPress={loadTesterInvites}
+                        disabled={adminLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Load tester invites"
+                      >
+                        <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Load Invites</Text>
                       </TouchableOpacity>
                     </View>
-                  ))}
-                </View>
 
-                <View style={styles.superAdminDivider} />
-                <View style={styles.policyHeader}>
-                  <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
-                </View>
-                <Text style={styles.policyText}>
-                  Grant tester access by client ID, email, profile name, or shop name. The starting password is hashed on the backend and must be reset by the tester.
-                </Text>
+                    <View style={styles.credentialList}>
+                      {testerInvites.map(invite => (
+                        <View key={invite.inviteId} style={styles.credentialCard}>
+                          <View style={styles.credentialInfo}>
+                            <Text style={styles.credentialRefText}>{invite.email}</Text>
+                            <Text style={styles.credentialMetaText}>
+                              {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
+                            </Text>
+                            {invite.activationCode && (
+                              <Text selectable style={styles.inviteCodeText}>
+                                Code: {invite.activationCode}
+                              </Text>
+                            )}
+                          </View>
+                          <TouchableOpacity
+                            style={styles.deleteCredentialButton}
+                            onPress={() => handleRevokeTesterInvite(invite.inviteId)}
+                            disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                          >
+                            <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
 
-                <Text style={styles.compactLabel}>Tester invite email</Text>
-                <TextInput
-                  style={styles.input}
-                  value={inviteEmail}
-                  onChangeText={setInviteEmail}
-                  accessibilityLabel="Tester invite email"
-                  placeholder="tester@example.com"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
+                    <View style={styles.superAdminDivider} />
+                    <Text style={styles.policyText}>
+                      Fallback password grants are only for exception cases where a tester cannot redeem an invite code.
+                    </Text>
 
-                <Text style={styles.compactLabel}>Tester path</Text>
-                <View style={styles.themeToggleRow}>
-                  {(['both', 'ios', 'android'] as const).map(platform => (
-                    <TouchableOpacity
-                      key={platform}
-                      style={[styles.themeToggleButton, invitePlatform === platform && styles.themeToggleButtonActive]}
-                      onPress={() => setInvitePlatform(platform)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Set tester invite path to ${platform}`}
-                      accessibilityState={{ selected: invitePlatform === platform }}
-                    >
-                      <Ionicons
-                        name={platform === 'ios' ? 'logo-apple' : platform === 'android' ? 'logo-android' : 'phone-portrait-outline'}
-                        size={16}
-                        color={invitePlatform === platform ? Colors.black : Colors.gray[400]}
-                      />
-                      <Text style={[styles.themeToggleText, invitePlatform === platform && styles.themeToggleTextActive]}>
-                        {platform === 'both' ? 'Both' : platform === 'ios' ? 'iOS' : 'Android'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                    <Text style={styles.compactLabel}>Grant email</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={grantEmail}
+                      onChangeText={setGrantEmail}
+                      accessibilityLabel="Commercial access grant email"
+                      placeholder="tester@example.com"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
 
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
-                    onPress={handleCreateTesterInvite}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Create tester invite code"
-                  >
-                    <Ionicons name="ticket-outline" size={17} color={Colors.black} />
-                    <Text style={styles.saveCredentialButtonText}>Create Invite</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                    onPress={loadTesterInvites}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Load tester invites"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Load Invites</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.credentialList}>
-                  {testerInvites.map(invite => (
-                    <View key={invite.inviteId} style={styles.credentialCard}>
-                      <View style={styles.credentialInfo}>
-                        <Text style={styles.credentialRefText}>{invite.email}</Text>
-                        <Text style={styles.credentialMetaText}>
-                          {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
-                        </Text>
-                        {invite.activationCode && (
-                          <Text selectable style={styles.inviteCodeText}>
-                            Code: {invite.activationCode}
+                    <Text style={styles.compactLabel}>Access role</Text>
+                    <View style={styles.themeToggleRow}>
+                      {(['tester', 'super_admin'] as const).map(role => (
+                        <TouchableOpacity
+                          key={role}
+                          style={[styles.themeToggleButton, grantRole === role && styles.themeToggleButtonActive]}
+                          onPress={() => setGrantRole(role)}
+                          accessibilityRole="button"
+                          accessibilityLabel={role === 'super_admin' ? 'Create a super admin grant' : 'Create a tester grant'}
+                          accessibilityState={{ selected: grantRole === role }}
+                        >
+                          <Ionicons
+                            name={role === 'super_admin' ? 'shield-checkmark-outline' : 'flask-outline'}
+                            size={16}
+                            color={grantRole === role ? Colors.black : Colors.gray[400]}
+                          />
+                          <Text style={[styles.themeToggleText, grantRole === role && styles.themeToggleTextActive]}>
+                            {role === 'super_admin' ? 'Super Admin' : 'Tester'}
                           </Text>
-                        )}
-                      </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <Text style={styles.compactLabel}>Starting password</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={grantStartingPassword}
+                      onChangeText={setGrantStartingPassword}
+                      accessibilityLabel="Commercial access grant starting password"
+                      placeholder="Give this to the tester once"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      secureTextEntry
+                    />
+
+                    <View style={styles.adminActionRow}>
                       <TouchableOpacity
-                        style={styles.deleteCredentialButton}
-                        onPress={() => handleRevokeTesterInvite(invite.inviteId)}
-                        disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                        style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                        onPress={handleSaveAccessGrant}
+                        disabled={adminLoading}
                         accessibilityRole="button"
-                        accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                        accessibilityLabel="Save commercial tester access grant"
                       >
-                        <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                        <Ionicons name="person-add-outline" size={17} color={Colors.black} />
+                        <Text style={styles.saveCredentialButtonText}>Grant Tester Access</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                        onPress={loadAccessGrants}
+                        disabled={adminLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Load commercial tester access grants"
+                      >
+                        <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Load Grants</Text>
                       </TouchableOpacity>
                     </View>
-                  ))}
-                </View>
 
-                <View style={styles.superAdminDivider} />
-                <Text style={styles.policyText}>
-                  Legacy grants are still available when a tester cannot redeem an invite code.
-                </Text>
-
-                <Text style={styles.compactLabel}>Client ID</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantClientId}
-                  onChangeText={setGrantClientId}
-                  accessibilityLabel="Commercial access grant client ID"
-                  placeholder="client_..."
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                />
-
-                <Text style={styles.compactLabel}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantEmail}
-                  onChangeText={setGrantEmail}
-                  accessibilityLabel="Commercial access grant email"
-                  placeholder="tester@example.com"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-
-                <Text style={styles.compactLabel}>Profile name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantProfileName}
-                  onChangeText={setGrantProfileName}
-                  accessibilityLabel="Commercial access grant profile name"
-                  placeholder="test3r"
-                  placeholderTextColor={Colors.gray[500]}
-                />
-
-                <Text style={styles.compactLabel}>Shop name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantShopName}
-                  onChangeText={setGrantShopName}
-                  accessibilityLabel="Commercial access grant shop name"
-                  placeholder="QA Repair Shop"
-                  placeholderTextColor={Colors.gray[500]}
-                />
-
-                <Text style={styles.compactLabel}>Access role</Text>
-                <View style={styles.themeToggleRow}>
-                  {(['tester', 'super_admin'] as const).map(role => (
-                    <TouchableOpacity
-                      key={role}
-                      style={[styles.themeToggleButton, grantRole === role && styles.themeToggleButtonActive]}
-                      onPress={() => setGrantRole(role)}
-                      accessibilityRole="button"
-                      accessibilityLabel={role === 'super_admin' ? 'Create a super admin grant' : 'Create a tester grant'}
-                      accessibilityState={{ selected: grantRole === role }}
-                    >
-                      <Ionicons
-                        name={role === 'super_admin' ? 'shield-checkmark-outline' : 'flask-outline'}
-                        size={16}
-                        color={grantRole === role ? Colors.black : Colors.gray[400]}
-                      />
-                      <Text style={[styles.themeToggleText, grantRole === role && styles.themeToggleTextActive]}>
-                        {role === 'super_admin' ? 'Super Admin' : 'Tester'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={styles.compactLabel}>Starting password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantStartingPassword}
-                  onChangeText={setGrantStartingPassword}
-                  accessibilityLabel="Commercial access grant starting password"
-                  placeholder="Give this to the tester once"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
-                    onPress={handleSaveAccessGrant}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Save commercial tester access grant"
-                  >
-                    <Ionicons name="person-add-outline" size={17} color={Colors.black} />
-                    <Text style={styles.saveCredentialButtonText}>Grant Tester Access</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                    onPress={loadAccessGrants}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Load commercial tester access grants"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Load Grants</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.credentialList}>
-                  {accessGrants.map(grant => (
-                    <View key={grant.grantId} style={styles.credentialCard}>
-                      <View style={styles.credentialInfo}>
-                        <Text style={styles.credentialRefText}>
-                          {grant.clientId || grant.email || grant.profileName || grant.shopName}
-                        </Text>
-                        <Text style={styles.credentialMetaText}>
-                          {grant.active ? 'active' : 'revoked'} | {grant.role === 'super_admin' ? 'super admin' : 'tester'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.deleteCredentialButton}
-                        onPress={() => handleRevokeAccessGrant(grant.grantId)}
-                        disabled={adminLoading || !grant.active}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Revoke commercial tester access grant ${grant.grantId}`}
-                      >
-                        <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
-                      </TouchableOpacity>
+                    <View style={styles.credentialList}>
+                      {accessGrants.map(grant => (
+                        <View key={grant.grantId} style={styles.credentialCard}>
+                          <View style={styles.credentialInfo}>
+                            <Text style={styles.credentialRefText}>
+                              {grant.email || grant.clientId || grant.profileName || grant.shopName}
+                            </Text>
+                            <Text style={styles.credentialMetaText}>
+                              {grant.active ? 'active' : 'revoked'} | {grant.role === 'super_admin' ? 'super admin' : 'tester'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.deleteCredentialButton}
+                            onPress={() => handleRevokeAccessGrant(grant.grantId)}
+                            disabled={adminLoading || !grant.active}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Revoke commercial tester access grant ${grant.grantId}`}
+                          >
+                            <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
                     </View>
-                  ))}
-                </View>
+                  </>
+                )}
               </View>
             )}
 
@@ -1876,9 +2042,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             style={styles.saveButton}
             onPress={saveSettings}
             accessibilityRole="button"
-            accessibilityLabel="Save settings"
+            accessibilityLabel={settingsSection === 'profile' ? 'Save profile' : 'Save settings'}
           >
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveButtonText}>{settingsSection === 'profile' ? 'Save Profile' : 'Save Changes'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -1967,14 +2133,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.gray[300],
     marginBottom: 12,
   },
-  appearancePanel: {
-    borderWidth: 1,
-    borderColor: Colors.gray[800],
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 24,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
-  },
   themeToggleRow: {
     flexDirection: 'row',
     gap: 10,
@@ -2012,6 +2170,39 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: 14,
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  profilePanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 24,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  profileAvatarRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 12,
+  },
+  profileAvatarFrame: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: Colors.panel,
+  },
+  profileAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  profileAvatarActions: {
+    flex: 1,
+    minWidth: 0,
   },
   planSummaryRow: {
     flexDirection: 'row',
@@ -2071,6 +2262,41 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.accent,
   },
+  resetCountdownCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.10)' : '#ecfdf5',
+  },
+  resetCountdownIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.16)' : '#d1fae5',
+  },
+  resetCountdownCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  resetCountdownLabel: {
+    color: Colors.mutedText,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  resetCountdownValue: {
+    color: Colors.accent,
+    fontSize: 13,
+    fontWeight: '900',
+    marginTop: 2,
+  },
   planListHeader: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -2091,6 +2317,25 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   planCardsGrid: {
     gap: 10,
     marginBottom: 14,
+  },
+  androidBillingStatusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.mode === 'dark' ? Colors.gray[800] : Colors.border,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(255,255,255,0.03)' : Colors.panel,
+  },
+  androidBillingStatusText: {
+    flex: 1,
+    color: Colors.mutedText,
+    fontSize: 11,
+    fontWeight: '700',
+    lineHeight: 15,
   },
   planCard: {
     borderWidth: 1,
@@ -2244,6 +2489,36 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
+  aiUsageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  aiUsageCard: {
+    flexGrow: 1,
+    flexBasis: '46%',
+    minHeight: 72,
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    backgroundColor: Colors.panel,
+  },
+  aiUsagePhase: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: '900',
+    marginTop: 5,
+  },
+  aiUsageActivity: {
+    color: Colors.gray[400],
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
   liveAiStatusRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2356,6 +2631,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
   },
+  inlineAdminPanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 6,
+    marginBottom: 12,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.18)' : Colors.panel,
+  },
   accessPanel: {
     borderWidth: 1,
     borderColor: Colors.gray[800],
@@ -2364,38 +2648,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginTop: 10,
     marginBottom: 14,
     backgroundColor: Colors.mode === 'dark' ? Colors.gray[900] : Colors.panel,
-  },
-  accessMethodRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  accessMethodButton: {
-    flex: 1,
-    minHeight: 40,
-    borderWidth: 1,
-    borderColor: Colors.gray[700],
-    borderRadius: 8,
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    backgroundColor: Colors.input,
-  },
-  accessMethodButtonActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accent,
-  },
-  accessMethodText: {
-    color: Colors.gray[400],
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  accessMethodTextActive: {
-    color: Colors.black,
   },
   clientIdRow: {
     borderTopWidth: 1,
@@ -2491,16 +2743,19 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginTop: 10,
     marginBottom: 12,
   },
   adminButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
     borderWidth: 1,
     borderColor: Colors.accent,
     borderRadius: 8,
-    paddingVertical: 9,
+    minHeight: 48,
+    paddingVertical: 11,
     paddingHorizontal: 12,
   },
   adminButtonText: {
@@ -2639,7 +2894,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: 8,
     backgroundColor: Colors.accent,
     borderRadius: 8,
+    minHeight: 48,
     paddingVertical: 12,
+    paddingHorizontal: 12,
     marginTop: 4,
   },
   grantButton: {

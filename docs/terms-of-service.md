@@ -14,7 +14,7 @@ ReversR Rebuild is a mobile application that helps users:
 - Validate an admin-approved machine inventory connector.
 - Match a scan to a machine record.
 - Generate a reconstruction package with a bill of materials, assembly steps, pricing estimates, and fabrication or 3D modeling handoff information.
-- Manage repair shop profiles, monthly AI reconstruction credits, paid shop entitlements, and hosted web billing where configured.
+- Manage repair shop profiles, monthly AI reconstruction credits, paid shop entitlements, hosted web billing, and Android Google Play Billing where configured.
 
 ## User Responsibilities
 
@@ -31,13 +31,13 @@ You agree to:
 
 Free users receive a limited monthly reconstruction credit trial. Paid repair shop plans may include higher monthly credit limits, export permissions, shared shop features, inventory connector access, and future cloud-history features.
 
-Paid plans and upgrades are managed through the hosted web account page and Stripe billing where configured. Credits meter AI-heavy reconstruction steps such as scans, specifications, BOM generation, and visual generation.
+Paid plans and upgrades are managed through the hosted web account page and Stripe billing where configured, or through Google Play Billing for eligible Android in-app subscriptions. Credits meter AI-heavy reconstruction steps such as scans, specifications, BOM generation, and visual generation.
 
 Credit limits, prices, included features, and add-ons may change with notice before renewal.
 
 ## Cancellation and Refunds
 
-Billing changes, cancellations, payment methods, and invoices are managed through the hosted web billing portal when Stripe is configured. Refund requests should be sent to support and are reviewed based on account activity, usage, and applicable law.
+Billing changes, cancellations, payment methods, and invoices are managed through the hosted web billing portal when Stripe is configured, or through Google Play subscription management for Android in-app subscriptions. Refund requests should be sent to support or the applicable app store and are reviewed based on account activity, usage, store rules, and applicable law.
 
 ## Reconstruction Output
 
