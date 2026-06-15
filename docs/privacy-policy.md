@@ -1,6 +1,6 @@
 # Privacy Policy for ReversR Rebuild
 
-**Last Updated:** June 13, 2026
+**Last Updated:** June 15, 2026
 
 ## Introduction
 
@@ -14,7 +14,7 @@ This Privacy Policy explains what information the app handles and how it is used
 
 - **Machine images:** Photos captured with the camera for machine identification.
 - **Machine descriptions:** Text descriptions, visible part notes, model names, and other scan context.
-- **Repair shop profile details:** Name, work email, shop name, role, plan, and monthly reconstruction credit usage.
+- **Repair shop profile details:** Name, work email, shop name, role, plan, and monthly reconstruction journey credit usage.
 - **Inventory connector metadata:** Source name, connector URI, connector type, auth mode selection, and admin notes.
 - **Reconstruction outputs:** Machine match results, assembly steps, bill of materials, pricing estimates, and export packages.
 - **Billing metadata:** Stripe customer IDs, Google Play purchase token hashes, subscription IDs, subscription status, plan, and billing period dates when a shop uses hosted web billing or Android in-app subscriptions.
@@ -31,7 +31,7 @@ We use information to:
 - Validate and read approved machine inventory sources.
 - Match scans to machine records.
 - Generate reconstruction plans, BOMs, assembly steps, pricing estimates, and handoff packages.
-- Meter monthly AI reconstruction credits and enforce plan entitlements.
+- Meter reconstruction journey credits and enforce plan entitlements.
 - Save reconstruction history locally on the device.
 - Support repair shop account, subscription, and billing management.
 - Improve reliability and support troubleshooting.

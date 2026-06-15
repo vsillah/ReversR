@@ -5,7 +5,7 @@ export default function PrivacyRoute() {
   return (
     <PolicyPage
       title="Privacy Policy"
-      updated="June 13, 2026"
+      updated="June 15, 2026"
       intro="ReversR Rebuild helps users scan machines, match them against an approved machine inventory, and prepare reconstruction packages with parts, assembly steps, pricing estimates, and fabrication handoff materials."
       sections={[
         {
@@ -13,10 +13,10 @@ export default function PrivacyRoute() {
           bullets: [
             'Machine images captured with the camera for machine identification.',
             'Machine descriptions, visible part notes, model names, and scan context.',
-            'Repair shop profile details such as name, work email, shop name, role, plan, and monthly credit usage.',
+            'Repair shop profile details such as name, work email, shop name, role, plan, and monthly reconstruction journey credit usage.',
             'Inventory connector metadata such as source name, connector URI, auth mode, credential reference, and admin notes.',
             'Reconstruction outputs including machine match results, assembly steps, bill of materials, pricing estimates, and export packages.',
-            'Billing identifiers and subscription status from Stripe when a shop manages billing through the hosted web account page.',
+            'Billing identifiers and subscription status from Stripe or Google Play when a shop uses hosted web billing or Android in-app subscriptions.',
           ],
         },
         {
@@ -35,7 +35,7 @@ export default function PrivacyRoute() {
           title: 'Storage and Sharing',
           bullets: [
             'Reconstruction history remains local by default; signed-in or configured shop accounts may use backend storage for profile, entitlement, usage, and future cloud-history records.',
-            'Stripe processes payments and billing details for hosted web checkout and customer portal sessions; the app stores only billing identifiers and subscription status.',
+            'Stripe processes payments and billing details for hosted web checkout and customer portal sessions. Google Play processes Android in-app subscription payments. The app stores billing identifiers and subscription status, not full card numbers.',
             'Exported sketches, specs, BOMs, and reconstruction packages are written to app-controlled storage before the user chooses whether to share them.',
             'Cloud AI processing is used only when a cloud provider is configured.',
             'Manufacturer quote packets and email drafts require explicit user action and are not sent automatically.',

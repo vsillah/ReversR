@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-13T03:44:02.339Z",
+  "generatedAt": "2026-06-15T14:57:44.751Z",
   "urlMode": "placeholder-allowed",
   "warnings": [],
   "appIdentity": {
@@ -26,10 +26,10 @@
     "nameLength": 15,
     "subtitleLength": 24,
     "promotionalTextLength": 118,
-    "descriptionLength": 1080,
+    "descriptionLength": 1135,
     "keywordsLength": 66,
     "reviewNotesPresent": true,
-    "testFlightWhatToTestLength": 592,
+    "testFlightWhatToTestLength": 698,
     "privacy": {
       "tracking": false,
       "dataUsedForAdvertising": false,
@@ -40,12 +40,12 @@
   "googlePlay": {
     "titleLength": 15,
     "shortDescriptionLength": 73,
-    "fullDescriptionLength": 1089,
+    "fullDescriptionLength": 1144,
     "dataSafety": {
       "tracking": false,
       "ads": false,
       "encryptedInTransit": true,
-      "dataCollectedCount": 3,
+      "dataCollectedCount": 5,
       "dataSharedCount": 2,
       "requiredPermissions": [
         "android.permission.CAMERA"
