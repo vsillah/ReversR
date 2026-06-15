@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-15T03:23:13Z",
+  "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 30 and iOS TestFlight build 14.",
+  "repository": {
+    "nameWithOwner": "vsillah/ReversR-Rebuild",
+    "mainCommit": "ff1b977b26c751a9056169c88b6a4860736663bb",
+    "mergedPullRequests": [
+      {
+        "number": 38,
+        "title": "feat: add launch update coordinator",
+        "mergeCommit": "8bbf9cc34d5e59ecefa8b699c5a67f084303be1b"
+      },
+      {
+        "number": 39,
+        "title": "fix: read installed native build version",
+        "mergeCommit": "ff1b977b26c751a9056169c88b6a4860736663bb"
+      }
+    ],
+    "localPreflight": [
+      {
+        "command": "npm run native:preflight:local",
+        "status": "passed"
+      },
+      {
+        "command": "npm run typecheck",
+        "status": "passed"
+      },
+      {
+        "command": "npm run accessibility:preflight",
+        "status": "passed"
+      }
+    ]
+  },
+  "androidGooglePlay": {
+    "packageName": "com.vsillah.reversrrebuild",
+    "easBuildId": "816cc0fd-ad7b-4888-b03b-8deb47f1915c",
+    "version": "1.0.0",
+    "versionCode": "30",
+    "runtimeVersion": "1.0.0",
+    "gitCommitHash": "ff1b977b26c751a9056169c88b6a4860736663bb",
+    "artifact": "https://expo.dev/artifacts/eas/VCDEzP9Vxj30XdwCU1MH6Y4CwQ_D_to817K3F64hCPU.aab",
+    "internalTesting": {
+      "track": "internal",
+      "status": "completed",
+      "verifiedVersionCodes": [
+        "30"
+      ],
+      "installUrl": "https://play.google.com/apps/internaltest/4700334027214849380"
+    },
+    "submissions": [
+      {
+        "id": "97df20a8-8fa0-4bb1-96ef-a3c000d6442a",
+        "status": "supersededByWaitedRetry",
+        "note": "Initial no-wait EAS submission was scheduled but did not update the Play internal track during polling."
+      },
+      {
+        "id": "b1ea38f3-2518-4174-8f1b-e8dba354bb7c",
+        "status": "failed",
+        "note": "Waited EAS retry failed while stale parallel Play edits were still clearing."
+      },
+      {
+        "id": "35169f13-0417-4306-ba70-00c8607c7080",
+        "status": "succeeded",
+        "note": "Waited EAS retry succeeded after a quiet period; Google Play internal track verification returned versionCode 30."
+      }
+    ],
+    "versionCodeNotes": [
+      {
+        "versionCode": "29",
+        "status": "consumedWithoutArtifact",
+        "note": "The first Android retry after remote versionCode 28 incremented to 29 but stopped at the Expo plan quota gate before producing an artifact."
+      }
+    ]
+  },
+  "iosTestFlight": {
+    "appStoreConnectAppId": "6777091538",
+    "easBuildId": "20d71dc0-e9c0-4da5-9141-ec9083ca99bd",
+    "buildId": "0b0626fc-60d3-4a10-9e4a-18f7e1d967a8",
+    "deliveryUuid": "0b0626fc-60d3-4a10-9e4a-18f7e1d967a8",
+    "version": "1.0.0",
+    "buildNumber": "14",
+    "runtimeVersion": "1.0.0",
+    "gitCommitHash": "ff1b977b26c751a9056169c88b6a4860736663bb",
+    "artifact": "https://expo.dev/artifacts/eas/zqMiAKwM_22TkTow0TiYFgwqXEjSEqfIxuCsw6a144w.ipa",
+    "upload": {
+      "tool": "xcrun altool",
+      "status": "succeeded",
+      "processingState": "VALID"
+    },
+    "groupsUpdated": [
+      {
+        "name": "ReversR Internal QA",
+        "groupId": "0e95a925-c6fa-4a5d-beda-a8311ec15785",
+        "action": "Build 14 attached through the App Store Connect API."
+      },
+      {
+        "name": "ReversR External Beta",
+        "groupId": "355ad927-f5a9-4ec5-81c7-3fb54f12ce62",
+        "action": "Build 14 attached through the App Store Connect API."
+      }
+    ],
+    "whatToTest": {
+      "locale": "en-US",
+      "localizationId": "fc2ffb92-49ae-4b0e-b41c-95f5a013a90a",
+      "status": "saved",
+      "text": "Build 14 includes the launch update coordinator, the native installed-build-version fix, Welcome menu/contrast updates, gated tester update banner, and Phase 2 inventory match layout improvements. Please install from TestFlight, launch the app, confirm the Welcome footer shows the installed build correctly, verify no false update banner appears when current, run the guided tour, and report any install, focus, checklist, or update prompt confusion."
+    },
+    "betaReview": {
+      "submissionStatus": "submitted",
+      "betaReviewState": "APPROVED",
+      "publicAppReviewSubmitted": false,
+      "productionRolloutStarted": false
+    },
+    "installUrl": "https://testflight.apple.com/join/twj2dNQY"
+  },
+  "hostedTesterManifest": {
+    "path": "public/release.json",
+    "androidVersionCode": 30,
+    "iosBuildNumber": "14",
+    "testerBuildAvailable": true,
+    "androidTesterBuildAvailable": true,
+    "iosTesterBuildAvailable": true
+  },
+  "remainingGates": [
+    "Tester install QA remains user/tester-owned: install from Google Play Internal Testing and TestFlight, then report any onboarding, focus, checklist, or update-prompt confusion.",
+    "No public App Review submission, App Store production rollout, Google Play production review, or public release was started in this sweep."
+  ]
+}
