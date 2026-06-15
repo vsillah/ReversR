@@ -1178,7 +1178,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 <Text style={styles.policyTitle}>Billing Plan Tier</Text>
                 {renderInfoButton('billing', 'Show billing plan details')}
               </View>
-              {renderTooltip('billing', 'Review the current tier, journey credits, and upgrade options. Billing changes are completed on the ReversR web account page.')}
+              {renderTooltip('billing', 'Review the current tier, journey credits, and upgrade options. One journey credit starts a reconstruction. Specs, sketches, BOMs, and exports in that journey do not spend additional credits. Billing changes are completed on the ReversR web account page.')}
 
               <View style={styles.planSummaryRow}>
                 <View style={styles.planBadge}>
@@ -1210,9 +1210,19 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 <View style={styles.usageTrack}>
                   <View style={[styles.usageFill, { width: `${usagePercent}%` }]} />
                 </View>
-                <Text style={styles.helpText}>
-                  One journey credit starts a reconstruction. Specs, sketches, BOMs, and exports in that journey do not spend additional credits. {resetLabel}.
-                </Text>
+                <View style={styles.resetCountdownCard}>
+                  <View style={styles.resetCountdownIcon}>
+                    <Ionicons
+                      name={usageIsUnlimited ? 'infinite-outline' : 'timer-outline'}
+                      size={16}
+                      color={Colors.accent}
+                    />
+                  </View>
+                  <View style={styles.resetCountdownCopy}>
+                    <Text style={styles.resetCountdownLabel}>Credit reset</Text>
+                    <Text style={styles.resetCountdownValue}>{resetLabel}</Text>
+                  </View>
+                </View>
               </View>
 
               <View style={styles.planListHeader}>
@@ -2208,6 +2218,41 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   usageFill: {
     height: '100%',
     backgroundColor: Colors.accent,
+  },
+  resetCountdownCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.10)' : '#ecfdf5',
+  },
+  resetCountdownIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.16)' : '#d1fae5',
+  },
+  resetCountdownCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  resetCountdownLabel: {
+    color: Colors.mutedText,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  resetCountdownValue: {
+    color: Colors.accent,
+    fontSize: 13,
+    fontWeight: '900',
+    marginTop: 2,
   },
   planListHeader: {
     flexDirection: 'row',
