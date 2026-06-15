@@ -29,9 +29,11 @@ interface WelcomeScreenProps {
   onStart: () => void;
   onHistory?: () => void;
   onSettings?: () => void;
+  onProfile?: () => void;
   onTour?: () => void;
   userDisplayName?: string;
   userIsAuthenticated?: boolean;
+  userAvatarUri?: string;
 }
 
 const phases = [
@@ -74,9 +76,11 @@ export default function WelcomeScreen({
   onStart,
   onHistory,
   onSettings,
+  onProfile,
   onTour,
   userDisplayName = 'Guest',
   userIsAuthenticated = false,
+  userAvatarUri = '',
 }: WelcomeScreenProps) {
   const { colors: Colors } = useAppTheme();
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -127,19 +131,23 @@ export default function WelcomeScreen({
         {hasMenuActions && (
           <View style={styles.topBar}>
             <View style={styles.topActions}>
-              {onSettings && (
+              {(onProfile || onSettings) && (
                 <TouchableOpacity
                   style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
-                  onPress={() => handleMenuAction(onSettings)}
+                  onPress={() => handleMenuAction(onProfile || onSettings)}
                   accessibilityRole="button"
-                  accessibilityLabel={userIsAuthenticated ? `Open account settings for ${userDisplayName}` : 'Open account settings as guest'}
+                  accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
                   testID="welcome-profile-chip"
                 >
-                  <Ionicons
-                    name={profileIcon}
-                    size={18}
-                    color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
-                  />
+                  {userAvatarUri ? (
+                    <Image source={{ uri: userAvatarUri }} style={styles.profileAvatarThumb} resizeMode="cover" />
+                  ) : (
+                    <Ionicons
+                      name={profileIcon}
+                      size={18}
+                      color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+                    />
+                  )}
                   <Text
                     style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
                     numberOfLines={1}
@@ -347,6 +355,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   profileButtonActive: {
     borderColor: Colors.accent,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.10)' : '#ecfdf5',
+  },
+  profileAvatarThumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 999,
+    backgroundColor: Colors.surface,
   },
   profileButtonText: {
     color: Colors.gray[400],

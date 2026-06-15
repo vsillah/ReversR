@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -48,8 +48,9 @@ import {
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
 
-export type SettingsSection = 'account' | 'ai' | 'inventory' | 'admin' | 'legal';
+export type SettingsSection = 'profile' | 'account' | 'ai' | 'inventory' | 'admin' | 'legal';
 type SettingsTooltip =
+  | 'profileImage'
   | 'billing'
   | 'email'
   | 'invite'
@@ -167,6 +168,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [countdownNow, setCountdownNow] = useState(Date.now());
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('account');
   const [inventoryEditing, setInventoryEditing] = useState(false);
+  const profileImageInputRef = React.useRef<any>(null);
 
   const policyLinks = [
     {
@@ -185,6 +187,36 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       icon: 'help-circle-outline' as const,
     },
   ];
+
+  const triggerProfileImageUpload = () => {
+    if (Platform.OS === 'web') {
+      profileImageInputRef.current?.click?.();
+      return;
+    }
+    setCommercialStatus('Profile image upload is available in the web preview. Native image picker support can be added to a future tester build.');
+  };
+
+  const handleProfileImageSelected = (event: any) => {
+    const file = event?.target?.files?.[0];
+    if (!file) return;
+    if (!String(file.type || '').startsWith('image/')) {
+      setCommercialStatus('Select an image file for the profile photo.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageData = typeof reader.result === 'string' ? reader.result : '';
+      if (!imageData) {
+        setCommercialStatus('Unable to read that profile image.');
+        return;
+      }
+      setCommercialProfile(prev => ({ ...prev, avatarUri: imageData }));
+      setCommercialStatus('Profile image selected. Save Profile to keep it on this device.');
+    };
+    reader.onerror = () => setCommercialStatus('Unable to read that profile image.');
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
 
   useEffect(() => {
     if (visible) {
@@ -241,6 +273,13 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   const saveSettings = async () => {
     try {
+      if (settingsSection === 'profile') {
+        await saveProfile({
+          ...commercialProfile,
+          name: commercialProfile.name.trim() || 'Repair shop user',
+          avatarUri: commercialProfile.avatarUri || '',
+        });
+      }
       if (localProviderSettingsEnabled) {
         await AsyncStorage.setItem('ai_provider', provider);
         await AsyncStorage.setItem('ollama_model', ollamaModel);
@@ -790,7 +829,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const canUseAdminConsole = Boolean(adminCredentialSettingsEnabled || account?.entitlements.canUseAdminConsole || account?.access?.role === 'super_admin');
   const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
   const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
-    { id: 'account', label: 'Account', icon: 'person-circle-outline' },
+    { id: 'profile', label: 'Profile', icon: 'person-circle-outline' },
+    { id: 'account', label: 'Plan', icon: 'briefcase-outline' },
     { id: 'ai', label: 'AI', icon: 'hardware-chip-outline' },
     { id: 'inventory', label: 'Inventory', icon: 'git-branch-outline' },
     ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
@@ -864,7 +904,155 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             ))}
           </View>
 
+          {Platform.OS === 'web' && React.createElement('input', {
+            ref: profileImageInputRef,
+            type: 'file',
+            accept: 'image/*',
+            style: { display: 'none' },
+            onChange: handleProfileImageSelected,
+          })}
+
           <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
+            {settingsSection === 'profile' && (
+              <View style={styles.profilePanel}>
+                <View style={styles.policyHeader}>
+                  <Ionicons name="person-circle-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Profile</Text>
+                </View>
+
+                <View style={styles.profileAvatarRow}>
+                  <View style={styles.profileAvatarFrame}>
+                    {commercialProfile.avatarUri ? (
+                      <Image
+                        source={{ uri: commercialProfile.avatarUri }}
+                        style={styles.profileAvatarImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Ionicons name="person-outline" size={30} color={Colors.accent} />
+                    )}
+                  </View>
+                  <View style={styles.profileAvatarActions}>
+                    <View style={styles.labelWithInfo}>
+                      <Text style={styles.compactLabel}>Profile image</Text>
+                      {renderInfoButton('profileImage', 'Show profile image details')}
+                    </View>
+                    {renderTooltip('profileImage', 'Upload a local image to replace the person icon in the top-right profile chip. The image is stored on this device with the profile settings.')}
+                    <View style={styles.adminActionRow}>
+                      <TouchableOpacity
+                        style={[styles.adminButton, styles.grantButton]}
+                        onPress={triggerProfileImageUpload}
+                        accessibilityRole="button"
+                        accessibilityLabel="Upload profile image"
+                      >
+                        <Ionicons name="image-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Upload</Text>
+                      </TouchableOpacity>
+                      {commercialProfile.avatarUri ? (
+                        <TouchableOpacity
+                          style={[styles.adminButton, styles.grantButton]}
+                          onPress={() => setCommercialProfile(prev => ({ ...prev, avatarUri: '' }))}
+                          accessibilityRole="button"
+                          accessibilityLabel="Remove profile image"
+                        >
+                          <Ionicons name="trash-outline" size={16} color={Colors.accent} />
+                          <Text style={styles.adminButtonText}>Remove</Text>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  </View>
+                </View>
+
+                <Text style={styles.compactLabel}>Client name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={commercialProfile.name}
+                  onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
+                  accessibilityLabel="Profile client name"
+                  placeholder="Client name"
+                  placeholderTextColor={Colors.gray[500]}
+                />
+
+                <Text style={styles.compactLabel}>Password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={accessPassword}
+                  onChangeText={setAccessPassword}
+                  accessibilityLabel="Profile access password"
+                  placeholder="Current or starter password"
+                  placeholderTextColor={Colors.gray[500]}
+                  autoCapitalize="none"
+                  secureTextEntry
+                />
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={handleActivateAccessPassword}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Activate profile password"
+                  >
+                    <Ionicons name="key-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Activate</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                    onPress={() => setPasswordResetOpen(prev => !prev)}
+                    disabled={accountLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Show profile password reset fields"
+                    accessibilityState={{ expanded: passwordResetOpen }}
+                  >
+                    <Ionicons name={passwordResetOpen ? 'chevron-up-outline' : 'refresh-outline'} size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Reset</Text>
+                  </TouchableOpacity>
+                  {account?.access && (
+                    <TouchableOpacity
+                      style={[styles.adminButton, accountLoading && styles.disabledButton]}
+                      onPress={handleClearAccessPassword}
+                      disabled={accountLoading}
+                      accessibilityRole="button"
+                      accessibilityLabel="Clear profile access password"
+                    >
+                      <Ionicons name="person-outline" size={16} color={Colors.accent} />
+                      <Text style={styles.adminButtonText}>Guest</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {(passwordResetOpen || account?.access?.requiresPasswordReset) && (
+                  <>
+                    <Text style={styles.compactLabel}>New password</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={newAccessPassword}
+                      onChangeText={setNewAccessPassword}
+                      accessibilityLabel="Profile new password"
+                      placeholder="Set your replacement password"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      secureTextEntry
+                    />
+                    <TouchableOpacity
+                      style={[styles.saveCredentialButton, accountLoading && styles.disabledButton]}
+                      onPress={handleResetAccessPassword}
+                      disabled={accountLoading}
+                      accessibilityRole="button"
+                      accessibilityLabel="Save profile password reset"
+                    >
+                      <Ionicons name="checkmark-circle-outline" size={17} color={Colors.black} />
+                      <Text style={styles.saveCredentialButtonText}>Save New Password</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+
+                {(commercialStatus || accessStatus || accountError) && (
+                  <Text style={styles.adminStatusText}>{commercialStatus || accessStatus || accountError}</Text>
+                )}
+              </View>
+            )}
+
             {settingsSection === 'account' && (
               <>
             <View style={styles.appearancePanel}>
@@ -989,16 +1177,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   );
                 })}
               </View>
-
-              <Text style={styles.compactLabel}>Display name</Text>
-              <TextInput
-                style={styles.input}
-                value={commercialProfile.name}
-                onChangeText={(name) => setCommercialProfile(prev => ({ ...prev, name }))}
-                accessibilityLabel="Commercial profile display name"
-                placeholder="Your name"
-                placeholderTextColor={Colors.gray[500]}
-              />
 
               <View style={styles.labelWithInfo}>
                 <Text style={styles.compactLabel}>Work email</Text>
@@ -1938,9 +2116,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             style={styles.saveButton}
             onPress={saveSettings}
             accessibilityRole="button"
-            accessibilityLabel="Save settings"
+            accessibilityLabel={settingsSection === 'profile' ? 'Save profile' : 'Save settings'}
           >
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveButtonText}>{settingsSection === 'profile' ? 'Save Profile' : 'Save Changes'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -2074,6 +2252,39 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: 14,
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  profilePanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 24,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  profileAvatarRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 12,
+  },
+  profileAvatarFrame: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: Colors.panel,
+  },
+  profileAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  profileAvatarActions: {
+    flex: 1,
+    minWidth: 0,
   },
   planSummaryRow: {
     flexDirection: 'row',

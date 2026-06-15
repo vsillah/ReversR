@@ -521,6 +521,7 @@ export default function HomeScreen() {
     ? (savedDisplayName && savedDisplayName !== 'Repair shop user' ? savedDisplayName : 'User')
     : 'Guest';
   const userChipIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
+  const userAvatarUri = profile.avatarUri || '';
 
   const openSettings = useCallback((section: SettingsSection = 'account') => {
     setSettingsInitialSection(section);
@@ -1352,9 +1353,11 @@ export default function HomeScreen() {
           onStart={handleStartNew}
           onHistory={openHistory}
           onSettings={() => openSettings('account')}
+          onProfile={() => openSettings('profile')}
           onTour={startTour}
           userDisplayName={userDisplayName}
           userIsAuthenticated={userIsAuthenticated}
+          userAvatarUri={userAvatarUri}
         />
         <SettingsModal
           visible={showSettings}
@@ -1397,16 +1400,20 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity
           style={[styles.userChip, styles.userChipFloating, userIsAuthenticated && styles.userChipActive]}
-          onPress={() => openSettings('account')}
+          onPress={() => openSettings('profile')}
           accessibilityRole="button"
-          accessibilityLabel={userIsAuthenticated ? `Open account settings for ${userDisplayName}` : 'Open account settings as guest'}
+          accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
           testID="reversr-user-chip"
         >
-          <Ionicons
-            name={userChipIcon}
-            size={18}
-            color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
-          />
+          {userAvatarUri ? (
+            <Image source={{ uri: userAvatarUri }} style={styles.userChipAvatar} resizeMode="cover" />
+          ) : (
+            <Ionicons
+              name={userChipIcon}
+              size={18}
+              color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+            />
+          )}
           <Text
             style={[styles.userChipText, userIsAuthenticated && styles.userChipTextActive]}
             numberOfLines={1}
@@ -1750,6 +1757,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   userChipActive: {
     borderColor: Colors.accent,
     backgroundColor: Colors.accent + '10',
+  },
+  userChipAvatar: {
+    width: 22,
+    height: 22,
+    borderRadius: 999,
+    backgroundColor: Colors.surface,
   },
   userChipText: {
     color: Colors.gray[400],

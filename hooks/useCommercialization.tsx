@@ -23,6 +23,7 @@ export interface CommercialProfile {
   email: string;
   role?: string;
   shopName: string;
+  avatarUri?: string;
 }
 
 export interface CommercialEntitlements {
@@ -191,6 +192,7 @@ const defaultProfile: CommercialProfile = {
   name: 'Repair shop user',
   email: '',
   shopName: 'ReversR Repair Shop',
+  avatarUri: '',
 };
 
 const CommercialContext = createContext<CommercialContextValue | null>(null);
@@ -403,6 +405,7 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
       name: nextProfile.name.trim() || defaultProfile.name,
       email: nextProfile.email.trim().toLowerCase(),
       shopName: nextProfile.shopName.trim() || defaultProfile.shopName,
+      avatarUri: nextProfile.avatarUri || '',
     };
     await AsyncStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(cleanProfile));
     setProfileState(cleanProfile);
