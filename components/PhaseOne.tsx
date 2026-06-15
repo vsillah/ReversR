@@ -108,6 +108,10 @@ export default function PhaseOne({
     return input.trim().length > 0;
   };
 
+  const submitDisabled = !hasValidInput() || !!mockAnalysis;
+  const submitLocked = !isLoading && submitDisabled;
+  const submitIconColor = submitLocked ? Colors.mutedText : '#ffffff';
+
   const handleAnalyze = async () => {
     const activeInput = getActiveInput() || mockInput || '';
     if (!activeInput.trim() && !capturedImage) return;
@@ -426,23 +430,25 @@ export default function PhaseOne({
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (!hasValidInput() || !!mockAnalysis) && styles.submitButtonDisabled,
+            submitLocked && styles.submitButtonDisabled,
           ]}
           onPress={handleAnalyze}
-          disabled={isLoading || !hasValidInput() || !!mockAnalysis}
+          disabled={isLoading || submitDisabled}
           accessibilityRole="button"
           accessibilityLabel={mockAnalysis ? 'Mock scan result is preloaded' : 'Initiate machine scan'}
-          accessibilityState={{ disabled: isLoading || !hasValidInput() || !!mockAnalysis }}
+          accessibilityState={{ disabled: isLoading || submitDisabled }}
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={Colors.white} />
+              <ActivityIndicator size="small" color="#ffffff" />
               <Text style={styles.submitButtonText}>Scanning Machine...</Text>
             </View>
           ) : (
             <View style={styles.buttonContent}>
-              <Text style={styles.submitButtonText}>{mockAnalysis ? 'Mock Scan Preloaded' : 'Start Machine Scan'}</Text>
-              <Ionicons name="flash" size={18} color={Colors.white} />
+              <Text style={[styles.submitButtonText, submitLocked && styles.submitButtonTextDisabled]}>
+                {mockAnalysis ? 'Mock Scan Preloaded' : 'Start Machine Scan'}
+              </Text>
+              <Ionicons name="flash" size={18} color={submitIconColor} />
             </View>
           )}
         </TouchableOpacity>
@@ -720,18 +726,24 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   submitButton: {
     backgroundColor: Colors.blue[600],
+    borderWidth: 1,
+    borderColor: Colors.blue[600],
     borderRadius: 8,
     padding: Spacing.md,
     alignItems: 'center',
     marginTop: Spacing.lg,
   },
   submitButtonDisabled: {
-    opacity: 0.5,
+    backgroundColor: Colors.elevated,
+    borderColor: Colors.border,
   },
   submitButtonText: {
-    color: Colors.mode === 'dark' ? Colors.white : '#ffffff',
+    color: '#ffffff',
     fontSize: FontSizes.md,
     fontWeight: '600',
+  },
+  submitButtonTextDisabled: {
+    color: Colors.mutedText,
   },
   loadingContainer: {
     flexDirection: 'row',
