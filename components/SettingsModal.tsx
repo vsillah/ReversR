@@ -49,7 +49,17 @@ import {
 } from '../utils/inventoryConnector';
 
 export type SettingsSection = 'account' | 'inventory' | 'admin' | 'legal';
-type SettingsTooltip = 'billing' | 'email' | 'invite' | 'password' | null;
+type SettingsTooltip =
+  | 'billing'
+  | 'email'
+  | 'invite'
+  | 'password'
+  | 'connectorAdmin'
+  | 'adminToken'
+  | 'creditRules'
+  | 'credentialReference'
+  | 'credentialAuth'
+  | null;
 
 interface SettingsModalProps {
   visible: boolean;
@@ -1455,13 +1465,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 <View style={styles.policyHeader}>
                   <Ionicons name="server-outline" size={18} color={Colors.accent} />
                   <Text style={styles.policyTitle}>Admin Connector Credentials</Text>
+                  {renderInfoButton('connectorAdmin', 'Show connector credential source details')}
                 </View>
-                <Text style={styles.policyText}>
-                  Advanced setup for private inventory connectors. This is separate from tester invite codes and account passwords.
-                </Text>
+                {renderTooltip('connectorAdmin', 'Use this only for private inventory connectors such as ERP, parts database, or spreadsheet APIs. Get the API admin token from the ReversR API deployment owner. Get API-key or OAuth credentials from the external inventory provider admin portal, save them here as backend references, then use that reference in Inventory Source.')}
                 <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
 
-                <Text style={styles.compactLabel}>API admin token</Text>
+                <View style={styles.labelWithInfo}>
+                  <Text style={styles.compactLabel}>API admin token</Text>
+                  {renderInfoButton('adminToken', 'Show API admin token details')}
+                </View>
+                {renderTooltip('adminToken', 'Get this from the hosted API environment value ADMIN_API_TOKEN, or from a ReversR super admin or deployment owner. It authorizes this Settings session to load or save backend credential references. It is not a tester invite code, account password, API key, or OAuth token. It is not saved in the app.')}
                 <TextInput
                   style={styles.input}
                   value={adminToken}
@@ -1471,9 +1484,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   autoCapitalize="none"
                   secureTextEntry
                 />
-                <Text style={styles.helpText}>
-                  Authorizes this Settings session to load or save backend credential references. The token is not a tester code and is not saved in the app.
-                </Text>
 
                 <View style={styles.adminActionRow}>
                   <TouchableOpacity
@@ -1497,10 +1507,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 <View style={styles.policyHeader}>
                   <Ionicons name="speedometer-outline" size={18} color={Colors.accent} />
                   <Text style={styles.policyTitle}>Journey Credit Rules</Text>
+                  {renderInfoButton('creditRules', 'Show journey credit rule details')}
                 </View>
-                <Text style={styles.policyText}>
-                  Configure the credit allowance and reset frequency without shipping a new app build. Default Free is 5 credits per week.
-                </Text>
+                {renderTooltip('creditRules', 'Configure plan credit allowance and reset frequency without shipping a new app build. Default Free is 5 credits per week. Changes require the API admin token above.')}
 
                 <Text style={styles.compactLabel}>Plan</Text>
                 <View style={styles.themeToggleRow}>
@@ -1572,7 +1581,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </TouchableOpacity>
                 </View>
 
-                <Text style={styles.compactLabel}>Backend credential reference</Text>
+                <View style={styles.labelWithInfo}>
+                  <Text style={styles.compactLabel}>Backend credential reference</Text>
+                  {renderInfoButton('credentialReference', 'Show backend credential reference details')}
+                </View>
+                {renderTooltip('credentialReference', 'Create a short reference name for the external provider secret, for example partsledger-prod-api-key. After saving, use this same reference in Inventory Source. The app stores this name only; the raw secret stays on the backend.')}
                 <TextInput
                   style={styles.input}
                   value={credentialRef}
@@ -1581,10 +1594,12 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   placeholderTextColor={Colors.gray[500]}
                   autoCapitalize="none"
                 />
-                <Text style={styles.helpText}>
-                  Reference name used by Inventory Source. The app keeps this name only; the secret value stays on the backend.
-                </Text>
 
+                <View style={styles.labelWithInfo}>
+                  <Text style={styles.compactLabel}>Credential type</Text>
+                  {renderInfoButton('credentialAuth', 'Show API key and OAuth credential details')}
+                </View>
+                {renderTooltip('credentialAuth', 'Choose API Key when the inventory provider gives you a fixed key and header name. Choose OAuth when the provider gives you a bearer access token. These credentials come from the provider admin portal or the shop IT/admin owner, not from ReversR tester setup.')}
                 <View style={styles.providerRow}>
                   {(['api_key', 'oauth'] as const).map(mode => (
                     <TouchableOpacity
@@ -1601,9 +1616,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     </TouchableOpacity>
                   ))}
                 </View>
-                <Text style={styles.helpText}>
-                  API Key stores a fixed key/header for a connector. OAuth stores a bearer token issued by an external inventory system.
-                </Text>
 
                 {credentialMode === 'api_key' && (
                   <>
