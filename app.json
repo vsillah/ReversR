@@ -9,7 +9,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vsillah.reversrrebuild",
-      "buildNumber": "13",
+      "buildNumber": "15",
       "infoPlist": {
         "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
         "ITSAppUsesNonExemptEncryption": false
@@ -31,7 +31,7 @@
         "android.permission.READ_MEDIA_VIDEO"
       ],
       "package": "com.vsillah.reversrrebuild",
-      "versionCode": 28
+      "versionCode": 31
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -67,7 +67,7 @@
     "scheme": "reversr-rebuild",
     "extra": {
       "apiBaseUrl": "https://reversr.vercel.app",
-      "releaseDate": "2026-06-14",
+      "releaseDate": "2026-06-15",
       "releaseManifestUrl": "https://reversr.vercel.app/release.json",
       "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
       "termsUrl": "https://reversr.vercel.app/terms",

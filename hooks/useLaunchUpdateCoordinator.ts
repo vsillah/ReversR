@@ -77,10 +77,17 @@ const configuredReleaseManifestUrl = typeof releaseExtra.releaseManifestUrl === 
 const TESTFLIGHT_URL = 'https://testflight.apple.com/join/twj2dNQY';
 const PLAY_INTERNAL_TEST_URL = 'https://play.google.com/apps/internaltest/4700334027214849380';
 
-export const installedAppVersion = Application.nativeApplicationVersion || appVersion;
+const isExpoGo = Constants.appOwnership === 'expo';
+export const installedAppVersion = isExpoGo
+  ? appVersion
+  : Application.nativeApplicationVersion || appVersion;
 
 export const getInstalledNativeBuildNumber = () => {
   if (Platform.OS === 'web') {
+    return undefined;
+  }
+
+  if (isExpoGo) {
     return undefined;
   }
 
