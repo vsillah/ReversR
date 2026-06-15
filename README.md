@@ -1,6 +1,6 @@
 # ReversR Rebuild
 
-ReversR Rebuild is a clone direction for the original ReversR app. The old ideation phase has been replaced with an inventory connector and machine reconstruction workflow.
+ReversR Rebuild is the Machine Rebuild product line. It is intentionally separate from `ReversR-SIT`, which keeps the Systematic Inventive Thinking concept-generation app.
 
 ## Workflow
 
@@ -39,7 +39,7 @@ demo://sample-machines
 Or validate the sample CSV fixture:
 
 ```text
-file:///Users/vambahsillah/Documents/ReversR/original-ReversR/docs/sample-machine-inventory.csv
+file:///Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild/docs/sample-machine-inventory.csv
 ```
 
 See [docs/inventory-connector-spec.md](docs/inventory-connector-spec.md).

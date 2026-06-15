@@ -1,6 +1,6 @@
 # ReversR Rebuild Hosted Operator Packet
 
-Generated at: 2026-06-13T03:43:58.838Z
+Generated at: 2026-06-15T15:55:53.931Z
 
 This folder is the hosted API, policy URL, preview smoke, and real inventory connector handoff packet. It prepares the hosted lane for native builds and store-console metadata. It does not prove that the API, policy pages, or real inventory connector are already deployed.
 
@@ -43,7 +43,7 @@ This folder is the hosted API, policy URL, preview smoke, and real inventory con
    - Prove hosted privacy, terms, and support URLs are reachable over public HTTPS.
 5. `npm run inventory:farmbot:validate`
    - Generate and validate the public FarmBot Genesis v1.8 machine inventory before connecting it to the hosted API.
-6. `EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR/refs/heads/codex/inventory-reconstruction-clone/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke`
+6. `EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke`
    - Prove hosted machine inventory validation, machine matching, BOM generation, and no-raw-secret handling against a public source.
 7. `PREVIEW_SMOKE_URL=<preview-url> PREVIEW_SMOKE_VERCEL_BYPASS_SECRET=<secret> npm run preview:smoke`
    - Prove the PR preview renders the app and policy/support routes before production hosting decisions.

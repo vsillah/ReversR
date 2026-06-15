@@ -110,7 +110,7 @@ const commandSequence = [
   },
   {
     id: 'hosted-connector-smoke',
-    command: 'EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR/refs/heads/codex/inventory-reconstruction-clone/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke',
+    command: 'EXPO_PUBLIC_API_BASE_URL=https://reversr.vercel.app CONNECTOR_SMOKE_SOURCE_URL=https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/farmbot-genesis-v1.8.json CONNECTOR_SMOKE_AUTH_MODE=none CONNECTOR_SMOKE_EXPECTED_MACHINE_ID=FARMBOT-GENESIS-V1-8 npm run connector:smoke',
     purpose: 'Prove hosted machine inventory validation, machine matching, BOM generation, and no-raw-secret handling against a public source.',
   },
   {
