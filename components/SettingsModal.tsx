@@ -345,7 +345,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const requireAdminToken = () => {
     const token = adminToken.trim();
     if (!token) {
-      setAdminStatus('Enter the API admin token to manage backend credentials and commercial access grants.');
+      setAdminStatus('Enter the API admin token in Inventory settings before managing backend credentials or admin rules.');
       return null;
     }
     return token;
@@ -378,7 +378,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     const token = requireAdminToken();
     if (!token) return;
 
-    const ref = credentialRef.trim();
+    const ref = (credentialRef.trim() || inventoryConnector.credentialRef?.trim() || '');
     const secretValue = credentialValue.trim();
     if (!ref || !secretValue) {
       setAdminStatus('Credential ref and secret value are required.');
@@ -1431,16 +1431,148 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
                   {inventoryConnector.authMode !== 'none' && (
                     <>
-                      <Text style={styles.compactLabel}>Backend credential reference</Text>
+                      <View style={styles.labelWithInfo}>
+                        <Text style={styles.compactLabel}>Backend credential reference</Text>
+                        {renderInfoButton('credentialReference', 'Show backend credential reference details')}
+                      </View>
+                      {renderTooltip('credentialReference', 'Create a short reference name for the external provider secret, for example partsledger-prod-api-key. After saving, use this same reference in Inventory Source. The app stores this name only; the raw secret stays on the backend.')}
                       <TextInput
                         style={styles.input}
                         value={inventoryConnector.credentialRef || ''}
-                        onChangeText={(credentialRef) => updateInventoryConnector({ credentialRef })}
+                        onChangeText={(nextCredentialRef) => {
+                          updateInventoryConnector({ credentialRef: nextCredentialRef });
+                          setCredentialRef(nextCredentialRef);
+                        }}
                         accessibilityLabel="Inventory backend credential reference"
                         placeholder="partsledger-prod-api-key"
                         placeholderTextColor={Colors.gray[500]}
                         autoCapitalize="none"
                       />
+
+                      <View style={styles.inlineAdminPanel}>
+                        <View style={styles.policyHeader}>
+                          <Ionicons name="server-outline" size={18} color={Colors.accent} />
+                          <Text style={styles.policyTitle}>Private Connector Credentials</Text>
+                          {renderInfoButton('connectorAdmin', 'Show connector credential source details')}
+                        </View>
+                        {renderTooltip('connectorAdmin', 'Use this only for private inventory connectors such as ERP, parts database, or spreadsheet APIs. Get the API admin token from the ReversR API deployment owner. Get API-key or OAuth credentials from the external inventory provider admin portal, save them here as backend references, then use that reference in Inventory Source.')}
+                        <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
+
+                        <View style={styles.labelWithInfo}>
+                          <Text style={styles.compactLabel}>API admin token</Text>
+                          {renderInfoButton('adminToken', 'Show API admin token details')}
+                        </View>
+                        {renderTooltip('adminToken', 'Get this from the hosted API environment value ADMIN_API_TOKEN, or from a ReversR super admin or deployment owner. It authorizes this Settings session to load or save backend credential references. It is not a tester invite code, account password, API key, or OAuth token. It is not saved in the app.')}
+                        <TextInput
+                          style={styles.input}
+                          value={adminToken}
+                          onChangeText={setAdminToken}
+                          placeholder="Session-only API admin token"
+                          placeholderTextColor={Colors.gray[500]}
+                          autoCapitalize="none"
+                          secureTextEntry
+                        />
+
+                        <View style={styles.adminActionRow}>
+                          <TouchableOpacity
+                            style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                            onPress={loadCredentials}
+                            disabled={adminLoading}
+                            accessibilityRole="button"
+                            accessibilityLabel="Load backend credential references"
+                          >
+                            <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                            <Text style={styles.adminButtonText}>{adminLoading ? 'Working...' : 'Load Refs'}</Text>
+                          </TouchableOpacity>
+                          <View style={[styles.registryBadge, registryEnabled === false && styles.registryBadgeWarn]}>
+                            <Text style={styles.registryBadgeText}>
+                              {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.labelWithInfo}>
+                          <Text style={styles.compactLabel}>Credential type</Text>
+                          {renderInfoButton('credentialAuth', 'Show API key and OAuth credential details')}
+                        </View>
+                        {renderTooltip('credentialAuth', 'Choose API Key when the inventory provider gives you a fixed key and header name. Choose OAuth when the provider gives you a bearer access token. These credentials come from the provider admin portal or the shop IT/admin owner, not from ReversR tester setup.')}
+                        <View style={styles.providerRow}>
+                          {(['api_key', 'oauth'] as const).map(mode => (
+                            <TouchableOpacity
+                              key={mode}
+                              style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
+                              onPress={() => setCredentialMode(mode)}
+                              accessibilityRole="button"
+                              accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
+                              accessibilityState={{ selected: credentialMode === mode }}
+                            >
+                              <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
+                                {mode === 'api_key' ? 'API Key' : 'OAuth'}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+
+                        {credentialMode === 'api_key' && (
+                          <>
+                            <Text style={styles.compactLabel}>Header name</Text>
+                            <TextInput
+                              style={styles.input}
+                              value={credentialHeaderName}
+                              onChangeText={setCredentialHeaderName}
+                              placeholder="X-API-Key"
+                              placeholderTextColor={Colors.gray[500]}
+                              autoCapitalize="none"
+                            />
+                          </>
+                        )}
+
+                        <Text style={styles.compactLabel}>{credentialMode === 'api_key' ? 'API key value' : 'OAuth bearer token'}</Text>
+                        <TextInput
+                          style={styles.input}
+                          value={credentialValue}
+                          onChangeText={setCredentialValue}
+                          placeholder="Sent to backend, then cleared from this form"
+                          placeholderTextColor={Colors.gray[500]}
+                          autoCapitalize="none"
+                          secureTextEntry
+                        />
+
+                        <TouchableOpacity
+                          style={[styles.saveCredentialButton, adminLoading && styles.disabledButton]}
+                          onPress={handleSaveCredential}
+                          disabled={adminLoading}
+                          accessibilityRole="button"
+                          accessibilityLabel="Save backend credential reference"
+                        >
+                          <Ionicons name="key-outline" size={17} color={Colors.black} />
+                          <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
+                        </TouchableOpacity>
+
+                        {adminStatus && <Text style={styles.adminStatusText}>{adminStatus}</Text>}
+
+                        <View style={styles.credentialList}>
+                          {credentials.map(item => (
+                            <View key={item.credentialRef} style={styles.credentialCard}>
+                              <View style={styles.credentialInfo}>
+                                <Text style={styles.credentialRefText}>{item.credentialRef}</Text>
+                                <Text style={styles.credentialMetaText}>
+                                  {(item.authModes || []).join(', ') || 'credential'} | {(item.headerNames || []).join(', ') || 'headers hidden'} | {item.source || 'backend'}
+                                </Text>
+                              </View>
+                              <TouchableOpacity
+                                style={styles.deleteCredentialButton}
+                                onPress={() => handleDeleteCredential(item.credentialRef)}
+                                disabled={adminLoading}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
+                              >
+                                <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
                     </>
                   )}
 
@@ -1462,48 +1594,6 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
             {settingsSection === 'admin' && canUseAdminConsole && (
               <View style={styles.adminPanel}>
-                <View style={styles.policyHeader}>
-                  <Ionicons name="server-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Admin Connector Credentials</Text>
-                  {renderInfoButton('connectorAdmin', 'Show connector credential source details')}
-                </View>
-                {renderTooltip('connectorAdmin', 'Use this only for private inventory connectors such as ERP, parts database, or spreadsheet APIs. Get the API admin token from the ReversR API deployment owner. Get API-key or OAuth credentials from the external inventory provider admin portal, save them here as backend references, then use that reference in Inventory Source.')}
-                <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
-
-                <View style={styles.labelWithInfo}>
-                  <Text style={styles.compactLabel}>API admin token</Text>
-                  {renderInfoButton('adminToken', 'Show API admin token details')}
-                </View>
-                {renderTooltip('adminToken', 'Get this from the hosted API environment value ADMIN_API_TOKEN, or from a ReversR super admin or deployment owner. It authorizes this Settings session to load or save backend credential references. It is not a tester invite code, account password, API key, or OAuth token. It is not saved in the app.')}
-                <TextInput
-                  style={styles.input}
-                  value={adminToken}
-                  onChangeText={setAdminToken}
-                  placeholder="Session-only API admin token"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                    onPress={loadCredentials}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Load backend credential references"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>{adminLoading ? 'Working...' : 'Load Refs'}</Text>
-                  </TouchableOpacity>
-                  <View style={[styles.registryBadge, registryEnabled === false && styles.registryBadgeWarn]}>
-                    <Text style={styles.registryBadgeText}>
-                      {registryEnabled === null ? 'not checked' : registryEnabled ? 'registry on' : 'writes off'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.superAdminDivider} />
                 <View style={styles.policyHeader}>
                   <Ionicons name="speedometer-outline" size={18} color={Colors.accent} />
                   <Text style={styles.policyTitle}>Journey Credit Rules</Text>
@@ -1581,101 +1671,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.labelWithInfo}>
-                  <Text style={styles.compactLabel}>Backend credential reference</Text>
-                  {renderInfoButton('credentialReference', 'Show backend credential reference details')}
-                </View>
-                {renderTooltip('credentialReference', 'Create a short reference name for the external provider secret, for example partsledger-prod-api-key. After saving, use this same reference in Inventory Source. The app stores this name only; the raw secret stays on the backend.')}
-                <TextInput
-                  style={styles.input}
-                  value={credentialRef}
-                  onChangeText={setCredentialRef}
-                  placeholder="partsledger-prod-api-key"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                />
-
-                <View style={styles.labelWithInfo}>
-                  <Text style={styles.compactLabel}>Credential type</Text>
-                  {renderInfoButton('credentialAuth', 'Show API key and OAuth credential details')}
-                </View>
-                {renderTooltip('credentialAuth', 'Choose API Key when the inventory provider gives you a fixed key and header name. Choose OAuth when the provider gives you a bearer access token. These credentials come from the provider admin portal or the shop IT/admin owner, not from ReversR tester setup.')}
-                <View style={styles.providerRow}>
-                  {(['api_key', 'oauth'] as const).map(mode => (
-                    <TouchableOpacity
-                      key={mode}
-                      style={[styles.providerButton, credentialMode === mode && styles.providerButtonActive]}
-                      onPress={() => setCredentialMode(mode)}
-                      accessibilityRole="button"
-                      accessibilityLabel={mode === 'api_key' ? 'Use API key credential mode' : 'Use OAuth credential mode'}
-                      accessibilityState={{ selected: credentialMode === mode }}
-                    >
-                      <Text style={[styles.providerButtonText, credentialMode === mode && styles.providerButtonTextActive]}>
-                        {mode === 'api_key' ? 'API Key' : 'OAuth'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {credentialMode === 'api_key' && (
-                  <>
-                    <Text style={styles.compactLabel}>Header name</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={credentialHeaderName}
-                      onChangeText={setCredentialHeaderName}
-                      placeholder="X-API-Key"
-                      placeholderTextColor={Colors.gray[500]}
-                      autoCapitalize="none"
-                    />
-                  </>
-                )}
-
-                <Text style={styles.compactLabel}>{credentialMode === 'api_key' ? 'API key value' : 'OAuth bearer token'}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={credentialValue}
-                  onChangeText={setCredentialValue}
-                  placeholder="Sent to backend, then cleared from this form"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-
-                <TouchableOpacity
-                  style={[styles.saveCredentialButton, adminLoading && styles.disabledButton]}
-                  onPress={handleSaveCredential}
-                  disabled={adminLoading}
-                  accessibilityRole="button"
-                  accessibilityLabel="Save backend credential reference"
-                >
-                  <Ionicons name="key-outline" size={17} color={Colors.black} />
-                  <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
-                </TouchableOpacity>
-
                 {adminStatus && <Text style={styles.adminStatusText}>{adminStatus}</Text>}
-
-                <View style={styles.credentialList}>
-                  {credentials.map(item => (
-                    <View key={item.credentialRef} style={styles.credentialCard}>
-                      <View style={styles.credentialInfo}>
-                        <Text style={styles.credentialRefText}>{item.credentialRef}</Text>
-                        <Text style={styles.credentialMetaText}>
-                          {(item.authModes || []).join(', ') || 'credential'} | {(item.headerNames || []).join(', ') || 'headers hidden'} | {item.source || 'backend'}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.deleteCredentialButton}
-                        onPress={() => handleDeleteCredential(item.credentialRef)}
-                        disabled={adminLoading}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Delete credential reference ${item.credentialRef}`}
-                      >
-                        <Ionicons name="trash-outline" size={15} color={Colors.red[500]} />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
 
                 {isSuperAdmin && (
                   <>
@@ -2386,6 +2382,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: 14,
     marginBottom: 24,
     backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.25)' : Colors.surface,
+  },
+  inlineAdminPanel: {
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 6,
+    marginBottom: 12,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(0,0,0,0.18)' : Colors.panel,
   },
   accessPanel: {
     borderWidth: 1,
