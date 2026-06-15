@@ -6,13 +6,13 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Linking,
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { AppColors, Spacing, FontSizes } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
+import { formatReleaseDate, useLaunchUpdateCoordinator } from '../hooks/useLaunchUpdateCoordinator';
 
 const staticAppConfig = require('../app.json') as {
   expo?: {
@@ -63,16 +63,6 @@ const phases = [
   },
 ];
 
-type ReleaseManifest = {
-  version?: string;
-  releaseDate?: string;
-  androidVersionCode?: number;
-  iosBuildNumber?: string;
-  testerBuildAvailable?: boolean;
-  message?: string;
-  updateUrl?: string;
-};
-
 const expoConfig = Constants.expoConfig;
 const releaseExtra = (expoConfig?.extra || {}) as Record<string, unknown>;
 const staticReleaseExtra = staticAppConfig.expo?.extra || {};
@@ -82,116 +72,8 @@ const releaseDate = typeof releaseExtra.releaseDate === 'string'
   : typeof staticReleaseExtra.releaseDate === 'string'
     ? staticReleaseExtra.releaseDate
     : undefined;
-const configuredReleaseManifestUrl = typeof releaseExtra.releaseManifestUrl === 'string'
-  ? releaseExtra.releaseManifestUrl
-  : typeof staticReleaseExtra.releaseManifestUrl === 'string'
-    ? staticReleaseExtra.releaseManifestUrl
-    : 'https://reversr.vercel.app/release.json';
 const androidVersionCode = expoConfig?.android?.versionCode || staticAppConfig.expo?.android?.versionCode;
 const iosBuildNumber = expoConfig?.ios?.buildNumber || staticAppConfig.expo?.ios?.buildNumber;
-
-const getReleaseManifestUrl = () => {
-  if (
-    Platform.OS === 'web'
-    && typeof window !== 'undefined'
-    && window.location?.origin
-    && window.location.origin.includes('localhost')
-  ) {
-    return `${window.location.origin}/release.json`;
-  }
-
-  return configuredReleaseManifestUrl;
-};
-
-const parseBuildNumber = (value: number | string | undefined) => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = Number.parseInt(value, 10);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }
-
-  return undefined;
-};
-
-const formatReleaseDate = (dateValue?: string) => {
-  if (!dateValue) {
-    return 'date unavailable';
-  }
-
-  const normalizedDate = /^\d{4}-\d{2}-\d{2}$/.test(dateValue)
-    ? `${dateValue}T00:00:00Z`
-    : dateValue;
-  const parsedDate = new Date(normalizedDate);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return dateValue;
-  }
-
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(parsedDate);
-};
-
-const compareVersions = (latestVersion?: string, currentVersion?: string) => {
-  if (!latestVersion || !currentVersion) {
-    return false;
-  }
-
-  const latestParts = latestVersion.split('.').map((part) => Number.parseInt(part, 10) || 0);
-  const currentParts = currentVersion.split('.').map((part) => Number.parseInt(part, 10) || 0);
-  const maxLength = Math.max(latestParts.length, currentParts.length);
-
-  for (let index = 0; index < maxLength; index += 1) {
-    const latestPart = latestParts[index] || 0;
-    const currentPart = currentParts[index] || 0;
-
-    if (latestPart > currentPart) {
-      return true;
-    }
-
-    if (latestPart < currentPart) {
-      return false;
-    }
-  }
-
-  return false;
-};
-
-const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) => {
-  if (!latestRelease) {
-    return false;
-  }
-
-  if (!latestRelease.testerBuildAvailable) {
-    return false;
-  }
-
-  if (Platform.OS === 'android') {
-    const latestAndroidBuild = parseBuildNumber(latestRelease.androidVersionCode);
-    const currentAndroidBuild = parseBuildNumber(androidVersionCode);
-
-    if (latestAndroidBuild && currentAndroidBuild) {
-      return latestAndroidBuild > currentAndroidBuild;
-    }
-  }
-
-  if (Platform.OS === 'ios') {
-    const latestIosBuild = parseBuildNumber(latestRelease.iosBuildNumber);
-    const currentIosBuild = parseBuildNumber(iosBuildNumber);
-
-    if (latestIosBuild && currentIosBuild) {
-      return latestIosBuild > currentIosBuild;
-    }
-  }
-
-  return compareVersions(latestRelease.version, appVersion);
-};
 
 export default function WelcomeScreen({
   onStart,
@@ -202,9 +84,15 @@ export default function WelcomeScreen({
   userIsAuthenticated = false,
 }: WelcomeScreenProps) {
   const { colors: Colors } = useAppTheme();
-  const [latestRelease, setLatestRelease] = React.useState<ReleaseManifest | null>(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const isOutdated = React.useMemo(() => isCurrentBuildOutdated(latestRelease), [latestRelease]);
+  const updateCoordinator = useLaunchUpdateCoordinator();
+  const showUpdateBanner = [
+    'ota-downloading',
+    'ota-ready',
+    'native-available',
+    'native-required',
+    'error',
+  ].includes(updateCoordinator.status);
   const styles = createStyles(Colors);
   const hasMenuActions = Boolean(onHistory || onSettings || onTour);
   const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
@@ -219,34 +107,19 @@ export default function WelcomeScreen({
     `Released ${formatReleaseDate(releaseDate)}`,
   ].filter(Boolean).join(' - ');
 
-  React.useEffect(() => {
-    const releaseManifestUrl = getReleaseManifestUrl();
-
-    if (!releaseManifestUrl) {
-      return undefined;
+  const handleUpdateAction = React.useCallback(() => {
+    if (updateCoordinator.status === 'ota-ready') {
+      updateCoordinator.applyOtaUpdate().catch(() => undefined);
+      return;
     }
 
-    const controller = new AbortController();
-
-    fetch(releaseManifestUrl, { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((release: ReleaseManifest | null) => {
-        if (release) {
-          setLatestRelease(release);
-        }
-      })
-      .catch(() => undefined);
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  const openUpdateUrl = React.useCallback(() => {
-    if (latestRelease?.updateUrl) {
-      Linking.openURL(latestRelease.updateUrl).catch(() => undefined);
+    if (updateCoordinator.status === 'error') {
+      updateCoordinator.checkNow().catch(() => undefined);
+      return;
     }
-  }, [latestRelease?.updateUrl]);
+
+    updateCoordinator.openNativeUpdate().catch(() => undefined);
+  }, [updateCoordinator]);
 
   const handleMenuAction = React.useCallback((action?: () => void) => {
     setMenuOpen(false);
@@ -360,26 +233,39 @@ export default function WelcomeScreen({
           An AI-assisted workflow for reconstruction packages, BOMs, pricing, and 3D modeling handoff.
         </Text>
 
-        {isOutdated && (
+        {showUpdateBanner && (
           <View
-            style={styles.updateBanner}
+            style={[
+              styles.updateBanner,
+              updateCoordinator.status === 'error' && styles.updateBannerError,
+              updateCoordinator.status === 'ota-ready' && styles.updateBannerReady,
+            ]}
             accessibilityRole="alert"
             testID="welcome-update-banner"
           >
-            <Ionicons name="cloud-download-outline" size={22} color={Colors.warning} />
+            <Ionicons
+              name={updateCoordinator.status === 'ota-ready' ? 'refresh-circle-outline' : 'cloud-download-outline'}
+              size={22}
+              color={updateCoordinator.status === 'error' ? Colors.danger : Colors.warning}
+            />
             <View style={styles.updateBannerText}>
-              <Text style={styles.updateTitle}>Tester update available</Text>
+              <Text style={styles.updateTitle}>{updateCoordinator.updateTitle}</Text>
               <Text style={styles.updateDescription}>
-                This install is older than the latest tester release. Update before validating new changes.
+                {updateCoordinator.updateDescription}
               </Text>
-              {latestRelease?.updateUrl && (
+              {updateCoordinator.errorMessage && (
+                <Text style={styles.updateMeta}>
+                  {updateCoordinator.errorMessage}
+                </Text>
+              )}
+              {updateCoordinator.status !== 'ota-downloading' && (
                 <TouchableOpacity
                   style={styles.updateButton}
-                  onPress={openUpdateUrl}
+                  onPress={handleUpdateAction}
                   accessibilityRole="button"
-                  accessibilityLabel="Open Google Play tester update link"
+                  accessibilityLabel={updateCoordinator.updateActionLabel}
                 >
-                  <Text style={styles.updateButtonText}>Open tester link</Text>
+                  <Text style={styles.updateButtonText}>{updateCoordinator.updateActionLabel}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -572,6 +458,14 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
   },
+  updateBannerReady: {
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
+    borderColor: Colors.accent,
+  },
+  updateBannerError: {
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(239, 68, 68, 0.12)' : '#fef2f2',
+    borderColor: Colors.danger,
+  },
   updateBannerText: {
     flex: 1,
     gap: Spacing.xs,
@@ -585,6 +479,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.mutedText,
     lineHeight: 18,
+  },
+  updateMeta: {
+    fontSize: FontSizes.xs,
+    color: Colors.dim,
+    lineHeight: 16,
   },
   updateButton: {
     alignSelf: 'flex-start',

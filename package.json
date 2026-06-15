@@ -83,6 +83,7 @@
     "expo-sharing": "~56.0.16",
     "expo-splash-screen": "~56.0.10",
     "expo-status-bar": "~56.0.4",
+    "expo-updates": "~56.0.19",
     "express": "^5.1.0",
     "ollama": "^0.6.3",
     "react": "19.2.3",
