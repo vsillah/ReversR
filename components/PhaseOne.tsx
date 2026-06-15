@@ -51,6 +51,12 @@ const PRODUCT_PRESETS = [
 ];
 
 type InputMode = 'type' | 'scan' | 'lucky';
+type PhaseOneAlert = {
+  visible: boolean;
+  title: string;
+  message: string;
+  type?: 'info' | 'error' | 'success';
+};
 
 export default function PhaseOne({
   onComplete,
@@ -74,7 +80,7 @@ export default function PhaseOne({
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const [alert, setAlert] = useState<{visible: boolean, title: string, message: string} | null>(null);
+  const [alert, setAlert] = useState<PhaseOneAlert | null>(null);
   const [loadingStep, setLoadingStep] = useState<string>('capture');
 
   useEffect(() => {
@@ -104,6 +110,31 @@ export default function PhaseOne({
   const submitDisabled = !hasValidInput() || !!mockAnalysis;
   const submitLocked = !isLoading && submitDisabled;
   const submitIconColor = submitLocked ? Colors.mutedText : '#ffffff';
+
+  const getSubmitLockMessage = () => {
+    if (mockAnalysis) {
+      return 'The mock scan is already loaded. Use the guided tour controls to move to the next step.';
+    }
+
+    if (inputMode === 'scan') {
+      return 'Capture a machine photo or add scan notes first. Use Tap to Open Camera, or enter model numbers, visible assemblies, damage, or inventory clues.';
+    }
+
+    if (inputMode === 'lucky') {
+      return 'Choose a sample machine first. Use Shuffle if no sample is loaded, then Start Machine Scan will activate.';
+    }
+
+    return 'Describe the machine first. Add visible assemblies, model numbers, labels, damage, or other identifying marks, then Start Machine Scan will activate.';
+  };
+
+  const showSubmitLockGuidance = () => {
+    setAlert({
+      visible: true,
+      title: 'Start Machine Scan needs input',
+      message: getSubmitLockMessage(),
+      type: 'info',
+    });
+  };
 
   const handleAnalyze = async () => {
     const activeInput = getActiveInput() || mockInput || '';
@@ -139,6 +170,15 @@ export default function PhaseOne({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmitPress = () => {
+    if (submitDisabled) {
+      showSubmitLockGuidance();
+      return;
+    }
+
+    handleAnalyze();
   };
 
   const handleShuffle = () => {
@@ -404,10 +444,10 @@ export default function PhaseOne({
             styles.submitButton,
             submitLocked && styles.submitButtonDisabled,
           ]}
-          onPress={handleAnalyze}
-          disabled={isLoading || submitDisabled}
+          onPress={handleSubmitPress}
+          disabled={isLoading}
           accessibilityRole="button"
-          accessibilityLabel={mockAnalysis ? 'Mock scan result is preloaded' : 'Initiate machine scan'}
+          accessibilityLabel={submitDisabled ? `Start Machine Scan inactive. ${getSubmitLockMessage()}` : 'Initiate machine scan'}
           accessibilityState={{ disabled: isLoading || submitDisabled }}
         >
           {isLoading ? (
@@ -430,7 +470,7 @@ export default function PhaseOne({
         visible={alert?.visible || false}
         title={alert?.title || ''}
         message={alert?.message || ''}
-        type="error"
+        type={alert?.type || 'error'}
         onClose={() => setAlert(null)}
       />
 
