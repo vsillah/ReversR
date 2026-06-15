@@ -196,6 +196,31 @@ const run = async () => {
     assert.equal(typeof inviteBody.invite.activationCode, 'string');
     assert.ok(inviteBody.invite.activationCode.length > 12);
 
+    const lookupWithoutSavedEmailResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/lookup`, {
+      method: 'POST',
+      headers: headersFor('invite-smoke-client', 'Invite Smoke'),
+      body: JSON.stringify({ email: 'invite-smoke@example.com' }),
+    });
+    assert.equal(lookupWithoutSavedEmailResponse.status, 403);
+
+    const lookupWrongEmailResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/lookup`, {
+      method: 'POST',
+      headers: headersFor('invite-smoke-client', 'Invite Smoke', 'someone-else@example.com'),
+      body: JSON.stringify({ email: 'invite-smoke@example.com' }),
+    });
+    assert.equal(lookupWrongEmailResponse.status, 403);
+
+    const lookupResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/lookup`, {
+      method: 'POST',
+      headers: headersFor('invite-smoke-client', 'Invite Smoke', 'invite-smoke@example.com'),
+      body: JSON.stringify({ email: 'invite-smoke@example.com' }),
+    });
+    const lookupBody = await lookupResponse.json();
+    assert.equal(lookupResponse.status, 200);
+    assert.equal(lookupBody.invite.email, 'invite-smoke@example.com');
+    assert.equal(lookupBody.invite.activationCode, inviteBody.invite.activationCode);
+    assert.equal(lookupBody.invite.tokenHash, undefined);
+
     const redeemResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/redeem`, {
       method: 'POST',
       headers: headersFor('invite-smoke-client', 'Invite Smoke', 'invite-smoke@example.com'),

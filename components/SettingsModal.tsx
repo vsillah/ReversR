@@ -16,6 +16,7 @@ import {
   loadCommercialCreditConfig,
   listCommercialAccessGrants,
   listCommercialTesterInvites,
+  lookupCommercialTesterInvite,
   revokeCommercialAccessGrant,
   revokeCommercialTesterInvite,
   saveCommercialAccessGrant,
@@ -471,7 +472,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     }
     const cleanCode = testerInviteCode.trim();
     if (!cleanCode) {
-      setAccessStatus('Paste the admin-issued invite code, then tap Redeem Admin Code.');
+      setAccessStatus('Tap Find Admin Code or paste an admin-issued invite code, then tap Redeem Admin Code.');
       return;
     }
     try {
@@ -484,6 +485,31 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       setAccessStatus('Tester access activated on this device. No starter password is needed.');
     } catch (e: any) {
       setAccessStatus(e?.message || 'Unable to redeem tester invite.');
+    }
+  };
+
+  const handleLookupTesterInvite = async () => {
+    setAccessStatus(null);
+    setEmailTouched(true);
+    const email = normalizeEmail(commercialProfile.email);
+    if (!isValidEmail(email)) {
+      setAccessStatus('Enter a valid work email before finding an admin code.');
+      return;
+    }
+
+    try {
+      await saveProfile({ ...commercialProfile, email });
+      const result = await lookupCommercialTesterInvite(email);
+      const activationCode = result.invite.activationCode?.trim();
+      if (!activationCode) {
+        setAccessStatus('An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
+        return;
+      }
+      setAccessMethod('invite');
+      setTesterInviteCode(activationCode);
+      setAccessStatus('Admin code found and filled. Tap Redeem Admin Code to activate this device.');
+    } catch (e: any) {
+      setAccessStatus(e?.message || 'Unable to find an admin code for this email.');
     }
   };
 
@@ -545,7 +571,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
         const others = prev.filter(item => !inviteIds.has(item.inviteId));
         return [...returnedInvites, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
       });
-      setAdminStatus(`Created tester invite for ${result.invite.email}. Copy this activation code now: ${result.invite.activationCode}`);
+      setAdminStatus(`Created tester invite for ${result.invite.email}. The tester can now enter that work email and tap Find Admin Code.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to create tester invite.');
     } finally {
@@ -979,7 +1005,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   <Text style={styles.policyTitle}>Tester Activation</Text>
                   {renderInfoButton('invite', 'Show invite code details')}
                 </View>
-                {renderTooltip('invite', 'Invite codes are created by a ReversR admin outside the tester app. Enter your work email, paste the admin-issued code, then redeem it on this device.')}
+                {renderTooltip('invite', 'A ReversR admin must create an invite for your work email first. Enter that email, tap Find Admin Code, then redeem the code on this device.')}
                 <View style={styles.activationStepRow}>
                   <View style={styles.activationStep}>
                     <Ionicons
@@ -1018,7 +1044,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                         setAccessMethod(method);
                         setPasswordResetOpen(method === 'password' && Boolean(account?.access?.requiresPasswordReset));
                         setAccessStatus(method === 'invite'
-                          ? 'Admin invite code selected. Enter a valid work email and paste the code you received.'
+                          ? 'Admin invite code selected. Enter a valid work email, find the admin code, then redeem it.'
                           : 'Starter password selected. Use this only if a ReversR admin gave you a starter password.');
                       }}
                       accessibilityRole="button"
@@ -1048,12 +1074,22 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       value={testerInviteCode}
                       onChangeText={setTesterInviteCode}
                       accessibilityLabel="Tester invite code"
-                      placeholder="Paste code from ReversR admin"
+                      placeholder="Find or paste admin code"
                       placeholderTextColor={Colors.gray[500]}
                       autoCapitalize="none"
                     />
 
                     <View style={styles.adminActionRow}>
+                      <TouchableOpacity
+                        style={[styles.adminButton, styles.grantButton, accountLoading && styles.disabledButton]}
+                        onPress={handleLookupTesterInvite}
+                        disabled={accountLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Find tester admin code for this email"
+                      >
+                        <Ionicons name="search-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Find Admin Code</Text>
+                      </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.saveCredentialButton, styles.grantButton, accountLoading && styles.disabledButton]}
                         onPress={handleRedeemTesterInvite}
@@ -1625,7 +1661,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
                 </View>
                 <Text style={styles.policyText}>
-                  Grant tester access by client ID, email, profile name, or shop name. The starting password is hashed on the backend and must be reset by the tester.
+                  Create tester invite codes by email. Testers can retrieve a pending code in the app after entering the same work email.
                 </Text>
 
                 <Text style={styles.compactLabel}>Tester invite email</Text>

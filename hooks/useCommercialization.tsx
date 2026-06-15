@@ -324,6 +324,20 @@ export const revokeCommercialTesterInvite = async (
   return data;
 };
 
+export const lookupCommercialTesterInvite = async (
+  email: string
+): Promise<{ status: 'ok'; invite: CommercialTesterInviteSummary }> => {
+  const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
+  const response = await fetch(`${getApiBase()}/api/commercial/tester-invites/lookup`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email: email.trim().toLowerCase() }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.invite) throw new Error(data.error || 'Unable to find a tester invite for this email.');
+  return data;
+};
+
 export const loadCommercialCreditConfig = async (
   adminToken: string
 ): Promise<{ status: 'ok'; config: CommercialCreditConfig; plans: CommercialPlan[] }> => {

@@ -253,6 +253,8 @@ const redactTesterInvite = (invite = {}) => ({
   redeemedAt: invite.redeemedAt || '',
   redeemedClientId: invite.redeemedClientId || '',
   grantId: invite.grantId || '',
+  activationCode: invite.active !== false && invite.status === 'pending' ? invite.activationCode || '' : '',
+  inviteUrl: invite.active !== false && invite.status === 'pending' ? invite.inviteUrl || '' : '',
 });
 
 const findMatchingStoredGrant = (store, profile) => {
@@ -954,17 +956,15 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
           status: 'pending',
           active: true,
           tokenHash,
+          activationCode: token,
+          inviteUrl: buildTesterInviteUrl(token),
           expiresAt: buildTesterInviteExpiry(requestedInvite?.expiresInDays || req.body?.expiresInDays),
           createdAt: now,
           updatedAt: now,
         };
 
         store.testerInvites[invite.inviteId] = invite;
-        invites.push({
-          ...redactTesterInvite(invite),
-          activationCode: token,
-          inviteUrl: buildTesterInviteUrl(token),
-        });
+        invites.push(redactTesterInvite(invite));
       }
 
       await saveStore(store);
@@ -1002,6 +1002,72 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
     }
   });
 
+  app.post('/api/commercial/tester-invites/lookup', async (req, res) => {
+    try {
+      const email = String(req.body?.email || '').trim().toLowerCase();
+      const validationError = validateInviteEmail(email);
+      if (validationError) {
+        return res.status(400).json({ status: 'error', error: validationError, canRetry: false });
+      }
+
+      const profile = requestProfile(req);
+      if (normalizeAccessValue(profile.email) !== normalizeAccessValue(email)) {
+        return res.status(403).json({
+          status: 'error',
+          error: 'Save this work email on the device before finding its tester admin code.',
+          canRetry: true,
+        });
+      }
+
+      const store = await loadStore();
+      const now = Date.now();
+      const invites = Object.values(store.testerInvites || {})
+        .filter(invite => String(invite.email || '').trim().toLowerCase() === email)
+        .sort((left, right) => String(right.updatedAt || '').localeCompare(String(left.updatedAt || '')));
+      const activeInvite = invites.find(invite => invite.active !== false && invite.status === 'pending');
+
+      if (!activeInvite) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'No active tester invite exists for this email. Ask a ReversR admin to create one first.',
+          canRetry: false,
+        });
+      }
+
+      if (activeInvite.expiresAt && new Date(activeInvite.expiresAt).getTime() < now) {
+        activeInvite.active = false;
+        activeInvite.status = 'expired';
+        activeInvite.updatedAt = new Date().toISOString();
+        store.testerInvites[activeInvite.inviteId] = activeInvite;
+        await saveStore(store);
+        return res.status(409).json({
+          status: 'error',
+          error: 'The tester invite for this email has expired. Ask a ReversR admin to create a new one.',
+          canRetry: false,
+        });
+      }
+
+      if (!activeInvite.activationCode) {
+        return res.status(409).json({
+          status: 'error',
+          error: 'A tester invite exists for this email, but its code was created before in-app retrieval was available. Ask a ReversR admin to recreate the invite.',
+          canRetry: false,
+        });
+      }
+
+      res.json({
+        status: 'ok',
+        invite: redactTesterInvite(activeInvite),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to look up tester invite.',
+        canRetry: true,
+      });
+    }
+  });
+
   app.post('/api/commercial/tester-invites/redeem', async (req, res) => {
     try {
       const token = String(req.body?.token || req.body?.activationCode || '').trim();
@@ -1034,6 +1100,14 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
           status: 'error',
           error: 'Tester invite code has expired.',
           canRetry: false,
+        });
+      }
+
+      if (normalizeAccessValue(profile.email) !== normalizeAccessValue(invite.email)) {
+        return res.status(403).json({
+          status: 'error',
+          error: 'This admin code belongs to a different tester email. Save the invited work email before redeeming it.',
+          canRetry: true,
         });
       }
 
