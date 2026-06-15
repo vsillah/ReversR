@@ -107,7 +107,7 @@ const TOUR_STEPS: TourStep[] = [
     checks: [
       { id: 'map', label: 'Read the four-phase map' },
       { id: 'start', label: 'Locate New Reconstruction' },
-      { id: 'settings', label: 'Locate Settings' },
+      { id: 'settings', label: 'Locate the menu' },
     ],
   },
   {
@@ -1353,6 +1353,8 @@ export default function HomeScreen() {
           onHistory={openHistory}
           onSettings={() => openSettings('account')}
           onTour={startTour}
+          userDisplayName={userDisplayName}
+          userIsAuthenticated={userIsAuthenticated}
         />
         <SettingsModal
           visible={showSettings}

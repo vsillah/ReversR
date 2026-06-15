@@ -32,6 +32,8 @@ interface WelcomeScreenProps {
   onHistory?: () => void;
   onSettings?: () => void;
   onTour?: () => void;
+  userDisplayName?: string;
+  userIsAuthenticated?: boolean;
 }
 
 const phases = [
@@ -186,11 +188,21 @@ const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) => {
   return compareVersions(latestRelease.version, appVersion);
 };
 
-export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }: WelcomeScreenProps) {
+export default function WelcomeScreen({
+  onStart,
+  onHistory,
+  onSettings,
+  onTour,
+  userDisplayName = 'Guest',
+  userIsAuthenticated = false,
+}: WelcomeScreenProps) {
   const { colors: Colors } = useAppTheme();
   const [latestRelease, setLatestRelease] = React.useState<ReleaseManifest | null>(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const isOutdated = React.useMemo(() => isCurrentBuildOutdated(latestRelease), [latestRelease]);
   const styles = createStyles(Colors);
+  const hasMenuActions = Boolean(onHistory || onSettings || onTour);
+  const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
   const buildLabel = Platform.select({
     android: androidVersionCode ? `Android ${androidVersionCode}` : undefined,
     ios: iosBuildNumber ? `iOS ${iosBuildNumber}` : undefined,
@@ -231,6 +243,11 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }
     }
   }, [latestRelease?.updateUrl]);
 
+  const handleMenuAction = React.useCallback((action?: () => void) => {
+    setMenuOpen(false);
+    action?.();
+  }, []);
+
   return (
     <ScrollView 
       style={styles.container}
@@ -238,6 +255,88 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.content}>
+        {hasMenuActions && (
+          <View style={styles.topBar}>
+            <View style={styles.topActions}>
+              {onSettings && (
+                <TouchableOpacity
+                  style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
+                  onPress={() => handleMenuAction(onSettings)}
+                  accessibilityRole="button"
+                  accessibilityLabel={userIsAuthenticated ? `Open account settings for ${userDisplayName}` : 'Open account settings as guest'}
+                  testID="welcome-profile-chip"
+                >
+                  <Ionicons
+                    name={profileIcon}
+                    size={18}
+                    color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+                  />
+                  <Text
+                    style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
+                    numberOfLines={1}
+                  >
+                    {userDisplayName}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.menuHost}>
+                <TouchableOpacity
+                  style={[styles.menuButton, menuOpen && styles.menuButtonActive]}
+                  onPress={() => setMenuOpen(current => !current)}
+                  accessibilityRole="button"
+                  accessibilityLabel={menuOpen ? 'Close welcome menu' : 'Open welcome menu'}
+                  accessibilityState={{ expanded: menuOpen }}
+                  testID="welcome-actions-menu-button"
+                >
+                  <Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={24} color={Colors.accent} />
+                </TouchableOpacity>
+
+                {menuOpen && (
+                  <View style={styles.menuPanel} testID="welcome-actions-menu">
+                    {onHistory && (
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => handleMenuAction(onHistory)}
+                        accessibilityRole="button"
+                        accessibilityLabel="Open reconstruction history"
+                      >
+                        <Ionicons name="time-outline" size={18} color={Colors.accent} />
+                        <Text style={styles.menuItemText}>History</Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {onSettings && (
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => handleMenuAction(onSettings)}
+                        accessibilityRole="button"
+                        accessibilityLabel="Open settings"
+                      >
+                        <Ionicons name="settings-outline" size={18} color={Colors.accent} />
+                        <Text style={styles.menuItemText}>Settings</Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {onTour && (
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => handleMenuAction(onTour)}
+                        accessibilityRole="button"
+                        accessibilityLabel="Start guided tour"
+                        testID="reversr-tour-start"
+                      >
+                        <Ionicons name="compass-outline" size={18} color={Colors.accent} />
+                        <Text style={styles.menuItemText}>Tour</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+        )}
+
         <View style={styles.logoSection} testID="reversr-tour-welcome">
           <Image
             source={require('../assets/logo-transparent.png')}
@@ -299,50 +398,16 @@ export default function WelcomeScreen({ onStart, onHistory, onSettings, onTour }
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.button}
-            onPress={onStart}
+            onPress={() => {
+              setMenuOpen(false);
+              onStart();
+            }}
             accessibilityRole="button"
             accessibilityLabel="Start new machine reconstruction"
           >
             <Text style={styles.buttonText}>New Reconstruction</Text>
             <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
           </TouchableOpacity>
-
-          {onHistory && (
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={onHistory}
-              accessibilityRole="button"
-              accessibilityLabel="Open reconstruction history"
-            >
-              <Ionicons name="time-outline" size={20} color={Colors.gray[400]} />
-              <Text style={styles.secondaryButtonText}>History</Text>
-            </TouchableOpacity>
-          )}
-
-          {onSettings && (
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={onSettings}
-              accessibilityRole="button"
-              accessibilityLabel="Open settings"
-            >
-              <Ionicons name="settings-outline" size={20} color={Colors.gray[400]} />
-              <Text style={styles.secondaryButtonText}>Settings</Text>
-            </TouchableOpacity>
-          )}
-
-          {onTour && (
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={onTour}
-              accessibilityRole="button"
-              accessibilityLabel="Start guided tour"
-              testID="reversr-tour-start"
-            >
-              <Ionicons name="compass-outline" size={20} color={Colors.gray[400]} />
-              <Text style={styles.secondaryButtonText}>Tour</Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         <Text
@@ -370,6 +435,93 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   content: {
     alignItems: 'center',
+  },
+  topBar: {
+    width: '100%',
+    minHeight: 44,
+    alignItems: 'flex-end',
+    marginBottom: Spacing.xs,
+    zIndex: 20,
+  },
+  topActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: Spacing.sm,
+    maxWidth: '100%',
+  },
+  profileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    height: 44,
+    maxWidth: 152,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.panel,
+    paddingHorizontal: Spacing.sm,
+  },
+  profileButtonActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.10)' : '#ecfdf5',
+  },
+  profileButtonText: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
+    flexShrink: 1,
+  },
+  profileButtonTextActive: {
+    color: Colors.accent,
+  },
+  menuHost: {
+    position: 'relative',
+    alignItems: 'flex-end',
+  },
+  menuButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.panel,
+  },
+  menuButtonActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
+  },
+  menuPanel: {
+    position: 'absolute',
+    top: 50,
+    right: 0,
+    width: 184,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    backgroundColor: Colors.panel,
+    paddingVertical: Spacing.xs,
+    shadowColor: Colors.black,
+    shadowOpacity: Colors.mode === 'dark' ? 0.35 : 0.14,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+    zIndex: 30,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    minHeight: 44,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  menuItemText: {
+    color: Colors.text,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
   },
   logoSection: {
     alignItems: 'center',
@@ -504,23 +656,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     letterSpacing: 1,
     flexShrink: 1,
     textAlign: 'center',
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    backgroundColor: Colors.surface,
-    minWidth: 104,
-  },
-  secondaryButtonText: {
-    fontSize: FontSizes.sm,
-    color: Colors.gray[400],
   },
   releaseFooter: {
     marginTop: Spacing.md,
