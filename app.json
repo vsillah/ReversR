@@ -9,7 +9,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vsillah.reversrrebuild",
-      "buildNumber": "15",
+      "buildNumber": "16",
       "infoPlist": {
         "NSCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",
         "ITSAppUsesNonExemptEncryption": false
@@ -31,7 +31,7 @@
         "android.permission.READ_MEDIA_VIDEO"
       ],
       "package": "com.vsillah.reversrrebuild",
-      "versionCode": 31
+      "versionCode": 37
     },
     "web": {
       "favicon": "./assets/favicon.png",

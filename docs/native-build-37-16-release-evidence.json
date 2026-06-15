@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-15T18:14:19Z",
+  "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 37 and iOS TestFlight build 16.",
+  "sourceCommit": {
+    "android": "b00d2e8115ed46fa5fad25603b739f71c93309a3",
+    "ios": "e50919b803bd463e26a1bc42953f92fdf4efb082"
+  },
+  "builds": {
+    "android": {
+      "id": "96b7092a-dc81-42d3-adf1-8d872181ed0b",
+      "status": "FINISHED",
+      "versionCode": "37",
+      "appVersion": "1.0.0",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/96b7092a-dc81-42d3-adf1-8d872181ed0b",
+      "artifactUrl": "https://expo.dev/artifacts/eas/yR9NNZ4nPIKeDFSsJAnwGD8l8ce_8KJRs2-Um9qg2aY.aab",
+      "completedAt": "2026-06-15T18:09:28.854Z"
+    },
+    "ios": {
+      "id": "040492c5-6d8c-4ff4-9b31-78d8c922ae0a",
+      "status": "FINISHED",
+      "buildNumber": "16",
+      "appVersion": "1.0.0",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/040492c5-6d8c-4ff4-9b31-78d8c922ae0a",
+      "artifactUrl": "https://expo.dev/artifacts/eas/H5hW1TEkI6Ma0IJLwMIXfRrqDUFqybE2pWsLasYmYMQ.ipa",
+      "completedAt": "2026-06-15T17:00:22.634Z"
+    }
+  },
+  "submissions": {
+    "android": {
+      "id": "479e2f73-2311-4ac2-b161-3c4347946730",
+      "status": "FINISHED",
+      "track": "internal",
+      "releaseStatus": "COMPLETED",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/479e2f73-2311-4ac2-b161-3c4347946730"
+    },
+    "ios": {
+      "id": "48d27a6e-360e-40ed-90a8-aa35f66e7f83",
+      "status": "FINISHED",
+      "ascAppIdentifier": "6777091538",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/48d27a6e-360e-40ed-90a8-aa35f66e7f83"
+    }
+  },
+  "testerInstallLinks": {
+    "googlePlayInternalTesting": "https://play.google.com/apps/internaltest/4700334027214849380",
+    "testFlight": "https://testflight.apple.com/join/twj2dNQY"
+  },
+  "androidRecoveryNotes": [
+    {
+      "versionCode": "32",
+      "buildId": "86477186-608a-4a39-aa72-6e03045be84e",
+      "status": "CANCELED",
+      "note": "Canceled after EAS did not progress."
+    },
+    {
+      "versionCode": "33",
+      "buildId": "3816b046-2874-49eb-bd37-641c7cdc4a9d",
+      "status": "ERRORED",
+      "note": "Gradle failed while resolving dependencies through JitPack."
+    },
+    {
+      "versionCode": "35",
+      "buildId": "a5076b8f-3c3e-48cd-8741-820ad4fe4fde",
+      "status": "ERRORED",
+      "note": "Clean-cache retry failed while resolving org.bouncycastle metadata through JitPack."
+    },
+    {
+      "versionCode": "36",
+      "buildId": "df2289b8-845e-49f1-93f4-53229418e026",
+      "status": "ERRORED",
+      "note": "After scoping JitPack, expo-image still required the JitPack glide-plugin artifact and timed out."
+    }
+  ],
+  "fixesMerged": [
+    {
+      "pr": 51,
+      "title": "fix: scope Android JitPack repository",
+      "mergeCommit": "160e99d338dea556e8cd3239d43e1fb9e160d470"
+    },
+    {
+      "pr": 52,
+      "title": "fix: remove unused expo image dependency",
+      "mergeCommit": "b00d2e8115ed46fa5fad25603b739f71c93309a3"
+    }
+  ],
+  "metadataUpdated": [
+    {
+      "path": "app.json",
+      "androidVersionCode": 37,
+      "iosBuildNumber": "16"
+    },
+    {
+      "path": "public/release.json",
+      "androidVersionCode": 37,
+      "iosBuildNumber": "16"
+    }
+  ],
+  "validation": [
+    "npm run typecheck -- --pretty false",
+    "Temporary Android prebuild outside the repo with npx expo prebuild --platform android --clean --no-install",
+    "npm run native:preflight:local",
+    "npm run store:submission:preflight:local",
+    "npm run store:console:preflight:local",
+    "npm run native:eas:sync-production-builds"
+  ],
+  "openGates": [
+    "Apple TestFlight processing and tester availability should be verified in App Store Connect before calling the iOS tester path fully live.",
+    "Store console signoff and production submission approval remain separate human gates for public release."
+  ]
+}
