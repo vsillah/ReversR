@@ -99,7 +99,7 @@ export const LightColors: AppColors = {
   surface: '#f1f5f9',
   elevated: '#e2e8f0',
   border: '#d7dee8',
-  accent: '#008f63',
+  accent: '#007a55',
   secondary: '#7c3aed',
   text: '#111827',
   mutedText: '#334155',

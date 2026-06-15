@@ -107,7 +107,7 @@ const TOUR_STEPS: TourStep[] = [
     checks: [
       { id: 'map', label: 'Read the four-phase map' },
       { id: 'start', label: 'Locate New Reconstruction' },
-      { id: 'settings', label: 'Locate Settings' },
+      { id: 'settings', label: 'Locate the menu' },
     ],
   },
   {
@@ -1353,6 +1353,8 @@ export default function HomeScreen() {
           onHistory={openHistory}
           onSettings={() => openSettings('account')}
           onTour={startTour}
+          userDisplayName={userDisplayName}
+          userIsAuthenticated={userIsAuthenticated}
         />
         <SettingsModal
           visible={showSettings}
@@ -1797,7 +1799,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontFamily: "monospace",
     fontSize: FontSizes.xs,
     fontWeight: "bold",
-    color: Colors.gray[600],
+    color: Colors.mutedText,
   },
   stepNumberActive: {
     color: Colors.black,
@@ -1806,7 +1808,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginTop: Spacing.xs,
     fontSize: 9,
     fontWeight: "bold",
-    color: Colors.gray[700],
+    color: Colors.mutedText,
     letterSpacing: 1,
   },
   stepLabelActive: {
