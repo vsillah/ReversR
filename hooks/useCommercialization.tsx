@@ -154,6 +154,14 @@ export interface CommercialTesterInviteSummary {
   redeemedAt: string;
   redeemedClientId: string;
   grantId: string;
+  emailDelivery?: {
+    status: 'sent' | 'failed' | 'not_configured';
+    provider?: 'resend' | 'file' | 'manual' | string;
+    sentAt?: string;
+    updatedAt?: string;
+    message?: string;
+    messageId?: string;
+  };
   activationCode?: string;
   inviteUrl?: string;
 }
@@ -345,6 +353,19 @@ export const revokeCommercialTesterInvite = async (
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Unable to revoke tester invite.');
+  return data;
+};
+
+export const sendCommercialTesterInviteEmail = async (
+  adminToken: string,
+  inviteId: string
+): Promise<{ status: 'ok'; invite: CommercialTesterInviteSummary }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/commercial/tester-invites/${encodeURIComponent(inviteId)}/send`, {
+    method: 'POST',
+    headers: adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.invite) throw new Error(data.error || 'Unable to send tester invite email.');
   return data;
 };
 

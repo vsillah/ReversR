@@ -100,6 +100,12 @@ const GOOGLE_PLAY_PLAN_PRODUCTS = {
 };
 let googlePlayAccessTokenCache = null;
 
+const testerInviteEmailFrom = () => String(process.env.TESTER_INVITE_EMAIL_FROM || '').trim();
+const testerInviteEmailReplyTo = () => String(process.env.TESTER_INVITE_EMAIL_REPLY_TO || '').trim();
+const testerInviteEmailSubjectPrefix = () => String(process.env.TESTER_INVITE_EMAIL_SUBJECT_PREFIX || 'ReversR').trim();
+const testerInviteEmailFile = () => String(process.env.TESTER_INVITE_EMAIL_FILE || '').trim();
+const resendApiKey = () => String(process.env.RESEND_API_KEY || '').trim();
+
 const hashId = (value = '') => crypto.createHash('sha256').update(String(value)).digest('hex').slice(0, 24);
 
 const dateKey = (date = new Date()) => date.toISOString().slice(0, 10);
@@ -222,6 +228,99 @@ const buildTesterInviteUrl = (token = '') => {
   return `${baseUrl}${separator}testerInvite=${encodeURIComponent(token)}`;
 };
 
+const buildTesterInviteEmail = (invite = {}) => {
+  const subject = `${testerInviteEmailSubjectPrefix()} tester invite`;
+  const expiresAt = invite.expiresAt ? new Date(invite.expiresAt).toLocaleString('en-US', { timeZone: 'UTC' }) : 'the listed expiration time';
+  const inviteUrlText = invite.inviteUrl ? `\n\nOpen this link on your device if available:\n${invite.inviteUrl}` : '';
+  const text = [
+    'You have been invited to test ReversR Rebuild.',
+    '',
+    `Use this one-time admin code in the app: ${invite.activationCode}`,
+    `This invite is for: ${invite.email}`,
+    `It expires at: ${expiresAt} UTC`,
+    '',
+    'In the mobile app, open Settings, enter the same work email, then redeem this admin code.',
+    inviteUrlText,
+  ].filter(Boolean).join('\n');
+  const html = `
+    <p>You have been invited to test ReversR Rebuild.</p>
+    <p><strong>Admin code:</strong> <code>${invite.activationCode}</code></p>
+    <p><strong>Email:</strong> ${invite.email}</p>
+    <p><strong>Expires:</strong> ${expiresAt} UTC</p>
+    <p>In the mobile app, open Settings, enter the same work email, then redeem this admin code.</p>
+    ${invite.inviteUrl ? `<p><a href="${invite.inviteUrl}">Open invite link</a></p>` : ''}
+  `;
+  return { subject, text, html };
+};
+
+const appendTesterInviteEmailFile = async (filePath, payload) => {
+  const existing = await readJson(filePath, { emails: [] });
+  const emails = Array.isArray(existing.emails) ? existing.emails : [];
+  await writeJson(filePath, { emails: [...emails, payload] });
+};
+
+const sendTesterInviteEmail = async (invite = {}) => {
+  const now = new Date().toISOString();
+  const message = buildTesterInviteEmail(invite);
+  const filePath = testerInviteEmailFile();
+  if (filePath) {
+    await appendTesterInviteEmailFile(filePath, {
+      to: invite.email,
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
+      activationCode: invite.activationCode,
+      inviteUrl: invite.inviteUrl,
+      sentAt: now,
+    });
+    return { status: 'sent', provider: 'file', sentAt: now };
+  }
+
+  const apiKey = resendApiKey();
+  const from = testerInviteEmailFrom();
+  if (!apiKey || !from) {
+    return {
+      status: 'not_configured',
+      provider: 'manual',
+      message: 'Set RESEND_API_KEY and TESTER_INVITE_EMAIL_FROM to send tester invite emails.',
+      updatedAt: now,
+    };
+  }
+
+  const body = {
+    from,
+    to: [invite.email],
+    subject: message.subject,
+    text: message.text,
+    html: message.html,
+    ...(testerInviteEmailReplyTo() ? { reply_to: testerInviteEmailReplyTo() } : {}),
+  };
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const responseBody = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return {
+      status: 'failed',
+      provider: 'resend',
+      message: responseBody.message || responseBody.error || `Resend request failed (${response.status}).`,
+      updatedAt: now,
+    };
+  }
+
+  return {
+    status: 'sent',
+    provider: 'resend',
+    sentAt: now,
+    messageId: responseBody.id || '',
+  };
+};
+
 const requestAccessPassword = (req) => String(
   req.get('x-reversr-access-password') ||
   req.body?.accessPassword ||
@@ -260,21 +359,25 @@ const redactTesterInvite = (invite = {}) => ({
   redeemedAt: invite.redeemedAt || '',
   redeemedClientId: invite.redeemedClientId || '',
   grantId: invite.grantId || '',
-  activationCode: invite.active !== false && invite.status === 'pending' ? invite.activationCode || '' : '',
-  inviteUrl: invite.active !== false && invite.status === 'pending' ? invite.inviteUrl || '' : '',
+  emailDelivery: invite.emailDelivery || { status: 'not_configured', provider: 'manual' },
+  activationCode: invite.active !== false && invite.status === 'pending' && invite.emailDelivery?.status !== 'sent'
+    ? invite.activationCode || ''
+    : '',
+  inviteUrl: invite.active !== false && invite.status === 'pending' && invite.emailDelivery?.status !== 'sent'
+    ? invite.inviteUrl || ''
+    : '',
 });
 
 const findMatchingStoredGrant = (store, profile) => {
-  const grants = Object.values(store.commercialAccessGrants || {});
-  return grants.find(grant => {
-    if (grant.active === false) return false;
-    return (
-      (grant.clientId && normalizeAccessValue(grant.clientId) === normalizeAccessValue(profile.clientId)) ||
-      (grant.email && normalizeAccessValue(grant.email) === normalizeAccessValue(profile.email)) ||
-      (grant.profileName && normalizeAccessValue(grant.profileName) === normalizeAccessValue(profile.name)) ||
-      (grant.shopName && normalizeAccessValue(grant.shopName) === normalizeAccessValue(profile.shopName))
-    );
-  }) || null;
+  const grants = Object.values(store.commercialAccessGrants || {})
+    .filter(grant => grant.active !== false);
+  return (
+    grants.find(grant => grant.clientId && normalizeAccessValue(grant.clientId) === normalizeAccessValue(profile.clientId)) ||
+    grants.find(grant => grant.email && normalizeAccessValue(grant.email) === normalizeAccessValue(profile.email)) ||
+    grants.find(grant => grant.profileName && normalizeAccessValue(grant.profileName) === normalizeAccessValue(profile.name)) ||
+    grants.find(grant => grant.shopName && normalizeAccessValue(grant.shopName) === normalizeAccessValue(profile.shopName)) ||
+    null
+  );
 };
 
 const isClientBoundInviteGrant = (grant = {}, profile = {}) => (
@@ -1081,11 +1184,19 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
         };
 
         store.testerInvites[invite.inviteId] = invite;
-        invites.push(redactTesterInvite(invite));
+        invites.push(invite);
       }
 
       await saveStore(store);
-      res.json({ status: 'ok', invite: invites[0], invites });
+      for (const invite of invites) {
+        invite.emailDelivery = await sendTesterInviteEmail(invite);
+        invite.updatedAt = new Date().toISOString();
+        store.testerInvites[invite.inviteId] = invite;
+      }
+
+      await saveStore(store);
+      const redactedInvites = invites.map(redactTesterInvite);
+      res.json({ status: 'ok', invite: redactedInvites[0], invites: redactedInvites });
     } catch (error) {
       res.status(500).json({
         status: 'error',
@@ -1114,6 +1225,53 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
       res.status(500).json({
         status: 'error',
         error: error.message || 'Failed to revoke tester invite.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/admin/commercial/tester-invites/:inviteId/send', async (req, res) => {
+    if (!requireAdmin || !requireAdmin(req, res)) return;
+    try {
+      const inviteId = String(req.params.inviteId || '').trim();
+      const store = await loadStore();
+      const invite = store.testerInvites?.[inviteId];
+      if (!invite) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'Tester invite not found.',
+          canRetry: false,
+        });
+      }
+      if (invite.active === false || invite.status !== 'pending') {
+        return res.status(409).json({
+          status: 'error',
+          error: 'Only pending active tester invites can be emailed.',
+          canRetry: false,
+        });
+      }
+      if (invite.expiresAt && new Date(invite.expiresAt).getTime() < Date.now()) {
+        invite.active = false;
+        invite.status = 'expired';
+        invite.updatedAt = new Date().toISOString();
+        store.testerInvites[invite.inviteId] = invite;
+        await saveStore(store);
+        return res.status(409).json({
+          status: 'error',
+          error: 'Tester invite has expired. Create a new invite before sending email.',
+          canRetry: false,
+        });
+      }
+
+      invite.emailDelivery = await sendTesterInviteEmail(invite);
+      invite.updatedAt = new Date().toISOString();
+      store.testerInvites[invite.inviteId] = invite;
+      await saveStore(store);
+      res.json({ status: 'ok', invite: redactTesterInvite(invite) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to send tester invite email.',
         canRetry: true,
       });
     }

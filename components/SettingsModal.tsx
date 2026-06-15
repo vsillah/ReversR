@@ -21,6 +21,7 @@ import {
   revokeCommercialTesterInvite,
   saveCommercialAccessGrant,
   saveCommercialCreditConfig,
+  sendCommercialTesterInviteEmail,
   useCommercialization,
 } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -554,7 +555,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       const result = await lookupCommercialTesterInvite(email);
       const activationCode = result.invite.activationCode?.trim();
       if (!activationCode) {
-        setAccessStatus('An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
+        setAccessStatus(result.invite.emailDelivery?.status === 'sent'
+          ? 'An admin invite exists for this email. Enter the one-time code from your email, then tap Redeem Admin Code.'
+          : 'An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
         return;
       }
       setTesterInviteCode(activationCode);
@@ -598,6 +601,15 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     }
   };
 
+  const inviteDeliveryLabel = (invite: CommercialTesterInviteSummary) => {
+    const delivery = invite.emailDelivery;
+    if (delivery?.status === 'sent') {
+      return `email sent${delivery.sentAt ? ` ${new Date(delivery.sentAt).toLocaleDateString()}` : ''}`;
+    }
+    if (delivery?.status === 'failed') return `email failed${delivery.message ? `: ${delivery.message}` : ''}`;
+    return 'manual code fallback';
+  };
+
   const handleCreateTesterInvite = async () => {
     const token = requireAdminToken();
     if (!token) return;
@@ -622,9 +634,33 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
         const others = prev.filter(item => !inviteIds.has(item.inviteId));
         return [...returnedInvites, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
       });
-      setAdminStatus(`Created tester invite for ${result.invite.email}. The tester can now enter that work email and tap Find Admin Code.`);
+      const delivery = result.invite.emailDelivery;
+      setAdminStatus(delivery?.status === 'sent'
+        ? `Created tester invite for ${result.invite.email} and sent the one-time code by email.`
+        : `Created tester invite for ${result.invite.email}. Email delivery is not configured, so the tester can enter that work email and tap Find Admin Code.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to create tester invite.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleSendTesterInviteEmail = async (inviteId: string) => {
+    const token = requireAdminToken();
+    if (!token) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await sendCommercialTesterInviteEmail(token, inviteId);
+      setTesterInvites(prev => prev.map(item => (
+        item.inviteId === inviteId ? result.invite : item
+      )));
+      setAdminStatus(result.invite.emailDelivery?.status === 'sent'
+        ? `Sent tester invite email to ${result.invite.email}.`
+        : result.invite.emailDelivery?.message || 'Tester invite email delivery is not configured.');
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to send tester invite email.');
     } finally {
       setAdminLoading(false);
     }
@@ -1820,7 +1856,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
                     </View>
                     <Text style={styles.policyText}>
-                      Pre-authorize a tester by work email. The tester enters the same email in Settings, taps Find Admin Code, and redeems the code in the app.
+                      Pre-authorize a tester by work email. When invite email is configured, ReversR sends a one-time code to that address. Manual in-app code lookup remains available as a fallback.
                     </Text>
 
                     <Text style={styles.compactLabel}>Tester invite email</Text>
@@ -1889,21 +1925,35 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                             <Text style={styles.credentialMetaText}>
                               {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
                             </Text>
+                            <Text style={styles.credentialMetaText}>
+                              {inviteDeliveryLabel(invite)}
+                            </Text>
                             {invite.activationCode && (
                               <Text selectable style={styles.inviteCodeText}>
                                 Code: {invite.activationCode}
                               </Text>
                             )}
                           </View>
-                          <TouchableOpacity
-                            style={styles.deleteCredentialButton}
-                            onPress={() => handleRevokeTesterInvite(invite.inviteId)}
-                            disabled={adminLoading || !invite.active || invite.status !== 'pending'}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
-                          >
-                            <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
-                          </TouchableOpacity>
+                          <View style={styles.credentialActionStack}>
+                            <TouchableOpacity
+                              style={styles.sendCredentialButton}
+                              onPress={() => handleSendTesterInviteEmail(invite.inviteId)}
+                              disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Send tester invite email ${invite.inviteId}`}
+                            >
+                              <Ionicons name="mail-outline" size={15} color={Colors.accent} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.deleteCredentialButton}
+                              onPress={() => handleRevokeTesterInvite(invite.inviteId)}
+                              disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                            >
+                              <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       ))}
                     </View>
@@ -2955,6 +3005,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     lineHeight: 16,
     marginTop: 4,
     fontWeight: '800',
+  },
+  credentialActionStack: {
+    gap: 6,
+  },
+  sendCredentialButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.gray[800],
   },
   deleteCredentialButton: {
     width: 30,

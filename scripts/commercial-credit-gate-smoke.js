@@ -258,6 +258,46 @@ const run = async () => {
     assert.equal(inviteList.invites[0].status, 'redeemed');
     assert.equal(inviteList.invites[0].tokenHash, undefined);
 
+    process.env.TESTER_INVITE_EMAIL_FILE = path.join(tempDir, 'tester-invite-email-outbox.json');
+    const emailedInviteResponse = await fetch(`${baseUrl}/api/admin/commercial/tester-invites`, {
+      method: 'POST',
+      headers: grantHeaders,
+      body: JSON.stringify({
+        email: 'emailed-invite-smoke@example.com',
+        platform: 'android',
+      }),
+    });
+    const emailedInviteBody = await emailedInviteResponse.json();
+    assert.equal(emailedInviteResponse.status, 200);
+    assert.equal(emailedInviteBody.invite.emailDelivery.status, 'sent');
+    assert.equal(emailedInviteBody.invite.emailDelivery.provider, 'file');
+    assert.equal(emailedInviteBody.invite.activationCode, '');
+
+    const outbox = JSON.parse(await fs.readFile(process.env.TESTER_INVITE_EMAIL_FILE, 'utf8'));
+    assert.equal(outbox.emails.length, 1);
+    assert.equal(outbox.emails[0].to, 'emailed-invite-smoke@example.com');
+    assert.ok(outbox.emails[0].activationCode.length > 12);
+
+    const emailedLookupResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/lookup`, {
+      method: 'POST',
+      headers: headersFor('emailed-invite-smoke-client', 'Emailed Invite Smoke', 'emailed-invite-smoke@example.com'),
+      body: JSON.stringify({ email: 'emailed-invite-smoke@example.com' }),
+    });
+    const emailedLookupBody = await emailedLookupResponse.json();
+    assert.equal(emailedLookupResponse.status, 200);
+    assert.equal(emailedLookupBody.invite.emailDelivery.status, 'sent');
+    assert.equal(emailedLookupBody.invite.activationCode, '');
+
+    const emailedRedeemResponse = await fetch(`${baseUrl}/api/commercial/tester-invites/redeem`, {
+      method: 'POST',
+      headers: headersFor('emailed-invite-smoke-client', 'Emailed Invite Smoke', 'emailed-invite-smoke@example.com'),
+      body: JSON.stringify({ token: outbox.emails[0].activationCode }),
+    });
+    const emailedRedeemBody = await emailedRedeemResponse.json();
+    assert.equal(emailedRedeemResponse.status, 200);
+    assert.equal(emailedRedeemBody.account.billing.planId, 'tester');
+    assert.equal(emailedRedeemBody.invite.status, 'redeemed');
+
     console.log('Commercial credit gate smoke passed.');
   } finally {
     await new Promise(resolve => server.close(resolve));
