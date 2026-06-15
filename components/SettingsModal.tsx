@@ -146,10 +146,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [creditPeriod, setCreditPeriod] = useState<'day' | 'week' | 'month'>('week');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePlatform, setInvitePlatform] = useState<TesterInvitePlatform>('both');
-  const [grantClientId, setGrantClientId] = useState('');
   const [grantEmail, setGrantEmail] = useState('');
-  const [grantProfileName, setGrantProfileName] = useState('');
-  const [grantShopName, setGrantShopName] = useState('');
   const [grantRole, setGrantRole] = useState<'tester' | 'super_admin'>('tester');
   const [grantStartingPassword, setGrantStartingPassword] = useState('');
   const [countdownNow, setCountdownNow] = useState(Date.now());
@@ -604,6 +601,12 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     const token = requireAdminToken();
     if (!token) return;
 
+    const email = normalizeEmail(grantEmail);
+    if (!email || !isValidEmail(email)) {
+      setAdminStatus('Enter a valid grant email before creating a fallback password grant.');
+      return;
+    }
+
     if (!grantStartingPassword.trim()) {
       setAdminStatus('Starting password is required for a commercial access grant.');
       return;
@@ -613,10 +616,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     setAdminStatus(null);
     try {
       const result = await saveCommercialAccessGrant(token, {
-        clientId: grantClientId.trim(),
-        email: grantEmail.trim(),
-        profileName: grantProfileName.trim(),
-        shopName: grantShopName.trim(),
+        email,
         role: grantRole,
         startingPassword: grantStartingPassword.trim(),
       });
@@ -771,6 +771,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const normalizedCommercialEmail = normalizeEmail(commercialProfile.email);
   const commercialEmailIsValid = isValidEmail(normalizedCommercialEmail);
   const showEmailError = emailTouched && !commercialEmailIsValid;
+  const isSuperAdmin = account?.access?.role === 'super_admin';
   const canUseAdminConsole = Boolean(adminCredentialSettingsEnabled || account?.entitlements.canUseAdminConsole || account?.access?.role === 'super_admin');
   const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
   const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
@@ -1655,229 +1656,202 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   ))}
                 </View>
 
-                <View style={styles.superAdminDivider} />
-                <View style={styles.policyHeader}>
-                  <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
-                  <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
-                </View>
-                <Text style={styles.policyText}>
-                  Create tester invite codes by email. Testers can retrieve a pending code in the app after entering the same work email.
-                </Text>
+                {isSuperAdmin && (
+                  <>
+                    <View style={styles.superAdminDivider} />
+                    <View style={styles.policyHeader}>
+                      <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
+                      <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
+                    </View>
+                    <Text style={styles.policyText}>
+                      Pre-authorize a tester by work email. The tester enters the same email in Settings, taps Find Admin Code, and redeems the code in the app.
+                    </Text>
 
-                <Text style={styles.compactLabel}>Tester invite email</Text>
-                <TextInput
-                  style={styles.input}
-                  value={inviteEmail}
-                  onChangeText={setInviteEmail}
-                  accessibilityLabel="Tester invite email"
-                  placeholder="tester@example.com"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
+                    <Text style={styles.compactLabel}>Tester invite email</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={inviteEmail}
+                      onChangeText={setInviteEmail}
+                      accessibilityLabel="Tester invite email"
+                      placeholder="tester@example.com"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
 
-                <Text style={styles.compactLabel}>Tester path</Text>
-                <View style={styles.themeToggleRow}>
-                  {(['both', 'ios', 'android'] as const).map(platform => (
-                    <TouchableOpacity
-                      key={platform}
-                      style={[styles.themeToggleButton, invitePlatform === platform && styles.themeToggleButtonActive]}
-                      onPress={() => setInvitePlatform(platform)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Set tester invite path to ${platform}`}
-                      accessibilityState={{ selected: invitePlatform === platform }}
-                    >
-                      <Ionicons
-                        name={platform === 'ios' ? 'logo-apple' : platform === 'android' ? 'logo-android' : 'phone-portrait-outline'}
-                        size={16}
-                        color={invitePlatform === platform ? Colors.black : Colors.gray[400]}
-                      />
-                      <Text style={[styles.themeToggleText, invitePlatform === platform && styles.themeToggleTextActive]}>
-                        {platform === 'both' ? 'Both' : platform === 'ios' ? 'iOS' : 'Android'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
-                    onPress={handleCreateTesterInvite}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Create tester invite code"
-                  >
-                    <Ionicons name="ticket-outline" size={17} color={Colors.black} />
-                    <Text style={styles.saveCredentialButtonText}>Create Invite</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                    onPress={loadTesterInvites}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Load tester invites"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Load Invites</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.credentialList}>
-                  {testerInvites.map(invite => (
-                    <View key={invite.inviteId} style={styles.credentialCard}>
-                      <View style={styles.credentialInfo}>
-                        <Text style={styles.credentialRefText}>{invite.email}</Text>
-                        <Text style={styles.credentialMetaText}>
-                          {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
-                        </Text>
-                        {invite.activationCode && (
-                          <Text selectable style={styles.inviteCodeText}>
-                            Code: {invite.activationCode}
+                    <Text style={styles.compactLabel}>Tester path</Text>
+                    <View style={styles.themeToggleRow}>
+                      {(['both', 'ios', 'android'] as const).map(platform => (
+                        <TouchableOpacity
+                          key={platform}
+                          style={[styles.themeToggleButton, invitePlatform === platform && styles.themeToggleButtonActive]}
+                          onPress={() => setInvitePlatform(platform)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Set tester invite path to ${platform}`}
+                          accessibilityState={{ selected: invitePlatform === platform }}
+                        >
+                          <Ionicons
+                            name={platform === 'ios' ? 'logo-apple' : platform === 'android' ? 'logo-android' : 'phone-portrait-outline'}
+                            size={16}
+                            color={invitePlatform === platform ? Colors.black : Colors.gray[400]}
+                          />
+                          <Text style={[styles.themeToggleText, invitePlatform === platform && styles.themeToggleTextActive]}>
+                            {platform === 'both' ? 'Both' : platform === 'ios' ? 'iOS' : 'Android'}
                           </Text>
-                        )}
-                      </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <View style={styles.adminActionRow}>
                       <TouchableOpacity
-                        style={styles.deleteCredentialButton}
-                        onPress={() => handleRevokeTesterInvite(invite.inviteId)}
-                        disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                        style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                        onPress={handleCreateTesterInvite}
+                        disabled={adminLoading}
                         accessibilityRole="button"
-                        accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                        accessibilityLabel="Create tester invite code"
                       >
-                        <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                        <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+                        <Text style={styles.saveCredentialButtonText}>Create Invite</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                        onPress={loadTesterInvites}
+                        disabled={adminLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Load tester invites"
+                      >
+                        <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Load Invites</Text>
                       </TouchableOpacity>
                     </View>
-                  ))}
-                </View>
 
-                <View style={styles.superAdminDivider} />
-                <Text style={styles.policyText}>
-                  Legacy grants are still available when a tester cannot redeem an invite code.
-                </Text>
+                    <View style={styles.credentialList}>
+                      {testerInvites.map(invite => (
+                        <View key={invite.inviteId} style={styles.credentialCard}>
+                          <View style={styles.credentialInfo}>
+                            <Text style={styles.credentialRefText}>{invite.email}</Text>
+                            <Text style={styles.credentialMetaText}>
+                              {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
+                            </Text>
+                            {invite.activationCode && (
+                              <Text selectable style={styles.inviteCodeText}>
+                                Code: {invite.activationCode}
+                              </Text>
+                            )}
+                          </View>
+                          <TouchableOpacity
+                            style={styles.deleteCredentialButton}
+                            onPress={() => handleRevokeTesterInvite(invite.inviteId)}
+                            disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                          >
+                            <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
 
-                <Text style={styles.compactLabel}>Client ID</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantClientId}
-                  onChangeText={setGrantClientId}
-                  accessibilityLabel="Commercial access grant client ID"
-                  placeholder="client_..."
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                />
+                    <View style={styles.superAdminDivider} />
+                    <Text style={styles.policyText}>
+                      Fallback password grants are only for exception cases where a tester cannot redeem an invite code.
+                    </Text>
 
-                <Text style={styles.compactLabel}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantEmail}
-                  onChangeText={setGrantEmail}
-                  accessibilityLabel="Commercial access grant email"
-                  placeholder="tester@example.com"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
+                    <Text style={styles.compactLabel}>Grant email</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={grantEmail}
+                      onChangeText={setGrantEmail}
+                      accessibilityLabel="Commercial access grant email"
+                      placeholder="tester@example.com"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
 
-                <Text style={styles.compactLabel}>Profile name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantProfileName}
-                  onChangeText={setGrantProfileName}
-                  accessibilityLabel="Commercial access grant profile name"
-                  placeholder="test3r"
-                  placeholderTextColor={Colors.gray[500]}
-                />
+                    <Text style={styles.compactLabel}>Access role</Text>
+                    <View style={styles.themeToggleRow}>
+                      {(['tester', 'super_admin'] as const).map(role => (
+                        <TouchableOpacity
+                          key={role}
+                          style={[styles.themeToggleButton, grantRole === role && styles.themeToggleButtonActive]}
+                          onPress={() => setGrantRole(role)}
+                          accessibilityRole="button"
+                          accessibilityLabel={role === 'super_admin' ? 'Create a super admin grant' : 'Create a tester grant'}
+                          accessibilityState={{ selected: grantRole === role }}
+                        >
+                          <Ionicons
+                            name={role === 'super_admin' ? 'shield-checkmark-outline' : 'flask-outline'}
+                            size={16}
+                            color={grantRole === role ? Colors.black : Colors.gray[400]}
+                          />
+                          <Text style={[styles.themeToggleText, grantRole === role && styles.themeToggleTextActive]}>
+                            {role === 'super_admin' ? 'Super Admin' : 'Tester'}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
 
-                <Text style={styles.compactLabel}>Shop name</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantShopName}
-                  onChangeText={setGrantShopName}
-                  accessibilityLabel="Commercial access grant shop name"
-                  placeholder="QA Repair Shop"
-                  placeholderTextColor={Colors.gray[500]}
-                />
+                    <Text style={styles.compactLabel}>Starting password</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={grantStartingPassword}
+                      onChangeText={setGrantStartingPassword}
+                      accessibilityLabel="Commercial access grant starting password"
+                      placeholder="Give this to the tester once"
+                      placeholderTextColor={Colors.gray[500]}
+                      autoCapitalize="none"
+                      secureTextEntry
+                    />
 
-                <Text style={styles.compactLabel}>Access role</Text>
-                <View style={styles.themeToggleRow}>
-                  {(['tester', 'super_admin'] as const).map(role => (
-                    <TouchableOpacity
-                      key={role}
-                      style={[styles.themeToggleButton, grantRole === role && styles.themeToggleButtonActive]}
-                      onPress={() => setGrantRole(role)}
-                      accessibilityRole="button"
-                      accessibilityLabel={role === 'super_admin' ? 'Create a super admin grant' : 'Create a tester grant'}
-                      accessibilityState={{ selected: grantRole === role }}
-                    >
-                      <Ionicons
-                        name={role === 'super_admin' ? 'shield-checkmark-outline' : 'flask-outline'}
-                        size={16}
-                        color={grantRole === role ? Colors.black : Colors.gray[400]}
-                      />
-                      <Text style={[styles.themeToggleText, grantRole === role && styles.themeToggleTextActive]}>
-                        {role === 'super_admin' ? 'Super Admin' : 'Tester'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={styles.compactLabel}>Starting password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={grantStartingPassword}
-                  onChangeText={setGrantStartingPassword}
-                  accessibilityLabel="Commercial access grant starting password"
-                  placeholder="Give this to the tester once"
-                  placeholderTextColor={Colors.gray[500]}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-
-                <View style={styles.adminActionRow}>
-                  <TouchableOpacity
-                    style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
-                    onPress={handleSaveAccessGrant}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Save commercial tester access grant"
-                  >
-                    <Ionicons name="person-add-outline" size={17} color={Colors.black} />
-                    <Text style={styles.saveCredentialButtonText}>Grant Tester Access</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.adminButton, adminLoading && styles.disabledButton]}
-                    onPress={loadAccessGrants}
-                    disabled={adminLoading}
-                    accessibilityRole="button"
-                    accessibilityLabel="Load commercial tester access grants"
-                  >
-                    <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.adminButtonText}>Load Grants</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.credentialList}>
-                  {accessGrants.map(grant => (
-                    <View key={grant.grantId} style={styles.credentialCard}>
-                      <View style={styles.credentialInfo}>
-                        <Text style={styles.credentialRefText}>
-                          {grant.clientId || grant.email || grant.profileName || grant.shopName}
-                        </Text>
-                        <Text style={styles.credentialMetaText}>
-                          {grant.active ? 'active' : 'revoked'} | {grant.role === 'super_admin' ? 'super admin' : 'tester'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
-                        </Text>
-                      </View>
+                    <View style={styles.adminActionRow}>
                       <TouchableOpacity
-                        style={styles.deleteCredentialButton}
-                        onPress={() => handleRevokeAccessGrant(grant.grantId)}
-                        disabled={adminLoading || !grant.active}
+                        style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                        onPress={handleSaveAccessGrant}
+                        disabled={adminLoading}
                         accessibilityRole="button"
-                        accessibilityLabel={`Revoke commercial tester access grant ${grant.grantId}`}
+                        accessibilityLabel="Save commercial tester access grant"
                       >
-                        <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                        <Ionicons name="person-add-outline" size={17} color={Colors.black} />
+                        <Text style={styles.saveCredentialButtonText}>Grant Tester Access</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                        onPress={loadAccessGrants}
+                        disabled={adminLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Load commercial tester access grants"
+                      >
+                        <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Load Grants</Text>
                       </TouchableOpacity>
                     </View>
-                  ))}
-                </View>
+
+                    <View style={styles.credentialList}>
+                      {accessGrants.map(grant => (
+                        <View key={grant.grantId} style={styles.credentialCard}>
+                          <View style={styles.credentialInfo}>
+                            <Text style={styles.credentialRefText}>
+                              {grant.email || grant.clientId || grant.profileName || grant.shopName}
+                            </Text>
+                            <Text style={styles.credentialMetaText}>
+                              {grant.active ? 'active' : 'revoked'} | {grant.role === 'super_admin' ? 'super admin' : 'tester'} | {grant.mustResetPassword ? 'reset required' : 'password reset'} | {grant.planId}
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.deleteCredentialButton}
+                            onPress={() => handleRevokeAccessGrant(grant.grantId)}
+                            disabled={adminLoading || !grant.active}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Revoke commercial tester access grant ${grant.grantId}`}
+                          >
+                            <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                )}
               </View>
             )}
 
