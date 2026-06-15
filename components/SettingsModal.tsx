@@ -21,6 +21,7 @@ import {
   revokeCommercialTesterInvite,
   saveCommercialAccessGrant,
   saveCommercialCreditConfig,
+  sendCommercialTesterInviteEmail,
   useCommercialization,
 } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -106,6 +107,14 @@ const FALLBACK_COMMERCIAL_PLANS: CommercialPlan[] = [
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const normalizeEmail = (value = '') => value.trim().toLowerCase();
 const isValidEmail = (value = '') => EMAIL_PATTERN.test(normalizeEmail(value));
+const shortFingerprint = (value = '') => {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0').slice(0, 8);
+};
 
 export default function SettingsModal({ visible, onClose, initialSection = 'account' }: SettingsModalProps) {
   const { colors: Colors } = useAppTheme();
@@ -146,6 +155,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const localProviderSettingsEnabled = isLocalProviderSettingsEnabled();
   const adminCredentialSettingsEnabled = isAdminCredentialSettingsEnabled();
   const canUseInventoryConnectors = account?.entitlements.canUseInventoryConnectors ?? false;
+  const superAdminSessionActive = Boolean(account?.access?.role === 'super_admin' && account?.entitlements.canUseAdminConsole);
   const [aiRuntimeStatus, setAiRuntimeStatus] = useState<AiRuntimeStatus | null>(null);
   const [aiStatusLoading, setAiStatusLoading] = useState(false);
   const [commercialProfile, setCommercialProfile] = useState<CommercialProfile>(profile);
@@ -388,10 +398,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     );
   };
 
-  const requireAdminToken = () => {
+  const requireAdminToken = ({ allowSuperAdminSession = false } = {}) => {
     const token = adminToken.trim();
+    if (!token && allowSuperAdminSession && superAdminSessionActive) return '';
     if (!token) {
-      setAdminStatus('Enter the API admin token in Inventory settings before managing backend credentials or admin rules.');
+      setAdminStatus('API admin token is required.');
       return null;
     }
     return token;
@@ -399,7 +410,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   const loadCredentials = async () => {
     const token = requireAdminToken();
-    if (!token) return;
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -422,7 +433,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   const handleSaveCredential = async () => {
     const token = requireAdminToken();
-    if (!token) return;
+    if (token === null) return;
 
     const ref = (credentialRef.trim() || inventoryConnector.credentialRef?.trim() || '');
     const secretValue = credentialValue.trim();
@@ -462,7 +473,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   const handleDeleteCredential = async (ref: string) => {
     const token = requireAdminToken();
-    if (!token) return;
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -554,7 +565,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       const result = await lookupCommercialTesterInvite(email);
       const activationCode = result.invite.activationCode?.trim();
       if (!activationCode) {
-        setAccessStatus('An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
+        setAccessStatus(result.invite.emailDelivery?.status === 'sent'
+          ? 'An admin invite exists for this email. Enter the one-time code from your email, then tap Redeem Admin Code.'
+          : 'An admin invite exists for this email, but its code is not retrievable. Ask a ReversR admin to recreate it.');
         return;
       }
       setTesterInviteCode(activationCode);
@@ -565,8 +578,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   };
 
   const loadAccessGrants = async () => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -582,8 +595,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   };
 
   const loadTesterInvites = async () => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -598,9 +611,18 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     }
   };
 
+  const inviteDeliveryLabel = (invite: CommercialTesterInviteSummary) => {
+    const delivery = invite.emailDelivery;
+    if (delivery?.status === 'sent') {
+      return `email sent${delivery.sentAt ? ` ${new Date(delivery.sentAt).toLocaleDateString()}` : ''}`;
+    }
+    if (delivery?.status === 'failed') return `email failed${delivery.message ? `: ${delivery.message}` : ''}`;
+    return 'manual code fallback';
+  };
+
   const handleCreateTesterInvite = async () => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     const email = normalizeEmail(inviteEmail);
     if (!email || !isValidEmail(email)) {
@@ -622,7 +644,10 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
         const others = prev.filter(item => !inviteIds.has(item.inviteId));
         return [...returnedInvites, ...others].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
       });
-      setAdminStatus(`Created tester invite for ${result.invite.email}. The tester can now enter that work email and tap Find Admin Code.`);
+      const delivery = result.invite.emailDelivery;
+      setAdminStatus(delivery?.status === 'sent'
+        ? `Created tester invite for ${result.invite.email} and sent the one-time code by email.`
+        : `Created tester invite for ${result.invite.email}. Email delivery is not configured, so the tester can enter that work email and tap Find Admin Code.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to create tester invite.');
     } finally {
@@ -630,9 +655,30 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     }
   };
 
+  const handleSendTesterInviteEmail = async (inviteId: string) => {
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await sendCommercialTesterInviteEmail(token, inviteId);
+      setTesterInvites(prev => prev.map(item => (
+        item.inviteId === inviteId ? result.invite : item
+      )));
+      setAdminStatus(result.invite.emailDelivery?.status === 'sent'
+        ? `Sent tester invite email to ${result.invite.email}.`
+        : result.invite.emailDelivery?.message || 'Tester invite email delivery is not configured.');
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to send tester invite email.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
   const handleRevokeTesterInvite = async (inviteId: string) => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -652,8 +698,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   };
 
   const handleSaveAccessGrant = async () => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     const email = normalizeEmail(grantEmail);
     if (!email || !isValidEmail(email)) {
@@ -688,8 +734,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   };
 
   const handleRevokeAccessGrant = async (grantId: string) => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -782,8 +828,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   };
 
   const loadJourneyCreditConfig = async () => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     setAdminLoading(true);
     setAdminStatus(null);
@@ -804,8 +850,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   };
 
   const saveJourneyCreditConfig = async () => {
-    const token = requireAdminToken();
-    if (!token) return;
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
 
     const credits = Number(creditAllowance);
     if (!Number.isFinite(credits) || credits < 0) {
@@ -848,6 +894,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const showEmailError = emailTouched && !commercialEmailIsValid;
   const isSuperAdmin = account?.access?.role === 'super_admin';
   const canUseAdminConsole = Boolean(adminCredentialSettingsEnabled || account?.entitlements.canUseAdminConsole || account?.access?.role === 'super_admin');
+  const apiCredentialDisplay = superAdminSessionActive
+    ? `hash:${shortFingerprint(`${account?.profile.id || ''}:${account?.profile.email || ''}:${account?.access?.grantId || 'env-super-admin'}`)}`
+    : adminToken;
   const visiblePlans = account?.plans?.length ? account.plans : FALLBACK_COMMERCIAL_PLANS;
   const settingsSections: Array<{ id: SettingsSection; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
     { id: 'profile', label: 'Profile', icon: 'person-circle-outline' },
@@ -1601,15 +1650,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                           <Text style={styles.compactLabel}>API admin token</Text>
                           {renderInfoButton('adminToken', 'Show API admin token details')}
                         </View>
-                        {renderTooltip('adminToken', 'Get this from the hosted API environment value ADMIN_API_TOKEN, or from a ReversR super admin or deployment owner. It authorizes this Settings session to load or save backend credential references. It is not a tester invite code, account password, API key, or OAuth token. It is not saved in the app.')}
+                        {renderTooltip('adminToken', 'Get this from the hosted API environment value ADMIN_API_TOKEN, or from a ReversR super admin or deployment owner.')}
                         <TextInput
-                          style={styles.input}
-                          value={adminToken}
+                          style={[styles.input, superAdminSessionActive && styles.inputDisabled]}
+                          value={apiCredentialDisplay}
                           onChangeText={setAdminToken}
+                          editable={!superAdminSessionActive}
                           placeholder="Session-only API admin token"
                           placeholderTextColor={Colors.gray[500]}
                           autoCapitalize="none"
-                          secureTextEntry
+                          secureTextEntry={!superAdminSessionActive}
                         />
 
                         <View style={styles.adminActionRow}>
@@ -1820,7 +1870,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       <Text style={styles.policyTitle}>Super Admin Tester Access</Text>
                     </View>
                     <Text style={styles.policyText}>
-                      Pre-authorize a tester by work email. The tester enters the same email in Settings, taps Find Admin Code, and redeems the code in the app.
+                      Pre-authorize a tester by work email. When invite email is configured, ReversR sends a one-time code to that address. Manual in-app code lookup remains available as a fallback.
                     </Text>
 
                     <Text style={styles.compactLabel}>Tester invite email</Text>
@@ -1889,21 +1939,35 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                             <Text style={styles.credentialMetaText}>
                               {invite.status} | {invite.platform} | expires {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'unknown'}
                             </Text>
+                            <Text style={styles.credentialMetaText}>
+                              {inviteDeliveryLabel(invite)}
+                            </Text>
                             {invite.activationCode && (
                               <Text selectable style={styles.inviteCodeText}>
                                 Code: {invite.activationCode}
                               </Text>
                             )}
                           </View>
-                          <TouchableOpacity
-                            style={styles.deleteCredentialButton}
-                            onPress={() => handleRevokeTesterInvite(invite.inviteId)}
-                            disabled={adminLoading || !invite.active || invite.status !== 'pending'}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
-                          >
-                            <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
-                          </TouchableOpacity>
+                          <View style={styles.credentialActionStack}>
+                            <TouchableOpacity
+                              style={styles.sendCredentialButton}
+                              onPress={() => handleSendTesterInviteEmail(invite.inviteId)}
+                              disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Send tester invite email ${invite.inviteId}`}
+                            >
+                              <Ionicons name="mail-outline" size={15} color={Colors.accent} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.deleteCredentialButton}
+                              onPress={() => handleRevokeTesterInvite(invite.inviteId)}
+                              disabled={adminLoading || !invite.active || invite.status !== 'pending'}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Revoke tester invite ${invite.inviteId}`}
+                            >
+                              <Ionicons name="remove-circle-outline" size={15} color={Colors.red[500]} />
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       ))}
                     </View>
@@ -2561,6 +2625,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   inputError: {
     borderColor: Colors.danger,
   },
+  inputDisabled: {
+    backgroundColor: Colors.gray[900],
+    borderColor: Colors.gray[800],
+    color: Colors.gray[500],
+  },
   textArea: {
     minHeight: 88,
     textAlignVertical: 'top',
@@ -2955,6 +3024,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     lineHeight: 16,
     marginTop: 4,
     fontWeight: '800',
+  },
+  credentialActionStack: {
+    gap: 6,
+  },
+  sendCredentialButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.gray[800],
   },
   deleteCredentialButton: {
     width: 30,
