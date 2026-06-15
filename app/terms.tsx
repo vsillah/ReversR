@@ -5,7 +5,7 @@ export default function TermsRoute() {
   return (
     <PolicyPage
       title="Terms of Service"
-      updated="June 13, 2026"
+      updated="June 15, 2026"
       intro="By accessing or using ReversR Rebuild, you agree to these terms. If you do not agree, do not use the app."
       sections={[
         {
@@ -15,7 +15,7 @@ export default function TermsRoute() {
             'Validate an admin-approved machine inventory connector.',
             'Match a scan to a machine record.',
             'Generate a reconstruction package with BOM, assembly steps, pricing estimates, and fabrication or 3D modeling handoff information.',
-            'Manage repair shop profiles, monthly reconstruction journey credits, and paid shop entitlements.',
+            'Manage repair shop profiles, monthly reconstruction journey credits, paid shop entitlements, hosted web billing, and Android Google Play Billing where configured.',
           ],
         },
         {
@@ -31,15 +31,15 @@ export default function TermsRoute() {
         {
           title: 'Subscriptions and Credits',
           bullets: [
-            'Free users receive a limited monthly reconstruction credit trial.',
-            'Paid shop plans and upgrades are managed through the hosted web account page and Stripe billing where configured.',
-            'Credits meter AI-heavy reconstruction steps such as scans, specifications, BOM generation, and visual generation.',
+            'Free users receive a limited monthly journey credit trial.',
+            'Paid shop plans and upgrades are managed through the hosted web account page and Stripe billing where configured, or through Google Play Billing for eligible Android in-app subscriptions.',
+            'One journey credit starts a reconstruction. Specs, sketches, BOMs, exports, and other continuation steps in that same journey do not spend additional credits.',
             'Credit limits, plan features, prices, and add-ons may change with notice before renewal.',
           ],
         },
         {
           title: 'Cancellation and Refunds',
-          body: 'Billing changes, cancellations, payment methods, and invoices are managed through the hosted web billing portal when Stripe is configured. Refund requests should be sent to support and are reviewed based on account activity, usage, and applicable law.',
+          body: 'Billing changes, cancellations, payment methods, and invoices are managed through the hosted web billing portal when Stripe is configured, or through Google Play subscription management for Android in-app subscriptions. Refund requests should be sent to support or the applicable app store and are reviewed based on account activity, usage, store rules, and applicable law.',
         },
         {
           title: 'Reconstruction Output',

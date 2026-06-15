@@ -1,6 +1,6 @@
 # Terms of Service for ReversR Rebuild
 
-**Last Updated:** June 13, 2026
+**Last Updated:** June 15, 2026
 
 ## Acceptance of Terms
 
@@ -14,7 +14,7 @@ ReversR Rebuild is a mobile application that helps users:
 - Validate an admin-approved machine inventory connector.
 - Match a scan to a machine record.
 - Generate a reconstruction package with a bill of materials, assembly steps, pricing estimates, and fabrication or 3D modeling handoff information.
-- Manage repair shop profiles, monthly AI reconstruction credits, paid shop entitlements, hosted web billing, and Android Google Play Billing where configured.
+- Manage repair shop profiles, monthly reconstruction journey credits, paid shop entitlements, hosted web billing, and Android Google Play Billing where configured.
 
 ## User Responsibilities
 
@@ -29,9 +29,9 @@ You agree to:
 
 ## Subscriptions and Credits
 
-Free users receive a limited monthly reconstruction credit trial. Paid repair shop plans may include higher monthly credit limits, export permissions, shared shop features, inventory connector access, and future cloud-history features.
+Free users receive a limited monthly journey credit trial. Paid repair shop plans may include higher journey credit limits, export permissions, shared shop features, inventory connector access, and future cloud-history features.
 
-Paid plans and upgrades are managed through the hosted web account page and Stripe billing where configured, or through Google Play Billing for eligible Android in-app subscriptions. Credits meter AI-heavy reconstruction steps such as scans, specifications, BOM generation, and visual generation.
+Paid plans and upgrades are managed through the hosted web account page and Stripe billing where configured, or through Google Play Billing for eligible Android in-app subscriptions. One journey credit starts a reconstruction. Specs, sketches, BOMs, exports, and other continuation steps in that same journey do not spend additional credits.
 
 Credit limits, prices, included features, and add-ons may change with notice before renewal.
 
