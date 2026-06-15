@@ -2,8 +2,13 @@
   "version": "1.0.0",
   "releaseDate": "2026-06-14",
   "androidVersionCode": 27,
-  "iosBuildNumber": "12",
+  "iosBuildNumber": "13",
   "testerBuildAvailable": false,
-  "message": "Latest tester build",
-  "updateUrl": "https://play.google.com/apps/internaltest/4700334027214849380"
+  "androidTesterBuildAvailable": false,
+  "iosTesterBuildAvailable": true,
+  "message": "A newer tester build is available for this platform. Install it before validating new changes.",
+  "updateUrl": "https://play.google.com/apps/internaltest/4700334027214849380",
+  "androidUpdateUrl": "https://play.google.com/apps/internaltest/4700334027214849380",
+  "iosUpdateUrl": "https://testflight.apple.com/join/twj2dNQY",
+  "testFlightUrl": "https://testflight.apple.com/join/twj2dNQY"
 }
