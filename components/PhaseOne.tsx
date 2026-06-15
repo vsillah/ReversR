@@ -565,7 +565,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.white,
   },
   contentArea: {
-    minHeight: 180,
+    minHeight: 150,
   },
   contentLabel: {
     fontSize: FontSizes.sm,
@@ -658,7 +658,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.text,
     fontFamily: 'monospace',
     fontSize: FontSizes.sm,
-    minHeight: 200,
+    minHeight: 150,
     textAlignVertical: 'top',
   },
   imagePreview: {
