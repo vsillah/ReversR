@@ -66,6 +66,7 @@ type ReleaseManifest = {
   releaseDate?: string;
   androidVersionCode?: number;
   iosBuildNumber?: string;
+  testerBuildAvailable?: boolean;
   message?: string;
   updateUrl?: string;
 };
@@ -162,6 +163,10 @@ const compareVersions = (latestVersion?: string, currentVersion?: string) => {
 
 const isCurrentBuildOutdated = (latestRelease: ReleaseManifest | null) => {
   if (!latestRelease) {
+    return false;
+  }
+
+  if (!latestRelease.testerBuildAvailable) {
     return false;
   }
 
