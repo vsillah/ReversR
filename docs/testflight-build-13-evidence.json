@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-15T01:51:23Z",
+  "scope": "TestFlight setup evidence for ReversR Rebuild iOS build 1.0.0 (13), recorded during the captain sweep that also merged PRs #34, #35, and #36.",
+  "repository": {
+    "nameWithOwner": "vsillah/ReversR-Rebuild",
+    "mainCommit": "8f925908e6d649102b1d57f0bd9e55427edceeaa",
+    "mergedPullRequests": [
+      {
+        "number": 34,
+        "title": "fix: gate tester update banner availability",
+        "mergeCommit": "c42b568d2022de789e157f5be786f3783e8139c4"
+      },
+      {
+        "number": 35,
+        "title": "feat: prioritize inventory match selection",
+        "mergeCommit": "01bea55d99a05628cccc84c9f3079c62eb4d02d6"
+      },
+      {
+        "number": 36,
+        "title": "feat: move welcome actions into menu",
+        "mergeCommit": "8f925908e6d649102b1d57f0bd9e55427edceeaa"
+      }
+    ]
+  },
+  "iosTestFlight": {
+    "appStoreConnectAppId": "6777091538",
+    "buildId": "37582c7c-77aa-4d9b-8b86-de9995707922",
+    "easBuildId": "aa08e5f7-2586-4cc5-987f-be5a273d5fb6",
+    "version": "1.0.0",
+    "buildNumber": "13",
+    "gitCommitHash": "a412e1db6e5ceb7c947140871a6a554f11012ea5",
+    "gitCommitMessage": "Merge pull request #31 from vsillah/codex/release-build-28-13-metadata",
+    "processingState": "VALID",
+    "expired": false,
+    "uploadedDate": "2026-06-14T15:24:16-07:00",
+    "nativeBuildBoundary": "Build 13 was uploaded before PRs #34, #35, and #36 were created. Those changes are merged to main but are not included in this iOS native build.",
+    "groupsUpdated": [
+      {
+        "name": "ReversR Internal QA",
+        "groupId": "0e95a925-c6fa-4a5d-beda-a8311ec15785",
+        "action": "Build 13 attached through the App Store Connect API."
+      },
+      {
+        "name": "ReversR External Beta",
+        "groupId": "355ad927-f5a9-4ec5-81c7-3fb54f12ce62",
+        "action": "Build 13 attached through the App Store Connect API."
+      }
+    ],
+    "whatToTest": {
+      "locale": "en-US",
+      "localizationId": "61a98684-26dd-4aa2-8286-7acd13041749",
+      "status": "saved",
+      "text": "Build 13 is the current iOS TestFlight tester build from the release-build 28/13 metadata lane. It includes the earlier guided-tour auto-complete/focus improvements and tester-access updates, and is ready for install QA. The later PR #34-#36 source changes (tester-update banner gate, Phase 2 match layout, Welcome menu/contrast) are merged to main but are not in this native build yet; verify those after the next native build."
+    },
+    "betaReview": {
+      "submissionStatus": "submitted",
+      "betaReviewState": "APPROVED",
+      "publicAppReviewSubmitted": false,
+      "productionRolloutStarted": false
+    }
+  },
+  "androidGooglePlay": {
+    "latestInternalTestingBuild": {
+      "version": "1.0.0",
+      "versionCode": "27",
+      "gitCommitHash": "5a634baeb95351198c43750ed6e4f498f2e16bcc",
+      "gitCommitMessage": "Merge pull request #30 from vsillah/codex/tour-auto-complete-checks"
+    },
+    "note": "Android corrected build 28 was not generated during this sweep because the Expo Free monthly Android cloud build quota remains the limiting gate. Google Play internal testing still points to the previously submitted Android build 27."
+  },
+  "validation": {
+    "localCommands": [
+      {
+        "command": "npm run typecheck",
+        "status": "passed"
+      },
+      {
+        "command": "npm run accessibility:preflight",
+        "status": "passed"
+      }
+    ],
+    "github": {
+      "openPullRequestsAfterSweep": 0
+    },
+    "vercel": {
+      "commit": "8f925908e6d649102b1d57f0bd9e55427edceeaa",
+      "status": "success",
+      "deploymentUrl": "https://vercel.com/vsillahs-projects/reversr/AQYJe2wFqpJ4qKtRZ7hUdWp4Rr1W"
+    }
+  },
+  "remainingGates": [
+    "Tester install QA is still user/tester-owned: install from TestFlight and Google Play Internal Testing and report any onboarding, focus, checklist, or navigation confusion.",
+    "Do not set the shared tester update banner flag true until the platform-specific tester build situation is safe, especially because Android still needs the corrected post-27 native build when quota allows.",
+    "No public App Review submission, App Store production rollout, Google Play production review, or public release was started in this sweep."
+  ]
+}
