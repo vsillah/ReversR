@@ -1457,11 +1457,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   <Text style={styles.policyTitle}>Admin Connector Credentials</Text>
                 </View>
                 <Text style={styles.policyText}>
-                  Register API-key or OAuth credential references on the backend. The workflow stores only the reference name in the app.
+                  Advanced setup for private inventory connectors. This is separate from tester invite codes and account passwords.
                 </Text>
                 <Text style={styles.apiHostText}>API host: {getApiBase()}</Text>
 
-                <Text style={styles.compactLabel}>Admin token</Text>
+                <Text style={styles.compactLabel}>API admin token</Text>
                 <TextInput
                   style={styles.input}
                   value={adminToken}
@@ -1471,6 +1471,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   autoCapitalize="none"
                   secureTextEntry
                 />
+                <Text style={styles.helpText}>
+                  Authorizes this Settings session to load or save backend credential references. The token is not a tester code and is not saved in the app.
+                </Text>
 
                 <View style={styles.adminActionRow}>
                   <TouchableOpacity
@@ -1569,7 +1572,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </TouchableOpacity>
                 </View>
 
-                <Text style={styles.compactLabel}>Credential reference</Text>
+                <Text style={styles.compactLabel}>Backend credential reference</Text>
                 <TextInput
                   style={styles.input}
                   value={credentialRef}
@@ -1578,6 +1581,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   placeholderTextColor={Colors.gray[500]}
                   autoCapitalize="none"
                 />
+                <Text style={styles.helpText}>
+                  Reference name used by Inventory Source. The app keeps this name only; the secret value stays on the backend.
+                </Text>
 
                 <View style={styles.providerRow}>
                   {(['api_key', 'oauth'] as const).map(mode => (
@@ -1595,6 +1601,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     </TouchableOpacity>
                   ))}
                 </View>
+                <Text style={styles.helpText}>
+                  API Key stores a fixed key/header for a connector. OAuth stores a bearer token issued by an external inventory system.
+                </Text>
 
                 {credentialMode === 'api_key' && (
                   <>
