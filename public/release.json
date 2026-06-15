@@ -3,6 +3,7 @@
   "releaseDate": "2026-06-14",
   "androidVersionCode": 27,
   "iosBuildNumber": "12",
+  "testerBuildAvailable": false,
   "message": "Latest tester build",
   "updateUrl": "https://play.google.com/apps/internaltest/4700334027214849380"
 }
