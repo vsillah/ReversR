@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   Image,
   Animated,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Asset } from 'expo-asset';
 import { router } from 'expo-router';
 import { AppColors, DarkColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
@@ -33,7 +35,7 @@ const staticAppConfig = require('../app.json') as {
 
 // Selected Canva hero render. Swap the require path to use a different file in
 // assets/hero/canva/. Set to null to fall back to the blueprint backdrop.
-const HERO_IMAGE: number | null = require('../assets/hero/canva/hero-heavy-gearbox-pump-assembly.png');
+const HERO_IMAGE: number | null = require('../assets/hero/canva/hero-premium-industrial-pump-render-right-split.png');
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -130,6 +132,10 @@ export default function WelcomeScreen({
     isDark: true,
     hasUserPreference,
   }), [setThemeMode, hasUserPreference]);
+  const heroImageUri = React.useMemo(
+    () => (HERO_IMAGE ? Asset.fromModule(HERO_IMAGE).uri : undefined),
+    [],
+  );
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [recent, setRecent] = React.useState<SavedInnovation[]>([]);
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -342,35 +348,56 @@ export default function WelcomeScreen({
           ]}
         >
           <HeroBackdrop radius={0} />
-          {HERO_IMAGE ? <View style={styles.heroBackdropScrim} /> : null}
-        </Animated.View>
-        {HERO_IMAGE ? (
-          <Animated.View
-            style={[
-              styles.heroMediaWrap,
-              { transform: [{ translateY: heroTranslate }] },
-            ]}
+          <View style={styles.heroBase} />
+          <View style={styles.heroTextPanel} />
+          {HERO_IMAGE ? (
+            <View style={styles.heroImagePanel}>
+              {Platform.OS === 'web' && heroImageUri ? (
+                <View
+                  style={[
+                    styles.heroImageSplit,
+                    {
+                      backgroundImage: `url("${heroImageUri}")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: '70% 34%',
+                      backgroundSize: '76%',
+                    } as any,
+                  ]}
+                />
+              ) : (
+                <Image
+                  source={HERO_IMAGE}
+                  style={styles.heroImageSplit}
+                  resizeMode="contain"
+                />
+              )}
+              <LinearGradient
+                colors={['rgba(6,8,12,0.06)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.30)']}
+                locations={[0, 0.5, 1]}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                pointerEvents="none"
+              />
+            </View>
+          ) : null}
+          <LinearGradient
+            colors={['rgba(4,6,10,1.0)', 'rgba(4,6,10,0.96)', 'rgba(4,6,10,0.78)', 'rgba(4,6,10,0.42)', 'rgba(4,6,10,0.12)', 'rgba(4,6,10,0.0)']}
+            locations={[0, 0.14, 0.34, 0.62, 0.84, 1]}
+            style={styles.heroPanelBlend}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
             pointerEvents="none"
-          >
-            <Image source={HERO_IMAGE} style={styles.heroImage} resizeMode="contain" />
-          </Animated.View>
-        ) : null}
-        <LinearGradient
-          colors={['rgba(6,8,12,0.82)', 'rgba(6,8,12,0.54)', 'rgba(6,8,12,0.18)', 'rgba(6,8,12,0.06)']}
-          locations={[0, 0.34, 0.72, 1]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          pointerEvents="none"
-        />
-        <LinearGradient
-          colors={['rgba(6,8,12,0.06)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.42)', 'rgba(6,8,12,0.88)']}
-          locations={[0, 0.2, 0.72, 1]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          pointerEvents="none"
-        />
+          />
+          <LinearGradient
+            colors={['rgba(6,8,12,0.0)', 'rgba(6,8,12,0.04)', 'rgba(6,8,12,0.28)', 'rgba(6,8,12,0.80)']}
+            locations={[0, 0.24, 0.7, 1]}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            pointerEvents="none"
+          />
+        </Animated.View>
         <View style={styles.heroContent}>
           <Badge label="AI-assisted rebuild" tone="accent" icon="sparkles-outline" style={styles.heroBadge} />
           <Text style={styles.heroTitle}>
@@ -378,7 +405,7 @@ export default function WelcomeScreen({
             <Text style={styles.heroTitleAccent}>confidence.</Text>
           </Text>
           <Text style={styles.heroBody}>
-            From first scan to final build, document every step.
+            Start with what you see.
           </Text>
 
           {currentProject ? (
@@ -790,27 +817,46 @@ const createStyles = (Colors: AppColors) => {
       justifyContent: 'flex-end',
       ...shadows.floating,
     },
-    heroBackdropScrim: {
+    heroBase: {
       position: 'absolute',
       top: 0,
       right: 0,
       bottom: 0,
       left: 0,
-      backgroundColor: 'rgba(4,6,10,0.16)',
+      backgroundColor: '#04060A',
     },
-    heroMediaWrap: {
+    heroTextPanel: {
       position: 'absolute',
-      right: -44,
+      top: 0,
       bottom: 0,
-      width: '70%',
-      height: '84%',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      opacity: 0.98,
+      left: 0,
+      width: '54%',
+      backgroundColor: 'rgba(4,6,10,0.98)',
     },
-    heroImage: {
-      width: '100%',
-      height: '100%',
+    heroImagePanel: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: '66%',
+      backgroundColor: '#020406',
+      overflow: 'hidden',
+    },
+    heroImageSplit: {
+      position: 'absolute',
+      top: '-2%',
+      right: '-12%',
+      bottom: '-2%',
+      left: '0%',
+      opacity: 1,
+      zIndex: 1,
+    },
+    heroPanelBlend: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: '26%',
+      width: '42%',
     },
     heroContent: {
       padding: Spacing.lg,
@@ -826,6 +872,7 @@ const createStyles = (Colors: AppColors) => {
       lineHeight: 41,
       letterSpacing: -0.6,
       color: '#ffffff',
+      maxWidth: '84%',
     },
     heroTitleAccent: {
       color: Colors.accent,
@@ -833,10 +880,12 @@ const createStyles = (Colors: AppColors) => {
     heroBody: {
       ...Typography.body,
       color: 'rgba(255,255,255,0.84)',
-      maxWidth: '90%',
+      maxWidth: '76%',
     },
     cpCard: {
       marginTop: Spacing.md,
+      alignSelf: 'flex-start',
+      width: '88%',
       padding: Spacing.md,
       borderRadius: Radii.lg,
       borderWidth: 1,
