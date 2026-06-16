@@ -9,8 +9,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
+import { Badge, Card, PrimaryButton, SectionHeader } from './ui';
 import {
   formatReleaseDate,
   getInstalledBuildLabel,
@@ -39,25 +40,25 @@ interface WelcomeScreenProps {
 const phases = [
   {
     number: 1,
-    title: 'SCAN',
-    icon: 'search' as const,
+    title: 'Scan',
+    icon: 'scan-outline' as const,
     description: 'Capture or describe a machine and identify visible assemblies, parts, and signals.',
   },
   {
     number: 2,
-    title: 'INVENTORY',
+    title: 'Inventory',
     icon: 'git-branch-outline' as const,
     description: 'Connect an admin-approved machine inventory and match the scan to a known record.',
   },
   {
     number: 3,
-    title: 'DESIGN',
+    title: 'Design',
     icon: 'pencil' as const,
     description: 'Generate reconstruction specs, visual references, and 3D modeling handoff files.',
   },
   {
     number: 4,
-    title: 'BUILD',
+    title: 'Build',
     icon: 'hammer-outline' as const,
     description: 'Build a BOM, assembly sequence, pricing estimate, and fabrication handoff.',
   },
@@ -71,6 +72,12 @@ const releaseDate = typeof releaseExtra.releaseDate === 'string'
   : typeof staticReleaseExtra.releaseDate === 'string'
     ? staticReleaseExtra.releaseDate
     : undefined;
+
+const greetingForHour = (hour: number): string => {
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+};
 
 export default function WelcomeScreen({
   onStart,
@@ -96,6 +103,7 @@ export default function WelcomeScreen({
   const hasMenuActions = Boolean(onHistory || onSettings || onTour);
   const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
   const buildLabel = getInstalledBuildLabel();
+  const greeting = greetingForHour(new Date().getHours());
   const footerLabel = [
     `Version ${installedAppVersion}`,
     buildLabel,
@@ -128,66 +136,118 @@ export default function WelcomeScreen({
     });
   }, [nextThemeMode, setThemeMode]);
 
+  const quickActions: Array<{
+    key: string;
+    label: string;
+    description: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    onPress: () => void;
+    testID?: string;
+    accessibilityLabel: string;
+  }> = [];
+  if (onHistory) {
+    quickActions.push({
+      key: 'history',
+      label: 'History',
+      description: 'Resume saved reconstructions',
+      icon: 'time-outline',
+      onPress: () => handleMenuAction(onHistory),
+      accessibilityLabel: 'Open reconstruction history',
+    });
+  }
+  if (onTour) {
+    quickActions.push({
+      key: 'tour',
+      label: 'Guided tour',
+      description: 'Learn the four-phase flow',
+      icon: 'compass-outline',
+      onPress: () => handleMenuAction(onTour),
+      testID: 'reversr-tour-start',
+      accessibilityLabel: 'Start guided tour',
+    });
+  }
+  if (onSettings) {
+    quickActions.push({
+      key: 'settings',
+      label: 'Settings',
+      description: 'Account, AI, and inventory',
+      icon: 'settings-outline',
+      onPress: () => handleMenuAction(onSettings),
+      accessibilityLabel: 'Open settings',
+    });
+  }
+
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.content}>
-        {hasMenuActions && (
-          <View style={styles.topBar}>
-            <View style={styles.topActions}>
-              {(onProfile || onSettings) && (
-                <TouchableOpacity
-                  style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
-                  onPress={() => handleMenuAction(onProfile || onSettings)}
-                  accessibilityRole="button"
-                  accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
-                  testID="welcome-profile-chip"
-                >
-                  {userAvatarUri ? (
-                    <Image source={{ uri: userAvatarUri }} style={styles.profileAvatarThumb} resizeMode="cover" />
-                  ) : (
-                    <Ionicons
-                      name={profileIcon}
-                      size={18}
-                      color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
-                    />
-                  )}
-                  <Text
-                    style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
-                    numberOfLines={1}
-                  >
-                    {userDisplayName}
-                  </Text>
-                </TouchableOpacity>
-              )}
+        <View style={styles.topBar}>
+          <View style={styles.brandRow}>
+            <Image
+              source={require('../assets/logo-transparent.png')}
+              style={styles.brandLogo}
+              resizeMode="contain"
+            />
+            <Text style={styles.brandWordmark}>
+              REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
+            </Text>
+          </View>
 
+          <View style={styles.topActions}>
+            {(onProfile || onSettings) && (
               <TouchableOpacity
-                style={styles.menuButton}
-                onPress={handleToggleTheme}
+                style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
+                onPress={() => handleMenuAction(onProfile || onSettings)}
                 accessibilityRole="button"
-                accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
-                testID="welcome-appearance-toggle"
+                accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
+                testID="welcome-profile-chip"
               >
-                <Ionicons
-                  name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
-                  size={22}
-                  color={Colors.accent}
-                />
+                {userAvatarUri ? (
+                  <Image source={{ uri: userAvatarUri }} style={styles.profileAvatarThumb} resizeMode="cover" />
+                ) : (
+                  <Ionicons
+                    name={profileIcon}
+                    size={18}
+                    color={userIsAuthenticated ? Colors.accent : Colors.mutedText}
+                  />
+                )}
+                <Text
+                  style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
+                  numberOfLines={1}
+                >
+                  {userDisplayName}
+                </Text>
               </TouchableOpacity>
+            )}
 
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleToggleTheme}
+              accessibilityRole="button"
+              accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
+              testID="welcome-appearance-toggle"
+            >
+              <Ionicons
+                name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+                size={20}
+                color={Colors.text}
+              />
+            </TouchableOpacity>
+
+            {hasMenuActions && (
               <View style={styles.menuHost}>
                 <TouchableOpacity
-                  style={[styles.menuButton, menuOpen && styles.menuButtonActive]}
+                  style={[styles.iconButton, menuOpen && styles.iconButtonActive]}
                   onPress={() => setMenuOpen(current => !current)}
                   accessibilityRole="button"
                   accessibilityLabel={menuOpen ? 'Close welcome menu' : 'Open welcome menu'}
                   accessibilityState={{ expanded: menuOpen }}
                   testID="welcome-actions-menu-button"
                 >
-                  <Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={24} color={Colors.accent} />
+                  <Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={22} color={Colors.text} />
                 </TouchableOpacity>
 
                 {menuOpen && (
@@ -199,7 +259,7 @@ export default function WelcomeScreen({
                         accessibilityRole="button"
                         accessibilityLabel="Open reconstruction history"
                       >
-                        <Ionicons name="time-outline" size={18} color={Colors.accent} />
+                        <Ionicons name="time-outline" size={18} color={Colors.primary} />
                         <Text style={styles.menuItemText}>History</Text>
                       </TouchableOpacity>
                     )}
@@ -211,7 +271,7 @@ export default function WelcomeScreen({
                         accessibilityRole="button"
                         accessibilityLabel="Open settings"
                       >
-                        <Ionicons name="settings-outline" size={18} color={Colors.accent} />
+                        <Ionicons name="settings-outline" size={18} color={Colors.primary} />
                         <Text style={styles.menuItemText}>Settings</Text>
                       </TouchableOpacity>
                     )}
@@ -222,36 +282,47 @@ export default function WelcomeScreen({
                         onPress={() => handleMenuAction(onTour)}
                         accessibilityRole="button"
                         accessibilityLabel="Start guided tour"
-                        testID="reversr-tour-start"
                       >
-                        <Ionicons name="compass-outline" size={18} color={Colors.accent} />
+                        <Ionicons name="compass-outline" size={18} color={Colors.primary} />
                         <Text style={styles.menuItemText}>Tour</Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 )}
               </View>
-            </View>
+            )}
           </View>
-        )}
-
-        <View style={styles.logoSection} testID="reversr-tour-welcome">
-          <Image
-            source={require('../assets/logo-transparent.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={styles.title}>
-            REVERS<Text style={styles.titleAccent}>R</Text>
-          </Text>
-          <Text style={styles.subtitle}>Machine Reconstruction Engine</Text>
         </View>
 
-        <Text style={styles.description}>
-          Scan a machine. Match it to inventory. Rebuild the path from parts to assembly.
-          {'\n\n'}
-          An AI-assisted workflow for reconstruction packages, BOMs, pricing, and 3D modeling handoff.
-        </Text>
+        <View style={styles.greetingBlock}>
+          <Text style={styles.greetingHello}>{greeting},</Text>
+          <Text style={styles.greetingName} numberOfLines={1}>{userDisplayName}</Text>
+          <Text style={styles.greetingTagline}>Machine reconstruction. Smarter. Faster. Proven.</Text>
+        </View>
+
+        <Card style={styles.heroCard} testID="reversr-tour-welcome">
+          <View style={styles.heroTop}>
+            <View style={styles.heroIconWrap}>
+              <Ionicons name="construct-outline" size={26} color={Colors.primary} />
+            </View>
+            <Badge label="AI-assisted" tone="primary" icon="sparkles-outline" />
+          </View>
+          <Text style={styles.heroTitle}>Let&apos;s rebuild</Text>
+          <Text style={styles.heroBody}>
+            Scan a machine, match it to inventory, and rebuild the path from parts to assembly — with
+            reconstruction packages, BOMs, pricing, and 3D modeling handoff.
+          </Text>
+          <PrimaryButton
+            label="New Reconstruction"
+            icon="arrow-forward"
+            onPress={() => {
+              setMenuOpen(false);
+              onStart();
+            }}
+            accessibilityLabel="Start new machine reconstruction"
+            style={styles.heroButton}
+          />
+        </Card>
 
         {showUpdateBanner && (
           <View
@@ -292,34 +363,53 @@ export default function WelcomeScreen({
           </View>
         )}
 
-        <View style={styles.phasesContainer}>
-          {phases.map((phase) => (
-            <View key={phase.number} style={styles.phaseCard}>
-              <View style={styles.phaseHeader}>
-                <Ionicons name={phase.icon} size={18} color={Colors.accent} />
-                <Text style={styles.phaseTitle}>
-                  {phase.number}. {phase.title}
-                </Text>
+        <View style={styles.section}>
+          <SectionHeader title="Reconstruction path" />
+          <View style={styles.phaseList}>
+            {phases.map((phase, index) => (
+              <View key={phase.number} style={styles.phaseRow}>
+                <View style={styles.phaseRail}>
+                  <View style={styles.phaseNode}>
+                    <Ionicons name={phase.icon} size={16} color={Colors.primary} />
+                  </View>
+                  {index < phases.length - 1 ? <View style={styles.phaseConnector} /> : null}
+                </View>
+                <View style={styles.phaseTextWrap}>
+                  <Text style={styles.phaseTitle}>
+                    {phase.number}. {phase.title}
+                  </Text>
+                  <Text style={styles.phaseDescription}>{phase.description}</Text>
+                </View>
               </View>
-              <Text style={styles.phaseDescription}>{phase.description}</Text>
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
 
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setMenuOpen(false);
-              onStart();
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="Start new machine reconstruction"
-          >
-            <Text style={styles.buttonText}>New Reconstruction</Text>
-            <Ionicons name="arrow-forward" size={20} color={Colors.accent} />
-          </TouchableOpacity>
-        </View>
+        {quickActions.length > 0 && (
+          <View style={styles.section}>
+            <SectionHeader title="Shortcuts" />
+            <View style={styles.shortcutGrid}>
+              {quickActions.map(action => (
+                <Card
+                  key={action.key}
+                  style={styles.shortcutCard}
+                  padded={false}
+                  onPress={action.onPress}
+                  accessibilityLabel={action.accessibilityLabel}
+                  testID={action.testID}
+                >
+                  <View style={styles.shortcutInner}>
+                    <View style={styles.shortcutIcon}>
+                      <Ionicons name={action.icon} size={18} color={Colors.primary} />
+                    </View>
+                    <Text style={styles.shortcutLabel}>{action.label}</Text>
+                    <Text style={styles.shortcutDescription} numberOfLines={2}>{action.description}</Text>
+                  </View>
+                </Card>
+              ))}
+            </View>
+          </View>
+        )}
 
         <Text
           style={styles.releaseFooter}
@@ -333,265 +423,319 @@ export default function WelcomeScreen({
   );
 }
 
-const createStyles = (Colors: AppColors) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.lg,
-  },
-  content: {
-    alignItems: 'center',
-  },
-  topBar: {
-    width: '100%',
-    minHeight: 44,
-    alignItems: 'flex-end',
-    marginBottom: Spacing.xs,
-    zIndex: 20,
-  },
-  topActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: Spacing.sm,
-    maxWidth: '100%',
-  },
-  profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    height: 44,
-    maxWidth: 152,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.panel,
-    paddingHorizontal: Spacing.sm,
-  },
-  profileButtonActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.10)' : '#ecfdf5',
-  },
-  profileAvatarThumb: {
-    width: 22,
-    height: 22,
-    borderRadius: 999,
-    backgroundColor: Colors.surface,
-  },
-  profileButtonText: {
-    color: Colors.gray[400],
-    fontSize: FontSizes.xs,
-    fontWeight: '700',
-    flexShrink: 1,
-  },
-  profileButtonTextActive: {
-    color: Colors.accent,
-  },
-  menuHost: {
-    position: 'relative',
-    alignItems: 'flex-end',
-  },
-  menuButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.panel,
-  },
-  menuButtonActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
-  },
-  menuPanel: {
-    position: 'absolute',
-    top: 50,
-    right: 0,
-    width: 184,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    backgroundColor: Colors.panel,
-    paddingVertical: Spacing.xs,
-    shadowColor: Colors.black,
-    shadowOpacity: Colors.mode === 'dark' ? 0.35 : 0.14,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-    zIndex: 30,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    minHeight: 44,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  menuItemText: {
-    color: Colors.text,
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-  },
-  logoSection: {
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: Spacing.xs,
-  },
-  title: {
-    fontFamily: 'monospace',
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: Colors.white,
-    letterSpacing: 3,
-  },
-  titleAccent: {
-    color: Colors.accent,
-  },
-  subtitle: {
-    fontSize: FontSizes.lg,
-    color: Colors.dim,
-    fontStyle: 'italic',
-    marginTop: Spacing.xs,
-  },
-  description: {
-    fontSize: FontSizes.sm,
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
-    lineHeight: 20,
-    opacity: 0.8,
-  },
-  updateBanner: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(253, 186, 116, 0.12)' : '#fff7ed',
-    borderWidth: 1,
-    borderColor: Colors.warning,
-    borderRadius: 8,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  updateBannerReady: {
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
-    borderColor: Colors.accent,
-  },
-  updateBannerError: {
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(239, 68, 68, 0.12)' : '#fef2f2',
-    borderColor: Colors.danger,
-  },
-  updateBannerText: {
-    flex: 1,
-    gap: Spacing.xs,
-  },
-  updateTitle: {
-    fontSize: FontSizes.md,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  updateDescription: {
-    fontSize: FontSizes.sm,
-    color: Colors.mutedText,
-    lineHeight: 18,
-  },
-  updateMeta: {
-    fontSize: FontSizes.xs,
-    color: Colors.dim,
-    lineHeight: 16,
-  },
-  updateButton: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: Colors.warning,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  updateButtonText: {
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-    color: Colors.warning,
-  },
-  phasesContainer: {
-    width: '100%',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  phaseCard: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    padding: Spacing.sm,
-  },
-  phaseHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.xs,
-  },
-  phaseTitle: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.sm,
-    fontWeight: 'bold',
-    color: Colors.accent,
-  },
-  phaseDescription: {
-    fontSize: FontSizes.sm,
-    color: Colors.dim,
-    lineHeight: 20,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.mode === 'dark' ? 'transparent' : Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.accent,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.sm,
-    borderRadius: 8,
-    minWidth: 0,
-    maxWidth: '100%',
-    flexBasis: 220,
-    flexGrow: 1,
-  },
-  buttonText: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.md,
-    fontWeight: 'bold',
-    color: Colors.accent,
-    letterSpacing: 1,
-    flexShrink: 1,
-    textAlign: 'center',
-  },
-  releaseFooter: {
-    marginTop: Spacing.md,
-    fontSize: FontSizes.xs,
-    color: Colors.dim,
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-});
+const createStyles = (Colors: AppColors) => {
+  const shadows = makeShadows(Colors);
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: Spacing.lg,
+      paddingTop: Spacing.md,
+      paddingBottom: Spacing.xl,
+    },
+    content: {
+      width: '100%',
+    },
+    topBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: 44,
+      marginBottom: Spacing.lg,
+      zIndex: 20,
+    },
+    brandRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      flexShrink: 1,
+    },
+    brandLogo: {
+      width: 34,
+      height: 34,
+    },
+    brandWordmark: {
+      fontFamily: 'monospace',
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: Colors.text,
+      letterSpacing: 2,
+    },
+    brandWordmarkAccent: {
+      color: Colors.accent,
+    },
+    topActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: Spacing.sm,
+      flexShrink: 0,
+    },
+    profileButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      height: 40,
+      maxWidth: 132,
+      borderRadius: Radii.pill,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      backgroundColor: Colors.surface,
+      paddingHorizontal: Spacing.sm,
+    },
+    profileButtonActive: {
+      borderColor: Colors.accent,
+      backgroundColor: Colors.accentSoft,
+    },
+    profileAvatarThumb: {
+      width: 24,
+      height: 24,
+      borderRadius: 999,
+      backgroundColor: Colors.elevated,
+    },
+    profileButtonText: {
+      color: Colors.mutedText,
+      fontSize: FontSizes.xs,
+      fontWeight: '700',
+      flexShrink: 1,
+    },
+    profileButtonTextActive: {
+      color: Colors.accent,
+    },
+    menuHost: {
+      position: 'relative',
+      alignItems: 'flex-end',
+    },
+    iconButton: {
+      width: 40,
+      height: 40,
+      borderRadius: Radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: Colors.border,
+      backgroundColor: Colors.surface,
+    },
+    iconButtonActive: {
+      borderColor: Colors.primary,
+      backgroundColor: Colors.primarySoft,
+    },
+    menuPanel: {
+      position: 'absolute',
+      top: 48,
+      right: 0,
+      width: 184,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      borderRadius: Radii.md,
+      backgroundColor: Colors.panel,
+      paddingVertical: Spacing.xs,
+      ...shadows.elevated,
+      zIndex: 30,
+    },
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      minHeight: 44,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+    menuItemText: {
+      color: Colors.text,
+      fontSize: FontSizes.sm,
+      fontWeight: '700',
+    },
+    greetingBlock: {
+      marginBottom: Spacing.md,
+    },
+    greetingHello: {
+      ...Typography.body,
+      color: Colors.mutedText,
+    },
+    greetingName: {
+      ...Typography.display,
+      color: Colors.text,
+    },
+    greetingTagline: {
+      ...Typography.caption,
+      color: Colors.dimText,
+      marginTop: 2,
+    },
+    heroCard: {
+      marginBottom: Spacing.lg,
+      gap: Spacing.sm,
+    },
+    heroTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    heroIconWrap: {
+      width: 46,
+      height: 46,
+      borderRadius: Radii.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.primarySoft,
+    },
+    heroTitle: {
+      ...Typography.title,
+      color: Colors.text,
+      marginTop: Spacing.xs,
+    },
+    heroBody: {
+      ...Typography.body,
+      color: Colors.mutedText,
+    },
+    heroButton: {
+      marginTop: Spacing.sm,
+    },
+    updateBanner: {
+      width: '100%',
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      backgroundColor: Colors.warningSoft,
+      borderWidth: 1,
+      borderColor: Colors.warning,
+      borderRadius: Radii.md,
+      padding: Spacing.md,
+      marginBottom: Spacing.lg,
+    },
+    updateBannerReady: {
+      backgroundColor: Colors.accentSoft,
+      borderColor: Colors.accent,
+    },
+    updateBannerError: {
+      backgroundColor: Colors.dangerSoft,
+      borderColor: Colors.danger,
+    },
+    updateBannerText: {
+      flex: 1,
+      gap: Spacing.xs,
+    },
+    updateTitle: {
+      fontSize: FontSizes.md,
+      fontWeight: '700',
+      color: Colors.text,
+    },
+    updateDescription: {
+      fontSize: FontSizes.sm,
+      color: Colors.mutedText,
+      lineHeight: 18,
+    },
+    updateMeta: {
+      fontSize: FontSizes.xs,
+      color: Colors.dim,
+      lineHeight: 16,
+    },
+    updateButton: {
+      alignSelf: 'flex-start',
+      borderWidth: 1,
+      borderColor: Colors.warning,
+      borderRadius: Radii.sm,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      marginTop: Spacing.xs,
+    },
+    updateButtonText: {
+      fontSize: FontSizes.sm,
+      fontWeight: '700',
+      color: Colors.warning,
+    },
+    section: {
+      marginBottom: Spacing.lg,
+    },
+    phaseList: {
+      backgroundColor: Colors.surface,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      borderRadius: Radii.lg,
+      padding: Spacing.md,
+      ...shadows.card,
+    },
+    phaseRow: {
+      flexDirection: 'row',
+      gap: Spacing.md,
+    },
+    phaseRail: {
+      alignItems: 'center',
+      width: 36,
+    },
+    phaseNode: {
+      width: 36,
+      height: 36,
+      borderRadius: Radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.primarySoft,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    phaseConnector: {
+      flex: 1,
+      width: 2,
+      minHeight: 16,
+      marginVertical: 4,
+      backgroundColor: Colors.border,
+    },
+    phaseTextWrap: {
+      flex: 1,
+      paddingBottom: Spacing.md,
+      gap: 2,
+    },
+    phaseTitle: {
+      fontSize: FontSizes.lg,
+      fontWeight: '700',
+      color: Colors.text,
+    },
+    phaseDescription: {
+      fontSize: FontSizes.sm,
+      color: Colors.dimText,
+      lineHeight: 20,
+    },
+    shortcutGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.sm,
+    },
+    shortcutCard: {
+      flexGrow: 1,
+      flexBasis: '30%',
+      minWidth: 100,
+    },
+    shortcutInner: {
+      padding: Spacing.md,
+      gap: 6,
+    },
+    shortcutIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: Radii.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.primarySoft,
+      marginBottom: 2,
+    },
+    shortcutLabel: {
+      fontSize: FontSizes.md,
+      fontWeight: '700',
+      color: Colors.text,
+    },
+    shortcutDescription: {
+      fontSize: FontSizes.xs,
+      color: Colors.dimText,
+      lineHeight: 15,
+    },
+    releaseFooter: {
+      marginTop: Spacing.sm,
+      fontSize: FontSizes.xs,
+      color: Colors.dim,
+      textAlign: 'center',
+      lineHeight: 16,
+    },
+  });
+};
