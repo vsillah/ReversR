@@ -472,14 +472,16 @@ export function StepRow({
   );
 }
 
-/** Horizontal compact progress stepper used in the workflow header rail. */
+/** Horizontal progress stepper with optional sublabels. Green marks active/complete progress. */
 export function HorizontalStepper({
   steps,
+  subLabels,
   currentStep,
   onStepPress,
   testID,
 }: {
   steps: string[];
+  subLabels?: string[];
   currentStep: number; // 1-based
   onStepPress?: (step: number) => void;
   testID?: string;
@@ -493,26 +495,27 @@ export function HorizontalStepper({
       {steps.map((label, idx) => {
         const step = idx + 1;
         const isComplete = currentStep > step;
-        const isActive = currentStep >= step;
+        const isCurrent = currentStep === step;
+        const isActive = isComplete || isCurrent;
         const canPress = Boolean(onStepPress) && currentStep > step;
         const node = (
-          <View style={{ alignItems: 'center', gap: 6, width: 64 }}>
+          <View style={{ alignItems: 'center', gap: 5, width: 74 }}>
             <View
               style={{
-                width: 30,
-                height: 30,
+                width: 34,
+                height: 34,
                 borderRadius: Radii.pill,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: isComplete ? colors.accent : isActive ? colors.primary : colors.elevated,
-                borderWidth: isActive ? 0 : 1,
-                borderColor: colors.border,
+                backgroundColor: isComplete ? colors.accent : 'transparent',
+                borderWidth: isComplete ? 0 : 2,
+                borderColor: isCurrent ? colors.accent : colors.border,
               }}
             >
               {isComplete ? (
-                <Ionicons name="checkmark" size={16} color={colors.background} />
+                <Ionicons name="checkmark" size={18} color={colors.background} />
               ) : (
-                <Text style={{ color: isActive ? colors.onPrimary : colors.dimText, fontWeight: '800', fontSize: 13 }}>
+                <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontWeight: '800', fontSize: 14 }}>
                   {step}
                 </Text>
               )}
@@ -520,14 +523,27 @@ export function HorizontalStepper({
             <Text
               style={{
                 fontSize: 11,
-                fontWeight: '700',
-                letterSpacing: 0.4,
+                fontWeight: '800',
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
                 color: isActive ? colors.text : colors.dimText,
+                textAlign: 'center',
               }}
               numberOfLines={1}
             >
               {label}
             </Text>
+            {subLabels?.[idx] ? (
+              <Text
+                style={{ fontSize: 10, color: colors.dimText, textAlign: 'center' }}
+                numberOfLines={2}
+              >
+                {subLabels[idx]}
+              </Text>
+            ) : null}
+            {isCurrent ? (
+              <View style={{ marginTop: 3, width: 26, height: 3, borderRadius: 2, backgroundColor: colors.accent }} />
+            ) : null}
           </View>
         );
         return (
@@ -549,7 +565,7 @@ export function HorizontalStepper({
                 style={{
                   flex: 1,
                   height: 2,
-                  marginTop: 14,
+                  marginTop: 16,
                   borderRadius: 2,
                   backgroundColor: currentStep > step ? colors.accent : colors.border,
                 }}

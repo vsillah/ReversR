@@ -13,7 +13,7 @@ import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { Badge, Card, GradientButton, HeroBackdrop, ScoreRing, SectionHeader, StatTile, StepRow } from './ui';
+import { Badge, Card, HeroBackdrop, HorizontalStepper, SectionHeader, StatTile } from './ui';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
 import {
   formatReleaseDate,
@@ -73,6 +73,8 @@ const phases = [
 ];
 
 const PHASE_NAMES = ['Scan', 'Inventory', 'Design', 'Build'];
+const PHASE_STEP_LABELS = ['SCAN', 'INVENTORY', 'DESIGN', 'BUILD'];
+const PHASE_STEP_SUBLABELS = ['Capture & identify', 'Catalog parts', 'Engineer & plan', 'Rebuild & test'];
 
 const expoConfig = Constants.expoConfig;
 const releaseExtra = (expoConfig?.extra || {}) as Record<string, unknown>;
@@ -157,6 +159,11 @@ export default function WelcomeScreen({
     const completed = recent.filter(item => item.phase >= 4).length;
     return { total, completed, inProgress: total - completed };
   }, [recent]);
+
+  const currentProject = React.useMemo(
+    () => recent.find(item => item.phase < 4) || recent[0] || null,
+    [recent],
+  );
 
   const evidence = React.useMemo(() => recent.slice(0, 3).map(item => {
     const approvals = item.reviewerApprovalRecords?.length || 0;
@@ -270,108 +277,112 @@ export default function WelcomeScreen({
     >
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          <Image
-            source={require('../assets/logo-transparent.png')}
-            style={styles.brandLogo}
-            resizeMode="contain"
-          />
-          <Text style={styles.brandWordmark}>
-            REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
-          </Text>
-        </View>
-
-        <View style={styles.topActions}>
-          {(onProfile || onSettings) && (
+          {onSettings && (
             <TouchableOpacity
-              style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
-              onPress={() => handleMenuAction(onProfile || onSettings)}
+              style={styles.gearButton}
+              onPress={() => handleMenuAction(onSettings)}
               accessibilityRole="button"
-              accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
-              testID="welcome-profile-chip"
+              accessibilityLabel="Open settings"
             >
-              {userAvatarUri ? (
-                <Image source={{ uri: userAvatarUri }} style={styles.profileAvatarThumb} resizeMode="cover" />
-              ) : (
-                <Ionicons
-                  name={profileIcon}
-                  size={18}
-                  color={userIsAuthenticated ? Colors.accent : Colors.mutedText}
-                />
-              )}
-              <Text
-                style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
-                numberOfLines={1}
-              >
-                {userDisplayName}
-              </Text>
+              <Ionicons name="settings-outline" size={20} color={Colors.text} />
             </TouchableOpacity>
           )}
+          <View style={styles.brandTextWrap}>
+            <Text style={styles.brandWordmark}>
+              REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
+            </Text>
+            <Text style={styles.brandSubtitle}>MACHINE RECONSTRUCTION</Text>
+          </View>
+        </View>
 
+        <View style={styles.menuHost}>
           <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleToggleTheme}
+            style={[styles.avatarPill, menuOpen && styles.avatarPillActive]}
+            onPress={() => setMenuOpen(current => !current)}
             accessibilityRole="button"
-            accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
-            testID="welcome-appearance-toggle"
+            accessibilityLabel={`Open account menu for ${userDisplayName}`}
+            accessibilityState={{ expanded: menuOpen }}
+            testID="welcome-actions-menu-button"
           >
-            <Ionicons
-              name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
-              size={20}
-              color={Colors.text}
-            />
+            <View style={styles.avatarWrap}>
+              {userAvatarUri ? (
+                <Image source={{ uri: userAvatarUri }} style={styles.avatarImage} resizeMode="cover" />
+              ) : (
+                <Ionicons name={profileIcon} size={20} color={userIsAuthenticated ? Colors.accent : Colors.mutedText} />
+              )}
+              {userIsAuthenticated ? <View style={styles.avatarStatusDot} /> : null}
+            </View>
+            {userIsAuthenticated ? (
+              <Text style={styles.avatarName} numberOfLines={1}>{userDisplayName}</Text>
+            ) : null}
+            <Ionicons name={menuOpen ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.mutedText} />
           </TouchableOpacity>
 
-          {hasMenuActions && (
-            <View style={styles.menuHost}>
+          {menuOpen && (
+            <View style={styles.menuPanel} testID="welcome-actions-menu">
+              {(onProfile || onSettings) && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleMenuAction(onProfile || onSettings)}
+                  accessibilityRole="button"
+                  accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
+                  testID="welcome-profile-chip"
+                >
+                  <Ionicons name="person-circle-outline" size={18} color={Colors.primary} />
+                  <Text style={styles.menuItemText}>{userIsAuthenticated ? 'Profile' : 'Guest profile'}</Text>
+                </TouchableOpacity>
+              )}
+
+              {onHistory && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleMenuAction(onHistory)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open reconstruction history"
+                >
+                  <Ionicons name="time-outline" size={18} color={Colors.primary} />
+                  <Text style={styles.menuItemText}>History</Text>
+                </TouchableOpacity>
+              )}
+
+              {onTour && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleMenuAction(onTour)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Start guided tour"
+                  testID="reversr-tour-start"
+                >
+                  <Ionicons name="compass-outline" size={18} color={Colors.primary} />
+                  <Text style={styles.menuItemText}>Guided tour</Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
-                style={[styles.iconButton, menuOpen && styles.iconButtonActive]}
-                onPress={() => setMenuOpen(current => !current)}
+                style={styles.menuItem}
+                onPress={() => { setMenuOpen(false); handleToggleTheme(); }}
                 accessibilityRole="button"
-                accessibilityLabel={menuOpen ? 'Close welcome menu' : 'Open welcome menu'}
-                accessibilityState={{ expanded: menuOpen }}
-                testID="welcome-actions-menu-button"
+                accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
+                testID="welcome-appearance-toggle"
               >
-                <Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={22} color={Colors.text} />
+                <Ionicons
+                  name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+                  size={18}
+                  color={Colors.primary}
+                />
+                <Text style={styles.menuItemText}>{nextThemeMode === 'dark' ? 'Dark appearance' : 'Light appearance'}</Text>
               </TouchableOpacity>
 
-              {menuOpen && (
-                <View style={styles.menuPanel} testID="welcome-actions-menu">
-                  {onHistory && (
-                    <TouchableOpacity
-                      style={styles.menuItem}
-                      onPress={() => handleMenuAction(onHistory)}
-                      accessibilityRole="button"
-                      accessibilityLabel="Open reconstruction history"
-                    >
-                      <Ionicons name="time-outline" size={18} color={Colors.primary} />
-                      <Text style={styles.menuItemText}>History</Text>
-                    </TouchableOpacity>
-                  )}
-
-                  {onSettings && (
-                    <TouchableOpacity
-                      style={styles.menuItem}
-                      onPress={() => handleMenuAction(onSettings)}
-                      accessibilityRole="button"
-                      accessibilityLabel="Open settings"
-                    >
-                      <Ionicons name="settings-outline" size={18} color={Colors.primary} />
-                      <Text style={styles.menuItemText}>Settings</Text>
-                    </TouchableOpacity>
-                  )}
-
-                  {onTour && (
-                    <TouchableOpacity
-                      style={styles.menuItem}
-                      onPress={() => handleMenuAction(onTour)}
-                      accessibilityRole="button"
-                      accessibilityLabel="Start guided tour"
-                    >
-                      <Ionicons name="compass-outline" size={18} color={Colors.primary} />
-                      <Text style={styles.menuItemText}>Tour</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+              {onSettings && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => handleMenuAction(onSettings)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open settings"
+                >
+                  <Ionicons name="settings-outline" size={18} color={Colors.primary} />
+                  <Text style={styles.menuItemText}>Settings</Text>
+                </TouchableOpacity>
               )}
             </View>
           )}
@@ -398,22 +409,38 @@ export default function WelcomeScreen({
           )}
         </Animated.View>
         <View style={styles.heroContent}>
-          <Badge label="AI-assisted rebuild" tone="primary" icon="sparkles-outline" />
-          <Text style={[styles.heroHello, onImage && styles.heroHelloOnImage]}>{greeting}, {userDisplayName}</Text>
-          <Text style={[styles.heroTitle, onImage && styles.heroTextOnImage]}>Let&apos;s rebuild</Text>
-          <Text style={[styles.heroBody, onImage && styles.heroBodyOnImage]}>
-            Guided by intelligent steps. Backed by proven data — from scan to BOM to 3D handoff.
+          <Text style={[styles.heroTitle, onImage && styles.heroTextOnImage]}>
+            Reconstruct.{'\n'}Restore.{'\n'}Rebuild with{'\n'}
+            <Text style={styles.heroTitleAccent}>confidence.</Text>
           </Text>
-          <GradientButton
-            label="New Reconstruction"
-            icon="arrow-forward"
-            onPress={() => {
-              setMenuOpen(false);
-              onStart();
-            }}
-            accessibilityLabel="Start new machine reconstruction"
-            style={styles.heroButton}
-          />
+          <Text style={[styles.heroBody, onImage && styles.heroBodyOnImage]}>
+            From first scan to final build, document every step.
+          </Text>
+          {currentProject ? (
+            <TouchableOpacity
+              style={styles.currentProjectCard}
+              onPress={() => handleMenuAction(onHistory)}
+              accessibilityRole="button"
+              accessibilityLabel={`Current project ${reconstructionTitle(currentProject)}. Open in projects.`}
+            >
+              <View style={styles.currentProjectIcon}>
+                <Ionicons name="scan-outline" size={20} color={Colors.accent} />
+              </View>
+              <View style={styles.currentProjectText}>
+                <Text style={styles.currentProjectOverline}>Current project</Text>
+                <Text style={styles.currentProjectName} numberOfLines={1}>{reconstructionTitle(currentProject)}</Text>
+                <Text style={styles.currentProjectMeta} numberOfLines={1}>
+                  <Text style={{ color: currentProject.phase >= 4 ? Colors.success : Colors.accent }}>
+                    {currentProject.phase >= 4 ? '● Complete' : '● In progress'}
+                  </Text>
+                  {`  ·  ${PHASE_NAMES[Math.min(currentProject.phase, 4) - 1]}`}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
+            </TouchableOpacity>
+          ) : (
+            <Badge label="AI-assisted rebuild" tone="accent" icon="sparkles-outline" style={styles.heroBadge} />
+          )}
         </View>
       </View>
 
@@ -462,29 +489,30 @@ export default function WelcomeScreen({
         </View>
       )}
 
-      <Card style={styles.pathCard}>
-        <View style={styles.pathHeader}>
-          <View style={styles.pathHeaderText}>
-            <Text style={styles.pathOverline}>Reconstruction path</Text>
-            <Text style={styles.pathTitle}>4 guided phases</Text>
-            <Text style={styles.pathSubtitle}>Start with a scan — the rest unlock as you go.</Text>
+      <Card style={styles.stepperCard}>
+        <HorizontalStepper
+          steps={PHASE_STEP_LABELS}
+          subLabels={PHASE_STEP_SUBLABELS}
+          currentStep={currentProject ? Math.min(currentProject.phase, 4) : 1}
+        />
+      </Card>
+
+      <Card
+        style={styles.newCard}
+        tone="highlight"
+        padded={false}
+        onPress={() => { setMenuOpen(false); onStart(); }}
+        accessibilityLabel="Start new machine reconstruction"
+      >
+        <View style={styles.newCardInner}>
+          <View style={styles.newCardIcon}>
+            <Ionicons name="cube-outline" size={26} color={Colors.primary} />
           </View>
-          <ScoreRing progress={0} value="0/4" caption="Phases" size={84} />
-        </View>
-        <View style={styles.stepList}>
-          {phases.map((phase) => (
-            <StepRow
-              key={phase.number}
-              index={phase.number}
-              title={phase.title}
-              subtitle={phase.short}
-              state={phase.number === 1 ? 'current' : 'locked'}
-              onPress={phase.number === 1 ? () => { setMenuOpen(false); onStart(); } : undefined}
-              accessibilityLabel={phase.number === 1
-                ? `Start with ${phase.title}: ${phase.short}`
-                : `${phase.title} locked: ${phase.short}`}
-            />
-          ))}
+          <View style={styles.newCardText}>
+            <Text style={styles.newCardTitle}>New Reconstruction</Text>
+            <Text style={styles.newCardBody}>Start a new scan or describe the machine you&apos;re working on.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color={Colors.primary} />
         </View>
       </Card>
 
@@ -590,9 +618,19 @@ const createStyles = (Colors: AppColors) => {
       gap: Spacing.sm,
       flexShrink: 1,
     },
-    brandLogo: {
-      width: 34,
-      height: 34,
+    gearButton: {
+      width: 44,
+      height: 44,
+      borderRadius: Radii.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: Colors.border,
+      backgroundColor: Colors.surface,
+    },
+    brandTextWrap: {
+      flexShrink: 1,
+      minWidth: 0,
     },
     brandWordmark: {
       fontFamily: 'monospace',
@@ -604,61 +642,64 @@ const createStyles = (Colors: AppColors) => {
     brandWordmarkAccent: {
       color: Colors.accent,
     },
-    topActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      gap: Spacing.sm,
-      flexShrink: 0,
-    },
-    profileButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.xs,
-      height: 40,
-      maxWidth: 132,
-      borderRadius: Radii.pill,
-      borderWidth: 1,
-      borderColor: Colors.border,
-      backgroundColor: Colors.surface,
-      paddingHorizontal: Spacing.sm,
-    },
-    profileButtonActive: {
-      borderColor: Colors.accent,
-      backgroundColor: Colors.accentSoft,
-    },
-    profileAvatarThumb: {
-      width: 24,
-      height: 24,
-      borderRadius: 999,
-      backgroundColor: Colors.elevated,
-    },
-    profileButtonText: {
-      color: Colors.mutedText,
-      fontSize: FontSizes.xs,
+    brandSubtitle: {
+      fontSize: 9,
       fontWeight: '700',
-      flexShrink: 1,
-    },
-    profileButtonTextActive: {
-      color: Colors.accent,
+      letterSpacing: 2,
+      color: Colors.dimText,
+      marginTop: 1,
     },
     menuHost: {
       position: 'relative',
       alignItems: 'flex-end',
     },
-    iconButton: {
-      width: 40,
-      height: 40,
-      borderRadius: Radii.pill,
+    avatarPill: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      gap: Spacing.xs,
+      height: 44,
+      maxWidth: 168,
+      borderRadius: Radii.pill,
       borderWidth: 1,
       borderColor: Colors.border,
       backgroundColor: Colors.surface,
+      paddingLeft: 5,
+      paddingRight: Spacing.sm,
     },
-    iconButtonActive: {
+    avatarPillActive: {
       borderColor: Colors.primary,
       backgroundColor: Colors.primarySoft,
+    },
+    avatarWrap: {
+      width: 34,
+      height: 34,
+      borderRadius: Radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.elevated,
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 34,
+      height: 34,
+      borderRadius: Radii.pill,
+    },
+    avatarStatusDot: {
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+      width: 10,
+      height: 10,
+      borderRadius: Radii.pill,
+      backgroundColor: Colors.accent,
+      borderWidth: 2,
+      borderColor: Colors.background,
+    },
+    avatarName: {
+      color: Colors.text,
+      fontSize: FontSizes.sm,
+      fontWeight: '700',
+      flexShrink: 1,
     },
     menuPanel: {
       position: 'absolute',
@@ -701,19 +742,14 @@ const createStyles = (Colors: AppColors) => {
       padding: Spacing.lg,
       gap: Spacing.sm,
     },
-    heroHello: {
-      ...Typography.label,
-      color: Colors.mutedText,
-      marginTop: Spacing.xs,
-    },
-    heroHelloOnImage: {
-      color: 'rgba(255,255,255,0.82)',
-    },
     heroTitle: {
-      fontSize: 34,
+      fontSize: 33,
       fontWeight: '800',
-      lineHeight: 40,
+      lineHeight: 39,
       color: Colors.text,
+    },
+    heroTitleAccent: {
+      color: Colors.accent,
     },
     heroTextOnImage: {
       color: '#ffffff',
@@ -721,13 +757,53 @@ const createStyles = (Colors: AppColors) => {
     heroBody: {
       ...Typography.body,
       color: Colors.mutedText,
-      maxWidth: '94%',
+      maxWidth: '88%',
     },
     heroBodyOnImage: {
       color: 'rgba(255,255,255,0.88)',
     },
-    heroButton: {
-      marginTop: Spacing.md,
+    heroBadge: {
+      marginTop: Spacing.sm,
+    },
+    currentProjectCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      marginTop: Spacing.sm,
+      padding: Spacing.sm,
+      borderRadius: Radii.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.16)',
+      backgroundColor: 'rgba(10,12,16,0.55)',
+    },
+    currentProjectIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: Radii.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,255,157,0.14)',
+    },
+    currentProjectText: {
+      flex: 1,
+      minWidth: 0,
+    },
+    currentProjectOverline: {
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      color: 'rgba(255,255,255,0.6)',
+    },
+    currentProjectName: {
+      fontSize: FontSizes.md,
+      fontWeight: '700',
+      color: '#ffffff',
+    },
+    currentProjectMeta: {
+      fontSize: FontSizes.xs,
+      color: 'rgba(255,255,255,0.7)',
+      marginTop: 1,
     },
     statRow: {
       flexDirection: 'row',
@@ -786,35 +862,42 @@ const createStyles = (Colors: AppColors) => {
       fontWeight: '700',
       color: Colors.warning,
     },
-    pathCard: {
+    stepperCard: {
       marginBottom: Spacing.lg,
-      gap: Spacing.md,
+      paddingVertical: Spacing.lg,
     },
-    pathHeader: {
+    newCard: {
+      marginBottom: Spacing.lg,
+    },
+    newCardInner: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
       gap: Spacing.md,
+      padding: Spacing.md,
     },
-    pathHeaderText: {
+    newCardIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: Radii.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.primarySoft,
+      borderWidth: 1,
+      borderColor: Colors.primary,
+    },
+    newCardText: {
       flex: 1,
+      minWidth: 0,
       gap: 2,
     },
-    pathOverline: {
-      ...Typography.overline,
-      color: Colors.dimText,
-      textTransform: 'uppercase',
-    },
-    pathTitle: {
+    newCardTitle: {
       ...Typography.heading,
       color: Colors.text,
     },
-    pathSubtitle: {
+    newCardBody: {
       ...Typography.caption,
-      color: Colors.dimText,
-    },
-    stepList: {
-      gap: Spacing.sm,
+      color: Colors.mutedText,
+      lineHeight: 17,
     },
     section: {
       marginBottom: Spacing.lg,

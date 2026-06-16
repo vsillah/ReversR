@@ -1592,8 +1592,8 @@ export default function HomeScreen() {
       <View style={styles.progressBar}>
         <LinearGradient
           colors={Colors.mode === 'dark'
-            ? ['rgba(59,130,246,0.18)', 'rgba(16,18,24,0.25)']
-            : ['rgba(37,99,235,0.10)', 'rgba(255,255,255,0)']}
+            ? ['rgba(0,255,157,0.14)', 'rgba(16,18,24,0.25)']
+            : ['rgba(0,122,85,0.10)', 'rgba(255,255,255,0)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.currentStepCard}
@@ -1615,6 +1615,7 @@ export default function HomeScreen() {
         </LinearGradient>
         <HorizontalStepper
           steps={PHASE_STEP_LABELS}
+          subLabels={PHASE_STEP_HINTS}
           currentStep={context.phase}
           onStepPress={(step) => setPhaseActionModal(step)}
           testID="reversr-tour-phase-nav"
@@ -1996,7 +1997,7 @@ const createStyles = (Colors: AppColors) => {
     padding: Spacing.md,
     borderRadius: Radii.lg,
     borderWidth: 1,
-    borderColor: Colors.mode === 'dark' ? 'rgba(59,130,246,0.35)' : Colors.border,
+    borderColor: Colors.mode === 'dark' ? 'rgba(0,255,157,0.30)' : Colors.border,
   },
   currentStepInfo: {
     flex: 1,
@@ -2008,7 +2009,7 @@ const createStyles = (Colors: AppColors) => {
     fontWeight: '700',
     letterSpacing: 1.1,
     textTransform: 'uppercase',
-    color: Colors.primary,
+    color: Colors.accent,
   },
   currentStepName: {
     fontSize: FontSizes.xl,
