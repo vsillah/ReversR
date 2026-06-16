@@ -12,8 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { AppColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
-import { useAppTheme } from '../hooks/useAppTheme';
+import { AppColors, DarkColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
+import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
 import { Badge, Card, HeroBackdrop, HorizontalStepper } from './ui';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
 import { useCommercialization } from '../hooks/useCommercialization';
@@ -42,6 +42,7 @@ interface WelcomeScreenProps {
   onSettings?: () => void;
   onProfile?: () => void;
   onTour?: () => void;
+  onResume?: (item: SavedInnovation) => void;
   userDisplayName?: string;
   userIsAuthenticated?: boolean;
   userAvatarUri?: string;
@@ -114,12 +115,22 @@ export default function WelcomeScreen({
   onSettings,
   onProfile,
   onTour,
+  onResume,
   userDisplayName = 'Guest',
   userIsAuthenticated = false,
   userAvatarUri = '',
   bottomBarInset = 0,
 }: WelcomeScreenProps) {
-  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
+  // Home is dark-first / cinematic regardless of the global appearance setting.
+  const { mode: themeMode, setMode: setThemeMode, hasUserPreference } = useAppTheme();
+  const Colors = DarkColors;
+  const darkThemeValue = React.useMemo(() => ({
+    mode: 'dark' as const,
+    colors: DarkColors,
+    setMode: setThemeMode,
+    isDark: true,
+    hasUserPreference,
+  }), [setThemeMode, hasUserPreference]);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [recent, setRecent] = React.useState<SavedInnovation[]>([]);
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -134,7 +145,6 @@ export default function WelcomeScreen({
   const styles = createStyles(Colors);
   const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
   const buildLabel = getInstalledBuildLabel();
-  const onImage = HERO_IMAGE != null;
   const footerLabel = [
     `Version ${installedAppVersion}`,
     buildLabel,
@@ -200,6 +210,7 @@ export default function WelcomeScreen({
   });
 
   return (
+    <AppThemeContext.Provider value={darkThemeValue}>
     <Animated.ScrollView
       style={styles.container}
       contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.xl + bottomBarInset }]}
@@ -336,46 +347,73 @@ export default function WelcomeScreen({
             <Image source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover" />
           ) : null}
         </Animated.View>
-        {onImage ? (
-          <LinearGradient
-            colors={['rgba(8,9,12,0)', 'rgba(8,9,12,0.12)', 'rgba(8,9,12,0.72)', 'rgba(8,9,12,0.95)']}
-            locations={[0, 0.42, 0.78, 1]}
-            style={StyleSheet.absoluteFill}
-            pointerEvents="none"
-          />
-        ) : null}
+        <LinearGradient
+          colors={['rgba(8,9,12,0.30)', 'rgba(8,9,12,0)', 'rgba(8,9,12,0.45)', 'rgba(8,9,12,0.92)', 'rgba(8,9,12,0.99)']}
+          locations={[0, 0.28, 0.6, 0.86, 1]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
         <View style={styles.heroContent}>
-          <Text style={[styles.heroTitle, onImage && styles.heroTextOnImage]}>
+          <Badge label="AI-assisted rebuild" tone="accent" icon="sparkles-outline" style={styles.heroBadge} />
+          <Text style={styles.heroTitle}>
             Reconstruct.{'\n'}Restore.{'\n'}Rebuild with{'\n'}
             <Text style={styles.heroTitleAccent}>confidence.</Text>
           </Text>
-          <Text style={[styles.heroBody, onImage && styles.heroBodyOnImage]}>
+          <Text style={styles.heroBody}>
             From first scan to final build, document every step.
           </Text>
+
           {currentProject ? (
             <TouchableOpacity
-              style={styles.currentProjectCard}
-              onPress={() => handleMenuAction(onHistory)}
+              style={styles.cpCard}
+              activeOpacity={0.9}
+              onPress={() => (onResume ? onResume(currentProject) : handleMenuAction(onHistory))}
               accessibilityRole="button"
-              accessibilityLabel={`Current project ${reconstructionTitle(currentProject)}. Open in projects.`}
+              accessibilityLabel={`Continue current project ${reconstructionTitle(currentProject)}, phase ${Math.min(currentProject.phase, 4)} of 4`}
             >
-              <View style={styles.currentProjectIcon}>
-                <Ionicons name="scan-outline" size={20} color={Colors.accent} />
+              <View style={styles.cpTopRow}>
+                <View style={styles.cpIcon}>
+                  <Ionicons name="scan-outline" size={20} color={Colors.accent} />
+                </View>
+                <View style={styles.cpHead}>
+                  <Text style={styles.cpOverline}>Current project</Text>
+                  <Text style={styles.cpName} numberOfLines={1}>{reconstructionTitle(currentProject)}</Text>
+                </View>
+                <View style={[styles.cpStatus, currentProject.phase >= 4 && styles.cpStatusDone]}>
+                  <View style={[styles.cpStatusDot, { backgroundColor: currentProject.phase >= 4 ? Colors.success : Colors.accent }]} />
+                  <Text style={styles.cpStatusText}>{currentProject.phase >= 4 ? 'Complete' : 'In progress'}</Text>
+                </View>
               </View>
-              <View style={styles.currentProjectText}>
-                <Text style={styles.currentProjectOverline}>Current project</Text>
-                <Text style={styles.currentProjectName} numberOfLines={1}>{reconstructionTitle(currentProject)}</Text>
-                <Text style={styles.currentProjectMeta} numberOfLines={1}>
-                  <Text style={{ color: currentProject.phase >= 4 ? Colors.success : Colors.accent }}>
-                    {currentProject.phase >= 4 ? '● Complete' : '● In progress'}
-                  </Text>
-                  {`  ·  ${PHASE_NAMES[Math.min(currentProject.phase, 4) - 1]}`}
+
+              <View style={styles.cpProgressRow}>
+                <View style={styles.cpTrack}>
+                  <View style={[styles.cpFill, { width: `${Math.round((Math.min(currentProject.phase, 4) / 4) * 100)}%` }]} />
+                </View>
+                <Text style={styles.cpPhaseLabel}>Phase {Math.min(currentProject.phase, 4)} of 4</Text>
+              </View>
+
+              <View style={styles.cpFootRow}>
+                <Text style={styles.cpMeta} numberOfLines={1}>
+                  {PHASE_NAMES[Math.min(currentProject.phase, 4) - 1]} · {relativeTime(currentProject.updatedAt || currentProject.createdAt)}
                 </Text>
+                <View style={styles.cpContinue}>
+                  <Text style={styles.cpContinueText}>Continue</Text>
+                  <Ionicons name="arrow-forward" size={15} color={Colors.accent} />
+                </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
           ) : (
-            <Badge label="AI-assisted rebuild" tone="accent" icon="sparkles-outline" style={styles.heroBadge} />
+            <TouchableOpacity
+              style={styles.cpStartButton}
+              activeOpacity={0.9}
+              onPress={() => { setMenuOpen(false); onStart(); }}
+              accessibilityRole="button"
+              accessibilityLabel="Start new machine reconstruction"
+            >
+              <Ionicons name="scan-outline" size={18} color={Colors.background} />
+              <Text style={styles.cpStartText}>Start a reconstruction</Text>
+              <Ionicons name="arrow-forward" size={18} color={Colors.background} />
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -550,6 +588,7 @@ export default function WelcomeScreen({
         {footerLabel}
       </Text>
     </Animated.ScrollView>
+    </AppThemeContext.Provider>
   );
 }
 
@@ -690,87 +729,156 @@ const createStyles = (Colors: AppColors) => {
     },
     hero: {
       position: 'relative',
-      minHeight: 400,
+      minHeight: 520,
       borderRadius: Radii.xl,
       borderWidth: 1,
-      borderColor: Colors.hairline,
+      borderColor: 'rgba(255,255,255,0.08)',
       overflow: 'hidden',
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
       justifyContent: 'flex-end',
-      ...shadows.elevated,
+      ...shadows.floating,
     },
     heroContent: {
       padding: Spacing.lg,
       gap: Spacing.sm,
     },
+    heroBadge: {
+      marginBottom: Spacing.xs,
+    },
     heroTitle: {
       fontFamily: Fonts.display,
-      fontSize: 33,
-      lineHeight: 39,
-      letterSpacing: -0.5,
-      color: Colors.text,
+      fontSize: 36,
+      lineHeight: 41,
+      letterSpacing: -0.6,
+      color: '#ffffff',
     },
     heroTitleAccent: {
       color: Colors.accent,
     },
-    heroTextOnImage: {
-      color: '#ffffff',
-    },
     heroBody: {
       ...Typography.body,
-      color: Colors.mutedText,
-      maxWidth: '88%',
+      color: 'rgba(255,255,255,0.84)',
+      maxWidth: '90%',
     },
-    heroBodyOnImage: {
-      color: 'rgba(255,255,255,0.88)',
+    cpCard: {
+      marginTop: Spacing.md,
+      padding: Spacing.md,
+      borderRadius: Radii.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.14)',
+      backgroundColor: 'rgba(12,15,20,0.66)',
+      gap: Spacing.sm,
     },
-    heroBadge: {
-      marginTop: Spacing.sm,
-    },
-    currentProjectCard: {
+    cpTopRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.sm,
-      marginTop: Spacing.sm,
-      padding: Spacing.sm,
-      borderRadius: Radii.md,
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.16)',
-      backgroundColor: 'rgba(10,12,16,0.55)',
     },
-    currentProjectIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: Radii.sm,
+    cpIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: Radii.md,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(0,255,157,0.14)',
+      borderWidth: 1,
+      borderColor: 'rgba(0,255,157,0.30)',
     },
-    currentProjectText: {
+    cpHead: {
       flex: 1,
       minWidth: 0,
     },
-    currentProjectOverline: {
-      fontSize: 10,
-      fontWeight: '700',
-      letterSpacing: 0.8,
-      textTransform: 'uppercase',
-      color: 'rgba(255,255,255,0.6)',
-    },
-    currentProjectName: {
+    cpOverline: {
       fontFamily: Fonts.bold,
-      fontSize: FontSizes.md,
+      fontSize: 10,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      color: 'rgba(255,255,255,0.55)',
+    },
+    cpName: {
+      fontFamily: Fonts.bold,
+      fontSize: FontSizes.lg,
       color: '#ffffff',
     },
-    currentProjectMeta: {
+    cpStatus: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 4,
+      borderRadius: Radii.pill,
+      backgroundColor: 'rgba(0,255,157,0.12)',
+    },
+    cpStatusDone: {
+      backgroundColor: Colors.successSoft,
+    },
+    cpStatusDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 999,
+    },
+    cpStatusText: {
+      fontFamily: Fonts.bold,
+      fontSize: 10,
+      color: '#ffffff',
+    },
+    cpProgressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    cpTrack: {
+      flex: 1,
+      height: 6,
+      borderRadius: Radii.pill,
+      backgroundColor: 'rgba(255,255,255,0.14)',
+      overflow: 'hidden',
+    },
+    cpFill: {
+      height: '100%',
+      borderRadius: Radii.pill,
+      backgroundColor: Colors.accent,
+    },
+    cpPhaseLabel: {
+      fontFamily: Fonts.semibold,
       fontSize: FontSizes.xs,
       color: 'rgba(255,255,255,0.7)',
-      marginTop: 1,
     },
-    statRow: {
+    cpFootRow: {
       flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       gap: Spacing.sm,
-      marginBottom: Spacing.lg,
+    },
+    cpMeta: {
+      flex: 1,
+      fontSize: FontSizes.xs,
+      color: 'rgba(255,255,255,0.62)',
+    },
+    cpContinue: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    cpContinueText: {
+      fontFamily: Fonts.bold,
+      fontSize: FontSizes.sm,
+      color: Colors.accent,
+    },
+    cpStartButton: {
+      marginTop: Spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.sm,
+      paddingVertical: 15,
+      borderRadius: Radii.md,
+      backgroundColor: Colors.accent,
+    },
+    cpStartText: {
+      fontFamily: Fonts.bold,
+      fontSize: FontSizes.md,
+      color: Colors.background,
     },
     updateBanner: {
       width: '100%',
@@ -825,11 +933,11 @@ const createStyles = (Colors: AppColors) => {
       color: Colors.warning,
     },
     stepperCard: {
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
       paddingVertical: Spacing.lg,
     },
     newCard: {
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
     },
     newCardInner: {
       flexDirection: 'row',
@@ -862,7 +970,7 @@ const createStyles = (Colors: AppColors) => {
       lineHeight: 17,
     },
     listCard: {
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
     },
     listHeader: {
       flexDirection: 'row',
@@ -968,7 +1076,7 @@ const createStyles = (Colors: AppColors) => {
       marginTop: 2,
     },
     creditCard: {
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
       gap: Spacing.sm,
     },
     creditHeaderRow: {

@@ -15,6 +15,8 @@ interface AppThemeContextValue {
 
 const AppThemeContext = createContext<AppThemeContextValue | null>(null);
 
+export { AppThemeContext };
+
 const resolveSystemMode = (scheme: ColorSchemeName): ThemeMode => (
   scheme === 'light' || scheme === 'dark' ? scheme : 'dark'
 );

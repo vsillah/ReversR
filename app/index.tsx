@@ -12,8 +12,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
-import { useAppTheme } from '../hooks/useAppTheme';
+import { AppColors, DarkColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
+import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
 import { LinearGradient } from "expo-linear-gradient";
 import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
 import AlertModal from "../components/AlertModal";
@@ -1384,6 +1384,15 @@ export default function HomeScreen() {
 
   const tabBarInset = safeAreaInsets.bottom + 84;
 
+  // The home is dark-first / cinematic; force its chrome (container + bottom bar) dark.
+  const homeDarkTheme = useMemo(() => ({
+    mode: 'dark' as const,
+    colors: DarkColors,
+    setMode: setThemeMode,
+    isDark: true,
+    hasUserPreference: true,
+  }), [setThemeMode]);
+
   const renderTourGuide = () => (
     <TourGuide
       active={tourActive}
@@ -1410,13 +1419,14 @@ export default function HomeScreen() {
 
   if (!started) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: DarkColors.background }]}>
         <WelcomeScreen
           onStart={handleStartNew}
           onHistory={openHistory}
           onSettings={() => openSettings('account')}
           onProfile={() => openSettings('profile')}
           onTour={startTour}
+          onResume={handleResume}
           userDisplayName={userDisplayName}
           userIsAuthenticated={userIsAuthenticated}
           userAvatarUri={userAvatarUri}
@@ -1428,15 +1438,17 @@ export default function HomeScreen() {
           initialSection={settingsInitialSection}
         />
         {renderTourGuide()}
-        <BottomTabBar
-          active="home"
-          onHome={goHome}
-          onProjects={openHistory}
-          onNew={handleStartNew}
-          onTour={startTour}
-          onMore={() => openSettings('account')}
-          bottomInset={safeAreaInsets.bottom}
-        />
+        <AppThemeContext.Provider value={homeDarkTheme}>
+          <BottomTabBar
+            active="home"
+            onHome={goHome}
+            onProjects={openHistory}
+            onNew={handleStartNew}
+            onTour={startTour}
+            onMore={() => openSettings('account')}
+            bottomInset={safeAreaInsets.bottom}
+          />
+        </AppThemeContext.Provider>
       </View>
     );
   }
