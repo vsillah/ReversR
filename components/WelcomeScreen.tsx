@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ImageBackground,
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -343,14 +342,33 @@ export default function WelcomeScreen({
           ]}
         >
           <HeroBackdrop radius={0} />
-          {HERO_IMAGE ? (
-            <Image source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover" />
-          ) : null}
+          {HERO_IMAGE ? <View style={styles.heroBackdropScrim} /> : null}
         </Animated.View>
+        {HERO_IMAGE ? (
+          <Animated.View
+            style={[
+              styles.heroMediaWrap,
+              { transform: [{ translateY: heroTranslate }] },
+            ]}
+            pointerEvents="none"
+          >
+            <Image source={HERO_IMAGE} style={styles.heroImage} resizeMode="contain" />
+          </Animated.View>
+        ) : null}
         <LinearGradient
-          colors={['rgba(8,9,12,0.30)', 'rgba(8,9,12,0)', 'rgba(8,9,12,0.45)', 'rgba(8,9,12,0.92)', 'rgba(8,9,12,0.99)']}
-          locations={[0, 0.28, 0.6, 0.86, 1]}
+          colors={['rgba(6,8,12,0.82)', 'rgba(6,8,12,0.54)', 'rgba(6,8,12,0.18)', 'rgba(6,8,12,0.06)']}
+          locations={[0, 0.34, 0.72, 1]}
           style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          pointerEvents="none"
+        />
+        <LinearGradient
+          colors={['rgba(6,8,12,0.06)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.42)', 'rgba(6,8,12,0.88)']}
+          locations={[0, 0.2, 0.72, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
           pointerEvents="none"
         />
         <View style={styles.heroContent}>
@@ -403,17 +421,38 @@ export default function WelcomeScreen({
               </View>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity
-              style={styles.cpStartButton}
-              activeOpacity={0.9}
-              onPress={() => { setMenuOpen(false); onStart(); }}
-              accessibilityRole="button"
-              accessibilityLabel="Start new machine reconstruction"
-            >
-              <Ionicons name="scan-outline" size={18} color={Colors.background} />
-              <Text style={styles.cpStartText}>Start a reconstruction</Text>
-              <Ionicons name="arrow-forward" size={18} color={Colors.background} />
-            </TouchableOpacity>
+            <View style={styles.cpEmptyCard}>
+              <View style={styles.cpTopRow}>
+                <View style={styles.cpIcon}>
+                  <Ionicons name="sparkles-outline" size={20} color={Colors.accent} />
+                </View>
+                <View style={styles.cpHead}>
+                  <Text style={styles.cpOverline}>Get started</Text>
+                  <Text style={styles.cpName} numberOfLines={1}>Your first reconstruction</Text>
+                </View>
+              </View>
+              <Text style={styles.cpEmptySub}>Scan a machine, describe it, or try a sample build.</Text>
+              <View style={styles.cpQuickRow}>
+                {([
+                  { icon: 'camera-outline' as const, label: 'Scan', hint: 'Use camera' },
+                  { icon: 'create-outline' as const, label: 'Describe', hint: 'Type details' },
+                  { icon: 'cube-outline' as const, label: 'Sample', hint: 'Try a demo' },
+                ]).map(action => (
+                  <TouchableOpacity
+                    key={action.label}
+                    style={styles.cpQuickTile}
+                    activeOpacity={0.85}
+                    onPress={() => { setMenuOpen(false); onStart(); }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Start new machine reconstruction — ${action.label}, ${action.hint}`}
+                  >
+                    <Ionicons name={action.icon} size={20} color={Colors.accent} />
+                    <Text style={styles.cpQuickLabel}>{action.label}</Text>
+                    <Text style={styles.cpQuickHint}>{action.hint}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
           )}
         </View>
       </View>
@@ -520,9 +559,22 @@ export default function WelcomeScreen({
             </TouchableOpacity>
           ))
         ) : (
-          <View style={styles.projectEmpty}>
-            <Text style={styles.projectEmptyText}>No projects yet — start your first reconstruction.</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.projectEmpty}
+            activeOpacity={0.85}
+            onPress={() => { setMenuOpen(false); onStart(); }}
+            accessibilityRole="button"
+            accessibilityLabel="Start new machine reconstruction"
+          >
+            <View style={styles.projectEmptyIcon}>
+              <Ionicons name="cube-outline" size={20} color={Colors.dimText} />
+            </View>
+            <View style={styles.projectEmptyTextWrap}>
+              <Text style={styles.projectEmptyTitle}>No projects yet</Text>
+              <Text style={styles.projectEmptyText}>Your saved reconstructions will appear here.</Text>
+            </View>
+            <Text style={styles.listHeaderAction}>Start</Text>
+          </TouchableOpacity>
         )}
       </Card>
 
@@ -738,9 +790,32 @@ const createStyles = (Colors: AppColors) => {
       justifyContent: 'flex-end',
       ...shadows.floating,
     },
+    heroBackdropScrim: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      backgroundColor: 'rgba(4,6,10,0.16)',
+    },
+    heroMediaWrap: {
+      position: 'absolute',
+      right: -44,
+      bottom: 0,
+      width: '70%',
+      height: '84%',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      opacity: 0.98,
+    },
+    heroImage: {
+      width: '100%',
+      height: '100%',
+    },
     heroContent: {
       padding: Spacing.lg,
       gap: Spacing.sm,
+      zIndex: 2,
     },
     heroBadge: {
       marginBottom: Spacing.xs,
@@ -865,20 +940,44 @@ const createStyles = (Colors: AppColors) => {
       fontSize: FontSizes.sm,
       color: Colors.accent,
     },
-    cpStartButton: {
+    cpEmptyCard: {
       marginTop: Spacing.md,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      padding: Spacing.md,
+      borderRadius: Radii.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.14)',
+      backgroundColor: 'rgba(12,15,20,0.66)',
       gap: Spacing.sm,
-      paddingVertical: 15,
-      borderRadius: Radii.md,
-      backgroundColor: Colors.accent,
     },
-    cpStartText: {
-      fontFamily: Fonts.bold,
-      fontSize: FontSizes.md,
-      color: Colors.background,
+    cpEmptySub: {
+      fontSize: FontSizes.sm,
+      color: 'rgba(255,255,255,0.7)',
+      lineHeight: 18,
+    },
+    cpQuickRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginTop: 2,
+    },
+    cpQuickTile: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 3,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.xs,
+      borderRadius: Radii.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.12)',
+      backgroundColor: 'rgba(255,255,255,0.04)',
+    },
+    cpQuickLabel: {
+      fontFamily: Fonts.semibold,
+      fontSize: FontSizes.sm,
+      color: '#ffffff',
+    },
+    cpQuickHint: {
+      fontSize: 10,
+      color: 'rgba(255,255,255,0.55)',
     },
     updateBanner: {
       width: '100%',
@@ -1032,13 +1131,35 @@ const createStyles = (Colors: AppColors) => {
       borderRadius: Radii.pill,
     },
     projectEmpty: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
       paddingHorizontal: Spacing.md,
       paddingBottom: Spacing.md,
+      paddingTop: Spacing.xs,
+    },
+    projectEmptyIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: Radii.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.elevated,
+    },
+    projectEmptyTextWrap: {
+      flex: 1,
+      minWidth: 0,
+      gap: 1,
+    },
+    projectEmptyTitle: {
+      fontFamily: Fonts.semibold,
+      fontSize: FontSizes.md,
+      color: Colors.text,
     },
     projectEmptyText: {
-      fontSize: FontSizes.sm,
+      fontSize: FontSizes.xs,
       color: Colors.dimText,
-      lineHeight: 19,
+      lineHeight: 16,
     },
     twoColRow: {
       flexDirection: 'row',

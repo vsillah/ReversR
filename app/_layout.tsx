@@ -16,6 +16,7 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
 } from '@expo-google-fonts/inter';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '../constants/theme';
 import { AppThemeProvider, useAppTheme } from '../hooks/useAppTheme';
@@ -55,30 +56,42 @@ export default function RootLayout() {
 }
 
 function ThemedRootLayout() {
-  const { colors, isDark } = useAppTheme();
+  const { colors } = useAppTheme();
   const styles = createStyles(colors);
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <StatusBar style={isDark ? 'light' : 'dark'} />
-        <View style={styles.shell}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-          />
-        </View>
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#0d1320', '#08090c', '#0a0d14']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+          <StatusBar style="light" />
+          <View style={styles.shell}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.background },
+              }}
+            />
+          </View>
+        </SafeAreaView>
+      </View>
     </SafeAreaProvider>
   );
 }
 
 const createStyles = (Colors: AppColors) => StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#08090c',
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: 'transparent',
     alignItems: 'center',
   },
   shell: {
