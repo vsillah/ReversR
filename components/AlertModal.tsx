@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
 interface AlertModalProps {
@@ -40,9 +40,9 @@ export default function AlertModal({
   };
 
   const colorMap = {
-    info: Colors.accent,
-    error: Colors.red[500],
-    success: Colors.green[400],
+    info: Colors.primary,
+    error: Colors.danger,
+    success: Colors.success,
   };
 
   const handleButtonPress = (onPress: () => void) => {
@@ -102,77 +102,81 @@ export default function AlertModal({
   );
 }
 
-const createStyles = (Colors: AppColors) => StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-  },
-  container: {
-    backgroundColor: Colors.panel,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: Spacing.lg,
-    width: '100%',
-    maxWidth: 320,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  title: {
-    fontSize: FontSizes.md,
-    fontWeight: 'bold',
-    color: Colors.white,
-    flex: 1,
-  },
-  message: {
-    fontSize: FontSizes.sm,
-    color: Colors.gray[300],
-    lineHeight: 20,
-    marginBottom: Spacing.lg,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  button: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 255, 157, 0.1)',
-    borderWidth: 1,
-    borderColor: Colors.accent,
-    borderRadius: 6,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    alignItems: 'center',
-  },
-  buttonMultiple: {
-    marginLeft: Spacing.sm,
-  },
-  buttonDestructive: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderColor: Colors.red[500],
-  },
-  buttonCancel: {
-    backgroundColor: 'transparent',
-    borderColor: Colors.gray[600],
-  },
-  buttonText: {
-    fontSize: FontSizes.xs,
-    fontWeight: 'bold',
-    color: Colors.accent,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  buttonTextDestructive: {
-    color: Colors.red[500],
-  },
-  buttonTextCancel: {
-    color: Colors.gray[400],
-  },
-});
+const createStyles = (Colors: AppColors) => {
+  const shadows = makeShadows(Colors);
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: Colors.scrim,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: Spacing.lg,
+    },
+    container: {
+      backgroundColor: Colors.panel,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      borderRadius: Radii.xl,
+      padding: Spacing.lg,
+      width: '100%',
+      maxWidth: 340,
+      ...shadows.floating,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    title: {
+      fontSize: FontSizes.lg,
+      fontFamily: Fonts.heading,
+      color: Colors.text,
+      flex: 1,
+    },
+    message: {
+      fontSize: FontSizes.sm,
+      fontFamily: Fonts.regular,
+      color: Colors.mutedText,
+      lineHeight: 20,
+      marginBottom: Spacing.lg,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+    },
+    button: {
+      flex: 1,
+      backgroundColor: Colors.primary,
+      borderWidth: 1,
+      borderColor: Colors.primary,
+      borderRadius: Radii.md,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.md,
+      alignItems: 'center',
+    },
+    buttonMultiple: {
+      marginLeft: Spacing.sm,
+    },
+    buttonDestructive: {
+      backgroundColor: Colors.dangerSoft,
+      borderColor: Colors.danger,
+    },
+    buttonCancel: {
+      backgroundColor: 'transparent',
+      borderColor: Colors.border,
+    },
+    buttonText: {
+      fontSize: FontSizes.sm,
+      fontFamily: Fonts.bold,
+      color: '#ffffff',
+      letterSpacing: 0.3,
+    },
+    buttonTextDestructive: {
+      color: Colors.danger,
+    },
+    buttonTextCancel: {
+      color: Colors.mutedText,
+    },
+  });
+};

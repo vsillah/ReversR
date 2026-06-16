@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
 export type ImageGenStatus = 'idle' | 'generating' | 'complete' | 'error';
@@ -234,7 +234,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     bottom: 20,
     left: 16,
     right: 16,
-    borderRadius: 12,
+    borderRadius: Radii.md,
     borderWidth: 1,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -252,8 +252,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   text: {
     flex: 1,
     fontSize: FontSizes.sm,
-    fontFamily: 'monospace',
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
   viewButton: {
     flexDirection: 'row',
@@ -263,7 +262,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   viewButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.accent,
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
   dotsContainer: {
     marginLeft: Spacing.xs,
