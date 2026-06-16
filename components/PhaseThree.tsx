@@ -19,7 +19,7 @@ import {
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   InnovationResult,
@@ -638,7 +638,9 @@ export default function PhaseThree({
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-design">
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="pencil" size={28} color={Colors.accent} />
+          <View style={styles.headerIcon}>
+            <Ionicons name="pencil" size={24} color={Colors.primary} />
+          </View>
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 3: Design</Text>
             <Text style={styles.description}>Inventory match ready. Prepare reconstruction specs and modeling assets.</Text>
@@ -1123,7 +1125,7 @@ export default function PhaseThree({
           accessibilityLabel="Continue to build phase"
         >
           <Text style={styles.continueButtonText}>Continue to Build</Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.black} />
+          <Ionicons name="arrow-forward" size={20} color="#ffffff" />
         </TouchableOpacity>
       )}
 
@@ -1335,8 +1337,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: Spacing.lg,
   },
+  headerIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: Radii.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primarySoft,
+  },
   headerLeft: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.md,
     flex: 1,
   },
@@ -1346,12 +1357,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   title: {
     fontSize: FontSizes.xl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
     marginBottom: Spacing.xs,
   },
   description: {
     fontSize: FontSizes.sm,
-    color: Colors.dim,
+    color: Colors.mutedText,
+    lineHeight: 20,
   },
   navButtons: {
     flexDirection: 'row',
@@ -1535,16 +1547,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   generateButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    borderRadius: 8,
+    borderRadius: Radii.md,
   },
   generateButtonText: {
     fontFamily: 'monospace',
     fontSize: FontSizes.md,
     fontWeight: 'bold',
-    color: Colors.black,
+    color: '#ffffff',
   },
   mockVisualPanel: {
     alignItems: 'stretch',
@@ -1941,16 +1953,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.accent,
-    paddingVertical: Spacing.md,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    paddingVertical: 15,
+    borderRadius: Radii.md,
     marginBottom: Spacing.md,
   },
   continueButtonText: {
     fontFamily: 'monospace',
     fontSize: FontSizes.md,
     fontWeight: 'bold',
-    color: Colors.black,
+    color: '#ffffff',
   },
   continueButtonDisabled: {
     backgroundColor: Colors.gray[800],

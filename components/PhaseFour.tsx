@@ -12,7 +12,7 @@ import {
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii } from '../constants/theme';
 import { useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
@@ -593,7 +593,9 @@ export default function PhaseFour({
     <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-build">
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="hammer-outline" size={28} color={Colors.orange[300]} />
+          <View style={styles.headerIcon}>
+            <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
+          </View>
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 4: Build</Text>
             <Text style={styles.description}>BOM, assembly sequence, pricing, and fulfillment handoff</Text>
@@ -742,7 +744,7 @@ export default function PhaseFour({
               accessibilityRole="button"
               accessibilityLabel="Generate bill of materials"
             >
-              <Ionicons name="hammer" size={20} color={Colors.black} />
+              <Ionicons name="hammer" size={20} color="#ffffff" />
               <Text style={styles.generateButtonText}>Generate BOM</Text>
             </TouchableOpacity>
           </View>
@@ -1170,8 +1172,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: Spacing.lg,
   },
+  headerIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: Radii.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primarySoft,
+  },
   headerLeft: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.md,
     flex: 1,
   },
@@ -1181,12 +1192,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   title: {
     fontSize: FontSizes.xl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
     marginBottom: Spacing.xs,
   },
   description: {
     fontSize: FontSizes.sm,
-    color: Colors.dim,
+    color: Colors.mutedText,
+    lineHeight: 20,
   },
   navButtons: {
     flexDirection: 'row',
@@ -1543,16 +1555,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.orange[300],
+    backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    borderRadius: 8,
+    borderRadius: Radii.md,
   },
   generateButtonText: {
     fontFamily: 'monospace',
     fontSize: FontSizes.md,
     fontWeight: 'bold',
-    color: Colors.black,
+    color: '#ffffff',
   },
   errorText: {
     fontSize: FontSizes.sm,
@@ -1954,8 +1966,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   quotePacketButton: {
     alignItems: 'center',
-    backgroundColor: Colors.accent,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: Radii.md,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
   },
@@ -1963,7 +1975,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: Colors.gray[700],
   },
   quotePacketButtonText: {
-    color: Colors.black,
+    color: '#ffffff',
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
   },
