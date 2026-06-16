@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {
@@ -62,12 +62,14 @@ function ThemedRootLayout() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <StatusBar style={isDark ? 'light' : 'dark'} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        />
+        <View style={styles.shell}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          />
+        </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -76,6 +78,14 @@ function ThemedRootLayout() {
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+  },
+  shell: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
     backgroundColor: Colors.background,
   },
 });
