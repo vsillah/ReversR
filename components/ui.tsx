@@ -9,6 +9,16 @@ import {
   TextStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Svg, {
+  Circle,
+  Defs,
+  G,
+  Line,
+  LinearGradient as SvgLinearGradient,
+  Path,
+  Stop,
+} from 'react-native-svg';
 import { AppColors, Radii, Spacing, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
@@ -551,3 +561,189 @@ export function HorizontalStepper({
     </View>
   );
 }
+
+/** Filled gradient call-to-action — the signature primary button. */
+export function GradientButton({
+  label,
+  onPress,
+  icon = 'arrow-forward',
+  iconPosition = 'right',
+  colors,
+  disabled = false,
+  fullWidth = true,
+  style,
+  accessibilityLabel,
+  testID,
+}: {
+  label: string;
+  onPress: () => void;
+  icon?: IconName | null;
+  iconPosition?: 'left' | 'right';
+  colors?: [string, string, ...string[]];
+  disabled?: boolean;
+  fullWidth?: boolean;
+  style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
+  testID?: string;
+}) {
+  const { colors: theme } = useAppTheme();
+  const shadows = makeShadows(theme);
+  const gradient = (colors || [theme.primary, theme.primaryStrong]) as [string, string, ...string[]];
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      accessibilityLabel={accessibilityLabel || label}
+      testID={testID}
+      style={[
+        {
+          borderRadius: Radii.md,
+          alignSelf: fullWidth ? 'stretch' : 'flex-start',
+          opacity: disabled ? 0.55 : 1,
+          ...shadows.elevated,
+          shadowColor: theme.primary,
+        },
+        style,
+      ]}
+    >
+      <LinearGradient
+        colors={gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: Spacing.sm,
+          borderRadius: Radii.md,
+          paddingVertical: 16,
+          paddingHorizontal: Spacing.lg,
+        }}
+      >
+        {icon && iconPosition === 'left' ? <Ionicons name={icon} size={18} color="#ffffff" /> : null}
+        <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 }}>{label}</Text>
+        {icon && iconPosition === 'right' ? <Ionicons name={icon} size={18} color="#ffffff" /> : null}
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+}
+
+/** Circular SVG progress ring with a centered value/label. */
+export function ScoreRing({
+  progress,
+  size = 92,
+  strokeWidth = 9,
+  value,
+  caption,
+  trackColor,
+  gradientColors,
+}: {
+  progress: number; // 0..1
+  size?: number;
+  strokeWidth?: number;
+  value: string;
+  caption?: string;
+  trackColor?: string;
+  gradientColors?: [string, string];
+}) {
+  const { colors } = useAppTheme();
+  const clamped = Math.max(0, Math.min(1, progress));
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - clamped);
+  const grad = gradientColors || [colors.accent, colors.primary];
+  const center = size / 2;
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={size} height={size}>
+        <Defs>
+          <SvgLinearGradient id="scoreRingGrad" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={grad[0]} />
+            <Stop offset="1" stopColor={grad[1]} />
+          </SvgLinearGradient>
+        </Defs>
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={trackColor || colors.border}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke="url(#scoreRingGrad)"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          fill="none"
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={dashOffset}
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+      </Svg>
+      <View style={{ position: 'absolute', alignItems: 'center' }}>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text }}>{value}</Text>
+        {caption ? (
+          <Text style={{ fontSize: 10, fontWeight: '700', letterSpacing: 0.6, color: colors.dimText, textTransform: 'uppercase' }}>
+            {caption}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+/** Cinematic gradient + blueprint backdrop, absolutely filling its parent. */
+export function HeroBackdrop({ radius = Radii.xl }: { radius?: number }) {
+  const { colors } = useAppTheme();
+  const isDark = colors.mode === 'dark';
+  const gridColor = isDark ? 'rgba(120,160,255,0.10)' : 'rgba(37,99,235,0.08)';
+  const accentLine = isDark ? 'rgba(0,255,157,0.18)' : 'rgba(0,122,85,0.16)';
+  const gradient = (isDark
+    ? ['#11203a', '#0c1424', '#08090c']
+    : ['#dbe6ff', '#eef3fb', '#f4f6fb']) as [string, string, ...string[]];
+
+  // Blueprint grid lines
+  const gridLines: React.ReactNode[] = [];
+  for (let i = 1; i < 7; i += 1) {
+    gridLines.push(<Line key={`v${i}`} x1={i * 50} y1={0} x2={i * 50} y2={300} stroke={gridColor} strokeWidth={1} />);
+  }
+  for (let j = 1; j < 6; j += 1) {
+    gridLines.push(<Line key={`h${j}`} x1={0} y1={j * 50} x2={350} y2={j * 50} stroke={gridColor} strokeWidth={1} />);
+  }
+
+  return (
+    <View style={{ ...StyleSheetAbsoluteFill, borderRadius: radius, overflow: 'hidden' }} pointerEvents="none">
+      <LinearGradient
+        colors={gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheetAbsoluteFill}
+      />
+      <Svg width="100%" height="100%" viewBox="0 0 350 300" preserveAspectRatio="xMidYMid slice">
+        <G opacity={0.9}>{gridLines}</G>
+        {/* Stylized gear / machine motif */}
+        <Circle cx={272} cy={70} r={52} stroke={accentLine} strokeWidth={1.5} fill="none" />
+        <Circle cx={272} cy={70} r={34} stroke={gridColor} strokeWidth={1.5} fill="none" />
+        <Circle cx={272} cy={70} r={8} stroke={accentLine} strokeWidth={2} fill="none" />
+        <Path
+          d="M272 8 L278 28 L266 28 Z M272 132 L278 112 L266 112 Z M210 70 L230 76 L230 64 Z M334 70 L314 76 L314 64 Z"
+          fill={accentLine}
+        />
+      </Svg>
+    </View>
+  );
+}
+
+const StyleSheetAbsoluteFill: ViewStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};

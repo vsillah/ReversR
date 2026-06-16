@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { Badge, Card, PrimaryButton, SectionHeader } from './ui';
+import { Badge, Card, GradientButton, HeroBackdrop, ScoreRing, SectionHeader, StepRow } from './ui';
 import {
   formatReleaseDate,
   getInstalledBuildLabel,
@@ -43,24 +43,28 @@ const phases = [
     title: 'Scan',
     icon: 'scan-outline' as const,
     description: 'Capture or describe a machine and identify visible assemblies, parts, and signals.',
+    short: 'Capture or describe the machine',
   },
   {
     number: 2,
     title: 'Inventory',
     icon: 'git-branch-outline' as const,
     description: 'Connect an admin-approved machine inventory and match the scan to a known record.',
+    short: 'Match the scan to a record',
   },
   {
     number: 3,
     title: 'Design',
     icon: 'pencil' as const,
     description: 'Generate reconstruction specs, visual references, and 3D modeling handoff files.',
+    short: 'Specs, references, and 3D handoff',
   },
   {
     number: 4,
     title: 'Build',
     icon: 'hammer-outline' as const,
     description: 'Build a BOM, assembly sequence, pricing estimate, and fabrication handoff.',
+    short: 'BOM, assembly, and pricing',
   },
 ];
 
@@ -294,35 +298,27 @@ export default function WelcomeScreen({
           </View>
         </View>
 
-        <View style={styles.greetingBlock}>
-          <Text style={styles.greetingHello}>{greeting},</Text>
-          <Text style={styles.greetingName} numberOfLines={1}>{userDisplayName}</Text>
-          <Text style={styles.greetingTagline}>Machine reconstruction. Smarter. Faster. Proven.</Text>
-        </View>
-
-        <Card style={styles.heroCard} testID="reversr-tour-welcome">
-          <View style={styles.heroTop}>
-            <View style={styles.heroIconWrap}>
-              <Ionicons name="construct-outline" size={26} color={Colors.primary} />
-            </View>
-            <Badge label="AI-assisted" tone="primary" icon="sparkles-outline" />
+        <View style={styles.hero} testID="reversr-tour-welcome">
+          <HeroBackdrop />
+          <View style={styles.heroContent}>
+            <Badge label="AI-assisted rebuild" tone="primary" icon="sparkles-outline" />
+            <Text style={styles.heroHello}>{greeting}, {userDisplayName}</Text>
+            <Text style={styles.heroTitle}>Let&apos;s rebuild</Text>
+            <Text style={styles.heroBody}>
+              Guided by intelligent steps. Backed by proven data — from scan to BOM to 3D handoff.
+            </Text>
+            <GradientButton
+              label="New Reconstruction"
+              icon="arrow-forward"
+              onPress={() => {
+                setMenuOpen(false);
+                onStart();
+              }}
+              accessibilityLabel="Start new machine reconstruction"
+              style={styles.heroButton}
+            />
           </View>
-          <Text style={styles.heroTitle}>Let&apos;s rebuild</Text>
-          <Text style={styles.heroBody}>
-            Scan a machine, match it to inventory, and rebuild the path from parts to assembly — with
-            reconstruction packages, BOMs, pricing, and 3D modeling handoff.
-          </Text>
-          <PrimaryButton
-            label="New Reconstruction"
-            icon="arrow-forward"
-            onPress={() => {
-              setMenuOpen(false);
-              onStart();
-            }}
-            accessibilityLabel="Start new machine reconstruction"
-            style={styles.heroButton}
-          />
-        </Card>
+        </View>
 
         {showUpdateBanner && (
           <View
@@ -363,27 +359,31 @@ export default function WelcomeScreen({
           </View>
         )}
 
-        <View style={styles.section}>
-          <SectionHeader title="Reconstruction path" />
-          <View style={styles.phaseList}>
-            {phases.map((phase, index) => (
-              <View key={phase.number} style={styles.phaseRow}>
-                <View style={styles.phaseRail}>
-                  <View style={styles.phaseNode}>
-                    <Ionicons name={phase.icon} size={16} color={Colors.primary} />
-                  </View>
-                  {index < phases.length - 1 ? <View style={styles.phaseConnector} /> : null}
-                </View>
-                <View style={styles.phaseTextWrap}>
-                  <Text style={styles.phaseTitle}>
-                    {phase.number}. {phase.title}
-                  </Text>
-                  <Text style={styles.phaseDescription}>{phase.description}</Text>
-                </View>
-              </View>
+        <Card style={styles.pathCard}>
+          <View style={styles.pathHeader}>
+            <View style={styles.pathHeaderText}>
+              <Text style={styles.pathOverline}>Reconstruction path</Text>
+              <Text style={styles.pathTitle}>4 guided phases</Text>
+              <Text style={styles.pathSubtitle}>Start with a scan — the rest unlock as you go.</Text>
+            </View>
+            <ScoreRing progress={0} value="0/4" caption="Phases" size={84} />
+          </View>
+          <View style={styles.stepList}>
+            {phases.map((phase) => (
+              <StepRow
+                key={phase.number}
+                index={phase.number}
+                title={phase.title}
+                subtitle={phase.short}
+                state={phase.number === 1 ? 'current' : 'locked'}
+                onPress={phase.number === 1 ? () => { setMenuOpen(false); onStart(); } : undefined}
+                accessibilityLabel={phase.number === 1
+                  ? `Start with ${phase.title}: ${phase.short}`
+                  : `${phase.title} locked: ${phase.short}`}
+              />
             ))}
           </View>
-        </View>
+        </Card>
 
         {quickActions.length > 0 && (
           <View style={styles.section}>
@@ -549,50 +549,67 @@ const createStyles = (Colors: AppColors) => {
       fontSize: FontSizes.sm,
       fontWeight: '700',
     },
-    greetingBlock: {
-      marginBottom: Spacing.md,
-    },
-    greetingHello: {
-      ...Typography.body,
-      color: Colors.mutedText,
-    },
-    greetingName: {
-      ...Typography.display,
-      color: Colors.text,
-    },
-    greetingTagline: {
-      ...Typography.caption,
-      color: Colors.dimText,
-      marginTop: 2,
-    },
-    heroCard: {
+    hero: {
+      position: 'relative',
+      borderRadius: Radii.xl,
+      borderWidth: 1,
+      borderColor: Colors.hairline,
+      overflow: 'hidden',
       marginBottom: Spacing.lg,
+      ...shadows.elevated,
+    },
+    heroContent: {
+      padding: Spacing.lg,
       gap: Spacing.sm,
     },
-    heroTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    heroIconWrap: {
-      width: 46,
-      height: 46,
-      borderRadius: Radii.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: Colors.primarySoft,
+    heroHello: {
+      ...Typography.label,
+      color: Colors.mutedText,
+      marginTop: Spacing.xs,
     },
     heroTitle: {
-      ...Typography.title,
+      fontSize: 34,
+      fontWeight: '800',
+      lineHeight: 40,
       color: Colors.text,
-      marginTop: Spacing.xs,
     },
     heroBody: {
       ...Typography.body,
       color: Colors.mutedText,
+      maxWidth: '92%',
     },
     heroButton: {
-      marginTop: Spacing.sm,
+      marginTop: Spacing.md,
+    },
+    pathCard: {
+      marginBottom: Spacing.lg,
+      gap: Spacing.md,
+    },
+    pathHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: Spacing.md,
+    },
+    pathHeaderText: {
+      flex: 1,
+      gap: 2,
+    },
+    pathOverline: {
+      ...Typography.overline,
+      color: Colors.dimText,
+      textTransform: 'uppercase',
+    },
+    pathTitle: {
+      ...Typography.heading,
+      color: Colors.text,
+    },
+    pathSubtitle: {
+      ...Typography.caption,
+      color: Colors.dimText,
+    },
+    stepList: {
+      gap: Spacing.sm,
     },
     updateBanner: {
       width: '100%',
@@ -648,54 +665,6 @@ const createStyles = (Colors: AppColors) => {
     },
     section: {
       marginBottom: Spacing.lg,
-    },
-    phaseList: {
-      backgroundColor: Colors.surface,
-      borderWidth: 1,
-      borderColor: Colors.border,
-      borderRadius: Radii.lg,
-      padding: Spacing.md,
-      ...shadows.card,
-    },
-    phaseRow: {
-      flexDirection: 'row',
-      gap: Spacing.md,
-    },
-    phaseRail: {
-      alignItems: 'center',
-      width: 36,
-    },
-    phaseNode: {
-      width: 36,
-      height: 36,
-      borderRadius: Radii.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: Colors.primarySoft,
-      borderWidth: 1,
-      borderColor: Colors.border,
-    },
-    phaseConnector: {
-      flex: 1,
-      width: 2,
-      minHeight: 16,
-      marginVertical: 4,
-      backgroundColor: Colors.border,
-    },
-    phaseTextWrap: {
-      flex: 1,
-      paddingBottom: Spacing.md,
-      gap: 2,
-    },
-    phaseTitle: {
-      fontSize: FontSizes.lg,
-      fontWeight: '700',
-      color: Colors.text,
-    },
-    phaseDescription: {
-      fontSize: FontSizes.sm,
-      color: Colors.dimText,
-      lineHeight: 20,
     },
     shortcutGrid: {
       flexDirection: 'row',
