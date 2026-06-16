@@ -5,13 +5,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ScrollView,
+  ImageBackground,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { Badge, Card, GradientButton, HeroBackdrop, ScoreRing, SectionHeader, StepRow } from './ui';
+import { Badge, Card, GradientButton, HeroBackdrop, ScoreRing, SectionHeader, StatTile, StepRow } from './ui';
+import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
 import {
   formatReleaseDate,
   getInstalledBuildLabel,
@@ -25,6 +27,10 @@ const staticAppConfig = require('../app.json') as {
     extra?: Record<string, unknown>;
   };
 };
+
+// Drop a hero render at assets/hero-machine.png and set this to
+// require('../assets/hero-machine.png') to swap the blueprint backdrop for art.
+const HERO_IMAGE: number | null = null;
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -42,31 +48,29 @@ const phases = [
     number: 1,
     title: 'Scan',
     icon: 'scan-outline' as const,
-    description: 'Capture or describe a machine and identify visible assemblies, parts, and signals.',
     short: 'Capture or describe the machine',
   },
   {
     number: 2,
     title: 'Inventory',
     icon: 'git-branch-outline' as const,
-    description: 'Connect an admin-approved machine inventory and match the scan to a known record.',
     short: 'Match the scan to a record',
   },
   {
     number: 3,
     title: 'Design',
     icon: 'pencil' as const,
-    description: 'Generate reconstruction specs, visual references, and 3D modeling handoff files.',
     short: 'Specs, references, and 3D handoff',
   },
   {
     number: 4,
     title: 'Build',
     icon: 'hammer-outline' as const,
-    description: 'Build a BOM, assembly sequence, pricing estimate, and fabrication handoff.',
     short: 'BOM, assembly, and pricing',
   },
 ];
+
+const PHASE_NAMES = ['Scan', 'Inventory', 'Design', 'Build'];
 
 const expoConfig = Constants.expoConfig;
 const releaseExtra = (expoConfig?.extra || {}) as Record<string, unknown>;
@@ -83,6 +87,26 @@ const greetingForHour = (hour: number): string => {
   return 'Good evening';
 };
 
+const relativeTime = (iso: string): string => {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return '';
+  const diff = Date.now() - then;
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString();
+};
+
+const reconstructionTitle = (item: SavedInnovation): string =>
+  item.analysis?.productName
+  || item.innovation?.conceptName
+  || (item.input ? item.input.slice(0, 40) : '')
+  || 'Untitled reconstruction';
+
 export default function WelcomeScreen({
   onStart,
   onHistory,
@@ -95,6 +119,8 @@ export default function WelcomeScreen({
 }: WelcomeScreenProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [recent, setRecent] = React.useState<SavedInnovation[]>([]);
+  const scrollY = React.useRef(new Animated.Value(0)).current;
   const updateCoordinator = useLaunchUpdateCoordinator();
   const showUpdateBanner = [
     'ota-downloading',
@@ -114,17 +140,52 @@ export default function WelcomeScreen({
     `Released ${formatReleaseDate(releaseDate)}`,
   ].filter(Boolean).join(' - ');
 
+  React.useEffect(() => {
+    let mounted = true;
+    getAllInnovations()
+      .then(items => { if (mounted) setRecent(items); })
+      .catch(() => undefined);
+    return () => { mounted = false; };
+  }, []);
+
+  const stats = React.useMemo(() => {
+    const total = recent.length;
+    const completed = recent.filter(item => item.phase >= 4).length;
+    return { total, completed, inProgress: total - completed };
+  }, [recent]);
+
+  const evidence = React.useMemo(() => recent.slice(0, 3).map(item => {
+    const approvals = item.reviewerApprovalRecords?.length || 0;
+    const hasBom = Boolean(item.bom);
+    const has3d = Boolean(item.threeDScene);
+    const verified = approvals > 0 || (hasBom && item.phase >= 4);
+    const artifact = approvals > 0
+      ? `${approvals} approval${approvals > 1 ? 's' : ''}`
+      : hasBom ? 'Bill of materials'
+        : has3d ? '3D scene set'
+          : `${PHASE_NAMES[Math.min(item.phase, 4) - 1]} in progress`;
+    return {
+      id: item.id,
+      title: reconstructionTitle(item),
+      artifact,
+      when: relativeTime(item.updatedAt || item.createdAt),
+      verified,
+      icon: (approvals > 0 ? 'shield-checkmark-outline'
+        : hasBom ? 'document-text-outline'
+          : has3d ? 'cube-outline'
+            : 'construct-outline') as keyof typeof Ionicons.glyphMap,
+    };
+  }), [recent]);
+
   const handleUpdateAction = React.useCallback(() => {
     if (updateCoordinator.status === 'ota-ready') {
       updateCoordinator.applyOtaUpdate().catch(() => undefined);
       return;
     }
-
     if (updateCoordinator.status === 'error') {
       updateCoordinator.checkNow().catch(() => undefined);
       return;
     }
-
     updateCoordinator.openNativeUpdate().catch(() => undefined);
   }, [updateCoordinator]);
 
@@ -140,6 +201,17 @@ export default function WelcomeScreen({
     });
   }, [nextThemeMode, setThemeMode]);
 
+  const heroTranslate = scrollY.interpolate({
+    inputRange: [-200, 0, 240],
+    outputRange: [0, 0, 96],
+    extrapolateLeft: 'clamp',
+  });
+  const heroScale = scrollY.interpolate({
+    inputRange: [-220, 0],
+    outputRange: [1.32, 1],
+    extrapolateRight: 'clamp',
+  });
+
   const quickActions: Array<{
     key: string;
     label: string;
@@ -152,7 +224,7 @@ export default function WelcomeScreen({
   if (onHistory) {
     quickActions.push({
       key: 'history',
-      label: 'History',
+      label: 'Projects',
       description: 'Resume saved reconstructions',
       icon: 'time-outline',
       onPress: () => handleMenuAction(onHistory),
@@ -182,244 +254,304 @@ export default function WelcomeScreen({
   }
 
   return (
-    <ScrollView
+    <Animated.ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
+      onScroll={Animated.event(
+        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        { useNativeDriver: true },
+      )}
     >
-      <View style={styles.content}>
-        <View style={styles.topBar}>
-          <View style={styles.brandRow}>
-            <Image
-              source={require('../assets/logo-transparent.png')}
-              style={styles.brandLogo}
-              resizeMode="contain"
-            />
-            <Text style={styles.brandWordmark}>
-              REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
-            </Text>
-          </View>
+      <View style={styles.topBar}>
+        <View style={styles.brandRow}>
+          <Image
+            source={require('../assets/logo-transparent.png')}
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.brandWordmark}>
+            REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
+          </Text>
+        </View>
 
-          <View style={styles.topActions}>
-            {(onProfile || onSettings) && (
-              <TouchableOpacity
-                style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
-                onPress={() => handleMenuAction(onProfile || onSettings)}
-                accessibilityRole="button"
-                accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
-                testID="welcome-profile-chip"
-              >
-                {userAvatarUri ? (
-                  <Image source={{ uri: userAvatarUri }} style={styles.profileAvatarThumb} resizeMode="cover" />
-                ) : (
-                  <Ionicons
-                    name={profileIcon}
-                    size={18}
-                    color={userIsAuthenticated ? Colors.accent : Colors.mutedText}
-                  />
-                )}
-                <Text
-                  style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
-                  numberOfLines={1}
-                >
-                  {userDisplayName}
-                </Text>
-              </TouchableOpacity>
-            )}
-
+        <View style={styles.topActions}>
+          {(onProfile || onSettings) && (
             <TouchableOpacity
-              style={styles.iconButton}
-              onPress={handleToggleTheme}
+              style={[styles.profileButton, userIsAuthenticated && styles.profileButtonActive]}
+              onPress={() => handleMenuAction(onProfile || onSettings)}
               accessibilityRole="button"
-              accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
-              testID="welcome-appearance-toggle"
+              accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
+              testID="welcome-profile-chip"
             >
-              <Ionicons
-                name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
-                size={20}
-                color={Colors.text}
-              />
+              {userAvatarUri ? (
+                <Image source={{ uri: userAvatarUri }} style={styles.profileAvatarThumb} resizeMode="cover" />
+              ) : (
+                <Ionicons
+                  name={profileIcon}
+                  size={18}
+                  color={userIsAuthenticated ? Colors.accent : Colors.mutedText}
+                />
+              )}
+              <Text
+                style={[styles.profileButtonText, userIsAuthenticated && styles.profileButtonTextActive]}
+                numberOfLines={1}
+              >
+                {userDisplayName}
+              </Text>
             </TouchableOpacity>
+          )}
 
-            {hasMenuActions && (
-              <View style={styles.menuHost}>
-                <TouchableOpacity
-                  style={[styles.iconButton, menuOpen && styles.iconButtonActive]}
-                  onPress={() => setMenuOpen(current => !current)}
-                  accessibilityRole="button"
-                  accessibilityLabel={menuOpen ? 'Close welcome menu' : 'Open welcome menu'}
-                  accessibilityState={{ expanded: menuOpen }}
-                  testID="welcome-actions-menu-button"
-                >
-                  <Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={22} color={Colors.text} />
-                </TouchableOpacity>
-
-                {menuOpen && (
-                  <View style={styles.menuPanel} testID="welcome-actions-menu">
-                    {onHistory && (
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => handleMenuAction(onHistory)}
-                        accessibilityRole="button"
-                        accessibilityLabel="Open reconstruction history"
-                      >
-                        <Ionicons name="time-outline" size={18} color={Colors.primary} />
-                        <Text style={styles.menuItemText}>History</Text>
-                      </TouchableOpacity>
-                    )}
-
-                    {onSettings && (
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => handleMenuAction(onSettings)}
-                        accessibilityRole="button"
-                        accessibilityLabel="Open settings"
-                      >
-                        <Ionicons name="settings-outline" size={18} color={Colors.primary} />
-                        <Text style={styles.menuItemText}>Settings</Text>
-                      </TouchableOpacity>
-                    )}
-
-                    {onTour && (
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => handleMenuAction(onTour)}
-                        accessibilityRole="button"
-                        accessibilityLabel="Start guided tour"
-                      >
-                        <Ionicons name="compass-outline" size={18} color={Colors.primary} />
-                        <Text style={styles.menuItemText}>Tour</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.hero} testID="reversr-tour-welcome">
-          <HeroBackdrop />
-          <View style={styles.heroContent}>
-            <Badge label="AI-assisted rebuild" tone="primary" icon="sparkles-outline" />
-            <Text style={styles.heroHello}>{greeting}, {userDisplayName}</Text>
-            <Text style={styles.heroTitle}>Let&apos;s rebuild</Text>
-            <Text style={styles.heroBody}>
-              Guided by intelligent steps. Backed by proven data — from scan to BOM to 3D handoff.
-            </Text>
-            <GradientButton
-              label="New Reconstruction"
-              icon="arrow-forward"
-              onPress={() => {
-                setMenuOpen(false);
-                onStart();
-              }}
-              accessibilityLabel="Start new machine reconstruction"
-              style={styles.heroButton}
-            />
-          </View>
-        </View>
-
-        {showUpdateBanner && (
-          <View
-            style={[
-              styles.updateBanner,
-              updateCoordinator.status === 'error' && styles.updateBannerError,
-              updateCoordinator.status === 'ota-ready' && styles.updateBannerReady,
-            ]}
-            accessibilityRole="alert"
-            testID="welcome-update-banner"
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleToggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel={nextThemeMode === 'dark' ? 'Use dark mode' : 'Use light mode'}
+            testID="welcome-appearance-toggle"
           >
             <Ionicons
-              name={updateCoordinator.status === 'ota-ready' ? 'refresh-circle-outline' : 'cloud-download-outline'}
-              size={22}
-              color={updateCoordinator.status === 'error' ? Colors.danger : Colors.warning}
+              name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+              size={20}
+              color={Colors.text}
             />
-            <View style={styles.updateBannerText}>
-              <Text style={styles.updateTitle}>{updateCoordinator.updateTitle}</Text>
-              <Text style={styles.updateDescription}>
-                {updateCoordinator.updateDescription}
-              </Text>
-              {updateCoordinator.errorMessage && (
-                <Text style={styles.updateMeta}>
-                  {updateCoordinator.errorMessage}
-                </Text>
-              )}
-              {updateCoordinator.status !== 'ota-downloading' && (
-                <TouchableOpacity
-                  style={styles.updateButton}
-                  onPress={handleUpdateAction}
-                  accessibilityRole="button"
-                  accessibilityLabel={updateCoordinator.updateActionLabel}
-                >
-                  <Text style={styles.updateButtonText}>{updateCoordinator.updateActionLabel}</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        )}
+          </TouchableOpacity>
 
-        <Card style={styles.pathCard}>
-          <View style={styles.pathHeader}>
-            <View style={styles.pathHeaderText}>
-              <Text style={styles.pathOverline}>Reconstruction path</Text>
-              <Text style={styles.pathTitle}>4 guided phases</Text>
-              <Text style={styles.pathSubtitle}>Start with a scan — the rest unlock as you go.</Text>
+          {hasMenuActions && (
+            <View style={styles.menuHost}>
+              <TouchableOpacity
+                style={[styles.iconButton, menuOpen && styles.iconButtonActive]}
+                onPress={() => setMenuOpen(current => !current)}
+                accessibilityRole="button"
+                accessibilityLabel={menuOpen ? 'Close welcome menu' : 'Open welcome menu'}
+                accessibilityState={{ expanded: menuOpen }}
+                testID="welcome-actions-menu-button"
+              >
+                <Ionicons name={menuOpen ? 'close-outline' : 'menu-outline'} size={22} color={Colors.text} />
+              </TouchableOpacity>
+
+              {menuOpen && (
+                <View style={styles.menuPanel} testID="welcome-actions-menu">
+                  {onHistory && (
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => handleMenuAction(onHistory)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Open reconstruction history"
+                    >
+                      <Ionicons name="time-outline" size={18} color={Colors.primary} />
+                      <Text style={styles.menuItemText}>History</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {onSettings && (
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => handleMenuAction(onSettings)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Open settings"
+                    >
+                      <Ionicons name="settings-outline" size={18} color={Colors.primary} />
+                      <Text style={styles.menuItemText}>Settings</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {onTour && (
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => handleMenuAction(onTour)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Start guided tour"
+                    >
+                      <Ionicons name="compass-outline" size={18} color={Colors.primary} />
+                      <Text style={styles.menuItemText}>Tour</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
             </View>
-            <ScoreRing progress={0} value="0/4" caption="Phases" size={84} />
+          )}
+        </View>
+      </View>
+
+      <View style={styles.hero} testID="reversr-tour-welcome">
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            { transform: [{ translateY: heroTranslate }, { scale: heroScale }] },
+          ]}
+        >
+          {HERO_IMAGE ? (
+            <ImageBackground source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover">
+              <View style={styles.heroImageScrim} />
+            </ImageBackground>
+          ) : (
+            <HeroBackdrop radius={0} />
+          )}
+        </Animated.View>
+        <View style={styles.heroContent}>
+          <Badge label="AI-assisted rebuild" tone="primary" icon="sparkles-outline" />
+          <Text style={styles.heroHello}>{greeting}, {userDisplayName}</Text>
+          <Text style={styles.heroTitle}>Let&apos;s rebuild</Text>
+          <Text style={styles.heroBody}>
+            Guided by intelligent steps. Backed by proven data — from scan to BOM to 3D handoff.
+          </Text>
+          <GradientButton
+            label="New Reconstruction"
+            icon="arrow-forward"
+            onPress={() => {
+              setMenuOpen(false);
+              onStart();
+            }}
+            accessibilityLabel="Start new machine reconstruction"
+            style={styles.heroButton}
+          />
+        </View>
+      </View>
+
+      <View style={styles.statRow}>
+        <StatTile label="Projects" value={stats.total} icon="albums-outline" />
+        <StatTile label="In progress" value={stats.inProgress} tone="primary" icon="sync-outline" />
+        <StatTile label="Completed" value={stats.completed} tone="success" icon="checkmark-done-outline" />
+      </View>
+
+      {showUpdateBanner && (
+        <View
+          style={[
+            styles.updateBanner,
+            updateCoordinator.status === 'error' && styles.updateBannerError,
+            updateCoordinator.status === 'ota-ready' && styles.updateBannerReady,
+          ]}
+          accessibilityRole="alert"
+          testID="welcome-update-banner"
+        >
+          <Ionicons
+            name={updateCoordinator.status === 'ota-ready' ? 'refresh-circle-outline' : 'cloud-download-outline'}
+            size={22}
+            color={updateCoordinator.status === 'error' ? Colors.danger : Colors.warning}
+          />
+          <View style={styles.updateBannerText}>
+            <Text style={styles.updateTitle}>{updateCoordinator.updateTitle}</Text>
+            <Text style={styles.updateDescription}>
+              {updateCoordinator.updateDescription}
+            </Text>
+            {updateCoordinator.errorMessage && (
+              <Text style={styles.updateMeta}>
+                {updateCoordinator.errorMessage}
+              </Text>
+            )}
+            {updateCoordinator.status !== 'ota-downloading' && (
+              <TouchableOpacity
+                style={styles.updateButton}
+                onPress={handleUpdateAction}
+                accessibilityRole="button"
+                accessibilityLabel={updateCoordinator.updateActionLabel}
+              >
+                <Text style={styles.updateButtonText}>{updateCoordinator.updateActionLabel}</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <View style={styles.stepList}>
-            {phases.map((phase) => (
-              <StepRow
-                key={phase.number}
-                index={phase.number}
-                title={phase.title}
-                subtitle={phase.short}
-                state={phase.number === 1 ? 'current' : 'locked'}
-                onPress={phase.number === 1 ? () => { setMenuOpen(false); onStart(); } : undefined}
-                accessibilityLabel={phase.number === 1
-                  ? `Start with ${phase.title}: ${phase.short}`
-                  : `${phase.title} locked: ${phase.short}`}
-              />
+        </View>
+      )}
+
+      <Card style={styles.pathCard}>
+        <View style={styles.pathHeader}>
+          <View style={styles.pathHeaderText}>
+            <Text style={styles.pathOverline}>Reconstruction path</Text>
+            <Text style={styles.pathTitle}>4 guided phases</Text>
+            <Text style={styles.pathSubtitle}>Start with a scan — the rest unlock as you go.</Text>
+          </View>
+          <ScoreRing progress={0} value="0/4" caption="Phases" size={84} />
+        </View>
+        <View style={styles.stepList}>
+          {phases.map((phase) => (
+            <StepRow
+              key={phase.number}
+              index={phase.number}
+              title={phase.title}
+              subtitle={phase.short}
+              state={phase.number === 1 ? 'current' : 'locked'}
+              onPress={phase.number === 1 ? () => { setMenuOpen(false); onStart(); } : undefined}
+              accessibilityLabel={phase.number === 1
+                ? `Start with ${phase.title}: ${phase.short}`
+                : `${phase.title} locked: ${phase.short}`}
+            />
+          ))}
+        </View>
+      </Card>
+
+      <View style={styles.section}>
+        <SectionHeader
+          title="Evidence"
+          actionLabel={onHistory && recent.length > 0 ? 'View all' : undefined}
+          onAction={onHistory && recent.length > 0 ? () => handleMenuAction(onHistory) : undefined}
+        />
+        {evidence.length > 0 ? (
+          <View style={styles.evidenceList}>
+            {evidence.map(item => (
+              <Card key={item.id} style={styles.evidenceCard} padded={false} onPress={onHistory ? () => handleMenuAction(onHistory) : undefined} accessibilityLabel={`${item.title}, ${item.artifact}`}>
+                <View style={styles.evidenceInner}>
+                  <View style={styles.evidenceIcon}>
+                    <Ionicons name={item.icon} size={18} color={Colors.primary} />
+                  </View>
+                  <View style={styles.evidenceText}>
+                    <Text style={styles.evidenceTitle} numberOfLines={1}>{item.title}</Text>
+                    <Text style={styles.evidenceMeta} numberOfLines={1}>{item.artifact} · {item.when}</Text>
+                  </View>
+                  {item.verified
+                    ? <Badge label="Verified" tone="success" icon="checkmark-circle" />
+                    : <Badge label="In progress" tone="primary" dot />}
+                </View>
+              </Card>
             ))}
           </View>
-        </Card>
-
-        {quickActions.length > 0 && (
-          <View style={styles.section}>
-            <SectionHeader title="Shortcuts" />
-            <View style={styles.shortcutGrid}>
-              {quickActions.map(action => (
-                <Card
-                  key={action.key}
-                  style={styles.shortcutCard}
-                  padded={false}
-                  onPress={action.onPress}
-                  accessibilityLabel={action.accessibilityLabel}
-                  testID={action.testID}
-                >
-                  <View style={styles.shortcutInner}>
-                    <View style={styles.shortcutIcon}>
-                      <Ionicons name={action.icon} size={18} color={Colors.primary} />
-                    </View>
-                    <Text style={styles.shortcutLabel}>{action.label}</Text>
-                    <Text style={styles.shortcutDescription} numberOfLines={2}>{action.description}</Text>
-                  </View>
-                </Card>
-              ))}
+        ) : (
+          <Card style={styles.emptyEvidence}>
+            <View style={styles.emptyEvidenceIcon}>
+              <Ionicons name="documents-outline" size={22} color={Colors.dimText} />
             </View>
-          </View>
+            <Text style={styles.emptyEvidenceTitle}>No evidence yet</Text>
+            <Text style={styles.emptyEvidenceText}>
+              Reconstruction artifacts — BOMs, 3D scenes, and reviewer approvals — appear here as you build.
+            </Text>
+          </Card>
         )}
-
-        <Text
-          style={styles.releaseFooter}
-          accessibilityLabel={`Installed tester build ${footerLabel}`}
-          testID="welcome-release-footer"
-        >
-          {footerLabel}
-        </Text>
       </View>
-    </ScrollView>
+
+      {quickActions.length > 0 && (
+        <View style={styles.section}>
+          <SectionHeader title="Shortcuts" />
+          <View style={styles.shortcutGrid}>
+            {quickActions.map(action => (
+              <Card
+                key={action.key}
+                style={styles.shortcutCard}
+                padded={false}
+                onPress={action.onPress}
+                accessibilityLabel={action.accessibilityLabel}
+                testID={action.testID}
+              >
+                <View style={styles.shortcutInner}>
+                  <View style={styles.shortcutIcon}>
+                    <Ionicons name={action.icon} size={18} color={Colors.primary} />
+                  </View>
+                  <Text style={styles.shortcutLabel}>{action.label}</Text>
+                  <Text style={styles.shortcutDescription} numberOfLines={2}>{action.description}</Text>
+                </View>
+              </Card>
+            ))}
+          </View>
+        </View>
+      )}
+
+      <Text
+        style={styles.releaseFooter}
+        accessibilityLabel={`Installed tester build ${footerLabel}`}
+        testID="welcome-release-footer"
+      >
+        {footerLabel}
+      </Text>
+    </Animated.ScrollView>
   );
 }
 
@@ -436,15 +568,12 @@ const createStyles = (Colors: AppColors) => {
       paddingTop: Spacing.md,
       paddingBottom: Spacing.xl,
     },
-    content: {
-      width: '100%',
-    },
     topBar: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       minHeight: 44,
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
       zIndex: 20,
     },
     brandRow: {
@@ -551,12 +680,18 @@ const createStyles = (Colors: AppColors) => {
     },
     hero: {
       position: 'relative',
+      minHeight: 280,
       borderRadius: Radii.xl,
       borderWidth: 1,
       borderColor: Colors.hairline,
       overflow: 'hidden',
       marginBottom: Spacing.lg,
+      justifyContent: 'flex-end',
       ...shadows.elevated,
+    },
+    heroImageScrim: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: Colors.mode === 'dark' ? 'rgba(6,8,12,0.55)' : 'rgba(8,12,20,0.28)',
     },
     heroContent: {
       padding: Spacing.lg,
@@ -576,40 +711,15 @@ const createStyles = (Colors: AppColors) => {
     heroBody: {
       ...Typography.body,
       color: Colors.mutedText,
-      maxWidth: '92%',
+      maxWidth: '94%',
     },
     heroButton: {
       marginTop: Spacing.md,
     },
-    pathCard: {
-      marginBottom: Spacing.lg,
-      gap: Spacing.md,
-    },
-    pathHeader: {
+    statRow: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: Spacing.md,
-    },
-    pathHeaderText: {
-      flex: 1,
-      gap: 2,
-    },
-    pathOverline: {
-      ...Typography.overline,
-      color: Colors.dimText,
-      textTransform: 'uppercase',
-    },
-    pathTitle: {
-      ...Typography.heading,
-      color: Colors.text,
-    },
-    pathSubtitle: {
-      ...Typography.caption,
-      color: Colors.dimText,
-    },
-    stepList: {
       gap: Spacing.sm,
+      marginBottom: Spacing.lg,
     },
     updateBanner: {
       width: '100%',
@@ -663,8 +773,96 @@ const createStyles = (Colors: AppColors) => {
       fontWeight: '700',
       color: Colors.warning,
     },
+    pathCard: {
+      marginBottom: Spacing.lg,
+      gap: Spacing.md,
+    },
+    pathHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: Spacing.md,
+    },
+    pathHeaderText: {
+      flex: 1,
+      gap: 2,
+    },
+    pathOverline: {
+      ...Typography.overline,
+      color: Colors.dimText,
+      textTransform: 'uppercase',
+    },
+    pathTitle: {
+      ...Typography.heading,
+      color: Colors.text,
+    },
+    pathSubtitle: {
+      ...Typography.caption,
+      color: Colors.dimText,
+    },
+    stepList: {
+      gap: Spacing.sm,
+    },
     section: {
       marginBottom: Spacing.lg,
+    },
+    evidenceList: {
+      gap: Spacing.sm,
+    },
+    evidenceCard: {},
+    evidenceInner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+      padding: Spacing.md,
+    },
+    evidenceIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: Radii.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.primarySoft,
+    },
+    evidenceText: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    evidenceTitle: {
+      fontSize: FontSizes.md,
+      fontWeight: '700',
+      color: Colors.text,
+    },
+    evidenceMeta: {
+      fontSize: FontSizes.xs,
+      color: Colors.dimText,
+    },
+    emptyEvidence: {
+      alignItems: 'center',
+      gap: Spacing.xs,
+      paddingVertical: Spacing.lg,
+    },
+    emptyEvidenceIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: Radii.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.elevated,
+      marginBottom: Spacing.xs,
+    },
+    emptyEvidenceTitle: {
+      fontSize: FontSizes.md,
+      fontWeight: '700',
+      color: Colors.text,
+    },
+    emptyEvidenceText: {
+      fontSize: FontSizes.sm,
+      color: Colors.dimText,
+      textAlign: 'center',
+      lineHeight: 19,
+      maxWidth: '90%',
     },
     shortcutGrid: {
       flexDirection: 'row',
