@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, FontSizes, Spacing } from '../constants/theme';
+import { AppColors, FontSizes, Spacing, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
 type PolicySection = {
@@ -31,7 +31,7 @@ export default function PolicyPage({ title, updated, intro, sections }: PolicyPa
             accessibilityRole="button"
             accessibilityLabel="Back to ReversR Rebuild"
           >
-            <Ionicons name="arrow-back" size={16} color={Colors.accent} />
+            <Ionicons name="arrow-back" size={16} color={Colors.primary} />
             <Text style={styles.backText}>ReversR Rebuild</Text>
           </TouchableOpacity>
         </Link>
@@ -59,7 +59,7 @@ export default function PolicyPage({ title, updated, intro, sections }: PolicyPa
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark,
+    backgroundColor: Colors.background,
   },
   content: {
     width: '100%',
@@ -78,23 +78,23 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   backText: {
-    color: Colors.accent,
+    color: Colors.primary,
+    fontFamily: Fonts.bold,
     fontSize: FontSizes.sm,
-    fontWeight: '700',
   },
   title: {
-    color: Colors.white,
+    color: Colors.text,
+    fontFamily: Fonts.display,
     fontSize: FontSizes.xxxl,
-    fontWeight: '800',
     marginBottom: Spacing.sm,
   },
   updated: {
-    color: Colors.gray[500],
+    color: Colors.dimText,
     fontSize: FontSizes.sm,
     marginBottom: Spacing.lg,
   },
   intro: {
-    color: Colors.gray[300],
+    color: Colors.mutedText,
     fontSize: FontSizes.md,
     lineHeight: 24,
   },
@@ -105,13 +105,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   sectionTitle: {
-    color: Colors.white,
+    color: Colors.text,
+    fontFamily: Fonts.heading,
     fontSize: FontSizes.lg,
-    fontWeight: '800',
     marginBottom: Spacing.sm,
   },
   body: {
-    color: Colors.gray[300],
+    color: Colors.mutedText,
     fontSize: FontSizes.sm,
     lineHeight: 22,
   },
@@ -121,13 +121,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   bullet: {
-    color: Colors.accent,
+    color: Colors.primary,
     fontSize: FontSizes.sm,
     lineHeight: 22,
   },
   bulletText: {
     flex: 1,
-    color: Colors.gray[300],
+    color: Colors.mutedText,
     fontSize: FontSizes.sm,
     lineHeight: 22,
   },

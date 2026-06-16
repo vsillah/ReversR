@@ -1010,7 +1010,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
           accessibilityRole="button"
           accessibilityLabel="Redeem tester invite code"
         >
-          <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+          <Ionicons name="ticket-outline" size={17} color="#ffffff" />
           <Text style={styles.saveCredentialButtonText}>Redeem Admin Code</Text>
         </TouchableOpacity>
       </View>
@@ -1049,7 +1049,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 <Ionicons
                   name={section.icon}
                   size={15}
-                  color={settingsSection === section.id ? Colors.black : Colors.gray[400]}
+                  color={settingsSection === section.id ? "#ffffff" : Colors.gray[400]}
                 />
                 <Text style={[styles.settingsSectionTabText, settingsSection === section.id && styles.settingsSectionTabTextActive]}>
                   {section.label}
@@ -1232,7 +1232,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       accessibilityRole="button"
                       accessibilityLabel="Save profile password reset"
                     >
-                      <Ionicons name="checkmark-circle-outline" size={17} color={Colors.black} />
+                      <Ionicons name="checkmark-circle-outline" size={17} color="#ffffff" />
                       <Text style={styles.saveCredentialButtonText}>Save New Password</Text>
                     </TouchableOpacity>
                   </>
@@ -1734,7 +1734,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                           accessibilityRole="button"
                           accessibilityLabel="Save backend credential reference"
                         >
-                          <Ionicons name="key-outline" size={17} color={Colors.black} />
+                          <Ionicons name="key-outline" size={17} color="#ffffff" />
                           <Text style={styles.saveCredentialButtonText}>Save Credential Ref</Text>
                         </TouchableOpacity>
 
@@ -1845,7 +1845,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     accessibilityRole="button"
                     accessibilityLabel="Save journey credit rule"
                   >
-                    <Ionicons name="save-outline" size={17} color={Colors.black} />
+                    <Ionicons name="save-outline" size={17} color="#ffffff" />
                     <Text style={styles.saveCredentialButtonText}>Save Credit Rule</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -1899,7 +1899,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                           <Ionicons
                             name={platform === 'ios' ? 'logo-apple' : platform === 'android' ? 'logo-android' : 'phone-portrait-outline'}
                             size={16}
-                            color={invitePlatform === platform ? Colors.black : Colors.gray[400]}
+                            color={invitePlatform === platform ? "#ffffff" : Colors.gray[400]}
                           />
                           <Text style={[styles.themeToggleText, invitePlatform === platform && styles.themeToggleTextActive]}>
                             {platform === 'both' ? 'Both' : platform === 'ios' ? 'iOS' : 'Android'}
@@ -1916,7 +1916,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                         accessibilityRole="button"
                         accessibilityLabel="Create tester invite code"
                       >
-                        <Ionicons name="ticket-outline" size={17} color={Colors.black} />
+                        <Ionicons name="ticket-outline" size={17} color="#ffffff" />
                         <Text style={styles.saveCredentialButtonText}>Create Invite</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -2003,7 +2003,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                           <Ionicons
                             name={role === 'super_admin' ? 'shield-checkmark-outline' : 'flask-outline'}
                             size={16}
-                            color={grantRole === role ? Colors.black : Colors.gray[400]}
+                            color={grantRole === role ? "#ffffff" : Colors.gray[400]}
                           />
                           <Text style={[styles.themeToggleText, grantRole === role && styles.themeToggleTextActive]}>
                             {role === 'super_admin' ? 'Super Admin' : 'Tester'}
@@ -2032,7 +2032,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                         accessibilityRole="button"
                         accessibilityLabel="Save commercial tester access grant"
                       >
-                        <Ionicons name="person-add-outline" size={17} color={Colors.black} />
+                        <Ionicons name="person-add-outline" size={17} color="#ffffff" />
                         <Text style={styles.saveCredentialButtonText}>Grant Tester Access</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -2150,7 +2150,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
   },
   body: {
     maxHeight: 440,
@@ -2180,8 +2180,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: Colors.input,
   },
   settingsSectionTabActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accent,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   settingsSectionTabText: {
     color: Colors.gray[400],
@@ -2189,7 +2189,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '900',
   },
   settingsSectionTabTextActive: {
-    color: Colors.black,
+    color: '#ffffff',
   },
   label: {
     fontSize: 16,
@@ -2216,8 +2216,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: Colors.input,
   },
   themeToggleButtonActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   themeToggleText: {
     color: Colors.gray[400],
@@ -2225,7 +2225,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '800',
   },
   themeToggleTextActive: {
-    color: Colors.black,
+    color: '#ffffff',
   },
   accountPanel: {
     borderWidth: 1,
@@ -2369,7 +2369,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: 8,
   },
   planListTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 13,
     fontWeight: '900',
   },
@@ -2424,7 +2424,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     minWidth: 0,
   },
   planCardTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 15,
     fontWeight: '900',
   },
@@ -2571,7 +2571,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: Colors.panel,
   },
   aiUsagePhase: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 12,
     fontWeight: '900',
     marginTop: 5,
@@ -2652,7 +2652,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   dropdownButtonText: {
     flex: 1,
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -2864,7 +2864,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '900',
   },
   providerOptionTitleActive: {
-    color: Colors.white,
+    color: Colors.text,
   },
   providerOptionBadge: {
     color: Colors.accent,
@@ -2938,7 +2938,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: 3,
   },
   inventorySummaryValue: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -2961,8 +2961,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.accent,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
     minHeight: 48,
     paddingVertical: 12,
     paddingHorizontal: 12,
@@ -2973,7 +2973,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginTop: 0,
   },
   saveCredentialButtonText: {
-    color: Colors.black,
+    color: '#ffffff',
     fontSize: 13,
     fontWeight: '800',
   },
@@ -3008,7 +3008,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     minWidth: 0,
   },
   credentialRefText: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -3059,7 +3059,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: 8,
   },
   policyTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -3088,13 +3088,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '600',
   },
   saveButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: Colors.black,
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },

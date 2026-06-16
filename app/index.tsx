@@ -12,8 +12,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
-import { useAppTheme } from '../hooks/useAppTheme';
+import { AppColors, DarkColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
+import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
+import { LinearGradient } from "expo-linear-gradient";
+import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
@@ -63,10 +65,6 @@ interface MutationContext {
   reviewerApprovalRecords: ReviewerApprovalRecord[];
 }
 
-const HEADER_CONTROL_SIZE = 44;
-const HEADER_CONTROL_TOP = Spacing.sm;
-const HEADER_TITLE_TOP_PADDING = HEADER_CONTROL_TOP + HEADER_CONTROL_SIZE + Spacing.md;
-
 const createEmptyContext = (): MutationContext => {
   const newInnovation = createNewInnovation();
   return {
@@ -87,6 +85,13 @@ const createEmptyContext = (): MutationContext => {
 };
 
 const PHASE_LABELS = ['SCAN', 'INVENTORY', 'DESIGN', 'BUILD'];
+const PHASE_STEP_LABELS = ['Scan', 'Inventory', 'Design', 'Build'];
+const PHASE_STEP_HINTS = [
+  'Capture or describe the machine',
+  'Match the scan to a record',
+  'Specs, references, and 3D handoff',
+  'BOM, assembly, and pricing',
+];
 const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   1: 'search',
   2: 'repeat-sharp',
@@ -1371,6 +1376,23 @@ export default function HomeScreen() {
     setStarted(true);
   }, []);
 
+  const goHome = useCallback(() => {
+    setShowSettings(false);
+    setShowHistory(false);
+    setStarted(false);
+  }, []);
+
+  const tabBarInset = safeAreaInsets.bottom + 84;
+
+  // The home is dark-first / cinematic; force its chrome (container + bottom bar) dark.
+  const homeDarkTheme = useMemo(() => ({
+    mode: 'dark' as const,
+    colors: DarkColors,
+    setMode: setThemeMode,
+    isDark: true,
+    hasUserPreference: true,
+  }), [setThemeMode]);
+
   const renderTourGuide = () => (
     <TourGuide
       active={tourActive}
@@ -1393,20 +1415,22 @@ export default function HomeScreen() {
       onExit={closeTour}
     />
   );
-  const contentBottomPadding = safeAreaInsets.bottom + Spacing.xxl;
+  const contentBottomPadding = tabBarInset + Spacing.md;
 
   if (!started) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: DarkColors.background }]}>
         <WelcomeScreen
           onStart={handleStartNew}
           onHistory={openHistory}
           onSettings={() => openSettings('account')}
           onProfile={() => openSettings('profile')}
           onTour={startTour}
+          onResume={handleResume}
           userDisplayName={userDisplayName}
           userIsAuthenticated={userIsAuthenticated}
           userAvatarUri={userAvatarUri}
+          bottomBarInset={tabBarInset}
         />
         <SettingsModal
           visible={showSettings}
@@ -1414,6 +1438,17 @@ export default function HomeScreen() {
           initialSection={settingsInitialSection}
         />
         {renderTourGuide()}
+        <AppThemeContext.Provider value={homeDarkTheme}>
+          <BottomTabBar
+            active="home"
+            onHome={goHome}
+            onProjects={openHistory}
+            onNew={handleStartNew}
+            onTour={startTour}
+            onMore={() => openSettings('account')}
+            bottomInset={safeAreaInsets.bottom}
+          />
+        </AppThemeContext.Provider>
       </View>
     );
   }
@@ -1425,8 +1460,18 @@ export default function HomeScreen() {
           onBack={() => setShowHistory(false)}
           onResume={handleResume}
           refreshKey={historyRefreshKey}
+          bottomBarInset={tabBarInset}
         />
         {renderTourGuide()}
+        <BottomTabBar
+          active="projects"
+          onHome={goHome}
+          onProjects={openHistory}
+          onNew={handleStartNew}
+          onTour={startTour}
+          onMore={() => openSettings('account')}
+          bottomInset={safeAreaInsets.bottom}
+        />
       </View>
     );
   }
@@ -1440,11 +1485,11 @@ export default function HomeScreen() {
             style={styles.headerLogo}
             resizeMode="contain"
           />
-          <View>
+          <View style={styles.brandTextWrap}>
             <Text style={styles.title}>
               REVERS<Text style={styles.titleAccent}>R</Text>
             </Text>
-            <Text style={styles.subtitle}>MACHINE RECONSTRUCTION</Text>
+            <Text style={styles.subtitle} numberOfLines={1}>Machine Reconstruction</Text>
           </View>
         </View>
         <View style={styles.headerControls}>
@@ -1481,8 +1526,8 @@ export default function HomeScreen() {
           >
             <Ionicons
               name={nextThemeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
-              size={22}
-              color={Colors.accent}
+              size={20}
+              color={Colors.text}
             />
           </TouchableOpacity>
 
@@ -1495,7 +1540,7 @@ export default function HomeScreen() {
               accessibilityState={{ expanded: workflowMenuOpen }}
               testID="reversr-actions-menu-button"
             >
-              <Ionicons name={workflowMenuOpen ? 'close-outline' : 'menu-outline'} size={24} color={Colors.accent} />
+              <Ionicons name={workflowMenuOpen ? 'close-outline' : 'menu-outline'} size={22} color={Colors.text} />
             </TouchableOpacity>
 
             {workflowMenuOpen && (
@@ -1507,7 +1552,7 @@ export default function HomeScreen() {
                   accessibilityLabel="Open settings"
                   testID="reversr-tour-settings-button"
                 >
-                  <Ionicons name="settings-outline" size={18} color={Colors.accent} />
+                  <Ionicons name="settings-outline" size={18} color={Colors.primary} />
                   <Text style={styles.menuItemText}>Settings</Text>
                 </TouchableOpacity>
 
@@ -1518,7 +1563,7 @@ export default function HomeScreen() {
                   accessibilityLabel="Open reconstruction history"
                   testID="reversr-tour-history-button"
                 >
-                  <Ionicons name="time-outline" size={18} color={Colors.accent} />
+                  <Ionicons name="time-outline" size={18} color={Colors.primary} />
                   <Text style={styles.menuItemText}>History</Text>
                 </TouchableOpacity>
 
@@ -1529,7 +1574,7 @@ export default function HomeScreen() {
                   accessibilityLabel="Start guided tour"
                   testID="reversr-tour-start-header"
                 >
-                  <Ionicons name="compass-outline" size={18} color={Colors.accent} />
+                  <Ionicons name="compass-outline" size={18} color={Colors.primary} />
                   <Text style={styles.menuItemText}>Tour</Text>
                 </TouchableOpacity>
               </View>
@@ -1558,58 +1603,37 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <View style={styles.progressBar} testID="reversr-tour-phase-nav">
-        {[1, 2, 3, 4].map((step, index) => (
-          <React.Fragment key={step}>
-            <TouchableOpacity 
-              style={styles.stepContainer}
-              onPress={() => {
-                if (context.phase > step) {
-                  setPhaseActionModal(step);
-                }
-              }}
-              disabled={context.phase <= step}
-              activeOpacity={context.phase > step ? 0.7 : 1}
-            >
-              <View
-                style={[
-                  styles.stepCircle,
-                  context.phase >= step && styles.stepCircleActive,
-                  context.phase > step && styles.stepCircleComplete,
-                ]}
-              >
-                {context.phase > step ? (
-                  <Ionicons name="checkmark" size={16} color={Colors.black} />
-                ) : (
-                  <Text
-                    style={[
-                      styles.stepNumber,
-                      context.phase >= step && styles.stepNumberActive,
-                    ]}
-                  >
-                    {step}
-                  </Text>
-                )}
-              </View>
-              <Text
-                style={[
-                  styles.stepLabel,
-                  context.phase >= step && styles.stepLabelActive,
-                ]}
-              >
-                {PHASE_LABELS[step - 1]}
-              </Text>
-            </TouchableOpacity>
-            {index < 3 && (
-              <View
-                style={[
-                  styles.stepConnector,
-                  context.phase > step && styles.stepConnectorActive,
-                ]}
-              />
-            )}
-          </React.Fragment>
-        ))}
+      <View style={styles.progressBar}>
+        <LinearGradient
+          colors={Colors.mode === 'dark'
+            ? ['rgba(0,255,157,0.14)', 'rgba(16,18,24,0.25)']
+            : ['rgba(0,122,85,0.10)', 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.currentStepCard}
+        >
+          <ScoreRing
+            progress={context.phase / 4}
+            value={`${Math.min(context.phase, 4)}/4`}
+            caption="Step"
+            size={72}
+            strokeWidth={8}
+          />
+          <View style={styles.currentStepInfo}>
+            <Text style={styles.currentStepOverline}>Current step</Text>
+            <Text style={styles.currentStepName}>{PHASE_STEP_LABELS[Math.min(context.phase, 4) - 1]}</Text>
+            <Text style={styles.currentStepHint} numberOfLines={2}>
+              {PHASE_STEP_HINTS[Math.min(context.phase, 4) - 1]}
+            </Text>
+          </View>
+        </LinearGradient>
+        <HorizontalStepper
+          steps={PHASE_STEP_LABELS}
+          subLabels={PHASE_STEP_HINTS}
+          currentStep={context.phase}
+          onStepPress={(step) => setPhaseActionModal(step)}
+          testID="reversr-tour-phase-nav"
+        />
       </View>
 
       <ScrollView
@@ -1778,32 +1802,42 @@ export default function HomeScreen() {
         onClose={() => setConfirmAlert(null)}
       />
 
-      <SettingsModal 
-        visible={showSettings} 
-        onClose={() => setShowSettings(false)} 
+      <SettingsModal
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
         initialSection={settingsInitialSection}
       />
       {renderTourGuide()}
+      <BottomTabBar
+        active={null}
+        onHome={goHome}
+        onProjects={openHistory}
+        onNew={handleStartNew}
+        onTour={startTour}
+        onMore={() => openSettings('account')}
+        bottomInset={safeAreaInsets.bottom}
+      />
     </View>
   );
 }
 
-const createStyles = (Colors: AppColors) => StyleSheet.create({
+const createStyles = (Colors: AppColors) => {
+  const shadows = makeShadows(Colors);
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark,
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: "row",
-    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
-    paddingTop: HEADER_TITLE_TOP_PADDING,
+    paddingTop: Spacing.md,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.hairline,
     backgroundColor: Colors.panel,
     position: 'relative',
     zIndex: 60,
@@ -1812,38 +1846,39 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.md,
+    gap: Spacing.sm,
     flexShrink: 1,
     minWidth: 0,
   },
   headerLogo: {
-    width: 56,
-    height: 56,
+    width: 40,
+    height: 40,
+  },
+  brandTextWrap: {
+    flexShrink: 1,
+    minWidth: 0,
   },
   title: {
-    fontFamily: "monospace",
+    fontFamily: Fonts.display,
     fontSize: FontSizes.xl,
-    fontWeight: "bold",
-    color: Colors.white,
-    letterSpacing: 2,
+    color: Colors.text,
+    letterSpacing: 1,
   },
   titleAccent: {
     color: Colors.accent,
   },
   subtitle: {
     fontSize: FontSizes.xs,
-    color: Colors.dim,
-    letterSpacing: 3,
+    color: Colors.dimText,
+    letterSpacing: 0.5,
     flexShrink: 1,
   },
   headerControls: {
-    position: 'absolute',
-    top: HEADER_CONTROL_TOP,
-    right: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: Spacing.sm,
+    flexShrink: 0,
     zIndex: 40,
   },
   menuHost: {
@@ -1851,34 +1886,30 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'flex-end',
   },
   menuButton: {
-    width: HEADER_CONTROL_SIZE,
-    height: HEADER_CONTROL_SIZE,
-    borderRadius: 8,
+    width: 40,
+    height: 40,
+    borderRadius: Radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.panel,
+    backgroundColor: Colors.surface,
   },
   menuButtonActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primarySoft,
   },
   menuPanel: {
     position: 'absolute',
-    top: HEADER_CONTROL_SIZE + Spacing.xs,
+    top: 48,
     right: 0,
     width: 184,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
+    borderRadius: Radii.md,
     backgroundColor: Colors.panel,
     paddingVertical: Spacing.xs,
-    shadowColor: Colors.black,
-    shadowOpacity: Colors.mode === 'dark' ? 0.35 : 0.14,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    ...shadows.elevated,
     zIndex: 30,
   },
   menuItem: {
@@ -1895,11 +1926,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '700',
   },
   userChip: {
-    minHeight: 36,
+    minHeight: 40,
     maxWidth: 118,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 999,
+    borderRadius: Radii.pill,
     paddingVertical: 7,
     paddingHorizontal: 10,
     flexDirection: 'row',
@@ -1910,16 +1941,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   userChipActive: {
     borderColor: Colors.accent,
-    backgroundColor: Colors.accent + '10',
+    backgroundColor: Colors.accentSoft,
   },
   userChipAvatar: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     borderRadius: 999,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.elevated,
   },
   userChipText: {
-    color: Colors.gray[400],
+    color: Colors.mutedText,
     fontSize: FontSizes.xs,
     fontWeight: '800',
     maxWidth: 86,
@@ -1929,13 +1960,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   guestCreditBar: {
     alignSelf: 'center',
-    maxWidth: 320,
+    maxWidth: 360,
     marginHorizontal: Spacing.lg,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.xs,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    marginTop: Spacing.md,
+    marginBottom: 0,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radii.pill,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.surface,
@@ -1946,7 +1977,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: Spacing.sm,
   },
   guestCreditText: {
-    color: Colors.text,
+    color: Colors.mutedText,
     fontSize: FontSizes.xs,
     fontWeight: '700',
     textAlign: 'center',
@@ -1963,66 +1994,46 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingHorizontal: 4,
   },
   guestCreditLinkText: {
-    color: Colors.accent,
+    color: Colors.primary,
     fontSize: FontSizes.xs,
     fontWeight: '800',
   },
   progressBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
+    gap: Spacing.md,
   },
-  stepContainer: {
-    alignItems: "center",
+  currentStepCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    borderColor: Colors.mode === 'dark' ? 'rgba(0,255,157,0.30)' : Colors.border,
   },
-  stepCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.black,
-    borderWidth: 2,
-    borderColor: Colors.gray[800],
-    justifyContent: "center",
-    alignItems: "center",
+  currentStepInfo: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
   },
-  stepCircleActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
+  currentStepOverline: {
+    fontFamily: Fonts.bold,
+    fontSize: 11,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    color: Colors.accent,
   },
-  stepCircleComplete: {
-    backgroundColor: Colors.green[500],
-    borderColor: Colors.green[500],
+  currentStepName: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.xl,
+    color: Colors.text,
   },
-  stepNumber: {
-    fontFamily: "monospace",
-    fontSize: FontSizes.xs,
-    fontWeight: "bold",
+  currentStepHint: {
+    fontSize: FontSizes.sm,
     color: Colors.mutedText,
-  },
-  stepNumberActive: {
-    color: Colors.black,
-  },
-  stepLabel: {
-    marginTop: Spacing.xs,
-    fontSize: 9,
-    fontWeight: "bold",
-    color: Colors.mutedText,
-    letterSpacing: 1,
-  },
-  stepLabelActive: {
-    color: Colors.white,
-  },
-  stepConnector: {
-    width: 24,
-    height: 2,
-    backgroundColor: Colors.gray[800],
-    marginHorizontal: 4,
-    marginBottom: 20,
-  },
-  stepConnectorActive: {
-    backgroundColor: Colors.green[500],
+    lineHeight: 18,
   },
   content: {
     flex: 1,
@@ -2033,31 +2044,32 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: Colors.scrim,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.lg,
   },
   phaseActionModal: {
     backgroundColor: Colors.panel,
-    borderRadius: 16,
+    borderRadius: Radii.xl,
     padding: Spacing.xl,
     width: '100%',
-    maxWidth: 320,
+    maxWidth: 340,
     borderWidth: 1,
     borderColor: Colors.border,
+    ...shadows.floating,
   },
   phaseActionTitle: {
     fontFamily: 'monospace',
     fontSize: FontSizes.lg,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   phaseActionSubtitle: {
     fontSize: FontSizes.sm,
-    color: Colors.gray[400],
+    color: Colors.mutedText,
     textAlign: 'center',
     marginBottom: Spacing.lg,
   },
@@ -2067,16 +2079,20 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
-    borderRadius: 8,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
     backgroundColor: Colors.surface,
     marginBottom: Spacing.sm,
   },
   phaseActionButtonText: {
     fontSize: FontSizes.md,
-    color: Colors.white,
+    fontWeight: '600',
+    color: Colors.text,
   },
   phaseActionButtonDanger: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: Colors.dangerSoft,
+    borderColor: Colors.danger,
   },
   phaseActionCancelButton: {
     paddingVertical: Spacing.md,
@@ -2084,7 +2100,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   phaseActionCancelText: {
     fontSize: FontSizes.sm,
-    color: Colors.gray[500],
+    fontWeight: '600',
+    color: Colors.mutedText,
     textAlign: 'center',
   },
-});
+  });
+};

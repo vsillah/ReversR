@@ -8,7 +8,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/useStorage';
 import { MACHINE_WORKFLOW_LABELS, MachineWorkflowKey } from '../hooks/useGemini';
@@ -120,9 +120,10 @@ interface Props {
   onBack: () => void;
   onResume: (innovation: SavedInnovation) => void;
   refreshKey?: number;
+  bottomBarInset?: number;
 }
 
-export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
+export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarInset = 0 }: Props) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
   const [innovations, setInnovations] = useState<SavedInnovation[]>([]);
@@ -358,7 +359,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
     <View style={styles.container} testID="reversr-tour-history">
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.white} />
+          <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
         <View style={styles.headerText}>
           <Text style={styles.title}>{viewMode === 'history' ? 'Reconstruction History' : 'Review Queue'}</Text>
@@ -385,7 +386,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
               <Ionicons
                 name="time-outline"
                 size={14}
-                color={viewMode === 'history' ? Colors.black : Colors.gray[400]}
+                color={viewMode === 'history' ? '#ffffff' : Colors.mutedText}
               />
               <Text style={[styles.viewSwitchText, viewMode === 'history' && styles.viewSwitchTextActive]}>
                 History
@@ -400,7 +401,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
               <Ionicons
                 name="shield-checkmark-outline"
                 size={14}
-                color={viewMode === 'review_queue' ? Colors.black : Colors.gray[400]}
+                color={viewMode === 'review_queue' ? '#ffffff' : Colors.mutedText}
               />
               <Text style={[styles.viewSwitchText, viewMode === 'review_queue' && styles.viewSwitchTextActive]}>
                 Review Queue
@@ -435,7 +436,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
                     <Ionicons
                       name={option.icon as any}
                       size={12}
-                      color={sortBy === option.key ? Colors.black : Colors.gray[400]}
+                      color={sortBy === option.key ? '#ffffff' : Colors.mutedText}
                     />
                     <Text style={[styles.sortChipText, sortBy === option.key && styles.sortChipTextActive]}>
                       {option.label}
@@ -536,7 +537,11 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
         </View>
       )}
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: bottomBarInset }}
+        showsVerticalScrollIndicator={false}
+      >
         {loading ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Loading...</Text>
@@ -783,7 +788,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark,
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -791,7 +796,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.hairline,
     backgroundColor: Colors.panel,
     gap: Spacing.md,
   },
@@ -804,7 +809,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   title: {
     fontSize: FontSizes.xl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
   },
   subtitle: {
     fontSize: FontSizes.sm,
@@ -836,16 +841,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   viewSwitchButtonActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   viewSwitchText: {
-    color: Colors.gray[400],
+    color: Colors.mutedText,
     fontSize: FontSizes.xs,
     fontWeight: '600',
   },
   viewSwitchTextActive: {
-    color: Colors.black,
+    color: '#ffffff',
   },
   searchBar: {
     flexDirection: 'row',
@@ -912,15 +917,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginRight: Spacing.xs,
   },
   sortChipActive: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   sortChipText: {
     fontSize: FontSizes.xs,
-    color: Colors.gray[400],
+    color: Colors.mutedText,
   },
   sortChipTextActive: {
-    color: Colors.black,
+    color: '#ffffff',
     fontWeight: '600',
   },
   filterButton: {
@@ -933,13 +938,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.border,
   },
   filterButtonActive: {
-    borderColor: Colors.accent,
+    borderColor: Colors.primary,
   },
   filterBadge: {
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -948,7 +953,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   filterBadgeText: {
     fontSize: 10,
-    color: Colors.black,
+    color: '#ffffff',
     fontWeight: 'bold',
   },
   filtersPanel: {
@@ -1018,7 +1023,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   emptyTitle: {
     fontSize: FontSizes.lg,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
     marginTop: Spacing.lg,
   },
   emptyText: {
@@ -1029,15 +1034,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   startButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    borderRadius: 8,
+    borderRadius: Radii.md,
     marginTop: Spacing.xl,
   },
   startButtonText: {
-    color: Colors.black,
-    fontWeight: '600',
+    color: '#ffffff',
+    fontWeight: '700',
     fontSize: FontSizes.md,
   },
   clearButton: {
@@ -1239,8 +1244,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: 'rgba(0, 255, 136, 0.1)',
   },
   progressCircleCurrent: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accent,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   progressDot: {
     width: 4,

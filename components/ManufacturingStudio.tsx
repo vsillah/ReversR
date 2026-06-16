@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, FontSizes, Spacing } from '../constants/theme';
+import { AppColors, FontSizes, Spacing, Radii, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { ThreeDSceneDescriptor } from '../hooks/useGemini';
 import {
@@ -267,7 +267,7 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
     <View style={styles.panel}>
       <View style={styles.header}>
         <View style={styles.headerIcon}>
-          <Ionicons name="cube-outline" size={20} color={Colors.black} />
+          <Ionicons name="cube-outline" size={20} color={Colors.primary} />
         </View>
         <View style={styles.headerText}>
           <Text style={styles.title}>Manufacturing Studio</Text>
@@ -416,8 +416,8 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
 
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   panel: {
-    backgroundColor: Colors.panel,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radii.lg,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: Spacing.lg,
@@ -430,23 +430,23 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.md,
   },
   headerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+    width: 40,
+    height: 40,
+    borderRadius: Radii.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primarySoft,
   },
   headerText: {
     flex: 1,
   },
   title: {
-    color: Colors.white,
+    color: Colors.text,
+    fontFamily: Fonts.heading,
     fontSize: FontSizes.lg,
-    fontWeight: 'bold',
   },
   subtitle: {
-    color: Colors.gray[500],
+    color: Colors.dimText,
     fontSize: FontSizes.xs,
     marginTop: 2,
   },
@@ -580,7 +580,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flex: 1,
   },
   datumReference: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
   },
@@ -616,7 +616,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontFamily: 'monospace',
   },
   selectedPartTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.md,
     fontWeight: 'bold',
     marginBottom: Spacing.xs,
@@ -660,7 +660,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flex: 1,
   },
   measurementPart: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
   },
@@ -721,7 +721,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.md,
   },
   featureTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
     marginBottom: Spacing.xs,
@@ -749,7 +749,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginTop: Spacing.sm,
   },
   treatmentTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
     marginBottom: 2,
@@ -776,7 +776,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.sm,
   },
   processStage: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
     textTransform: 'capitalize',

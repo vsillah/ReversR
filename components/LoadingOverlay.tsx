@@ -8,7 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
 export type LoadingPhase = 'scan' | 'reverse' | 'design' | 'build';
@@ -27,7 +27,7 @@ interface Props {
 }
 
 const getPhaseConfig = (Colors: AppColors): Record<LoadingPhase, { icon: keyof typeof Ionicons.glyphMap; color: string }> => ({
-  scan: { icon: 'scan-outline', color: Colors.blue[500] },
+  scan: { icon: 'scan-outline', color: Colors.primary },
   reverse: { icon: 'repeat-sharp', color: Colors.secondary },
   design: { icon: 'color-palette-outline', color: Colors.green[400] },
   build: { icon: 'construct-outline', color: Colors.orange[300] },
@@ -190,10 +190,12 @@ export default function LoadingOverlay({ visible, phase, currentStep, steps }: P
   );
 }
 
-const createStyles = (Colors: AppColors) => StyleSheet.create({
+const createStyles = (Colors: AppColors) => {
+  const shadows = makeShadows(Colors);
+  return StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(0, 0, 0, 0.85)' : 'rgba(248, 250, 252, 0.92)',
+    backgroundColor: Colors.scrim,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.lg,
@@ -205,8 +207,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     maxWidth: 300,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 12,
+    borderRadius: Radii.xl,
     backgroundColor: Colors.panel,
+    ...shadows.floating,
   },
   iconContainer: {
     width: 100,
@@ -220,7 +223,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   stepText: {
     fontSize: FontSizes.md,
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
     textAlign: 'center',
     marginBottom: Spacing.lg,
   },
@@ -270,4 +273,5 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
-});
+  });
+};
