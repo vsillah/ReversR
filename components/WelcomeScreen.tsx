@@ -331,18 +331,19 @@ export default function WelcomeScreen({
             { transform: [{ translateY: heroTranslate }, { scale: heroScale }] },
           ]}
         >
+          <HeroBackdrop radius={0} />
           {HERO_IMAGE ? (
-            <ImageBackground source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover">
-              <LinearGradient
-                colors={['rgba(8,9,12,0.10)', 'rgba(8,9,12,0.55)', 'rgba(8,9,12,0.94)']}
-                locations={[0, 0.5, 1]}
-                style={StyleSheet.absoluteFill}
-              />
-            </ImageBackground>
-          ) : (
-            <HeroBackdrop radius={0} />
-          )}
+            <Image source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          ) : null}
         </Animated.View>
+        {onImage ? (
+          <LinearGradient
+            colors={['rgba(8,9,12,0)', 'rgba(8,9,12,0.12)', 'rgba(8,9,12,0.72)', 'rgba(8,9,12,0.95)']}
+            locations={[0, 0.42, 0.78, 1]}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
+        ) : null}
         <View style={styles.heroContent}>
           <Text style={[styles.heroTitle, onImage && styles.heroTextOnImage]}>
             Reconstruct.{'\n'}Restore.{'\n'}Rebuild with{'\n'}
@@ -689,7 +690,7 @@ const createStyles = (Colors: AppColors) => {
     },
     hero: {
       position: 'relative',
-      minHeight: 340,
+      minHeight: 400,
       borderRadius: Radii.xl,
       borderWidth: 1,
       borderColor: Colors.hairline,
