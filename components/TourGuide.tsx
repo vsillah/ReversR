@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, FontSizes, Spacing } from '../constants/theme';
+import { AppColors, FontSizes, Spacing, Radii, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
 export type TourTargetId =
@@ -305,7 +305,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     maxWidth: 440,
     maxHeight: '78%',
     padding: Spacing.md,
-    borderRadius: 8,
+    borderRadius: Radii.lg,
     borderWidth: 1,
     borderColor: Colors.accent,
     backgroundColor: Colors.mode === 'dark' ? '#101816' : Colors.gray[50],
@@ -341,7 +341,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flex: 1,
     color: Colors.accent,
     fontSize: FontSizes.xs,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     textTransform: 'uppercase',
   },
   stepCounter: {
@@ -358,9 +358,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.lg,
-    fontWeight: '800',
+    fontFamily: Fonts.heading,
   },
   totalCounter: {
     color: Colors.gray[400],
@@ -380,7 +380,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: Colors.accent,
   },
   body: {
-    color: Colors.gray[300],
+    color: Colors.mutedText,
+    fontFamily: Fonts.regular,
     fontSize: FontSizes.sm,
     lineHeight: 18,
   },
@@ -409,7 +410,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flex: 1,
   },
   mockTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.xs,
     fontWeight: '900',
   },
@@ -433,7 +434,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   mockButtonText: {
     color: Colors.black,
     fontSize: FontSizes.xs,
-    fontWeight: '900',
+    fontFamily: Fonts.extrabold,
   },
   mockSecondaryButton: {
     minHeight: 34,
@@ -458,7 +459,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: 2,
   },
   manualTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.xs,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -549,7 +550,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   actionButtonText: {
     color: Colors.accent,
     fontSize: FontSizes.xs,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
   },
   actionButtonTextDisabled: {
     color: Colors.gray[500],
@@ -573,7 +574,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   primaryButtonText: {
     color: Colors.black,
     fontSize: FontSizes.xs,
-    fontWeight: '900',
+    fontFamily: Fonts.extrabold,
   },
   primaryButtonTextLocked: {
     color: Colors.gray[500],
