@@ -344,12 +344,16 @@ export default function WelcomeScreen({
         >
           <HeroBackdrop radius={0} />
           {HERO_IMAGE ? (
-            <Image source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover" />
+            <Image
+              source={HERO_IMAGE}
+              style={[StyleSheet.absoluteFill, { transform: [{ scale: 1.14 }, { translateY: -18 }] }]}
+              resizeMode="cover"
+            />
           ) : null}
         </Animated.View>
         <LinearGradient
-          colors={['rgba(8,9,12,0.30)', 'rgba(8,9,12,0)', 'rgba(8,9,12,0.45)', 'rgba(8,9,12,0.92)', 'rgba(8,9,12,0.99)']}
-          locations={[0, 0.28, 0.6, 0.86, 1]}
+          colors={['rgba(8,9,12,0.20)', 'rgba(8,9,12,0)', 'rgba(8,9,12,0.10)', 'rgba(8,9,12,0.66)', 'rgba(8,9,12,0.98)']}
+          locations={[0, 0.18, 0.46, 0.76, 1]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
@@ -403,17 +407,38 @@ export default function WelcomeScreen({
               </View>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity
-              style={styles.cpStartButton}
-              activeOpacity={0.9}
-              onPress={() => { setMenuOpen(false); onStart(); }}
-              accessibilityRole="button"
-              accessibilityLabel="Start new machine reconstruction"
-            >
-              <Ionicons name="scan-outline" size={18} color={Colors.background} />
-              <Text style={styles.cpStartText}>Start a reconstruction</Text>
-              <Ionicons name="arrow-forward" size={18} color={Colors.background} />
-            </TouchableOpacity>
+            <View style={styles.cpEmptyCard}>
+              <View style={styles.cpTopRow}>
+                <View style={styles.cpIcon}>
+                  <Ionicons name="sparkles-outline" size={20} color={Colors.accent} />
+                </View>
+                <View style={styles.cpHead}>
+                  <Text style={styles.cpOverline}>Get started</Text>
+                  <Text style={styles.cpName} numberOfLines={1}>Your first reconstruction</Text>
+                </View>
+              </View>
+              <Text style={styles.cpEmptySub}>Scan a machine, describe it, or try a sample build.</Text>
+              <View style={styles.cpQuickRow}>
+                {([
+                  { icon: 'camera-outline' as const, label: 'Scan', hint: 'Use camera' },
+                  { icon: 'create-outline' as const, label: 'Describe', hint: 'Type details' },
+                  { icon: 'cube-outline' as const, label: 'Sample', hint: 'Try a demo' },
+                ]).map(action => (
+                  <TouchableOpacity
+                    key={action.label}
+                    style={styles.cpQuickTile}
+                    activeOpacity={0.85}
+                    onPress={() => { setMenuOpen(false); onStart(); }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Start new machine reconstruction — ${action.label}, ${action.hint}`}
+                  >
+                    <Ionicons name={action.icon} size={20} color={Colors.accent} />
+                    <Text style={styles.cpQuickLabel}>{action.label}</Text>
+                    <Text style={styles.cpQuickHint}>{action.hint}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
           )}
         </View>
       </View>
@@ -520,9 +545,22 @@ export default function WelcomeScreen({
             </TouchableOpacity>
           ))
         ) : (
-          <View style={styles.projectEmpty}>
-            <Text style={styles.projectEmptyText}>No projects yet — start your first reconstruction.</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.projectEmpty}
+            activeOpacity={0.85}
+            onPress={() => { setMenuOpen(false); onStart(); }}
+            accessibilityRole="button"
+            accessibilityLabel="Start new machine reconstruction"
+          >
+            <View style={styles.projectEmptyIcon}>
+              <Ionicons name="cube-outline" size={20} color={Colors.dimText} />
+            </View>
+            <View style={styles.projectEmptyTextWrap}>
+              <Text style={styles.projectEmptyTitle}>No projects yet</Text>
+              <Text style={styles.projectEmptyText}>Your saved reconstructions will appear here.</Text>
+            </View>
+            <Text style={styles.listHeaderAction}>Start</Text>
+          </TouchableOpacity>
         )}
       </Card>
 
@@ -729,7 +767,7 @@ const createStyles = (Colors: AppColors) => {
     },
     hero: {
       position: 'relative',
-      minHeight: 520,
+      minHeight: 560,
       borderRadius: Radii.xl,
       borderWidth: 1,
       borderColor: 'rgba(255,255,255,0.08)',
@@ -865,20 +903,44 @@ const createStyles = (Colors: AppColors) => {
       fontSize: FontSizes.sm,
       color: Colors.accent,
     },
-    cpStartButton: {
+    cpEmptyCard: {
       marginTop: Spacing.md,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      padding: Spacing.md,
+      borderRadius: Radii.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.14)',
+      backgroundColor: 'rgba(12,15,20,0.66)',
       gap: Spacing.sm,
-      paddingVertical: 15,
-      borderRadius: Radii.md,
-      backgroundColor: Colors.accent,
     },
-    cpStartText: {
-      fontFamily: Fonts.bold,
-      fontSize: FontSizes.md,
-      color: Colors.background,
+    cpEmptySub: {
+      fontSize: FontSizes.sm,
+      color: 'rgba(255,255,255,0.7)',
+      lineHeight: 18,
+    },
+    cpQuickRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginTop: 2,
+    },
+    cpQuickTile: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 3,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.xs,
+      borderRadius: Radii.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.12)',
+      backgroundColor: 'rgba(255,255,255,0.04)',
+    },
+    cpQuickLabel: {
+      fontFamily: Fonts.semibold,
+      fontSize: FontSizes.sm,
+      color: '#ffffff',
+    },
+    cpQuickHint: {
+      fontSize: 10,
+      color: 'rgba(255,255,255,0.55)',
     },
     updateBanner: {
       width: '100%',
@@ -1032,13 +1094,35 @@ const createStyles = (Colors: AppColors) => {
       borderRadius: Radii.pill,
     },
     projectEmpty: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
       paddingHorizontal: Spacing.md,
       paddingBottom: Spacing.md,
+      paddingTop: Spacing.xs,
+    },
+    projectEmptyIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: Radii.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.elevated,
+    },
+    projectEmptyTextWrap: {
+      flex: 1,
+      minWidth: 0,
+      gap: 1,
+    },
+    projectEmptyTitle: {
+      fontFamily: Fonts.semibold,
+      fontSize: FontSizes.md,
+      color: Colors.text,
     },
     projectEmptyText: {
-      fontSize: FontSizes.sm,
+      fontSize: FontSizes.xs,
       color: Colors.dimText,
-      lineHeight: 19,
+      lineHeight: 16,
     },
     twoColRow: {
       flexDirection: 'row',
