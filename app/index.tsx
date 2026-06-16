@@ -12,7 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { LinearGradient } from "expo-linear-gradient";
 import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
@@ -1844,11 +1844,10 @@ const createStyles = (Colors: AppColors) => {
     minWidth: 0,
   },
   title: {
-    fontFamily: "monospace",
+    fontFamily: Fonts.display,
     fontSize: FontSizes.xl,
-    fontWeight: "bold",
     color: Colors.text,
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   titleAccent: {
     color: Colors.accent,
@@ -2005,15 +2004,15 @@ const createStyles = (Colors: AppColors) => {
     gap: 2,
   },
   currentStepOverline: {
+    fontFamily: Fonts.bold,
     fontSize: 11,
-    fontWeight: '700',
     letterSpacing: 1.1,
     textTransform: 'uppercase',
     color: Colors.accent,
   },
   currentStepName: {
+    fontFamily: Fonts.display,
     fontSize: FontSizes.xl,
-    fontWeight: '800',
     color: Colors.text,
   },
   currentStepHint: {

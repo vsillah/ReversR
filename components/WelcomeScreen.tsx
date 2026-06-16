@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
+import { AppColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { Badge, Card, HeroBackdrop, HorizontalStepper } from './ui';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
@@ -594,18 +594,17 @@ const createStyles = (Colors: AppColors) => {
       minWidth: 0,
     },
     brandWordmark: {
-      fontFamily: 'monospace',
+      fontFamily: Fonts.display,
       fontSize: 20,
-      fontWeight: 'bold',
       color: Colors.text,
-      letterSpacing: 2,
+      letterSpacing: 1,
     },
     brandWordmarkAccent: {
       color: Colors.accent,
     },
     brandSubtitle: {
+      fontFamily: Fonts.bold,
       fontSize: 9,
-      fontWeight: '700',
       letterSpacing: 2,
       color: Colors.dimText,
       marginTop: 1,
@@ -658,8 +657,8 @@ const createStyles = (Colors: AppColors) => {
     },
     avatarName: {
       color: Colors.text,
+      fontFamily: Fonts.semibold,
       fontSize: FontSizes.sm,
-      fontWeight: '700',
       flexShrink: 1,
     },
     menuPanel: {
@@ -704,9 +703,10 @@ const createStyles = (Colors: AppColors) => {
       gap: Spacing.sm,
     },
     heroTitle: {
+      fontFamily: Fonts.display,
       fontSize: 33,
-      fontWeight: '800',
       lineHeight: 39,
+      letterSpacing: -0.5,
       color: Colors.text,
     },
     heroTitleAccent: {
@@ -757,8 +757,8 @@ const createStyles = (Colors: AppColors) => {
       color: 'rgba(255,255,255,0.6)',
     },
     currentProjectName: {
+      fontFamily: Fonts.bold,
       fontSize: FontSizes.md,
-      fontWeight: '700',
       color: '#ffffff',
     },
     currentProjectMeta: {
@@ -909,8 +909,8 @@ const createStyles = (Colors: AppColors) => {
       gap: 1,
     },
     projectName: {
+      fontFamily: Fonts.semibold,
       fontSize: FontSizes.md,
-      fontWeight: '700',
       color: Colors.text,
     },
     projectMeta: {
@@ -1012,13 +1012,13 @@ const createStyles = (Colors: AppColors) => {
       gap: Spacing.sm,
     },
     creditValue: {
+      fontFamily: Fonts.extrabold,
       fontSize: 30,
-      fontWeight: '800',
       color: Colors.text,
     },
     creditValueTotal: {
+      fontFamily: Fonts.bold,
       fontSize: FontSizes.lg,
-      fontWeight: '700',
       color: Colors.dimText,
     },
     creditReset: {

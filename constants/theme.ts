@@ -220,15 +220,28 @@ export const Radii = {
   pill: 999,
 };
 
+// Bespoke type: Space Grotesk for display/headings, Inter for body/labels.
+// Weight is carried by the font file (custom fonts don't synthesize weight reliably).
+export const Fonts = {
+  display: 'SpaceGrotesk_700Bold',
+  displaySemi: 'SpaceGrotesk_600SemiBold',
+  heading: 'SpaceGrotesk_600SemiBold',
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semibold: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+  extrabold: 'Inter_800ExtraBold',
+};
+
 export const Typography = {
-  display: { fontSize: 30, fontWeight: '700' as const, lineHeight: 36 },
-  title: { fontSize: 22, fontWeight: '700' as const, lineHeight: 28 },
-  heading: { fontSize: 18, fontWeight: '700' as const, lineHeight: 24 },
-  bodyStrong: { fontSize: 15, fontWeight: '600' as const, lineHeight: 22 },
-  body: { fontSize: 15, fontWeight: '400' as const, lineHeight: 22 },
-  label: { fontSize: 13, fontWeight: '600' as const, lineHeight: 18 },
-  caption: { fontSize: 12, fontWeight: '500' as const, lineHeight: 16 },
-  overline: { fontSize: 11, fontWeight: '700' as const, lineHeight: 14, letterSpacing: 1.1 },
+  display: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.5 },
+  title: { fontFamily: Fonts.display, fontSize: 22, lineHeight: 28, letterSpacing: -0.3 },
+  heading: { fontFamily: Fonts.heading, fontSize: 18, lineHeight: 24, letterSpacing: -0.2 },
+  bodyStrong: { fontFamily: Fonts.semibold, fontSize: 15, lineHeight: 22 },
+  body: { fontFamily: Fonts.regular, fontSize: 15, lineHeight: 22 },
+  label: { fontFamily: Fonts.semibold, fontSize: 13, lineHeight: 18 },
+  caption: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16 },
+  overline: { fontFamily: Fonts.bold, fontSize: 11, lineHeight: 14, letterSpacing: 1.1 },
 };
 
 type ShadowPreset = {

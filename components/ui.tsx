@@ -19,7 +19,7 @@ import Svg, {
   Path,
   Stop,
 } from 'react-native-svg';
-import { AppColors, Radii, Spacing, Typography, makeShadows } from '../constants/theme';
+import { AppColors, Fonts, Radii, Spacing, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -43,7 +43,7 @@ const toneColors = (colors: AppColors, tone: Tone): { fg: string; bg: string; bo
   }
 };
 
-/** Elevated surface container with subtle border + shadow. */
+/** Material surface: gradient fill (lit from top) + 1px top highlight + soft shadow. */
 export function Card({
   children,
   style,
@@ -63,17 +63,39 @@ export function Card({
 }) {
   const { colors } = useAppTheme();
   const shadows = makeShadows(colors);
-  const base: ViewStyle = {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: tone === 'highlight' ? colors.primary : colors.border,
+  const isHighlight = tone === 'highlight';
+
+  const frame: ViewStyle = {
     borderRadius: Radii.lg,
+    borderWidth: 1,
+    borderColor: isHighlight ? colors.primary : colors.border,
+    overflow: 'hidden',
     padding: padded ? Spacing.md : 0,
     ...shadows.card,
   };
-  if (tone === 'highlight') {
-    base.backgroundColor = colors.primarySoft;
-  }
+
+  const gradientColors = (isHighlight
+    ? colors.mode === 'dark'
+      ? ['rgba(59,130,246,0.20)', 'rgba(59,130,246,0.06)']
+      : ['rgba(37,99,235,0.12)', 'rgba(37,99,235,0.03)']
+    : [colors.elevated, colors.surface]) as [string, string, ...string[]];
+
+  const highlightColor = colors.mode === 'dark'
+    ? 'rgba(255,255,255,0.10)'
+    : 'rgba(255,255,255,0.7)';
+
+  const layers = (
+    <>
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
+        style={StyleSheetAbsoluteFill}
+      />
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: highlightColor }} />
+    </>
+  );
+
   if (onPress) {
     return (
       <TouchableOpacity
@@ -82,14 +104,16 @@ export function Card({
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         testID={testID}
-        style={[base, style]}
+        style={[frame, style]}
       >
+        {layers}
         {children}
       </TouchableOpacity>
     );
   }
   return (
-    <View style={[base, style]} accessibilityLabel={accessibilityLabel} testID={testID}>
+    <View style={[frame, style]} accessibilityLabel={accessibilityLabel} testID={testID}>
+      {layers}
       {children}
     </View>
   );
@@ -129,7 +153,7 @@ export function Badge({
     >
       {dot ? <View style={{ width: 7, height: 7, borderRadius: 999, backgroundColor: t.fg }} /> : null}
       {icon ? <Ionicons name={icon} size={12} color={t.fg} /> : null}
-      <Text style={{ color: t.fg, fontSize: 11, fontWeight: '700', letterSpacing: 0.3 }}>{label}</Text>
+      <Text style={{ color: t.fg, fontFamily: Fonts.bold, fontSize: 11, letterSpacing: 0.3 }}>{label}</Text>
     </View>
   );
 }
@@ -206,7 +230,7 @@ export function StatTile({
         {icon ? <Ionicons name={icon} size={14} color={tone === 'neutral' ? colors.dimText : t.fg} /> : null}
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3 }}>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: tone === 'neutral' ? colors.text : t.fg }}>
+        <Text style={{ fontSize: 22, fontFamily: Fonts.extrabold, color: tone === 'neutral' ? colors.text : t.fg }}>
           {value}
         </Text>
         {unit ? <Text style={{ ...Typography.caption, color: colors.dimText }}>{unit}</Text> : null}
@@ -271,7 +295,7 @@ export function PrimaryButton({
       ) : (
         <>
           {icon && iconPosition === 'left' ? <Ionicons name={icon} size={18} color={colors.onPrimary} /> : null}
-          <Text style={{ color: colors.onPrimary, fontSize: 15, fontWeight: '700', letterSpacing: 0.3 }}>{label}</Text>
+          <Text style={{ color: colors.onPrimary, fontFamily: Fonts.bold, fontSize: 15, letterSpacing: 0.3 }}>{label}</Text>
           {icon && iconPosition === 'right' ? <Ionicons name={icon} size={18} color={colors.onPrimary} /> : null}
         </>
       )}
@@ -331,7 +355,7 @@ export function SecondaryButton({
       ]}
     >
       {icon && iconPosition === 'left' ? <Ionicons name={icon} size={18} color={fg} /> : null}
-      <Text style={[{ color: fg, fontSize: 15, fontWeight: '700', letterSpacing: 0.3 }, textStyle]}>{label}</Text>
+      <Text style={[{ color: fg, fontFamily: Fonts.bold, fontSize: 15, letterSpacing: 0.3 }, textStyle]}>{label}</Text>
       {icon && iconPosition === 'right' ? <Ionicons name={icon} size={18} color={fg} /> : null}
     </TouchableOpacity>
   );
@@ -394,7 +418,7 @@ export function StepRow({
         <Text
           style={{
             fontSize: 16,
-            fontWeight: '700',
+            fontFamily: Fonts.heading,
             color: isLocked ? colors.dimText : colors.text,
           }}
           numberOfLines={1}
@@ -515,7 +539,7 @@ export function HorizontalStepper({
               {isComplete ? (
                 <Ionicons name="checkmark" size={18} color={colors.background} />
               ) : (
-                <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontWeight: '800', fontSize: 14 }}>
+                <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontFamily: Fonts.bold, fontSize: 14 }}>
                   {step}
                 </Text>
               )}
@@ -523,7 +547,7 @@ export function HorizontalStepper({
             <Text
               style={{
                 fontSize: 11,
-                fontWeight: '800',
+                fontFamily: Fonts.bold,
                 letterSpacing: 0.5,
                 textTransform: 'uppercase',
                 color: isActive ? colors.text : colors.dimText,
@@ -640,7 +664,7 @@ export function GradientButton({
         }}
       >
         {icon && iconPosition === 'left' ? <Ionicons name={icon} size={18} color="#ffffff" /> : null}
-        <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 }}>{label}</Text>
+        <Text style={{ color: '#ffffff', fontFamily: Fonts.bold, fontSize: 16, letterSpacing: 0.3 }}>{label}</Text>
         {icon && iconPosition === 'right' ? <Ionicons name={icon} size={18} color="#ffffff" /> : null}
       </LinearGradient>
     </TouchableOpacity>
@@ -703,7 +727,7 @@ export function ScoreRing({
         />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center' }}>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text }}>{value}</Text>
+        <Text style={{ fontSize: 22, fontFamily: Fonts.extrabold, color: colors.text }}>{value}</Text>
         {caption ? (
           <Text style={{ fontSize: 10, fontWeight: '700', letterSpacing: 0.6, color: colors.dimText, textTransform: 'uppercase' }}>
             {caption}
