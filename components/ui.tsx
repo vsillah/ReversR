@@ -788,7 +788,7 @@ const StyleSheetAbsoluteFill: ViewStyle = {
   bottom: 0,
 };
 
-export type BottomTab = 'home' | 'projects' | 'more';
+export type BottomTab = 'home' | 'projects' | 'tour' | 'more';
 
 /** Persistent bottom navigation bar with a centered raised gradient action. */
 export function BottomTabBar({
@@ -796,6 +796,7 @@ export function BottomTabBar({
   onHome,
   onProjects,
   onNew,
+  onTour,
   onMore,
   bottomInset = 0,
 }: {
@@ -803,6 +804,7 @@ export function BottomTabBar({
   onHome: () => void;
   onProjects: () => void;
   onNew: () => void;
+  onTour: () => void;
   onMore: () => void;
   bottomInset?: number;
 }) {
@@ -853,6 +855,7 @@ export function BottomTabBar({
         {tab('projects', 'Projects', 'albums-outline', 'albums', onProjects)}
 
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          {/* center action */}
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={onNew}
@@ -882,6 +885,7 @@ export function BottomTabBar({
           </TouchableOpacity>
         </View>
 
+        {tab('tour', 'Tour', 'compass-outline', 'compass', onTour)}
         {tab('more', 'More', 'ellipsis-horizontal', 'ellipsis-horizontal', onMore)}
       </View>
     </View>

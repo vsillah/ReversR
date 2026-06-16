@@ -1433,6 +1433,7 @@ export default function HomeScreen() {
           onHome={goHome}
           onProjects={openHistory}
           onNew={handleStartNew}
+          onTour={startTour}
           onMore={() => openSettings('account')}
           bottomInset={safeAreaInsets.bottom}
         />
@@ -1455,6 +1456,7 @@ export default function HomeScreen() {
           onHome={goHome}
           onProjects={openHistory}
           onNew={handleStartNew}
+          onTour={startTour}
           onMore={() => openSettings('account')}
           bottomInset={safeAreaInsets.bottom}
         />
@@ -1799,6 +1801,7 @@ export default function HomeScreen() {
         onHome={goHome}
         onProjects={openHistory}
         onNew={handleStartNew}
+        onTour={startTour}
         onMore={() => openSettings('account')}
         bottomInset={safeAreaInsets.bottom}
       />
