@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { Badge, Card, GradientButton, HeroBackdrop, ScoreRing, SectionHeader, StatTile, StepRow } from './ui';
@@ -28,9 +29,9 @@ const staticAppConfig = require('../app.json') as {
   };
 };
 
-// Drop a hero render at assets/hero-machine.png and set this to
-// require('../assets/hero-machine.png') to swap the blueprint backdrop for art.
-const HERO_IMAGE: number | null = null;
+// Selected Canva hero render. Swap the require path to use a different file in
+// assets/hero/canva/. Set to null to fall back to the blueprint backdrop.
+const HERO_IMAGE: number | null = require('../assets/hero/canva/hero-heavy-gearbox-pump-assembly.png');
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -136,6 +137,7 @@ export default function WelcomeScreen({
   const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
   const buildLabel = getInstalledBuildLabel();
   const greeting = greetingForHour(new Date().getHours());
+  const onImage = HERO_IMAGE != null;
   const footerLabel = [
     `Version ${installedAppVersion}`,
     buildLabel,
@@ -385,7 +387,11 @@ export default function WelcomeScreen({
         >
           {HERO_IMAGE ? (
             <ImageBackground source={HERO_IMAGE} style={StyleSheet.absoluteFill} resizeMode="cover">
-              <View style={styles.heroImageScrim} />
+              <LinearGradient
+                colors={['rgba(8,9,12,0.10)', 'rgba(8,9,12,0.55)', 'rgba(8,9,12,0.94)']}
+                locations={[0, 0.5, 1]}
+                style={StyleSheet.absoluteFill}
+              />
             </ImageBackground>
           ) : (
             <HeroBackdrop radius={0} />
@@ -393,9 +399,9 @@ export default function WelcomeScreen({
         </Animated.View>
         <View style={styles.heroContent}>
           <Badge label="AI-assisted rebuild" tone="primary" icon="sparkles-outline" />
-          <Text style={styles.heroHello}>{greeting}, {userDisplayName}</Text>
-          <Text style={styles.heroTitle}>Let&apos;s rebuild</Text>
-          <Text style={styles.heroBody}>
+          <Text style={[styles.heroHello, onImage && styles.heroHelloOnImage]}>{greeting}, {userDisplayName}</Text>
+          <Text style={[styles.heroTitle, onImage && styles.heroTextOnImage]}>Let&apos;s rebuild</Text>
+          <Text style={[styles.heroBody, onImage && styles.heroBodyOnImage]}>
             Guided by intelligent steps. Backed by proven data — from scan to BOM to 3D handoff.
           </Text>
           <GradientButton
@@ -682,7 +688,7 @@ const createStyles = (Colors: AppColors) => {
     },
     hero: {
       position: 'relative',
-      minHeight: 280,
+      minHeight: 340,
       borderRadius: Radii.xl,
       borderWidth: 1,
       borderColor: Colors.hairline,
@@ -690,10 +696,6 @@ const createStyles = (Colors: AppColors) => {
       marginBottom: Spacing.lg,
       justifyContent: 'flex-end',
       ...shadows.elevated,
-    },
-    heroImageScrim: {
-      ...StyleSheet.absoluteFill,
-      backgroundColor: Colors.mode === 'dark' ? 'rgba(6,8,12,0.55)' : 'rgba(8,12,20,0.28)',
     },
     heroContent: {
       padding: Spacing.lg,
@@ -704,16 +706,25 @@ const createStyles = (Colors: AppColors) => {
       color: Colors.mutedText,
       marginTop: Spacing.xs,
     },
+    heroHelloOnImage: {
+      color: 'rgba(255,255,255,0.82)',
+    },
     heroTitle: {
       fontSize: 34,
       fontWeight: '800',
       lineHeight: 40,
       color: Colors.text,
     },
+    heroTextOnImage: {
+      color: '#ffffff',
+    },
     heroBody: {
       ...Typography.body,
       color: Colors.mutedText,
       maxWidth: '94%',
+    },
+    heroBodyOnImage: {
+      color: 'rgba(255,255,255,0.88)',
     },
     heroButton: {
       marginTop: Spacing.md,
