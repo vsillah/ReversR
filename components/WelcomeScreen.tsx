@@ -11,10 +11,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { AppColors, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { Badge, Card, HeroBackdrop, HorizontalStepper, SectionHeader, StatTile } from './ui';
+import { Badge, Card, HeroBackdrop, HorizontalStepper } from './ui';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
+import { useCommercialization } from '../hooks/useCommercialization';
+import { formatResetCountdown } from '../utils/commercialUsage';
 import {
   formatReleaseDate,
   getInstalledBuildLabel,
@@ -85,12 +88,6 @@ const releaseDate = typeof releaseExtra.releaseDate === 'string'
     ? staticReleaseExtra.releaseDate
     : undefined;
 
-const greetingForHour = (hour: number): string => {
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-};
-
 const relativeTime = (iso: string): string => {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return '';
@@ -135,10 +132,8 @@ export default function WelcomeScreen({
     'error',
   ].includes(updateCoordinator.status);
   const styles = createStyles(Colors);
-  const hasMenuActions = Boolean(onHistory || onSettings || onTour);
   const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
   const buildLabel = getInstalledBuildLabel();
-  const greeting = greetingForHour(new Date().getHours());
   const onImage = HERO_IMAGE != null;
   const footerLabel = [
     `Version ${installedAppVersion}`,
@@ -154,39 +149,20 @@ export default function WelcomeScreen({
     return () => { mounted = false; };
   }, []);
 
-  const stats = React.useMemo(() => {
-    const total = recent.length;
-    const completed = recent.filter(item => item.phase >= 4).length;
-    return { total, completed, inProgress: total - completed };
-  }, [recent]);
-
   const currentProject = React.useMemo(
     () => recent.find(item => item.phase < 4) || recent[0] || null,
     [recent],
   );
 
-  const evidence = React.useMemo(() => recent.slice(0, 3).map(item => {
-    const approvals = item.reviewerApprovalRecords?.length || 0;
-    const hasBom = Boolean(item.bom);
-    const has3d = Boolean(item.threeDScene);
-    const verified = approvals > 0 || (hasBom && item.phase >= 4);
-    const artifact = approvals > 0
-      ? `${approvals} approval${approvals > 1 ? 's' : ''}`
-      : hasBom ? 'Bill of materials'
-        : has3d ? '3D scene set'
-          : `${PHASE_NAMES[Math.min(item.phase, 4) - 1]} in progress`;
-    return {
-      id: item.id,
-      title: reconstructionTitle(item),
-      artifact,
-      when: relativeTime(item.updatedAt || item.createdAt),
-      verified,
-      icon: (approvals > 0 ? 'shield-checkmark-outline'
-        : hasBom ? 'document-text-outline'
-          : has3d ? 'cube-outline'
-            : 'construct-outline') as keyof typeof Ionicons.glyphMap,
-    };
-  }), [recent]);
+  const { account } = useCommercialization();
+  const usage = account?.usage;
+  const creditUnlimited = usage?.unlimitedCredits ?? false;
+  const creditRemaining = usage?.remainingCredits ?? null;
+  const creditTotal = usage?.monthlyCredits ?? null;
+  const creditProgress = creditTotal && creditTotal > 0 && creditRemaining != null
+    ? Math.max(0, Math.min(1, creditRemaining / creditTotal))
+    : 0;
+  const creditResetLabel = usage?.resetAt ? formatResetCountdown(usage.resetAt) : null;
 
   const handleUpdateAction = React.useCallback(() => {
     if (updateCoordinator.status === 'ota-ready') {
@@ -222,47 +198,6 @@ export default function WelcomeScreen({
     outputRange: [1.32, 1],
     extrapolateRight: 'clamp',
   });
-
-  const quickActions: Array<{
-    key: string;
-    label: string;
-    description: string;
-    icon: keyof typeof Ionicons.glyphMap;
-    onPress: () => void;
-    testID?: string;
-    accessibilityLabel: string;
-  }> = [];
-  if (onHistory) {
-    quickActions.push({
-      key: 'history',
-      label: 'Projects',
-      description: 'Resume saved reconstructions',
-      icon: 'time-outline',
-      onPress: () => handleMenuAction(onHistory),
-      accessibilityLabel: 'Open reconstruction history',
-    });
-  }
-  if (onTour) {
-    quickActions.push({
-      key: 'tour',
-      label: 'Guided tour',
-      description: 'Learn the four-phase flow',
-      icon: 'compass-outline',
-      onPress: () => handleMenuAction(onTour),
-      testID: 'reversr-tour-start',
-      accessibilityLabel: 'Start guided tour',
-    });
-  }
-  if (onSettings) {
-    quickActions.push({
-      key: 'settings',
-      label: 'Settings',
-      description: 'Account, AI, and inventory',
-      icon: 'settings-outline',
-      onPress: () => handleMenuAction(onSettings),
-      accessibilityLabel: 'Open settings',
-    });
-  }
 
   return (
     <Animated.ScrollView
@@ -444,12 +379,6 @@ export default function WelcomeScreen({
         </View>
       </View>
 
-      <View style={styles.statRow}>
-        <StatTile label="Projects" value={stats.total} icon="albums-outline" />
-        <StatTile label="In progress" value={stats.inProgress} tone="primary" icon="sync-outline" />
-        <StatTile label="Completed" value={stats.completed} tone="success" icon="checkmark-done-outline" />
-      </View>
-
       {showUpdateBanner && (
         <View
           style={[
@@ -516,69 +445,101 @@ export default function WelcomeScreen({
         </View>
       </Card>
 
-      <View style={styles.section}>
-        <SectionHeader
-          title="Evidence"
-          actionLabel={onHistory && recent.length > 0 ? 'View all' : undefined}
-          onAction={onHistory && recent.length > 0 ? () => handleMenuAction(onHistory) : undefined}
-        />
-        {evidence.length > 0 ? (
-          <View style={styles.evidenceList}>
-            {evidence.map(item => (
-              <Card key={item.id} style={styles.evidenceCard} padded={false} onPress={onHistory ? () => handleMenuAction(onHistory) : undefined} accessibilityLabel={`${item.title}, ${item.artifact}`}>
-                <View style={styles.evidenceInner}>
-                  <View style={styles.evidenceIcon}>
-                    <Ionicons name={item.icon} size={18} color={Colors.primary} />
-                  </View>
-                  <View style={styles.evidenceText}>
-                    <Text style={styles.evidenceTitle} numberOfLines={1}>{item.title}</Text>
-                    <Text style={styles.evidenceMeta} numberOfLines={1}>{item.artifact} · {item.when}</Text>
-                  </View>
-                  {item.verified
-                    ? <Badge label="Verified" tone="success" icon="checkmark-circle" />
-                    : <Badge label="In progress" tone="primary" dot />}
-                </View>
-              </Card>
-            ))}
+      <Card style={styles.listCard} padded={false}>
+        <View style={styles.listHeader}>
+          <View style={styles.listHeaderLeft}>
+            <Ionicons name="time-outline" size={18} color={Colors.accent} />
+            <Text style={styles.listHeaderTitle}>Recent Projects</Text>
           </View>
+          {onHistory && recent.length > 0 ? (
+            <TouchableOpacity onPress={() => handleMenuAction(onHistory)} accessibilityRole="button" accessibilityLabel="Open reconstruction history" hitSlop={8}>
+              <Text style={styles.listHeaderAction}>View All</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        {recent.length > 0 ? (
+          recent.slice(0, 3).map((item, idx) => (
+            <TouchableOpacity
+              key={item.id}
+              style={[styles.projectRow, idx > 0 && styles.projectRowDivider]}
+              onPress={() => handleMenuAction(onHistory)}
+              accessibilityRole="button"
+              accessibilityLabel={`${reconstructionTitle(item)}, ${PHASE_NAMES[Math.min(item.phase, 4) - 1]}`}
+            >
+              <View style={styles.projectThumb}>
+                <Ionicons name="cube-outline" size={18} color={Colors.mutedText} />
+              </View>
+              <View style={styles.projectText}>
+                <Text style={styles.projectName} numberOfLines={1}>{reconstructionTitle(item)}</Text>
+                <Text style={styles.projectMeta} numberOfLines={1}>
+                  {PHASE_NAMES[Math.min(item.phase, 4) - 1]} · {relativeTime(item.updatedAt || item.createdAt)}
+                </Text>
+              </View>
+              <View style={[styles.projectDot, {
+                backgroundColor: item.phase >= 4 ? Colors.success : item.phase >= 2 ? Colors.primary : Colors.dimText,
+              }]} />
+            </TouchableOpacity>
+          ))
         ) : (
-          <Card style={styles.emptyEvidence}>
-            <View style={styles.emptyEvidenceIcon}>
-              <Ionicons name="documents-outline" size={22} color={Colors.dimText} />
-            </View>
-            <Text style={styles.emptyEvidenceTitle}>No evidence yet</Text>
-            <Text style={styles.emptyEvidenceText}>
-              Reconstruction artifacts — BOMs, 3D scenes, and reviewer approvals — appear here as you build.
-            </Text>
-          </Card>
+          <View style={styles.projectEmpty}>
+            <Text style={styles.projectEmptyText}>No projects yet — start your first reconstruction.</Text>
+          </View>
         )}
+      </Card>
+
+      <View style={styles.twoColRow}>
+        {onTour ? (
+          <Card style={styles.infoCard} padded={false} onPress={() => handleMenuAction(onTour)} accessibilityLabel="Start guided tour" testID="reversr-tour-start">
+            <View style={styles.infoCardInner}>
+              <View style={styles.infoCardHeader}>
+                <Ionicons name="compass-outline" size={18} color={Colors.primary} />
+                <Ionicons name="chevron-forward" size={16} color={Colors.dimText} />
+              </View>
+              <Text style={styles.infoCardTitle}>Guided Tour</Text>
+              <Text style={styles.infoCardBody} numberOfLines={3}>Learn how ReversR accelerates your rebuild workflow.</Text>
+              <Text style={styles.infoCardLink}>Start Tour</Text>
+            </View>
+          </Card>
+        ) : null}
+
+        <Card style={styles.infoCard} padded={false} onPress={() => router.push('/support')} accessibilityLabel="Open workflow support resources">
+          <View style={styles.infoCardInner}>
+            <View style={styles.infoCardHeader}>
+              <Ionicons name="headset-outline" size={18} color={Colors.primary} />
+              <Ionicons name="chevron-forward" size={16} color={Colors.dimText} />
+            </View>
+            <Text style={styles.infoCardTitle}>Workflow Support</Text>
+            <Text style={styles.infoCardBody} numberOfLines={3}>Access documentation, policies, and help resources.</Text>
+            <Text style={styles.infoCardLink}>Browse Resources</Text>
+          </View>
+        </Card>
       </View>
 
-      {quickActions.length > 0 && (
-        <View style={styles.section}>
-          <SectionHeader title="Shortcuts" />
-          <View style={styles.shortcutGrid}>
-            {quickActions.map(action => (
-              <Card
-                key={action.key}
-                style={styles.shortcutCard}
-                padded={false}
-                onPress={action.onPress}
-                accessibilityLabel={action.accessibilityLabel}
-                testID={action.testID}
-              >
-                <View style={styles.shortcutInner}>
-                  <View style={styles.shortcutIcon}>
-                    <Ionicons name={action.icon} size={18} color={Colors.primary} />
-                  </View>
-                  <Text style={styles.shortcutLabel}>{action.label}</Text>
-                  <Text style={styles.shortcutDescription} numberOfLines={2}>{action.description}</Text>
-                </View>
-              </Card>
-            ))}
+      <Card style={styles.creditCard}>
+        <View style={styles.creditHeaderRow}>
+          <View style={styles.creditHeaderLeft}>
+            <View style={styles.creditIcon}>
+              <Ionicons name="hourglass-outline" size={18} color={Colors.accent} />
+            </View>
+            <Text style={styles.creditTitle}>Journey Credits</Text>
           </View>
+          <TouchableOpacity onPress={() => router.push('/account')} accessibilityRole="button" accessibilityLabel="Manage journey credits" style={styles.creditManageButton}>
+            <Text style={styles.creditManageText}>Manage Credits</Text>
+          </TouchableOpacity>
         </View>
-      )}
+        <View style={styles.creditValueRow}>
+          <Text style={styles.creditValue}>
+            {creditUnlimited ? '∞' : creditRemaining ?? '—'}
+            {!creditUnlimited && creditTotal != null ? <Text style={styles.creditValueTotal}> /{creditTotal}</Text> : null}
+          </Text>
+          {creditResetLabel ? <Text style={styles.creditReset}>{creditResetLabel}</Text> : null}
+        </View>
+        {!creditUnlimited ? (
+          <View style={styles.creditTrack}>
+            <View style={[styles.creditFill, { width: `${Math.round(creditProgress * 100)}%` }]} />
+          </View>
+        ) : null}
+      </Card>
 
       <Text
         style={styles.releaseFooter}
@@ -899,99 +860,183 @@ const createStyles = (Colors: AppColors) => {
       color: Colors.mutedText,
       lineHeight: 17,
     },
-    section: {
+    listCard: {
       marginBottom: Spacing.lg,
     },
-    evidenceList: {
+    listHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.md,
+      paddingBottom: Spacing.sm,
+    },
+    listHeaderLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
       gap: Spacing.sm,
     },
-    evidenceCard: {},
-    evidenceInner: {
+    listHeaderTitle: {
+      ...Typography.heading,
+      color: Colors.text,
+    },
+    listHeaderAction: {
+      ...Typography.label,
+      color: Colors.primary,
+    },
+    projectRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.md,
-      padding: Spacing.md,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
     },
-    evidenceIcon: {
+    projectRowDivider: {
+      borderTopWidth: 1,
+      borderTopColor: Colors.hairline,
+    },
+    projectThumb: {
       width: 40,
       height: 40,
       borderRadius: Radii.sm,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: Colors.primarySoft,
+      backgroundColor: Colors.elevated,
     },
-    evidenceText: {
+    projectText: {
       flex: 1,
       minWidth: 0,
-      gap: 2,
+      gap: 1,
     },
-    evidenceTitle: {
+    projectName: {
       fontSize: FontSizes.md,
       fontWeight: '700',
       color: Colors.text,
     },
-    evidenceMeta: {
+    projectMeta: {
       fontSize: FontSizes.xs,
       color: Colors.dimText,
     },
-    emptyEvidence: {
-      alignItems: 'center',
-      gap: Spacing.xs,
-      paddingVertical: Spacing.lg,
-    },
-    emptyEvidenceIcon: {
-      width: 44,
-      height: 44,
+    projectDot: {
+      width: 10,
+      height: 10,
       borderRadius: Radii.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: Colors.elevated,
-      marginBottom: Spacing.xs,
     },
-    emptyEvidenceTitle: {
-      fontSize: FontSizes.md,
-      fontWeight: '700',
-      color: Colors.text,
+    projectEmpty: {
+      paddingHorizontal: Spacing.md,
+      paddingBottom: Spacing.md,
     },
-    emptyEvidenceText: {
+    projectEmptyText: {
       fontSize: FontSizes.sm,
       color: Colors.dimText,
-      textAlign: 'center',
       lineHeight: 19,
-      maxWidth: '90%',
     },
-    shortcutGrid: {
+    twoColRow: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
       gap: Spacing.sm,
+      marginBottom: Spacing.lg,
     },
-    shortcutCard: {
-      flexGrow: 1,
-      flexBasis: '30%',
-      minWidth: 100,
+    infoCard: {
+      flex: 1,
+      minWidth: 0,
     },
-    shortcutInner: {
+    infoCardInner: {
       padding: Spacing.md,
       gap: 6,
     },
-    shortcutIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: Radii.sm,
+    infoCardHeader: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: Colors.primarySoft,
-      marginBottom: 2,
+      justifyContent: 'space-between',
     },
-    shortcutLabel: {
+    infoCardTitle: {
       fontSize: FontSizes.md,
       fontWeight: '700',
       color: Colors.text,
+      marginTop: 2,
     },
-    shortcutDescription: {
+    infoCardBody: {
       fontSize: FontSizes.xs,
       color: Colors.dimText,
-      lineHeight: 15,
+      lineHeight: 16,
+    },
+    infoCardLink: {
+      fontSize: FontSizes.sm,
+      fontWeight: '700',
+      color: Colors.primary,
+      marginTop: 2,
+    },
+    creditCard: {
+      marginBottom: Spacing.lg,
+      gap: Spacing.sm,
+    },
+    creditHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: Spacing.sm,
+    },
+    creditHeaderLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      flexShrink: 1,
+    },
+    creditIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: Radii.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.accentSoft,
+    },
+    creditTitle: {
+      ...Typography.heading,
+      color: Colors.text,
+    },
+    creditManageButton: {
+      borderWidth: 1,
+      borderColor: Colors.border,
+      borderRadius: Radii.pill,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: 7,
+    },
+    creditManageText: {
+      ...Typography.label,
+      color: Colors.text,
+    },
+    creditValueRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      gap: Spacing.sm,
+    },
+    creditValue: {
+      fontSize: 30,
+      fontWeight: '800',
+      color: Colors.text,
+    },
+    creditValueTotal: {
+      fontSize: FontSizes.lg,
+      fontWeight: '700',
+      color: Colors.dimText,
+    },
+    creditReset: {
+      fontSize: FontSizes.xs,
+      color: Colors.dimText,
+      flexShrink: 1,
+      textAlign: 'right',
+    },
+    creditTrack: {
+      height: 6,
+      borderRadius: Radii.pill,
+      backgroundColor: Colors.elevated,
+      overflow: 'hidden',
+    },
+    creditFill: {
+      height: '100%',
+      borderRadius: Radii.pill,
+      backgroundColor: Colors.accent,
     },
     releaseFooter: {
       marginTop: Spacing.sm,
