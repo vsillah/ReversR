@@ -14,7 +14,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { BottomTabBar, HorizontalStepper } from "../components/ui";
+import { LinearGradient } from "expo-linear-gradient";
+import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
@@ -85,6 +86,12 @@ const createEmptyContext = (): MutationContext => {
 
 const PHASE_LABELS = ['SCAN', 'INVENTORY', 'DESIGN', 'BUILD'];
 const PHASE_STEP_LABELS = ['Scan', 'Inventory', 'Design', 'Build'];
+const PHASE_STEP_HINTS = [
+  'Capture or describe the machine',
+  'Match the scan to a record',
+  'Specs, references, and 3D handoff',
+  'BOM, assembly, and pricing',
+];
 const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   1: 'search',
   2: 'repeat-sharp',
@@ -1583,6 +1590,29 @@ export default function HomeScreen() {
       )}
 
       <View style={styles.progressBar}>
+        <LinearGradient
+          colors={Colors.mode === 'dark'
+            ? ['rgba(59,130,246,0.18)', 'rgba(16,18,24,0.25)']
+            : ['rgba(37,99,235,0.10)', 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.currentStepCard}
+        >
+          <ScoreRing
+            progress={context.phase / 4}
+            value={`${Math.min(context.phase, 4)}/4`}
+            caption="Step"
+            size={72}
+            strokeWidth={8}
+          />
+          <View style={styles.currentStepInfo}>
+            <Text style={styles.currentStepOverline}>Current step</Text>
+            <Text style={styles.currentStepName}>{PHASE_STEP_LABELS[Math.min(context.phase, 4) - 1]}</Text>
+            <Text style={styles.currentStepHint} numberOfLines={2}>
+              {PHASE_STEP_HINTS[Math.min(context.phase, 4) - 1]}
+            </Text>
+          </View>
+        </LinearGradient>
         <HorizontalStepper
           steps={PHASE_STEP_LABELS}
           currentStep={context.phase}
@@ -1955,8 +1985,40 @@ const createStyles = (Colors: AppColors) => {
   },
   progressBar: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.md,
     paddingBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  currentStepCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    borderColor: Colors.mode === 'dark' ? 'rgba(59,130,246,0.35)' : Colors.border,
+  },
+  currentStepInfo: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  currentStepOverline: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    color: Colors.primary,
+  },
+  currentStepName: {
+    fontSize: FontSizes.xl,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  currentStepHint: {
+    fontSize: FontSizes.sm,
+    color: Colors.mutedText,
+    lineHeight: 18,
   },
   content: {
     flex: 1,
