@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   AnalysisResult,
@@ -280,7 +280,9 @@ export default function PhaseTwo({
     <View style={styles.container} testID="reversr-tour-inventory">
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="git-branch-outline" size={28} color={Colors.secondary} />
+          <View style={styles.headerIcon}>
+            <Ionicons name="git-branch-outline" size={24} color={Colors.primary} />
+          </View>
           <View style={styles.headerText}>
             <Text style={styles.title}>Phase 2: Inventory</Text>
             <Text style={styles.description}>
@@ -375,7 +377,7 @@ export default function PhaseTwo({
               accessibilityRole="button"
               accessibilityLabel="Restart Phase 1 scan"
             >
-              <Ionicons name="arrow-back" size={17} color={Colors.black} />
+              <Ionicons name="arrow-back" size={17} color="#ffffff" />
               <Text style={styles.restartButtonText}>Restart Phase 1</Text>
             </TouchableOpacity>
           </View>
@@ -410,7 +412,9 @@ export default function PhaseTwo({
   );
 }
 
-const createStyles = (Colors: AppColors) => StyleSheet.create({
+const createStyles = (Colors: AppColors) => {
+  const shadows = makeShadows(Colors);
+  return StyleSheet.create({
   container: {
     paddingVertical: Spacing.lg,
     gap: Spacing.lg,
@@ -422,9 +426,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   headerLeft: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: Spacing.md,
     flex: 1,
+  },
+  headerIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: Radii.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primarySoft,
   },
   headerText: {
     flex: 1,
@@ -432,20 +444,21 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   title: {
     fontSize: FontSizes.xl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
     marginBottom: Spacing.xs,
   },
   description: {
     fontSize: FontSizes.sm,
-    color: Colors.gray[400],
+    color: Colors.mutedText,
     lineHeight: 20,
   },
   panel: {
-    backgroundColor: Colors.panel,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
+    borderRadius: Radii.lg,
     padding: Spacing.lg,
+    ...shadows.card,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -457,7 +470,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.lg,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
   },
   sectionTitleRow: {
     flexDirection: 'row',
@@ -496,10 +509,10 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   componentChip: {
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
+    borderRadius: Radii.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.elevated,
   },
   componentName: {
     color: Colors.text,
@@ -579,13 +592,13 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   candidateCard: {
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
-    backgroundColor: Colors.surface,
+    borderRadius: Radii.md,
+    backgroundColor: Colors.elevated,
     overflow: 'hidden',
   },
   candidateCardSelected: {
     borderColor: Colors.accent,
-    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    backgroundColor: Colors.accentSoft,
   },
   candidateSelectArea: {
     padding: Spacing.md,
@@ -601,7 +614,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flex: 1,
   },
   candidateName: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.md,
     fontWeight: 'bold',
   },
@@ -689,7 +702,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: 'rgba(251, 146, 60, 0.08)',
   },
   noMatchTitle: {
-    color: Colors.white,
+    color: Colors.text,
     fontSize: FontSizes.md,
     fontWeight: 'bold',
     marginTop: Spacing.sm,
@@ -706,23 +719,23 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.accent,
-    borderRadius: 8,
-    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.primary,
+    borderRadius: Radii.md,
+    paddingVertical: Spacing.md,
   },
   restartButtonText: {
-    color: Colors.black,
+    color: '#ffffff',
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
   },
   errorText: {
-    color: Colors.red[500],
+    color: Colors.danger,
     marginTop: Spacing.sm,
   },
   applyButton: {
-    backgroundColor: Colors.secondary,
-    borderRadius: 8,
-    paddingVertical: Spacing.md,
+    backgroundColor: Colors.primary,
+    borderRadius: Radii.md,
+    paddingVertical: 15,
     alignItems: 'center',
     marginTop: Spacing.md,
   },
@@ -735,8 +748,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     gap: Spacing.sm,
   },
   applyButtonText: {
-    color: Colors.white,
+    color: '#ffffff',
     fontSize: FontSizes.md,
     fontWeight: 'bold',
   },
-});
+  });
+};

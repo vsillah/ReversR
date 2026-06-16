@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   analyzeProduct,
@@ -268,7 +268,9 @@ export default function PhaseOne({
   return (
     <View style={styles.container} testID="reversr-tour-scan">
       <View style={styles.header}>
-        <Ionicons name="search" size={28} color={Colors.blue[500]} />
+        <View style={styles.headerIcon}>
+          <Ionicons name="scan-outline" size={24} color={Colors.primary} />
+        </View>
         <View style={styles.headerText}>
           <Text style={styles.title}>Phase 1: Scan</Text>
           <Text style={styles.description}>
@@ -286,10 +288,10 @@ export default function PhaseOne({
             accessibilityLabel="Use text description mode"
             accessibilityState={{ selected: inputMode === 'type' }}
           >
-            <Ionicons 
-              name="create-outline" 
-              size={18} 
-              color={inputMode === 'type' ? Colors.white : Colors.gray[400]} 
+            <Ionicons
+              name="create-outline"
+              size={18}
+              color={inputMode === 'type' ? Colors.primary : Colors.mutedText}
             />
             <Text style={[styles.modeTabText, inputMode === 'type' && styles.modeTabTextActive]}>
               Type
@@ -302,10 +304,10 @@ export default function PhaseOne({
             accessibilityLabel="Use camera scan mode"
             accessibilityState={{ selected: inputMode === 'scan' }}
           >
-            <Ionicons 
-              name="camera-outline" 
-              size={18} 
-              color={inputMode === 'scan' ? Colors.white : Colors.gray[400]} 
+            <Ionicons
+              name="camera-outline"
+              size={18}
+              color={inputMode === 'scan' ? Colors.primary : Colors.mutedText}
             />
             <Text style={[styles.modeTabText, inputMode === 'scan' && styles.modeTabTextActive]}>
               Scan
@@ -318,10 +320,10 @@ export default function PhaseOne({
             accessibilityLabel="Use sample machine mode"
             accessibilityState={{ selected: inputMode === 'lucky' }}
           >
-            <Ionicons 
-              name="dice-outline" 
-              size={18} 
-              color={inputMode === 'lucky' ? Colors.white : Colors.gray[400]} 
+            <Ionicons
+              name="dice-outline"
+              size={18}
+              color={inputMode === 'lucky' ? Colors.primary : Colors.mutedText}
             />
             <Text style={[styles.modeTabText, inputMode === 'lucky' && styles.modeTabTextActive]}>
               Sample
@@ -484,14 +486,25 @@ export default function PhaseOne({
   );
 }
 
-const createStyles = (Colors: AppColors) => StyleSheet.create({
+const createStyles = (Colors: AppColors) => {
+  const shadows = makeShadows(Colors);
+  return StyleSheet.create({
   container: {
     paddingVertical: Spacing.lg,
   },
   header: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.md,
     marginBottom: Spacing.lg,
+  },
+  headerIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: Radii.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primarySoft,
   },
   headerText: {
     flex: 1,
@@ -499,19 +512,21 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   title: {
     fontSize: FontSizes.xl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.text,
     marginBottom: Spacing.xs,
   },
   description: {
     fontSize: FontSizes.sm,
-    color: Colors.dim,
+    color: Colors.mutedText,
+    lineHeight: 20,
   },
   panel: {
-    backgroundColor: Colors.panel,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: Radii.lg,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: Spacing.lg,
+    ...shadows.card,
   },
   modeSelector: {
     flexDirection: 'row',
@@ -524,32 +539,32 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.elevated,
     borderWidth: 1,
     borderColor: Colors.border,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    borderRadius: 8,
+    borderRadius: Radii.md,
   },
   modeTabActive: {
-    backgroundColor: Colors.mode === 'dark' ? 'rgba(59, 130, 246, 0.2)' : Colors.blue[900],
-    borderColor: Colors.blue[500],
+    backgroundColor: Colors.primarySoft,
+    borderColor: Colors.primary,
   },
   modeTabText: {
     fontSize: FontSizes.sm,
-    color: Colors.gray[400],
-    fontWeight: '500',
+    color: Colors.mutedText,
+    fontWeight: '600',
   },
   modeTabTextActive: {
-    color: Colors.white,
+    color: Colors.primary,
   },
   contentArea: {
     minHeight: 150,
   },
   contentLabel: {
     fontSize: FontSizes.sm,
-    fontWeight: '500',
-    color: Colors.gray[400],
+    fontWeight: '600',
+    color: Colors.mutedText,
     marginBottom: Spacing.sm,
   },
   typeContent: {},
@@ -594,7 +609,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   luckyProductText: {
     flex: 1,
     fontSize: FontSizes.md,
-    color: Colors.white,
+    color: Colors.text,
     lineHeight: FontSizes.md * 1.5,
   },
   cameraPrompt: {
@@ -630,7 +645,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   textInput: {
     backgroundColor: Colors.input,
-    borderRadius: 8,
+    borderRadius: Radii.md,
     borderWidth: 1,
     borderColor: Colors.inputBorder,
     padding: Spacing.md,
@@ -704,11 +719,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontWeight: '700',
   },
   submitButton: {
-    backgroundColor: Colors.blue[600],
+    backgroundColor: Colors.primary,
     borderWidth: 1,
-    borderColor: Colors.blue[600],
-    borderRadius: 8,
-    padding: Spacing.md,
+    borderColor: Colors.primary,
+    borderRadius: Radii.md,
+    paddingVertical: 15,
+    paddingHorizontal: Spacing.lg,
     alignItems: 'center',
     marginTop: Spacing.lg,
   },
@@ -719,7 +735,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   submitButtonText: {
     color: '#ffffff',
     fontSize: FontSizes.md,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   submitButtonTextDisabled: {
     color: Colors.mutedText,
@@ -786,4 +802,5 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 29,
     backgroundColor: Colors.white,
   },
-});
+  });
+};
