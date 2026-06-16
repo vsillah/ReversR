@@ -120,9 +120,10 @@ interface Props {
   onBack: () => void;
   onResume: (innovation: SavedInnovation) => void;
   refreshKey?: number;
+  bottomBarInset?: number;
 }
 
-export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
+export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarInset = 0 }: Props) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
   const [innovations, setInnovations] = useState<SavedInnovation[]>([]);
@@ -536,7 +537,11 @@ export default function HistoryScreen({ onBack, onResume, refreshKey }: Props) {
         </View>
       )}
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: bottomBarInset }}
+        showsVerticalScrollIndicator={false}
+      >
         {loading ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Loading...</Text>

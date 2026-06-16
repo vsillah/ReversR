@@ -41,6 +41,7 @@ interface WelcomeScreenProps {
   userDisplayName?: string;
   userIsAuthenticated?: boolean;
   userAvatarUri?: string;
+  bottomBarInset?: number;
 }
 
 const phases = [
@@ -116,6 +117,7 @@ export default function WelcomeScreen({
   userDisplayName = 'Guest',
   userIsAuthenticated = false,
   userAvatarUri = '',
+  bottomBarInset = 0,
 }: WelcomeScreenProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -256,7 +258,7 @@ export default function WelcomeScreen({
   return (
     <Animated.ScrollView
       style={styles.container}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.xl + bottomBarInset }]}
       showsVerticalScrollIndicator={false}
       scrollEventThrottle={16}
       onScroll={Animated.event(

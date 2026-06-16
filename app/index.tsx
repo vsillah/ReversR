@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { HorizontalStepper } from "../components/ui";
+import { BottomTabBar, HorizontalStepper } from "../components/ui";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
@@ -1369,6 +1369,14 @@ export default function HomeScreen() {
     setStarted(true);
   }, []);
 
+  const goHome = useCallback(() => {
+    setShowSettings(false);
+    setShowHistory(false);
+    setStarted(false);
+  }, []);
+
+  const tabBarInset = safeAreaInsets.bottom + 84;
+
   const renderTourGuide = () => (
     <TourGuide
       active={tourActive}
@@ -1391,7 +1399,7 @@ export default function HomeScreen() {
       onExit={closeTour}
     />
   );
-  const contentBottomPadding = safeAreaInsets.bottom + Spacing.xxl;
+  const contentBottomPadding = tabBarInset + Spacing.md;
 
   if (!started) {
     return (
@@ -1405,6 +1413,7 @@ export default function HomeScreen() {
           userDisplayName={userDisplayName}
           userIsAuthenticated={userIsAuthenticated}
           userAvatarUri={userAvatarUri}
+          bottomBarInset={tabBarInset}
         />
         <SettingsModal
           visible={showSettings}
@@ -1412,6 +1421,14 @@ export default function HomeScreen() {
           initialSection={settingsInitialSection}
         />
         {renderTourGuide()}
+        <BottomTabBar
+          active="home"
+          onHome={goHome}
+          onProjects={openHistory}
+          onNew={handleStartNew}
+          onMore={() => openSettings('account')}
+          bottomInset={safeAreaInsets.bottom}
+        />
       </View>
     );
   }
@@ -1423,8 +1440,17 @@ export default function HomeScreen() {
           onBack={() => setShowHistory(false)}
           onResume={handleResume}
           refreshKey={historyRefreshKey}
+          bottomBarInset={tabBarInset}
         />
         {renderTourGuide()}
+        <BottomTabBar
+          active="projects"
+          onHome={goHome}
+          onProjects={openHistory}
+          onNew={handleStartNew}
+          onMore={() => openSettings('account')}
+          bottomInset={safeAreaInsets.bottom}
+        />
       </View>
     );
   }
@@ -1731,12 +1757,20 @@ export default function HomeScreen() {
         onClose={() => setConfirmAlert(null)}
       />
 
-      <SettingsModal 
-        visible={showSettings} 
-        onClose={() => setShowSettings(false)} 
+      <SettingsModal
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
         initialSection={settingsInitialSection}
       />
       {renderTourGuide()}
+      <BottomTabBar
+        active={null}
+        onHome={goHome}
+        onProjects={openHistory}
+        onNew={handleStartNew}
+        onMore={() => openSettings('account')}
+        bottomInset={safeAreaInsets.bottom}
+      />
     </View>
   );
 }

@@ -747,3 +747,103 @@ const StyleSheetAbsoluteFill: ViewStyle = {
   right: 0,
   bottom: 0,
 };
+
+export type BottomTab = 'home' | 'projects' | 'more';
+
+/** Persistent bottom navigation bar with a centered raised gradient action. */
+export function BottomTabBar({
+  active,
+  onHome,
+  onProjects,
+  onNew,
+  onMore,
+  bottomInset = 0,
+}: {
+  active: BottomTab | null;
+  onHome: () => void;
+  onProjects: () => void;
+  onNew: () => void;
+  onMore: () => void;
+  bottomInset?: number;
+}) {
+  const { colors } = useAppTheme();
+  const shadows = makeShadows(colors);
+
+  const tab = (
+    key: BottomTab,
+    label: string,
+    icon: IconName,
+    activeIcon: IconName,
+    onPress: () => void,
+  ) => {
+    const isActive = active === key;
+    return (
+      <TouchableOpacity
+        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 6 }}
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ selected: isActive }}
+      >
+        <Ionicons name={isActive ? activeIcon : icon} size={22} color={isActive ? colors.primary : colors.dimText} />
+        <Text style={{ fontSize: 10, fontWeight: '700', color: isActive ? colors.primary : colors.dimText }}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingBottom: bottomInset,
+        backgroundColor: colors.panel,
+        borderTopWidth: 1,
+        borderTopColor: colors.hairline,
+        ...shadows.elevated,
+        shadowOffset: { width: 0, height: -6 },
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: 60, paddingHorizontal: Spacing.sm }}>
+        {tab('home', 'Home', 'home-outline', 'home', onHome)}
+        {tab('projects', 'Projects', 'albums-outline', 'albums', onProjects)}
+        <View style={{ width: 72, alignItems: 'center' }} />
+        {tab('more', 'More', 'ellipsis-horizontal', 'ellipsis-horizontal', onMore)}
+      </View>
+
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={onNew}
+        accessibilityRole="button"
+        accessibilityLabel="New reconstruction"
+        testID="reversr-bottom-new"
+        style={{
+          position: 'absolute',
+          alignSelf: 'center',
+          top: -20,
+          width: 58,
+          height: 58,
+          borderRadius: Radii.pill,
+          overflow: 'hidden',
+          borderWidth: 3,
+          borderColor: colors.background,
+          ...shadows.floating,
+          shadowColor: colors.primary,
+        }}
+      >
+        <LinearGradient
+          colors={[colors.primary, colors.primaryStrong]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Ionicons name="add" size={30} color="#ffffff" />
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
+  );
+}
