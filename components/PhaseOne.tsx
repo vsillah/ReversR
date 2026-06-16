@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, makeShadows, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   analyzeProduct,
@@ -511,7 +511,7 @@ const createStyles = (Colors: AppColors) => {
   },
   title: {
     fontSize: FontSizes.xl,
-    fontWeight: 'bold',
+    fontFamily: Fonts.display,
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
@@ -734,8 +734,8 @@ const createStyles = (Colors: AppColors) => {
   },
   submitButtonText: {
     color: '#ffffff',
+    fontFamily: Fonts.bold,
     fontSize: FontSizes.md,
-    fontWeight: '700',
   },
   submitButtonTextDisabled: {
     color: Colors.mutedText,

@@ -12,7 +12,7 @@ import {
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes, Radii } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, Fonts } from '../constants/theme';
 import { useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
@@ -1191,7 +1191,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   title: {
     fontSize: FontSizes.xl,
-    fontWeight: 'bold',
+    fontFamily: Fonts.display,
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
@@ -1561,9 +1561,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: Radii.md,
   },
   generateButtonText: {
-    fontFamily: 'monospace',
+    fontFamily: Fonts.bold,
     fontSize: FontSizes.md,
-    fontWeight: 'bold',
     color: '#ffffff',
   },
   errorText: {
@@ -1976,8 +1975,8 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   quotePacketButtonText: {
     color: '#ffffff',
+    fontFamily: Fonts.bold,
     fontSize: FontSizes.sm,
-    fontWeight: 'bold',
   },
   manufacturerGrid: {
     flexDirection: 'row',

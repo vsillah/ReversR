@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppColors, Spacing, FontSizes, Radii, makeShadows } from '../constants/theme';
+import { AppColors, Spacing, FontSizes, Radii, makeShadows, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
   AnalysisResult,
@@ -443,7 +443,7 @@ const createStyles = (Colors: AppColors) => {
   },
   title: {
     fontSize: FontSizes.xl,
-    fontWeight: 'bold',
+    fontFamily: Fonts.display,
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
@@ -469,7 +469,7 @@ const createStyles = (Colors: AppColors) => {
   },
   sectionTitle: {
     fontSize: FontSizes.lg,
-    fontWeight: 'bold',
+    fontFamily: Fonts.heading,
     color: Colors.text,
   },
   sectionTitleRow: {
@@ -725,8 +725,8 @@ const createStyles = (Colors: AppColors) => {
   },
   restartButtonText: {
     color: '#ffffff',
+    fontFamily: Fonts.bold,
     fontSize: FontSizes.sm,
-    fontWeight: 'bold',
   },
   errorText: {
     color: Colors.danger,
@@ -749,8 +749,8 @@ const createStyles = (Colors: AppColors) => {
   },
   applyButtonText: {
     color: '#ffffff',
+    fontFamily: Fonts.bold,
     fontSize: FontSizes.md,
-    fontWeight: 'bold',
   },
   });
 };
