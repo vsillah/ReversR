@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { AppColors, DarkColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
 import { Badge, Card, HeroBackdrop, HorizontalStepper } from './ui';
+import ReversRLogoMark from './ReversRLogoMark';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
 import { useCommercialization } from '../hooks/useCommercialization';
 import { formatResetCountdown } from '../utils/commercialUsage';
@@ -228,16 +229,7 @@ export default function WelcomeScreen({
     >
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          {onSettings && (
-            <TouchableOpacity
-              style={styles.gearButton}
-              onPress={() => handleMenuAction(onSettings)}
-              accessibilityRole="button"
-              accessibilityLabel="Open settings"
-            >
-              <Ionicons name="settings-outline" size={20} color={Colors.text} />
-            </TouchableOpacity>
-          )}
+          <ReversRLogoMark colors={Colors} size={44} />
           <View style={styles.brandTextWrap}>
             <Text style={styles.brandWordmark}>
               REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
@@ -697,16 +689,6 @@ const createStyles = (Colors: AppColors) => {
       alignItems: 'center',
       gap: Spacing.sm,
       flexShrink: 1,
-    },
-    gearButton: {
-      width: 44,
-      height: 44,
-      borderRadius: Radii.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: Colors.border,
-      backgroundColor: Colors.surface,
     },
     brandTextWrap: {
       flexShrink: 1,
