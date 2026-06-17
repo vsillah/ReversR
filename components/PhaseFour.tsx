@@ -238,7 +238,21 @@ export default function PhaseFour({
     getLatestSavedVendorApproval(savedReviewRecords)
   ), [savedReviewRecords]);
   const canExportQuotePacket = account?.entitlements.canExportQuotePacket ?? false;
-  const canPrepareVendorRequest = !!localBom && !!savedVendorApprovalRecord && canExportQuotePacket;
+  const hasBom = !!localBom;
+  const hasSavedVendorApproval = !!savedVendorApprovalRecord;
+  const canPrepareVendorRequest = hasBom && hasSavedVendorApproval && canExportQuotePacket;
+  const vendorRequestCtaLabel = !hasBom
+    ? 'Generate BOM First'
+    : !hasSavedVendorApproval
+      ? 'Saved Approval Required'
+      : canExportQuotePacket
+        ? 'Prepare Request Email'
+        : 'Upgrade for Vendor Requests';
+  const vendorRequestBlockedMessage = !hasSavedVendorApproval
+    ? 'Vendor request preparation remains locked until an Approved for vendor review record is saved.'
+    : canExportQuotePacket
+      ? `Vendor request preparation is enabled by saved review ${savedVendorApprovalRecord.recordId}. Fabrication is still not approved.`
+      : 'Vendor request preparation requires Pro Shop or Team after an approved review record is saved. Fabrication is still not approved.';
 
   const requirePaidExport = () => {
     if (canExportQuotePacket) return true;
@@ -991,9 +1005,7 @@ export default function PhaseFour({
               color={savedVendorApprovalRecord ? Colors.accent : Colors.orange[300]}
             />
             <Text style={styles.approvalStatusText}>
-              {savedVendorApprovalRecord
-                ? `Vendor request preparation is enabled by saved review ${savedVendorApprovalRecord.recordId}. Fabrication is still not approved.`
-                : 'Vendor request preparation remains locked until an Approved for vendor review record is saved.'}
+              {vendorRequestBlockedMessage}
             </Text>
           </View>
           {latestReviewRecord ? (
@@ -1100,7 +1112,7 @@ export default function PhaseFour({
             accessibilityState={{ disabled: !canPrepareVendorRequest }}
           >
             <Text style={styles.quotePacketButtonText}>
-              {!localBom ? 'Generate BOM First' : canPrepareVendorRequest ? 'Prepare Request Email' : 'Saved Approval Required'}
+              {vendorRequestCtaLabel}
             </Text>
           </TouchableOpacity>
         </View>
