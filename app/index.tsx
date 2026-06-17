@@ -533,10 +533,10 @@ export default function HomeScreen() {
   const [generatedMultiAngleImages, setGeneratedMultiAngleImages] = useState<AngleImage[]>([]);
   const userIsAuthenticated = Boolean(account?.access);
   const savedDisplayName = profile.name?.trim();
-  const userDisplayName = userIsAuthenticated
-    ? (savedDisplayName && savedDisplayName !== 'Repair shop user' ? savedDisplayName : 'User')
-    : 'Guest';
-  const userChipIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
+  const userHasSavedName = Boolean(savedDisplayName && savedDisplayName !== 'Repair shop user');
+  const userHasProfileIdentity = userIsAuthenticated || userHasSavedName || Boolean(profile.avatarUri);
+  const userDisplayName = userHasSavedName ? savedDisplayName : userIsAuthenticated ? 'User' : 'Guest';
+  const userChipIcon = userHasProfileIdentity ? 'person-circle-outline' : 'person-outline';
   const userAvatarUri = profile.avatarUri || '';
   const usageIsUnlimited = Boolean(account?.usage.unlimitedCredits || account?.entitlements.unlimitedCredits);
   const isGuestPlan = !account || account.billing.planId === 'free';
@@ -1491,10 +1491,10 @@ export default function HomeScreen() {
         </View>
         <View style={styles.headerControls}>
           <TouchableOpacity
-            style={[styles.userChip, userIsAuthenticated && styles.userChipActive]}
+            style={[styles.userChip, userHasProfileIdentity && styles.userChipActive]}
             onPress={() => openSettings('profile')}
             accessibilityRole="button"
-            accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
+            accessibilityLabel={userHasProfileIdentity ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
             testID="reversr-user-chip"
           >
             {userAvatarUri ? (
@@ -1503,11 +1503,11 @@ export default function HomeScreen() {
               <Ionicons
                 name={userChipIcon}
                 size={18}
-                color={userIsAuthenticated ? Colors.accent : Colors.gray[400]}
+                color={userHasProfileIdentity ? Colors.accent : Colors.gray[400]}
               />
             )}
             <Text
-              style={[styles.userChipText, userIsAuthenticated && styles.userChipTextActive]}
+              style={[styles.userChipText, userHasProfileIdentity && styles.userChipTextActive]}
               numberOfLines={1}
             >
               {userDisplayName}

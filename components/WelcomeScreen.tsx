@@ -149,7 +149,9 @@ export default function WelcomeScreen({
     'error',
   ].includes(updateCoordinator.status);
   const styles = createStyles(Colors);
-  const profileIcon = userIsAuthenticated ? 'person-circle-outline' : 'person-outline';
+  const hasNamedProfile = userDisplayName.trim().length > 0 && userDisplayName !== 'Guest';
+  const hasProfileIdentity = userIsAuthenticated || hasNamedProfile || Boolean(userAvatarUri);
+  const profileIcon = hasProfileIdentity ? 'person-circle-outline' : 'person-outline';
   const buildLabel = getInstalledBuildLabel();
   const footerLabel = [
     `Version ${installedAppVersion}`,
@@ -251,11 +253,11 @@ export default function WelcomeScreen({
               {userAvatarUri ? (
                 <Image source={{ uri: userAvatarUri }} style={styles.avatarImage} resizeMode="cover" />
               ) : (
-                <Ionicons name={profileIcon} size={20} color={userIsAuthenticated ? Colors.accent : Colors.mutedText} />
+                <Ionicons name={profileIcon} size={20} color={hasProfileIdentity ? Colors.accent : Colors.mutedText} />
               )}
               {userIsAuthenticated ? <View style={styles.avatarStatusDot} /> : null}
             </View>
-            {userIsAuthenticated ? (
+            {hasProfileIdentity ? (
               <Text style={styles.avatarName} numberOfLines={1}>{userDisplayName}</Text>
             ) : null}
             <Ionicons name={menuOpen ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.mutedText} />
@@ -268,11 +270,11 @@ export default function WelcomeScreen({
                   style={styles.menuItem}
                   onPress={() => handleMenuAction(onProfile || onSettings)}
                   accessibilityRole="button"
-                  accessibilityLabel={userIsAuthenticated ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
+                  accessibilityLabel={hasProfileIdentity ? `Open profile for ${userDisplayName}` : 'Open guest profile'}
                   testID="welcome-profile-chip"
                 >
                   <Ionicons name="person-circle-outline" size={18} color={Colors.primary} />
-                  <Text style={styles.menuItemText}>{userIsAuthenticated ? 'Profile' : 'Guest profile'}</Text>
+                  <Text style={styles.menuItemText}>{hasProfileIdentity ? 'Profile' : 'Guest profile'}</Text>
                 </TouchableOpacity>
               )}
 
