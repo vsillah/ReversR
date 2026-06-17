@@ -38,6 +38,7 @@ app.use(cors({
     'X-ReversR-Profile-Email',
     'X-ReversR-Profile-Name',
     'X-ReversR-Shop-Name',
+    'X-ReversR-Access-Password',
     'X-ReversR-Idempotency-Key',
   ],
 }));
