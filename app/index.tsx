@@ -1733,21 +1733,49 @@ export default function HomeScreen() {
           onPress={() => setPhaseActionModal(null)}
         >
           <View style={styles.phaseActionModal}>
-            <Text style={styles.phaseActionTitle}>
-              {phaseActionModal ? PHASE_LABELS[phaseActionModal - 1] : ''} Phase
-            </Text>
+            <LinearGradient
+              colors={Colors.mode === 'dark'
+                ? ['rgba(59,130,246,0.14)', 'rgba(0,255,157,0.06)', 'rgba(16,18,24,0)']
+                : ['rgba(37,99,235,0.10)', 'rgba(0,122,85,0.06)', 'rgba(255,255,255,0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.phaseActionGlow}
+            />
+            <View style={styles.phaseActionHeader}>
+              <View style={styles.phaseActionTitleGroup}>
+                <Text style={styles.phaseActionEyebrow}>Workflow navigation</Text>
+                <Text style={styles.phaseActionTitle}>
+                  {phaseActionModal ? PHASE_STEP_LABELS[phaseActionModal - 1] : ''} phase
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.phaseActionCloseButton}
+                onPress={() => setPhaseActionModal(null)}
+                accessibilityRole="button"
+                accessibilityLabel="Close phase navigation"
+                hitSlop={8}
+              >
+                <Ionicons name="close" size={18} color={Colors.mutedText} />
+              </TouchableOpacity>
+            </View>
             <Text style={styles.phaseActionSubtitle}>
-              What would you like to do?
+              Choose the next step for this reconstruction.
             </Text>
             
             <TouchableOpacity 
-              style={styles.phaseActionButton}
+              style={[styles.phaseActionButton, styles.phaseActionButtonPrimary]}
               onPress={() => phaseActionModal && handleGoToPhase(phaseActionModal)}
               accessibilityRole="button"
-              accessibilityLabel={`Go back to ${phaseActionModal ? PHASE_LABELS[phaseActionModal - 1] : 'selected'} phase`}
+              accessibilityLabel={`Go back to ${phaseActionModal ? PHASE_STEP_LABELS[phaseActionModal - 1] : 'selected'} phase`}
             >
-              <Ionicons name="arrow-back" size={20} color={Colors.accent} />
-              <Text style={styles.phaseActionButtonText}>Go back to this phase</Text>
+              <View style={[styles.phaseActionIconWrap, styles.phaseActionIconWrapPrimary]}>
+                <Ionicons name="arrow-back" size={18} color={Colors.accent} />
+              </View>
+              <View style={styles.phaseActionButtonCopy}>
+                <Text style={styles.phaseActionButtonText}>Go back to this phase</Text>
+                <Text style={styles.phaseActionButtonHint}>Return to the selected workflow step.</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={Colors.dimText} />
             </TouchableOpacity>
 
             {phaseActionModal && phaseActionModal >= 2 && (
@@ -1760,8 +1788,14 @@ export default function HomeScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Review inventory match"
               >
-                <Ionicons name="shuffle" size={20} color={Colors.secondary} />
-                <Text style={styles.phaseActionButtonText}>Review inventory match</Text>
+                <View style={[styles.phaseActionIconWrap, styles.phaseActionIconWrapSecondary]}>
+                  <Ionicons name="shuffle" size={18} color={Colors.secondary} />
+                </View>
+                <View style={styles.phaseActionButtonCopy}>
+                  <Text style={styles.phaseActionButtonText}>Review inventory match</Text>
+                  <Text style={styles.phaseActionButtonHint}>Compare the matched inventory path.</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={Colors.dimText} />
               </TouchableOpacity>
             )}
 
@@ -1774,8 +1808,13 @@ export default function HomeScreen() {
               accessibilityRole="button"
               accessibilityLabel="Reset and start over"
             >
-              <Ionicons name="refresh" size={20} color={Colors.red[500]} />
-              <Text style={[styles.phaseActionButtonText, { color: Colors.red[500] }]}>Reset and start over</Text>
+              <View style={[styles.phaseActionIconWrap, styles.phaseActionIconWrapDanger]}>
+                <Ionicons name="refresh" size={18} color={Colors.danger} />
+              </View>
+              <View style={styles.phaseActionButtonCopy}>
+                <Text style={[styles.phaseActionButtonText, styles.phaseActionButtonTextDanger]}>Reset and start over</Text>
+                <Text style={[styles.phaseActionButtonHint, styles.phaseActionButtonHintDanger]}>Clear this reconstruction and begin again.</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -2044,33 +2083,68 @@ const createStyles = (Colors: AppColors) => {
   },
   phaseActionModal: {
     backgroundColor: Colors.panel,
-    borderRadius: Radii.xl,
-    padding: Spacing.xl,
+    borderRadius: Radii.lg,
+    padding: Spacing.lg,
     width: '100%',
-    maxWidth: 340,
+    maxWidth: 360,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.mode === 'dark' ? 'rgba(148,163,184,0.22)' : Colors.border,
+    overflow: 'hidden',
     ...shadows.floating,
   },
+  phaseActionGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 150,
+  },
+  phaseActionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  phaseActionTitleGroup: {
+    flex: 1,
+    minWidth: 0,
+  },
+  phaseActionEyebrow: {
+    fontFamily: Fonts.bold,
+    fontSize: 11,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    color: Colors.accent,
+    marginBottom: 4,
+  },
   phaseActionTitle: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.lg,
-    fontWeight: 'bold',
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.xxl,
     color: Colors.text,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
+  },
+  phaseActionCloseButton: {
+    width: 34,
+    height: 34,
+    borderRadius: Radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
   },
   phaseActionSubtitle: {
-    fontSize: FontSizes.sm,
+    fontSize: FontSizes.md,
     color: Colors.mutedText,
-    textAlign: 'center',
     marginBottom: Spacing.lg,
+    lineHeight: 20,
   },
   phaseActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
-    paddingVertical: Spacing.md,
+    gap: Spacing.sm,
+    minHeight: 68,
+    paddingVertical: 12,
     paddingHorizontal: Spacing.md,
     borderRadius: Radii.md,
     borderWidth: 1,
@@ -2078,22 +2152,70 @@ const createStyles = (Colors: AppColors) => {
     backgroundColor: Colors.surface,
     marginBottom: Spacing.sm,
   },
+  phaseActionButtonPrimary: {
+    borderColor: Colors.mode === 'dark' ? 'rgba(0,255,157,0.32)' : 'rgba(0,122,85,0.24)',
+    backgroundColor: Colors.accentSoft,
+  },
+  phaseActionIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: Radii.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.elevated,
+  },
+  phaseActionIconWrapPrimary: {
+    borderColor: Colors.mode === 'dark' ? 'rgba(0,255,157,0.35)' : 'rgba(0,122,85,0.28)',
+    backgroundColor: Colors.accentSoft,
+  },
+  phaseActionIconWrapSecondary: {
+    borderColor: Colors.mode === 'dark' ? 'rgba(168,85,247,0.34)' : 'rgba(124,58,237,0.25)',
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(168,85,247,0.14)' : 'rgba(124,58,237,0.10)',
+  },
+  phaseActionIconWrapDanger: {
+    borderColor: Colors.mode === 'dark' ? 'rgba(239,68,68,0.36)' : 'rgba(220,38,38,0.24)',
+    backgroundColor: Colors.dangerSoft,
+  },
+  phaseActionButtonCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
   phaseActionButtonText: {
     fontSize: FontSizes.md,
-    fontWeight: '600',
+    fontWeight: '800',
     color: Colors.text,
+    marginBottom: 2,
+  },
+  phaseActionButtonHint: {
+    fontSize: FontSizes.sm,
+    color: Colors.mutedText,
+    lineHeight: 16,
+  },
+  phaseActionButtonTextDanger: {
+    color: Colors.danger,
+  },
+  phaseActionButtonHintDanger: {
+    color: Colors.mode === 'dark' ? 'rgba(252,165,165,0.82)' : Colors.red[600],
   },
   phaseActionButtonDanger: {
     backgroundColor: Colors.dangerSoft,
-    borderColor: Colors.danger,
+    borderColor: Colors.mode === 'dark' ? 'rgba(239,68,68,0.42)' : 'rgba(220,38,38,0.30)',
   },
   phaseActionCancelButton: {
-    paddingVertical: Spacing.md,
+    minHeight: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    backgroundColor: Colors.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(15,23,42,0.03)',
     marginTop: Spacing.sm,
   },
   phaseActionCancelText: {
     fontSize: FontSizes.sm,
-    fontWeight: '600',
+    fontWeight: '800',
     color: Colors.mutedText,
     textAlign: 'center',
   },
