@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { AppColors, DarkColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
 import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
 import { Badge, Card, HeroBackdrop, HorizontalStepper } from './ui';
+import ReversRLogoMark from './ReversRLogoMark';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
 import { useCommercialization } from '../hooks/useCommercialization';
 import { formatResetCountdown } from '../utils/commercialUsage';
@@ -36,7 +37,6 @@ const staticAppConfig = require('../app.json') as {
 // Selected Canva hero render. Swap the require path to use a different file in
 // assets/hero/canva/. Set to null to fall back to the blueprint backdrop.
 const HERO_IMAGE: number | null = require('../assets/hero/canva/hero-premium-industrial-pump-render-right-split.png');
-const LOGO_MARK = require('../assets/logo-transparent.png');
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -229,14 +229,7 @@ export default function WelcomeScreen({
     >
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          <View
-            style={styles.logoMark}
-            accessible
-            accessibilityRole="image"
-            accessibilityLabel="ReversR logo"
-          >
-            <Image source={LOGO_MARK} style={styles.logoMarkImage} resizeMode="contain" />
-          </View>
+          <ReversRLogoMark colors={Colors} size={44} />
           <View style={styles.brandTextWrap}>
             <Text style={styles.brandWordmark}>
               REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
@@ -696,17 +689,6 @@ const createStyles = (Colors: AppColors) => {
       alignItems: 'center',
       gap: Spacing.sm,
       flexShrink: 1,
-    },
-    logoMark: {
-      width: 44,
-      height: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-    },
-    logoMarkImage: {
-      width: 92,
-      height: 92,
     },
     brandTextWrap: {
       flexShrink: 1,

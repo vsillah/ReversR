@@ -16,6 +16,7 @@ import { AppColors, DarkColors, Spacing, FontSizes, Radii, Fonts, makeShadows } 
 import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
 import { LinearGradient } from "expo-linear-gradient";
 import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
+import ReversRLogoMark from "../components/ReversRLogoMark";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
 import PhaseOne from "../components/PhaseOne";
@@ -1480,11 +1481,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <Image
-            source={require("../assets/logo-transparent.png")}
-            style={styles.headerLogo}
-            resizeMode="contain"
-          />
+          <ReversRLogoMark colors={Colors} size={40} />
           <View style={styles.brandTextWrap}>
             <Text style={styles.title}>
               REVERS<Text style={styles.titleAccent}>R</Text>
@@ -1849,10 +1846,6 @@ const createStyles = (Colors: AppColors) => {
     gap: Spacing.sm,
     flexShrink: 1,
     minWidth: 0,
-  },
-  headerLogo: {
-    width: 40,
-    height: 40,
   },
   brandTextWrap: {
     flexShrink: 1,
