@@ -135,6 +135,26 @@ const run = async () => {
     'Allowed CORS origin should be reflected in Access-Control-Allow-Origin.'
   );
 
+  const accessPasswordPreflight = await fetch(`${apiBase}/api/me`, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: allowedOrigin,
+      'Access-Control-Request-Method': 'GET',
+      'Access-Control-Request-Headers': [
+        'x-reversr-client-id',
+        'x-reversr-profile-name',
+        'x-reversr-shop-name',
+        'x-reversr-access-password',
+      ].join(','),
+    },
+  });
+  const allowedHeaders = accessPasswordPreflight.headers.get('access-control-allow-headers') || '';
+  assert(accessPasswordPreflight.status === 204, 'Commercial account preflight should return 204.');
+  assert(
+    allowedHeaders.toLowerCase().includes('x-reversr-access-password'),
+    'Commercial account CORS preflight should allow X-ReversR-Access-Password.'
+  );
+
   const deniedHealth = await fetch(`${apiBase}/api/health`, {
     headers: { Origin: 'https://unapproved.example.com' },
   });
@@ -173,6 +193,7 @@ const run = async () => {
       healthOk: true,
       restrictedCors: true,
       allowedOriginAccepted: true,
+      accessPasswordHeaderAllowed: true,
       deniedOriginRejected: true,
       requestBodyLimit: bodyLimit,
       retiredSitRouteStatus: retiredSit.status,
