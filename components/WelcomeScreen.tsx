@@ -36,6 +36,7 @@ const staticAppConfig = require('../app.json') as {
 // Selected Canva hero render. Swap the require path to use a different file in
 // assets/hero/canva/. Set to null to fall back to the blueprint backdrop.
 const HERO_IMAGE: number | null = require('../assets/hero/canva/hero-premium-industrial-pump-render-right-split.png');
+const LOGO_MARK = require('../assets/logo-transparent.png');
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -228,16 +229,14 @@ export default function WelcomeScreen({
     >
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          {onSettings && (
-            <TouchableOpacity
-              style={styles.gearButton}
-              onPress={() => handleMenuAction(onSettings)}
-              accessibilityRole="button"
-              accessibilityLabel="Open settings"
-            >
-              <Ionicons name="settings-outline" size={20} color={Colors.text} />
-            </TouchableOpacity>
-          )}
+          <View
+            style={styles.logoMark}
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel="ReversR logo"
+          >
+            <Image source={LOGO_MARK} style={styles.logoMarkImage} resizeMode="contain" />
+          </View>
           <View style={styles.brandTextWrap}>
             <Text style={styles.brandWordmark}>
               REVERS<Text style={styles.brandWordmarkAccent}>R</Text>
@@ -698,15 +697,16 @@ const createStyles = (Colors: AppColors) => {
       gap: Spacing.sm,
       flexShrink: 1,
     },
-    gearButton: {
+    logoMark: {
       width: 44,
       height: 44,
-      borderRadius: Radii.md,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: Colors.border,
-      backgroundColor: Colors.surface,
+      overflow: 'hidden',
+    },
+    logoMarkImage: {
+      width: 92,
+      height: 92,
     },
     brandTextWrap: {
       flexShrink: 1,
