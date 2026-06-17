@@ -1766,7 +1766,7 @@ export default function HomeScreen() {
               style={[styles.phaseActionButton, styles.phaseActionButtonPrimary]}
               onPress={() => phaseActionModal && handleGoToPhase(phaseActionModal)}
               accessibilityRole="button"
-              accessibilityLabel={`Go back to ${phaseActionModal ? PHASE_STEP_LABELS[phaseActionModal - 1] : 'selected'} phase`}
+              accessibilityLabel={`Go back to ${phaseActionModal ? PHASE_LABELS[phaseActionModal - 1] : 'selected'} phase`}
             >
               <View style={[styles.phaseActionIconWrap, styles.phaseActionIconWrapPrimary]}>
                 <Ionicons name="arrow-back" size={18} color={Colors.accent} />
