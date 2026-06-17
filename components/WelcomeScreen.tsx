@@ -382,8 +382,8 @@ export default function WelcomeScreen({
             </View>
           ) : null}
           <LinearGradient
-            colors={['rgba(4,6,10,1.0)', 'rgba(4,6,10,0.96)', 'rgba(4,6,10,0.78)', 'rgba(4,6,10,0.42)', 'rgba(4,6,10,0.12)', 'rgba(4,6,10,0.0)']}
-            locations={[0, 0.14, 0.34, 0.62, 0.84, 1]}
+            colors={['rgba(4,6,10,1.0)', 'rgba(4,6,10,0.98)', 'rgba(4,6,10,0.88)', 'rgba(4,6,10,0.58)', 'rgba(4,6,10,0.22)', 'rgba(4,6,10,0.0)']}
+            locations={[0, 0.2, 0.42, 0.66, 0.86, 1]}
             style={styles.heroPanelBlend}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
@@ -855,8 +855,8 @@ const createStyles = (Colors: AppColors) => {
       position: 'absolute',
       top: 0,
       bottom: 0,
-      left: '26%',
-      width: '42%',
+      left: '20%',
+      width: '58%',
     },
     heroContent: {
       padding: Spacing.lg,
