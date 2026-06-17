@@ -3,6 +3,8 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
+  Animated,
   ActivityIndicator,
   StyleProp,
   ViewStyle,
@@ -790,6 +792,184 @@ const StyleSheetAbsoluteFill: ViewStyle = {
 
 export type BottomTab = 'home' | 'projects' | 'tour' | 'more';
 
+function BottomTabButton({
+  tabKey,
+  label,
+  icon,
+  activeIcon,
+  active,
+  onPress,
+  colors,
+}: {
+  tabKey: BottomTab;
+  label: string;
+  icon: IconName;
+  activeIcon: IconName;
+  active: BottomTab | null;
+  onPress: () => void;
+  colors: AppColors;
+}) {
+  const isActive = active === tabKey;
+  const hover = React.useRef(new Animated.Value(0)).current;
+  const press = React.useRef(new Animated.Value(1)).current;
+
+  const hoverScale = hover.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.16],
+  });
+  const hoverLift = hover.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -2],
+  });
+  const hoverOpacity = hover.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  const animateHover = (toValue: number) => {
+    Animated.spring(hover, {
+      toValue,
+      friction: 7,
+      tension: 120,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const animatePress = (toValue: number) => {
+    Animated.spring(press, {
+      toValue,
+      friction: 6,
+      tension: 180,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Pressable
+      style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 6 }}
+      onPress={onPress}
+      onHoverIn={() => animateHover(1)}
+      onHoverOut={() => animateHover(0)}
+      onPressIn={() => animatePress(1.08)}
+      onPressOut={() => animatePress(1)}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: isActive }}
+    >
+      <Animated.View
+        style={{
+          width: 36,
+          height: 30,
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: [
+            { translateY: hoverLift },
+            { scale: Animated.multiply(hoverScale, press) },
+          ],
+        }}
+      >
+        <Animated.View
+          style={{
+            position: 'absolute',
+            width: 30,
+            height: 30,
+            borderRadius: Radii.pill,
+            backgroundColor: colors.primarySoft,
+            opacity: hoverOpacity,
+            transform: [{ scale: 0.92 }],
+          }}
+        />
+        <Ionicons name={isActive ? activeIcon : icon} size={22} color={isActive ? colors.primary : colors.dimText} />
+      </Animated.View>
+      <Text style={{ fontSize: 10, fontWeight: '700', color: isActive ? colors.primary : colors.dimText }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function BottomNewButton({
+  onPress,
+  colors,
+  shadows,
+}: {
+  onPress: () => void;
+  colors: AppColors;
+  shadows: ReturnType<typeof makeShadows>;
+}) {
+  const hover = React.useRef(new Animated.Value(0)).current;
+  const press = React.useRef(new Animated.Value(1)).current;
+
+  const hoverScale = hover.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.08],
+  });
+  const hoverLift = hover.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -2],
+  });
+
+  const animateHover = (toValue: number) => {
+    Animated.spring(hover, {
+      toValue,
+      friction: 7,
+      tension: 120,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const animatePress = (toValue: number) => {
+    Animated.spring(press, {
+      toValue,
+      friction: 6,
+      tension: 180,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Animated.View
+      style={{
+        transform: [
+          { translateY: hoverLift },
+          { scale: Animated.multiply(hoverScale, press) },
+        ],
+      }}
+    >
+      <Pressable
+        onPress={onPress}
+        onHoverIn={() => animateHover(1)}
+        onHoverOut={() => animateHover(0)}
+        onPressIn={() => animatePress(1.04)}
+        onPressOut={() => animatePress(1)}
+        accessibilityRole="button"
+        accessibilityLabel="New reconstruction"
+        testID="reversr-bottom-new"
+        style={{
+          width: 56,
+          height: 56,
+          marginTop: -24,
+          borderRadius: Radii.pill,
+          overflow: 'hidden',
+          borderWidth: 3,
+          borderColor: colors.background,
+          ...shadows.floating,
+          shadowColor: colors.primary,
+        }}
+      >
+        <LinearGradient
+          colors={[colors.primary, colors.primaryStrong]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Ionicons name="add" size={28} color="#ffffff" />
+        </LinearGradient>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 /** Persistent bottom navigation bar with a centered raised gradient action. */
 export function BottomTabBar({
   active,
@@ -818,20 +998,17 @@ export function BottomTabBar({
     activeIcon: IconName,
     onPress: () => void,
   ) => {
-    const isActive = active === key;
     return (
-      <TouchableOpacity
-        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 6 }}
+      <BottomTabButton
+        key={key}
+        tabKey={key}
+        label={label}
+        icon={icon}
+        activeIcon={activeIcon}
+        active={active}
         onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        accessibilityState={{ selected: isActive }}
-      >
-        <Ionicons name={isActive ? activeIcon : icon} size={22} color={isActive ? colors.primary : colors.dimText} />
-        <Text style={{ fontSize: 10, fontWeight: '700', color: isActive ? colors.primary : colors.dimText }}>
-          {label}
-        </Text>
-      </TouchableOpacity>
+        colors={colors}
+      />
     );
   };
 
@@ -856,33 +1033,7 @@ export function BottomTabBar({
 
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           {/* center action */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={onNew}
-            accessibilityRole="button"
-            accessibilityLabel="New reconstruction"
-            testID="reversr-bottom-new"
-            style={{
-              width: 56,
-              height: 56,
-              marginTop: -24,
-              borderRadius: Radii.pill,
-              overflow: 'hidden',
-              borderWidth: 3,
-              borderColor: colors.background,
-              ...shadows.floating,
-              shadowColor: colors.primary,
-            }}
-          >
-            <LinearGradient
-              colors={[colors.primary, colors.primaryStrong]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Ionicons name="add" size={28} color="#ffffff" />
-            </LinearGradient>
-          </TouchableOpacity>
+          <BottomNewButton onPress={onNew} colors={colors} shadows={shadows} />
         </View>
 
         {tab('tour', 'Tour', 'compass-outline', 'compass', onTour)}
