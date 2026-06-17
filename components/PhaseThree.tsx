@@ -1158,7 +1158,7 @@ export default function PhaseThree({
               style={styles.modalCloseButton}
               onPress={() => setImageModalVisible(false)}
             >
-              <Ionicons name="close" size={24} color={Colors.white} />
+              <Ionicons name="close" size={20} color={Colors.mutedText} />
             </TouchableOpacity>
           </View>
           
@@ -1191,7 +1191,7 @@ export default function PhaseThree({
                 }}
                 disabled={currentAngleIndex === 0}
               >
-                <Ionicons name="chevron-back" size={28} color={currentAngleIndex === 0 ? Colors.gray[600] : Colors.white} />
+                <Ionicons name="chevron-back" size={24} color={currentAngleIndex === 0 ? Colors.dimText : Colors.text} />
               </TouchableOpacity>
               
               <View style={styles.modalAngleDots}>
@@ -1213,20 +1213,20 @@ export default function PhaseThree({
                 }}
                 disabled={currentAngleIndex === availableAngles.length - 1}
               >
-                <Ionicons name="chevron-forward" size={28} color={currentAngleIndex === availableAngles.length - 1 ? Colors.gray[600] : Colors.white} />
+                <Ionicons name="chevron-forward" size={24} color={currentAngleIndex === availableAngles.length - 1 ? Colors.dimText : Colors.text} />
               </TouchableOpacity>
             </View>
           )}
 
           <View style={styles.modalControls}>
             <TouchableOpacity style={styles.zoomButton} onPress={handleZoomOut}>
-              <Ionicons name="remove" size={24} color={Colors.white} />
+              <Ionicons name="remove" size={22} color={Colors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.zoomButton} onPress={resetZoom}>
-              <Ionicons name="scan-outline" size={24} color={Colors.white} />
+              <Ionicons name="scan-outline" size={22} color={Colors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.zoomButton} onPress={handleZoomIn}>
-              <Ionicons name="add" size={24} color={Colors.white} />
+              <Ionicons name="add" size={22} color={Colors.text} />
             </TouchableOpacity>
             <View style={styles.modalSpacer} />
             <TouchableOpacity style={styles.modalActionButton} onPress={handleExportImage}>
@@ -1738,13 +1738,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.panel,
+    borderTopWidth: 1,
+    borderTopColor: Colors.hairline,
   },
   modalAngleButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: Radii.pill,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -2020,7 +2024,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    backgroundColor: Colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -2029,21 +2033,33 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: 50,
     paddingBottom: Spacing.md,
+    backgroundColor: Colors.panel,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.hairline,
   },
   modalTitle: {
     fontSize: FontSizes.lg,
-    fontWeight: 'bold',
-    color: Colors.white,
-    fontFamily: 'monospace',
+    color: Colors.text,
+    fontFamily: Fonts.display,
+    flex: 1,
+    paddingRight: Spacing.md,
   },
   modalCloseButton: {
-    padding: Spacing.sm,
+    width: 38,
+    height: 38,
+    borderRadius: Radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
   },
   modalImageContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    backgroundColor: Colors.mode === 'dark' ? '#05070a' : Colors.elevated,
   },
   modalImage: {
     width: SCREEN_WIDTH,
@@ -2057,13 +2073,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     paddingBottom: 40,
     backgroundColor: Colors.panel,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.hairline,
   },
   zoomButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.gray[800],
+    borderRadius: Radii.pill,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.sm,
@@ -2075,18 +2093,18 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    backgroundColor: Colors.accentSoft,
     borderWidth: 1,
-    borderColor: Colors.accent,
+    borderColor: Colors.mode === 'dark' ? 'rgba(0,255,157,0.32)' : 'rgba(0,122,85,0.24)',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: 6,
+    borderRadius: Radii.md,
     marginLeft: Spacing.sm,
   },
   modalActionText: {
     fontSize: FontSizes.sm,
     color: Colors.accent,
-    fontWeight: '600',
+    fontWeight: '800',
   },
   backgroundGenerating: {
     alignItems: 'center',
