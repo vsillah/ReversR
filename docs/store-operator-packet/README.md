@@ -1,6 +1,6 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-13T03:43:58.226Z
+Generated at: 2026-06-18T21:54:36.666Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
@@ -17,13 +17,16 @@ This folder is the store-console handoff packet for App Store Connect and Google
 
 ## Current Status
 
-- Release pass gates: 37
-- Release pending gates: 2
-- Release blocked gates: 0
+- Release pass gates: 34
+- Release pending gates: 4
+- Release blocked gates: 1
 - Release warnings: 0
 
 Pending gates:
 
+- store-submission-packet-smoke: Run npm run store:submission:preflight:local before store console setup.
+- store-review-safety-packet: Run npm run store:review-safety before store review packet handoff.
+- camera-only-permissions: Fix app.json android.permissions and blockedPermissions.
 - local-release-ci-evidence: Run npm run release:local-ci before external account-side release work.
 - store-console-records: Complete TestFlight tester/review readiness, final signoff before any public submission.
 
@@ -72,7 +75,7 @@ Use these files when filling console drafts:
 - Title: ReversR Rebuild
 - Short description length: 73/80
 - Data safety draft ready: true
-- Required permissions: android.permission.CAMERA
+- Required permissions: android.permission.CAMERA, android.permission.READ_EXTERNAL_STORAGE, android.permission.READ_MEDIA_IMAGES
 
 ## Assets
 

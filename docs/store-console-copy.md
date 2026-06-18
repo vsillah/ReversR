@@ -76,7 +76,7 @@ machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D
 ### Review Notes
 
 ```text
-Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Repair shop profiles, plan status, and reconstruction journey credit status are used for account and entitlement functionality. Paid billing is managed on the hosted web account page for web/Stripe billing and through Google Play Billing for eligible Android in-app subscriptions; mobile builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
+Camera access is used only to capture machine images for inventory matching and reconstruction planning. Photo library access is used only when a user chooses a profile image for the account chip. The app does not use camera or photo-library data for advertising or tracking. Repair shop profiles, plan status, and reconstruction journey credit status are used for account and entitlement functionality. Paid billing is managed on the hosted web account page for web/Stripe billing and through Google Play Billing for eligible Android in-app subscriptions; mobile builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.
 ```
 
 ### TestFlight What To Test
@@ -104,6 +104,7 @@ Do not submit real purchase orders or send vendor requests from this build. Trea
 User content processed:
 
 - Machine images
+- Profile image selected from the photo library
 - Machine descriptions
 - Inventory connector metadata
 - Reconstruction outputs
@@ -162,6 +163,7 @@ The app does not automatically order parts, submit manufacturing jobs, transmit 
 Data collected:
 
 - Machine photos or descriptions when submitted for reconstruction planning
+- Profile image selected from the photo library when entered
 - Repair shop profile details when entered
 - Account/shop identifiers, subscription status, and reconstruction journey credit usage
 - Inventory connector metadata
@@ -188,13 +190,13 @@ Purposes:
 Required permissions:
 
 - android.permission.CAMERA
+- android.permission.READ_EXTERNAL_STORAGE
+- android.permission.READ_MEDIA_IMAGES
 
 Blocked permissions:
 
 - android.permission.RECORD_AUDIO
-- android.permission.READ_EXTERNAL_STORAGE
 - android.permission.WRITE_EXTERNAL_STORAGE
-- android.permission.READ_MEDIA_IMAGES
 - android.permission.READ_MEDIA_VIDEO
 
 ## Screenshots And Feature Graphic

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-15T18:13:53.461Z",
+  "generatedAt": "2026-06-18T21:54:41.618Z",
   "urlMode": "placeholder-allowed",
   "warnings": [],
   "appIdentity": {
@@ -33,7 +33,7 @@
     "privacy": {
       "tracking": false,
       "dataUsedForAdvertising": false,
-      "userContentProcessedCount": 4,
+      "userContentProcessedCount": 5,
       "thirdPartyProcessingCount": 2
     }
   },
@@ -45,16 +45,16 @@
       "tracking": false,
       "ads": false,
       "encryptedInTransit": true,
-      "dataCollectedCount": 5,
+      "dataCollectedCount": 6,
       "dataSharedCount": 2,
       "requiredPermissions": [
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
       ],
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO"
       ]
     }

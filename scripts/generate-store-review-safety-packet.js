@@ -36,12 +36,13 @@ const combinedText = [
 
 const requiredPhrases = [
   'Camera access is used only to capture machine images',
+  'Photo library access is used only when a user chooses a profile image',
   'does not automatically order parts',
   'does not automatically submit',
   'explicit human review',
   'qualified person',
   'Raw inventory connector secrets must remain server-side',
-  'does not use camera data for advertising or tracking',
+  'does not use camera or photo-library data for advertising or tracking',
   'configured AI provider',
 ];
 const requiredPacketFields = [
@@ -50,14 +51,17 @@ const requiredPacketFields = [
   ['googlePlay.dataSafety.tracking', packet.googlePlay?.dataSafety?.tracking === false],
   ['googlePlay.dataSafety.ads', packet.googlePlay?.dataSafety?.ads === false],
   ['googlePlay.dataSafety.encryptedInTransit', packet.googlePlay?.dataSafety?.encryptedInTransit === true],
-  ['googlePlay.dataSafety.requiredPermissions.cameraOnly', JSON.stringify(packet.googlePlay?.dataSafety?.requiredPermissions || []) === JSON.stringify(['android.permission.CAMERA'])],
-  ['android.permissions.cameraOnly', JSON.stringify(appConfig.android?.permissions || []) === JSON.stringify(['android.permission.CAMERA'])],
+  ['googlePlay.dataSafety.requiredPermissions.cameraAndProfilePhoto', JSON.stringify(packet.googlePlay?.dataSafety?.requiredPermissions || []) === JSON.stringify([
+    'android.permission.CAMERA',
+    'android.permission.READ_EXTERNAL_STORAGE',
+    'android.permission.READ_MEDIA_IMAGES',
+  ])],
+  ['android.permissions.cameraConfigured', (appConfig.android?.permissions || []).includes('android.permission.CAMERA')],
+  ['expoImagePicker.pluginConfigured', (appConfig.plugins || []).some(plugin => plugin === 'expo-image-picker' || (Array.isArray(plugin) && plugin[0] === 'expo-image-picker'))],
 ];
 const blockedPermissionsRequired = [
   'android.permission.RECORD_AUDIO',
-  'android.permission.READ_EXTERNAL_STORAGE',
   'android.permission.WRITE_EXTERNAL_STORAGE',
-  'android.permission.READ_MEDIA_IMAGES',
   'android.permission.READ_MEDIA_VIDEO',
 ];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
@@ -65,12 +69,16 @@ const blockedPermissionChecks = blockedPermissionsRequired.map(permission => [
   `android.blockedPermissions.${permission}`,
   blockedPermissions.includes(permission),
 ]);
+const profilePhotoPermissionChecks = [
+  ['android.profilePhotoPermission.READ_EXTERNAL_STORAGE.allowed', !blockedPermissions.includes('android.permission.READ_EXTERNAL_STORAGE')],
+  ['android.profilePhotoPermission.READ_MEDIA_IMAGES.allowed', !blockedPermissions.includes('android.permission.READ_MEDIA_IMAGES')],
+];
 
 const phraseChecks = requiredPhrases.map(phrase => ({
   phrase,
   found: combinedText.includes(phrase),
 }));
-const fieldChecks = [...requiredPacketFields, ...blockedPermissionChecks].map(([field, pass]) => ({
+const fieldChecks = [...requiredPacketFields, ...blockedPermissionChecks, ...profilePhotoPermissionChecks].map(([field, pass]) => ({
   field,
   pass: Boolean(pass),
 }));
@@ -92,7 +100,9 @@ The app is not positioned as an autonomous manufacturing, purchasing, or safety-
 ## Safety Boundaries
 
 - Camera access is used only to capture machine images for inventory matching and reconstruction planning.
+- Photo library access is used only when a user chooses a profile image for the account chip.
 - Camera data is not used for advertising, tracking, marketing, or unrelated profiling.
+- Profile images are stored with the local profile settings and are not used for advertising or tracking.
 - Reconstruction outputs may be incomplete, inaccurate, or unsuitable for a specific machine revision.
 - A qualified person must verify machine matches, BOMs, pricing, assembly instructions, vendor files, and safety implications before action.
 - The app does not automatically order parts, submit manufacturing jobs, transmit files to vendors, or purchase services.
@@ -108,7 +118,10 @@ The app is not positioned as an autonomous manufacturing, purchasing, or safety-
 
 ## Permission Story
 
-- Required Android permission: \`android.permission.CAMERA\`
+- Required Android permissions:
+  - \`android.permission.CAMERA\`
+  - \`android.permission.READ_EXTERNAL_STORAGE\`
+  - \`android.permission.READ_MEDIA_IMAGES\`
 - Blocked Android permissions:
 ${blockedPermissionsRequired.map(permission => `  - \`${permission}\``).join('\n')}
 
@@ -117,7 +130,7 @@ ${blockedPermissionsRequired.map(permission => `  - \`${permission}\``).join('\n
 Use this short note when a reviewer asks how the app handles safety-sensitive machine reconstruction output:
 
 \`\`\`text
-ReversR Rebuild creates reviewable machine reconstruction planning packets. Camera access is used only for machine identification. The app does not use camera data for advertising or tracking. Inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Generated machine matches, BOMs, pricing estimates, assembly steps, quote packets, and vendor request drafts require qualified human review. The app does not automatically order parts, submit manufacturing jobs, transmit files, or purchase services.
+ReversR Rebuild creates reviewable machine reconstruction planning packets. Camera access is used only for machine identification. Photo library access is used only when a user chooses a profile image. The app does not use camera or photo-library data for advertising or tracking. Inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Generated machine matches, BOMs, pricing estimates, assembly steps, quote packets, and vendor request drafts require qualified human review. The app does not automatically order parts, submit manufacturing jobs, transmit files, or purchase services.
 \`\`\`
 
 ## Evidence Checks

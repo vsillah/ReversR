@@ -66,7 +66,7 @@ Information may be shared only when:
 
 Camera access is used only to capture machine images for inventory matching and reconstruction planning. Camera access is not used for advertising, marketing, or unrelated data mining.
 
-The app does not request broad photo library or media library access in the current release path. Generated visual references are exported through app storage and the system share sheet instead of being saved directly to the user's photo library.
+Photo library access is used only when you choose a profile image for your account chip. Generated visual references are exported through app storage and the system share sheet instead of being saved directly to the user's photo library.
 
 ## Your Choices
 
