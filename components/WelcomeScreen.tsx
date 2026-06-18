@@ -132,6 +132,9 @@ export default function WelcomeScreen({
     () => Asset.fromModule(heroImage).uri,
     [heroImage],
   );
+  const [nativeHeroUri, setNativeHeroUri] = React.useState<string | null>(
+    Platform.OS === 'web' ? null : Asset.fromModule(heroImage).localUri ?? Asset.fromModule(heroImage).uri,
+  );
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [recent, setRecent] = React.useState<SavedInnovation[]>([]);
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -161,6 +164,30 @@ export default function WelcomeScreen({
       .catch(() => undefined);
     return () => { mounted = false; };
   }, []);
+
+  React.useEffect(() => {
+    if (Platform.OS === 'web') return undefined;
+    let cancelled = false;
+    const asset = Asset.fromModule(heroImage);
+
+    const ensureNativeHeroAsset = async () => {
+      try {
+        if (!asset.localUri) {
+          await asset.downloadAsync();
+        }
+        if (!cancelled) {
+          setNativeHeroUri(asset.localUri ?? asset.uri);
+        }
+      } catch {
+        if (!cancelled) {
+          setNativeHeroUri(asset.localUri ?? asset.uri ?? null);
+        }
+      }
+    };
+
+    ensureNativeHeroAsset();
+    return () => { cancelled = true; };
+  }, [heroImage]);
 
   const currentProject = React.useMemo(
     () => recent.find(item => item.phase < 4) || recent[0] || null,
@@ -357,16 +384,17 @@ export default function WelcomeScreen({
                     } as any,
                   ]}
                 />
-              ) : (
+              ) : nativeHeroUri ? (
                 <Image
-                  source={heroImage}
+                  source={{ uri: nativeHeroUri }}
                   style={[
                     styles.heroImageSplitNative,
                     useNativeDarkHeroFallback && styles.heroImageSplitNativeFallback,
                   ]}
                   resizeMode={useNativeDarkHeroFallback ? 'cover' : 'contain'}
                 />
-              )}
+              ) : null
+              }
               <LinearGradient
                 colors={useNativeDarkHeroFallback
                   ? ['rgba(6,8,12,0.03)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.18)']
