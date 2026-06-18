@@ -124,10 +124,8 @@ export default function WelcomeScreen({
 }: WelcomeScreenProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const isDark = Colors.mode === 'dark';
-  const useNativeDarkHeroFallback = Platform.OS !== 'web' && !isDark;
-  const heroImage = Platform.OS === 'web'
-    ? (isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT)
-    : HERO_IMAGE_DARK;
+  const useNativeDarkHeroFallback = false;
+  const heroImage = isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT;
   const heroImageUri = React.useMemo(
     () => Asset.fromModule(heroImage).uri,
     [heroImage],
