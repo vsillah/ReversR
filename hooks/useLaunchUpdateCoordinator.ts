@@ -389,7 +389,7 @@ export function useLaunchUpdateCoordinator(): LaunchUpdateCoordinator {
       } catch (error) {
         if (!controller.signal.aborted) {
           setErrorMessage(error instanceof Error ? error.message : 'Unknown update error');
-          setStatus('error');
+          setStatus('current');
         }
       }
     };
