@@ -57,19 +57,23 @@ export default function RootLayout() {
 
 function ThemedRootLayout() {
   const { colors } = useAppTheme();
+  const isDark = colors.mode === 'dark';
   const styles = createStyles(colors);
 
   return (
     <SafeAreaProvider>
       <View style={styles.root}>
         <LinearGradient
-          colors={['#0d1320', '#08090c', '#0a0d14']}
+          colors={isDark
+            ? ['#0d1320', '#08090c', '#0a0d14']
+            : ['#eef4ff', '#f4f6fb', '#ffffff']
+          }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-          <StatusBar style="light" />
+          <StatusBar style={isDark ? 'light' : 'dark'} />
           <View style={styles.shell}>
             <Stack
               screenOptions={{
@@ -87,7 +91,7 @@ function ThemedRootLayout() {
 const createStyles = (Colors: AppColors) => StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#08090c',
+    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
