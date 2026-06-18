@@ -124,6 +124,7 @@ export default function WelcomeScreen({
 }: WelcomeScreenProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const isDark = Colors.mode === 'dark';
+  const useNativeDarkHeroFallback = Platform.OS !== 'web' && !isDark;
   const heroImage = Platform.OS === 'web'
     ? (isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT)
     : HERO_IMAGE_DARK;
@@ -338,7 +339,12 @@ export default function WelcomeScreen({
           <View style={styles.heroBase} />
           <View style={styles.heroTextPanel} />
           {heroImage ? (
-            <View style={styles.heroImagePanel}>
+            <View
+              style={[
+                styles.heroImagePanel,
+                useNativeDarkHeroFallback && styles.heroImagePanelNativeFallback,
+              ]}
+            >
               {Platform.OS === 'web' && heroImageUri ? (
                 <View
                   style={[
@@ -354,12 +360,17 @@ export default function WelcomeScreen({
               ) : (
                 <Image
                   source={heroImage}
-                  style={styles.heroImageSplitNative}
-                  resizeMode="contain"
+                  style={[
+                    styles.heroImageSplitNative,
+                    useNativeDarkHeroFallback && styles.heroImageSplitNativeFallback,
+                  ]}
+                  resizeMode={useNativeDarkHeroFallback ? 'cover' : 'contain'}
                 />
               )}
               <LinearGradient
-                colors={isDark
+                colors={useNativeDarkHeroFallback
+                  ? ['rgba(6,8,12,0.03)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.18)']
+                  : isDark
                   ? ['rgba(6,8,12,0.06)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.30)']
                   : ['rgba(248,250,252,0.12)', 'rgba(248,250,252,0.0)', 'rgba(248,250,252,0.22)']
                 }
@@ -372,12 +383,17 @@ export default function WelcomeScreen({
             </View>
           ) : null}
           <LinearGradient
-            colors={isDark
+            colors={useNativeDarkHeroFallback
+              ? ['rgba(248,250,252,1.0)', 'rgba(248,250,252,0.98)', 'rgba(248,250,252,0.84)', 'rgba(248,250,252,0.22)', 'rgba(248,250,252,0.0)']
+              : isDark
               ? ['rgba(4,6,10,1.0)', 'rgba(4,6,10,0.98)', 'rgba(4,6,10,0.88)', 'rgba(4,6,10,0.58)', 'rgba(4,6,10,0.22)', 'rgba(4,6,10,0.0)']
               : ['rgba(248,250,252,1.0)', 'rgba(248,250,252,1.0)', 'rgba(248,250,252,0.96)', 'rgba(248,250,252,0.74)', 'rgba(248,250,252,0.32)', 'rgba(248,250,252,0.0)']
             }
-            locations={[0, 0.2, 0.42, 0.66, 0.86, 1]}
-            style={styles.heroPanelBlend}
+            locations={useNativeDarkHeroFallback ? [0, 0.18, 0.38, 0.62, 1] : [0, 0.2, 0.42, 0.66, 0.86, 1]}
+            style={[
+              styles.heroPanelBlend,
+              useNativeDarkHeroFallback && styles.heroPanelBlendNativeFallback,
+            ]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             pointerEvents="none"
@@ -828,6 +844,9 @@ const createStyles = (Colors: AppColors) => {
       backgroundColor: isDark ? '#020406' : '#eef3f8',
       overflow: 'hidden',
     },
+    heroImagePanelNativeFallback: {
+      backgroundColor: '#020406',
+    },
     heroImageSplitWeb: {
       position: 'absolute',
       top: '-2%',
@@ -846,12 +865,22 @@ const createStyles = (Colors: AppColors) => {
       opacity: 1,
       zIndex: 1,
     },
+    heroImageSplitNativeFallback: {
+      top: -18,
+      right: -26,
+      bottom: -18,
+      left: -160,
+    },
     heroPanelBlend: {
       position: 'absolute',
       top: 0,
       bottom: 0,
       left: '18%',
       width: '60%',
+    },
+    heroPanelBlendNativeFallback: {
+      left: '22%',
+      width: '44%',
     },
     heroContent: {
       padding: Spacing.lg,
