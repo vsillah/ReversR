@@ -243,7 +243,9 @@ const resolveNativeUpdateUrl = (latestRelease: ReleaseManifest | null) => {
   return latestRelease?.updateUrl || null;
 };
 
-const canUseExpoUpdates = () => Platform.OS !== 'web' && Updates.isEnabled && !__DEV__;
+const hasConfiguredUpdateChannel = () => typeof Updates.channel === 'string' && Updates.channel.length > 0;
+
+const canUseExpoUpdates = () => Platform.OS !== 'web' && Updates.isEnabled && !__DEV__ && hasConfiguredUpdateChannel();
 
 const getStatusCopy = (
   status: LaunchUpdateStatus,
