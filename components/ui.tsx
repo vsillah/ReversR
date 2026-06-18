@@ -71,6 +71,11 @@ export function Card({
     borderRadius: Radii.lg,
     borderWidth: 1,
     borderColor: isHighlight ? colors.primary : colors.border,
+    backgroundColor: isHighlight
+      ? colors.mode === 'dark'
+        ? 'rgba(12,18,30,0.9)'
+        : '#f8fbff'
+      : colors.surface,
     overflow: 'hidden',
     padding: padded ? Spacing.md : 0,
     ...shadows.card,
@@ -79,7 +84,7 @@ export function Card({
   const gradientColors = (isHighlight
     ? colors.mode === 'dark'
       ? ['rgba(59,130,246,0.20)', 'rgba(59,130,246,0.06)']
-      : ['rgba(37,99,235,0.12)', 'rgba(37,99,235,0.03)']
+      : ['rgba(255,255,255,0.98)', 'rgba(239,246,255,0.92)']
     : [colors.elevated, colors.surface]) as [string, string, ...string[]];
 
   const highlightColor = colors.mode === 'dark'

@@ -352,8 +352,11 @@ export default function WelcomeScreen({
               ) : (
                 <Image
                   source={heroImage}
-                  style={styles.heroImageSplitNative}
-                  resizeMode="contain"
+                  style={[
+                    styles.heroImageSplitNative,
+                    !isDark && styles.heroImageSplitNativeLight,
+                  ]}
+                  resizeMode={isDark ? 'contain' : 'cover'}
                 />
               )}
               <LinearGradient
@@ -807,7 +810,7 @@ const createStyles = (Colors: AppColors) => {
       right: 0,
       bottom: 0,
       left: 0,
-      backgroundColor: isDark ? '#04060A' : '#f8fafc',
+      backgroundColor: isDark ? '#04060A' : '#eef3f8',
     },
     heroTextPanel: {
       position: 'absolute',
@@ -815,7 +818,7 @@ const createStyles = (Colors: AppColors) => {
       bottom: 0,
       left: 0,
       width: '54%',
-      backgroundColor: isDark ? 'rgba(4,6,10,0.98)' : 'rgba(248,250,252,0.98)',
+      backgroundColor: isDark ? 'rgba(4,6,10,0.98)' : 'rgba(248,250,252,0.96)',
     },
     heroImagePanel: {
       position: 'absolute',
@@ -823,7 +826,7 @@ const createStyles = (Colors: AppColors) => {
       right: 0,
       bottom: 0,
       width: '66%',
-      backgroundColor: isDark ? '#020406' : '#f8fafc',
+      backgroundColor: isDark ? '#020406' : '#eef3f8',
       overflow: 'hidden',
     },
     heroImageSplitWeb: {
@@ -844,12 +847,20 @@ const createStyles = (Colors: AppColors) => {
       opacity: 1,
       zIndex: 1,
     },
+    heroImageSplitNativeLight: {
+      top: -6,
+      right: -68,
+      bottom: -16,
+      left: -28,
+      opacity: 1,
+      transform: [{ scale: 1.02 }],
+    },
     heroPanelBlend: {
       position: 'absolute',
       top: 0,
       bottom: 0,
-      left: '20%',
-      width: '58%',
+      left: '18%',
+      width: '60%',
     },
     heroContent: {
       padding: Spacing.lg,
@@ -883,7 +894,7 @@ const createStyles = (Colors: AppColors) => {
       borderRadius: Radii.lg,
       borderWidth: 1,
       borderColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.12)',
-      backgroundColor: isDark ? 'rgba(12,15,20,0.66)' : 'rgba(255,255,255,0.76)',
+      backgroundColor: isDark ? 'rgba(12,15,20,0.66)' : 'rgba(255,255,255,0.92)',
       gap: Spacing.sm,
     },
     cpTopRow: {
@@ -988,7 +999,7 @@ const createStyles = (Colors: AppColors) => {
       borderRadius: Radii.lg,
       borderWidth: 1,
       borderColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.12)',
-      backgroundColor: isDark ? 'rgba(12,15,20,0.66)' : 'rgba(255,255,255,0.76)',
+      backgroundColor: isDark ? 'rgba(12,15,20,0.66)' : 'rgba(255,255,255,0.92)',
       gap: Spacing.sm,
     },
     cpEmptySub: {
@@ -1009,8 +1020,8 @@ const createStyles = (Colors: AppColors) => {
       paddingHorizontal: Spacing.xs,
       borderRadius: Radii.md,
       borderWidth: 1,
-      borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.08)',
-      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.035)',
+      borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(148,163,184,0.18)',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.82)',
     },
     cpQuickLabel: {
       fontFamily: Fonts.semibold,
