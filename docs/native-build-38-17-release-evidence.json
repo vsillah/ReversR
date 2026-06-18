@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-17T09:58:00Z",
+  "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 38 and iOS TestFlight build 17.",
+  "sourceCommit": "9bf3724e5e1f0226ad0f302145d798dc156f74ef",
+  "builds": {
+    "android": {
+      "id": "e4ab938d-6cc3-426f-a5a0-cbb08761f18d",
+      "status": "FINISHED",
+      "versionCode": "38",
+      "appVersion": "1.0.0",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/e4ab938d-6cc3-426f-a5a0-cbb08761f18d",
+      "artifactUrl": "https://expo.dev/artifacts/eas/fMaUHd1FnNijw76wmYSbFRdGawGnpkhvPsu8562WSho.aab",
+      "completedAt": "2026-06-17T04:48:56.530Z"
+    },
+    "ios": {
+      "id": "af79dadc-84d7-4060-b262-3ff2a5405709",
+      "status": "FINISHED",
+      "buildNumber": "17",
+      "appVersion": "1.0.0",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/af79dadc-84d7-4060-b262-3ff2a5405709",
+      "artifactUrl": "https://expo.dev/artifacts/eas/ja5HPw2ZOK9Q_zaTjcuVJkSV0xZZZ59bPZGu9fQZeMs.ipa",
+      "completedAt": "2026-06-17T04:28:58.736Z"
+    }
+  },
+  "submissions": {
+    "android": {
+      "id": "58a41cfc-adef-4d4f-b0eb-0c075743d743",
+      "status": "scheduled-and-cli-confirmed",
+      "track": "internal",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/58a41cfc-adef-4d4f-b0eb-0c075743d743"
+    },
+    "ios": {
+      "status": "uploaded-via-altool-valid-on-app-store-connect-and-assigned-to-testflight-groups",
+      "deliveryUuid": "6e7cef35-01e3-462d-9abf-9ad7caf0276c",
+      "uploadTool": "xcrun altool",
+      "buildStatus": "VALID",
+      "isOnAppStoreConnect": true,
+      "testFlight": {
+        "buildId": "6e7cef35-01e3-462d-9abf-9ad7caf0276c",
+        "internalGroup": {
+          "id": "0e95a925-c6fa-4a5d-beda-a8311ec15785",
+          "name": "ReversR Internal QA"
+        },
+        "externalGroup": {
+          "id": "355ad927-f5a9-4ec5-81c7-3fb54f12ce62",
+          "name": "ReversR External Beta",
+          "publicLink": "https://testflight.apple.com/join/twj2dNQY"
+        },
+        "betaAppReviewSubmission": {
+          "id": "6e7cef35-01e3-462d-9abf-9ad7caf0276c",
+          "betaReviewState": "APPROVED"
+        }
+      },
+      "notes": [
+        "EAS submit refused App Store Connect API key setup in non-interactive mode.",
+        "The IPA was uploaded successfully through altool using the approved local ASC API key.",
+        "Apple altool build-status reported import-status VALID and is-on-app-store-connect true for build 17.",
+        "App Store Connect API confirmed build 17 is attached to both the ReversR Internal QA and ReversR External Beta TestFlight groups.",
+        "App Store Connect API confirmed the beta app review submission for build 17 is APPROVED."
+      ]
+    }
+  },
+  "testerInstallLinks": {
+    "googlePlayInternalTesting": "https://play.google.com/apps/internaltest/4700334027214849380",
+    "testFlight": "https://testflight.apple.com/join/twj2dNQY"
+  },
+  "draftEmail": {
+    "gmailDraftId": "r-3275989423398817911",
+    "recipient": "vsillah@gmail.com",
+    "status": "saved-for-review"
+  },
+  "validation": [
+    "npm run native:preflight:local",
+    "npm run native:qa:preflight:local",
+    "npm run native:eas:sync-production-builds",
+    "npx eas-cli@20.0.0 submit --platform android --profile production --latest --non-interactive",
+    "xcrun altool --upload-app -f /tmp/reversr-build-17.ipa --apiKey FZ4LLB2243 --apiIssuer d4e5bef0-4168-4aad-b41e-fcd8079e9bfc --p8-file-path /Users/vambahsillah/.config/reversr/eas-submit/AuthKey_FZ4LLB2243.p8 --output-format json"
+  ],
+  "openGates": [
+    "Confirm Android internal availability on the tester track if needed.",
+    "Store-console signoff and final reviewer approval remain separate human gates."
+  ]
+}
