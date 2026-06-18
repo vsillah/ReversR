@@ -6,7 +6,7 @@ const SCOPED_JITPACK_REPOSITORY = `exclusiveContent {
         maven { url 'https://www.jitpack.io' }
       }
       filter {
-        includeGroupByRegex('com\\\\.github\\\\..*')
+        includeGroup('io.github.hyochan.openiap')
       }
     }`;
 
