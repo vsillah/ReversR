@@ -125,6 +125,7 @@ export default function WelcomeScreen({
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const isDark = Colors.mode === 'dark';
   const useNativeDarkHeroFallback = false;
+  const useNativeLightHero = Platform.OS !== 'web' && !isDark && !useNativeDarkHeroFallback;
   const heroImage = isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT;
   const heroImageUri = React.useMemo(
     () => Asset.fromModule(heroImage).uri,
@@ -387,6 +388,7 @@ export default function WelcomeScreen({
                   source={{ uri: nativeHeroUri }}
                   style={[
                     styles.heroImageSplitNative,
+                    useNativeLightHero && styles.heroImageSplitNativeLight,
                     useNativeDarkHeroFallback && styles.heroImageSplitNativeFallback,
                   ]}
                   resizeMode={useNativeDarkHeroFallback ? 'cover' : 'contain'}
@@ -890,6 +892,10 @@ const createStyles = (Colors: AppColors) => {
       left: 0,
       opacity: 1,
       zIndex: 1,
+    },
+    heroImageSplitNativeLight: {
+      right: -10,
+      left: -18,
     },
     heroImageSplitNativeFallback: {
       top: -18,
