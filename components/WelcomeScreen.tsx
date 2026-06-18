@@ -124,7 +124,9 @@ export default function WelcomeScreen({
 }: WelcomeScreenProps) {
   const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
   const isDark = Colors.mode === 'dark';
-  const heroImage = isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT;
+  const heroImage = Platform.OS === 'web'
+    ? (isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT)
+    : HERO_IMAGE_DARK;
   const heroImageUri = React.useMemo(
     () => Asset.fromModule(heroImage).uri,
     [heroImage],
@@ -352,11 +354,8 @@ export default function WelcomeScreen({
               ) : (
                 <Image
                   source={heroImage}
-                  style={[
-                    styles.heroImageSplitNative,
-                    !isDark && styles.heroImageSplitNativeLight,
-                  ]}
-                  resizeMode={isDark ? 'contain' : 'cover'}
+                  style={styles.heroImageSplitNative}
+                  resizeMode="contain"
                 />
               )}
               <LinearGradient
@@ -846,14 +845,6 @@ const createStyles = (Colors: AppColors) => {
       left: 0,
       opacity: 1,
       zIndex: 1,
-    },
-    heroImageSplitNativeLight: {
-      top: -6,
-      right: -68,
-      bottom: -16,
-      left: -28,
-      opacity: 1,
-      transform: [{ scale: 1.02 }],
     },
     heroPanelBlend: {
       position: 'absolute',
