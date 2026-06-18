@@ -70,9 +70,7 @@ const androidPermissions = appConfig.android?.permissions || [];
 const blockedPermissions = appConfig.android?.blockedPermissions || [];
 const disallowedPermissions = [
   'android.permission.RECORD_AUDIO',
-  'android.permission.READ_EXTERNAL_STORAGE',
   'android.permission.WRITE_EXTERNAL_STORAGE',
-  'android.permission.READ_MEDIA_IMAGES',
   'android.permission.READ_MEDIA_VIDEO',
   'android.permission.ACCESS_FINE_LOCATION',
   'android.permission.ACCESS_COARSE_LOCATION',
@@ -89,7 +87,13 @@ for (const permission of disallowedPermissions) {
   }
 }
 
-for (const permission of disallowedPermissions.slice(0, 5)) {
+const blockedPermissionsRequired = [
+  'android.permission.RECORD_AUDIO',
+  'android.permission.WRITE_EXTERNAL_STORAGE',
+  'android.permission.READ_MEDIA_VIDEO',
+];
+
+for (const permission of blockedPermissionsRequired) {
   if (!blockedPermissions.includes(permission)) {
     fail(`Android blockedPermissions should include ${permission} to keep the store permission story narrow.`);
   }
@@ -105,8 +109,13 @@ if (allDependencies['expo-media-library']) {
 }
 
 if (!allDependencies['expo-camera']) fail('expo-camera must stay installed for machine scanning.');
+if (!allDependencies['expo-image-picker']) fail('expo-image-picker must stay installed for user-selected profile images.');
 if (!allDependencies['expo-sharing']) fail('expo-sharing must stay installed for reconstruction package export.');
 if (!allDependencies['expo-file-system']) fail('expo-file-system must stay installed for local package export.');
+
+if (!getPluginOptions('expo-image-picker').photosPermission) {
+  fail('expo-image-picker must declare a photosPermission string for profile image selection.');
+}
 
 runCheck('Accessibility preflight', process.execPath, ['scripts/accessibility-preflight.js']);
 runCheck(

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-13T03:43:57.463Z",
+  "generatedAt": "2026-06-18T21:54:35.773Z",
   "outputFile": "docs/store-review-safety-packet.md",
   "sources": [
     "docs/store-submission-packet.json",
@@ -13,6 +13,10 @@
   "phraseChecks": [
     {
       "phrase": "Camera access is used only to capture machine images",
+      "found": true
+    },
+    {
+      "phrase": "Photo library access is used only when a user chooses a profile image",
       "found": true
     },
     {
@@ -36,7 +40,7 @@
       "found": true
     },
     {
-      "phrase": "does not use camera data for advertising or tracking",
+      "phrase": "does not use camera or photo-library data for advertising or tracking",
       "found": true
     },
     {
@@ -66,11 +70,15 @@
       "pass": true
     },
     {
-      "field": "googlePlay.dataSafety.requiredPermissions.cameraOnly",
+      "field": "googlePlay.dataSafety.requiredPermissions.cameraAndProfilePhoto",
       "pass": true
     },
     {
-      "field": "android.permissions.cameraOnly",
+      "field": "android.permissions.cameraConfigured",
+      "pass": true
+    },
+    {
+      "field": "expoImagePicker.pluginConfigured",
       "pass": true
     },
     {
@@ -78,27 +86,27 @@
       "pass": true
     },
     {
-      "field": "android.blockedPermissions.android.permission.READ_EXTERNAL_STORAGE",
-      "pass": true
-    },
-    {
       "field": "android.blockedPermissions.android.permission.WRITE_EXTERNAL_STORAGE",
-      "pass": true
-    },
-    {
-      "field": "android.blockedPermissions.android.permission.READ_MEDIA_IMAGES",
       "pass": true
     },
     {
       "field": "android.blockedPermissions.android.permission.READ_MEDIA_VIDEO",
       "pass": true
+    },
+    {
+      "field": "android.profilePhotoPermission.READ_EXTERNAL_STORAGE.allowed",
+      "pass": true
+    },
+    {
+      "field": "android.profilePhotoPermission.READ_MEDIA_IMAGES.allowed",
+      "pass": true
     }
   ],
   "failures": [],
   "summary": {
-    "phrasePassCount": 8,
-    "phraseCount": 8,
-    "fieldPassCount": 12,
-    "fieldCount": 12
+    "phrasePassCount": 9,
+    "phraseCount": 9,
+    "fieldPassCount": 13,
+    "fieldCount": 13
   }
 }

@@ -85,12 +85,19 @@ maxLength('googlePlay.fullDescription', google.fullDescription, 4000);
 if (google.dataSafety?.tracking !== false) fail('Google Play Data safety draft must state tracking=false.');
 if (google.dataSafety?.ads !== false) fail('Google Play Data safety draft must state ads=false.');
 if (google.dataSafety?.encryptedInTransit !== true) fail('Google Play Data safety draft must state encryptedInTransit=true.');
-if (!google.dataSafety?.requiredPermissions?.includes('android.permission.CAMERA')) {
-  fail('Google Play Data safety draft must include camera as the only required sensitive permission.');
-}
-
 const requiredPermissions = google.dataSafety?.requiredPermissions || [];
-const unexpectedPermissions = requiredPermissions.filter(permission => permission !== 'android.permission.CAMERA');
+const allowedRequiredPermissions = [
+  'android.permission.CAMERA',
+  'android.permission.READ_EXTERNAL_STORAGE',
+  'android.permission.READ_MEDIA_IMAGES',
+];
+if (!requiredPermissions.includes('android.permission.CAMERA')) {
+  fail('Google Play Data safety draft must include camera for machine scanning.');
+}
+if (!requiredPermissions.includes('android.permission.READ_MEDIA_IMAGES')) {
+  fail('Google Play Data safety draft must include image read access for user-selected profile images.');
+}
+const unexpectedPermissions = requiredPermissions.filter(permission => !allowedRequiredPermissions.includes(permission));
 if (unexpectedPermissions.length > 0) {
   fail(`Google Play Data safety draft includes unexpected required permissions: ${unexpectedPermissions.join(', ')}`);
 }

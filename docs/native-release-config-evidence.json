@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-17T04:20:26.477Z",
+  "generatedAt": "2026-06-18T21:54:41.306Z",
   "mode": {
     "allowPlaceholder": true,
     "allowMissingCli": true,
@@ -25,9 +25,7 @@
     ],
     "androidBlockedPermissions": [
       "android.permission.RECORD_AUDIO",
-      "android.permission.READ_EXTERNAL_STORAGE",
       "android.permission.WRITE_EXTERNAL_STORAGE",
-      "android.permission.READ_MEDIA_IMAGES",
       "android.permission.READ_MEDIA_VIDEO"
     ],
     "iosCameraUsageDescription": "Allow ReversR Rebuild to scan machines for inventory matching and reconstruction planning.",

@@ -11,7 +11,9 @@ The app is not positioned as an autonomous manufacturing, purchasing, or safety-
 ## Safety Boundaries
 
 - Camera access is used only to capture machine images for inventory matching and reconstruction planning.
+- Photo library access is used only when a user chooses a profile image for the account chip.
 - Camera data is not used for advertising, tracking, marketing, or unrelated profiling.
+- Profile images are stored with the local profile settings and are not used for advertising or tracking.
 - Reconstruction outputs may be incomplete, inaccurate, or unsuitable for a specific machine revision.
 - A qualified person must verify machine matches, BOMs, pricing, assembly instructions, vendor files, and safety implications before action.
 - The app does not automatically order parts, submit manufacturing jobs, transmit files to vendors, or purchase services.
@@ -27,12 +29,13 @@ The app is not positioned as an autonomous manufacturing, purchasing, or safety-
 
 ## Permission Story
 
-- Required Android permission: `android.permission.CAMERA`
+- Required Android permissions:
+  - `android.permission.CAMERA`
+  - `android.permission.READ_EXTERNAL_STORAGE`
+  - `android.permission.READ_MEDIA_IMAGES`
 - Blocked Android permissions:
   - `android.permission.RECORD_AUDIO`
-  - `android.permission.READ_EXTERNAL_STORAGE`
   - `android.permission.WRITE_EXTERNAL_STORAGE`
-  - `android.permission.READ_MEDIA_IMAGES`
   - `android.permission.READ_MEDIA_VIDEO`
 
 ## Store Review Notes
@@ -40,28 +43,30 @@ The app is not positioned as an autonomous manufacturing, purchasing, or safety-
 Use this short note when a reviewer asks how the app handles safety-sensitive machine reconstruction output:
 
 ```text
-ReversR Rebuild creates reviewable machine reconstruction planning packets. Camera access is used only for machine identification. The app does not use camera data for advertising or tracking. Inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Generated machine matches, BOMs, pricing estimates, assembly steps, quote packets, and vendor request drafts require qualified human review. The app does not automatically order parts, submit manufacturing jobs, transmit files, or purchase services.
+ReversR Rebuild creates reviewable machine reconstruction planning packets. Camera access is used only for machine identification. Photo library access is used only when a user chooses a profile image. The app does not use camera or photo-library data for advertising or tracking. Inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Generated machine matches, BOMs, pricing estimates, assembly steps, quote packets, and vendor request drafts require qualified human review. The app does not automatically order parts, submit manufacturing jobs, transmit files, or purchase services.
 ```
 
 ## Evidence Checks
 
 - PASS Required phrase: `Camera access is used only to capture machine images`
+- PASS Required phrase: `Photo library access is used only when a user chooses a profile image`
 - PASS Required phrase: `does not automatically order parts`
 - PASS Required phrase: `does not automatically submit`
 - PASS Required phrase: `explicit human review`
 - PASS Required phrase: `qualified person`
 - PASS Required phrase: `Raw inventory connector secrets must remain server-side`
-- PASS Required phrase: `does not use camera data for advertising or tracking`
+- PASS Required phrase: `does not use camera or photo-library data for advertising or tracking`
 - PASS Required phrase: `configured AI provider`
 - PASS appStoreConnect.appPrivacy.tracking
 - PASS appStoreConnect.appPrivacy.dataUsedForAdvertising
 - PASS googlePlay.dataSafety.tracking
 - PASS googlePlay.dataSafety.ads
 - PASS googlePlay.dataSafety.encryptedInTransit
-- PASS googlePlay.dataSafety.requiredPermissions.cameraOnly
-- PASS android.permissions.cameraOnly
+- PASS googlePlay.dataSafety.requiredPermissions.cameraAndProfilePhoto
+- PASS android.permissions.cameraConfigured
+- PASS expoImagePicker.pluginConfigured
 - PASS android.blockedPermissions.android.permission.RECORD_AUDIO
-- PASS android.blockedPermissions.android.permission.READ_EXTERNAL_STORAGE
 - PASS android.blockedPermissions.android.permission.WRITE_EXTERNAL_STORAGE
-- PASS android.blockedPermissions.android.permission.READ_MEDIA_IMAGES
 - PASS android.blockedPermissions.android.permission.READ_MEDIA_VIDEO
+- PASS android.profilePhotoPermission.READ_EXTERNAL_STORAGE.allowed
+- PASS android.profilePhotoPermission.READ_MEDIA_IMAGES.allowed

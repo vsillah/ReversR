@@ -35,7 +35,7 @@
     "promotionalText": "Scan or describe a machine, match it to an approved inventory record, and prepare a reviewable reconstruction package.",
     "description": "ReversR Rebuild helps teams move from machine scan to reconstruction plan.\n\nCapture or describe a machine, connect an approved inventory source, and match the visible machine to a known record. The app prepares a practical reconstruction package with machine evidence, assembly steps, bill of materials, pricing estimates, technical specs, and fabrication handoff files.\n\nThe workflow is designed for human review. Inventory matches, procurement decisions, fabrication files, and assembly steps should be checked by a qualified person before parts are ordered or machines are rebuilt.\n\nCore capabilities:\n- Machine scan or manual description intake\n- Repair shop profile, plan, and journey credit status\n- Admin inventory connector validation\n- Machine matching against approved records\n- Bill of materials generation\n- Assembly sequence planning\n- Pricing estimate ranges\n- Manufacturer quote packet export\n- User-reviewed vendor request draft\n\nReversR Rebuild does not automatically order parts, submit manufacturing jobs, or transmit files to vendors. It prepares reviewable handoff materials so users can make controlled decisions.",
     "keywords": "machine,rebuild,BOM,parts,inventory,assembly,repair,fabrication,3D",
-    "reviewNotes": "Camera access is used only to capture machine images for inventory matching and reconstruction planning. The app does not use camera data for advertising or tracking. Repair shop profiles, plan status, and reconstruction journey credit status are used for account and entitlement functionality. Paid billing is managed on the hosted web account page for web/Stripe billing and through Google Play Billing for eligible Android in-app subscriptions; mobile builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.",
+    "reviewNotes": "Camera access is used only to capture machine images for inventory matching and reconstruction planning. Photo library access is used only when a user chooses a profile image for the account chip. The app does not use camera or photo-library data for advertising or tracking. Repair shop profiles, plan status, and reconstruction journey credit status are used for account and entitlement functionality. Paid billing is managed on the hosted web account page for web/Stripe billing and through Google Play Billing for eligible Android in-app subscriptions; mobile builds do not include Stripe checkout purchase links. Authenticated inventory connectors use backend credential references so raw ERP/API secrets are not stored in the mobile app. Quote packets and vendor request drafts require explicit user review; the app does not automatically submit manufacturing jobs, transmit files, order parts, or purchase services.",
     "testFlightWhatToTest": "Please focus on the core reconstruction workflow:\n- Start a new reconstruction using Type mode and a machine description.\n- Validate the demo or approved inventory connector.\n- Confirm the app matches the machine to an inventory record.\n- Generate the BOM and review parts, quantities, pricing ranges, and supplier guidance.\n- Review assembly steps, quote packet controls, policy links, and error handling.\n- Open Settings and confirm the Repair Shop Account panel shows profile, plan, and journey credit status.\n\nDo not submit real purchase orders or send vendor requests from this build. Treat generated BOMs and assembly steps as review drafts that require qualified human validation before use.",
     "appPrivacy": {
       "tracking": false,
@@ -45,6 +45,7 @@
       "diagnosticsCollected": false,
       "userContentProcessed": [
         "Machine images",
+        "Profile image selected from the photo library",
         "Machine descriptions",
         "Inventory connector metadata",
         "Reconstruction outputs"
@@ -63,6 +64,7 @@
     "dataSafety": {
       "dataCollected": [
         "Machine photos or descriptions when submitted for reconstruction planning",
+        "Profile image selected from the photo library when entered",
         "Repair shop profile details when entered",
         "Account/shop identifiers, subscription status, and reconstruction journey credit usage",
         "Inventory connector metadata",
@@ -84,13 +86,13 @@
       "ads": false,
       "accountDeletionRequired": "Yes. Until self-service deletion is implemented, users request deletion through support.",
       "requiredPermissions": [
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
       ],
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO"
       ]
     }

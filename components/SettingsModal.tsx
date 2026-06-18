@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '../constants/theme';
 import {
   CommercialAccessGrantSummary,
@@ -107,6 +109,12 @@ const FALLBACK_COMMERCIAL_PLANS: CommercialPlan[] = [
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const normalizeEmail = (value = '') => value.trim().toLowerCase();
 const isValidEmail = (value = '') => EMAIL_PATTERN.test(normalizeEmail(value));
+const getProfileImageExtension = (uri: string) => {
+  const cleanUri = uri.split('?')[0] || '';
+  const match = cleanUri.match(/\.([a-zA-Z0-9]+)$/);
+  const ext = match?.[1]?.toLowerCase();
+  return ext && ['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext) ? ext : 'jpg';
+};
 const shortFingerprint = (value = '') => {
   let hash = 0x811c9dc5;
   for (let index = 0; index < value.length; index += 1) {
@@ -201,12 +209,52 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     },
   ];
 
-  const triggerProfileImageUpload = () => {
+  const persistNativeProfileImage = async (sourceUri: string) => {
+    if (Platform.OS === 'web' || !FileSystem.documentDirectory) return sourceUri;
+    const extension = getProfileImageExtension(sourceUri);
+    const destination = `${FileSystem.documentDirectory}reversr-profile-avatar-${Date.now()}.${extension}`;
+    await FileSystem.copyAsync({ from: sourceUri, to: destination });
+    return destination;
+  };
+
+  const triggerProfileImageUpload = async () => {
     if (Platform.OS === 'web') {
       profileImageInputRef.current?.click?.();
       return;
     }
-    setCommercialStatus('Profile image upload is available in the web preview. Native image picker support can be added to a future tester build.');
+
+    setCommercialStatus(null);
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        const message = 'Photo library access is needed to choose a profile image.';
+        setCommercialStatus(message);
+        Alert.alert('Photo access needed', message);
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.82,
+      });
+      if (result.canceled) {
+        setCommercialStatus('Profile image selection cancelled.');
+        return;
+      }
+
+      const imageUri = result.assets?.[0]?.uri;
+      if (!imageUri) throw new Error('No image was returned from the picker.');
+
+      const avatarUri = await persistNativeProfileImage(imageUri);
+      setCommercialProfile(prev => ({ ...prev, avatarUri }));
+      setCommercialStatus('Profile image selected. Save Profile to keep it on this device.');
+    } catch (e: any) {
+      const message = e?.message || 'Unable to choose that profile image.';
+      setCommercialStatus(message);
+      Alert.alert('Profile image unavailable', message);
+    }
   };
 
   const handleProfileImageSelected = (event: any) => {
@@ -1114,6 +1162,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                         </TouchableOpacity>
                       ) : null}
                     </View>
+                    {commercialStatus ? (
+                      <Text style={styles.inlineStatusText}>{commercialStatus}</Text>
+                    ) : null}
                   </View>
                 </View>
 
@@ -1153,7 +1204,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   <TouchableOpacity
                     style={[styles.adminButton, accountLoading && styles.disabledButton]}
                     onPress={handleLookupTesterInvite}
-                    disabled={accountLoading || !commercialEmailIsValid}
+                    disabled={accountLoading}
                     accessibilityRole="button"
                     accessibilityLabel="Check work email for tester or admin activation"
                   >
@@ -1161,6 +1212,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                     <Text style={styles.adminButtonText}>Check Access</Text>
                   </TouchableOpacity>
                 </View>
+                {accessStatus ? (
+                  <Text style={styles.inlineStatusText}>{accessStatus}</Text>
+                ) : null}
 
                 <Text style={styles.compactLabel}>Password</Text>
                 <TextInput
@@ -1238,8 +1292,8 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   </>
                 )}
 
-                {(commercialStatus || accessStatus || accountError) && (
-                  <Text style={styles.adminStatusText}>{commercialStatus || accessStatus || accountError}</Text>
+                {accountError && (
+                  <Text style={styles.adminStatusText}>{accountError}</Text>
                 )}
               </View>
             )}
@@ -2982,6 +3036,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     marginTop: 10,
+  },
+  inlineStatusText: {
+    color: Colors.gray[400],
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
   },
   credentialList: {
     gap: 8,

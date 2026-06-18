@@ -1,14 +1,18 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-13T03:43:58.226Z",
+  "generatedAt": "2026-06-18T21:54:36.666Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-13T03:43:58.222Z",
+    "generatedAt": "2026-06-18T21:54:36.661Z",
     "summary": {
-      "pass": 37,
-      "pending": 2
+      "pass": 34,
+      "pending": 4,
+      "blocked": 1
     },
     "pendingGateIds": [
+      "store-submission-packet-smoke",
+      "store-review-safety-packet",
+      "camera-only-permissions",
       "local-release-ci-evidence",
       "store-console-records"
     ]
@@ -38,7 +42,9 @@
     "shortDescriptionLength": 73,
     "dataSafetyDraftReady": true,
     "requiredPermissions": [
-      "android.permission.CAMERA"
+      "android.permission.CAMERA",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.READ_MEDIA_IMAGES"
     ]
   },
   "assets": {
@@ -131,6 +137,24 @@
     "Run npm run store:console:preflight and npm run native:qa:preflight before TestFlight or Play Internal Testing submission."
   ],
   "pendingGates": [
+    {
+      "id": "store-submission-packet-smoke",
+      "group": "store-local",
+      "title": "Store submission metadata and privacy packet evidence is recorded",
+      "nextStep": "Run npm run store:submission:preflight:local before store console setup."
+    },
+    {
+      "id": "store-review-safety-packet",
+      "group": "store-local",
+      "title": "Store review safety packet proves human-review and no-auto-submission boundaries",
+      "nextStep": "Run npm run store:review-safety before store review packet handoff."
+    },
+    {
+      "id": "camera-only-permissions",
+      "group": "store-local",
+      "title": "Android permission story is camera-only with broad media/microphone permissions blocked",
+      "nextStep": "Fix app.json android.permissions and blockedPermissions."
+    },
     {
       "id": "local-release-ci-evidence",
       "group": "store-local",
