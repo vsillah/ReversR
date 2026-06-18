@@ -13,8 +13,8 @@ import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Asset } from 'expo-asset';
 import { router } from 'expo-router';
-import { AppColors, DarkColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
-import { AppThemeContext, useAppTheme } from '../hooks/useAppTheme';
+import { AppColors, Fonts, Radii, Spacing, FontSizes, Typography, makeShadows } from '../constants/theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { Badge, Card, HeroBackdrop, HorizontalStepper } from './ui';
 import ReversRLogoMark from './ReversRLogoMark';
 import { getAllInnovations, SavedInnovation } from '../hooks/useStorage';
@@ -34,9 +34,8 @@ const staticAppConfig = require('../app.json') as {
   };
 };
 
-// Selected Canva hero render. Swap the require path to use a different file in
-// assets/hero/canva/. Set to null to fall back to the blueprint backdrop.
-const HERO_IMAGE: number | null = require('../assets/hero/canva/hero-premium-industrial-pump-render-right-split.png');
+const HERO_IMAGE_DARK: number = require('../assets/hero/canva/hero-premium-industrial-pump-render-right-split.png');
+const HERO_IMAGE_LIGHT: number = require('../assets/hero/canva/hero-premium-industrial-pump-render-light-studio.png');
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -123,19 +122,12 @@ export default function WelcomeScreen({
   userAvatarUri = '',
   bottomBarInset = 0,
 }: WelcomeScreenProps) {
-  // Home is dark-first / cinematic regardless of the global appearance setting.
-  const { mode: themeMode, setMode: setThemeMode, hasUserPreference } = useAppTheme();
-  const Colors = DarkColors;
-  const darkThemeValue = React.useMemo(() => ({
-    mode: 'dark' as const,
-    colors: DarkColors,
-    setMode: setThemeMode,
-    isDark: true,
-    hasUserPreference,
-  }), [setThemeMode, hasUserPreference]);
+  const { colors: Colors, mode: themeMode, setMode: setThemeMode } = useAppTheme();
+  const isDark = Colors.mode === 'dark';
+  const heroImage = isDark ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT;
   const heroImageUri = React.useMemo(
-    () => (HERO_IMAGE ? Asset.fromModule(HERO_IMAGE).uri : undefined),
-    [],
+    () => Asset.fromModule(heroImage).uri,
+    [heroImage],
   );
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [recent, setRecent] = React.useState<SavedInnovation[]>([]);
@@ -148,7 +140,7 @@ export default function WelcomeScreen({
     'native-required',
     'error',
   ].includes(updateCoordinator.status);
-  const styles = createStyles(Colors);
+  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
   const hasNamedProfile = userDisplayName.trim().length > 0 && userDisplayName !== 'Guest';
   const hasProfileIdentity = userIsAuthenticated || hasNamedProfile || Boolean(userAvatarUri);
   const profileIcon = hasProfileIdentity ? 'person-circle-outline' : 'person-outline';
@@ -218,7 +210,6 @@ export default function WelcomeScreen({
   });
 
   return (
-    <AppThemeContext.Provider value={darkThemeValue}>
     <Animated.ScrollView
       style={styles.container}
       contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.xl + bottomBarInset }]}
@@ -344,7 +335,7 @@ export default function WelcomeScreen({
           <HeroBackdrop radius={0} />
           <View style={styles.heroBase} />
           <View style={styles.heroTextPanel} />
-          {HERO_IMAGE ? (
+          {heroImage ? (
             <View style={styles.heroImagePanel}>
               {Platform.OS === 'web' && heroImageUri ? (
                 <View
@@ -353,20 +344,23 @@ export default function WelcomeScreen({
                     {
                       backgroundImage: `url("${heroImageUri}")`,
                       backgroundRepeat: 'no-repeat',
-                      backgroundPosition: '70% 34%',
-                      backgroundSize: '76%',
+                      backgroundPosition: isDark ? '70% 34%' : '70% 35%',
+                      backgroundSize: isDark ? '76%' : '68%',
                     } as any,
                   ]}
                 />
               ) : (
                 <Image
-                  source={HERO_IMAGE}
+                  source={heroImage}
                   style={styles.heroImageSplitNative}
                   resizeMode="contain"
                 />
               )}
               <LinearGradient
-                colors={['rgba(6,8,12,0.06)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.30)']}
+                colors={isDark
+                  ? ['rgba(6,8,12,0.06)', 'rgba(6,8,12,0.0)', 'rgba(6,8,12,0.30)']
+                  : ['rgba(248,250,252,0.12)', 'rgba(248,250,252,0.0)', 'rgba(248,250,252,0.22)']
+                }
                 locations={[0, 0.5, 1]}
                 style={StyleSheet.absoluteFill}
                 start={{ x: 0.5, y: 0 }}
@@ -376,7 +370,10 @@ export default function WelcomeScreen({
             </View>
           ) : null}
           <LinearGradient
-            colors={['rgba(4,6,10,1.0)', 'rgba(4,6,10,0.98)', 'rgba(4,6,10,0.88)', 'rgba(4,6,10,0.58)', 'rgba(4,6,10,0.22)', 'rgba(4,6,10,0.0)']}
+            colors={isDark
+              ? ['rgba(4,6,10,1.0)', 'rgba(4,6,10,0.98)', 'rgba(4,6,10,0.88)', 'rgba(4,6,10,0.58)', 'rgba(4,6,10,0.22)', 'rgba(4,6,10,0.0)']
+              : ['rgba(248,250,252,1.0)', 'rgba(248,250,252,1.0)', 'rgba(248,250,252,0.96)', 'rgba(248,250,252,0.74)', 'rgba(248,250,252,0.32)', 'rgba(248,250,252,0.0)']
+            }
             locations={[0, 0.2, 0.42, 0.66, 0.86, 1]}
             style={styles.heroPanelBlend}
             start={{ x: 0, y: 0.5 }}
@@ -384,7 +381,10 @@ export default function WelcomeScreen({
             pointerEvents="none"
           />
           <LinearGradient
-            colors={['rgba(6,8,12,0.0)', 'rgba(6,8,12,0.04)', 'rgba(6,8,12,0.28)', 'rgba(6,8,12,0.80)']}
+            colors={isDark
+              ? ['rgba(6,8,12,0.0)', 'rgba(6,8,12,0.04)', 'rgba(6,8,12,0.28)', 'rgba(6,8,12,0.80)']
+              : ['rgba(248,250,252,0.0)', 'rgba(248,250,252,0.04)', 'rgba(248,250,252,0.24)', 'rgba(248,250,252,0.86)']
+            }
             locations={[0, 0.24, 0.7, 1]}
             style={StyleSheet.absoluteFill}
             start={{ x: 0.5, y: 0 }}
@@ -661,11 +661,11 @@ export default function WelcomeScreen({
         {footerLabel}
       </Text>
     </Animated.ScrollView>
-    </AppThemeContext.Provider>
   );
 }
 
 const createStyles = (Colors: AppColors) => {
+  const isDark = Colors.mode === 'dark';
   const shadows = makeShadows(Colors);
   return StyleSheet.create({
     container: {
@@ -795,7 +795,7 @@ const createStyles = (Colors: AppColors) => {
       minHeight: 520,
       borderRadius: Radii.xl,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.08)',
+      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.10)',
       overflow: 'hidden',
       marginBottom: Spacing.md,
       justifyContent: 'flex-end',
@@ -807,7 +807,7 @@ const createStyles = (Colors: AppColors) => {
       right: 0,
       bottom: 0,
       left: 0,
-      backgroundColor: '#04060A',
+      backgroundColor: isDark ? '#04060A' : '#f8fafc',
     },
     heroTextPanel: {
       position: 'absolute',
@@ -815,7 +815,7 @@ const createStyles = (Colors: AppColors) => {
       bottom: 0,
       left: 0,
       width: '54%',
-      backgroundColor: 'rgba(4,6,10,0.98)',
+      backgroundColor: isDark ? 'rgba(4,6,10,0.98)' : 'rgba(248,250,252,0.98)',
     },
     heroImagePanel: {
       position: 'absolute',
@@ -823,7 +823,7 @@ const createStyles = (Colors: AppColors) => {
       right: 0,
       bottom: 0,
       width: '66%',
-      backgroundColor: '#020406',
+      backgroundColor: isDark ? '#020406' : '#f8fafc',
       overflow: 'hidden',
     },
     heroImageSplitWeb: {
@@ -864,7 +864,7 @@ const createStyles = (Colors: AppColors) => {
       fontSize: 36,
       lineHeight: 41,
       letterSpacing: -0.6,
-      color: '#ffffff',
+      color: Colors.text,
       maxWidth: '84%',
     },
     heroTitleAccent: {
@@ -872,7 +872,7 @@ const createStyles = (Colors: AppColors) => {
     },
     heroBody: {
       ...Typography.body,
-      color: 'rgba(255,255,255,0.84)',
+      color: isDark ? 'rgba(255,255,255,0.84)' : Colors.mutedText,
       maxWidth: '76%',
     },
     cpCard: {
@@ -882,8 +882,8 @@ const createStyles = (Colors: AppColors) => {
       padding: Spacing.md,
       borderRadius: Radii.lg,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.14)',
-      backgroundColor: 'rgba(12,15,20,0.66)',
+      borderColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.12)',
+      backgroundColor: isDark ? 'rgba(12,15,20,0.66)' : 'rgba(255,255,255,0.76)',
       gap: Spacing.sm,
     },
     cpTopRow: {
@@ -910,12 +910,12 @@ const createStyles = (Colors: AppColors) => {
       fontSize: 10,
       letterSpacing: 1,
       textTransform: 'uppercase',
-      color: 'rgba(255,255,255,0.55)',
+      color: isDark ? 'rgba(255,255,255,0.55)' : Colors.dimText,
     },
     cpName: {
       fontFamily: Fonts.bold,
       fontSize: FontSizes.lg,
-      color: '#ffffff',
+      color: Colors.text,
     },
     cpStatus: {
       flexDirection: 'row',
@@ -924,7 +924,7 @@ const createStyles = (Colors: AppColors) => {
       paddingHorizontal: Spacing.sm,
       paddingVertical: 4,
       borderRadius: Radii.pill,
-      backgroundColor: 'rgba(0,255,157,0.12)',
+      backgroundColor: Colors.accentSoft,
     },
     cpStatusDone: {
       backgroundColor: Colors.successSoft,
@@ -937,7 +937,7 @@ const createStyles = (Colors: AppColors) => {
     cpStatusText: {
       fontFamily: Fonts.bold,
       fontSize: 10,
-      color: '#ffffff',
+      color: Colors.text,
     },
     cpProgressRow: {
       flexDirection: 'row',
@@ -948,7 +948,7 @@ const createStyles = (Colors: AppColors) => {
       flex: 1,
       height: 6,
       borderRadius: Radii.pill,
-      backgroundColor: 'rgba(255,255,255,0.14)',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.10)',
       overflow: 'hidden',
     },
     cpFill: {
@@ -959,7 +959,7 @@ const createStyles = (Colors: AppColors) => {
     cpPhaseLabel: {
       fontFamily: Fonts.semibold,
       fontSize: FontSizes.xs,
-      color: 'rgba(255,255,255,0.7)',
+      color: isDark ? 'rgba(255,255,255,0.7)' : Colors.mutedText,
     },
     cpFootRow: {
       flexDirection: 'row',
@@ -970,7 +970,7 @@ const createStyles = (Colors: AppColors) => {
     cpMeta: {
       flex: 1,
       fontSize: FontSizes.xs,
-      color: 'rgba(255,255,255,0.62)',
+      color: isDark ? 'rgba(255,255,255,0.62)' : Colors.dimText,
     },
     cpContinue: {
       flexDirection: 'row',
@@ -987,13 +987,13 @@ const createStyles = (Colors: AppColors) => {
       padding: Spacing.md,
       borderRadius: Radii.lg,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.14)',
-      backgroundColor: 'rgba(12,15,20,0.66)',
+      borderColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.12)',
+      backgroundColor: isDark ? 'rgba(12,15,20,0.66)' : 'rgba(255,255,255,0.76)',
       gap: Spacing.sm,
     },
     cpEmptySub: {
       fontSize: FontSizes.sm,
-      color: 'rgba(255,255,255,0.7)',
+      color: isDark ? 'rgba(255,255,255,0.7)' : Colors.mutedText,
       lineHeight: 18,
     },
     cpQuickRow: {
@@ -1009,17 +1009,17 @@ const createStyles = (Colors: AppColors) => {
       paddingHorizontal: Spacing.xs,
       borderRadius: Radii.md,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.12)',
-      backgroundColor: 'rgba(255,255,255,0.04)',
+      borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.08)',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.035)',
     },
     cpQuickLabel: {
       fontFamily: Fonts.semibold,
       fontSize: FontSizes.sm,
-      color: '#ffffff',
+      color: Colors.text,
     },
     cpQuickHint: {
       fontSize: 10,
-      color: 'rgba(255,255,255,0.55)',
+      color: isDark ? 'rgba(255,255,255,0.55)' : Colors.dimText,
     },
     updateBanner: {
       width: '100%',
