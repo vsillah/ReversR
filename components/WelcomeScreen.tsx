@@ -349,7 +349,7 @@ export default function WelcomeScreen({
               {Platform.OS === 'web' && heroImageUri ? (
                 <View
                   style={[
-                    styles.heroImageSplit,
+                    styles.heroImageSplitWeb,
                     {
                       backgroundImage: `url("${heroImageUri}")`,
                       backgroundRepeat: 'no-repeat',
@@ -361,7 +361,7 @@ export default function WelcomeScreen({
               ) : (
                 <Image
                   source={HERO_IMAGE}
-                  style={styles.heroImageSplit}
+                  style={styles.heroImageSplitNative}
                   resizeMode="contain"
                 />
               )}
@@ -826,12 +826,21 @@ const createStyles = (Colors: AppColors) => {
       backgroundColor: '#020406',
       overflow: 'hidden',
     },
-    heroImageSplit: {
+    heroImageSplitWeb: {
       position: 'absolute',
       top: '-2%',
       right: '-12%',
       bottom: '-2%',
       left: '0%',
+      opacity: 1,
+      zIndex: 1,
+    },
+    heroImageSplitNative: {
+      position: 'absolute',
+      top: -12,
+      right: -32,
+      bottom: -12,
+      left: 0,
       opacity: 1,
       zIndex: 1,
     },
