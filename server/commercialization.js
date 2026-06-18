@@ -87,6 +87,8 @@ const DEFAULT_STORE = {
   commercialAccessGrants: {},
   testerInvites: {},
   commercialConfig: {},
+  supportIssues: {},
+  supportNotifications: {},
 };
 
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -367,6 +369,109 @@ const redactTesterInvite = (invite = {}) => ({
     ? invite.inviteUrl || ''
     : '',
 });
+
+const SUPPORT_SEVERITIES = new Set(['low', 'normal', 'high', 'critical']);
+const SUPPORT_STATUSES = new Set(['open', 'triaging', 'ai_remediated', 'resolved']);
+
+const truncateText = (value = '', maxLength = 4000) => {
+  const text = String(value || '').trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+};
+
+const sanitizeSessionLog = (sessionLog = {}) => {
+  if (!sessionLog || typeof sessionLog !== 'object' || Array.isArray(sessionLog)) return {};
+  const allowedKeys = [
+    'platform',
+    'appVersion',
+    'nativeBuildVersion',
+    'runtimeVersion',
+    'deviceClientId',
+    'profileEmail',
+    'profileName',
+    'shopName',
+    'accountRole',
+    'planId',
+    'currentScreen',
+    'workflowPhase',
+    'lastAction',
+    'recentErrors',
+    'notes',
+  ];
+  return allowedKeys.reduce((result, key) => {
+    const value = sessionLog[key];
+    if (value == null) return result;
+    if (Array.isArray(value)) {
+      result[key] = value.slice(-12).map(item => truncateText(item, 600));
+      return result;
+    }
+    if (typeof value === 'object') {
+      result[key] = truncateText(JSON.stringify(value), 1000);
+      return result;
+    }
+    result[key] = truncateText(value, 1000);
+    return result;
+  }, {});
+};
+
+const normalizeSupportSeverity = (value = 'normal') => {
+  const severity = String(value || '').trim().toLowerCase();
+  return SUPPORT_SEVERITIES.has(severity) ? severity : 'normal';
+};
+
+const normalizeSupportStatus = (value = 'open') => {
+  const status = String(value || '').trim().toLowerCase();
+  return SUPPORT_STATUSES.has(status) ? status : 'open';
+};
+
+const buildSupportIssueId = ({ clientId = '', title = '', createdAt = '' }) => (
+  `issue_${hashId([clientId, title, createdAt, crypto.randomBytes(6).toString('hex')].join('|'))}`
+);
+
+const buildSupportNotificationId = ({ clientId = '', issueId = '', createdAt = '' }) => (
+  `notification_${hashId([clientId, issueId, createdAt, crypto.randomBytes(6).toString('hex')].join('|'))}`
+);
+
+const redactSupportIssue = (issue = {}, { includeSessionLog = false } = {}) => ({
+  issueId: issue.issueId || '',
+  status: normalizeSupportStatus(issue.status),
+  severity: normalizeSupportSeverity(issue.severity),
+  title: issue.title || '',
+  description: issue.description || '',
+  clientId: issue.clientId || '',
+  profileName: issue.profileName || '',
+  profileEmail: issue.profileEmail || '',
+  shopName: issue.shopName || '',
+  source: issue.source || 'in_app',
+  createdAt: issue.createdAt || '',
+  updatedAt: issue.updatedAt || '',
+  resolvedAt: issue.resolvedAt || '',
+  resolutionSummary: issue.resolutionSummary || '',
+  userMessage: issue.userMessage || '',
+  aiRemediation: issue.aiRemediation || null,
+  events: issue.events || [],
+  sessionLog: includeSessionLog ? sanitizeSessionLog(issue.sessionLog || {}) : undefined,
+  sessionLogKeys: Object.keys(issue.sessionLog || {}),
+});
+
+const redactSupportNotification = (notification = {}) => ({
+  notificationId: notification.notificationId || '',
+  issueId: notification.issueId || '',
+  clientId: notification.clientId || '',
+  title: notification.title || '',
+  message: notification.message || '',
+  status: notification.status || 'unread',
+  createdAt: notification.createdAt || '',
+  readAt: notification.readAt || '',
+});
+
+const listSupportIssues = (store, { includeSessionLog = false } = {}) => Object.values(store.supportIssues || {})
+  .map(issue => redactSupportIssue(issue, { includeSessionLog }))
+  .sort((left, right) => String(right.updatedAt).localeCompare(String(left.updatedAt)));
+
+const listSupportNotificationsForClient = (store, clientId = '') => Object.values(store.supportNotifications || {})
+  .filter(notification => notification.clientId === clientId)
+  .map(redactSupportNotification)
+  .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)));
 
 const findMatchingStoredGrant = (store, profile) => {
   const grants = Object.values(store.commercialAccessGrants || {})
@@ -850,7 +955,7 @@ const resolveAuthenticatedGrant = async (req) => {
   return { store, profile, grant };
 };
 
-const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
+const registerCommercialRoutes = (app, { requireAdmin, generateSupportIssueRemediation } = {}) => {
   const requireCommercialAdmin = async (req, res) => {
     try {
       const store = await loadStore();
@@ -904,6 +1009,97 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
       res.json(buildAccountResponse(store, user, shop, accessGrant));
     } catch (error) {
       res.status(500).json({ status: 'error', error: error.message || 'Failed to save commercial profile.' });
+    }
+  });
+
+  app.post('/api/support/issues', async (req, res) => {
+    try {
+      const profile = requestProfile(req);
+      const title = truncateText(req.body?.title, 140);
+      const description = truncateText(req.body?.description, 5000);
+      if (!title || !description) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Issue title and description are required.',
+          canRetry: false,
+        });
+      }
+
+      const store = await loadStore();
+      const now = new Date().toISOString();
+      const issue = {
+        issueId: buildSupportIssueId({ clientId: profile.clientId, title, createdAt: now }),
+        status: 'open',
+        severity: normalizeSupportSeverity(req.body?.severity),
+        title,
+        description,
+        clientId: profile.clientId,
+        profileName: profile.name,
+        profileEmail: profile.email,
+        shopName: profile.shopName,
+        source: 'in_app',
+        sessionLog: sanitizeSessionLog(req.body?.sessionLog || {}),
+        events: [{ type: 'submitted', at: now, actor: 'user' }],
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      store.supportIssues = {
+        ...(store.supportIssues || {}),
+        [issue.issueId]: issue,
+      };
+      await saveStore(store);
+      res.json({ status: 'ok', issue: redactSupportIssue(issue, { includeSessionLog: true }) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to submit support issue.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.get('/api/support/notifications', async (req, res) => {
+    try {
+      const store = await loadStore();
+      const profile = requestProfile(req);
+      res.json({
+        status: 'ok',
+        notifications: listSupportNotificationsForClient(store, profile.clientId),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to load support notifications.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/support/notifications/:notificationId/read', async (req, res) => {
+    try {
+      const store = await loadStore();
+      const profile = requestProfile(req);
+      const notificationId = String(req.params.notificationId || '').trim();
+      const notification = store.supportNotifications?.[notificationId];
+      if (!notification || notification.clientId !== profile.clientId) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'Notification not found.',
+          canRetry: false,
+        });
+      }
+      notification.status = 'read';
+      notification.readAt = notification.readAt || new Date().toISOString();
+      store.supportNotifications[notification.notificationId] = notification;
+      await saveStore(store);
+      res.json({ status: 'ok', notification: redactSupportNotification(notification) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to mark support notification read.',
+        canRetry: true,
+      });
     }
   });
 
@@ -1031,6 +1227,155 @@ const registerCommercialRoutes = (app, { requireAdmin } = {}) => {
       res.status(500).json({
         status: 'error',
         error: error.message || 'Failed to save journey credit configuration.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.get('/api/admin/support/issues', async (req, res) => {
+    if (!(await requireCommercialAdmin(req, res))) return;
+    try {
+      const store = await loadStore();
+      res.json({
+        status: 'ok',
+        issues: listSupportIssues(store, { includeSessionLog: false }),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to list support issues.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.get('/api/admin/support/issues/:issueId', async (req, res) => {
+    if (!(await requireCommercialAdmin(req, res))) return;
+    try {
+      const store = await loadStore();
+      const issue = store.supportIssues?.[String(req.params.issueId || '')];
+      if (!issue) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'Support issue not found.',
+          canRetry: false,
+        });
+      }
+      res.json({ status: 'ok', issue: redactSupportIssue(issue, { includeSessionLog: true }) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to load support issue.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/admin/support/issues/:issueId/remediate', async (req, res) => {
+    if (!(await requireCommercialAdmin(req, res))) return;
+    try {
+      const store = await loadStore();
+      const issue = store.supportIssues?.[String(req.params.issueId || '')];
+      if (!issue) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'Support issue not found.',
+          canRetry: false,
+        });
+      }
+
+      const remediation = generateSupportIssueRemediation
+        ? await generateSupportIssueRemediation(redactSupportIssue(issue, { includeSessionLog: true }))
+        : {
+          summary: 'AI remediation is not configured on this API server.',
+          rootCause: 'No remediation provider is registered.',
+          resolutionSteps: ['Review the session log manually.', 'Resolve the issue from the admin queue.'],
+          userMessage: 'A ReversR admin reviewed your report and will follow up after the fix is verified.',
+          followUpChecks: ['Confirm the reported workflow no longer fails.'],
+          automationActions: [],
+          confidence: 'low',
+        };
+      const now = new Date().toISOString();
+      issue.status = 'ai_remediated';
+      issue.aiRemediation = {
+        ...remediation,
+        generatedAt: now,
+        generatedBy: 'ai',
+      };
+      issue.events = [
+        ...(issue.events || []),
+        { type: 'ai_remediation_generated', at: now, actor: 'super_admin' },
+      ];
+      issue.updatedAt = now;
+      store.supportIssues[issue.issueId] = issue;
+      await saveStore(store);
+      res.json({ status: 'ok', issue: redactSupportIssue(issue, { includeSessionLog: true }) });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to generate AI remediation.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/admin/support/issues/:issueId/resolve', async (req, res) => {
+    if (!(await requireCommercialAdmin(req, res))) return;
+    try {
+      const store = await loadStore();
+      const issue = store.supportIssues?.[String(req.params.issueId || '')];
+      if (!issue) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'Support issue not found.',
+          canRetry: false,
+        });
+      }
+
+      const now = new Date().toISOString();
+      const resolutionSummary = truncateText(
+        req.body?.resolutionSummary || issue.aiRemediation?.summary || 'Issue resolved by ReversR admin.',
+        2000
+      );
+      const userMessage = truncateText(
+        req.body?.userMessage || issue.aiRemediation?.userMessage || 'Your ReversR issue has been resolved. Please retry the workflow.',
+        2000
+      );
+      issue.status = 'resolved';
+      issue.resolutionSummary = resolutionSummary;
+      issue.userMessage = userMessage;
+      issue.resolvedAt = now;
+      issue.updatedAt = now;
+      issue.events = [
+        ...(issue.events || []),
+        { type: 'resolved', at: now, actor: 'super_admin' },
+      ];
+      store.supportIssues[issue.issueId] = issue;
+
+      const notification = {
+        notificationId: buildSupportNotificationId({ clientId: issue.clientId, issueId: issue.issueId, createdAt: now }),
+        issueId: issue.issueId,
+        clientId: issue.clientId,
+        title: `Resolved: ${issue.title}`,
+        message: userMessage,
+        status: 'unread',
+        createdAt: now,
+      };
+      store.supportNotifications = {
+        ...(store.supportNotifications || {}),
+        [notification.notificationId]: notification,
+      };
+      await saveStore(store);
+
+      res.json({
+        status: 'ok',
+        issue: redactSupportIssue(issue, { includeSessionLog: true }),
+        notification: redactSupportNotification(notification),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to resolve support issue.',
         canRetry: true,
       });
     }

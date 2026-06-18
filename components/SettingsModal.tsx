@@ -39,6 +39,19 @@ import {
   listInventoryCredentials,
   saveInventoryCredential,
 } from '../hooks/useGemini';
+import {
+  SupportIssue,
+  SupportIssueSeverity,
+  SupportNotification,
+  buildSupportSessionLog,
+  listAdminSupportIssues,
+  listSupportNotifications,
+  loadAdminSupportIssue,
+  markSupportNotificationRead,
+  remediateAdminSupportIssue,
+  resolveAdminSupportIssue,
+  submitSupportIssue,
+} from '../hooks/useSupportIssues';
 import { formatCreditPeriod, formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
 import {
   AUTH_MODE_OPTIONS,
@@ -51,7 +64,7 @@ import {
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
 
-export type SettingsSection = 'profile' | 'account' | 'ai' | 'inventory' | 'admin' | 'legal';
+export type SettingsSection = 'profile' | 'account' | 'ai' | 'inventory' | 'support' | 'admin' | 'legal';
 type SettingsTooltip =
   | 'profileImage'
   | 'billing'
@@ -68,6 +81,8 @@ type SettingsTooltip =
   | 'creditRules'
   | 'credentialReference'
   | 'credentialAuth'
+  | 'supportReport'
+  | 'aiRemediation'
   | null;
 
 interface SettingsModalProps {
@@ -181,6 +196,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [creditPlanId, setCreditPlanId] = useState<CommercialPlanId>('free');
   const [creditAllowance, setCreditAllowance] = useState('5');
   const [creditPeriod, setCreditPeriod] = useState<'day' | 'week' | 'month'>('week');
+  const [supportTitle, setSupportTitle] = useState('');
+  const [supportDescription, setSupportDescription] = useState('');
+  const [supportSeverity, setSupportSeverity] = useState<SupportIssueSeverity>('normal');
+  const [supportStatus, setSupportStatus] = useState<string | null>(null);
+  const [supportLoading, setSupportLoading] = useState(false);
+  const [supportNotifications, setSupportNotifications] = useState<SupportNotification[]>([]);
+  const [supportIssues, setSupportIssues] = useState<SupportIssue[]>([]);
+  const [selectedSupportIssue, setSelectedSupportIssue] = useState<SupportIssue | null>(null);
+  const [resolutionSummary, setResolutionSummary] = useState('');
+  const [resolutionMessage, setResolutionMessage] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePlatform, setInvitePlatform] = useState<TesterInvitePlatform>('both');
   const [grantEmail, setGrantEmail] = useState('');
@@ -285,6 +310,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       loadSettings();
       loadAiRuntimeStatus();
       refreshAccount();
+      loadSupportNotifications();
     } else {
       setCredentialValue('');
     }
@@ -659,6 +685,145 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     }
   };
 
+  const loadSupportNotifications = async () => {
+    try {
+      const result = await listSupportNotifications();
+      setSupportNotifications(result.notifications || []);
+    } catch (_e) {
+      // Support notifications are advisory; Settings should still open if the API is unavailable.
+    }
+  };
+
+  const handleSubmitSupportIssue = async () => {
+    const title = supportTitle.trim();
+    const description = supportDescription.trim();
+    if (!title || !description) {
+      setSupportStatus('Add a short title and describe what went wrong before submitting.');
+      return;
+    }
+
+    setSupportLoading(true);
+    setSupportStatus(null);
+    try {
+      const sessionLog = await buildSupportSessionLog({
+        account,
+        currentScreen: `Settings:${settingsSection}`,
+        lastAction: title,
+        recentErrors: [accountError, commercialStatus, accessStatus].filter(Boolean) as string[],
+        notes: description,
+      });
+      const result = await submitSupportIssue({
+        title,
+        description,
+        severity: supportSeverity,
+        sessionLog,
+      });
+      setSupportTitle('');
+      setSupportDescription('');
+      setSupportSeverity('normal');
+      setSupportStatus(`Submitted issue ${result.issue.issueId}. A ReversR admin can review the session log from Super Admin settings.`);
+    } catch (e: any) {
+      setSupportStatus(e?.message || 'Unable to submit issue report.');
+    } finally {
+      setSupportLoading(false);
+    }
+  };
+
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    setSupportLoading(true);
+    try {
+      const result = await markSupportNotificationRead(notificationId);
+      setSupportNotifications(prev => prev.map(notification => (
+        notification.notificationId === notificationId ? result.notification : notification
+      )));
+    } catch (e: any) {
+      setSupportStatus(e?.message || 'Unable to mark notification read.');
+    } finally {
+      setSupportLoading(false);
+    }
+  };
+
+  const loadSupportIssues = async () => {
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await listAdminSupportIssues(token);
+      setSupportIssues(result.issues || []);
+      setAdminStatus(`Loaded ${result.issues?.length || 0} user issue report${result.issues?.length === 1 ? '' : 's'}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to load user issue reports.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleSelectSupportIssue = async (issueId: string) => {
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await loadAdminSupportIssue(token, issueId);
+      setSelectedSupportIssue(result.issue);
+      setResolutionSummary(result.issue.aiRemediation?.summary || result.issue.resolutionSummary || '');
+      setResolutionMessage(result.issue.aiRemediation?.userMessage || result.issue.userMessage || '');
+      setAdminStatus(`Loaded session log for ${issueId}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to load issue session log.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleAiRemediateSupportIssue = async (issueId: string) => {
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await remediateAdminSupportIssue(token, issueId);
+      setSelectedSupportIssue(result.issue);
+      setSupportIssues(prev => prev.map(issue => (
+        issue.issueId === issueId ? { ...issue, ...result.issue } : issue
+      )));
+      setResolutionSummary(result.issue.aiRemediation?.summary || '');
+      setResolutionMessage(result.issue.aiRemediation?.userMessage || '');
+      setAdminStatus(`AI remediation prepared for ${issueId}. Review the steps, then resolve when verified.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to run AI remediation.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleResolveSupportIssue = async (issueId: string) => {
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await resolveAdminSupportIssue(token, issueId, {
+        resolutionSummary,
+        userMessage: resolutionMessage,
+      });
+      setSelectedSupportIssue(result.issue);
+      setSupportIssues(prev => prev.map(issue => (
+        issue.issueId === issueId ? { ...issue, ...result.issue } : issue
+      )));
+      setAdminStatus(`Resolved ${issueId} and queued a user notification.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to resolve issue report.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
   const inviteDeliveryLabel = (invite: CommercialTesterInviteSummary) => {
     const delivery = invite.emailDelivery;
     if (delivery?.status === 'sent') {
@@ -951,6 +1116,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     { id: 'account', label: 'Plan', icon: 'briefcase-outline' },
     { id: 'ai', label: 'AI', icon: 'hardware-chip-outline' },
     { id: 'inventory', label: 'Inventory', icon: 'git-branch-outline' },
+    { id: 'support', label: 'Support', icon: 'alert-circle-outline' },
     ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
     { id: 'legal', label: 'Legal', icon: 'document-text-outline' },
   ];
@@ -1835,6 +2001,110 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
               </>
             )}
 
+            {settingsSection === 'support' && (
+              <View style={styles.policyPanel}>
+                <View style={styles.policyHeader}>
+                  <Ionicons name="alert-circle-outline" size={18} color={Colors.accent} />
+                  <Text style={styles.policyTitle}>Report an Issue</Text>
+                  {renderInfoButton('supportReport', 'Show issue report details')}
+                </View>
+                {renderTooltip('supportReport', 'Issue reports include a safe session log with device, app, account, plan, and current settings context. Photos, raw secrets, and reconstruction images are not attached.')}
+                <Text style={styles.policyText}>
+                  Send errors, confusing states, or failed workflow steps to a ReversR admin with enough context to troubleshoot.
+                </Text>
+
+                <Text style={styles.compactLabel}>Issue title</Text>
+                <TextInput
+                  style={styles.input}
+                  value={supportTitle}
+                  onChangeText={setSupportTitle}
+                  accessibilityLabel="Issue report title"
+                  placeholder="What went wrong?"
+                  placeholderTextColor={Colors.gray[500]}
+                />
+
+                <Text style={styles.compactLabel}>Severity</Text>
+                <View style={styles.themeToggleRow}>
+                  {(['normal', 'high', 'critical'] as const).map(severity => (
+                    <TouchableOpacity
+                      key={severity}
+                      style={[styles.themeToggleButton, supportSeverity === severity && styles.themeToggleButtonActive]}
+                      onPress={() => setSupportSeverity(severity)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Set issue severity to ${severity}`}
+                      accessibilityState={{ selected: supportSeverity === severity }}
+                    >
+                      <Text style={[styles.themeToggleText, supportSeverity === severity && styles.themeToggleTextActive]}>
+                        {severity === 'normal' ? 'Normal' : severity === 'high' ? 'High' : 'Critical'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.compactLabel}>What happened?</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={supportDescription}
+                  onChangeText={setSupportDescription}
+                  accessibilityLabel="Issue report description"
+                  placeholder="Describe the screen, action, error, and what you expected."
+                  placeholderTextColor={Colors.gray[500]}
+                  multiline
+                />
+
+                <TouchableOpacity
+                  style={[styles.saveCredentialButton, supportLoading && styles.disabledButton]}
+                  onPress={handleSubmitSupportIssue}
+                  disabled={supportLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Submit issue report"
+                >
+                  <Ionicons name="send-outline" size={17} color="#ffffff" />
+                  <Text style={styles.saveCredentialButtonText}>Submit Issue</Text>
+                </TouchableOpacity>
+
+                <View style={styles.adminActionRow}>
+                  <TouchableOpacity
+                    style={[styles.adminButton, supportLoading && styles.disabledButton]}
+                    onPress={loadSupportNotifications}
+                    disabled={supportLoading}
+                    accessibilityRole="button"
+                    accessibilityLabel="Load issue notifications"
+                  >
+                    <Ionicons name="notifications-outline" size={16} color={Colors.accent} />
+                    <Text style={styles.adminButtonText}>Load Updates</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {supportStatus ? <Text style={styles.inlineStatusText}>{supportStatus}</Text> : null}
+
+                <View style={styles.credentialList}>
+                  {supportNotifications.map(notification => (
+                    <View key={notification.notificationId} style={styles.credentialCard}>
+                      <View style={styles.credentialInfo}>
+                        <Text style={styles.credentialRefText}>{notification.title}</Text>
+                        <Text style={styles.credentialMetaText}>
+                          {notification.status} | {notification.createdAt ? new Date(notification.createdAt).toLocaleString() : 'time unavailable'}
+                        </Text>
+                        <Text style={styles.credentialMetaText}>{notification.message}</Text>
+                      </View>
+                      {notification.status !== 'read' ? (
+                        <TouchableOpacity
+                          style={styles.sendCredentialButton}
+                          onPress={() => handleMarkNotificationRead(notification.notificationId)}
+                          disabled={supportLoading}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Mark notification ${notification.notificationId} read`}
+                        >
+                          <Ionicons name="checkmark-outline" size={15} color={Colors.accent} />
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {settingsSection === 'admin' && canUseAdminConsole && (
               <View style={styles.adminPanel}>
                 <View style={styles.policyHeader}>
@@ -1918,6 +2188,142 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
                 {isSuperAdmin && (
                   <>
+                    <View style={styles.superAdminDivider} />
+                    <View style={styles.policyHeader}>
+                      <Ionicons name="alert-circle-outline" size={18} color={Colors.accent} />
+                      <Text style={styles.policyTitle}>Issue Reports</Text>
+                      {renderInfoButton('aiRemediation', 'Show AI remediation details')}
+                    </View>
+                    {renderTooltip('aiRemediation', 'AI remediation reads the issue description and safe session log, then drafts root cause, resolution steps, follow-up checks, and a user notification. Super admin still reviews and resolves before the user is notified.')}
+                    <Text style={styles.policyText}>
+                      Review user reports, inspect session logs, ask AI to prepare remediation steps, then resolve when the fix or workaround has been verified.
+                    </Text>
+                    <View style={styles.adminActionRow}>
+                      <TouchableOpacity
+                        style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                        onPress={loadSupportIssues}
+                        disabled={adminLoading}
+                        accessibilityRole="button"
+                        accessibilityLabel="Load user issue reports"
+                      >
+                        <Ionicons name="refresh-outline" size={16} color={Colors.accent} />
+                        <Text style={styles.adminButtonText}>Load Issues</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.credentialList}>
+                      {supportIssues.map(issue => (
+                        <View key={issue.issueId} style={styles.credentialCard}>
+                          <View style={styles.credentialInfo}>
+                            <Text style={styles.credentialRefText}>{issue.title}</Text>
+                            <Text style={styles.credentialMetaText}>
+                              {issue.status} | {issue.severity} | {issue.profileEmail || issue.clientId}
+                            </Text>
+                            <Text style={styles.credentialMetaText}>
+                              {issue.updatedAt ? new Date(issue.updatedAt).toLocaleString() : 'time unavailable'}
+                            </Text>
+                          </View>
+                          <View style={styles.credentialActionStack}>
+                            <TouchableOpacity
+                              style={styles.sendCredentialButton}
+                              onPress={() => handleSelectSupportIssue(issue.issueId)}
+                              disabled={adminLoading}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Load issue session log ${issue.issueId}`}
+                            >
+                              <Ionicons name="document-text-outline" size={15} color={Colors.accent} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.sendCredentialButton}
+                              onPress={() => handleAiRemediateSupportIssue(issue.issueId)}
+                              disabled={adminLoading || issue.status === 'resolved'}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Run AI remediation for issue ${issue.issueId}`}
+                            >
+                              <Ionicons name="sparkles-outline" size={15} color={Colors.accent} />
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+
+                    {selectedSupportIssue && (
+                      <View style={styles.inlineAdminPanel}>
+                        <Text style={styles.credentialRefText}>{selectedSupportIssue.title}</Text>
+                        <Text style={styles.credentialMetaText}>
+                          {selectedSupportIssue.issueId} | {selectedSupportIssue.status} | {selectedSupportIssue.profileEmail || selectedSupportIssue.clientId}
+                        </Text>
+                        <Text style={styles.policyText}>{selectedSupportIssue.description}</Text>
+
+                        <Text style={styles.compactLabel}>Session log</Text>
+                        <Text selectable style={styles.apiHostText}>
+                          {JSON.stringify(selectedSupportIssue.sessionLog || {}, null, 2)}
+                        </Text>
+
+                        {selectedSupportIssue.aiRemediation && (
+                          <>
+                            <Text style={styles.compactLabel}>AI remediation</Text>
+                            <Text style={styles.policyText}>{selectedSupportIssue.aiRemediation.summary}</Text>
+                            <Text style={styles.credentialMetaText}>Root cause: {selectedSupportIssue.aiRemediation.rootCause}</Text>
+                            {(selectedSupportIssue.aiRemediation.resolutionSteps || []).map((step, index) => (
+                              <Text key={`step-${index}`} style={styles.credentialMetaText}>
+                                {index + 1}. {step}
+                              </Text>
+                            ))}
+                            {(selectedSupportIssue.aiRemediation.followUpChecks || []).map((check, index) => (
+                              <Text key={`check-${index}`} style={styles.credentialMetaText}>
+                                Check {index + 1}: {check}
+                              </Text>
+                            ))}
+                          </>
+                        )}
+
+                        <Text style={styles.compactLabel}>Resolution summary</Text>
+                        <TextInput
+                          style={[styles.input, styles.textArea]}
+                          value={resolutionSummary}
+                          onChangeText={setResolutionSummary}
+                          accessibilityLabel="Issue resolution summary"
+                          placeholder="What changed or what workaround was completed?"
+                          placeholderTextColor={Colors.gray[500]}
+                          multiline
+                        />
+                        <Text style={styles.compactLabel}>User notification</Text>
+                        <TextInput
+                          style={[styles.input, styles.textArea]}
+                          value={resolutionMessage}
+                          onChangeText={setResolutionMessage}
+                          accessibilityLabel="Issue resolution notification"
+                          placeholder="Message sent back to the user after resolution"
+                          placeholderTextColor={Colors.gray[500]}
+                          multiline
+                        />
+
+                        <View style={styles.adminActionRow}>
+                          <TouchableOpacity
+                            style={[styles.adminButton, adminLoading && styles.disabledButton]}
+                            onPress={() => handleAiRemediateSupportIssue(selectedSupportIssue.issueId)}
+                            disabled={adminLoading || selectedSupportIssue.status === 'resolved'}
+                            accessibilityRole="button"
+                            accessibilityLabel="Run AI remediation for selected issue"
+                          >
+                            <Ionicons name="sparkles-outline" size={16} color={Colors.accent} />
+                            <Text style={styles.adminButtonText}>AI Remediate</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                            onPress={() => handleResolveSupportIssue(selectedSupportIssue.issueId)}
+                            disabled={adminLoading || selectedSupportIssue.status === 'resolved'}
+                            accessibilityRole="button"
+                            accessibilityLabel="Resolve issue and notify user"
+                          >
+                            <Ionicons name="checkmark-done-outline" size={17} color="#ffffff" />
+                            <Text style={styles.saveCredentialButtonText}>Resolve</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    )}
+
                     <View style={styles.superAdminDivider} />
                     <View style={styles.policyHeader}>
                       <Ionicons name="shield-checkmark-outline" size={18} color={Colors.accent} />
@@ -2156,14 +2562,16 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             )}
           </ScrollView>
 
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={saveSettings}
-            accessibilityRole="button"
-            accessibilityLabel={settingsSection === 'profile' ? 'Save profile' : 'Save settings'}
-          >
-            <Text style={styles.saveButtonText}>{settingsSection === 'profile' ? 'Save Profile' : 'Save Changes'}</Text>
-          </TouchableOpacity>
+          {settingsSection !== 'support' && (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={saveSettings}
+              accessibilityRole="button"
+              accessibilityLabel={settingsSection === 'profile' ? 'Save profile' : 'Save settings'}
+            >
+              <Text style={styles.saveButtonText}>{settingsSection === 'profile' ? 'Save Profile' : 'Save Changes'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
