@@ -165,6 +165,79 @@ export function Badge({
   );
 }
 
+/** Tap/click info affordance that keeps explanatory copy out of the main layout. */
+export function InfoTooltip({
+  text,
+  accessibilityLabel = 'Show details',
+  bubbleAlign = 'center',
+  iconSize = 14,
+  style,
+}: {
+  text: string;
+  accessibilityLabel?: string;
+  bubbleAlign?: 'start' | 'center' | 'end';
+  iconSize?: number;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { colors } = useAppTheme();
+  const [visible, setVisible] = React.useState(false);
+  const bubblePosition: ViewStyle = bubbleAlign === 'start'
+    ? { left: -8 }
+    : bubbleAlign === 'end'
+      ? { right: -8 }
+      : { left: -86 };
+
+  return (
+    <View style={[{ position: 'relative', alignSelf: 'center', zIndex: visible ? 30 : 1 }, style]}>
+      <Pressable
+        onPress={() => setVisible(current => !current)}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={text}
+        accessibilityState={{ expanded: visible }}
+        hitSlop={8}
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 10,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.elevated,
+          borderWidth: 1,
+          borderColor: colors.border,
+        }}
+      >
+        <Ionicons name="information" size={iconSize} color={colors.dimText} />
+      </Pressable>
+      {visible ? (
+        <View
+          style={[
+            {
+              position: 'absolute',
+              top: 24,
+              width: 192,
+              borderRadius: Radii.md,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.elevated,
+              paddingHorizontal: Spacing.sm,
+              paddingVertical: Spacing.xs,
+              shadowColor: '#000',
+              shadowOpacity: 0.16,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: 8,
+            },
+            bubblePosition,
+          ]}
+        >
+          <Text style={{ ...Typography.caption, color: colors.mutedText, lineHeight: 16 }}>{text}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 /** Section title with an optional trailing action (e.g. "View all"). */
 export function SectionHeader({
   title,
@@ -555,71 +628,70 @@ export function HorizontalStepper({
         const isCurrent = currentStep === step;
         const isActive = isComplete || isCurrent;
         const canPress = Boolean(onStepPress) && currentStep > step;
-        const node = (
-          <View style={{ flex: 1, minWidth: 0, alignItems: 'center', gap: 5, paddingHorizontal: 3 }}>
-            <View
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: Radii.pill,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: isComplete ? colors.accent : 'transparent',
-                borderWidth: isComplete ? 0 : 2,
-                borderColor: isCurrent ? colors.accent : colors.border,
-              }}
-            >
-              {isComplete ? (
-                <Ionicons name="checkmark" size={18} color={colors.background} />
-              ) : (
-                <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontFamily: Fonts.bold, fontSize: 14 }}>
-                  {step}
-                </Text>
-              )}
-            </View>
-            <Text
-              style={{
-                fontSize: 10,
-                fontFamily: Fonts.bold,
-                letterSpacing: 0,
-                textTransform: 'uppercase',
-                color: isActive ? colors.text : colors.dimText,
-                textAlign: 'center',
-              }}
-              numberOfLines={1}
-            >
-              {label}
-            </Text>
-            {subLabels?.[idx] ? (
-              <Text
-                style={{ fontSize: 10, color: colors.dimText, textAlign: 'center' }}
-                numberOfLines={2}
-              >
-                {subLabels[idx]}
+        const marker = (
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: Radii.pill,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isComplete ? colors.accent : colors.background,
+              borderWidth: isComplete ? 0 : 2,
+              borderColor: isCurrent ? colors.accent : colors.border,
+            }}
+          >
+            {isComplete ? (
+              <Ionicons name="checkmark" size={18} color={colors.background} />
+            ) : (
+              <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontFamily: Fonts.bold, fontSize: 14 }}>
+                {step}
               </Text>
-            ) : null}
-            {isCurrent ? (
-              <View style={{ marginTop: 3, width: 26, height: 3, borderRadius: 2, backgroundColor: colors.accent }} />
-            ) : null}
+            )}
           </View>
         );
         return (
-          canPress ? (
-            <TouchableOpacity
-              key={label}
-              onPress={() => onStepPress?.(step)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              accessibilityLabel={`Reopen ${label} phase`}
-              style={{ flex: 1, minWidth: 0 }}
-            >
-              {node}
-            </TouchableOpacity>
-          ) : (
-            <View key={label} style={{ flex: 1, minWidth: 0 }}>
-              {node}
+          <View key={label} style={{ flex: 1, minWidth: 0 }}>
+            <View style={{ flex: 1, minWidth: 0, alignItems: 'center', gap: 5, paddingHorizontal: 3 }}>
+              {canPress ? (
+                <TouchableOpacity
+                  onPress={() => onStepPress?.(step)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Reopen ${label} phase`}
+                  hitSlop={8}
+                >
+                  {marker}
+                </TouchableOpacity>
+              ) : marker}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, maxWidth: '100%' }}>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    fontFamily: Fonts.bold,
+                    letterSpacing: 0,
+                    textTransform: 'uppercase',
+                    color: isActive ? colors.text : colors.dimText,
+                    textAlign: 'center',
+                  }}
+                  numberOfLines={1}
+                >
+                  {label}
+                </Text>
+                {subLabels?.[idx] ? (
+                  <InfoTooltip
+                    text={subLabels[idx]}
+                    accessibilityLabel={`Show ${label} phase details`}
+                    bubbleAlign={idx === 0 ? 'start' : idx === steps.length - 1 ? 'end' : 'center'}
+                    iconSize={11}
+                  />
+                ) : null}
+              </View>
+              {isCurrent ? (
+                <View style={{ marginTop: 3, width: 26, height: 3, borderRadius: 2, backgroundColor: colors.accent }} />
+              ) : null}
             </View>
-          )
+          </View>
         );
       })}
     </View>

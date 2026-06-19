@@ -28,6 +28,7 @@ import {
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 import ManufacturingStudio from './ManufacturingStudio';
+import { InfoTooltip } from './ui';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
 import {
   ReviewerApproval,
@@ -669,27 +670,38 @@ export default function PhaseFour({
       <View style={styles.quotePacketHeader}>
         <Ionicons name="shield-checkmark-outline" size={20} color={Colors.orange[300]} />
         <Text style={styles.quotePacketTitle}>Reviewer Approval</Text>
+        <InfoTooltip
+          text="Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass."
+          accessibilityLabel="Show reviewer approval details"
+          bubbleAlign="start"
+        />
       </View>
-      <Text style={styles.quotePacketText}>
-        Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass.
-      </Text>
       <View style={styles.approvalChoiceGrid}>
         {REVIEWER_APPROVAL_OPTIONS.map(option => {
           const isSelected = reviewerApprovalStatus === option.status;
           return (
-            <TouchableOpacity
+            <View
               key={option.status}
               style={[styles.approvalChoiceButton, isSelected && styles.approvalChoiceButtonActive]}
-              onPress={() => setReviewerApprovalStatus(option.status)}
-              accessibilityRole="button"
-              accessibilityLabel={`Set reviewer approval status to ${option.label}`}
-              accessibilityState={{ selected: isSelected }}
             >
-              <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
-                {option.label}
-              </Text>
-              <Text style={styles.approvalChoiceDescription}>{option.description}</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.approvalChoiceSelect}
+                onPress={() => setReviewerApprovalStatus(option.status)}
+                accessibilityRole="button"
+                accessibilityLabel={`Set reviewer approval status to ${option.label}`}
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+              <InfoTooltip
+                text={option.description}
+                accessibilityLabel={`Show ${option.label} review status details`}
+                bubbleAlign="start"
+                iconSize={11}
+              />
+            </View>
           );
         })}
       </View>
@@ -775,8 +787,14 @@ export default function PhaseFour({
             <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.title}>Phase 4: Build</Text>
-            <Text style={styles.description}>BOM, assembly sequence, pricing, and fulfillment handoff</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.title}>Phase 4: Build</Text>
+              <InfoTooltip
+                text="BOM, assembly sequence, pricing, and fulfillment handoff"
+                accessibilityLabel="Show Build phase details"
+                bubbleAlign="start"
+              />
+            </View>
           </View>
         </View>
       </View>
@@ -800,26 +818,40 @@ export default function PhaseFour({
         </View>
         <View style={styles.readinessList}>
           {buildReadinessItems.map(item => (
-            <TouchableOpacity
+            <View
               key={item.id}
               style={[styles.readinessItem, item.ready && styles.readinessItemReady, item.onPress && styles.readinessItemActionable]}
-              onPress={item.onPress}
-              disabled={!item.onPress}
-              accessibilityRole={item.onPress ? 'button' : undefined}
               accessibilityLabel={`${item.label}: ${item.ready ? 'complete' : 'incomplete'}`}
-              accessibilityState={{ selected: item.ready, disabled: !item.onPress }}
+              accessibilityHint={item.detail}
+              accessibilityState={{ selected: item.ready }}
             >
               <View style={[styles.readinessItemIcon, item.ready && styles.readinessItemIconReady]}>
                 <Ionicons name={item.ready ? 'checkmark' : item.icon} size={17} color={item.ready ? Colors.black : Colors.gray[400]} />
               </View>
               <View style={styles.readinessItemText}>
-                <Text style={styles.readinessItemLabel}>{item.label}</Text>
-                <Text style={styles.readinessItemDetail} numberOfLines={2}>{item.detail}</Text>
+                <View style={styles.readinessItemLabelRow}>
+                  <Text style={styles.readinessItemLabel}>{item.label}</Text>
+                  <InfoTooltip
+                    text={item.detail}
+                    accessibilityLabel={`Show ${item.label} details`}
+                    bubbleAlign="start"
+                    iconSize={11}
+                  />
+                </View>
               </View>
               {item.actionLabel ? (
-                <Text style={styles.readinessItemAction}>{item.actionLabel}</Text>
+                <TouchableOpacity
+                  onPress={item.onPress}
+                  disabled={!item.onPress}
+                  accessibilityRole="button"
+                  accessibilityLabel={item.actionLabel}
+                  accessibilityState={{ disabled: !item.onPress }}
+                  hitSlop={8}
+                >
+                  <Text style={styles.readinessItemAction}>{item.actionLabel}</Text>
+                </TouchableOpacity>
               ) : null}
-            </TouchableOpacity>
+            </View>
           ))}
         </View>
       </View>
@@ -828,12 +860,18 @@ export default function PhaseFour({
 
       <View style={styles.packageSummaryCard}>
         <View style={styles.packageSummaryHeader}>
-          <Text style={styles.packageSummaryTitle}>{innovation.machineName || innovation.conceptName}</Text>
+          <View style={styles.packageSummaryTitleRow}>
+            <Text style={styles.packageSummaryTitle}>{innovation.machineName || innovation.conceptName}</Text>
+            <InfoTooltip
+              text={innovation.conceptDescription}
+              accessibilityLabel="Show package description"
+              bubbleAlign="start"
+            />
+          </View>
           <Text style={styles.packageSummaryMeta}>
             {innovation.machineId ? `${innovation.machineId} | ` : ''}{innovation.inventorySource || 'Inventory source pending'}
           </Text>
         </View>
-        <Text style={styles.packageSummaryDesc}>{innovation.conceptDescription}</Text>
         <View style={styles.packageSummaryGrid}>
           <View style={styles.packageSummaryTile}>
             <Text style={styles.packageSummaryTileLabel}>BOM</Text>
@@ -1231,11 +1269,16 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   headerText: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   title: {
     fontSize: FontSizes.xl,
     fontFamily: Fonts.display,
     color: Colors.text,
-    marginBottom: Spacing.xs,
+    marginBottom: 0,
   },
   description: {
     fontSize: FontSizes.sm,
@@ -1271,6 +1314,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   packageSummaryHeader: {
     gap: 4,
+  },
+  packageSummaryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   packageSummaryTitle: {
     fontSize: FontSizes.lg,
@@ -1399,12 +1447,18 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   readinessItemText: {
     flex: 1,
     minWidth: 0,
+    justifyContent: 'center',
+  },
+  readinessItemLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   readinessItemLabel: {
     color: Colors.white,
     fontSize: FontSizes.sm,
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   readinessItemDetail: {
     color: Colors.gray[500],
@@ -1925,6 +1979,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.md,
   },
   approvalChoiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -1935,11 +1992,20 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.orange[300],
     backgroundColor: 'rgba(251, 191, 36, 0.12)',
   },
+  approvalChoiceLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  approvalChoiceSelect: {
+    flex: 1,
+    minWidth: 0,
+  },
   approvalChoiceLabel: {
     color: Colors.gray[300],
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   approvalChoiceLabelActive: {
     color: Colors.orange[300],
