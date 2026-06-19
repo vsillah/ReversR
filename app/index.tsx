@@ -100,7 +100,7 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   4: 'hammer-outline',
 };
 
-const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v1';
+const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v2';
 const MOCK_TOUR_FIXTURE_CACHE_KEY = 'reversr-rebuild-mock-tour:farmbot-genesis-v1.8:v1';
 
 type TourSavedState = {
@@ -126,14 +126,15 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'settings',
     eyebrow: 'Settings',
-    title: 'Review account, AI, and inventory settings',
-    body: 'Settings is where users confirm plan credits, managed AI status, inventory source configuration, policy links, and backend credential references.',
+    title: 'Review account, support, and AI remediation settings',
+    body: 'Settings is where users confirm plan credits, managed AI status, inventory sources, and Support reports. Super admins can review session logs, preview AI remediation actions, run safe fixes, queue engineering handoffs, and send in-app updates.',
     structureId: 'reversr-tour-settings',
     opensSettings: true,
     checks: [
       { id: 'account', label: 'Open account settings', completion: 'auto' },
       { id: 'ai', label: 'Review AI status' },
-      { id: 'inventory', label: 'Review inventory source' },
+      { id: 'support', label: 'Find Support issue reporting' },
+      { id: 'remediation', label: 'Review Super Admin AI remediation path' },
     ],
   },
   {
