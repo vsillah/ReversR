@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Linking,
   TextInput,
+  LayoutChangeEvent,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -68,9 +69,11 @@ type BuildReadinessItem = {
   detail: string;
   ready: boolean;
   icon: keyof typeof Ionicons.glyphMap;
-  actionLabel?: string;
-  onPress?: () => void;
+  section: BuildSectionKey;
+  actionLabel: string;
 };
+
+type BuildSectionKey = 'inventory' | 'bom' | 'assembly' | 'manufacturing' | 'exports' | 'approval' | 'handoff';
 
 const MANUFACTURERS = [
   {
@@ -200,6 +203,7 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
+  const sectionOffsetsRef = useRef<Partial<Record<BuildSectionKey, number>>>({});
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
@@ -257,6 +261,25 @@ export default function PhaseFour({
     : canExportQuotePacket
       ? `Vendor request preparation is enabled by saved review ${savedVendorApprovalRecord.recordId}. Fabrication is still not approved.`
       : 'Vendor request preparation requires Pro Shop or Team after an approved review record is saved. Fabrication is still not approved.';
+
+  const handleSectionLayout = (section: BuildSectionKey) => (event: LayoutChangeEvent) => {
+    sectionOffsetsRef.current[section] = event.nativeEvent.layout.y;
+  };
+
+  const scrollToBuildSection = (section: BuildSectionKey) => {
+    const documentRef = typeof document !== 'undefined' ? document : null;
+    const targetElement = documentRef?.getElementById(`build-section-${section}`);
+    if (targetElement?.scrollIntoView) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    const targetY = sectionOffsetsRef.current[section];
+    if (typeof targetY !== 'number') {
+      return;
+    }
+    scrollViewRef.current?.scrollTo({ y: Math.max(targetY - Spacing.md, 0), animated: true });
+  };
 
   const requirePaidExport = () => {
     if (canExportQuotePacket) return true;
@@ -610,46 +633,57 @@ export default function PhaseFour({
 
   const buildReadinessItems: BuildReadinessItem[] = [
     {
-      id: 'source-specs',
-      label: 'Source + specs',
+      id: 'inventory',
+      label: 'Tour inventory',
       detail: innovation.machineId || innovation.inventorySource
         ? `${innovation.machineId || 'Matched machine'}${innovation.inventorySource ? ` | ${innovation.inventorySource}` : ''}`
         : 'Confirm machine revision and source evidence.',
       ready: !!spec && (!!innovation.machineId || !!innovation.inventorySource || !!innovation.machineName),
       icon: 'document-text-outline',
-    },
-    {
-      id: '2d',
-      label: '2D references',
-      detail: has2D
-        ? `${angleLabels.length || 1} view${(angleLabels.length || 1) === 1 ? '' : 's'} available for review.`
-        : 'Generate source-backed 2D references in Design.',
-      ready: has2D,
-      icon: 'image-outline',
-      actionLabel: has2D ? undefined : 'Open Design',
-      onPress: has2D ? undefined : onGoToDesign,
-    },
-    {
-      id: '3d',
-      label: '3D reference',
-      detail: has3D
-        ? `${threeDScene?.objects.length || 0} visual-reference objects available.`
-        : 'Generate a 3D scene before package review.',
-      ready: has3D,
-      icon: 'cube-outline',
-      actionLabel: has3D ? undefined : 'Open Design',
-      onPress: has3D ? undefined : onGoToDesign,
+      section: 'inventory',
+      actionLabel: 'View',
     },
     {
       id: 'bom',
-      label: 'BOM + assembly',
+      label: 'Bill of materials',
       detail: localBom
-        ? `${localBom.items.length} line items; ${innovation.assemblySteps?.length || 0} assembly steps.`
+        ? `${localBom.items.length} line items ready for material and supplier review.`
         : 'Generate parts, materials, costs, and supplier list.',
       ready: !!localBom,
       icon: 'list-outline',
-      actionLabel: localBom ? undefined : status === 'generating' ? 'Generating' : 'Generate BOM',
-      onPress: localBom || status === 'generating' ? undefined : handleGenerateBOM,
+      section: 'bom',
+      actionLabel: localBom ? 'View' : 'Open',
+    },
+    {
+      id: 'assembly',
+      label: 'Assembly sequence',
+      detail: `${innovation.assemblySteps?.length || 0} assembly step${(innovation.assemblySteps?.length || 0) === 1 ? '' : 's'} available.`,
+      ready: (innovation.assemblySteps?.length || 0) > 0,
+      icon: 'construct-outline',
+      section: 'assembly',
+      actionLabel: 'View',
+    },
+    {
+      id: 'manufacturing',
+      label: 'Manufacturing studio',
+      detail: has2D || has3D
+        ? `${has2D ? '2D' : ''}${has2D && has3D ? ' + ' : ''}${has3D ? '3D' : ''} references feed CAD readiness and DfM review.`
+        : 'Generate visual references before manufacturing review.',
+      ready: has2D || has3D,
+      icon: 'cube-outline',
+      section: 'manufacturing',
+      actionLabel: 'View',
+    },
+    {
+      id: 'exports',
+      label: 'Export options',
+      detail: localBom
+        ? 'BOM, complete package, and quote packet exports are available.'
+        : 'Generate the BOM before export options unlock.',
+      ready: !!localBom,
+      icon: 'archive-outline',
+      section: localBom ? 'exports' : 'bom',
+      actionLabel: localBom ? 'View' : 'Open',
     },
     {
       id: 'approval',
@@ -659,6 +693,19 @@ export default function PhaseFour({
         : 'Save an Approved for vendor review record before vendor request.',
       ready: hasSavedVendorApproval,
       icon: 'shield-checkmark-outline',
+      section: 'approval',
+      actionLabel: 'View',
+    },
+    {
+      id: 'handoff',
+      label: 'Manufacturer handoff',
+      detail: canPrepareVendorRequest
+        ? 'Vendor request draft is ready for packet attachment and review.'
+        : vendorRequestBlockedMessage,
+      ready: canPrepareVendorRequest,
+      icon: 'business-outline',
+      section: 'handoff',
+      actionLabel: 'View',
     },
   ];
   const readinessReadyCount = buildReadinessItems.filter(item => item.ready).length;
@@ -806,11 +853,13 @@ export default function PhaseFour({
         </View>
         <View style={styles.readinessList}>
           {buildReadinessItems.map(item => (
-            <View
+            <TouchableOpacity
               key={item.id}
-              style={[styles.readinessItem, item.ready && styles.readinessItemReady, item.onPress && styles.readinessItemActionable]}
+              style={[styles.readinessItem, item.ready && styles.readinessItemReady, styles.readinessItemActionable]}
+              onPress={() => scrollToBuildSection(item.section)}
+              accessibilityRole="button"
               accessibilityLabel={`${item.label}: ${item.ready ? 'complete' : 'incomplete'}`}
-              accessibilityHint={item.detail}
+              accessibilityHint={`Jump to ${item.label}. ${item.detail}`}
               accessibilityState={{ selected: item.ready }}
             >
               <View style={[styles.readinessItemIcon, item.ready && styles.readinessItemIconReady]}>
@@ -819,95 +868,45 @@ export default function PhaseFour({
               <View style={styles.readinessItemText}>
                 <Text style={styles.readinessItemLabel}>{item.label}</Text>
               </View>
-              {item.actionLabel ? (
-                <TouchableOpacity
-                  onPress={item.onPress}
-                  disabled={!item.onPress}
-                  accessibilityRole="button"
-                  accessibilityLabel={item.actionLabel}
-                  accessibilityState={{ disabled: !item.onPress }}
-                  hitSlop={8}
-                >
-                  <Text style={styles.readinessItemAction}>{item.actionLabel}</Text>
-                </TouchableOpacity>
-              ) : null}
-            </View>
+              <Text style={styles.readinessItemAction}>{item.actionLabel}</Text>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {renderReviewerApprovalCard()}
-
-      <View style={styles.packageSummaryCard}>
-        <View style={styles.packageSummaryHeader}>
-          <View style={styles.packageSummaryTitleRow}>
-            <Text style={styles.packageSummaryTitle}>{innovation.machineName || innovation.conceptName}</Text>
-            <InfoTooltip
-              text={innovation.conceptDescription}
-              accessibilityLabel="Show package description"
-              bubbleAlign="start"
-            />
+      <View nativeID="build-section-inventory" onLayout={handleSectionLayout('inventory')}>
+        <View style={styles.packageSummaryCard}>
+          <View style={styles.packageSummaryHeader}>
+            <View style={styles.packageSummaryTitleRow}>
+              <Text style={styles.packageSummaryTitle}>{innovation.machineName || innovation.conceptName}</Text>
+              <InfoTooltip
+                text={innovation.conceptDescription}
+                accessibilityLabel="Show package description"
+                bubbleAlign="start"
+              />
+            </View>
+            <Text style={styles.packageSummaryMeta}>
+              {innovation.machineId ? `${innovation.machineId} | ` : ''}{innovation.inventorySource || 'Inventory source pending'}
+            </Text>
           </View>
-          <Text style={styles.packageSummaryMeta}>
-            {innovation.machineId ? `${innovation.machineId} | ` : ''}{innovation.inventorySource || 'Inventory source pending'}
-          </Text>
-        </View>
-        <View style={styles.packageSummaryGrid}>
-          <View style={styles.packageSummaryTile}>
-            <Text style={styles.packageSummaryTileLabel}>BOM</Text>
-            <Text style={styles.packageSummaryTileValue}>{localBom ? `${localBom.items.length} items` : 'Pending'}</Text>
-          </View>
-          <View style={styles.packageSummaryTile}>
-            <Text style={styles.packageSummaryTileLabel}>Assembly</Text>
-            <Text style={styles.packageSummaryTileValue}>{innovation.assemblySteps?.length || 0} steps</Text>
-          </View>
-          <View style={styles.packageSummaryTile}>
-            <Text style={styles.packageSummaryTileLabel}>Visuals</Text>
-            <Text style={styles.packageSummaryTileValue}>{has2D && has3D ? '2D + 3D' : has2D ? '2D only' : has3D ? '3D only' : 'Pending'}</Text>
+          <View style={styles.packageSummaryGrid}>
+            <View style={styles.packageSummaryTile}>
+              <Text style={styles.packageSummaryTileLabel}>BOM</Text>
+              <Text style={styles.packageSummaryTileValue}>{localBom ? `${localBom.items.length} items` : 'Pending'}</Text>
+            </View>
+            <View style={styles.packageSummaryTile}>
+              <Text style={styles.packageSummaryTileLabel}>Assembly</Text>
+              <Text style={styles.packageSummaryTileValue}>{innovation.assemblySteps?.length || 0} steps</Text>
+            </View>
+            <View style={styles.packageSummaryTile}>
+              <Text style={styles.packageSummaryTileLabel}>Visuals</Text>
+              <Text style={styles.packageSummaryTileValue}>{has2D && has3D ? '2D + 3D' : has2D ? '2D only' : has3D ? '3D only' : 'Pending'}</Text>
+            </View>
           </View>
         </View>
       </View>
 
-      {innovation.assemblySteps && innovation.assemblySteps.length > 0 && (
-        <View style={styles.assemblyPanel}>
-          <Text style={styles.exportTitle}>Assembly Sequence</Text>
-          {innovation.assemblySteps.map(step => (
-            <View key={step.stepNumber} style={styles.assemblyStep}>
-              <View style={styles.assemblyStepHeader}>
-                <Text style={styles.assemblyStepNumber}>{step.stepNumber}</Text>
-                <View style={styles.assemblyStepTitleWrap}>
-                  <Text style={styles.assemblyStepTitle}>{step.title}</Text>
-                  <Text style={styles.assemblyStepMeta}>{step.estimatedTime}</Text>
-                </View>
-              </View>
-              <Text style={styles.assemblyInstructions}>{step.instructions}</Text>
-              <Text style={styles.assemblyParts}>Parts: {step.parts.join(', ')}</Text>
-              <Text style={styles.assemblyCheck}>QC: {step.qualityCheck}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {innovation.pricing && (
-        <View style={styles.pricingPanel}>
-          <Text style={styles.exportTitle}>Pricing Estimate</Text>
-          <View style={styles.pricingGrid}>
-            <Text style={styles.pricingLabel}>Parts</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.partsSubtotal}</Text>
-            <Text style={styles.pricingLabel}>3D modeling</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.modelingEstimate}</Text>
-            <Text style={styles.pricingLabel}>Fabrication</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.fabricationEstimate}</Text>
-            <Text style={styles.pricingLabel}>Assembly labor</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.assemblyLaborEstimate}</Text>
-            <Text style={[styles.pricingLabel, styles.pricingTotalLabel]}>Total</Text>
-            <Text style={[styles.pricingValue, styles.pricingTotalValue]}>{innovation.pricing.totalEstimate}</Text>
-          </View>
-        </View>
-      )}
-
-      <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} initiallyExpanded={false} />
-
+      <View nativeID="build-section-bom" onLayout={handleSectionLayout('bom')}>
       <View style={styles.bomPanel}>
         <TouchableOpacity 
           style={styles.panelHeader} 
@@ -1028,7 +1027,53 @@ export default function PhaseFour({
         )}
       </View>
 
+      {innovation.pricing && (
+        <View style={styles.pricingPanel}>
+          <Text style={styles.exportTitle}>Pricing Estimate</Text>
+          <View style={styles.pricingGrid}>
+            <Text style={styles.pricingLabel}>Parts</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.partsSubtotal}</Text>
+            <Text style={styles.pricingLabel}>3D modeling</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.modelingEstimate}</Text>
+            <Text style={styles.pricingLabel}>Fabrication</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.fabricationEstimate}</Text>
+            <Text style={styles.pricingLabel}>Assembly labor</Text>
+            <Text style={styles.pricingValue}>{innovation.pricing.assemblyLaborEstimate}</Text>
+            <Text style={[styles.pricingLabel, styles.pricingTotalLabel]}>Total</Text>
+            <Text style={[styles.pricingValue, styles.pricingTotalValue]}>{innovation.pricing.totalEstimate}</Text>
+          </View>
+        </View>
+      )}
+      </View>
+
+      {innovation.assemblySteps && innovation.assemblySteps.length > 0 && (
+        <View nativeID="build-section-assembly" onLayout={handleSectionLayout('assembly')}>
+          <View style={styles.assemblyPanel}>
+            <Text style={styles.exportTitle}>Assembly Sequence</Text>
+            {innovation.assemblySteps.map(step => (
+              <View key={step.stepNumber} style={styles.assemblyStep}>
+                <View style={styles.assemblyStepHeader}>
+                  <Text style={styles.assemblyStepNumber}>{step.stepNumber}</Text>
+                  <View style={styles.assemblyStepTitleWrap}>
+                    <Text style={styles.assemblyStepTitle}>{step.title}</Text>
+                    <Text style={styles.assemblyStepMeta}>{step.estimatedTime}</Text>
+                  </View>
+                </View>
+                <Text style={styles.assemblyInstructions}>{step.instructions}</Text>
+                <Text style={styles.assemblyParts}>Parts: {step.parts.join(', ')}</Text>
+                <Text style={styles.assemblyCheck}>QC: {step.qualityCheck}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      <View nativeID="build-section-manufacturing" onLayout={handleSectionLayout('manufacturing')}>
+        <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} initiallyExpanded={false} />
+      </View>
+
       {localBom && (
+        <View nativeID="build-section-exports" onLayout={handleSectionLayout('exports')}>
         <View style={styles.exportPanel}>
           <Text style={styles.exportTitle}>Export Options</Text>
           <View style={styles.exportButtons}>
@@ -1073,9 +1118,15 @@ export default function PhaseFour({
             <Text style={styles.exportInfoItem}>• Export timestamp</Text>
           </View>
         </View>
+        </View>
       )}
 
+      <View nativeID="build-section-approval" onLayout={handleSectionLayout('approval')}>
+        {renderReviewerApprovalCard()}
+      </View>
+
       {/* Send to Manufacturer Section */}
+      <View nativeID="build-section-handoff" onLayout={handleSectionLayout('handoff')}>
       <View style={styles.manufacturerPanel}>
         <View style={styles.manufacturerHeader}>
           <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
@@ -1183,6 +1234,7 @@ export default function PhaseFour({
         <Text style={styles.manufacturerNote}>
           Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
         </Text>
+      </View>
       </View>
 
       <View style={styles.actionsPanel}>
