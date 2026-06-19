@@ -1846,6 +1846,7 @@ export default function HomeScreen() {
 }
 
 const createStyles = (Colors: AppColors) => {
+  const isDark = Colors.mode === 'dark';
   const shadows = makeShadows(Colors);
   return StyleSheet.create({
   container: {
@@ -1879,13 +1880,14 @@ const createStyles = (Colors: AppColors) => {
     minWidth: 0,
   },
   title: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.xl,
-    color: Colors.text,
-    letterSpacing: 1,
+    fontFamily: Fonts.brand,
+    fontSize: 18,
+    color: isDark ? '#d8dde2' : '#343a40',
+    letterSpacing: 1.5,
+    lineHeight: 22,
   },
   titleAccent: {
-    color: Colors.accent,
+    color: isDark ? '#28c6cf' : '#008c95',
   },
   subtitle: {
     fontSize: FontSizes.xs,

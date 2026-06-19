@@ -765,13 +765,14 @@ const createStyles = (Colors: AppColors) => {
       minWidth: 0,
     },
     brandWordmark: {
-      fontFamily: Fonts.display,
-      fontSize: 20,
-      color: Colors.text,
-      letterSpacing: 1,
+      fontFamily: Fonts.brand,
+      fontSize: 19,
+      color: isDark ? '#d8dde2' : '#343a40',
+      letterSpacing: 1.6,
+      lineHeight: 23,
     },
     brandWordmarkAccent: {
-      color: Colors.accent,
+      color: isDark ? '#28c6cf' : '#008c95',
     },
     brandSubtitle: {
       fontFamily: Fonts.bold,

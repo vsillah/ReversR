@@ -220,9 +220,10 @@ export const Radii = {
   pill: 999,
 };
 
-// Bespoke type: Space Grotesk for display/headings, Inter for body/labels.
+// Bespoke type: Orbitron for the engineered wordmark, Space Grotesk for display/headings, Inter for body/labels.
 // Weight is carried by the font file (custom fonts don't synthesize weight reliably).
 export const Fonts = {
+  brand: 'Orbitron_800ExtraBold',
   display: 'SpaceGrotesk_700Bold',
   displaySemi: 'SpaceGrotesk_600SemiBold',
   heading: 'SpaceGrotesk_600SemiBold',
