@@ -689,18 +689,13 @@ export default function PhaseFour({
                 onPress={() => setReviewerApprovalStatus(option.status)}
                 accessibilityRole="button"
                 accessibilityLabel={`Set reviewer approval status to ${option.label}`}
+                accessibilityHint={option.description}
                 accessibilityState={{ selected: isSelected }}
               >
                 <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
                   {option.label}
                 </Text>
               </TouchableOpacity>
-              <InfoTooltip
-                text={option.description}
-                accessibilityLabel={`Show ${option.label} review status details`}
-                bubbleAlign="start"
-                iconSize={11}
-              />
             </View>
           );
         })}
@@ -787,14 +782,7 @@ export default function PhaseFour({
             <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
           </View>
           <View style={styles.headerText}>
-            <View style={styles.titleRow}>
-              <Text style={styles.title}>Phase 4: Build</Text>
-              <InfoTooltip
-                text="BOM, assembly sequence, pricing, and fulfillment handoff"
-                accessibilityLabel="Show Build phase details"
-                bubbleAlign="start"
-              />
-            </View>
+            <Text style={styles.title}>Phase 4: Build</Text>
           </View>
         </View>
       </View>
@@ -829,15 +817,7 @@ export default function PhaseFour({
                 <Ionicons name={item.ready ? 'checkmark' : item.icon} size={17} color={item.ready ? Colors.black : Colors.gray[400]} />
               </View>
               <View style={styles.readinessItemText}>
-                <View style={styles.readinessItemLabelRow}>
-                  <Text style={styles.readinessItemLabel}>{item.label}</Text>
-                  <InfoTooltip
-                    text={item.detail}
-                    accessibilityLabel={`Show ${item.label} details`}
-                    bubbleAlign="start"
-                    iconSize={11}
-                  />
-                </View>
+                <Text style={styles.readinessItemLabel}>{item.label}</Text>
               </View>
               {item.actionLabel ? (
                 <TouchableOpacity
@@ -1269,11 +1249,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   headerText: {
     flex: 1,
   },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
   title: {
     fontSize: FontSizes.xl,
     fontFamily: Fonts.display,
@@ -1311,9 +1286,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
     gap: Spacing.md,
+    overflow: 'visible',
   },
   packageSummaryHeader: {
     gap: 4,
+    zIndex: 50,
+    elevation: 50,
   },
   packageSummaryTitleRow: {
     flexDirection: 'row',
@@ -1448,11 +1426,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flex: 1,
     minWidth: 0,
     justifyContent: 'center',
-  },
-  readinessItemLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
   },
   readinessItemLabel: {
     color: Colors.white,
@@ -1927,12 +1900,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 8,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+    overflow: 'visible',
   },
   quotePacketHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
     marginBottom: Spacing.xs,
+    zIndex: 50,
+    elevation: 50,
   },
   quotePacketTitle: {
     color: Colors.white,
@@ -1991,11 +1967,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   approvalChoiceButtonActive: {
     borderColor: Colors.orange[300],
     backgroundColor: 'rgba(251, 191, 36, 0.12)',
-  },
-  approvalChoiceLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
   },
   approvalChoiceSelect: {
     flex: 1,

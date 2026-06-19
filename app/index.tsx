@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { LinearGradient } from "expo-linear-gradient";
-import { BottomTabBar, HorizontalStepper, InfoTooltip, ScoreRing } from "../components/ui";
+import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
 import ReversRLogoMark from "../components/ReversRLogoMark";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
@@ -1608,14 +1608,7 @@ export default function HomeScreen() {
           />
           <View style={styles.currentStepInfo}>
             <Text style={styles.currentStepOverline}>Current step</Text>
-            <View style={styles.currentStepNameRow}>
-              <Text style={styles.currentStepName}>{PHASE_STEP_LABELS[Math.min(context.phase, 4) - 1]}</Text>
-              <InfoTooltip
-                text={PHASE_STEP_HINTS[Math.min(context.phase, 4) - 1]}
-                accessibilityLabel="Show current step details"
-                bubbleAlign="start"
-              />
-            </View>
+            <Text style={styles.currentStepName}>{PHASE_STEP_LABELS[Math.min(context.phase, 4) - 1]}</Text>
           </View>
         </LinearGradient>
         <HorizontalStepper
@@ -2055,11 +2048,6 @@ const createStyles = (Colors: AppColors) => {
     fontFamily: Fonts.display,
     fontSize: FontSizes.xl,
     color: Colors.text,
-  },
-  currentStepNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
   },
   currentStepHint: {
     fontSize: FontSizes.sm,

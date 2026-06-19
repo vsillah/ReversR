@@ -188,7 +188,7 @@ export function InfoTooltip({
       : { left: -86 };
 
   return (
-    <View style={[{ position: 'relative', alignSelf: 'center', zIndex: visible ? 30 : 1 }, style]}>
+    <View style={[{ position: 'relative', alignSelf: 'center', zIndex: visible ? 9999 : 1, elevation: visible ? 24 : 0 }, style]}>
       <Pressable
         onPress={() => setVisible(current => !current)}
         accessibilityRole="button"
@@ -226,7 +226,8 @@ export function InfoTooltip({
               shadowOpacity: 0.16,
               shadowRadius: 12,
               shadowOffset: { width: 0, height: 6 },
-              elevation: 8,
+              zIndex: 9999,
+              elevation: 24,
             },
             bubblePosition,
           ]}
@@ -664,29 +665,19 @@ export function HorizontalStepper({
                   {marker}
                 </TouchableOpacity>
               ) : marker}
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, maxWidth: '100%' }}>
-                <Text
-                  style={{
-                    fontSize: 10,
-                    fontFamily: Fonts.bold,
-                    letterSpacing: 0,
-                    textTransform: 'uppercase',
-                    color: isActive ? colors.text : colors.dimText,
-                    textAlign: 'center',
-                  }}
-                  numberOfLines={1}
-                >
-                  {label}
-                </Text>
-                {subLabels?.[idx] ? (
-                  <InfoTooltip
-                    text={subLabels[idx]}
-                    accessibilityLabel={`Show ${label} phase details`}
-                    bubbleAlign={idx === 0 ? 'start' : idx === steps.length - 1 ? 'end' : 'center'}
-                    iconSize={11}
-                  />
-                ) : null}
-              </View>
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontFamily: Fonts.bold,
+                  letterSpacing: 0,
+                  textTransform: 'uppercase',
+                  color: isActive ? colors.text : colors.dimText,
+                  textAlign: 'center',
+                }}
+                numberOfLines={1}
+              >
+                {label}
+              </Text>
               {isCurrent ? (
                 <View style={{ marginTop: 3, width: 26, height: 3, borderRadius: 2, backgroundColor: colors.accent }} />
               ) : null}
