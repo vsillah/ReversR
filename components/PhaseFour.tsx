@@ -61,11 +61,14 @@ interface Props {
   onReset: () => void;
 }
 
-type ArtifactStatus = {
+type BuildReadinessItem = {
   id: string;
-  name: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  detail: string;
   ready: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+  actionLabel?: string;
+  onPress?: () => void;
 };
 
 const MANUFACTURERS = [
@@ -205,7 +208,7 @@ export default function PhaseFour({
   const [error, setError] = useState<string | null>(null);
   const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
-  const [bomExpanded, setBomExpanded] = useState(true);
+  const [bomExpanded, setBomExpanded] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('analyzing');
   const [selectedVendorName, setSelectedVendorName] = useState('');
   const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('');
@@ -432,6 +435,7 @@ export default function PhaseFour({
     try {
       const bomResult = await generateBOM(innovation);
       setLocalBom(bomResult);
+      setBomExpanded(false);
       setStatus('complete');
       onBOMGenerated(bomResult);
     } catch (err: unknown) {
@@ -603,6 +607,166 @@ export default function PhaseFour({
     }
   };
 
+  const buildReadinessItems: BuildReadinessItem[] = [
+    {
+      id: 'source-specs',
+      label: 'Source + specs',
+      detail: innovation.machineId || innovation.inventorySource
+        ? `${innovation.machineId || 'Matched machine'}${innovation.inventorySource ? ` | ${innovation.inventorySource}` : ''}`
+        : 'Confirm machine revision and source evidence.',
+      ready: !!spec && (!!innovation.machineId || !!innovation.inventorySource || !!innovation.machineName),
+      icon: 'document-text-outline',
+    },
+    {
+      id: '2d',
+      label: '2D references',
+      detail: has2D
+        ? `${angleLabels.length || 1} view${(angleLabels.length || 1) === 1 ? '' : 's'} available for review.`
+        : 'Generate source-backed 2D references in Design.',
+      ready: has2D,
+      icon: 'image-outline',
+      actionLabel: has2D ? undefined : 'Open Design',
+      onPress: has2D ? undefined : onGoToDesign,
+    },
+    {
+      id: '3d',
+      label: '3D reference',
+      detail: has3D
+        ? `${threeDScene?.objects.length || 0} visual-reference objects available.`
+        : 'Generate a 3D scene before package review.',
+      ready: has3D,
+      icon: 'cube-outline',
+      actionLabel: has3D ? undefined : 'Open Design',
+      onPress: has3D ? undefined : onGoToDesign,
+    },
+    {
+      id: 'bom',
+      label: 'BOM + assembly',
+      detail: localBom
+        ? `${localBom.items.length} line items; ${innovation.assemblySteps?.length || 0} assembly steps.`
+        : 'Generate parts, materials, costs, and supplier list.',
+      ready: !!localBom,
+      icon: 'list-outline',
+      actionLabel: localBom ? undefined : status === 'generating' ? 'Generating' : 'Generate BOM',
+      onPress: localBom || status === 'generating' ? undefined : handleGenerateBOM,
+    },
+    {
+      id: 'approval',
+      label: 'Reviewer approval',
+      detail: savedVendorApprovalRecord
+        ? `${getReviewStatusLabel(savedVendorApprovalRecord.status)} | ${formatReviewDate(savedVendorApprovalRecord.savedAt)}`
+        : 'Save an Approved for vendor review record before vendor request.',
+      ready: hasSavedVendorApproval,
+      icon: 'shield-checkmark-outline',
+    },
+  ];
+  const readinessReadyCount = buildReadinessItems.filter(item => item.ready).length;
+  const readinessPercent = Math.round((readinessReadyCount / buildReadinessItems.length) * 100);
+  const isVendorReviewReady = readinessReadyCount === buildReadinessItems.length;
+
+  const renderReviewerApprovalCard = () => (
+    <View style={styles.reviewerApprovalCard}>
+      <View style={styles.quotePacketHeader}>
+        <Ionicons name="shield-checkmark-outline" size={20} color={Colors.orange[300]} />
+        <Text style={styles.quotePacketTitle}>Reviewer Approval</Text>
+      </View>
+      <Text style={styles.quotePacketText}>
+        Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass.
+      </Text>
+      <View style={styles.approvalChoiceGrid}>
+        {REVIEWER_APPROVAL_OPTIONS.map(option => {
+          const isSelected = reviewerApprovalStatus === option.status;
+          return (
+            <TouchableOpacity
+              key={option.status}
+              style={[styles.approvalChoiceButton, isSelected && styles.approvalChoiceButtonActive]}
+              onPress={() => setReviewerApprovalStatus(option.status)}
+              accessibilityRole="button"
+              accessibilityLabel={`Set reviewer approval status to ${option.label}`}
+              accessibilityState={{ selected: isSelected }}
+            >
+              <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
+                {option.label}
+              </Text>
+              <Text style={styles.approvalChoiceDescription}>{option.description}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <Text style={styles.quoteFieldLabel}>Reviewer name</Text>
+      <TextInput
+        style={styles.quoteInput}
+        value={reviewerName}
+        onChangeText={setReviewerName}
+        accessibilityLabel="Reviewer name"
+        placeholder="Reviewer name"
+        placeholderTextColor={Colors.gray[600]}
+      />
+      <Text style={styles.quoteFieldLabel}>Reviewer role</Text>
+      <TextInput
+        style={styles.quoteInput}
+        value={reviewerRole}
+        onChangeText={setReviewerRole}
+        accessibilityLabel="Reviewer role"
+        placeholder="CAD reviewer, machinist, engineer, or vendor"
+        placeholderTextColor={Colors.gray[600]}
+      />
+      <Text style={styles.quoteFieldLabel}>Reviewer notes</Text>
+      <TextInput
+        style={[styles.quoteInput, styles.quoteNotesInput]}
+        value={reviewerNotes}
+        onChangeText={setReviewerNotes}
+        accessibilityLabel="Reviewer approval notes"
+        placeholder="Record source-dimension, CAD, material treatment, DfM, or release concerns."
+        placeholderTextColor={Colors.gray[600]}
+        multiline
+      />
+      <TouchableOpacity
+        style={styles.saveReviewButton}
+        onPress={handleSaveReviewerApprovalRecord}
+        accessibilityRole="button"
+        accessibilityLabel="Save reviewer approval record"
+      >
+        <Ionicons name="save-outline" size={18} color={Colors.black} />
+        <Text style={styles.saveReviewButtonText}>Save Review Record</Text>
+      </TouchableOpacity>
+      <View style={[styles.approvalStatusBox, !!savedVendorApprovalRecord && styles.approvalStatusBoxApproved]}>
+        <Ionicons
+          name={savedVendorApprovalRecord ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+          size={16}
+          color={savedVendorApprovalRecord ? Colors.accent : Colors.orange[300]}
+        />
+        <Text style={styles.approvalStatusText}>
+          {vendorRequestBlockedMessage}
+        </Text>
+      </View>
+      {latestReviewRecord ? (
+        <View style={styles.reviewHistoryBox}>
+          <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
+          {savedReviewRecords.slice(0, 3).map(record => (
+            <View key={record.recordId} style={styles.reviewHistoryItem}>
+              <View style={styles.reviewHistoryItemHeader}>
+                <Text style={styles.reviewHistoryStatus}>{getReviewStatusLabel(record.status)}</Text>
+                <Text style={styles.reviewHistoryDate}>{formatReviewDate(record.savedAt)}</Text>
+              </View>
+              <Text style={styles.reviewHistoryMeta} numberOfLines={2}>
+                {record.reviewerName || 'Unnamed reviewer'}{record.reviewerRole ? ` | ${record.reviewerRole}` : ''} | {record.recordId}
+              </Text>
+              {record.notes ? (
+                <Text style={styles.reviewHistoryNotes} numberOfLines={2}>{record.notes}</Text>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      ) : (
+        <View style={styles.reviewHistoryBox}>
+          <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
+          <Text style={styles.reviewHistoryEmpty}>No saved reviewer decision yet.</Text>
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-build">
       <View style={styles.header}>
@@ -617,9 +781,73 @@ export default function PhaseFour({
         </View>
       </View>
 
-      <View style={styles.conceptCard}>
-        <Text style={styles.conceptName}>{innovation.conceptName}</Text>
-        <Text style={styles.conceptDesc}>{innovation.conceptDescription}</Text>
+      <View style={styles.readinessPanel}>
+        <View style={styles.readinessHeader}>
+          <View style={styles.readinessLeft}>
+            <Ionicons name={isVendorReviewReady ? 'checkmark-circle-outline' : 'alert-circle-outline'} size={22} color={isVendorReviewReady ? Colors.accent : Colors.orange[300]} />
+            <View style={styles.readinessHeadingText}>
+              <Text style={styles.readinessTitle}>Build Readiness</Text>
+              <Text style={styles.readinessSubtitle}>
+                {isVendorReviewReady
+                  ? 'Ready for vendor review. Fabrication still requires qualified CAD and DfM signoff.'
+                  : `${buildReadinessItems.length - readinessReadyCount} gate${buildReadinessItems.length - readinessReadyCount === 1 ? '' : 's'} open before vendor review.`}
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.readinessBadge, isVendorReviewReady && styles.readinessBadgeReady]}>
+            <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
+          </View>
+        </View>
+        <View style={styles.readinessList}>
+          {buildReadinessItems.map(item => (
+            <TouchableOpacity
+              key={item.id}
+              style={[styles.readinessItem, item.ready && styles.readinessItemReady, item.onPress && styles.readinessItemActionable]}
+              onPress={item.onPress}
+              disabled={!item.onPress}
+              accessibilityRole={item.onPress ? 'button' : undefined}
+              accessibilityLabel={`${item.label}: ${item.ready ? 'complete' : 'incomplete'}`}
+              accessibilityState={{ selected: item.ready, disabled: !item.onPress }}
+            >
+              <View style={[styles.readinessItemIcon, item.ready && styles.readinessItemIconReady]}>
+                <Ionicons name={item.ready ? 'checkmark' : item.icon} size={17} color={item.ready ? Colors.black : Colors.gray[400]} />
+              </View>
+              <View style={styles.readinessItemText}>
+                <Text style={styles.readinessItemLabel}>{item.label}</Text>
+                <Text style={styles.readinessItemDetail} numberOfLines={2}>{item.detail}</Text>
+              </View>
+              {item.actionLabel ? (
+                <Text style={styles.readinessItemAction}>{item.actionLabel}</Text>
+              ) : null}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {renderReviewerApprovalCard()}
+
+      <View style={styles.packageSummaryCard}>
+        <View style={styles.packageSummaryHeader}>
+          <Text style={styles.packageSummaryTitle}>{innovation.machineName || innovation.conceptName}</Text>
+          <Text style={styles.packageSummaryMeta}>
+            {innovation.machineId ? `${innovation.machineId} | ` : ''}{innovation.inventorySource || 'Inventory source pending'}
+          </Text>
+        </View>
+        <Text style={styles.packageSummaryDesc}>{innovation.conceptDescription}</Text>
+        <View style={styles.packageSummaryGrid}>
+          <View style={styles.packageSummaryTile}>
+            <Text style={styles.packageSummaryTileLabel}>BOM</Text>
+            <Text style={styles.packageSummaryTileValue}>{localBom ? `${localBom.items.length} items` : 'Pending'}</Text>
+          </View>
+          <View style={styles.packageSummaryTile}>
+            <Text style={styles.packageSummaryTileLabel}>Assembly</Text>
+            <Text style={styles.packageSummaryTileValue}>{innovation.assemblySteps?.length || 0} steps</Text>
+          </View>
+          <View style={styles.packageSummaryTile}>
+            <Text style={styles.packageSummaryTileLabel}>Visuals</Text>
+            <Text style={styles.packageSummaryTileValue}>{has2D && has3D ? '2D + 3D' : has2D ? '2D only' : has3D ? '3D only' : 'Pending'}</Text>
+          </View>
+        </View>
       </View>
 
       {innovation.assemblySteps && innovation.assemblySteps.length > 0 && (
@@ -660,7 +888,7 @@ export default function PhaseFour({
         </View>
       )}
 
-      <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} />
+      <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} initiallyExpanded={false} />
 
       <View style={styles.bomPanel}>
         <TouchableOpacity 
@@ -829,209 +1057,11 @@ export default function PhaseFour({
         </View>
       )}
 
-      {/* Manufacturing Readiness Tracker */}
-      {(() => {
-        const artifacts: ArtifactStatus[] = [
-          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
-          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
-          { id: 'specs', name: 'Specs', icon: 'document-text-outline', ready: !!spec },
-          { id: 'bom', name: 'BOM', icon: 'list-outline', ready: !!localBom },
-        ];
-        const readyCount = artifacts.filter(a => a.ready).length;
-        const percentage = Math.round((readyCount / artifacts.length) * 100);
-        
-        const handleArtifactPress = (artifactId: string, isReady: boolean) => {
-          if (isReady) {
-            const readyMessages: Record<string, string> = {
-              '2d': '2D visualization is complete.',
-              '3d': '3D scene is complete.',
-              'specs': 'Specifications are complete.',
-              'bom': 'Bill of Materials is complete.',
-            };
-            setAlert({visible: true, title: 'Already Generated', message: readyMessages[artifactId] || 'This artifact is ready.', type: 'success'});
-            return;
-          }
-          
-          if (artifactId === 'bom') {
-            if (status === 'generating') {
-              setAlert({visible: true, title: 'Please Wait', message: 'BOM generation is already in progress.', type: 'info'});
-              return;
-            }
-            handleGenerateBOM();
-          } else {
-            onGoToDesign();
-          }
-        };
-        
-        return (
-          <View style={styles.readinessPanel}>
-            <View style={styles.readinessHeader}>
-              <View style={styles.readinessLeft}>
-                <Ionicons name="rocket-outline" size={18} color={Colors.gray[400]} />
-                <View>
-                  <Text style={styles.readinessTitle}>Manufacturing Readiness</Text>
-                  <Text style={styles.readinessSubtitle}>Tap missing artifacts to generate them</Text>
-                </View>
-              </View>
-              <View style={styles.readinessBadge}>
-                <Text style={styles.readinessPercent}>{percentage}% Ready</Text>
-              </View>
-            </View>
-            <View style={styles.artifactGrid}>
-              {artifacts.map((artifact) => {
-                const isBomGenerating = artifact.id === 'bom' && status === 'generating';
-                return (
-                  <TouchableOpacity 
-                    key={artifact.id} 
-                    style={[
-                      styles.artifactItem,
-                      artifact.ready && styles.artifactItemReady,
-                      !artifact.ready && !isBomGenerating && styles.artifactItemTappable,
-                      isBomGenerating && styles.artifactItemGenerating,
-                    ]}
-                    onPress={() => handleArtifactPress(artifact.id, artifact.ready)}
-                    activeOpacity={0.7}
-                    disabled={isBomGenerating}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${artifact.name} artifact ${artifact.ready ? 'ready' : 'missing'}`}
-                    accessibilityHint={artifact.ready ? 'Shows artifact status' : artifact.id === 'bom' ? 'Generates the bill of materials' : 'Returns to design to generate this artifact'}
-                    accessibilityState={{ disabled: isBomGenerating, selected: artifact.ready }}
-                  >
-                    {isBomGenerating ? (
-                      <ActivityIndicator size="small" color={Colors.secondary} />
-                    ) : (
-                      <Ionicons 
-                        name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
-                        size={24} 
-                        color={artifact.ready ? Colors.accent : Colors.gray[600]} 
-                      />
-                    )}
-                    <Text style={[
-                      styles.artifactName,
-                      artifact.ready && styles.artifactNameReady,
-                      isBomGenerating && styles.artifactNameGenerating,
-                    ]}>{isBomGenerating ? 'Generating...' : artifact.name}</Text>
-                    {!artifact.ready && !isBomGenerating && (
-                      <Ionicons 
-                        name={artifact.id === 'bom' ? 'add-circle-outline' : 'arrow-back-circle-outline'} 
-                        size={14} 
-                        color={Colors.gray[500]} 
-                        style={styles.artifactAction}
-                      />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        );
-      })()}
-
       {/* Send to Manufacturer Section */}
       <View style={styles.manufacturerPanel}>
         <View style={styles.manufacturerHeader}>
           <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
           <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
-        </View>
-        <View style={styles.reviewerApprovalCard}>
-          <View style={styles.quotePacketHeader}>
-            <Ionicons name="shield-checkmark-outline" size={20} color={Colors.orange[300]} />
-            <Text style={styles.quotePacketTitle}>Reviewer Approval</Text>
-          </View>
-          <Text style={styles.quotePacketText}>
-            Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass.
-          </Text>
-          <View style={styles.approvalChoiceGrid}>
-            {REVIEWER_APPROVAL_OPTIONS.map(option => {
-              const isSelected = reviewerApprovalStatus === option.status;
-              return (
-                <TouchableOpacity
-                  key={option.status}
-                  style={[styles.approvalChoiceButton, isSelected && styles.approvalChoiceButtonActive]}
-                  onPress={() => setReviewerApprovalStatus(option.status)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Set reviewer approval status to ${option.label}`}
-                  accessibilityState={{ selected: isSelected }}
-                >
-                  <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
-                    {option.label}
-                  </Text>
-                  <Text style={styles.approvalChoiceDescription}>{option.description}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          <Text style={styles.quoteFieldLabel}>Reviewer name</Text>
-          <TextInput
-            style={styles.quoteInput}
-            value={reviewerName}
-            onChangeText={setReviewerName}
-            accessibilityLabel="Reviewer name"
-            placeholder="Reviewer name"
-            placeholderTextColor={Colors.gray[600]}
-          />
-          <Text style={styles.quoteFieldLabel}>Reviewer role</Text>
-          <TextInput
-            style={styles.quoteInput}
-            value={reviewerRole}
-            onChangeText={setReviewerRole}
-            accessibilityLabel="Reviewer role"
-            placeholder="CAD reviewer, machinist, engineer, or vendor"
-            placeholderTextColor={Colors.gray[600]}
-          />
-          <Text style={styles.quoteFieldLabel}>Reviewer notes</Text>
-          <TextInput
-            style={[styles.quoteInput, styles.quoteNotesInput]}
-            value={reviewerNotes}
-            onChangeText={setReviewerNotes}
-            accessibilityLabel="Reviewer approval notes"
-            placeholder="Record source-dimension, CAD, material treatment, DfM, or release concerns."
-            placeholderTextColor={Colors.gray[600]}
-            multiline
-          />
-          <TouchableOpacity
-            style={styles.saveReviewButton}
-            onPress={handleSaveReviewerApprovalRecord}
-            accessibilityRole="button"
-            accessibilityLabel="Save reviewer approval record"
-          >
-            <Ionicons name="save-outline" size={18} color={Colors.black} />
-            <Text style={styles.saveReviewButtonText}>Save Review Record</Text>
-          </TouchableOpacity>
-          <View style={[styles.approvalStatusBox, !!savedVendorApprovalRecord && styles.approvalStatusBoxApproved]}>
-            <Ionicons
-              name={savedVendorApprovalRecord ? 'checkmark-circle-outline' : 'alert-circle-outline'}
-              size={16}
-              color={savedVendorApprovalRecord ? Colors.accent : Colors.orange[300]}
-            />
-            <Text style={styles.approvalStatusText}>
-              {vendorRequestBlockedMessage}
-            </Text>
-          </View>
-          {latestReviewRecord ? (
-            <View style={styles.reviewHistoryBox}>
-              <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
-              {savedReviewRecords.slice(0, 3).map(record => (
-                <View key={record.recordId} style={styles.reviewHistoryItem}>
-                  <View style={styles.reviewHistoryItemHeader}>
-                    <Text style={styles.reviewHistoryStatus}>{getReviewStatusLabel(record.status)}</Text>
-                    <Text style={styles.reviewHistoryDate}>{formatReviewDate(record.savedAt)}</Text>
-                  </View>
-                  <Text style={styles.reviewHistoryMeta} numberOfLines={2}>
-                    {record.reviewerName || 'Unnamed reviewer'}{record.reviewerRole ? ` | ${record.reviewerRole}` : ''} | {record.recordId}
-                  </Text>
-                  {record.notes ? (
-                    <Text style={styles.reviewHistoryNotes} numberOfLines={2}>{record.notes}</Text>
-                  ) : null}
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.reviewHistoryBox}>
-              <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
-              <Text style={styles.reviewHistoryEmpty}>No saved reviewer decision yet.</Text>
-            </View>
-          )}
         </View>
         <View style={styles.quotePacketCard}>
           <View style={styles.quotePacketHeader}>
@@ -1230,23 +1260,55 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.gray[400],
   },
-  conceptCard: {
+  packageSummaryCard: {
     backgroundColor: Colors.panel,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
+    gap: Spacing.md,
   },
-  conceptName: {
-    fontFamily: 'monospace',
+  packageSummaryHeader: {
+    gap: 4,
+  },
+  packageSummaryTitle: {
     fontSize: FontSizes.lg,
-    color: Colors.orange[300],
-    marginBottom: Spacing.sm,
+    fontFamily: Fonts.display,
+    color: Colors.white,
   },
-  conceptDesc: {
+  packageSummaryMeta: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  packageSummaryDesc: {
     fontSize: FontSizes.sm,
     color: Colors.gray[300],
+    lineHeight: 20,
+  },
+  packageSummaryGrid: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  packageSummaryTile: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.sm,
+    gap: 4,
+  },
+  packageSummaryTileLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    textTransform: 'uppercase',
+  },
+  packageSummaryTileValue: {
+    fontSize: FontSizes.xs,
+    color: Colors.white,
+    fontWeight: 'bold',
   },
   readinessPanel: {
     backgroundColor: Colors.panel,
@@ -1267,6 +1329,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'flex-start',
     gap: Spacing.sm,
     flex: 1,
+    minWidth: 0,
+  },
+  readinessHeadingText: {
+    flex: 1,
+    minWidth: 0,
   },
   readinessTitle: {
     fontSize: FontSizes.md,
@@ -1292,45 +1359,63 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.accent,
     fontWeight: 'bold',
   },
-  artifactGrid: {
-    flexDirection: 'row',
+  readinessBadgeReady: {
+    backgroundColor: 'rgba(0, 255, 136, 0.22)',
+  },
+  readinessList: {
     gap: Spacing.sm,
   },
-  artifactItem: {
-    flex: 1,
+  readinessItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
     backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.gray[800],
+    borderColor: Colors.border,
     borderRadius: 8,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: Spacing.xs,
+    padding: Spacing.sm,
   },
-  artifactItemReady: {
-    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-    borderColor: Colors.accent,
+  readinessItemReady: {
+    borderColor: 'rgba(0, 255, 157, 0.35)',
+    backgroundColor: 'rgba(0, 255, 136, 0.08)',
   },
-  artifactItemTappable: {
+  readinessItemActionable: {
     borderStyle: 'dashed',
   },
-  artifactItemGenerating: {
-    backgroundColor: 'rgba(251, 191, 36, 0.1)',
-    borderColor: Colors.secondary,
-    borderStyle: 'solid',
+  readinessItemIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.black,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  artifactAction: {
-    marginTop: 2,
+  readinessItemIconReady: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
-  artifactNameGenerating: {
-    color: Colors.secondary,
+  readinessItemText: {
+    flex: 1,
+    minWidth: 0,
   },
-  artifactName: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.xs,
+  readinessItemLabel: {
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  readinessItemDetail: {
     color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
   },
-  artifactNameReady: {
+  readinessItemAction: {
     color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    alignSelf: 'center',
   },
   bomPanel: {
     backgroundColor: Colors.black,
