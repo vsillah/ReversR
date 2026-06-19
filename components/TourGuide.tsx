@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions, StyleProp, ViewStyle, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, FontSizes, Spacing, Radii, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -81,6 +81,7 @@ export default function TourGuide({
   const { width } = useWindowDimensions();
   const styles = createStyles(Colors);
   const [nextLockMessage, setNextLockMessage] = useState<string | null>(null);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const isCompact = width < 760;
   const isLastStep = stepIndex === stepCount - 1;
@@ -104,6 +105,10 @@ export default function TourGuide({
     setNextLockMessage(null);
   }, [stepIndex, isStepComplete, canFocusStep]);
 
+  useEffect(() => {
+    setIsMinimized(isCompact && Boolean(step.opensSettings || step.opensHistory));
+  }, [isCompact, step.opensHistory, step.opensSettings, stepIndex]);
+
   if (!active) return null;
 
   const handleNextPress = () => {
@@ -125,6 +130,88 @@ export default function TourGuide({
     onNext();
   };
 
+  const handleToggleManualPress = () => {
+    if (!canFocusStep || manualCheckCount === 0) return;
+    onToggleStepDone(stepIndex);
+  };
+
+  if (isCompact && isMinimized) {
+    return (
+      <Modal transparent visible animationType="none" statusBarTranslucent>
+        <View style={styles.tourModalLayer} pointerEvents="box-none">
+          <View
+            style={styles.miniDock}
+            accessibilityRole="summary"
+            accessibilityLabel="Collapsed ReversR guided tour"
+            testID="reversr-tour-guide-minimized"
+          >
+            <View style={styles.miniMain}>
+              <View style={styles.miniText}>
+                <Text style={styles.miniEyebrow}>Step {stepIndex + 1} of {stepCount}</Text>
+                <Text style={styles.miniTitle} numberOfLines={1}>{step.title}</Text>
+              </View>
+              <Text style={styles.miniCounter}>{stepCompleteCount}/{step.checks.length}</Text>
+            </View>
+            <View style={styles.miniActions}>
+              {manualCheckCount > 0 ? (
+                <TouchableOpacity
+                  style={[styles.miniButton, !canFocusStep && styles.miniButtonDisabled]}
+                  onPress={handleToggleManualPress}
+                  disabled={!canFocusStep}
+                  accessibilityRole="button"
+                  accessibilityLabel={areManualChecksComplete ? 'Undo manual actions for this tour step' : 'Mark manual actions for this tour step complete'}
+                  accessibilityState={{ disabled: !canFocusStep }}
+                >
+                  <Text style={[styles.miniButtonText, !canFocusStep && styles.miniButtonTextDisabled]}>
+                    {areManualChecksComplete ? 'Undo' : 'Done'}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+              <TouchableOpacity
+                style={[styles.miniButton, stepIndex === 0 && styles.miniButtonDisabled]}
+                onPress={onBack}
+                disabled={stepIndex === 0}
+                accessibilityRole="button"
+                accessibilityLabel="Go to previous tour step"
+                accessibilityState={{ disabled: stepIndex === 0 }}
+              >
+                <Ionicons name="arrow-back-outline" size={14} color={stepIndex === 0 ? Colors.gray[500] : Colors.accent} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.miniPrimaryButton, isNextLocked && styles.miniButtonDisabled]}
+                onPress={handleNextPress}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isNextLocked
+                    ? 'Next tour step locked until actions are complete'
+                    : isLastStep
+                      ? 'Finish tour'
+                      : 'Go to next tour step'
+                }
+                accessibilityState={{ disabled: isNextLocked }}
+              >
+                <Text style={[styles.miniPrimaryText, isNextLocked && styles.miniButtonTextDisabled]}>
+                  {isLastStep ? 'Finish' : 'Next'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.miniButton}
+                onPress={() => setIsMinimized(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Expand guided tour panel"
+              >
+                <Ionicons name="expand-outline" size={14} color={Colors.accent} />
+              </TouchableOpacity>
+            </View>
+            {nextLockMessage ? (
+              <Text style={styles.miniLockText} numberOfLines={2}>{nextLockMessage}</Text>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
   return (
     <View
       style={[styles.dock, dockPlacementStyle]}
@@ -141,7 +228,20 @@ export default function TourGuide({
 
       <View style={styles.titleRow}>
         <Text style={styles.title}>{step.title}</Text>
-        <Text style={styles.totalCounter}>{completedCount}/{totalCount} done</Text>
+        <View style={styles.titleMeta}>
+          <Text style={styles.totalCounter}>{completedCount}/{totalCount} done</Text>
+          {isCompact ? (
+            <TouchableOpacity
+              style={styles.minimizeButton}
+              onPress={() => setIsMinimized(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Minimize guided tour panel"
+            >
+              <Ionicons name="contract-outline" size={14} color={Colors.accent} />
+              <Text style={styles.minimizeButtonText}>Minimize</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       <View style={styles.progressTrack} accessibilityLabel={`Tour progress ${progressValue}`}>
@@ -229,7 +329,7 @@ export default function TourGuide({
         {manualCheckCount > 0 ? (
           <TouchableOpacity
             style={[styles.actionButton, !canFocusStep && styles.actionButtonDisabled]}
-            onPress={() => onToggleStepDone(stepIndex)}
+            onPress={handleToggleManualPress}
             disabled={!canFocusStep}
             accessibilityRole="button"
             accessibilityLabel={areManualChecksComplete ? 'Undo all manual actions for this tour step' : 'Mark all manual actions for this tour step complete'}
@@ -321,6 +421,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     right: Spacing.md,
     bottom: Spacing.md,
     maxWidth: 520,
+    maxHeight: '62%',
   },
   dockBottomLeft: {
     left: Spacing.lg,
@@ -364,6 +465,27 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   totalCounter: {
     color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: '800',
+  },
+  titleMeta: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  minimizeButton: {
+    minHeight: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    backgroundColor: Colors.surface,
+  },
+  minimizeButtonText: {
+    color: Colors.accent,
     fontSize: FontSizes.xs,
     fontWeight: '800',
   },
@@ -606,5 +728,105 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xs,
     lineHeight: 16,
     fontWeight: '700',
+  },
+  tourModalLayer: {
+    flex: 1,
+  },
+  miniDock: {
+    position: 'absolute',
+    top: Spacing.sm,
+    left: Spacing.sm,
+    right: Spacing.sm,
+    alignSelf: 'center',
+    maxWidth: 520,
+    padding: Spacing.sm,
+    borderRadius: Radii.lg,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    backgroundColor: Colors.mode === 'dark' ? '#101816' : Colors.gray[50],
+    shadowColor: Colors.black,
+    shadowOpacity: 0.22,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 14,
+    zIndex: 10000,
+    elevation: 10000,
+  },
+  miniMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  miniText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  miniEyebrow: {
+    color: Colors.accent,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  miniTitle: {
+    color: Colors.text,
+    fontSize: FontSizes.sm,
+    fontFamily: Fonts.heading,
+  },
+  miniCounter: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: '900',
+  },
+  miniActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  miniButton: {
+    minHeight: 30,
+    minWidth: 34,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    backgroundColor: Colors.surface,
+  },
+  miniButtonDisabled: {
+    opacity: 0.56,
+  },
+  miniButtonText: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: '900',
+  },
+  miniButtonTextDisabled: {
+    color: Colors.gray[500],
+  },
+  miniPrimaryButton: {
+    minHeight: 30,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    backgroundColor: Colors.accent,
+  },
+  miniPrimaryText: {
+    color: Colors.black,
+    fontSize: FontSizes.xs,
+    fontFamily: Fonts.extrabold,
+  },
+  miniLockText: {
+    color: Colors.orange[300],
+    fontSize: FontSizes.xs,
+    lineHeight: 15,
+    marginTop: Spacing.xs,
+    fontWeight: '800',
   },
 });
