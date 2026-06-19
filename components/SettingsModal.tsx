@@ -44,6 +44,7 @@ import {
   SupportIssueSeverity,
   SupportNotification,
   buildSupportSessionLog,
+  executeAdminSupportIssueRemediation,
   listAdminSupportIssues,
   listSupportNotifications,
   loadAdminSupportIssue,
@@ -793,9 +794,33 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       )));
       setResolutionSummary(result.issue.aiRemediation?.summary || '');
       setResolutionMessage(result.issue.aiRemediation?.userMessage || '');
-      setAdminStatus(`AI remediation prepared for ${issueId}. Review the steps, then resolve when verified.`);
+      setAdminStatus(`AI remediation preview prepared for ${issueId}. Review the planned actions, then run them when ready.`);
     } catch (e: any) {
       setAdminStatus(e?.message || 'Unable to run AI remediation.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleExecuteSupportIssueRemediation = async (issueId: string) => {
+    const token = requireAdminToken({ allowSuperAdminSession: true });
+    if (token === null) return;
+
+    setAdminLoading(true);
+    setAdminStatus(null);
+    try {
+      const result = await executeAdminSupportIssueRemediation(token, issueId);
+      setSelectedSupportIssue(result.issue);
+      setSupportIssues(prev => prev.map(issue => (
+        issue.issueId === issueId ? { ...issue, ...result.issue } : issue
+      )));
+      setResolutionSummary(result.issue.resolutionSummary || result.issue.aiRemediation?.summary || '');
+      setResolutionMessage(result.issue.userMessage || result.issue.aiRemediation?.userMessage || '');
+      setAdminStatus(result.issue.status === 'engineering_queued'
+        ? `AI queued engineering remediation for ${issueId} and notified the user.`
+        : `AI executed remediation actions for ${issueId}.`);
+    } catch (e: any) {
+      setAdminStatus(e?.message || 'Unable to execute AI remediation actions.');
     } finally {
       setAdminLoading(false);
     }
@@ -1120,6 +1145,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     ...(canUseAdminConsole ? [{ id: 'admin' as const, label: 'Admin', icon: 'shield-checkmark-outline' as const }] : []),
     { id: 'legal', label: 'Legal', icon: 'document-text-outline' },
   ];
+  const selectedSupportHandoffJob = selectedSupportIssue?.remediationJob || (
+    (selectedSupportIssue?.remediationActions || [])
+      .find(action => action.type === 'create_agent_handoff')
+      ?.params as any
+  )?.job || null;
   const aiWorkflowUses = [
     { phase: '1', label: 'Scan', activity: 'Analyze', icon: 'search-outline' as const },
     { phase: '2', label: 'Inventory', activity: 'Match', icon: 'git-branch-outline' as const },
@@ -2194,9 +2224,9 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       <Text style={styles.policyTitle}>Issue Reports</Text>
                       {renderInfoButton('aiRemediation', 'Show AI remediation details')}
                     </View>
-                    {renderTooltip('aiRemediation', 'AI remediation reads the issue description and safe session log, then drafts root cause, resolution steps, follow-up checks, and a user notification. Super admin still reviews and resolves before the user is notified.')}
+                    {renderTooltip('aiRemediation', 'AI remediation reads the issue description and safe session log, previews allowlisted actions, then runs them only after Super Admin confirmation. Code-level issues create an agent handoff job instead of changing code from the app server.')}
                     <Text style={styles.policyText}>
-                      Review user reports, inspect session logs, ask AI to prepare remediation steps, then resolve when the fix or workaround has been verified.
+                      Review user reports, inspect session logs, ask AI to prepare remediation steps, then run the planned actions or resolve manually after verification.
                     </Text>
                     <View style={styles.adminActionRow}>
                       <TouchableOpacity
@@ -2275,6 +2305,63 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                                 Check {index + 1}: {check}
                               </Text>
                             ))}
+                            <Text style={styles.credentialMetaText}>
+                              Type: {selectedSupportIssue.aiRemediation.resolutionType === 'code' ? 'Code remediation handoff' : 'Operational remediation'}
+                            </Text>
+                          </>
+                        )}
+
+                        {(selectedSupportIssue.remediationActions || []).length > 0 && (
+                          <>
+                            <Text style={styles.compactLabel}>Planned AI Actions</Text>
+                            <View style={styles.credentialList}>
+                              {(selectedSupportIssue.remediationActions || []).map(action => (
+                                <View key={action.actionId} style={styles.credentialCard}>
+                                  <View style={styles.credentialInfo}>
+                                    <Text style={styles.credentialRefText}>{action.label}</Text>
+                                    <Text style={styles.credentialMetaText}>
+                                      {action.status} | {action.type}
+                                    </Text>
+                                    {action.error ? (
+                                      <Text style={styles.credentialMetaText}>{action.error}</Text>
+                                    ) : null}
+                                  </View>
+                                  <Ionicons
+                                    name={action.status === 'completed' ? 'checkmark-circle-outline' : action.status === 'failed' ? 'alert-circle-outline' : 'ellipse-outline'}
+                                    size={17}
+                                    color={action.status === 'failed' ? Colors.red[500] : Colors.accent}
+                                  />
+                                </View>
+                              ))}
+                            </View>
+                          </>
+                        )}
+
+                        {selectedSupportIssue.aiRemediation?.userMessage ? (
+                          <>
+                            <Text style={styles.compactLabel}>User message preview</Text>
+                            <Text style={styles.policyText}>{selectedSupportIssue.aiRemediation.userMessage}</Text>
+                          </>
+                        ) : null}
+
+                        {selectedSupportHandoffJob && (
+                          <>
+                            <Text style={styles.compactLabel}>Agent handoff packet</Text>
+                            <Text style={styles.credentialRefText}>{selectedSupportHandoffJob.title}</Text>
+                            <Text style={styles.credentialMetaText}>
+                              {selectedSupportHandoffJob.status} | {selectedSupportHandoffJob.branchName}
+                            </Text>
+                            <Text style={styles.policyText}>{selectedSupportHandoffJob.problemStatement}</Text>
+                            {(selectedSupportHandoffJob.implementationPlan || []).map((step: string, index: number) => (
+                              <Text key={`job-plan-${index}`} style={styles.credentialMetaText}>
+                                Plan {index + 1}: {step}
+                              </Text>
+                            ))}
+                            {(selectedSupportHandoffJob.acceptanceCriteria || []).map((check: string, index: number) => (
+                              <Text key={`job-check-${index}`} style={styles.credentialMetaText}>
+                                Acceptance {index + 1}: {check}
+                              </Text>
+                            ))}
                           </>
                         )}
 
@@ -2309,6 +2396,22 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                           >
                             <Ionicons name="sparkles-outline" size={16} color={Colors.accent} />
                             <Text style={styles.adminButtonText}>AI Remediate</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
+                            onPress={() => handleExecuteSupportIssueRemediation(selectedSupportIssue.issueId)}
+                            disabled={
+                              adminLoading ||
+                              selectedSupportIssue.status === 'resolved' ||
+                              selectedSupportIssue.status === 'engineering_queued' ||
+                              !(selectedSupportIssue.remediationActions || []).length ||
+                              (selectedSupportIssue.remediationActions || []).every(action => action.status === 'completed')
+                            }
+                            accessibilityRole="button"
+                            accessibilityLabel="Run planned AI remediation actions"
+                          >
+                            <Ionicons name="play-circle-outline" size={17} color="#ffffff" />
+                            <Text style={styles.saveCredentialButtonText}>Run AI Actions</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={[styles.saveCredentialButton, styles.grantButton, adminLoading && styles.disabledButton]}
