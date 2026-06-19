@@ -926,9 +926,9 @@ const createStyles = (Colors: AppColors) => {
       fontFamily: Fonts.display,
       fontSize: 36,
       lineHeight: 41,
-      letterSpacing: -0.6,
+      letterSpacing: 0,
       color: Colors.text,
-      maxWidth: '84%',
+      maxWidth: '94%',
     },
     heroTitleAccent: {
       color: Colors.accent,

@@ -518,11 +518,37 @@ export function HorizontalStepper({
   testID?: string;
 }) {
   const { colors } = useAppTheme();
+  const connectorInset = `${100 / (steps.length * 2)}%` as ViewStyle['left'];
   return (
     <View
-      style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}
+      style={{ position: 'relative', flexDirection: 'row', alignItems: 'flex-start' }}
       testID={testID}
     >
+      {steps.length > 1 ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: connectorInset,
+            right: connectorInset,
+            top: 16,
+            flexDirection: 'row',
+            gap: 0,
+          }}
+        >
+          {steps.slice(0, -1).map((_, idx) => (
+            <View
+              key={`connector-${idx}`}
+              style={{
+                flex: 1,
+                height: 2,
+                borderRadius: 2,
+                backgroundColor: currentStep > idx + 1 ? colors.accent : colors.border,
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
       {steps.map((label, idx) => {
         const step = idx + 1;
         const isComplete = currentStep > step;
@@ -530,7 +556,7 @@ export function HorizontalStepper({
         const isActive = isComplete || isCurrent;
         const canPress = Boolean(onStepPress) && currentStep > step;
         const node = (
-          <View style={{ alignItems: 'center', gap: 5, width: 74 }}>
+          <View style={{ flex: 1, minWidth: 0, alignItems: 'center', gap: 5, paddingHorizontal: 3 }}>
             <View
               style={{
                 width: 34,
@@ -553,9 +579,9 @@ export function HorizontalStepper({
             </View>
             <Text
               style={{
-                fontSize: 11,
+                fontSize: 10,
                 fontFamily: Fonts.bold,
-                letterSpacing: 0.5,
+                letterSpacing: 0,
                 textTransform: 'uppercase',
                 color: isActive ? colors.text : colors.dimText,
                 textAlign: 'center',
@@ -578,31 +604,22 @@ export function HorizontalStepper({
           </View>
         );
         return (
-          <React.Fragment key={label}>
-            {canPress ? (
-              <TouchableOpacity
-                onPress={() => onStepPress?.(step)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={`Reopen ${label} phase`}
-              >
-                {node}
-              </TouchableOpacity>
-            ) : (
-              node
-            )}
-            {idx < steps.length - 1 ? (
-              <View
-                style={{
-                  flex: 1,
-                  height: 2,
-                  marginTop: 16,
-                  borderRadius: 2,
-                  backgroundColor: currentStep > step ? colors.accent : colors.border,
-                }}
-              />
-            ) : null}
-          </React.Fragment>
+          canPress ? (
+            <TouchableOpacity
+              key={label}
+              onPress={() => onStepPress?.(step)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`Reopen ${label} phase`}
+              style={{ flex: 1, minWidth: 0 }}
+            >
+              {node}
+            </TouchableOpacity>
+          ) : (
+            <View key={label} style={{ flex: 1, minWidth: 0 }}>
+              {node}
+            </View>
+          )
         );
       })}
     </View>
