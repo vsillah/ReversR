@@ -1419,6 +1419,7 @@ export default function HomeScreen() {
           onSettings={() => openSettings('account')}
           onProfile={() => openSettings('profile')}
           onTour={startTour}
+          onSupport={() => openSettings('support')}
           onResume={handleResume}
           userDisplayName={userDisplayName}
           userIsAuthenticated={userIsAuthenticated}

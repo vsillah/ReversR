@@ -43,6 +43,7 @@ interface WelcomeScreenProps {
   onSettings?: () => void;
   onProfile?: () => void;
   onTour?: () => void;
+  onSupport?: () => void;
   onResume?: (item: SavedInnovation) => void;
   userDisplayName?: string;
   userIsAuthenticated?: boolean;
@@ -116,6 +117,7 @@ export default function WelcomeScreen({
   onSettings,
   onProfile,
   onTour,
+  onSupport,
   onResume,
   userDisplayName = 'Guest',
   userIsAuthenticated = false,
@@ -660,15 +662,35 @@ export default function WelcomeScreen({
           </Card>
         ) : null}
 
-        <Card style={styles.infoCard} padded={false} onPress={() => router.push('/support')} accessibilityLabel="Open workflow support resources">
+        <Card style={styles.infoCard} padded={false} accessibilityLabel="Workflow support resources and issue reporting">
           <View style={styles.infoCardInner}>
             <View style={styles.infoCardHeader}>
               <Ionicons name="headset-outline" size={18} color={Colors.primary} />
-              <Ionicons name="chevron-forward" size={16} color={Colors.dimText} />
+              <Ionicons name="help-circle-outline" size={16} color={Colors.dimText} />
             </View>
             <Text style={styles.infoCardTitle}>Workflow Support</Text>
             <Text style={styles.infoCardBody} numberOfLines={3}>Access documentation, policies, and help resources.</Text>
-            <Text style={styles.infoCardLink}>Browse Resources</Text>
+            <View style={styles.supportActionRow}>
+              <TouchableOpacity
+                style={styles.supportActionButton}
+                onPress={() => router.push('/support')}
+                accessibilityRole="button"
+                accessibilityLabel="Browse workflow support resources"
+              >
+                <Text style={styles.infoCardLink}>Browse Resources</Text>
+              </TouchableOpacity>
+              {onSupport ? (
+                <TouchableOpacity
+                  style={[styles.supportActionButton, styles.supportIssueButton]}
+                  onPress={() => handleMenuAction(onSupport)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Submit an issue report"
+                >
+                  <Ionicons name="alert-circle-outline" size={14} color={Colors.primary} />
+                  <Text style={styles.infoCardLink}>Submit Issue</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
           </View>
         </Card>
       </View>
@@ -1300,6 +1322,20 @@ const createStyles = (Colors: AppColors) => {
       fontWeight: '700',
       color: Colors.primary,
       marginTop: 2,
+    },
+    supportActionRow: {
+      gap: 6,
+      marginTop: 2,
+    },
+    supportActionButton: {
+      alignSelf: 'flex-start',
+      minHeight: 24,
+      justifyContent: 'center',
+    },
+    supportIssueButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
     },
     creditCard: {
       marginBottom: Spacing.md,
