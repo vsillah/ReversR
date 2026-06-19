@@ -72,6 +72,7 @@ type BuildReadinessItem = {
 };
 
 type BuildSectionKey = 'inventory' | 'bom' | 'assembly' | 'manufacturing' | 'exports' | 'approval' | 'handoff';
+type ActiveBuildSection = BuildSectionKey | 'none' | null;
 
 const MANUFACTURERS = [
   {
@@ -201,9 +202,8 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
-  const [expandedBuildSections, setExpandedBuildSections] = useState<Partial<Record<BuildSectionKey, boolean>>>({
-    inventory: true,
-  });
+  const [activeBuildSection, setActiveBuildSection] = useState<ActiveBuildSection>(null);
+  const [handoffDetailsExpanded, setHandoffDetailsExpanded] = useState(false);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
@@ -261,13 +261,6 @@ export default function PhaseFour({
     : canExportQuotePacket
       ? `Vendor request preparation is enabled by saved review ${savedVendorApprovalRecord.recordId}. Fabrication is still not approved.`
       : 'Vendor request preparation requires Pro Shop or Team after an approved review record is saved. Fabrication is still not approved.';
-
-  const toggleBuildSection = (section: BuildSectionKey) => {
-    setExpandedBuildSections(current => ({
-      ...current,
-      [section]: !current[section],
-    }));
-  };
 
   const requirePaidExport = () => {
     if (canExportQuotePacket) return true;
@@ -692,6 +685,26 @@ export default function PhaseFour({
   const readinessReadyCount = buildReadinessItems.filter(item => item.ready).length;
   const readinessPercent = Math.round((readinessReadyCount / buildReadinessItems.length) * 100);
   const isVendorReviewReady = readinessReadyCount === buildReadinessItems.length;
+  const defaultBuildSection = buildReadinessItems.find(item => !item.ready)?.section ?? 'inventory';
+  const activeReceiptSection = activeBuildSection === null
+    ? defaultBuildSection
+    : activeBuildSection === 'none'
+      ? null
+      : activeBuildSection;
+
+  const toggleBuildSection = (section: BuildSectionKey) => {
+    if (section === 'handoff') {
+      setHandoffDetailsExpanded(false);
+    }
+    setActiveBuildSection(current => {
+      const currentSection = current === null
+        ? defaultBuildSection
+        : current === 'none'
+          ? null
+          : current;
+      return currentSection === section ? 'none' : section;
+    });
+  };
 
   const renderReviewerApprovalCard = () => (
     <View style={styles.reviewerApprovalCard}>
@@ -1074,111 +1087,172 @@ export default function PhaseFour({
         return (
           <View style={styles.manufacturerPanel}>
             <View style={styles.manufacturerHeader}>
-              <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
-              <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
-            </View>
-            <View style={styles.quotePacketCard}>
-              <View style={styles.quotePacketHeader}>
-                <Ionicons name="send-outline" size={20} color={Colors.accent} />
-                <Text style={styles.quotePacketTitle}>Quote Packet</Text>
+              <View style={styles.manufacturerHeaderTitle}>
+                <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
+                <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
               </View>
-              <Text style={styles.quotePacketText}>
-                Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
-              </Text>
-              <TouchableOpacity
-                style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
-                onPress={handleExportQuotePacket}
-                disabled={!localBom}
-                accessibilityRole="button"
-                accessibilityLabel="Export manufacturer quote packet"
-                accessibilityState={{ disabled: !localBom }}
-              >
-                <Text style={styles.quotePacketButtonText}>
-                  {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.quoteRequestCard}>
-              <View style={styles.quotePacketHeader}>
-                <Ionicons name="mail-outline" size={20} color={Colors.accent} />
-                <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
-              </View>
-              <Text style={styles.quotePacketText}>
-                Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
-              </Text>
-              <Text style={styles.quoteFieldLabel}>Vendor target</Text>
-              <View style={styles.vendorChoiceGrid}>
-                {getVendorTargets().map(vendor => {
-                  const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
-                  return (
-                    <TouchableOpacity
-                      key={`${vendor.vendorName}-${vendor.url}`}
-                      style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
-                      onPress={() => setSelectedVendorName(vendor.vendorName)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
-                      accessibilityState={{ selected: isSelected }}
-                    >
-                      <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
-                        {vendor.vendorName}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              <Text style={styles.quoteFieldLabel}>Recipient email</Text>
-              <TextInput
-                style={styles.quoteInput}
-                value={quoteRecipientEmail}
-                onChangeText={setQuoteRecipientEmail}
-                accessibilityLabel="Vendor quote recipient email"
-                placeholder="quotes@vendor.com"
-                placeholderTextColor={Colors.gray[600]}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-              <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
-              <TextInput
-                style={[styles.quoteInput, styles.quoteNotesInput]}
-                value={quoteAdminNotes}
-                onChangeText={setQuoteAdminNotes}
-                accessibilityLabel="Admin notes for vendor quote request"
-                placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
-                placeholderTextColor={Colors.gray[600]}
-                multiline
-              />
-              <TouchableOpacity
-                style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
-                onPress={handlePrepareQuoteEmail}
-                disabled={!canPrepareVendorRequest}
-                accessibilityRole="button"
-                accessibilityLabel="Prepare vendor quote request email"
-                accessibilityState={{ disabled: !canPrepareVendorRequest }}
-              >
-                <Text style={styles.quotePacketButtonText}>
-                  {vendorRequestCtaLabel}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.manufacturerGrid}>
-              {MANUFACTURERS.map((mfr) => (
+              {handoffDetailsExpanded ? (
                 <TouchableOpacity
-                  key={mfr.id}
-                  style={styles.manufacturerCard}
-                  onPress={() => Linking.openURL(mfr.url)}
-                  accessibilityRole="link"
-                  accessibilityLabel={`Open ${mfr.name} vendor website`}
+                  style={styles.handoffHeaderAction}
+                  onPress={() => setHandoffDetailsExpanded(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Hide manufacturer handoff details"
                 >
-                  <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
-                  <Text style={styles.manufacturerName}>{mfr.name}</Text>
-                  <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
-                  <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
+                  <Text style={styles.handoffHeaderActionText}>Hide details</Text>
                 </TouchableOpacity>
-              ))}
+              ) : null}
             </View>
-            <Text style={styles.manufacturerNote}>
-              Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
-            </Text>
+            {handoffDetailsExpanded ? (
+              <>
+                <View style={styles.quotePacketCard}>
+                  <View style={styles.quotePacketHeader}>
+                    <Ionicons name="send-outline" size={20} color={Colors.accent} />
+                    <Text style={styles.quotePacketTitle}>Quote Packet</Text>
+                  </View>
+                  <Text style={styles.quotePacketText}>
+                    Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
+                    onPress={handleExportQuotePacket}
+                    disabled={!localBom}
+                    accessibilityRole="button"
+                    accessibilityLabel="Export manufacturer quote packet"
+                    accessibilityState={{ disabled: !localBom }}
+                  >
+                    <Text style={styles.quotePacketButtonText}>
+                      {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.quoteRequestCard}>
+                  <View style={styles.quotePacketHeader}>
+                    <Ionicons name="mail-outline" size={20} color={Colors.accent} />
+                    <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
+                  </View>
+                  <Text style={styles.quotePacketText}>
+                    Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
+                  </Text>
+                  <Text style={styles.quoteFieldLabel}>Vendor target</Text>
+                  <View style={styles.vendorChoiceGrid}>
+                    {getVendorTargets().map(vendor => {
+                      const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
+                      return (
+                        <TouchableOpacity
+                          key={`${vendor.vendorName}-${vendor.url}`}
+                          style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
+                          onPress={() => setSelectedVendorName(vendor.vendorName)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
+                          accessibilityState={{ selected: isSelected }}
+                        >
+                          <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
+                            {vendor.vendorName}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  <Text style={styles.quoteFieldLabel}>Recipient email</Text>
+                  <TextInput
+                    style={styles.quoteInput}
+                    value={quoteRecipientEmail}
+                    onChangeText={setQuoteRecipientEmail}
+                    accessibilityLabel="Vendor quote recipient email"
+                    placeholder="quotes@vendor.com"
+                    placeholderTextColor={Colors.gray[600]}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                  <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
+                  <TextInput
+                    style={[styles.quoteInput, styles.quoteNotesInput]}
+                    value={quoteAdminNotes}
+                    onChangeText={setQuoteAdminNotes}
+                    accessibilityLabel="Admin notes for vendor quote request"
+                    placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
+                    placeholderTextColor={Colors.gray[600]}
+                    multiline
+                  />
+                  <TouchableOpacity
+                    style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
+                    onPress={handlePrepareQuoteEmail}
+                    disabled={!canPrepareVendorRequest}
+                    accessibilityRole="button"
+                    accessibilityLabel="Prepare vendor quote request email"
+                    accessibilityState={{ disabled: !canPrepareVendorRequest }}
+                  >
+                    <Text style={styles.quotePacketButtonText}>
+                      {vendorRequestCtaLabel}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.manufacturerGrid}>
+                  {MANUFACTURERS.map((mfr) => (
+                    <TouchableOpacity
+                      key={mfr.id}
+                      style={styles.manufacturerCard}
+                      onPress={() => Linking.openURL(mfr.url)}
+                      accessibilityRole="link"
+                      accessibilityLabel={`Open ${mfr.name} vendor website`}
+                    >
+                      <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
+                      <Text style={styles.manufacturerName}>{mfr.name}</Text>
+                      <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
+                      <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={styles.manufacturerNote}>
+                  Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
+                </Text>
+              </>
+            ) : (
+              <View style={styles.handoffCompactCard}>
+                <View style={[styles.handoffSummaryRow, localBom && styles.handoffSummaryRowReady]}>
+                  <View style={[styles.handoffSummaryIcon, localBom && styles.handoffSummaryIconReady]}>
+                    <Ionicons name={localBom ? 'checkmark' : 'document-text-outline'} size={15} color={localBom ? Colors.black : Colors.gray[400]} />
+                  </View>
+                  <View style={styles.handoffSummaryText}>
+                    <Text style={styles.handoffSummaryLabel}>Quote packet</Text>
+                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
+                      {localBom ? 'BOM-backed packet can be exported.' : 'Generate BOM before packet export.'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={[styles.handoffSummaryRow, canPrepareVendorRequest && styles.handoffSummaryRowReady]}>
+                  <View style={[styles.handoffSummaryIcon, canPrepareVendorRequest && styles.handoffSummaryIconReady]}>
+                    <Ionicons name={canPrepareVendorRequest ? 'checkmark' : 'mail-outline'} size={15} color={canPrepareVendorRequest ? Colors.black : Colors.gray[400]} />
+                  </View>
+                  <View style={styles.handoffSummaryText}>
+                    <Text style={styles.handoffSummaryLabel}>Vendor request</Text>
+                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
+                      {vendorRequestBlockedMessage}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.handoffSummaryRow}>
+                  <View style={styles.handoffSummaryIcon}>
+                    <Ionicons name="business-outline" size={15} color={Colors.gray[400]} />
+                  </View>
+                  <View style={styles.handoffSummaryText}>
+                    <Text style={styles.handoffSummaryLabel}>Vendor targets</Text>
+                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
+                      {getVendorTargets().length} target{getVendorTargets().length === 1 ? '' : 's'} available for quote routing.
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.handoffCompactButton}
+                  onPress={() => setHandoffDetailsExpanded(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open manufacturer handoff details"
+                >
+                  <Text style={styles.handoffCompactButtonText}>Open handoff details</Text>
+                  <Ionicons name="chevron-down" size={16} color={Colors.black} />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         );
       default:
@@ -1218,7 +1292,7 @@ export default function PhaseFour({
         </View>
         <View style={styles.readinessList}>
           {buildReadinessItems.map(item => {
-            const isExpanded = !!expandedBuildSections[item.section];
+            const isExpanded = activeReceiptSection === item.section;
             return (
               <View
                 key={item.id}
@@ -1237,6 +1311,7 @@ export default function PhaseFour({
                   </View>
                   <View style={styles.readinessItemText}>
                     <Text style={styles.readinessItemLabel}>{item.label}</Text>
+                    <Text style={styles.readinessItemDetail} numberOfLines={1}>{item.detail}</Text>
                   </View>
                   <Text style={styles.readinessItemAction}>{isExpanded ? 'Hide' : 'Open'}</Text>
                   <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray[400]} />
@@ -1944,13 +2019,34 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   manufacturerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: Spacing.sm,
     marginBottom: Spacing.lg,
+  },
+  manufacturerHeaderTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    flex: 1,
+    minWidth: 0,
   },
   manufacturerTitle: {
     fontSize: FontSizes.md,
     fontWeight: 'bold',
     color: Colors.white,
+  },
+  handoffHeaderAction: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    backgroundColor: Colors.surface,
+  },
+  handoffHeaderActionText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
   },
   quotePacketCard: {
     backgroundColor: 'rgba(34, 197, 94, 0.08)',
@@ -1967,6 +2063,73 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 8,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+  },
+  handoffCompactCard: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  handoffSummaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    backgroundColor: Colors.panel,
+    padding: Spacing.sm,
+  },
+  handoffSummaryRowReady: {
+    borderColor: 'rgba(0, 255, 157, 0.3)',
+    backgroundColor: 'rgba(0, 255, 136, 0.08)',
+  },
+  handoffSummaryIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.black,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  handoffSummaryIconReady: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  handoffSummaryText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  handoffSummaryLabel: {
+    color: Colors.white,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  handoffSummaryValue: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+  },
+  handoffCompactButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+  },
+  handoffCompactButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
   },
   reviewerApprovalCard: {
     backgroundColor: 'rgba(251, 191, 36, 0.08)',
