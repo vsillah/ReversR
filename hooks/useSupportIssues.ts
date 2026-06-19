@@ -10,15 +10,54 @@ import {
 import { getApiBase } from '../utils/apiBase';
 
 export type SupportIssueSeverity = 'low' | 'normal' | 'high' | 'critical';
-export type SupportIssueStatus = 'open' | 'triaging' | 'ai_remediated' | 'resolved';
+export type SupportIssueStatus = 'open' | 'triaging' | 'ai_remediated' | 'executing' | 'engineering_queued' | 'execution_failed' | 'resolved';
+export type SupportRemediationActionType =
+  | 'populate_resolution_fields'
+  | 'create_user_notification'
+  | 'create_agent_handoff'
+  | 'set_issue_status'
+  | 'append_audit_event';
+
+export interface SupportRemediationAction {
+  actionId: string;
+  type: SupportRemediationActionType;
+  label: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  params: Record<string, unknown>;
+  result: Record<string, unknown> | null;
+  error: string;
+  createdAt: string;
+  completedAt: string;
+}
+
+export interface SupportRemediationJob {
+  jobId: string;
+  issueId: string;
+  status: string;
+  branchName: string;
+  title: string;
+  problemStatement: string;
+  suspectedFiles: string[];
+  implementationPlan: string[];
+  acceptanceCriteria: string[];
+  prBodyDraft: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface SupportIssueRemediation {
   summary: string;
   rootCause: string;
+  resolutionType?: 'operational' | 'code';
   resolutionSteps: string[];
   userMessage: string;
   followUpChecks: string[];
   automationActions: string[];
+  suspectedFiles?: string[];
+  implementationPlan?: string[];
+  acceptanceCriteria?: string[];
+  prTitle?: string;
+  prBodyDraft?: string;
   confidence: 'low' | 'medium' | 'high';
   generatedAt?: string;
   generatedBy?: string;
@@ -43,6 +82,9 @@ export interface SupportIssue {
   sessionLog?: Record<string, unknown>;
   sessionLogKeys: string[];
   aiRemediation: SupportIssueRemediation | null;
+  remediationActions: SupportRemediationAction[];
+  remediationJobId: string;
+  remediationJob: SupportRemediationJob | null;
 }
 
 export interface SupportNotification {
@@ -183,6 +225,31 @@ export const remediateAdminSupportIssue = async (
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.issue) throw new Error(data.error || 'Unable to run AI remediation.');
+  return data;
+};
+
+export const executeAdminSupportIssueRemediation = async (
+  adminToken: string,
+  issueId: string
+): Promise<{ status: 'ok'; issue: SupportIssue }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/support/issues/${encodeURIComponent(issueId)}/execute-remediation`, {
+    method: 'POST',
+    headers: await adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.issue) throw new Error(data.error || 'Unable to execute AI remediation.');
+  return data;
+};
+
+export const listAdminSupportRemediationJobs = async (
+  adminToken: string
+): Promise<{ status: 'ok'; jobs: SupportRemediationJob[] }> => {
+  const response = await fetch(`${getApiBase()}/api/admin/support/remediation-jobs`, {
+    method: 'GET',
+    headers: await adminHeaders(adminToken),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Unable to load support remediation jobs.');
   return data;
 };
 

@@ -89,6 +89,7 @@ const DEFAULT_STORE = {
   commercialConfig: {},
   supportIssues: {},
   supportNotifications: {},
+  supportRemediationJobs: {},
 };
 
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -371,7 +372,14 @@ const redactTesterInvite = (invite = {}) => ({
 });
 
 const SUPPORT_SEVERITIES = new Set(['low', 'normal', 'high', 'critical']);
-const SUPPORT_STATUSES = new Set(['open', 'triaging', 'ai_remediated', 'resolved']);
+const SUPPORT_STATUSES = new Set(['open', 'triaging', 'ai_remediated', 'executing', 'engineering_queued', 'execution_failed', 'resolved']);
+const SUPPORT_REMEDIATION_ACTION_TYPES = new Set([
+  'populate_resolution_fields',
+  'create_user_notification',
+  'create_agent_handoff',
+  'set_issue_status',
+  'append_audit_event',
+]);
 
 const truncateText = (value = '', maxLength = 4000) => {
   const text = String(value || '').trim();
@@ -431,6 +439,57 @@ const buildSupportNotificationId = ({ clientId = '', issueId = '', createdAt = '
   `notification_${hashId([clientId, issueId, createdAt, crypto.randomBytes(6).toString('hex')].join('|'))}`
 );
 
+const buildSupportRemediationActionId = ({ issueId = '', actionType = '', createdAt = '', index = 0 }) => (
+  `action_${hashId([issueId, actionType, createdAt, index, crypto.randomBytes(4).toString('hex')].join('|'))}`
+);
+
+const buildSupportRemediationJobId = ({ issueId = '', createdAt = '' }) => (
+  `job_${hashId([issueId, createdAt, crypto.randomBytes(6).toString('hex')].join('|'))}`
+);
+
+const slugifyBranchPart = (value = '') => String(value || '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .slice(0, 48) || 'support-issue';
+
+const normalizeSupportActionStatus = (value = 'pending') => {
+  const status = String(value || '').trim().toLowerCase();
+  return ['pending', 'running', 'completed', 'failed', 'skipped'].includes(status) ? status : 'pending';
+};
+
+const normalizeSupportActionType = (value = '') => {
+  const actionType = String(value || '').trim();
+  return SUPPORT_REMEDIATION_ACTION_TYPES.has(actionType) ? actionType : '';
+};
+
+const redactSupportRemediationAction = (action = {}) => ({
+  actionId: action.actionId || '',
+  type: normalizeSupportActionType(action.type),
+  label: action.label || '',
+  status: normalizeSupportActionStatus(action.status),
+  params: action.params || {},
+  result: action.result || null,
+  error: action.error || '',
+  createdAt: action.createdAt || '',
+  completedAt: action.completedAt || '',
+});
+
+const redactSupportRemediationJob = (job = {}) => ({
+  jobId: job.jobId || '',
+  issueId: job.issueId || '',
+  status: job.status || 'queued',
+  branchName: job.branchName || '',
+  title: job.title || '',
+  problemStatement: job.problemStatement || '',
+  suspectedFiles: Array.isArray(job.suspectedFiles) ? job.suspectedFiles : [],
+  implementationPlan: Array.isArray(job.implementationPlan) ? job.implementationPlan : [],
+  acceptanceCriteria: Array.isArray(job.acceptanceCriteria) ? job.acceptanceCriteria : [],
+  prBodyDraft: job.prBodyDraft || '',
+  createdAt: job.createdAt || '',
+  updatedAt: job.updatedAt || '',
+});
+
 const redactSupportIssue = (issue = {}, { includeSessionLog = false } = {}) => ({
   issueId: issue.issueId || '',
   status: normalizeSupportStatus(issue.status),
@@ -448,6 +507,11 @@ const redactSupportIssue = (issue = {}, { includeSessionLog = false } = {}) => (
   resolutionSummary: issue.resolutionSummary || '',
   userMessage: issue.userMessage || '',
   aiRemediation: issue.aiRemediation || null,
+  remediationActions: Array.isArray(issue.remediationActions)
+    ? issue.remediationActions.map(redactSupportRemediationAction)
+    : [],
+  remediationJobId: issue.remediationJobId || '',
+  remediationJob: issue.remediationJob ? redactSupportRemediationJob(issue.remediationJob) : null,
   events: issue.events || [],
   sessionLog: includeSessionLog ? sanitizeSessionLog(issue.sessionLog || {}) : undefined,
   sessionLogKeys: Object.keys(issue.sessionLog || {}),
@@ -465,13 +529,264 @@ const redactSupportNotification = (notification = {}) => ({
 });
 
 const listSupportIssues = (store, { includeSessionLog = false } = {}) => Object.values(store.supportIssues || {})
-  .map(issue => redactSupportIssue(issue, { includeSessionLog }))
+  .map(issue => redactSupportIssue({
+    ...issue,
+    remediationJob: issue.remediationJobId ? store.supportRemediationJobs?.[issue.remediationJobId] : null,
+  }, { includeSessionLog }))
   .sort((left, right) => String(right.updatedAt).localeCompare(String(left.updatedAt)));
+
+const listSupportRemediationJobs = (store) => Object.values(store.supportRemediationJobs || {})
+  .map(redactSupportRemediationJob)
+  .sort((left, right) => String(right.updatedAt || right.createdAt).localeCompare(String(left.updatedAt || left.createdAt)));
 
 const listSupportNotificationsForClient = (store, clientId = '') => Object.values(store.supportNotifications || {})
   .filter(notification => notification.clientId === clientId)
   .map(redactSupportNotification)
   .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)));
+
+const supportIssueNeedsEngineering = (issue = {}, remediation = {}) => {
+  const explicitType = String(remediation.resolutionType || remediation.remediationType || '').trim().toLowerCase();
+  if (['code', 'engineering', 'pr'].includes(explicitType)) return true;
+  if (['operational', 'ops', 'admin'].includes(explicitType)) return false;
+  const searchable = [
+    issue.title,
+    issue.description,
+    remediation.summary,
+    remediation.rootCause,
+    ...(Array.isArray(remediation.resolutionSteps) ? remediation.resolutionSteps : []),
+    ...(Array.isArray(remediation.automationActions) ? remediation.automationActions : []),
+    JSON.stringify(issue.sessionLog || {}),
+  ].join(' ').toLowerCase();
+  return [
+    'code change',
+    'pull request',
+    'pr',
+    'branch',
+    'commit',
+    'deploy',
+    'release',
+    'bug',
+    'typescript',
+    'backend',
+    'api route',
+  ].some(keyword => searchable.includes(keyword));
+};
+
+const buildSupportRemediationJob = ({ issue = {}, remediation = {}, createdAt = '' }) => {
+  const jobId = buildSupportRemediationJobId({ issueId: issue.issueId, createdAt });
+  const title = truncateText(
+    remediation.prTitle || `Fix support issue: ${issue.title || issue.issueId}`,
+    140
+  );
+  const suspectedFiles = Array.isArray(remediation.suspectedFiles)
+    ? remediation.suspectedFiles.map(file => truncateText(file, 220)).filter(Boolean).slice(0, 12)
+    : [];
+  const implementationPlan = Array.isArray(remediation.implementationPlan) && remediation.implementationPlan.length
+    ? remediation.implementationPlan.map(step => truncateText(step, 800)).filter(Boolean).slice(0, 12)
+    : (Array.isArray(remediation.resolutionSteps) ? remediation.resolutionSteps : []).map(step => truncateText(step, 800)).filter(Boolean).slice(0, 12);
+  const acceptanceCriteria = Array.isArray(remediation.acceptanceCriteria) && remediation.acceptanceCriteria.length
+    ? remediation.acceptanceCriteria.map(step => truncateText(step, 800)).filter(Boolean).slice(0, 12)
+    : (Array.isArray(remediation.followUpChecks) ? remediation.followUpChecks : []).map(step => truncateText(step, 800)).filter(Boolean).slice(0, 12);
+  const branchName = truncateText(
+    remediation.branchName || `codex/support-${slugifyBranchPart(issue.issueId || issue.title)}`,
+    120
+  );
+  return {
+    jobId,
+    issueId: issue.issueId || '',
+    status: 'queued',
+    branchName,
+    title,
+    problemStatement: truncateText(
+      remediation.problemStatement || `${issue.title || 'Support issue'}: ${issue.description || remediation.rootCause || ''}`,
+      2000
+    ),
+    suspectedFiles,
+    implementationPlan,
+    acceptanceCriteria,
+    prBodyDraft: truncateText(
+      remediation.prBodyDraft || [
+        `## Summary`,
+        `- Remediate support issue ${issue.issueId || ''}: ${issue.title || 'reported issue'}`,
+        '',
+        `## Root Cause`,
+        remediation.rootCause || 'Needs engineering investigation.',
+        '',
+        `## Implementation Plan`,
+        ...(implementationPlan.length ? implementationPlan.map(step => `- ${step}`) : ['- Investigate and implement the smallest safe fix.']),
+        '',
+        `## Validation`,
+        ...(acceptanceCriteria.length ? acceptanceCriteria.map(step => `- ${step}`) : ['- Reproduce the issue and verify the affected workflow succeeds.']),
+      ].join('\n'),
+      5000
+    ),
+    createdAt,
+    updatedAt: createdAt,
+  };
+};
+
+const createSupportRemediationAction = ({ issueId = '', type = '', label = '', params = {}, createdAt = '', index = 0 }) => ({
+  actionId: buildSupportRemediationActionId({ issueId, actionType: type, createdAt, index }),
+  type,
+  label,
+  status: 'pending',
+  params,
+  result: null,
+  error: '',
+  createdAt,
+  completedAt: '',
+});
+
+const buildSupportRemediationActions = ({ issue = {}, remediation = {}, createdAt = '' }) => {
+  const needsEngineering = supportIssueNeedsEngineering(issue, remediation);
+  const resolutionSummary = truncateText(remediation.summary || 'Issue reviewed by ReversR AI remediation.', 2000);
+  const userMessage = truncateText(
+    remediation.userMessage || (needsEngineering
+      ? 'Your ReversR issue needs an engineering fix. A remediation job has been queued for review.'
+      : 'Your ReversR issue has been resolved. Please retry the workflow.'),
+    2000
+  );
+  const actions = [
+    createSupportRemediationAction({
+      issueId: issue.issueId,
+      type: 'populate_resolution_fields',
+      label: 'Populate resolution summary and user message',
+      params: { resolutionSummary, userMessage },
+      createdAt,
+      index: 0,
+    }),
+  ];
+
+  if (needsEngineering) {
+    const job = buildSupportRemediationJob({ issue, remediation, createdAt });
+    actions.push(
+      createSupportRemediationAction({
+        issueId: issue.issueId,
+        type: 'create_agent_handoff',
+        label: 'Create agent handoff job for code remediation PR',
+        params: { job },
+        createdAt,
+        index: 1,
+      }),
+      createSupportRemediationAction({
+        issueId: issue.issueId,
+        type: 'create_user_notification',
+        label: 'Notify user that engineering remediation was queued',
+        params: {
+          title: `Engineering queued: ${issue.title || 'Support issue'}`,
+          message: userMessage,
+        },
+        createdAt,
+        index: 2,
+      }),
+      createSupportRemediationAction({
+        issueId: issue.issueId,
+        type: 'set_issue_status',
+        label: 'Mark issue as engineering queued',
+        params: { status: 'engineering_queued' },
+        createdAt,
+        index: 3,
+      })
+    );
+  } else {
+    actions.push(
+      createSupportRemediationAction({
+        issueId: issue.issueId,
+        type: 'create_user_notification',
+        label: 'Notify user that the issue was resolved',
+        params: {
+          title: `Resolved: ${issue.title || 'Support issue'}`,
+          message: userMessage,
+        },
+        createdAt,
+        index: 1,
+      }),
+      createSupportRemediationAction({
+        issueId: issue.issueId,
+        type: 'set_issue_status',
+        label: 'Mark issue as resolved',
+        params: { status: 'resolved', resolvedAt: createdAt },
+        createdAt,
+        index: 2,
+      })
+    );
+  }
+
+  actions.push(createSupportRemediationAction({
+    issueId: issue.issueId,
+    type: 'append_audit_event',
+    label: 'Append remediation execution audit event',
+    params: {
+      eventType: needsEngineering ? 'engineering_remediation_queued' : 'ai_remediation_executed',
+      message: needsEngineering ? 'AI queued engineering remediation handoff.' : 'AI executed operational remediation actions.',
+    },
+    createdAt,
+    index: actions.length,
+  }));
+  return actions;
+};
+
+const executeSupportRemediationAction = ({ store, issue, action, now }) => {
+  const type = normalizeSupportActionType(action.type);
+  if (!type) throw new Error(`Unsupported remediation action type: ${action.type || 'unknown'}`);
+  const params = action.params || {};
+  if (type === 'populate_resolution_fields') {
+    issue.resolutionSummary = truncateText(params.resolutionSummary || issue.resolutionSummary || '', 2000);
+    issue.userMessage = truncateText(params.userMessage || issue.userMessage || '', 2000);
+    return { applied: true };
+  }
+  if (type === 'create_user_notification') {
+    if (!issue.clientId) throw new Error('Cannot notify user without a client ID.');
+    const notification = {
+      notificationId: buildSupportNotificationId({ clientId: issue.clientId, issueId: issue.issueId, createdAt: now }),
+      issueId: issue.issueId,
+      clientId: issue.clientId,
+      title: truncateText(params.title || `Update: ${issue.title || 'Support issue'}`, 160),
+      message: truncateText(params.message || issue.userMessage || 'Your ReversR issue has an update.', 2000),
+      status: 'unread',
+      createdAt: now,
+    };
+    store.supportNotifications = {
+      ...(store.supportNotifications || {}),
+      [notification.notificationId]: notification,
+    };
+    return { notification: redactSupportNotification(notification) };
+  }
+  if (type === 'create_agent_handoff') {
+    const job = params.job || {};
+    if (!job.jobId) throw new Error('Agent handoff action is missing a job packet.');
+    const normalizedJob = {
+      ...job,
+      status: job.status || 'queued',
+      updatedAt: now,
+    };
+    store.supportRemediationJobs = {
+      ...(store.supportRemediationJobs || {}),
+      [normalizedJob.jobId]: normalizedJob,
+    };
+    issue.remediationJobId = normalizedJob.jobId;
+    return { job: redactSupportRemediationJob(normalizedJob) };
+  }
+  if (type === 'set_issue_status') {
+    const status = normalizeSupportStatus(params.status);
+    issue.status = status;
+    if (status === 'resolved') issue.resolvedAt = params.resolvedAt || now;
+    return { status };
+  }
+  if (type === 'append_audit_event') {
+    issue.events = [
+      ...(issue.events || []),
+      {
+        type: truncateText(params.eventType || 'remediation_action_executed', 120),
+        at: now,
+        actor: 'ai',
+        message: truncateText(params.message || action.label || '', 500),
+      },
+    ];
+    return { eventType: params.eventType || 'remediation_action_executed' };
+  }
+  throw new Error(`Unhandled remediation action type: ${type}`);
+};
 
 const findMatchingStoredGrant = (store, profile) => {
   const grants = Object.values(store.commercialAccessGrants || {})
@@ -1261,7 +1576,13 @@ const registerCommercialRoutes = (app, { requireAdmin, generateSupportIssueRemed
           canRetry: false,
         });
       }
-      res.json({ status: 'ok', issue: redactSupportIssue(issue, { includeSessionLog: true }) });
+      res.json({
+        status: 'ok',
+        issue: redactSupportIssue({
+          ...issue,
+          remediationJob: issue.remediationJobId ? store.supportRemediationJobs?.[issue.remediationJobId] : null,
+        }, { includeSessionLog: true }),
+      });
     } catch (error) {
       res.status(500).json({
         status: 'error',
@@ -1302,6 +1623,7 @@ const registerCommercialRoutes = (app, { requireAdmin, generateSupportIssueRemed
         generatedAt: now,
         generatedBy: 'ai',
       };
+      issue.remediationActions = buildSupportRemediationActions({ issue, remediation: issue.aiRemediation, createdAt: now });
       issue.events = [
         ...(issue.events || []),
         { type: 'ai_remediation_generated', at: now, actor: 'super_admin' },
@@ -1314,6 +1636,133 @@ const registerCommercialRoutes = (app, { requireAdmin, generateSupportIssueRemed
       res.status(500).json({
         status: 'error',
         error: error.message || 'Failed to generate AI remediation.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.post('/api/admin/support/issues/:issueId/execute-remediation', async (req, res) => {
+    if (!(await requireCommercialAdmin(req, res))) return;
+    try {
+      const store = await loadStore();
+      const issue = store.supportIssues?.[String(req.params.issueId || '')];
+      if (!issue) {
+        return res.status(404).json({
+          status: 'error',
+          error: 'Support issue not found.',
+          canRetry: false,
+        });
+      }
+      if (issue.status === 'resolved') {
+        return res.status(409).json({
+          status: 'error',
+          error: 'Support issue is already resolved.',
+          canRetry: false,
+        });
+      }
+      if (!Array.isArray(issue.remediationActions) || issue.remediationActions.length === 0) {
+        return res.status(409).json({
+          status: 'error',
+          error: 'Run AI remediation before executing actions.',
+          canRetry: false,
+        });
+      }
+
+      const startedAt = new Date().toISOString();
+      issue.status = 'executing';
+      issue.updatedAt = startedAt;
+      issue.events = [
+        ...(issue.events || []),
+        { type: 'remediation_execution_started', at: startedAt, actor: 'super_admin' },
+      ];
+
+      let failedAction = null;
+      issue.remediationActions = issue.remediationActions.map((action) => {
+        if (failedAction) return action;
+        const runningAction = {
+          ...action,
+          status: 'running',
+          error: '',
+        };
+        try {
+          const completedAt = new Date().toISOString();
+          const result = executeSupportRemediationAction({ store, issue, action: runningAction, now: completedAt });
+          return {
+            ...runningAction,
+            status: 'completed',
+            result,
+            completedAt,
+          };
+        } catch (error) {
+          failedAction = action;
+          return {
+            ...runningAction,
+            status: 'failed',
+            error: error.message || 'Remediation action failed.',
+            completedAt: new Date().toISOString(),
+          };
+        }
+      });
+
+      const completedAt = new Date().toISOString();
+      if (failedAction) {
+        issue.status = 'execution_failed';
+        issue.events = [
+          ...(issue.events || []),
+          {
+            type: 'remediation_execution_failed',
+            at: completedAt,
+            actor: 'ai',
+            message: failedAction.label || failedAction.type || 'Remediation action failed.',
+          },
+        ];
+      } else {
+        issue.events = [
+          ...(issue.events || []),
+          { type: 'remediation_execution_completed', at: completedAt, actor: 'ai' },
+        ];
+      }
+      issue.updatedAt = completedAt;
+      store.supportIssues[issue.issueId] = issue;
+      await saveStore(store);
+
+      const responseIssue = {
+        ...issue,
+        remediationJob: issue.remediationJobId ? store.supportRemediationJobs?.[issue.remediationJobId] : null,
+      };
+      const responseBody = {
+        status: failedAction ? 'error' : 'ok',
+        issue: redactSupportIssue(responseIssue, { includeSessionLog: true }),
+      };
+      if (failedAction) {
+        return res.status(500).json({
+          ...responseBody,
+          error: 'One or more remediation actions failed.',
+          canRetry: true,
+        });
+      }
+      res.json(responseBody);
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to execute AI remediation.',
+        canRetry: true,
+      });
+    }
+  });
+
+  app.get('/api/admin/support/remediation-jobs', async (req, res) => {
+    if (!(await requireCommercialAdmin(req, res))) return;
+    try {
+      const store = await loadStore();
+      res.json({
+        status: 'ok',
+        jobs: listSupportRemediationJobs(store),
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        error: error.message || 'Failed to list support remediation jobs.',
         canRetry: true,
       });
     }

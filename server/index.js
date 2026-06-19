@@ -364,6 +364,13 @@ const shouldUseDeterministicAiFallback = (error) => {
 const fallbackSupportIssueRemediation = (issue = {}) => ({
   summary: `Review and resolve "${issue.title || 'reported issue'}" from the admin issue queue.`,
   rootCause: 'AI remediation fallback used because the hosted AI provider is unavailable or not configured.',
+  resolutionType: [
+    issue.title,
+    issue.description,
+    JSON.stringify(issue.sessionLog || {}),
+  ].join(' ').toLowerCase().match(/code|bug|crash|deploy|release|branch|pull request|typescript|api/)
+    ? 'code'
+    : 'operational',
   resolutionSteps: [
     'Review the submitted description and session log.',
     'Reproduce the reported workflow in the same platform and build context.',
@@ -376,6 +383,14 @@ const fallbackSupportIssueRemediation = (issue = {}) => ({
     'Confirm the user can complete the next intended action.',
   ],
   automationActions: [],
+  suspectedFiles: [],
+  implementationPlan: [],
+  acceptanceCriteria: [
+    'Reproduce the reported issue before remediation.',
+    'Verify the affected workflow succeeds after remediation.',
+  ],
+  prTitle: `Fix support issue: ${issue.title || 'reported issue'}`,
+  prBodyDraft: '',
   confidence: 'low',
 });
 
@@ -393,13 +408,19 @@ const buildSupportIssueRemediation = async (issue = {}) => {
     properties: {
       summary: { type: Type.STRING },
       rootCause: { type: Type.STRING },
+      resolutionType: { type: Type.STRING, enum: ['operational', 'code'] },
       resolutionSteps: { type: Type.ARRAY, items: { type: Type.STRING } },
       userMessage: { type: Type.STRING },
       followUpChecks: { type: Type.ARRAY, items: { type: Type.STRING } },
       automationActions: { type: Type.ARRAY, items: { type: Type.STRING } },
+      suspectedFiles: { type: Type.ARRAY, items: { type: Type.STRING } },
+      implementationPlan: { type: Type.ARRAY, items: { type: Type.STRING } },
+      acceptanceCriteria: { type: Type.ARRAY, items: { type: Type.STRING } },
+      prTitle: { type: Type.STRING },
+      prBodyDraft: { type: Type.STRING },
       confidence: { type: Type.STRING, enum: ['low', 'medium', 'high'] },
     },
-    required: ['summary', 'rootCause', 'resolutionSteps', 'userMessage', 'followUpChecks', 'automationActions', 'confidence'],
+    required: ['summary', 'rootCause', 'resolutionType', 'resolutionSteps', 'userMessage', 'followUpChecks', 'automationActions', 'confidence'],
   };
 
   const prompt = `
@@ -407,8 +428,10 @@ const buildSupportIssueRemediation = async (issue = {}) => {
 
     Use the issue report and session log to create a concise remediation packet for a super admin.
     Stay inside app/admin-safe actions. Do not claim code has been deployed, data has been edited, or a user has been contacted.
-    If the issue needs a code change, describe the exact validation and release steps a human/admin lane should perform.
-    If the issue can be resolved operationally, list the admin actions and follow-up checks.
+    Set resolutionType to "operational" only when safe admin actions can resolve the issue now.
+    Set resolutionType to "code" when the issue likely needs a code change, branch, pull request, deploy, or release.
+    For code issues, include suspectedFiles, implementationPlan, acceptanceCriteria, prTitle, and prBodyDraft for a non-merging agent handoff.
+    For operational issues, list the admin actions and follow-up checks.
 
     Issue report:
     ${JSON.stringify(issue, null, 2)}
@@ -434,10 +457,16 @@ const buildSupportIssueRemediation = async (issue = {}) => {
     return {
       summary: String(result.summary || fallbackSupportIssueRemediation(issue).summary),
       rootCause: String(result.rootCause || 'Root cause needs admin verification.'),
+      resolutionType: ['operational', 'code'].includes(result.resolutionType) ? result.resolutionType : fallbackSupportIssueRemediation(issue).resolutionType,
       resolutionSteps: normalizeRemediationArray(result.resolutionSteps),
       userMessage: String(result.userMessage || fallbackSupportIssueRemediation(issue).userMessage),
       followUpChecks: normalizeRemediationArray(result.followUpChecks),
       automationActions: normalizeRemediationArray(result.automationActions),
+      suspectedFiles: normalizeRemediationArray(result.suspectedFiles),
+      implementationPlan: normalizeRemediationArray(result.implementationPlan),
+      acceptanceCriteria: normalizeRemediationArray(result.acceptanceCriteria),
+      prTitle: String(result.prTitle || fallbackSupportIssueRemediation(issue).prTitle),
+      prBodyDraft: String(result.prBodyDraft || ''),
       confidence: ['low', 'medium', 'high'].includes(result.confidence) ? result.confidence : 'medium',
     };
   } catch (error) {
