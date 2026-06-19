@@ -165,6 +165,80 @@ export function Badge({
   );
 }
 
+/** Tap/click info affordance that keeps explanatory copy out of the main layout. */
+export function InfoTooltip({
+  text,
+  accessibilityLabel = 'Show details',
+  bubbleAlign = 'center',
+  iconSize = 14,
+  style,
+}: {
+  text: string;
+  accessibilityLabel?: string;
+  bubbleAlign?: 'start' | 'center' | 'end';
+  iconSize?: number;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { colors } = useAppTheme();
+  const [visible, setVisible] = React.useState(false);
+  const bubblePosition: ViewStyle = bubbleAlign === 'start'
+    ? { left: -8 }
+    : bubbleAlign === 'end'
+      ? { right: -8 }
+      : { left: -86 };
+
+  return (
+    <View style={[{ position: 'relative', alignSelf: 'center', zIndex: visible ? 9999 : 1, elevation: visible ? 24 : 0 }, style]}>
+      <Pressable
+        onPress={() => setVisible(current => !current)}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={text}
+        accessibilityState={{ expanded: visible }}
+        hitSlop={8}
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 10,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.elevated,
+          borderWidth: 1,
+          borderColor: colors.border,
+        }}
+      >
+        <Ionicons name="information" size={iconSize} color={colors.dimText} />
+      </Pressable>
+      {visible ? (
+        <View
+          style={[
+            {
+              position: 'absolute',
+              top: 24,
+              width: 192,
+              borderRadius: Radii.md,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.elevated,
+              paddingHorizontal: Spacing.sm,
+              paddingVertical: Spacing.xs,
+              shadowColor: '#000',
+              shadowOpacity: 0.16,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              zIndex: 9999,
+              elevation: 24,
+            },
+            bubblePosition,
+          ]}
+        >
+          <Text style={{ ...Typography.caption, color: colors.mutedText, lineHeight: 16 }}>{text}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 /** Section title with an optional trailing action (e.g. "View all"). */
 export function SectionHeader({
   title,
@@ -518,91 +592,97 @@ export function HorizontalStepper({
   testID?: string;
 }) {
   const { colors } = useAppTheme();
+  const connectorInset = `${100 / (steps.length * 2)}%` as ViewStyle['left'];
   return (
     <View
-      style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}
+      style={{ position: 'relative', flexDirection: 'row', alignItems: 'flex-start' }}
       testID={testID}
     >
+      {steps.length > 1 ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: connectorInset,
+            right: connectorInset,
+            top: 16,
+            flexDirection: 'row',
+            gap: 0,
+          }}
+        >
+          {steps.slice(0, -1).map((_, idx) => (
+            <View
+              key={`connector-${idx}`}
+              style={{
+                flex: 1,
+                height: 2,
+                borderRadius: 2,
+                backgroundColor: currentStep > idx + 1 ? colors.accent : colors.border,
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
       {steps.map((label, idx) => {
         const step = idx + 1;
         const isComplete = currentStep > step;
         const isCurrent = currentStep === step;
         const isActive = isComplete || isCurrent;
         const canPress = Boolean(onStepPress) && currentStep > step;
-        const node = (
-          <View style={{ alignItems: 'center', gap: 5, width: 74 }}>
-            <View
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: Radii.pill,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: isComplete ? colors.accent : 'transparent',
-                borderWidth: isComplete ? 0 : 2,
-                borderColor: isCurrent ? colors.accent : colors.border,
-              }}
-            >
-              {isComplete ? (
-                <Ionicons name="checkmark" size={18} color={colors.background} />
-              ) : (
-                <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontFamily: Fonts.bold, fontSize: 14 }}>
-                  {step}
-                </Text>
-              )}
-            </View>
-            <Text
-              style={{
-                fontSize: 11,
-                fontFamily: Fonts.bold,
-                letterSpacing: 0.5,
-                textTransform: 'uppercase',
-                color: isActive ? colors.text : colors.dimText,
-                textAlign: 'center',
-              }}
-              numberOfLines={1}
-            >
-              {label}
-            </Text>
-            {subLabels?.[idx] ? (
-              <Text
-                style={{ fontSize: 10, color: colors.dimText, textAlign: 'center' }}
-                numberOfLines={2}
-              >
-                {subLabels[idx]}
+        const marker = (
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: Radii.pill,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isComplete ? colors.accent : colors.background,
+              borderWidth: isComplete ? 0 : 2,
+              borderColor: isCurrent ? colors.accent : colors.border,
+            }}
+          >
+            {isComplete ? (
+              <Ionicons name="checkmark" size={18} color={colors.background} />
+            ) : (
+              <Text style={{ color: isCurrent ? colors.accent : colors.dimText, fontFamily: Fonts.bold, fontSize: 14 }}>
+                {step}
               </Text>
-            ) : null}
-            {isCurrent ? (
-              <View style={{ marginTop: 3, width: 26, height: 3, borderRadius: 2, backgroundColor: colors.accent }} />
-            ) : null}
+            )}
           </View>
         );
         return (
-          <React.Fragment key={label}>
-            {canPress ? (
-              <TouchableOpacity
-                onPress={() => onStepPress?.(step)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel={`Reopen ${label} phase`}
-              >
-                {node}
-              </TouchableOpacity>
-            ) : (
-              node
-            )}
-            {idx < steps.length - 1 ? (
-              <View
+          <View key={label} style={{ flex: 1, minWidth: 0 }}>
+            <View style={{ flex: 1, minWidth: 0, alignItems: 'center', gap: 5, paddingHorizontal: 3 }}>
+              {canPress ? (
+                <TouchableOpacity
+                  onPress={() => onStepPress?.(step)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Reopen ${label} phase`}
+                  hitSlop={8}
+                >
+                  {marker}
+                </TouchableOpacity>
+              ) : marker}
+              <Text
                 style={{
-                  flex: 1,
-                  height: 2,
-                  marginTop: 16,
-                  borderRadius: 2,
-                  backgroundColor: currentStep > step ? colors.accent : colors.border,
+                  fontSize: 10,
+                  fontFamily: Fonts.bold,
+                  letterSpacing: 0,
+                  textTransform: 'uppercase',
+                  color: isActive ? colors.text : colors.dimText,
+                  textAlign: 'center',
                 }}
-              />
-            ) : null}
-          </React.Fragment>
+                numberOfLines={1}
+              >
+                {label}
+              </Text>
+              {isCurrent ? (
+                <View style={{ marginTop: 3, width: 26, height: 3, borderRadius: 2, backgroundColor: colors.accent }} />
+              ) : null}
+            </View>
+          </View>
         );
       })}
     </View>

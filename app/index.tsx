@@ -1609,9 +1609,6 @@ export default function HomeScreen() {
           <View style={styles.currentStepInfo}>
             <Text style={styles.currentStepOverline}>Current step</Text>
             <Text style={styles.currentStepName}>{PHASE_STEP_LABELS[Math.min(context.phase, 4) - 1]}</Text>
-            <Text style={styles.currentStepHint} numberOfLines={2}>
-              {PHASE_STEP_HINTS[Math.min(context.phase, 4) - 1]}
-            </Text>
           </View>
         </LinearGradient>
         <HorizontalStepper

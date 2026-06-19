@@ -28,6 +28,7 @@ import {
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 import ManufacturingStudio from './ManufacturingStudio';
+import { InfoTooltip } from './ui';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
 import {
   ReviewerApproval,
@@ -61,12 +62,17 @@ interface Props {
   onReset: () => void;
 }
 
-type ArtifactStatus = {
+type BuildReadinessItem = {
   id: string;
-  name: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  detail: string;
   ready: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+  section: BuildSectionKey;
 };
+
+type BuildSectionKey = 'inventory' | 'bom' | 'assembly' | 'manufacturing' | 'exports' | 'approval' | 'handoff';
+type ActiveBuildSection = BuildSectionKey | 'none' | null;
 
 const MANUFACTURERS = [
   {
@@ -196,6 +202,8 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
+  const [activeBuildSection, setActiveBuildSection] = useState<ActiveBuildSection>(null);
+  const [handoffDetailsExpanded, setHandoffDetailsExpanded] = useState(false);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
@@ -205,7 +213,7 @@ export default function PhaseFour({
   const [error, setError] = useState<string | null>(null);
   const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
-  const [bomExpanded, setBomExpanded] = useState(true);
+  const [bomExpanded, setBomExpanded] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('analyzing');
   const [selectedVendorName, setSelectedVendorName] = useState('');
   const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('');
@@ -432,6 +440,7 @@ export default function PhaseFour({
     try {
       const bomResult = await generateBOM(innovation);
       setLocalBom(bomResult);
+      setBomExpanded(false);
       setStatus('complete');
       onBOMGenerated(bomResult);
     } catch (err: unknown) {
@@ -603,155 +612,464 @@ export default function PhaseFour({
     }
   };
 
-  return (
-    <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-build">
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.headerIcon}>
-            <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
-          </View>
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Phase 4: Build</Text>
-            <Text style={styles.description}>BOM, assembly sequence, pricing, and fulfillment handoff</Text>
-          </View>
-        </View>
-      </View>
+  const buildReadinessItems: BuildReadinessItem[] = [
+    {
+      id: 'inventory',
+      label: 'Tour inventory',
+      detail: innovation.machineId || innovation.inventorySource
+        ? `${innovation.machineId || 'Matched machine'}${innovation.inventorySource ? ` | ${innovation.inventorySource}` : ''}`
+        : 'Confirm machine revision and source evidence.',
+      ready: !!spec && (!!innovation.machineId || !!innovation.inventorySource || !!innovation.machineName),
+      icon: 'document-text-outline',
+      section: 'inventory',
+    },
+    {
+      id: 'bom',
+      label: 'Bill of materials',
+      detail: localBom
+        ? `${localBom.items.length} line items ready for material and supplier review.`
+        : 'Generate parts, materials, costs, and supplier list.',
+      ready: !!localBom,
+      icon: 'list-outline',
+      section: 'bom',
+    },
+    {
+      id: 'assembly',
+      label: 'Assembly sequence',
+      detail: `${innovation.assemblySteps?.length || 0} assembly step${(innovation.assemblySteps?.length || 0) === 1 ? '' : 's'} available.`,
+      ready: (innovation.assemblySteps?.length || 0) > 0,
+      icon: 'construct-outline',
+      section: 'assembly',
+    },
+    {
+      id: 'manufacturing',
+      label: 'Manufacturing studio',
+      detail: has2D || has3D
+        ? `${has2D ? '2D' : ''}${has2D && has3D ? ' + ' : ''}${has3D ? '3D' : ''} references feed CAD readiness and DfM review.`
+        : 'Generate visual references before manufacturing review.',
+      ready: has2D || has3D,
+      icon: 'cube-outline',
+      section: 'manufacturing',
+    },
+    {
+      id: 'exports',
+      label: 'Export options',
+      detail: localBom
+        ? 'BOM, complete package, and quote packet exports are available.'
+        : 'Generate the BOM before export options unlock.',
+      ready: !!localBom,
+      icon: 'archive-outline',
+      section: 'exports',
+    },
+    {
+      id: 'approval',
+      label: 'Reviewer approval',
+      detail: savedVendorApprovalRecord
+        ? `${getReviewStatusLabel(savedVendorApprovalRecord.status)} | ${formatReviewDate(savedVendorApprovalRecord.savedAt)}`
+        : 'Save an Approved for vendor review record before vendor request.',
+      ready: hasSavedVendorApproval,
+      icon: 'shield-checkmark-outline',
+      section: 'approval',
+    },
+    {
+      id: 'handoff',
+      label: 'Manufacturer handoff',
+      detail: canPrepareVendorRequest
+        ? 'Vendor request draft is ready for packet attachment and review.'
+        : vendorRequestBlockedMessage,
+      ready: canPrepareVendorRequest,
+      icon: 'business-outline',
+      section: 'handoff',
+    },
+  ];
+  const readinessReadyCount = buildReadinessItems.filter(item => item.ready).length;
+  const readinessPercent = Math.round((readinessReadyCount / buildReadinessItems.length) * 100);
+  const isVendorReviewReady = readinessReadyCount === buildReadinessItems.length;
+  const defaultBuildSection = buildReadinessItems.find(item => !item.ready)?.section ?? 'inventory';
+  const activeReceiptSection = activeBuildSection === null
+    ? defaultBuildSection
+    : activeBuildSection === 'none'
+      ? null
+      : activeBuildSection;
 
-      <View style={styles.conceptCard}>
-        <Text style={styles.conceptName}>{innovation.conceptName}</Text>
-        <Text style={styles.conceptDesc}>{innovation.conceptDescription}</Text>
-      </View>
+  const toggleBuildSection = (section: BuildSectionKey) => {
+    if (section === 'handoff') {
+      setHandoffDetailsExpanded(false);
+    }
+    setActiveBuildSection(current => {
+      const currentSection = current === null
+        ? defaultBuildSection
+        : current === 'none'
+          ? null
+          : current;
+      return currentSection === section ? 'none' : section;
+    });
+  };
 
-      {innovation.assemblySteps && innovation.assemblySteps.length > 0 && (
-        <View style={styles.assemblyPanel}>
-          <Text style={styles.exportTitle}>Assembly Sequence</Text>
-          {innovation.assemblySteps.map(step => (
-            <View key={step.stepNumber} style={styles.assemblyStep}>
-              <View style={styles.assemblyStepHeader}>
-                <Text style={styles.assemblyStepNumber}>{step.stepNumber}</Text>
-                <View style={styles.assemblyStepTitleWrap}>
-                  <Text style={styles.assemblyStepTitle}>{step.title}</Text>
-                  <Text style={styles.assemblyStepMeta}>{step.estimatedTime}</Text>
-                </View>
+  const renderReviewerApprovalCard = () => (
+    <View style={styles.reviewerApprovalCard}>
+      <View style={styles.quotePacketHeader}>
+        <Ionicons name="shield-checkmark-outline" size={20} color={Colors.orange[300]} />
+        <Text style={styles.quotePacketTitle}>Reviewer Approval</Text>
+        <InfoTooltip
+          text="Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass."
+          accessibilityLabel="Show reviewer approval details"
+          bubbleAlign="start"
+        />
+      </View>
+      <View style={styles.approvalChoiceGrid}>
+        {REVIEWER_APPROVAL_OPTIONS.map(option => {
+          const isSelected = reviewerApprovalStatus === option.status;
+          return (
+            <View
+              key={option.status}
+              style={[styles.approvalChoiceButton, isSelected && styles.approvalChoiceButtonActive]}
+            >
+              <TouchableOpacity
+                style={styles.approvalChoiceSelect}
+                onPress={() => setReviewerApprovalStatus(option.status)}
+                accessibilityRole="button"
+                accessibilityLabel={`Set reviewer approval status to ${option.label}`}
+                accessibilityHint={option.description}
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+      </View>
+      <Text style={styles.quoteFieldLabel}>Reviewer name</Text>
+      <TextInput
+        style={styles.quoteInput}
+        value={reviewerName}
+        onChangeText={setReviewerName}
+        accessibilityLabel="Reviewer name"
+        placeholder="Reviewer name"
+        placeholderTextColor={Colors.gray[600]}
+      />
+      <Text style={styles.quoteFieldLabel}>Reviewer role</Text>
+      <TextInput
+        style={styles.quoteInput}
+        value={reviewerRole}
+        onChangeText={setReviewerRole}
+        accessibilityLabel="Reviewer role"
+        placeholder="CAD reviewer, machinist, engineer, or vendor"
+        placeholderTextColor={Colors.gray[600]}
+      />
+      <Text style={styles.quoteFieldLabel}>Reviewer notes</Text>
+      <TextInput
+        style={[styles.quoteInput, styles.quoteNotesInput]}
+        value={reviewerNotes}
+        onChangeText={setReviewerNotes}
+        accessibilityLabel="Reviewer approval notes"
+        placeholder="Record source-dimension, CAD, material treatment, DfM, or release concerns."
+        placeholderTextColor={Colors.gray[600]}
+        multiline
+      />
+      <TouchableOpacity
+        style={styles.saveReviewButton}
+        onPress={handleSaveReviewerApprovalRecord}
+        accessibilityRole="button"
+        accessibilityLabel="Save reviewer approval record"
+      >
+        <Ionicons name="save-outline" size={18} color={Colors.black} />
+        <Text style={styles.saveReviewButtonText}>Save Review Record</Text>
+      </TouchableOpacity>
+      <View style={[styles.approvalStatusBox, !!savedVendorApprovalRecord && styles.approvalStatusBoxApproved]}>
+        <Ionicons
+          name={savedVendorApprovalRecord ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+          size={16}
+          color={savedVendorApprovalRecord ? Colors.accent : Colors.orange[300]}
+        />
+        <Text style={styles.approvalStatusText}>
+          {vendorRequestBlockedMessage}
+        </Text>
+      </View>
+      {latestReviewRecord ? (
+        <View style={styles.reviewHistoryBox}>
+          <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
+          {savedReviewRecords.slice(0, 3).map(record => (
+            <View key={record.recordId} style={styles.reviewHistoryItem}>
+              <View style={styles.reviewHistoryItemHeader}>
+                <Text style={styles.reviewHistoryStatus}>{getReviewStatusLabel(record.status)}</Text>
+                <Text style={styles.reviewHistoryDate}>{formatReviewDate(record.savedAt)}</Text>
               </View>
-              <Text style={styles.assemblyInstructions}>{step.instructions}</Text>
-              <Text style={styles.assemblyParts}>Parts: {step.parts.join(', ')}</Text>
-              <Text style={styles.assemblyCheck}>QC: {step.qualityCheck}</Text>
+              <Text style={styles.reviewHistoryMeta} numberOfLines={2}>
+                {record.reviewerName || 'Unnamed reviewer'}{record.reviewerRole ? ` | ${record.reviewerRole}` : ''} | {record.recordId}
+              </Text>
+              {record.notes ? (
+                <Text style={styles.reviewHistoryNotes} numberOfLines={2}>{record.notes}</Text>
+              ) : null}
             </View>
           ))}
         </View>
-      )}
-
-      {innovation.pricing && (
-        <View style={styles.pricingPanel}>
-          <Text style={styles.exportTitle}>Pricing Estimate</Text>
-          <View style={styles.pricingGrid}>
-            <Text style={styles.pricingLabel}>Parts</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.partsSubtotal}</Text>
-            <Text style={styles.pricingLabel}>3D modeling</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.modelingEstimate}</Text>
-            <Text style={styles.pricingLabel}>Fabrication</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.fabricationEstimate}</Text>
-            <Text style={styles.pricingLabel}>Assembly labor</Text>
-            <Text style={styles.pricingValue}>{innovation.pricing.assemblyLaborEstimate}</Text>
-            <Text style={[styles.pricingLabel, styles.pricingTotalLabel]}>Total</Text>
-            <Text style={[styles.pricingValue, styles.pricingTotalValue]}>{innovation.pricing.totalEstimate}</Text>
-          </View>
+      ) : (
+        <View style={styles.reviewHistoryBox}>
+          <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
+          <Text style={styles.reviewHistoryEmpty}>No saved reviewer decision yet.</Text>
         </View>
       )}
+    </View>
+  );
 
-      <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} />
-
-      <View style={styles.bomPanel}>
-        <TouchableOpacity 
-          style={styles.panelHeader} 
-          onPress={() => localBom && setBomExpanded(!bomExpanded)}
-          activeOpacity={localBom ? 0.7 : 1}
-          accessibilityRole="button"
-          accessibilityLabel={localBom ? 'Toggle bill of materials details' : 'Bill of materials panel'}
-          accessibilityState={{ disabled: !localBom, expanded: localBom ? bomExpanded : undefined }}
-        >
-          <View style={styles.terminalDots}>
-            <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
-            <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
-            <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
-          </View>
-          <Text style={styles.panelTitle}>Bill of Materials (BOM)</Text>
-          {localBom && (
-            <View style={styles.bomToggleContainer}>
-              <Text style={styles.bomItemCount}>{localBom.items.length} items</Text>
-              <Ionicons 
-                name={bomExpanded ? 'chevron-up' : 'chevron-down'} 
-                size={20} 
-                color={Colors.gray[400]} 
-              />
-            </View>
-          )}
-        </TouchableOpacity>
-
-        {status === 'generating' ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.orange[300]} />
-            <Text style={styles.loadingText}>Generating Bill of Materials...</Text>
-            <Text style={styles.loadingSubtext}>Calculating parts, costs & suppliers</Text>
-          </View>
-        ) : localBom ? (
-          bomExpanded ? (
-            <View style={styles.bomContent}>
-              <View style={styles.bomHeader}>
-                <Text style={styles.bomProjectName}>{localBom.projectName}</Text>
-                <Text style={styles.bomMeta}>v{localBom.version} | {localBom.dateGenerated}</Text>
+  const renderBuildSectionContent = (section: BuildSectionKey) => {
+    switch (section) {
+      case 'inventory':
+        return (
+          <View style={styles.packageSummaryCard}>
+            <View style={styles.packageSummaryHeader}>
+              <View style={styles.packageSummaryTitleRow}>
+                <Text style={styles.packageSummaryTitle}>{innovation.machineName || innovation.conceptName}</Text>
+                <InfoTooltip
+                  text={innovation.conceptDescription}
+                  accessibilityLabel="Show package description"
+                  bubbleAlign="start"
+                />
               </View>
+              <Text style={styles.packageSummaryMeta}>
+                {innovation.machineId ? `${innovation.machineId} | ` : ''}{innovation.inventorySource || 'Inventory source pending'}
+              </Text>
+            </View>
+            <View style={styles.packageSummaryGrid}>
+              <View style={styles.packageSummaryTile}>
+                <Text style={styles.packageSummaryTileLabel}>BOM</Text>
+                <Text style={styles.packageSummaryTileValue}>{localBom ? `${localBom.items.length} items` : 'Pending'}</Text>
+              </View>
+              <View style={styles.packageSummaryTile}>
+                <Text style={styles.packageSummaryTileLabel}>Assembly</Text>
+                <Text style={styles.packageSummaryTileValue}>{innovation.assemblySteps?.length || 0} steps</Text>
+              </View>
+              <View style={styles.packageSummaryTile}>
+                <Text style={styles.packageSummaryTileLabel}>Visuals</Text>
+                <Text style={styles.packageSummaryTileValue}>{has2D && has3D ? '2D + 3D' : has2D ? '2D only' : has3D ? '3D only' : 'Pending'}</Text>
+              </View>
+            </View>
+          </View>
+        );
+      case 'bom':
+        return (
+          <>
+            <View style={styles.bomPanel}>
+              <TouchableOpacity
+                style={styles.panelHeader}
+                onPress={() => localBom && setBomExpanded(!bomExpanded)}
+                activeOpacity={localBom ? 0.7 : 1}
+                accessibilityRole="button"
+                accessibilityLabel={localBom ? 'Toggle bill of materials details' : 'Bill of materials panel'}
+                accessibilityState={{ disabled: !localBom, expanded: localBom ? bomExpanded : undefined }}
+              >
+                <View style={styles.terminalDots}>
+                  <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
+                  <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
+                  <View style={[styles.dot, { backgroundColor: '#22c55e' }]} />
+                </View>
+                <Text style={styles.panelTitle}>Bill of Materials (BOM)</Text>
+                {localBom && (
+                  <View style={styles.bomToggleContainer}>
+                    <Text style={styles.bomItemCount}>{localBom.items.length} items</Text>
+                    <Ionicons
+                      name={bomExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={20}
+                      color={Colors.gray[400]}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
 
-              <View style={styles.bomItemsContainer}>
-                {localBom.items.map((item, index) => (
-                  <View key={index} style={styles.bomItem}>
-                    <View style={styles.bomItemHeader}>
-                      <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
-                      <Text style={styles.bomQuantity}>x{item.quantity}</Text>
+              {status === 'generating' ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={Colors.orange[300]} />
+                  <Text style={styles.loadingText}>Generating Bill of Materials...</Text>
+                  <Text style={styles.loadingSubtext}>Calculating parts, costs & suppliers</Text>
+                </View>
+              ) : localBom ? (
+                bomExpanded ? (
+                  <View style={styles.bomContent}>
+                    <View style={styles.bomHeader}>
+                      <Text style={styles.bomProjectName}>{localBom.projectName}</Text>
+                      <Text style={styles.bomMeta}>v{localBom.version} | {localBom.dateGenerated}</Text>
                     </View>
-                    <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
-                    <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
-                    <View style={styles.bomItemMeta}>
-                      <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
-                      <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
+
+                    <View style={styles.bomItemsContainer}>
+                      {localBom.items.map((item, index) => (
+                        <View key={index} style={styles.bomItem}>
+                          <View style={styles.bomItemHeader}>
+                            <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
+                            <Text style={styles.bomQuantity}>x{item.quantity}</Text>
+                          </View>
+                          <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
+                          <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
+                          <View style={styles.bomItemMeta}>
+                            <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
+                            <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
+                          </View>
+                          <View style={styles.bomItemFooter}>
+                            <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
+                            <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
+                          </View>
+                        </View>
+                      ))}
                     </View>
-                    <View style={styles.bomItemFooter}>
-                      <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
-                      <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
+
+                    <View style={styles.bomTotalSection}>
+                      <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
+                      <Text style={styles.bomTotalValue}>{localBom.totalEstimatedCost}</Text>
+                    </View>
+
+                    <View style={styles.bomNotesSection}>
+                      <Text style={styles.bomNotesLabel}>Manufacturing Notes</Text>
+                      <Text style={styles.bomNotes}>{localBom.manufacturingNotes}</Text>
                     </View>
                   </View>
-                ))}
-              </View>
+                ) : (
+                  <View style={styles.bomCollapsed}>
+                    <View style={styles.bomCollapsedRow}>
+                      <Ionicons name="checkmark-circle" size={18} color={Colors.accent} />
+                      <Text style={styles.bomCollapsedText}>{localBom.items.length} parts</Text>
+                      <Text style={styles.bomCollapsedDivider}>|</Text>
+                      <Text style={styles.bomCollapsedCost}>{localBom.totalEstimatedCost}</Text>
+                    </View>
+                    <Text style={styles.bomCollapsedHint}>Tap header to expand</Text>
+                  </View>
+                )
+              ) : (
+                <View style={styles.generateContainer}>
+                  <Ionicons name="list-outline" size={48} color={Colors.gray[600]} />
+                  <Text style={styles.generateTitle}>Bill of Materials</Text>
+                  <Text style={styles.generateDesc}>
+                    Generate a complete parts list with quantities, materials, estimated costs, and supplier recommendations.
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.generateButton}
+                    onPress={handleGenerateBOM}
+                    accessibilityRole="button"
+                    accessibilityLabel="Generate bill of materials"
+                  >
+                    <Ionicons name="hammer" size={20} color="#ffffff" />
+                    <Text style={styles.generateButtonText}>Generate BOM</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
 
-              <View style={styles.bomTotalSection}>
-                <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
-                <Text style={styles.bomTotalValue}>{localBom.totalEstimatedCost}</Text>
-              </View>
+              {error && (
+                <View style={styles.errorPanel}>
+                  <Text style={styles.errorText}>{error}</Text>
+                  {creditUpgradeUrl && (
+                    <TouchableOpacity
+                      style={styles.errorActionButton}
+                      onPress={() => Linking.openURL(creditUpgradeUrl)}
+                      accessibilityRole="link"
+                      accessibilityLabel="Open ReversR account billing page"
+                    >
+                      <Ionicons name="open-outline" size={15} color={Colors.accent} />
+                      <Text style={styles.errorActionText}>Open Account</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+            </View>
 
-              <View style={styles.bomNotesSection}>
-                <Text style={styles.bomNotesLabel}>Manufacturing Notes</Text>
-                <Text style={styles.bomNotes}>{localBom.manufacturingNotes}</Text>
+            {innovation.pricing && (
+              <View style={styles.pricingPanel}>
+                <Text style={styles.exportTitle}>Pricing Estimate</Text>
+                <View style={styles.pricingGrid}>
+                  <Text style={styles.pricingLabel}>Parts</Text>
+                  <Text style={styles.pricingValue}>{innovation.pricing.partsSubtotal}</Text>
+                  <Text style={styles.pricingLabel}>3D modeling</Text>
+                  <Text style={styles.pricingValue}>{innovation.pricing.modelingEstimate}</Text>
+                  <Text style={styles.pricingLabel}>Fabrication</Text>
+                  <Text style={styles.pricingValue}>{innovation.pricing.fabricationEstimate}</Text>
+                  <Text style={styles.pricingLabel}>Assembly labor</Text>
+                  <Text style={styles.pricingValue}>{innovation.pricing.assemblyLaborEstimate}</Text>
+                  <Text style={[styles.pricingLabel, styles.pricingTotalLabel]}>Total</Text>
+                  <Text style={[styles.pricingValue, styles.pricingTotalValue]}>{innovation.pricing.totalEstimate}</Text>
+                </View>
               </View>
-            </View>
-          ) : (
-            <View style={styles.bomCollapsed}>
-              <View style={styles.bomCollapsedRow}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.accent} />
-                <Text style={styles.bomCollapsedText}>{localBom.items.length} parts</Text>
-                <Text style={styles.bomCollapsedDivider}>|</Text>
-                <Text style={styles.bomCollapsedCost}>{localBom.totalEstimatedCost}</Text>
+            )}
+          </>
+        );
+      case 'assembly':
+        return innovation.assemblySteps && innovation.assemblySteps.length > 0 ? (
+          <View style={styles.assemblyPanel}>
+            <Text style={styles.exportTitle}>Assembly Sequence</Text>
+            {innovation.assemblySteps.map(step => (
+              <View key={step.stepNumber} style={styles.assemblyStep}>
+                <View style={styles.assemblyStepHeader}>
+                  <Text style={styles.assemblyStepNumber}>{step.stepNumber}</Text>
+                  <View style={styles.assemblyStepTitleWrap}>
+                    <Text style={styles.assemblyStepTitle}>{step.title}</Text>
+                    <Text style={styles.assemblyStepMeta}>{step.estimatedTime}</Text>
+                  </View>
+                </View>
+                <Text style={styles.assemblyInstructions}>{step.instructions}</Text>
+                <Text style={styles.assemblyParts}>Parts: {step.parts.join(', ')}</Text>
+                <Text style={styles.assemblyCheck}>QC: {step.qualityCheck}</Text>
               </View>
-              <Text style={styles.bomCollapsedHint}>Tap header to expand</Text>
-            </View>
-          )
+            ))}
+          </View>
         ) : (
           <View style={styles.generateContainer}>
-            <Ionicons name="list-outline" size={48} color={Colors.gray[600]} />
-            <Text style={styles.generateTitle}>Bill of Materials</Text>
-            <Text style={styles.generateDesc}>
-              Generate a complete parts list with quantities, materials, estimated costs, and supplier recommendations.
-            </Text>
+            <Ionicons name="construct-outline" size={42} color={Colors.gray[600]} />
+            <Text style={styles.generateTitle}>Assembly Sequence</Text>
+            <Text style={styles.generateDesc}>No assembly sequence is available for this package yet.</Text>
+          </View>
+        );
+      case 'manufacturing':
+        return <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} initiallyExpanded={false} />;
+      case 'exports':
+        return localBom ? (
+          <View style={styles.exportPanel}>
+            <Text style={styles.exportTitle}>Export Options</Text>
+            <View style={styles.exportButtons}>
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={handleExportBOM}
+                accessibilityRole="button"
+                accessibilityLabel="Export BOM CSV"
+              >
+                <Ionicons name="document-text" size={20} color={Colors.accent} />
+                <Text style={styles.exportButtonText}>Export BOM (CSV)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={handleExportAll}
+                accessibilityRole="button"
+                accessibilityLabel="Export complete reconstruction package"
+              >
+                <Ionicons name="archive" size={20} color={Colors.accent} />
+                <Text style={styles.exportButtonText}>Export All (JSON)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={handleExportQuotePacket}
+                accessibilityRole="button"
+                accessibilityLabel="Export manufacturer quote packet"
+              >
+                <Ionicons name="send" size={20} color={Colors.accent} />
+                <Text style={styles.exportButtonText}>Export Quote Packet</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.exportInfo}>
+              <Text style={styles.exportInfoLabel}>Export All includes:</Text>
+              <Text style={styles.exportInfoItem}>• Machine match & reconstruction analysis</Text>
+              <Text style={styles.exportInfoItem}>• Technical specifications</Text>
+              <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
+              <Text style={styles.exportInfoItem}>• Manufacturer quote request packet</Text>
+              <Text style={styles.exportInfoItem}>• AI CAD gate, dimensions, datums, and DfM gates</Text>
+              <Text style={styles.exportInfoItem}>• Material treatment review assumptions</Text>
+              <Text style={styles.exportInfoItem}>• 2D visual references (PNG)</Text>
+              <Text style={styles.exportInfoItem}>• 3D scene descriptor as visual reference</Text>
+              <Text style={styles.exportInfoItem}>• Export timestamp</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.generateContainer}>
+            <Ionicons name="archive-outline" size={42} color={Colors.gray[600]} />
+            <Text style={styles.generateTitle}>Export Options</Text>
+            <Text style={styles.generateDesc}>Generate the BOM before export options unlock.</Text>
             <TouchableOpacity
               style={styles.generateButton}
               onPress={handleGenerateBOM}
@@ -762,379 +1080,251 @@ export default function PhaseFour({
               <Text style={styles.generateButtonText}>Generate BOM</Text>
             </TouchableOpacity>
           </View>
-        )}
-
-        {error && (
-          <View style={styles.errorPanel}>
-            <Text style={styles.errorText}>{error}</Text>
-            {creditUpgradeUrl && (
-              <TouchableOpacity
-                style={styles.errorActionButton}
-                onPress={() => Linking.openURL(creditUpgradeUrl)}
-                accessibilityRole="link"
-                accessibilityLabel="Open ReversR account billing page"
-              >
-                <Ionicons name="open-outline" size={15} color={Colors.accent} />
-                <Text style={styles.errorActionText}>Open Account</Text>
-              </TouchableOpacity>
+        );
+      case 'approval':
+        return renderReviewerApprovalCard();
+      case 'handoff':
+        return (
+          <View style={styles.manufacturerPanel}>
+            <View style={styles.manufacturerHeader}>
+              <View style={styles.manufacturerHeaderTitle}>
+                <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
+                <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
+              </View>
+              {handoffDetailsExpanded ? (
+                <TouchableOpacity
+                  style={styles.handoffHeaderAction}
+                  onPress={() => setHandoffDetailsExpanded(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Hide manufacturer handoff details"
+                >
+                  <Text style={styles.handoffHeaderActionText}>Hide details</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+            {handoffDetailsExpanded ? (
+              <>
+                <View style={styles.quotePacketCard}>
+                  <View style={styles.quotePacketHeader}>
+                    <Ionicons name="send-outline" size={20} color={Colors.accent} />
+                    <Text style={styles.quotePacketTitle}>Quote Packet</Text>
+                  </View>
+                  <Text style={styles.quotePacketText}>
+                    Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
+                    onPress={handleExportQuotePacket}
+                    disabled={!localBom}
+                    accessibilityRole="button"
+                    accessibilityLabel="Export manufacturer quote packet"
+                    accessibilityState={{ disabled: !localBom }}
+                  >
+                    <Text style={styles.quotePacketButtonText}>
+                      {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.quoteRequestCard}>
+                  <View style={styles.quotePacketHeader}>
+                    <Ionicons name="mail-outline" size={20} color={Colors.accent} />
+                    <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
+                  </View>
+                  <Text style={styles.quotePacketText}>
+                    Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
+                  </Text>
+                  <Text style={styles.quoteFieldLabel}>Vendor target</Text>
+                  <View style={styles.vendorChoiceGrid}>
+                    {getVendorTargets().map(vendor => {
+                      const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
+                      return (
+                        <TouchableOpacity
+                          key={`${vendor.vendorName}-${vendor.url}`}
+                          style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
+                          onPress={() => setSelectedVendorName(vendor.vendorName)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
+                          accessibilityState={{ selected: isSelected }}
+                        >
+                          <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
+                            {vendor.vendorName}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  <Text style={styles.quoteFieldLabel}>Recipient email</Text>
+                  <TextInput
+                    style={styles.quoteInput}
+                    value={quoteRecipientEmail}
+                    onChangeText={setQuoteRecipientEmail}
+                    accessibilityLabel="Vendor quote recipient email"
+                    placeholder="quotes@vendor.com"
+                    placeholderTextColor={Colors.gray[600]}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                  <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
+                  <TextInput
+                    style={[styles.quoteInput, styles.quoteNotesInput]}
+                    value={quoteAdminNotes}
+                    onChangeText={setQuoteAdminNotes}
+                    accessibilityLabel="Admin notes for vendor quote request"
+                    placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
+                    placeholderTextColor={Colors.gray[600]}
+                    multiline
+                  />
+                  <TouchableOpacity
+                    style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
+                    onPress={handlePrepareQuoteEmail}
+                    disabled={!canPrepareVendorRequest}
+                    accessibilityRole="button"
+                    accessibilityLabel="Prepare vendor quote request email"
+                    accessibilityState={{ disabled: !canPrepareVendorRequest }}
+                  >
+                    <Text style={styles.quotePacketButtonText}>
+                      {vendorRequestCtaLabel}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.manufacturerGrid}>
+                  {MANUFACTURERS.map((mfr) => (
+                    <TouchableOpacity
+                      key={mfr.id}
+                      style={styles.manufacturerCard}
+                      onPress={() => Linking.openURL(mfr.url)}
+                      accessibilityRole="link"
+                      accessibilityLabel={`Open ${mfr.name} vendor website`}
+                    >
+                      <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
+                      <Text style={styles.manufacturerName}>{mfr.name}</Text>
+                      <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
+                      <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={styles.manufacturerNote}>
+                  Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
+                </Text>
+              </>
+            ) : (
+              <View style={styles.handoffCompactCard}>
+                <View style={[styles.handoffSummaryRow, localBom && styles.handoffSummaryRowReady]}>
+                  <View style={[styles.handoffSummaryIcon, localBom && styles.handoffSummaryIconReady]}>
+                    <Ionicons name={localBom ? 'checkmark' : 'document-text-outline'} size={15} color={localBom ? Colors.black : Colors.gray[400]} />
+                  </View>
+                  <View style={styles.handoffSummaryText}>
+                    <Text style={styles.handoffSummaryLabel}>Quote packet</Text>
+                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
+                      {localBom ? 'BOM-backed packet can be exported.' : 'Generate BOM before packet export.'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={[styles.handoffSummaryRow, canPrepareVendorRequest && styles.handoffSummaryRowReady]}>
+                  <View style={[styles.handoffSummaryIcon, canPrepareVendorRequest && styles.handoffSummaryIconReady]}>
+                    <Ionicons name={canPrepareVendorRequest ? 'checkmark' : 'mail-outline'} size={15} color={canPrepareVendorRequest ? Colors.black : Colors.gray[400]} />
+                  </View>
+                  <View style={styles.handoffSummaryText}>
+                    <Text style={styles.handoffSummaryLabel}>Vendor request</Text>
+                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
+                      {vendorRequestBlockedMessage}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.handoffSummaryRow}>
+                  <View style={styles.handoffSummaryIcon}>
+                    <Ionicons name="business-outline" size={15} color={Colors.gray[400]} />
+                  </View>
+                  <View style={styles.handoffSummaryText}>
+                    <Text style={styles.handoffSummaryLabel}>Vendor targets</Text>
+                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
+                      {getVendorTargets().length} target{getVendorTargets().length === 1 ? '' : 's'} available for quote routing.
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.handoffCompactButton}
+                  onPress={() => setHandoffDetailsExpanded(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open manufacturer handoff details"
+                >
+                  <Text style={styles.handoffCompactButtonText}>Open handoff details</Text>
+                  <Ionicons name="chevron-down" size={16} color={Colors.black} />
+                </TouchableOpacity>
+              </View>
             )}
           </View>
-        )}
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-build">
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <View style={styles.headerIcon}>
+            <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Phase 4: Build</Text>
+          </View>
+        </View>
       </View>
 
-      {localBom && (
-        <View style={styles.exportPanel}>
-          <Text style={styles.exportTitle}>Export Options</Text>
-          <View style={styles.exportButtons}>
-            <TouchableOpacity
-              style={styles.exportButton}
-              onPress={handleExportBOM}
-              accessibilityRole="button"
-              accessibilityLabel="Export BOM CSV"
-            >
-              <Ionicons name="document-text" size={20} color={Colors.accent} />
-              <Text style={styles.exportButtonText}>Export BOM (CSV)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.exportButton}
-              onPress={handleExportAll}
-              accessibilityRole="button"
-              accessibilityLabel="Export complete reconstruction package"
-            >
-              <Ionicons name="archive" size={20} color={Colors.accent} />
-              <Text style={styles.exportButtonText}>Export All (JSON)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.exportButton}
-              onPress={handleExportQuotePacket}
-              accessibilityRole="button"
-              accessibilityLabel="Export manufacturer quote packet"
-            >
-              <Ionicons name="send" size={20} color={Colors.accent} />
-              <Text style={styles.exportButtonText}>Export Quote Packet</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.exportInfo}>
-            <Text style={styles.exportInfoLabel}>Export All includes:</Text>
-            <Text style={styles.exportInfoItem}>• Machine match & reconstruction analysis</Text>
-            <Text style={styles.exportInfoItem}>• Technical specifications</Text>
-            <Text style={styles.exportInfoItem}>• Bill of Materials with suppliers</Text>
-            <Text style={styles.exportInfoItem}>• Manufacturer quote request packet</Text>
-            <Text style={styles.exportInfoItem}>• AI CAD gate, dimensions, datums, and DfM gates</Text>
-            <Text style={styles.exportInfoItem}>• Material treatment review assumptions</Text>
-            <Text style={styles.exportInfoItem}>• 2D visual references (PNG)</Text>
-            <Text style={styles.exportInfoItem}>• 3D scene descriptor as visual reference</Text>
-            <Text style={styles.exportInfoItem}>• Export timestamp</Text>
-          </View>
-        </View>
-      )}
-
-      {/* Manufacturing Readiness Tracker */}
-      {(() => {
-        const artifacts: ArtifactStatus[] = [
-          { id: '2d', name: '2D', icon: 'image-outline', ready: has2D },
-          { id: '3d', name: '3D', icon: 'cube-outline', ready: has3D },
-          { id: 'specs', name: 'Specs', icon: 'document-text-outline', ready: !!spec },
-          { id: 'bom', name: 'BOM', icon: 'list-outline', ready: !!localBom },
-        ];
-        const readyCount = artifacts.filter(a => a.ready).length;
-        const percentage = Math.round((readyCount / artifacts.length) * 100);
-        
-        const handleArtifactPress = (artifactId: string, isReady: boolean) => {
-          if (isReady) {
-            const readyMessages: Record<string, string> = {
-              '2d': '2D visualization is complete.',
-              '3d': '3D scene is complete.',
-              'specs': 'Specifications are complete.',
-              'bom': 'Bill of Materials is complete.',
-            };
-            setAlert({visible: true, title: 'Already Generated', message: readyMessages[artifactId] || 'This artifact is ready.', type: 'success'});
-            return;
-          }
-          
-          if (artifactId === 'bom') {
-            if (status === 'generating') {
-              setAlert({visible: true, title: 'Please Wait', message: 'BOM generation is already in progress.', type: 'info'});
-              return;
-            }
-            handleGenerateBOM();
-          } else {
-            onGoToDesign();
-          }
-        };
-        
-        return (
-          <View style={styles.readinessPanel}>
-            <View style={styles.readinessHeader}>
-              <View style={styles.readinessLeft}>
-                <Ionicons name="rocket-outline" size={18} color={Colors.gray[400]} />
-                <View>
-                  <Text style={styles.readinessTitle}>Manufacturing Readiness</Text>
-                  <Text style={styles.readinessSubtitle}>Tap missing artifacts to generate them</Text>
-                </View>
-              </View>
-              <View style={styles.readinessBadge}>
-                <Text style={styles.readinessPercent}>{percentage}% Ready</Text>
-              </View>
-            </View>
-            <View style={styles.artifactGrid}>
-              {artifacts.map((artifact) => {
-                const isBomGenerating = artifact.id === 'bom' && status === 'generating';
-                return (
-                  <TouchableOpacity 
-                    key={artifact.id} 
-                    style={[
-                      styles.artifactItem,
-                      artifact.ready && styles.artifactItemReady,
-                      !artifact.ready && !isBomGenerating && styles.artifactItemTappable,
-                      isBomGenerating && styles.artifactItemGenerating,
-                    ]}
-                    onPress={() => handleArtifactPress(artifact.id, artifact.ready)}
-                    activeOpacity={0.7}
-                    disabled={isBomGenerating}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${artifact.name} artifact ${artifact.ready ? 'ready' : 'missing'}`}
-                    accessibilityHint={artifact.ready ? 'Shows artifact status' : artifact.id === 'bom' ? 'Generates the bill of materials' : 'Returns to design to generate this artifact'}
-                    accessibilityState={{ disabled: isBomGenerating, selected: artifact.ready }}
-                  >
-                    {isBomGenerating ? (
-                      <ActivityIndicator size="small" color={Colors.secondary} />
-                    ) : (
-                      <Ionicons 
-                        name={artifact.ready ? 'checkmark-circle' : artifact.icon} 
-                        size={24} 
-                        color={artifact.ready ? Colors.accent : Colors.gray[600]} 
-                      />
-                    )}
-                    <Text style={[
-                      styles.artifactName,
-                      artifact.ready && styles.artifactNameReady,
-                      isBomGenerating && styles.artifactNameGenerating,
-                    ]}>{isBomGenerating ? 'Generating...' : artifact.name}</Text>
-                    {!artifact.ready && !isBomGenerating && (
-                      <Ionicons 
-                        name={artifact.id === 'bom' ? 'add-circle-outline' : 'arrow-back-circle-outline'} 
-                        size={14} 
-                        color={Colors.gray[500]} 
-                        style={styles.artifactAction}
-                      />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
+      <View style={styles.readinessPanel}>
+        <View style={styles.readinessHeader}>
+          <View style={styles.readinessLeft}>
+            <Ionicons name={isVendorReviewReady ? 'checkmark-circle-outline' : 'alert-circle-outline'} size={22} color={isVendorReviewReady ? Colors.accent : Colors.orange[300]} />
+            <View style={styles.readinessHeadingText}>
+              <Text style={styles.readinessTitle}>Build Readiness</Text>
+              <Text style={styles.readinessSubtitle}>
+                {isVendorReviewReady
+                  ? 'Ready for vendor review. Fabrication still requires qualified CAD and DfM signoff.'
+                  : `${buildReadinessItems.length - readinessReadyCount} gate${buildReadinessItems.length - readinessReadyCount === 1 ? '' : 's'} open before vendor review.`}
+              </Text>
             </View>
           </View>
-        );
-      })()}
-
-      {/* Send to Manufacturer Section */}
-      <View style={styles.manufacturerPanel}>
-        <View style={styles.manufacturerHeader}>
-          <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
-          <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
-        </View>
-        <View style={styles.reviewerApprovalCard}>
-          <View style={styles.quotePacketHeader}>
-            <Ionicons name="shield-checkmark-outline" size={20} color={Colors.orange[300]} />
-            <Text style={styles.quotePacketTitle}>Reviewer Approval</Text>
+          <View style={[styles.readinessBadge, isVendorReviewReady && styles.readinessBadgeReady]}>
+            <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
           </View>
-          <Text style={styles.quotePacketText}>
-            Record the review decision before preparing a vendor request. Approval permits vendor quote review only; fabrication and production release remain blocked until qualified CAD, DfM, treatment, and first-article gates pass.
-          </Text>
-          <View style={styles.approvalChoiceGrid}>
-            {REVIEWER_APPROVAL_OPTIONS.map(option => {
-              const isSelected = reviewerApprovalStatus === option.status;
-              return (
+        </View>
+        <View style={styles.readinessList}>
+          {buildReadinessItems.map(item => {
+            const isExpanded = activeReceiptSection === item.section;
+            return (
+              <View
+                key={item.id}
+                style={[styles.readinessAccordionItem, item.ready && styles.readinessItemReady]}
+              >
                 <TouchableOpacity
-                  key={option.status}
-                  style={[styles.approvalChoiceButton, isSelected && styles.approvalChoiceButtonActive]}
-                  onPress={() => setReviewerApprovalStatus(option.status)}
+                  style={styles.readinessItemHeader}
+                  onPress={() => toggleBuildSection(item.section)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Set reviewer approval status to ${option.label}`}
-                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={`${item.label}: ${item.ready ? 'complete' : 'incomplete'}`}
+                  accessibilityHint={`${isExpanded ? 'Collapse' : 'Expand'} ${item.label}. ${item.detail}`}
+                  accessibilityState={{ expanded: isExpanded, selected: item.ready }}
                 >
-                  <Text style={[styles.approvalChoiceLabel, isSelected && styles.approvalChoiceLabelActive]}>
-                    {option.label}
-                  </Text>
-                  <Text style={styles.approvalChoiceDescription}>{option.description}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          <Text style={styles.quoteFieldLabel}>Reviewer name</Text>
-          <TextInput
-            style={styles.quoteInput}
-            value={reviewerName}
-            onChangeText={setReviewerName}
-            accessibilityLabel="Reviewer name"
-            placeholder="Reviewer name"
-            placeholderTextColor={Colors.gray[600]}
-          />
-          <Text style={styles.quoteFieldLabel}>Reviewer role</Text>
-          <TextInput
-            style={styles.quoteInput}
-            value={reviewerRole}
-            onChangeText={setReviewerRole}
-            accessibilityLabel="Reviewer role"
-            placeholder="CAD reviewer, machinist, engineer, or vendor"
-            placeholderTextColor={Colors.gray[600]}
-          />
-          <Text style={styles.quoteFieldLabel}>Reviewer notes</Text>
-          <TextInput
-            style={[styles.quoteInput, styles.quoteNotesInput]}
-            value={reviewerNotes}
-            onChangeText={setReviewerNotes}
-            accessibilityLabel="Reviewer approval notes"
-            placeholder="Record source-dimension, CAD, material treatment, DfM, or release concerns."
-            placeholderTextColor={Colors.gray[600]}
-            multiline
-          />
-          <TouchableOpacity
-            style={styles.saveReviewButton}
-            onPress={handleSaveReviewerApprovalRecord}
-            accessibilityRole="button"
-            accessibilityLabel="Save reviewer approval record"
-          >
-            <Ionicons name="save-outline" size={18} color={Colors.black} />
-            <Text style={styles.saveReviewButtonText}>Save Review Record</Text>
-          </TouchableOpacity>
-          <View style={[styles.approvalStatusBox, !!savedVendorApprovalRecord && styles.approvalStatusBoxApproved]}>
-            <Ionicons
-              name={savedVendorApprovalRecord ? 'checkmark-circle-outline' : 'alert-circle-outline'}
-              size={16}
-              color={savedVendorApprovalRecord ? Colors.accent : Colors.orange[300]}
-            />
-            <Text style={styles.approvalStatusText}>
-              {vendorRequestBlockedMessage}
-            </Text>
-          </View>
-          {latestReviewRecord ? (
-            <View style={styles.reviewHistoryBox}>
-              <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
-              {savedReviewRecords.slice(0, 3).map(record => (
-                <View key={record.recordId} style={styles.reviewHistoryItem}>
-                  <View style={styles.reviewHistoryItemHeader}>
-                    <Text style={styles.reviewHistoryStatus}>{getReviewStatusLabel(record.status)}</Text>
-                    <Text style={styles.reviewHistoryDate}>{formatReviewDate(record.savedAt)}</Text>
+                  <View style={[styles.readinessItemIcon, item.ready && styles.readinessItemIconReady]}>
+                    <Ionicons name={item.ready ? 'checkmark' : item.icon} size={17} color={item.ready ? Colors.black : Colors.gray[400]} />
                   </View>
-                  <Text style={styles.reviewHistoryMeta} numberOfLines={2}>
-                    {record.reviewerName || 'Unnamed reviewer'}{record.reviewerRole ? ` | ${record.reviewerRole}` : ''} | {record.recordId}
-                  </Text>
-                  {record.notes ? (
-                    <Text style={styles.reviewHistoryNotes} numberOfLines={2}>{record.notes}</Text>
-                  ) : null}
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.reviewHistoryBox}>
-              <Text style={styles.reviewHistoryTitle}>Saved Review Records</Text>
-              <Text style={styles.reviewHistoryEmpty}>No saved reviewer decision yet.</Text>
-            </View>
-          )}
-        </View>
-        <View style={styles.quotePacketCard}>
-          <View style={styles.quotePacketHeader}>
-            <Ionicons name="send-outline" size={20} color={Colors.accent} />
-            <Text style={styles.quotePacketTitle}>Quote Packet</Text>
-          </View>
-          <Text style={styles.quotePacketText}>
-            Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
-          </Text>
-          <TouchableOpacity
-            style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
-            onPress={handleExportQuotePacket}
-            disabled={!localBom}
-            accessibilityRole="button"
-            accessibilityLabel="Export manufacturer quote packet"
-            accessibilityState={{ disabled: !localBom }}
-          >
-            <Text style={styles.quotePacketButtonText}>
-              {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.quoteRequestCard}>
-          <View style={styles.quotePacketHeader}>
-            <Ionicons name="mail-outline" size={20} color={Colors.accent} />
-            <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
-          </View>
-          <Text style={styles.quotePacketText}>
-            Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
-          </Text>
-          <Text style={styles.quoteFieldLabel}>Vendor target</Text>
-          <View style={styles.vendorChoiceGrid}>
-            {getVendorTargets().map(vendor => {
-              const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
-              return (
-                <TouchableOpacity
-                  key={`${vendor.vendorName}-${vendor.url}`}
-                  style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
-                  onPress={() => setSelectedVendorName(vendor.vendorName)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
-                  accessibilityState={{ selected: isSelected }}
-                >
-                  <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
-                    {vendor.vendorName}
-                  </Text>
+                  <View style={styles.readinessItemText}>
+                    <Text style={styles.readinessItemLabel}>{item.label}</Text>
+                    <Text style={styles.readinessItemDetail} numberOfLines={1}>{item.detail}</Text>
+                  </View>
+                  <Text style={styles.readinessItemAction}>{isExpanded ? 'Hide' : 'Open'}</Text>
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray[400]} />
                 </TouchableOpacity>
-              );
-            })}
-          </View>
-          <Text style={styles.quoteFieldLabel}>Recipient email</Text>
-          <TextInput
-            style={styles.quoteInput}
-            value={quoteRecipientEmail}
-            onChangeText={setQuoteRecipientEmail}
-            accessibilityLabel="Vendor quote recipient email"
-            placeholder="quotes@vendor.com"
-            placeholderTextColor={Colors.gray[600]}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
-          <TextInput
-            style={[styles.quoteInput, styles.quoteNotesInput]}
-            value={quoteAdminNotes}
-            onChangeText={setQuoteAdminNotes}
-            accessibilityLabel="Admin notes for vendor quote request"
-            placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
-            placeholderTextColor={Colors.gray[600]}
-            multiline
-          />
-          <TouchableOpacity
-            style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
-            onPress={handlePrepareQuoteEmail}
-            disabled={!canPrepareVendorRequest}
-            accessibilityRole="button"
-            accessibilityLabel="Prepare vendor quote request email"
-            accessibilityState={{ disabled: !canPrepareVendorRequest }}
-          >
-            <Text style={styles.quotePacketButtonText}>
-              {vendorRequestCtaLabel}
-            </Text>
-          </TouchableOpacity>
+                {isExpanded ? (
+                  <View style={styles.readinessAccordionBody}>
+                    {renderBuildSectionContent(item.section)}
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
-        <View style={styles.manufacturerGrid}>
-          {MANUFACTURERS.map((mfr) => (
-            <TouchableOpacity
-              key={mfr.id}
-              style={styles.manufacturerCard}
-              onPress={() => Linking.openURL(mfr.url)}
-              accessibilityRole="link"
-              accessibilityLabel={`Open ${mfr.name} vendor website`}
-            >
-              <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
-              <Text style={styles.manufacturerName}>{mfr.name}</Text>
-              <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
-              <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Text style={styles.manufacturerNote}>
-          Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
-        </Text>
       </View>
 
       <View style={styles.actionsPanel}>
@@ -1205,7 +1395,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xl,
     fontFamily: Fonts.display,
     color: Colors.text,
-    marginBottom: Spacing.xs,
+    marginBottom: 0,
   },
   description: {
     fontSize: FontSizes.sm,
@@ -1230,23 +1420,63 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.gray[400],
   },
-  conceptCard: {
+  packageSummaryCard: {
     backgroundColor: Colors.panel,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
+    gap: Spacing.md,
+    overflow: 'visible',
   },
-  conceptName: {
-    fontFamily: 'monospace',
+  packageSummaryHeader: {
+    gap: 4,
+    zIndex: 50,
+    elevation: 50,
+  },
+  packageSummaryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  packageSummaryTitle: {
     fontSize: FontSizes.lg,
-    color: Colors.orange[300],
-    marginBottom: Spacing.sm,
+    fontFamily: Fonts.display,
+    color: Colors.white,
   },
-  conceptDesc: {
+  packageSummaryMeta: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+  },
+  packageSummaryDesc: {
     fontSize: FontSizes.sm,
     color: Colors.gray[300],
+    lineHeight: 20,
+  },
+  packageSummaryGrid: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  packageSummaryTile: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.sm,
+    gap: 4,
+  },
+  packageSummaryTileLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.gray[500],
+    textTransform: 'uppercase',
+  },
+  packageSummaryTileValue: {
+    fontSize: FontSizes.xs,
+    color: Colors.white,
+    fontWeight: 'bold',
   },
   readinessPanel: {
     backgroundColor: Colors.panel,
@@ -1267,6 +1497,11 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     alignItems: 'flex-start',
     gap: Spacing.sm,
     flex: 1,
+    minWidth: 0,
+  },
+  readinessHeadingText: {
+    flex: 1,
+    minWidth: 0,
   },
   readinessTitle: {
     fontSize: FontSizes.md,
@@ -1292,45 +1527,72 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.accent,
     fontWeight: 'bold',
   },
-  artifactGrid: {
-    flexDirection: 'row',
+  readinessBadgeReady: {
+    backgroundColor: 'rgba(0, 255, 136, 0.22)',
+  },
+  readinessList: {
     gap: Spacing.sm,
   },
-  artifactItem: {
-    flex: 1,
+  readinessAccordionItem: {
     backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.gray[800],
+    borderColor: Colors.border,
     borderRadius: 8,
-    padding: Spacing.md,
+    overflow: 'visible',
+  },
+  readinessItemHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: Spacing.sm,
+    padding: Spacing.sm,
   },
-  artifactItemReady: {
-    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-    borderColor: Colors.accent,
+  readinessItemReady: {
+    borderColor: 'rgba(0, 255, 157, 0.35)',
+    backgroundColor: 'rgba(0, 255, 136, 0.08)',
   },
-  artifactItemTappable: {
+  readinessItemActionable: {
     borderStyle: 'dashed',
   },
-  artifactItemGenerating: {
-    backgroundColor: 'rgba(251, 191, 36, 0.1)',
-    borderColor: Colors.secondary,
-    borderStyle: 'solid',
+  readinessAccordionBody: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    padding: Spacing.sm,
   },
-  artifactAction: {
-    marginTop: 2,
+  readinessItemIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.black,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  artifactNameGenerating: {
-    color: Colors.secondary,
+  readinessItemIconReady: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
-  artifactName: {
-    fontFamily: 'monospace',
-    fontSize: FontSizes.xs,
+  readinessItemText: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+  },
+  readinessItemLabel: {
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+    marginBottom: 0,
+  },
+  readinessItemDetail: {
     color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
   },
-  artifactNameReady: {
+  readinessItemAction: {
     color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    alignSelf: 'center',
   },
   bomPanel: {
     backgroundColor: Colors.black,
@@ -1757,13 +2019,34 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   manufacturerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: Spacing.sm,
     marginBottom: Spacing.lg,
+  },
+  manufacturerHeaderTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    flex: 1,
+    minWidth: 0,
   },
   manufacturerTitle: {
     fontSize: FontSizes.md,
     fontWeight: 'bold',
     color: Colors.white,
+  },
+  handoffHeaderAction: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    backgroundColor: Colors.surface,
+  },
+  handoffHeaderActionText: {
+    color: Colors.gray[300],
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
   },
   quotePacketCard: {
     backgroundColor: 'rgba(34, 197, 94, 0.08)',
@@ -1781,6 +2064,73 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
   },
+  handoffCompactCard: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  handoffSummaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    backgroundColor: Colors.panel,
+    padding: Spacing.sm,
+  },
+  handoffSummaryRowReady: {
+    borderColor: 'rgba(0, 255, 157, 0.3)',
+    backgroundColor: 'rgba(0, 255, 136, 0.08)',
+  },
+  handoffSummaryIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.black,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  handoffSummaryIconReady: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  handoffSummaryText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  handoffSummaryLabel: {
+    color: Colors.white,
+    fontSize: FontSizes.xs,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  handoffSummaryValue: {
+    color: Colors.gray[500],
+    fontSize: FontSizes.xs,
+    lineHeight: 16,
+  },
+  handoffCompactButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+  },
+  handoffCompactButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
+  },
   reviewerApprovalCard: {
     backgroundColor: 'rgba(251, 191, 36, 0.08)',
     borderWidth: 1,
@@ -1788,12 +2138,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 8,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+    overflow: 'visible',
   },
   quotePacketHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
     marginBottom: Spacing.xs,
+    zIndex: 50,
+    elevation: 50,
   },
   quotePacketTitle: {
     color: Colors.white,
@@ -1840,6 +2193,9 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.md,
   },
   approvalChoiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
@@ -1850,11 +2206,15 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.orange[300],
     backgroundColor: 'rgba(251, 191, 36, 0.12)',
   },
+  approvalChoiceSelect: {
+    flex: 1,
+    minWidth: 0,
+  },
   approvalChoiceLabel: {
     color: Colors.gray[300],
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   approvalChoiceLabelActive: {
     color: Colors.orange[300],

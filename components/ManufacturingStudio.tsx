@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, FontSizes, Spacing, Radii, Fonts } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -13,6 +13,7 @@ import {
 type Props = {
   handoff: ManufacturingHandoff;
   scene: ThreeDSceneDescriptor | null;
+  initiallyExpanded?: boolean;
 };
 
 type ThreeModule = typeof import('three');
@@ -250,9 +251,10 @@ function MeasurementRow({ item }: { item: ManufacturingPartMeasurement }) {
   );
 }
 
-export default function ManufacturingStudio({ handoff, scene }: Props) {
+export default function ManufacturingStudio({ handoff, scene, initiallyExpanded = true }: Props) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
+  const [expanded, setExpanded] = useState(initiallyExpanded);
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
   const selectedPart = handoff.partMeasurements[selectedPartIndex] || handoff.partMeasurements[0];
   const selectedTreatment = selectedPart
@@ -265,7 +267,14 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
 
   return (
     <View style={styles.panel}>
-      <View style={styles.header}>
+      <TouchableOpacity
+        style={styles.header}
+        onPress={() => setExpanded(current => !current)}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={expanded ? 'Collapse manufacturing studio details' : 'Expand manufacturing studio details'}
+        accessibilityState={{ expanded }}
+      >
         <View style={styles.headerIcon}>
           <Ionicons name="cube-outline" size={20} color={Colors.primary} />
         </View>
@@ -273,7 +282,47 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
           <Text style={styles.title}>Manufacturing Studio</Text>
           <Text style={styles.subtitle}>Visual references, CAD readiness, material treatments, datums, and DfM gates</Text>
         </View>
-      </View>
+        <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.dimText} />
+      </TouchableOpacity>
+
+      {!expanded ? (
+        <>
+          <View style={styles.compactGrid}>
+            <View style={styles.compactMetric}>
+              <Text style={styles.envelopeLabel}>Envelope</Text>
+              <Text style={styles.compactValue}>
+                {handoff.envelope.widthMm} x {handoff.envelope.depthMm} x {handoff.envelope.heightMm} mm
+              </Text>
+            </View>
+            <View style={styles.compactMetric}>
+              <Text style={styles.envelopeLabel}>CAD lane</Text>
+              <Text style={styles.compactValue}>{handoff.aiCadGate.recommendedCadLane.replace(/_/g, ' ')}</Text>
+            </View>
+            <View style={styles.compactMetric}>
+              <Text style={styles.envelopeLabel}>Review lines</Text>
+              <Text style={styles.compactValue}>{handoff.partMeasurements.length} parts | {handoff.processPlan.length} gates</Text>
+            </View>
+          </View>
+
+          <View style={styles.cadGatePanel}>
+            <View style={styles.cadGateHeader}>
+              <Text style={styles.sectionLabel}>AI CAD Gate</Text>
+              <Text style={styles.cadGateStatus}>{handoff.aiCadGate.status.replace(/_/g, ' ')}</Text>
+            </View>
+            {handoff.aiCadGate.missingInputs.length > 0 ? (
+              <Text style={styles.cadGateWarning}>Missing: {handoff.aiCadGate.missingInputs.join(', ')}</Text>
+            ) : (
+              <Text style={styles.cadGateText}>All required AI CAD inputs are present for the current lane.</Text>
+            )}
+          </View>
+
+          <View style={styles.boundaryBox}>
+            <Ionicons name="shield-checkmark-outline" size={16} color={Colors.orange[300]} />
+            <Text style={styles.boundaryText}>{handoff.safetyBoundary}</Text>
+          </View>
+        </>
+      ) : (
+        <>
 
       <View style={styles.canvasShell}>
         {scene && Platform.OS === 'web' ? (
@@ -410,6 +459,8 @@ export default function ManufacturingStudio({ handoff, scene }: Props) {
         <Ionicons name="shield-checkmark-outline" size={16} color={Colors.orange[300]} />
         <Text style={styles.boundaryText}>{handoff.safetyBoundary}</Text>
       </View>
+        </>
+      )}
     </View>
   );
 }
@@ -448,6 +499,23 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   subtitle: {
     color: Colors.dimText,
     fontSize: FontSizes.xs,
+    marginTop: 2,
+  },
+  compactGrid: {
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  compactMetric: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: Spacing.sm,
+  },
+  compactValue: {
+    color: Colors.text,
+    fontSize: FontSizes.sm,
+    fontWeight: 'bold',
     marginTop: 2,
   },
   canvasShell: {
