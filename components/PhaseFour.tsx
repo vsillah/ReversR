@@ -659,7 +659,7 @@ export default function PhaseFour({
         : 'Generate the BOM before export options unlock.',
       ready: !!localBom,
       icon: 'archive-outline',
-      section: localBom ? 'exports' : 'bom',
+      section: 'exports',
     },
     {
       id: 'approval',
