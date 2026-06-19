@@ -358,6 +358,95 @@ const shouldUseDeterministicAiFallback = (error) => {
 };
 
 // ============================================
+// SUPPORT ISSUE AI REMEDIATION
+// ============================================
+
+const fallbackSupportIssueRemediation = (issue = {}) => ({
+  summary: `Review and resolve "${issue.title || 'reported issue'}" from the admin issue queue.`,
+  rootCause: 'AI remediation fallback used because the hosted AI provider is unavailable or not configured.',
+  resolutionSteps: [
+    'Review the submitted description and session log.',
+    'Reproduce the reported workflow in the same platform and build context.',
+    'Apply the smallest safe fix or operational workaround.',
+    'Verify the workflow no longer fails before notifying the user.',
+  ],
+  userMessage: 'A ReversR admin reviewed your report and prepared a fix or workaround. Please retry the workflow and reopen the issue if it still fails.',
+  followUpChecks: [
+    'Confirm the reported screen no longer shows the error.',
+    'Confirm the user can complete the next intended action.',
+  ],
+  automationActions: [],
+  confidence: 'low',
+});
+
+const normalizeRemediationArray = (value) => (
+  Array.isArray(value) ? value.map(item => String(item || '').trim()).filter(Boolean).slice(0, 8) : []
+);
+
+const buildSupportIssueRemediation = async (issue = {}) => {
+  if (!hasConfiguredGeminiKey()) {
+    return fallbackSupportIssueRemediation(issue);
+  }
+
+  const schema = {
+    type: Type.OBJECT,
+    properties: {
+      summary: { type: Type.STRING },
+      rootCause: { type: Type.STRING },
+      resolutionSteps: { type: Type.ARRAY, items: { type: Type.STRING } },
+      userMessage: { type: Type.STRING },
+      followUpChecks: { type: Type.ARRAY, items: { type: Type.STRING } },
+      automationActions: { type: Type.ARRAY, items: { type: Type.STRING } },
+      confidence: { type: Type.STRING, enum: ['low', 'medium', 'high'] },
+    },
+    required: ['summary', 'rootCause', 'resolutionSteps', 'userMessage', 'followUpChecks', 'automationActions', 'confidence'],
+  };
+
+  const prompt = `
+    You are the ReversR Rebuild support remediation assistant.
+
+    Use the issue report and session log to create a concise remediation packet for a super admin.
+    Stay inside app/admin-safe actions. Do not claim code has been deployed, data has been edited, or a user has been contacted.
+    If the issue needs a code change, describe the exact validation and release steps a human/admin lane should perform.
+    If the issue can be resolved operationally, list the admin actions and follow-up checks.
+
+    Issue report:
+    ${JSON.stringify(issue, null, 2)}
+
+    Return valid JSON only.
+  `;
+
+  try {
+    const result = await callGeminiWithRetry(async (ai) => {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction: 'You produce safe, audit-ready support remediation packets for a mobile app admin queue.',
+          responseMimeType: 'application/json',
+          responseSchema: schema,
+        },
+      });
+      if (!response.text) throw new Error('No remediation response from Gemini');
+      return JSON.parse(response.text);
+    }, null, 2);
+
+    return {
+      summary: String(result.summary || fallbackSupportIssueRemediation(issue).summary),
+      rootCause: String(result.rootCause || 'Root cause needs admin verification.'),
+      resolutionSteps: normalizeRemediationArray(result.resolutionSteps),
+      userMessage: String(result.userMessage || fallbackSupportIssueRemediation(issue).userMessage),
+      followUpChecks: normalizeRemediationArray(result.followUpChecks),
+      automationActions: normalizeRemediationArray(result.automationActions),
+      confidence: ['low', 'medium', 'high'].includes(result.confidence) ? result.confidence : 'medium',
+    };
+  } catch (error) {
+    console.error('Support issue remediation error:', error);
+    return fallbackSupportIssueRemediation(issue);
+  }
+};
+
+// ============================================
 // SYSTEM INSTRUCTION
 // ============================================
 
@@ -1138,7 +1227,10 @@ const buildFallbackBom = (innovation, analysis) => {
 // API ROUTES - WITH /api/gemini PREFIX FOR MOBILE APP
 // ============================================
 
-registerCommercialRoutes(app, { requireAdmin });
+registerCommercialRoutes(app, {
+  requireAdmin,
+  generateSupportIssueRemediation: buildSupportIssueRemediation,
+});
 
 // Analyze product
 app.post('/api/gemini/analyze', async (req, res) => {
