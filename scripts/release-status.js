@@ -119,12 +119,18 @@ addGate(
   inventorySourceValidator ? '' : 'Restore npm run inventory:source:validate and the connector spec instructions.'
 );
 
-const machineScanExamples = allFilesContain([
-  ['components/PhaseOne.tsx', 'FarmBot Genesis v1.8'],
-  ['components/PhaseOne.tsx', 'gantry farming robot'],
-  ['components/PhaseOne.tsx', 'Point at a machine, model plate, or visible assembly'],
-  ['components/PhaseOne.tsx', 'Sample machine'],
-]);
+const machineSampleText = [
+  readText('components/PhaseOne.tsx'),
+  readText('utils/inventoryConnector.ts'),
+].join('\n');
+const machineScanExamples = (
+  machineSampleText.includes('FarmBot Genesis v1.8') &&
+  machineSampleText.includes('gantry farming robot') &&
+  allFilesContain([
+    ['components/PhaseOne.tsx', 'Point at a machine, model plate, or visible assembly'],
+    ['components/PhaseOne.tsx', 'Sample machine'],
+  ])
+);
 addGate(
   'clone',
   'machine-scan-examples',
