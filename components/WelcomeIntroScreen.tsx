@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useEventListener } from 'expo';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { AppColors, Fonts, FontSizes, Radii, Spacing, makeShadows } from '../constants/theme';
@@ -16,6 +17,7 @@ import ReversRLogoMark from './ReversRLogoMark';
 
 const WELCOME_VIDEO = require('../assets/welcome/reversr-welcome-intro.mp4');
 const WELCOME_POSTER = require('../assets/welcome/reversr-welcome-poster.png');
+const INTRO_FALLBACK_TIMEOUT_MS = 9000;
 
 interface WelcomeIntroScreenProps {
   onEnter: () => void;
@@ -26,15 +28,23 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
   const brandOpacity = React.useRef(new Animated.Value(0)).current;
   const footerOpacity = React.useRef(new Animated.Value(0)).current;
+  const hasEnteredRef = React.useRef(false);
   const [actionsEnabled, setActionsEnabled] = React.useState(false);
   const player = useVideoPlayer(WELCOME_VIDEO, videoPlayer => {
-    videoPlayer.loop = true;
+    videoPlayer.loop = false;
     videoPlayer.muted = true;
     videoPlayer.play();
   });
 
+  const handleEnter = React.useCallback(() => {
+    if (hasEnteredRef.current) return;
+    hasEnteredRef.current = true;
+    player.pause();
+    onEnter();
+  }, [onEnter, player]);
+
   React.useEffect(() => {
-    player.loop = true;
+    player.loop = false;
     player.muted = true;
     player.play();
 
@@ -42,6 +52,13 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       player.pause();
     };
   }, [player]);
+
+  useEventListener(player, 'playToEnd', handleEnter);
+
+  React.useEffect(() => {
+    const fallbackTimer = setTimeout(handleEnter, INTRO_FALLBACK_TIMEOUT_MS);
+    return () => clearTimeout(fallbackTimer);
+  }, [handleEnter]);
 
   React.useEffect(() => {
     brandOpacity.setValue(0);
@@ -114,7 +131,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
 
       <TouchableOpacity
         style={styles.skipButton}
-        onPress={onEnter}
+        onPress={handleEnter}
         accessibilityRole="button"
         accessibilityLabel="Skip welcome video"
       >
@@ -145,7 +162,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
         <Text style={styles.headline}>Scan the machine. Rebuild the system.</Text>
         <TouchableOpacity
           style={styles.enterButton}
-          onPress={onEnter}
+          onPress={handleEnter}
           accessibilityRole="button"
           accessibilityLabel="Enter ReversR home"
           testID="welcome-intro-enter"
