@@ -4,7 +4,7 @@
 
 Create a premium 9:16 welcome video for ReversR that plays before the Home screen. The video should feel like a real factory production shot: standard manufacturing machines assemble the ReversR caliper-R logo, then the center knob spins to adjust the caliper before the final brand lockup appears in native app UI.
 
-The current committed MP4 is a wiring placeholder only. It proves playback, timing, bundling, and fallback behavior in the app. It is not the approved final creative asset.
+The current committed MP4 is the approved metal-to-teal welcome candidate for app review. It proves playback, timing, bundling, and fallback behavior in the app while preserving the selected factory composition.
 
 ## Role Split
 
@@ -40,10 +40,10 @@ The Portfolio hero worked because it followed a production sequence instead of r
 
 Use these as the source package before generating video:
 
-- **Logo identity reference:** `assets/logo-transparent.png`
-  - Brushed steel caliper-R mark.
-  - Blue-teal center ring and diagonal slot.
-  - Keep this exact concept at all sizes.
+- **Video identity reference:** `/private/tmp/reversr-higgsfield/reversr-hero-still-anchor.png`
+  - Use this still as the canonical welcome-video identity source.
+  - It reflects the approved factory composition and updated metal mark used in the packaged candidate.
+  - Do not use `assets/logo-transparent.png` for video generation until a newer standalone transparent logo export is staged into the repo.
 
 - **Factory environment reference:** create a portrait still before video generation.
   - Dark premium factory bay, not a generic warehouse.
@@ -60,8 +60,8 @@ Use these as the source package before generating video:
 ## Production Workflow
 
 1. Claude reviews this brief and the prompt package, then prepares the exact Higgsfield run notes for the session.
-2. Upload `assets/logo-transparent.png` as the primary identity reference.
-3. Generate or upload the factory environment still as the composition reference.
+2. Upload `/private/tmp/reversr-higgsfield/reversr-hero-still-anchor.png` as the primary identity and composition reference.
+3. Keep `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow-contact.png` or `/private/tmp/reversr-higgsfield/reversr-packaged-metal-teal-contact.png` alongside the run for frame-sequence review.
 4. In Higgsfield, use image-to-video first. Avoid text-only video generation.
 5. Use Cinema Studio if available.
 6. Set output to vertical 9:16, no audio, 7-8 seconds.
@@ -116,7 +116,7 @@ The output is usable only if:
 - It looks like a real premium manufacturing scene, not a vector animation or generic tech background.
 - Standard manufacturing machines are visible and purposeful: CNC head, lathe spindle, torque driver, robotic arm, clamp fixture, or gantry rail.
 - The center knob visibly spins to adjust or lock the caliper.
-- The ReversR logo remains recognizable as the approved brushed-steel caliper-R.
+- The ReversR logo remains recognizable as the approved brushed-steel caliper-R used in the selected metal-to-teal candidate.
 - Caliper jaws, center knob, and teal accents are readable on mobile.
 - The blue-teal glow is controlled and material-aware, not neon decoration.
 - No generated text, fake UI, labels, subtitles, or watermark appear.

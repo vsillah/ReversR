@@ -2,9 +2,9 @@
 
 ## Current Asset Status
 
-- `assets/welcome/reversr-welcome-intro.mp4` is a wiring proof only.
-- `assets/welcome/reversr-welcome-poster.png` is a poster proof only.
-- The local generator verifies playback, app timing, bundling, and fallback behavior.
+- `assets/welcome/reversr-welcome-intro.mp4` is the current approved metal-to-teal app candidate.
+- `assets/welcome/reversr-welcome-poster.png` is the packaged inert-opening poster for that candidate.
+- The local generator still verifies playback, app timing, bundling, and fallback behavior for future replacements.
 - The approved cinematic creative must be generated through Claude-led Higgsfield image-to-video production.
 
 ## Claude Creative Lead Decision
@@ -18,6 +18,12 @@ Creative north star: a single continuous precision-assembly beat. The ReversR ma
 ## Reference Still Direction
 
 One hero still seeds the run. Build it first, lock it, generate everything from it.
+
+Current approved still source:
+
+- `/private/tmp/reversr-higgsfield/reversr-hero-still-anchor.png`
+
+Do not use `assets/logo-transparent.png` as the welcome-video identity reference unless a newer standalone transparent export replaces it in the repo. That file was stale relative to the approved video creative.
 
 Frame: low three-quarter angle across a CNC mill bed. A brushed-aluminum clamp fixture holds a matte-black ReversR mark blank at center. Lathe spindle and gantry rail sit in soft-focus depth behind. Caliper jaws stage left, open, parked at the edge of the mark.
 
@@ -96,6 +102,10 @@ Codex packages from the locked Higgsfield master:
 - **Loop build.** Trimmed at the reconciled seam if a looping variant is required.
 
 Naming and slot path follow the onboarding asset convention already wired in the proof build. Codex confirms the deliverable drops into the same path the proof MP4 occupied, then closes the handoff.
+
+Current packaged source:
+
+- `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`
 
 ## App Packaging
 
