@@ -57,10 +57,16 @@ import { formatCreditPeriod, formatJourneyCreditLabel, formatResetCountdown } fr
 import {
   AUTH_MODE_OPTIONS,
   CONNECTOR_TYPE_OPTIONS,
+  INVENTORY_SOURCE_ADD_NEW_VALUE,
+  INVENTORY_SOURCE_OPTIONS,
+  InventorySourceOptionValue,
   defaultAuthModeForConnectorType,
   defaultConnector,
+  findKnownInventorySourceValue,
   getAuthModeLabel,
   getConnectorTypeLabel,
+  getInventorySourceOptionLabel,
+  getKnownInventoryConnector,
   loadInventoryConnector,
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
@@ -165,7 +171,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [provider, setProvider] = useState<'gemini' | 'ollama'>('gemini');
   const [ollamaModel, setOllamaModel] = useState('qwen3.5:0.8b');
   const [inventoryConnector, setInventoryConnector] = useState<InventoryConnector>(defaultConnector);
-  const [inventoryDropdown, setInventoryDropdown] = useState<'connectorType' | 'authMode' | null>(null);
+  const [inventoryDropdown, setInventoryDropdown] = useState<'sourcePreset' | 'connectorType' | 'authMode' | null>(null);
   const [adminToken, setAdminToken] = useState('');
   const [adminStatus, setAdminStatus] = useState<string | null>(null);
   const [adminLoading, setAdminLoading] = useState(false);
@@ -233,6 +239,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const [countdownNow, setCountdownNow] = useState(Date.now());
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('account');
   const [inventoryEditing, setInventoryEditing] = useState(false);
+  const [inventorySourcePreset, setInventorySourcePreset] = useState<InventorySourceOptionValue>(() => findKnownInventorySourceValue(defaultConnector));
   const profileImageInputRef = React.useRef<any>(null);
 
   const policyLinks = [
@@ -356,6 +363,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       const savedModel = await AsyncStorage.getItem('ollama_model');
       const savedConnector = await loadInventoryConnector();
       setInventoryConnector(savedConnector);
+      setInventorySourcePreset(findKnownInventorySourceValue(savedConnector));
       if (localProviderSettingsEnabled && savedProvider) {
         setProvider(savedProvider === 'ollama' ? 'ollama' : 'gemini');
       } else {
@@ -407,12 +415,37 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   const updateInventoryConnector = (patch: Partial<InventoryConnector>) => {
     setInventoryConnector(prev => ({ ...prev, ...patch }));
+    setInventorySourcePreset(INVENTORY_SOURCE_ADD_NEW_VALUE);
   };
 
   const handleCancelInventoryEdit = async () => {
-    setInventoryConnector(await loadInventoryConnector());
+    const savedConnector = await loadInventoryConnector();
+    setInventoryConnector(savedConnector);
+    setInventorySourcePreset(findKnownInventorySourceValue(savedConnector));
     setInventoryDropdown(null);
     setInventoryEditing(false);
+  };
+
+  const handleInventorySourcePresetChange = (sourcePreset: InventorySourceOptionValue) => {
+    setInventorySourcePreset(sourcePreset);
+    setInventoryDropdown(null);
+
+    const knownConnector = getKnownInventoryConnector(sourcePreset);
+    if (knownConnector) {
+      setInventoryConnector(knownConnector);
+      setCredentialRef(knownConnector.credentialRef || '');
+      return;
+    }
+
+    setInventoryConnector({
+      sourceName: '',
+      sourceUrl: '',
+      connectorType: 'api',
+      authMode: 'none',
+      credentialRef: '',
+      notes: '',
+    });
+    setCredentialRef('');
   };
 
   const handleConnectorTypeChange = (connectorType: InventoryConnector['connectorType']) => {
@@ -427,6 +460,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       authMode: defaultAuthModeForConnectorType(connectorType),
       credentialRef: connectorType === 'demo' || connectorType === 'csv' ? '' : prev.credentialRef,
     }));
+    setInventorySourcePreset(INVENTORY_SOURCE_ADD_NEW_VALUE);
     setInventoryDropdown(null);
   };
 
@@ -436,6 +470,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       authMode,
       credentialRef: authMode === 'none' ? '' : prev.credentialRef,
     }));
+    setInventorySourcePreset(INVENTORY_SOURCE_ADD_NEW_VALUE);
     setInventoryDropdown(null);
   };
 
@@ -447,7 +482,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     getLabel,
     onChange,
   }: {
-    id: 'connectorType' | 'authMode';
+    id: 'sourcePreset' | 'connectorType' | 'authMode';
     label: string;
     value: T;
     options: Array<{ value: T; label: string; detail: string }>;
@@ -462,7 +497,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
           style={styles.dropdownButton}
           onPress={() => setInventoryDropdown(isOpen ? null : id)}
           accessibilityRole="button"
-          accessibilityLabel={`Choose ${label.toLowerCase()}`}
+          accessibilityLabel={label === 'Known source' ? 'Choose known source' : `Choose ${label.toLowerCase()}`}
           accessibilityState={{ expanded: isOpen }}
         >
           <Text style={styles.dropdownButtonText}>{getLabel(value)}</Text>
@@ -1865,6 +1900,15 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                 </View>
               ) : (
                 <>
+                  {renderDropdown<InventorySourceOptionValue>({
+                    id: 'sourcePreset',
+                    label: 'Known source',
+                    value: inventorySourcePreset,
+                    options: INVENTORY_SOURCE_OPTIONS,
+                    getLabel: getInventorySourceOptionLabel,
+                    onChange: handleInventorySourcePresetChange,
+                  })}
+
                   <Text style={styles.compactLabel}>Source name</Text>
                   <TextInput
                     style={styles.input}
