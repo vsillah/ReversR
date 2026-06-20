@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-20T12:33:29Z",
+  "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 44 and iOS TestFlight build 21.",
+  "sourceCommit": "d91087c2ecd8f1a8a120ad50873e212dc9b6a923",
+  "otaUpdate": {
+    "channel": "production",
+    "runtimeVersion": "1.0.1",
+    "groupId": "07801bfe-615a-48bd-9514-ee01c1396197",
+    "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/07801bfe-615a-48bd-9514-ee01c1396197"
+  },
+  "builds": {
+    "android": {
+      "id": "63552a0d-8ff6-472d-a389-5930b1c3d37c",
+      "status": "FINISHED",
+      "versionCode": "44",
+      "appVersion": "1.0.1",
+      "runtimeVersion": "1.0.1",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/63552a0d-8ff6-472d-a389-5930b1c3d37c",
+      "artifactUrl": "https://expo.dev/artifacts/eas/wY_4HzBbeeZha-d2EjPEYPnqr9Elv6nmZQC_96YYke4.aab",
+      "completedAt": "2026-06-20T11:55:38.432Z"
+    },
+    "ios": {
+      "id": "8e696c16-245f-48e5-9ec9-060419b49c1d",
+      "status": "FINISHED",
+      "buildNumber": "21",
+      "appVersion": "1.0.1",
+      "runtimeVersion": "1.0.1",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/8e696c16-245f-48e5-9ec9-060419b49c1d",
+      "artifactUrl": "https://expo.dev/artifacts/eas/f_Q2y2Eyn-hjRlZv9rUkNlVsAVh8LQJuwH_LuXXTnzw.ipa",
+      "completedAt": "2026-06-20T11:36:54.439Z"
+    }
+  },
+  "submissions": {
+    "android": {
+      "id": "0ce0532a-69ad-4bea-bf43-9a2ea959dee2",
+      "status": "FINISHED",
+      "track": "internal",
+      "releaseStatus": "COMPLETED",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/0ce0532a-69ad-4bea-bf43-9a2ea959dee2"
+    },
+    "ios": {
+      "id": "e34635f0-f4cd-4016-8a57-5f88bc6e623b",
+      "status": "FINISHED",
+      "ascAppId": "6777091538",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/e34635f0-f4cd-4016-8a57-5f88bc6e623b",
+      "notes": [
+        "EAS submit could not initialize App Store Connect API keys in non-interactive mode.",
+        "The local App Store Connect API key path was temporarily added to eas.json for the submit command and removed after scheduling.",
+        "EAS submission finished with no reported error."
+      ]
+    }
+  },
+  "testerInstallLinks": {
+    "googlePlayInternalTesting": "https://play.google.com/apps/internaltest/4700334027214849380",
+    "testFlight": "https://testflight.apple.com/join/twj2dNQY"
+  },
+  "validation": [
+    "npx eas-cli build:view 63552a0d-8ff6-472d-a389-5930b1c3d37c --json",
+    "npx eas-cli build:view 8e696c16-245f-48e5-9ec9-060419b49c1d --json",
+    "EAS GraphQL submission status query for 0ce0532a-69ad-4bea-bf43-9a2ea959dee2",
+    "EAS GraphQL submission status query for e34635f0-f4cd-4016-8a57-5f88bc6e623b"
+  ],
+  "openGates": [
+    "Confirm Google Play Internal Testing availability from a tester account after Play processing.",
+    "Confirm TestFlight processing and tester availability in App Store Connect/TestFlight.",
+    "Public App Review and production release remain separate human approval gates."
+  ]
+}
