@@ -103,8 +103,6 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
 
 const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v2';
 const MOCK_TOUR_FIXTURE_CACHE_KEY = 'reversr-rebuild-mock-tour:farmbot-genesis-v1.8:v1';
-const WELCOME_INTRO_STORAGE_KEY = 'reversr-welcome-intro-seen:v1';
-
 type TourSavedState = {
   active: boolean;
   stepIndex: number;
@@ -675,19 +673,8 @@ export default function HomeScreen() {
   ]);
 
   useEffect(() => {
-    const loadWelcomeIntroState = async () => {
-      try {
-        const seen = await AsyncStorage.getItem(WELCOME_INTRO_STORAGE_KEY);
-        setWelcomeIntroVisible(seen !== 'true');
-      } catch (error) {
-        console.warn('Failed to load welcome intro state', error);
-        setWelcomeIntroVisible(true);
-      } finally {
-        setWelcomeIntroLoaded(true);
-      }
-    };
-
-    loadWelcomeIntroState();
+    setWelcomeIntroVisible(true);
+    setWelcomeIntroLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -1406,9 +1393,6 @@ export default function HomeScreen() {
 
   const enterHome = useCallback(() => {
     setWelcomeIntroVisible(false);
-    AsyncStorage.setItem(WELCOME_INTRO_STORAGE_KEY, 'true').catch(error => {
-      console.warn('Failed to save welcome intro state', error);
-    });
   }, []);
 
   const tabBarInset = safeAreaInsets.bottom + 84;

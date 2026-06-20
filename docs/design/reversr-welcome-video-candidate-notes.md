@@ -2,7 +2,13 @@
 
 ## Candidate 2026-06-20: Kling Metal-To-Teal
 
-Status: packaged for in-app review, not final human-approved creative.
+Status: packaged into the app welcome flow for branch review.
+
+## Source Files
+
+- Approved candidate video: `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`
+- In-app smoke reference: `/private/tmp/reversr-higgsfield/welcome-metal-teal-smoke.png`
+- Anchor still: `/private/tmp/reversr-higgsfield/reversr-hero-still-anchor.png`
 
 ## Generation Inputs
 
@@ -42,3 +48,9 @@ Status: packaged for in-app review, not final human-approved creative.
 - Poster: `assets/welcome/reversr-welcome-poster.png`
 
 The packaged app asset should be reviewed in the welcome preview before final approval.
+
+## Validation
+
+- Packaged with `npm run welcome:asset:package -- /private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4 --poster-at 0.1`
+- Local web preview verified on `http://localhost:5001`
+- Browser smoke confirmed the welcome video was playing at runtime with `currentTime > 7s` and `paused = false`
