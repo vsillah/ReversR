@@ -13,14 +13,14 @@ const args = process.argv.slice(2);
 
 const usage = () => {
   console.log(`Usage:
-  npm run welcome:asset:package -- <candidate.mp4> [--poster-at 6.2] [--dry-run]
+  npm run welcome:asset:package -- <candidate.mp4> [--poster-at 0.1] [--dry-run]
 
 Packages an approved Higgsfield/ReversR welcome-video candidate into the app asset paths:
   assets/welcome/reversr-welcome-intro.mp4
   assets/welcome/reversr-welcome-poster.png
 
 The script validates the source, strips audio, encodes H.264/yuv420p with faststart,
-and exports a poster frame from the final hold.`);
+and exports a poster frame from the requested timestamp.`);
 };
 
 if (args.includes('--help') || args.includes('-h')) {
