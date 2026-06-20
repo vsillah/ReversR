@@ -23,6 +23,11 @@ export type KnownInventorySourceOption = {
   connector: InventoryConnector;
 };
 
+export type InventorySourceSampleSet = {
+  sourceLabel: string;
+  samples: string[];
+};
+
 export const CONNECTOR_TYPE_OPTIONS: Array<{ value: InventoryConnector['connectorType']; label: string; detail: string }> = [
   { value: 'demo', label: 'Demo', detail: 'Built-in sample records' },
   { value: 'csv', label: 'CSV / Spreadsheet', detail: 'Hosted CSV or spreadsheet export' },
@@ -134,6 +139,55 @@ export const findKnownInventorySourceValue = (connector: Partial<InventoryConnec
 export const getKnownInventoryConnector = (value: InventorySourceOptionValue): InventoryConnector | null => {
   const option = KNOWN_INVENTORY_SOURCE_OPTIONS.find(item => item.value === value);
   return option ? { ...option.connector } : null;
+};
+
+export const INVENTORY_SOURCE_SAMPLE_SETS: Record<KnownInventorySourceValue, InventorySourceSampleSet> = {
+  'farmbot-public': {
+    sourceLabel: 'FarmBot Genesis',
+    samples: [
+      'A FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry main beam, gantry columns, cross-slide plate, z-axis extrusion, Farmduino, Raspberry Pi, motors, encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.',
+      'A FarmBot Genesis gantry farming robot with aluminum tracks, gantry beam, z-axis, universal tool mount, Farmduino electronics, Raspberry Pi controller, motors, encoders, solenoid valve, vacuum pump, seeder, watering nozzle, camera, and power supply.',
+    ],
+  },
+  'traceparts-industrial': {
+    sourceLabel: 'TraceParts',
+    samples: [
+      'A linear actuator motion module with ball screw actuator, linear guide rail, stepper motor, limit switch, flexible coupling, mounting bracket, fastener kit, and provider CAD/viewer references.',
+      'A source-backed actuator rebuild assembly from a professional parts catalog with guide rail, motor coupling, endstop switch, aluminum bracket, hardened steel screw, and STEP/STL CAD format availability.',
+    ],
+  },
+  'cadenas-industrial': {
+    sourceLabel: 'CADENAS 3Dfindit',
+    samples: [
+      'A gantry motion swap kit with profile rail guide, bearing carriage, timing belt, pulley set, stepper motor, gantry plate, cable carrier, and configurable provider 3D/CAD evidence.',
+      'A desktop CNC gantry assembly with linear rails, bearing blocks, belt drive, pulleys, aluminum plate, cable carrier, and CADENAS provider-hosted CAD configurator metadata.',
+    ],
+  },
+  'documoto-parts-book': {
+    sourceLabel: 'Documoto',
+    samples: [
+      'A packaging conveyor parts-book assembly with drive roller, idler roller, belt section, gearmotor, guard panel, photoelectric sensor, control enclosure, fastener kit, and provider parts-book viewer reference.',
+      'A whole-machine conveyor rebuild record with exploded-view service parts, serial-range parts-book notes, belt and roller assemblies, guarding, motor drive, sensors, and control enclosure.',
+    ],
+  },
+};
+
+export const DEFAULT_SAMPLE_SET: InventorySourceSampleSet = {
+  sourceLabel: 'General machine inventory',
+  samples: [
+    'A benchtop drill press with cast base, column, quill, chuck, belt drive, motor, depth stop, table, and safety guard.',
+    'A small conveyor sorting machine with frame, belt, rollers, drive motor, sensors, controller, power supply, and diverter gate.',
+    'A compact injection molding machine with clamp frame, heated barrel, screw drive, hopper, hydraulic unit, controller, and mold platen.',
+    'A pneumatic packaging sealer with frame, heated sealing jaw, air cylinder, foot pedal, control board, power supply, and safety shield.',
+    'A lab centrifuge with rotor, motor, lid latch, control panel, vibration sensor, power supply, and enclosure.',
+    'A laser cutter with gantry frame, laser tube, mirrors, lens head, stepper motors, honeycomb bed, controller, exhaust fan, and water pump.',
+  ],
+};
+
+export const getSampleSetForConnector = (connector: Partial<InventoryConnector>): InventorySourceSampleSet => {
+  const sourceValue = findKnownInventorySourceValue(connector);
+  if (sourceValue === INVENTORY_SOURCE_ADD_NEW_VALUE) return DEFAULT_SAMPLE_SET;
+  return INVENTORY_SOURCE_SAMPLE_SETS[sourceValue] || DEFAULT_SAMPLE_SET;
 };
 
 export const defaultAuthModeForConnectorType = (

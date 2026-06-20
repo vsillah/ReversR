@@ -20,6 +20,11 @@ import {
   getCommercialUpgradeUrlFromError,
 } from '../hooks/useGemini';
 import { useCommercialization } from '../hooks/useCommercialization';
+import {
+  DEFAULT_SAMPLE_SET,
+  getSampleSetForConnector,
+  loadInventoryConnector,
+} from '../utils/inventoryConnector';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 
@@ -37,18 +42,8 @@ interface Props {
   initialImage?: string | null;
   mockAnalysis?: AnalysisResult | null;
   mockInput?: string;
+  inventoryRefreshKey?: number;
 }
-
-const PRODUCT_PRESETS = [
-  "A FarmBot Genesis v1.8 CNC farming machine with track extrusions, gantry main beam, gantry columns, cross-slide plate, z-axis extrusion, Farmduino, Raspberry Pi, motors, encoders, UTM PCB, solenoid valve, vacuum pump, watering tools, seeder, camera, belts, pulleys, and v-wheels.",
-  "A FarmBot Genesis gantry farming robot with aluminum tracks, gantry beam, z-axis, universal tool mount, Farmduino electronics, Raspberry Pi controller, motors, encoders, solenoid valve, vacuum pump, seeder, watering nozzle, camera, and power supply.",
-  "A benchtop drill press with cast base, column, quill, chuck, belt drive, motor, depth stop, table, and safety guard.",
-  "A small conveyor sorting machine with frame, belt, rollers, drive motor, sensors, controller, power supply, and diverter gate.",
-  "A compact injection molding machine with clamp frame, heated barrel, screw drive, hopper, hydraulic unit, controller, and mold platen.",
-  "A pneumatic packaging sealer with frame, heated sealing jaw, air cylinder, foot pedal, control board, power supply, and safety shield.",
-  "A lab centrifuge with rotor, motor, lid latch, control panel, vibration sensor, power supply, and enclosure.",
-  "A laser cutter with gantry frame, laser tube, mirrors, lens head, stepper motors, honeycomb bed, controller, exhaust fan, and water pump.",
-];
 
 type InputMode = 'type' | 'scan' | 'lucky';
 type PhaseOneAlert = {
@@ -66,12 +61,15 @@ export default function PhaseOne({
   initialImage,
   mockAnalysis,
   mockInput,
+  inventoryRefreshKey = 0,
 }: Props) {
   const { colors: Colors } = useAppTheme();
   const { refreshAccount } = useCommercialization();
   const styles = createStyles(Colors);
   const [inputMode, setInputMode] = useState<InputMode>(initialImage ? 'scan' : 'type');
   const [input, setInput] = useState(initialInput || '');
+  const [sampleSourceLabel, setSampleSourceLabel] = useState(DEFAULT_SAMPLE_SET.sourceLabel);
+  const [productPresets, setProductPresets] = useState<string[]>(DEFAULT_SAMPLE_SET.samples);
   const [luckyProduct, setLuckyProduct] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
@@ -94,6 +92,25 @@ export default function PhaseOne({
       };
     }
   }, [isLoading]);
+
+  const loadInventorySamples = async () => {
+    try {
+      const connector = await loadInventoryConnector();
+      const sampleSet = getSampleSetForConnector(connector);
+      setSampleSourceLabel(sampleSet.sourceLabel);
+      setProductPresets(sampleSet.samples);
+      return sampleSet.samples;
+    } catch (error) {
+      console.warn('Failed to load inventory source samples', error);
+      setSampleSourceLabel(DEFAULT_SAMPLE_SET.sourceLabel);
+      setProductPresets(DEFAULT_SAMPLE_SET.samples);
+      return DEFAULT_SAMPLE_SET.samples;
+    }
+  };
+
+  useEffect(() => {
+    loadInventorySamples();
+  }, [inventoryRefreshKey]);
 
   const getActiveInput = () => {
     if (inputMode === 'lucky') return luckyProduct;
@@ -181,9 +198,16 @@ export default function PhaseOne({
     handleAnalyze();
   };
 
-  const handleShuffle = () => {
-    const randomIndex = Math.floor(Math.random() * PRODUCT_PRESETS.length);
-    setLuckyProduct(PRODUCT_PRESETS[randomIndex]);
+  const handleShuffle = (nextPresets = productPresets) => {
+    const presets = nextPresets.length > 0 ? nextPresets : DEFAULT_SAMPLE_SET.samples;
+    const randomIndex = Math.floor(Math.random() * presets.length);
+    setLuckyProduct(presets[randomIndex]);
+  };
+
+  const openSampleMode = async () => {
+    const nextPresets = await loadInventorySamples();
+    setInputMode('lucky');
+    handleShuffle(nextPresets);
   };
 
   useEffect(() => {
@@ -315,7 +339,7 @@ export default function PhaseOne({
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.modeTab, inputMode === 'lucky' && styles.modeTabActive]}
-            onPress={() => setInputMode('lucky')}
+            onPress={openSampleMode}
             accessibilityRole="button"
             accessibilityLabel="Use sample machine mode"
             accessibilityState={{ selected: inputMode === 'lucky' }}
@@ -405,10 +429,13 @@ export default function PhaseOne({
           {inputMode === 'lucky' && (
             <View style={styles.luckyContent}>
               <View style={styles.luckyHeader}>
-                <Text style={styles.contentLabel}>Sample machine</Text>
+                <View style={styles.sampleLabelBlock}>
+                  <Text style={styles.contentLabel}>Sample machine</Text>
+                  <Text style={styles.sampleSourceText}>Source: {sampleSourceLabel}</Text>
+                </View>
                 <TouchableOpacity
                   style={styles.shuffleButton}
-                  onPress={handleShuffle}
+                  onPress={() => handleShuffle()}
                   accessibilityRole="button"
                   accessibilityLabel="Shuffle sample machine description"
                 >
@@ -577,6 +604,15 @@ const createStyles = (Colors: AppColors) => {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.sm,
+    gap: Spacing.md,
+  },
+  sampleLabelBlock: {
+    flex: 1,
+  },
+  sampleSourceText: {
+    color: Colors.dim,
+    fontSize: FontSizes.xs,
+    marginTop: -Spacing.xs,
   },
   shuffleButton: {
     flexDirection: 'row',
