@@ -10,9 +10,11 @@ Generate or assemble these stills before opening Higgsfield video generation. Do
 | R2 | Mid-assembly: caliper jaws partially closed around the diagonal leg, center bolt visible but not seated, knob clearly visible. | Anchors logo geometry and construction beat. |
 | R3 | Wide factory establishing still: premium machine shop with CNC mill, lathe spindle, torque driver, clamp fixture, gantry rail, brushed steel workbench, and controlled lighting. | Prevents drift into generic sci-fi or abstract backgrounds. |
 | R4 | Knob macro: close-up of knurled steel calibration knob with teal index marker at the center of the caliper. | Anchors the required spinning knob moment. |
-| R5 | Logo identity reference: `assets/logo-transparent.png`. | Keeps the model from inventing a new logo concept. |
+| R5 | Logo identity reference: `/private/tmp/reversr-higgsfield/reversr-hero-still-anchor.png`. | Keeps the model tied to the approved welcome-video logo geometry and factory composition. |
 
 R1, R2, and R5 are required. R3 and R4 are strongly recommended.
+
+Do not use `assets/logo-transparent.png` for welcome-video generation until a newer standalone transparent logo export replaces it in the repo. That file drifted from the approved video identity.
 
 ## Higgsfield Setup
 
@@ -108,7 +110,7 @@ text, letters, captions, subtitles, watermark, logo text, brand name, typography
 
 Reject the candidate if any item fails.
 
-- Logo identity matches `assets/logo-transparent.png`.
+- Logo identity matches the approved hero/reference still package used for the run.
 - No invented R shape, alternate mark, or second logo.
 - Assembly resolves to a stable logo by 4.0s.
 - Logo holds clean and motion-stable from 4.5s to 7.0s.
