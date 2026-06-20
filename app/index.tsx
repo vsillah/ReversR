@@ -519,6 +519,7 @@ export default function HomeScreen() {
   const [context, setContext] = useState<MutationContext>(createEmptyContext());
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [inventorySampleRefreshKey, setInventorySampleRefreshKey] = useState(0);
   const [settingsInitialSection, setSettingsInitialSection] = useState<SettingsSection>('account');
   const [workflowMenuOpen, setWorkflowMenuOpen] = useState(false);
   const [tourActive, setTourActive] = useState(false);
@@ -556,6 +557,10 @@ export default function HomeScreen() {
   const openSettings = useCallback((section: SettingsSection = 'account') => {
     setSettingsInitialSection(section);
     setShowSettings(true);
+  }, []);
+  const closeSettings = useCallback(() => {
+    setShowSettings(false);
+    setInventorySampleRefreshKey(prev => prev + 1);
   }, []);
   const nextThemeMode = themeMode === 'dark' ? 'light' : 'dark';
   const handleToggleTheme = useCallback(() => {
@@ -1451,7 +1456,7 @@ export default function HomeScreen() {
         />
         <SettingsModal
           visible={showSettings}
-          onClose={() => setShowSettings(false)}
+          onClose={closeSettings}
           initialSection={settingsInitialSection}
         />
         {renderTourGuide()}
@@ -1661,6 +1666,7 @@ export default function HomeScreen() {
             initialImage={context.capturedImage}
             mockAnalysis={mockJourneyActive ? MOCK_TOUR_ANALYSIS : null}
             mockInput={mockJourneyActive ? MOCK_TOUR_INPUT : undefined}
+            inventoryRefreshKey={inventorySampleRefreshKey}
           />
         )}
         {context.phase === 2 && context.analysis && (
@@ -1851,7 +1857,7 @@ export default function HomeScreen() {
 
       <SettingsModal
         visible={showSettings}
-        onClose={() => setShowSettings(false)}
+        onClose={closeSettings}
         initialSection={settingsInitialSection}
       />
       {renderTourGuide()}
