@@ -6,6 +6,15 @@ Create a premium 9:16 welcome video for ReversR that plays before the Home scree
 
 The current committed MP4 is a wiring placeholder only. It proves playback, timing, bundling, and fallback behavior in the app. It is not the approved final creative asset.
 
+## Role Split
+
+- **Claude Code:** creative lead for the generation run. Claude should translate the brief into the Higgsfield setup, manage variant strategy, decide which generation to iterate, and write the candidate notes.
+- **Higgsfield AI:** final video generation tool. The approved creative must come from Higgsfield image-to-video or an equivalent cinematic video model, not from the local FFmpeg placeholder generator.
+- **Codex:** technical QA and app integration only. Codex should package exported MP4s, validate dimensions/codec/timing, smoke the welcome screen, and reject candidates that fail this brief before showing them for human review.
+- **Human review:** final taste/brand approval after Codex confirms the asset meets the objective requirements.
+
+Do not present a local FFmpeg/programmatic render as the final cinematic creative. Local renders are acceptable only as wiring proofs or timing placeholders.
+
 ## Current App Integration
 
 - Video path: `assets/welcome/reversr-welcome-intro.mp4`
@@ -50,19 +59,21 @@ Use these as the source package before generating video:
 
 ## Production Workflow
 
-1. Upload `assets/logo-transparent.png` as the primary identity reference.
-2. Generate or upload the factory environment still as the composition reference.
-3. In Higgsfield, use image-to-video first. Avoid text-only video generation.
-4. Use Cinema Studio if available.
-5. Set output to vertical 9:16, no audio, 7-8 seconds.
-6. Generate three variants:
+1. Claude reviews this brief and the prompt package, then prepares the exact Higgsfield run notes for the session.
+2. Upload `assets/logo-transparent.png` as the primary identity reference.
+3. Generate or upload the factory environment still as the composition reference.
+4. In Higgsfield, use image-to-video first. Avoid text-only video generation.
+5. Use Cinema Studio if available.
+6. Set output to vertical 9:16, no audio, 7-8 seconds.
+7. Generate three variants:
    - **A: Precision Assembly**: robotic arms and CNC head assemble logo parts.
    - **B: Center Knob Calibration**: logo is mostly assembled; torque driver spins the center knob and caliper jaws adjust.
    - **C: Quiet Premium Macro**: minimal camera movement, close-up machining detail, controlled teal glow.
-7. Pick the best variant for brand fidelity first, then motion.
-8. Export the final MP4 and a poster frame from the final hold.
-9. Replace `assets/welcome/reversr-welcome-intro.mp4` and `assets/welcome/reversr-welcome-poster.png`.
-10. Run `npm run typecheck`, app smoke, and `npm run web:export`.
+8. Claude selects the strongest candidate or requests another Higgsfield iteration.
+9. Codex performs technical QA against the acceptance criteria before bringing the candidate to human review.
+10. Export the final MP4 and a poster frame from the final hold.
+11. Replace `assets/welcome/reversr-welcome-intro.mp4` and `assets/welcome/reversr-welcome-poster.png`.
+12. Run `npm run typecheck`, app smoke, and `npm run web:export`.
 
 ## Model Direction
 
@@ -111,4 +122,3 @@ The output is usable only if:
 - The native title/tagline only appear after the logo is assembled.
 - The lower area remains clean enough for the native CTA.
 - A still frame from the final hold is strong enough to use as the poster.
-
