@@ -19,6 +19,7 @@ import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
 import ReversRLogoMark from "../components/ReversRLogoMark";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
+import WelcomeIntroScreen from "../components/WelcomeIntroScreen";
 import PhaseOne from "../components/PhaseOne";
 import PhaseTwo from "../components/PhaseTwo";
 import PhaseThree from "../components/PhaseThree";
@@ -102,6 +103,7 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
 
 const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v2';
 const MOCK_TOUR_FIXTURE_CACHE_KEY = 'reversr-rebuild-mock-tour:farmbot-genesis-v1.8:v1';
+const WELCOME_INTRO_STORAGE_KEY = 'reversr-welcome-intro-seen:v1';
 
 type TourSavedState = {
   active: boolean;
@@ -512,6 +514,8 @@ export default function HomeScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const styles = createStyles(Colors);
   const [started, setStarted] = useState(false);
+  const [welcomeIntroLoaded, setWelcomeIntroLoaded] = useState(false);
+  const [welcomeIntroVisible, setWelcomeIntroVisible] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [context, setContext] = useState<MutationContext>(createEmptyContext());
@@ -669,6 +673,22 @@ export default function HomeScreen() {
     started,
     tourHistoryResumeDetected,
   ]);
+
+  useEffect(() => {
+    const loadWelcomeIntroState = async () => {
+      try {
+        const seen = await AsyncStorage.getItem(WELCOME_INTRO_STORAGE_KEY);
+        setWelcomeIntroVisible(seen !== 'true');
+      } catch (error) {
+        console.warn('Failed to load welcome intro state', error);
+        setWelcomeIntroVisible(true);
+      } finally {
+        setWelcomeIntroLoaded(true);
+      }
+    };
+
+    loadWelcomeIntroState();
+  }, []);
 
   useEffect(() => {
     const loadTourState = async () => {
@@ -1384,6 +1404,13 @@ export default function HomeScreen() {
     setStarted(false);
   }, []);
 
+  const enterHome = useCallback(() => {
+    setWelcomeIntroVisible(false);
+    AsyncStorage.setItem(WELCOME_INTRO_STORAGE_KEY, 'true').catch(error => {
+      console.warn('Failed to save welcome intro state', error);
+    });
+  }, []);
+
   const tabBarInset = safeAreaInsets.bottom + 84;
 
   const renderTourGuide = () => (
@@ -1409,6 +1436,18 @@ export default function HomeScreen() {
     />
   );
   const contentBottomPadding = tabBarInset + Spacing.md;
+
+  if (!welcomeIntroLoaded) {
+    return <View style={styles.container} />;
+  }
+
+  if (welcomeIntroVisible) {
+    return (
+      <View style={styles.container}>
+        <WelcomeIntroScreen onEnter={enterHome} />
+      </View>
+    );
+  }
 
   if (!started) {
     return (

@@ -3,7 +3,7 @@
   "status": "partial-pass-store-signoff-pending",
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "iosBundleId": "com.vsillah.reversrrebuild",
     "androidPackage": "com.vsillah.reversrrebuild",
     "easProjectId": "700c2107-2639-4a27-b374-59ed5edd54fc",

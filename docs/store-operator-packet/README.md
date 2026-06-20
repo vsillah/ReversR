@@ -1,13 +1,13 @@
 # ReversR Rebuild Store Operator Packet
 
-Generated at: 2026-06-18T21:54:36.666Z
+Generated at: 2026-06-20T09:32:07.541Z
 
 This folder is the store-console handoff packet for App Store Connect and Google Play Console setup. It is a preparation packet, not proof that Apple or Google have accepted the app.
 
 ## Release Identity
 
 - App name: ReversR Rebuild
-- Version: 1.0.0
+- Version: 1.0.1
 - iOS bundle ID: `com.vsillah.reversrrebuild`
 - Android package: `com.vsillah.reversrrebuild`
 - SKU: `reversr-rebuild-001`

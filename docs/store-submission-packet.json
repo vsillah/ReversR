@@ -7,7 +7,7 @@
   ],
   "appIdentity": {
     "name": "ReversR Rebuild",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "iosBundleId": "com.vsillah.reversrrebuild",
     "androidPackage": "com.vsillah.reversrrebuild",
     "primaryLanguage": "en-US",

@@ -36,6 +36,7 @@ module.exports = ({ config }) => {
         Array.isArray(plugin) ? plugin[0] !== 'expo-iap' : plugin !== 'expo-iap'
       ))),
       'expo-iap',
+      'expo-video',
       './plugins/withScopedJitpackRepository',
     ],
   };

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-18T21:54:38.940Z",
+  "generatedAt": "2026-06-20T09:32:10.145Z",
   "source": "docs/store-console-evidence.json",
   "finalEvidenceFile": "docs/store-console-evidence.json",
   "warnings": [
@@ -14,7 +14,7 @@
   ],
   "releaseCandidate": {
     "appName": "ReversR Rebuild",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "iosBundleId": "com.vsillah.reversrrebuild",
     "androidPackage": "com.vsillah.reversrrebuild",
     "sku": "reversr-rebuild-001",

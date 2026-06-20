@@ -7,7 +7,7 @@ Use this as the copy/paste source for App Store Connect and Google Play Console 
 ## Release Identity
 
 - App name: ReversR Rebuild
-- Version: 1.0.0
+- Version: 1.0.1
 - iOS bundle ID: `com.vsillah.reversrrebuild`
 - Android package: `com.vsillah.reversrrebuild`
 - SKU: `reversr-rebuild-001`

@@ -1,6 +1,6 @@
 {
   "name": "reversr-rebuild",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -18,6 +18,8 @@
     "policy:preflight": "node scripts/policy-hosting-preflight.js",
     "policy:preflight:local": "node scripts/policy-hosting-preflight.js --allow-placeholder",
     "store:assets:generate": "node scripts/generate-store-assets.js",
+    "welcome:asset:generate": "node scripts/generate-welcome-intro-asset.js",
+    "welcome:asset:package": "node scripts/package-welcome-video-candidate.js",
     "store:screenshots:google-play": "node scripts/generate-google-play-phone-screenshots.js",
     "store:assets:preflight": "node scripts/store-assets-preflight.js",
     "screenshots:store": "node scripts/capture-store-screenshots.js",
@@ -91,6 +93,7 @@
     "expo-splash-screen": "~56.0.10",
     "expo-status-bar": "~56.0.4",
     "expo-updates": "~56.0.19",
+    "expo-video": "~56.1.4",
     "express": "^5.1.0",
     "ollama": "^0.6.3",
     "react": "19.2.3",
