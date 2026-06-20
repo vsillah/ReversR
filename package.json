@@ -19,6 +19,7 @@
     "policy:preflight:local": "node scripts/policy-hosting-preflight.js --allow-placeholder",
     "store:assets:generate": "node scripts/generate-store-assets.js",
     "welcome:asset:generate": "node scripts/generate-welcome-intro-asset.js",
+    "welcome:asset:package": "node scripts/package-welcome-video-candidate.js",
     "store:screenshots:google-play": "node scripts/generate-google-play-phone-screenshots.js",
     "store:assets:preflight": "node scripts/store-assets-preflight.js",
     "screenshots:store": "node scripts/capture-store-screenshots.js",

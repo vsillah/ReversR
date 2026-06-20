@@ -100,7 +100,7 @@ text, letters, captions, subtitles, watermark, logo text, brand name, typography
 - Frame rate: 30 fps preferred.
 - Codec: H.264, yuv420p, faststart.
 - Audio: none. Strip audio track entirely.
-- MP4 budget: target 6-8 Mbps, under 4 MB if possible.
+- MP4 budget: target 4-6 Mbps, under 4 MB if possible.
 - Poster: PNG from final hold frame, ideally at or after 6.0s.
 
 ## Review Checklist
@@ -127,24 +127,31 @@ After a candidate passes review:
 1. Replace:
    - `assets/welcome/reversr-welcome-intro.mp4`
    - `assets/welcome/reversr-welcome-poster.png`
-2. If needed, re-encode:
+2. Preferred packaging command:
+   ```bash
+   npm run welcome:asset:package -- /path/to/higgsfield-candidate.mp4 --poster-at 6.2
+   ```
+3. To validate without changing app assets:
+   ```bash
+   npm run welcome:asset:package -- /path/to/higgsfield-candidate.mp4 --poster-at 6.2 --dry-run
+   ```
+4. Manual fallback if needed:
    ```bash
    ffmpeg -i in.mp4 -c:v libx264 -profile:v high -pix_fmt yuv420p \
-     -movflags +faststart -an -b:v 6M \
+     -movflags +faststart -an -b:v 4M \
      assets/welcome/reversr-welcome-intro.mp4
    ```
-3. Re-export poster:
+5. Re-export poster manually:
    ```bash
    ffmpeg -ss 6.2 -i assets/welcome/reversr-welcome-intro.mp4 \
      -frames:v 1 -update 1 assets/welcome/reversr-welcome-poster.png
    ```
-4. Check `components/WelcomeIntroScreen.tsx`.
+6. Check `components/WelcomeIntroScreen.tsx`.
    - Brand reveal currently starts at 4200ms.
    - CTA reveal currently starts at 4700ms.
    - If the final video resolves earlier/later, adjust those delays so native UI appears after assembly stabilizes.
-5. Run:
+7. Run:
    - `npm run typecheck`
    - mobile/web intro smoke
    - `npm run web:export`
-6. Commit the final MP4, poster, timing adjustment if needed, and prompt/evidence note together.
-
+8. Commit the final MP4, poster, timing adjustment if needed, and prompt/evidence note together.
