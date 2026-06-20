@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-18T21:54:41.306Z",
+  "generatedAt": "2026-06-20T03:00:43.454Z",
   "mode": {
-    "allowPlaceholder": true,
-    "allowMissingCli": true,
-    "allowUnlinkedEas": true,
-    "allowNotLoggedIn": true
+    "allowPlaceholder": false,
+    "allowMissingCli": false,
+    "allowUnlinkedEas": false,
+    "allowNotLoggedIn": false
   },
   "warnings": [],
   "appIdentity": {
@@ -34,11 +34,11 @@
   "eas": {
     "cli": {
       "label": "pinned npx eas-cli@20.0.0",
-      "version": "eas-cli/20.0.0 darwin-arm64 node-v24.15.0\n★ eas-cli@20.2.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
+      "version": "eas-cli/20.0.0 darwin-arm64 node-v24.15.0\n★ eas-cli@20.3.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
     },
     "whoami": {
       "status": 0,
-      "output": "vsillah\nvsillah@gmail.com\n★ eas-cli@20.2.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
+      "output": "vsillah\nvsillah@gmail.com\n★ eas-cli@20.3.0 is now available.\nTo upgrade, run:\nnpm install -g eas-cli\nProceeding with outdated version."
     },
     "buildProfiles": {
       "development": {
