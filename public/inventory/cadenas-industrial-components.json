@@ -1,0 +1,89 @@
+{
+  "sourceName": "CADENAS 3Dfindit Industrial Components Pilot",
+  "sourceProvider": "CADENAS",
+  "sourceLinks": {
+    "threeDfindit": "https://www.3dfindit.com/",
+    "partsolutions": "https://partsolutions.com/"
+  },
+  "machines": [
+    {
+      "machineId": "CADENAS-GANTRY-SWAP-KIT",
+      "machineName": "CADENAS Gantry Motion Swap Kit",
+      "revision": "pilot-2026-06",
+      "aliases": ["gantry motion kit", "linear gantry", "cnc gantry", "router gantry"],
+      "parts": ["Profile rail guide", "Bearing carriage", "Timing belt", "Pulley set", "Stepper motor", "Gantry plate", "Cable carrier"],
+      "materials": ["aluminum plate", "steel rail", "rubber belt", "polymer cable carrier"],
+      "sourceProvider": "CADENAS",
+      "sourceRecordId": "cadenas-pilot-gantry-kit",
+      "manufacturer": "CADENAS catalog manufacturer reference",
+      "manufacturerPartNumber": "CDN-PILOT-GANTRY-001",
+      "renderProvider": "CADENAS 3Dfindit",
+      "renderUrl": "https://www.3dfindit.com/",
+      "viewerUrl": "https://www.3dfindit.com/",
+      "cadModelUrl": "https://www.3dfindit.com/",
+      "cadFormats": ["STEP", "SAT", "IGES", "DWG", "STL"],
+      "renderKind": "provider-hosted-3d-configurator",
+      "renderProvenance": "CADENAS/3Dfindit provider-hosted 3D configurator reference for pilot validation.",
+      "licenseNote": "Pilot fixture stores provider links and metadata only. Verify CADENAS/PARTsolutions terms before downloading, caching, redistributing, or transmitting CAD assets.",
+      "lastSyncedAt": "2026-06-20T00:00:00Z",
+      "assemblySteps": [
+        {
+          "stepNumber": 1,
+          "title": "Select source-backed gantry components",
+          "instructions": "Use the provider-hosted configurator/viewer to confirm rail, carriage, pulley, and belt families before BOM export.",
+          "parts": ["Profile rail guide", "Bearing carriage", "Timing belt", "Pulley set"],
+          "estimatedTime": "30 min",
+          "qualityCheck": "Provider viewer/configurator supports the selected component families and CAD formats."
+        },
+        {
+          "stepNumber": 2,
+          "title": "Verify gantry plate interfaces",
+          "instructions": "Compare gantry plate mounting faces, motor mount position, and cable carrier path against the matched machine scan.",
+          "parts": ["Gantry plate", "Stepper motor", "Cable carrier"],
+          "estimatedTime": "45 min",
+          "qualityCheck": "Plate hole pattern and motion envelope are ready for CAD qualification."
+        },
+        {
+          "stepNumber": 3,
+          "title": "Prepare configurable CAD handoff",
+          "instructions": "Carry CAD format availability, provider viewer links, and configuration notes into the build sheet for reviewer approval.",
+          "parts": ["Profile rail guide", "Bearing carriage", "Gantry plate"],
+          "estimatedTime": "25 min",
+          "qualityCheck": "Build sheet records source provider, configuration assumptions, and license boundary."
+        }
+      ],
+      "pricing": {
+        "partsSubtotal": "$650-$1,900",
+        "modelingEstimate": "$0-$600",
+        "fabricationEstimate": "$500-$1,800",
+        "assemblyLaborEstimate": "$320-$880",
+        "totalEstimate": "$1,470-$5,180",
+        "confidence": "medium"
+      },
+      "modelingVendors": [
+        {
+          "vendorName": "Protolabs",
+          "serviceType": "rapid prototyping and DfM quote",
+          "url": "https://www.protolabs.com",
+          "packageRequired": ["BOM CSV", "provider CAD/viewer links", "configured component notes", "inspection checklist"]
+        }
+      ],
+      "sourceLinks": {
+        "provider": "https://www.3dfindit.com/",
+        "partsolutions": "https://partsolutions.com/",
+        "productMarketing": "https://www.cadenas.de/en/products/ecatalogsolutions/innovative-marketing-strategies/3dfindit-com"
+      },
+      "referenceImages": [
+        {
+          "id": "cadenas-gantry-provider-reference",
+          "label": "CADENAS 3Dfindit provider reference",
+          "url": "https://www.3dfindit.com/",
+          "sourceUrl": "https://www.3dfindit.com/",
+          "kind": "provider-catalog-reference",
+          "licenseNote": "Use as linked provenance only until catalog image reuse rights are confirmed."
+        }
+      ],
+      "notes": "Normalized fixture for proving ReversR can carry CADENAS/3Dfindit configurator metadata into BOM, build sheet, and source-backed 3D evidence flows."
+    }
+  ]
+}

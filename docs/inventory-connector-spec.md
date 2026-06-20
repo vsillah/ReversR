@@ -42,6 +42,19 @@ Recommended:
 - `modelingVendors`: JSON array.
 - `sourceLinks`: JSON object of source URLs such as product, documentation, BOM, and CAD repositories.
 - `referenceImages`: JSON array of source-backed visual references.
+- `sourceProvider`: professional source name such as TraceParts, CADENAS, or Documoto.
+- `sourceRecordId`: stable external record/catalog identifier when available.
+- `manufacturer`
+- `manufacturerPartNumber`
+- `renderProvider`
+- `renderUrl`: provider-hosted 3D render or preview URL.
+- `viewerUrl`: provider-hosted 3D/CAD viewer URL.
+- `cadModelUrl`: provider-hosted CAD model or download landing URL.
+- `cadFormats`: array or delimited list of available formats such as STEP, IGES, STL, or 3D PDF.
+- `renderKind`
+- `renderProvenance`
+- `licenseNote`: required for professional catalog pilots to keep reuse boundaries explicit.
+- `lastSyncedAt`
 - `notes`
 
 See [sample-machine-inventory.csv](./sample-machine-inventory.csv).
@@ -80,6 +93,16 @@ The API accepts a top-level array or an object with `machines`, `items`, `record
         "product": "https://example.com/machines/inv-fdm-100",
         "documentation": "https://example.com/docs/inv-fdm-100"
       },
+      "sourceProvider": "TraceParts",
+      "sourceRecordId": "provider-record-id",
+      "manufacturerPartNumber": "MFG-123",
+      "renderProvider": "TraceParts",
+      "viewerUrl": "https://example.com/provider/viewer",
+      "cadModelUrl": "https://example.com/provider/cad",
+      "cadFormats": ["STEP", "IGES", "STL"],
+      "renderKind": "provider-hosted-cad-viewer",
+      "renderProvenance": "Provider-hosted catalog viewer metadata.",
+      "licenseNote": "Keep provider CAD/render assets linked unless reuse terms permit storage or redistribution.",
       "referenceImages": [
         {
           "id": "inv-fdm-100-product-reference",
@@ -99,12 +122,34 @@ The API accepts a top-level array or an object with `machines`, `items`, `record
 
 Rebuild visuals should be deterministic and source-backed whenever possible. The app should use this priority order:
 
-1. `referenceImages` from the matched inventory record.
-2. A public source image found through approved `sourceLinks`.
-3. AI-generated sketch only when no database or public reference is available.
-4. Built-in placeholder image when external image services are unavailable.
+1. Database-provided 3D render, provider viewer, or CAD preview metadata from `renderUrl`, `viewerUrl`, or `cadModelUrl`.
+2. `referenceImages` from the matched inventory record.
+3. A public source image found through approved `sourceLinks`.
+4. AI-generated sketch or generated 3D scene only when no database or public reference is available.
+5. Built-in placeholder image when external image services are unavailable.
 
 AI-generated images are convenience previews. They are not source truth and should not be treated as professional-grade reconstruction evidence without human review.
+
+Professional catalog integrations should keep third-party CAD and render assets as provider links unless the source license explicitly permits storage or redistribution. The app/API can prove source-backed visual use through `hasDatabase3DRender`, `usedAiVisualFallback`, and `visualEvidenceSource` response fields.
+
+## Professional Source Pilots
+
+Phase 1 professional pilots are:
+
+- `public/inventory/traceparts-industrial-components.json`
+- `public/inventory/cadenas-industrial-components.json`
+
+Phase 2 whole-machine parts-book pilot:
+
+- `public/inventory/documoto-equipment-parts-book-phase2.json`
+
+Validate them together:
+
+```bash
+npm run inventory:professional:validate
+```
+
+The professional fixtures are normalized ReversR pilot records. They do not redistribute vendor CAD files, images, or customer parts books; they store provider URLs, render/CAD metadata, BOM/build-sheet fields, and explicit license notes so source-backed 3D rendering can be proven before authenticated vendor APIs are connected.
 
 ## Validation Endpoint
 

@@ -231,6 +231,28 @@ export default function PhaseTwo({
 
         <Text style={styles.candidateEvidence}>{candidate.evidence}</Text>
 
+        <View style={styles.visualEvidenceRow}>
+          <View style={[styles.visualEvidenceBadge, candidate.hasDatabase3DRender && styles.visualEvidenceBadgeStrong]}>
+            <Ionicons
+              name={candidate.hasDatabase3DRender ? 'cube' : 'cube-outline'}
+              size={13}
+              color={candidate.hasDatabase3DRender ? Colors.black : Colors.accent}
+            />
+            <Text style={[styles.visualEvidenceText, candidate.hasDatabase3DRender && styles.visualEvidenceTextStrong]}>
+              {candidate.hasDatabase3DRender ? 'Source-backed 3D render' : 'AI 3D fallback'}
+            </Text>
+          </View>
+          <View style={styles.visualEvidenceBadge}>
+            <Ionicons name={candidate.hasCadModelLink ? 'link-outline' : 'remove-circle-outline'} size={13} color={Colors.accent} />
+            <Text style={styles.visualEvidenceText}>
+              {candidate.hasCadModelLink ? 'CAD link available' : 'CAD link pending'}
+            </Text>
+          </View>
+          {candidate.sourceProvider ? (
+            <Text style={styles.providerText}>{candidate.sourceProvider}</Text>
+          ) : null}
+        </View>
+
         <View style={styles.candidateActionRow}>
           <TouchableOpacity
             style={styles.summaryToggle}
@@ -332,6 +354,25 @@ export default function PhaseTwo({
               {getConnectorTypeLabel(connector.connectorType)} | {getAuthModeLabel(connector.authMode)}
               {validation?.recordCount ? ` | ${validation.recordCount} records checked` : ''}
             </Text>
+            {validation?.sourceHealth && (
+              <View style={styles.sourceHealthGrid}>
+                <View style={styles.sourceHealthPill}>
+                  <Text style={styles.sourceHealthPillText}>
+                    {validation.sourceHealth.hasDatabase3DRender ? '3D render available' : '3D render pending'}
+                  </Text>
+                </View>
+                <View style={styles.sourceHealthPill}>
+                  <Text style={styles.sourceHealthPillText}>
+                    {validation.sourceHealth.hasCadModelLink ? 'CAD link available' : 'CAD link pending'}
+                  </Text>
+                </View>
+                <View style={[styles.sourceHealthPill, validation.sourceHealth.usedAiVisualFallback && styles.sourceHealthPillWarn]}>
+                  <Text style={styles.sourceHealthPillText}>
+                    {validation.sourceHealth.usedAiVisualFallback ? 'AI fallback used' : 'Source visual first'}
+                  </Text>
+                </View>
+              </View>
+            )}
             <TouchableOpacity
               style={styles.settingsLink}
               onPress={onOpenSettings}
@@ -555,6 +596,28 @@ const createStyles = (Colors: AppColors) => {
     fontSize: FontSizes.xs,
     lineHeight: 16,
   },
+  sourceHealthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  sourceHealthPill: {
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    backgroundColor: Colors.surface,
+  },
+  sourceHealthPillWarn: {
+    borderColor: Colors.orange[300],
+  },
+  sourceHealthPillText: {
+    color: Colors.text,
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
+  },
   settingsLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -644,6 +707,41 @@ const createStyles = (Colors: AppColors) => {
     fontSize: FontSizes.xs,
     lineHeight: 17,
     paddingHorizontal: Spacing.md,
+  },
+  visualEvidenceRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.sm,
+  },
+  visualEvidenceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    backgroundColor: Colors.surface,
+  },
+  visualEvidenceBadgeStrong: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  visualEvidenceText: {
+    color: Colors.accent,
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
+  },
+  visualEvidenceTextStrong: {
+    color: Colors.black,
+  },
+  providerText: {
+    color: Colors.dim,
+    fontSize: FontSizes.xs,
   },
   candidateActionRow: {
     flexDirection: 'row',

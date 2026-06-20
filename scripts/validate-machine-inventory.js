@@ -125,6 +125,8 @@ const names = new Set();
 let recordsWithAssembly = 0;
 let recordsWithPricing = 0;
 let recordsWithVendors = 0;
+let recordsWithDatabase3DRender = 0;
+let recordsWithCadModelLink = 0;
 let totalParts = 0;
 
 records.forEach((record, index) => {
@@ -182,6 +184,28 @@ records.forEach((record, index) => {
   } else {
     warn(`${machineId || rowLabel} has no modeling/fabrication vendor options.`);
   }
+
+  const sourceProvider = String(record.sourceProvider || record.provider || record.catalogProvider || '').trim();
+  const renderProvider = String(record.renderProvider || sourceProvider || '').trim();
+  const renderUrl = String(record.renderUrl || '').trim();
+  const viewerUrl = String(record.viewerUrl || '').trim();
+  const cadModelUrl = String(record.cadModelUrl || record.cadUrl || '').trim();
+  const cadFormats = splitList(record.cadFormats || record.availableFormats);
+  const hasDatabase3DRender = Boolean(renderUrl || viewerUrl || cadModelUrl);
+
+  if (hasDatabase3DRender) {
+    recordsWithDatabase3DRender += 1;
+    if (!sourceProvider) warn(`${machineId || rowLabel} has source-backed 3D evidence but no sourceProvider.`);
+    if (!renderProvider) warn(`${machineId || rowLabel} has source-backed 3D evidence but no renderProvider.`);
+    if (!record.renderProvenance) warn(`${machineId || rowLabel} has source-backed 3D evidence but no renderProvenance.`);
+    if (!record.licenseNote) warn(`${machineId || rowLabel} has source-backed 3D evidence but no licenseNote.`);
+  }
+
+  if (cadModelUrl || cadFormats.length > 0) {
+    recordsWithCadModelLink += 1;
+    if (cadModelUrl && !/^https:\/\//i.test(cadModelUrl)) warn(`${machineId || rowLabel} cadModelUrl should be HTTPS.`);
+    if (cadFormats.length === 0) warn(`${machineId || rowLabel} has a CAD model URL but no cadFormats list.`);
+  }
 });
 
 if (names.size < records.length) {
@@ -206,3 +230,5 @@ console.log(`Average parts per record: ${(totalParts / records.length).toFixed(1
 console.log(`Records with assembly steps: ${recordsWithAssembly}`);
 console.log(`Records with pricing: ${recordsWithPricing}`);
 console.log(`Records with modeling vendors: ${recordsWithVendors}`);
+console.log(`Records with database 3D render evidence: ${recordsWithDatabase3DRender}`);
+console.log(`Records with CAD model links or formats: ${recordsWithCadModelLink}`);

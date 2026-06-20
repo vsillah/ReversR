@@ -1,0 +1,89 @@
+{
+  "sourceName": "TraceParts Industrial Components Pilot",
+  "sourceProvider": "TraceParts",
+  "sourceLinks": {
+    "apiDocs": "https://developers.traceparts.com/docs/api-related-to-the-product-content",
+    "cadIntegration": "https://developers.traceparts.com/docs/add-the-basic-feature-on-your-product-pages"
+  },
+  "machines": [
+    {
+      "machineId": "TRACEPARTS-LINEAR-ACTUATOR-MODULE",
+      "machineName": "TraceParts Linear Actuator Rebuild Module",
+      "revision": "pilot-2026-06",
+      "aliases": ["linear actuator", "actuator module", "ball screw actuator", "motion module"],
+      "parts": ["Ball screw actuator", "Linear guide rail", "Stepper motor", "Limit switch", "Mounting bracket", "Flexible coupling", "Fastener kit"],
+      "materials": ["anodized aluminum", "hardened steel", "stainless fasteners"],
+      "sourceProvider": "TraceParts",
+      "sourceRecordId": "traceparts-pilot-linear-actuator",
+      "manufacturer": "TraceParts catalog manufacturer reference",
+      "manufacturerPartNumber": "TP-PILOT-ACT-001",
+      "renderProvider": "TraceParts",
+      "renderUrl": "https://www.traceparts.com/",
+      "viewerUrl": "https://www.traceparts.com/",
+      "cadModelUrl": "https://www.traceparts.com/",
+      "cadFormats": ["STEP", "IGES", "STL", "3D PDF"],
+      "renderKind": "provider-hosted-cad-viewer",
+      "renderProvenance": "TraceParts provider-hosted CAD/viewer reference for pilot validation.",
+      "licenseNote": "Pilot fixture keeps vendor CAD/render assets as provider links only. Verify TraceParts license terms before storing, redistributing, or exporting CAD files.",
+      "lastSyncedAt": "2026-06-20T00:00:00Z",
+      "assemblySteps": [
+        {
+          "stepNumber": 1,
+          "title": "Confirm actuator source record",
+          "instructions": "Verify the source provider, catalog record, stroke class, motor interface, and CAD format availability before adding the actuator to the rebuild package.",
+          "parts": ["Ball screw actuator", "Stepper motor", "Flexible coupling"],
+          "estimatedTime": "20 min",
+          "qualityCheck": "Provider viewer opens and the catalog record matches the selected actuator family."
+        },
+        {
+          "stepNumber": 2,
+          "title": "Fit motion rail and bracket",
+          "instructions": "Compare the linear guide rail, mounting bracket, and fastener kit against the machine scan and selected CAD reference.",
+          "parts": ["Linear guide rail", "Mounting bracket", "Fastener kit"],
+          "estimatedTime": "45 min",
+          "qualityCheck": "Rail length, bracket hole pattern, and actuator centerline are ready for CAD review."
+        },
+        {
+          "stepNumber": 3,
+          "title": "Prepare actuator BOM handoff",
+          "instructions": "Carry provider record IDs, CAD links, and reviewer notes into the BOM and build sheet without downloading restricted CAD files.",
+          "parts": ["Limit switch", "Fastener kit", "Ball screw actuator"],
+          "estimatedTime": "25 min",
+          "qualityCheck": "BOM lines include source provider, part family, visual evidence source, and reviewer-required license note."
+        }
+      ],
+      "pricing": {
+        "partsSubtotal": "$480-$1,350",
+        "modelingEstimate": "$0-$450",
+        "fabricationEstimate": "$300-$1,200",
+        "assemblyLaborEstimate": "$220-$640",
+        "totalEstimate": "$1,000-$3,640",
+        "confidence": "medium"
+      },
+      "modelingVendors": [
+        {
+          "vendorName": "Xometry",
+          "serviceType": "CAD qualification and fabrication quote",
+          "url": "https://www.xometry.com",
+          "packageRequired": ["BOM CSV", "provider CAD/viewer links", "assembly notes", "reviewer approval record"]
+        }
+      ],
+      "sourceLinks": {
+        "provider": "https://www.traceparts.com/",
+        "apiDocs": "https://developers.traceparts.com/docs/api-related-to-the-product-content",
+        "cadIntegration": "https://developers.traceparts.com/docs/add-the-basic-feature-on-your-product-pages"
+      },
+      "referenceImages": [
+        {
+          "id": "traceparts-linear-actuator-provider-reference",
+          "label": "TraceParts provider catalog reference",
+          "url": "https://www.traceparts.com/",
+          "sourceUrl": "https://www.traceparts.com/",
+          "kind": "provider-catalog-reference",
+          "licenseNote": "Use as linked provenance only until catalog image reuse rights are confirmed."
+        }
+      ],
+      "notes": "Normalized fixture for proving ReversR can carry TraceParts-style CAD/viewer metadata into BOM, build sheet, and source-backed 3D evidence flows."
+    }
+  ]
+}

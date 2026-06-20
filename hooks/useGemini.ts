@@ -160,12 +160,30 @@ export interface InventoryValidationResult {
     machineName: string;
     revision?: string;
     partCount: number;
+    sourceProvider?: string;
+    renderProvider?: string;
+    hasDatabase3DRender?: boolean;
+    hasCadModelLink?: boolean;
+    visualEvidenceSource?: string;
   }>;
+  sourceHealth?: {
+    hasDatabase3DRender: boolean;
+    hasCadModelLink: boolean;
+    usedAiVisualFallback: boolean;
+    visualEvidenceSource: string;
+    providers: string[];
+  };
   matchCandidates?: Array<{
     machineId: string;
     machineName: string;
     revision?: string;
     partCount: number;
+    sourceProvider?: string;
+    sourceRecordId?: string;
+    renderProvider?: string;
+    hasDatabase3DRender?: boolean;
+    hasCadModelLink?: boolean;
+    visualEvidenceSource?: string;
     confidenceScore: number;
     matchPercent: number;
     evidence: string;
@@ -244,6 +262,22 @@ export interface InnovationResult {
   fulfillmentOptions?: FulfillmentOption[];
   sourceLinks?: Record<string, string>;
   referenceImages?: ReferenceImage[];
+  sourceProvider?: string;
+  sourceRecordId?: string;
+  manufacturer?: string;
+  manufacturerPartNumber?: string;
+  renderProvider?: string;
+  renderUrl?: string;
+  viewerUrl?: string;
+  cadModelUrl?: string;
+  cadFormats?: string[];
+  renderKind?: string;
+  renderProvenance?: string;
+  licenseNote?: string;
+  lastSyncedAt?: string;
+  hasDatabase3DRender?: boolean;
+  usedAiVisualFallback?: boolean;
+  visualEvidenceSource?: string;
 }
 
 export interface TechnicalSpec {
@@ -287,6 +321,25 @@ export interface SceneObject {
 
 export interface ThreeDSceneDescriptor {
   objects: SceneObject[];
+  sourceRender?: {
+    sourceProvider?: string;
+    sourceRecordId?: string;
+    machineId?: string;
+    machineName?: string;
+    renderProvider?: string;
+    renderUrl?: string;
+    viewerUrl?: string;
+    cadModelUrl?: string;
+    cadFormats?: string[];
+    renderKind?: string;
+    renderProvenance?: string;
+    licenseNote?: string;
+    visualSourceType?: string;
+  };
+  renderSourceType?: string;
+  hasDatabase3DRender?: boolean;
+  usedAiVisualFallback?: boolean;
+  visualEvidenceSource?: string;
 }
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

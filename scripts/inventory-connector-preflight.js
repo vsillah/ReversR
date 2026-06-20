@@ -28,6 +28,18 @@ const fixtureInventory = {
         'Display',
       ],
       materials: ['aluminum extrusion', 'borosilicate glass', 'NEMA stepper motors'],
+      sourceProvider: 'TraceParts',
+      sourceRecordId: 'preflight-traceparts-fdm-motion',
+      manufacturer: 'Preflight catalog manufacturer',
+      manufacturerPartNumber: 'PRE-FDM-MOTION-001',
+      renderProvider: 'TraceParts',
+      renderUrl: 'https://www.traceparts.com/',
+      viewerUrl: 'https://www.traceparts.com/',
+      cadModelUrl: 'https://www.traceparts.com/',
+      cadFormats: ['STEP', 'STL', '3D PDF'],
+      renderKind: 'provider-hosted-cad-viewer',
+      renderProvenance: 'Preflight source-backed CAD/viewer metadata.',
+      licenseNote: 'Preflight uses provider links only; do not cache or redistribute catalog CAD assets.',
       assemblySteps: [
         {
           stepNumber: 1,
@@ -277,6 +289,9 @@ const run = async () => {
     validation.body.sampleMachines?.some(machine => machine.machineId === 'INV-FDM-100'),
     'Inventory validation sample should include the FDM printer.'
   );
+  assert(validation.body.sourceHealth?.hasDatabase3DRender === true, 'Inventory validation should report source-backed 3D render coverage.');
+  assert(validation.body.sourceHealth?.hasCadModelLink === true, 'Inventory validation should report CAD link coverage.');
+  assert(validation.body.sourceHealth?.usedAiVisualFallback === false, 'Inventory validation should prefer source visuals before AI fallback.');
   assert(!JSON.stringify(validation.body).includes(fixtureSecret), 'Inventory validation response leaked the raw fixture secret.');
 
   const match = await postJson(`http://127.0.0.1:${apiPort}/api/gemini/match-machine`, {
@@ -290,6 +305,18 @@ const run = async () => {
   assert(Array.isArray(match.body.assemblySteps) && match.body.assemblySteps.length >= 2, 'Machine match should include assembly steps.');
   assert(match.body.pricing?.totalEstimate, 'Machine match should include pricing totalEstimate.');
   assert(Array.isArray(match.body.fulfillmentOptions) && match.body.fulfillmentOptions.length >= 1, 'Machine match should include fulfillment options.');
+  assert(match.body.hasDatabase3DRender === true, 'Machine match should carry source-backed 3D render metadata.');
+  assert(match.body.visualEvidenceSource === 'database_3d_render', 'Machine match should prefer database 3D render evidence.');
+  assert(match.body.usedAiVisualFallback === false, 'Machine match should not mark AI visual fallback when provider render metadata exists.');
+
+  const scene = await postJson(`http://127.0.0.1:${apiPort}/api/gemini/generate-3d`, {
+    innovation: match.body,
+  });
+  assert(scene.response.ok, `3D source render failed: ${scene.body.error || scene.response.status}`);
+  assert(scene.body.hasDatabase3DRender === true, '3D endpoint should return source-backed database render proof.');
+  assert(scene.body.usedAiVisualFallback === false, '3D endpoint should not use AI fallback for source-backed records.');
+  assert(scene.body.visualEvidenceSource === 'database_3d_render', '3D endpoint should report database_3d_render visual evidence.');
+  assert(scene.body.sourceRender?.viewerUrl, '3D endpoint should return provider viewer metadata.');
 
   const bom = await postJson(`http://127.0.0.1:${apiPort}/api/gemini/generate-bom`, {
     innovation: match.body,
@@ -307,6 +334,7 @@ const run = async () => {
   console.log(`- protected inventory fixture: ${fixtureUrl}`);
   console.log(`- credentialRef verified: ${credentialRef}`);
   console.log(`- matched machine: ${match.body.machineId} (${match.body.machineName})`);
+  console.log(`- source-backed 3D: ${scene.body.sourceRender.renderProvider} (${scene.body.visualEvidenceSource})`);
   console.log(`- BOM items: ${bom.body.items.length}`);
 };
 

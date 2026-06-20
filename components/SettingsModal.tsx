@@ -180,6 +180,24 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const adminCredentialSettingsEnabled = isAdminCredentialSettingsEnabled();
   const canUseInventoryConnectors = account?.entitlements.canUseInventoryConnectors ?? false;
   const superAdminSessionActive = Boolean(account?.access?.role === 'super_admin' && account?.entitlements.canUseAdminConsole);
+  const inventorySourceHealth = React.useMemo(() => {
+    const descriptor = `${inventoryConnector.sourceName} ${inventoryConnector.sourceUrl} ${inventoryConnector.notes || ''}`.toLowerCase();
+    const isProfessional3DSource = /traceparts|cadenas|3dfindit|partsolutions|documoto|partful|farmbot|onshape/.test(descriptor);
+    const provider =
+      descriptor.includes('traceparts') ? 'TraceParts'
+        : descriptor.includes('cadenas') || descriptor.includes('3dfindit') || descriptor.includes('partsolutions') ? 'CADENAS'
+          : descriptor.includes('documoto') ? 'Documoto'
+            : descriptor.includes('partful') ? 'Partful'
+              : descriptor.includes('farmbot') || descriptor.includes('onshape') || inventoryConnector.connectorType === 'demo' ? 'Source-backed demo'
+                : 'Inventory source';
+
+    return {
+      provider,
+      hasDatabase3DRender: isProfessional3DSource,
+      hasCadModelLink: isProfessional3DSource,
+      usedAiVisualFallback: !isProfessional3DSource,
+    };
+  }, [inventoryConnector]);
   const [aiRuntimeStatus, setAiRuntimeStatus] = useState<AiRuntimeStatus | null>(null);
   const [aiStatusLoading, setAiStatusLoading] = useState(false);
   const [commercialProfile, setCommercialProfile] = useState<CommercialProfile>(profile);
@@ -1821,6 +1839,29 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                       <Text style={styles.inventorySummaryValue}>{inventoryConnector.sourceUrl || 'Not configured'}</Text>
                     </View>
                   )}
+                  <View style={styles.sourceHealthPanel}>
+                    <Text style={styles.sourceHealthTitle}>{inventorySourceHealth.provider} health</Text>
+                    <View style={styles.sourceHealthGrid}>
+                      <View style={[styles.sourceHealthChip, inventorySourceHealth.hasDatabase3DRender && styles.sourceHealthChipReady]}>
+                        <Ionicons name={inventorySourceHealth.hasDatabase3DRender ? 'cube' : 'cube-outline'} size={13} color={inventorySourceHealth.hasDatabase3DRender ? Colors.black : Colors.accent} />
+                        <Text style={[styles.sourceHealthChipText, inventorySourceHealth.hasDatabase3DRender && styles.sourceHealthChipTextReady]}>
+                          {inventorySourceHealth.hasDatabase3DRender ? '3D render available' : '3D render checked in validation'}
+                        </Text>
+                      </View>
+                      <View style={[styles.sourceHealthChip, inventorySourceHealth.hasCadModelLink && styles.sourceHealthChipReady]}>
+                        <Ionicons name="link-outline" size={13} color={inventorySourceHealth.hasCadModelLink ? Colors.black : Colors.accent} />
+                        <Text style={[styles.sourceHealthChipText, inventorySourceHealth.hasCadModelLink && styles.sourceHealthChipTextReady]}>
+                          {inventorySourceHealth.hasCadModelLink ? 'CAD link available' : 'CAD link checked in validation'}
+                        </Text>
+                      </View>
+                      <View style={[styles.sourceHealthChip, !inventorySourceHealth.usedAiVisualFallback && styles.sourceHealthChipReady]}>
+                        <Ionicons name={inventorySourceHealth.usedAiVisualFallback ? 'sparkles-outline' : 'shield-checkmark-outline'} size={13} color={!inventorySourceHealth.usedAiVisualFallback ? Colors.black : Colors.accent} />
+                        <Text style={[styles.sourceHealthChipText, !inventorySourceHealth.usedAiVisualFallback && styles.sourceHealthChipTextReady]}>
+                          {inventorySourceHealth.usedAiVisualFallback ? 'AI fallback if no source visual' : 'Source visual first'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
               ) : (
                 <>
@@ -3506,6 +3547,44 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.text,
     fontSize: 13,
     fontWeight: '800',
+  },
+  sourceHealthPanel: {
+    paddingVertical: 10,
+    paddingHorizontal: 11,
+    gap: 8,
+  },
+  sourceHealthTitle: {
+    color: Colors.text,
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  sourceHealthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  sourceHealthChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: Colors.gray[800],
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    backgroundColor: Colors.panel,
+  },
+  sourceHealthChipReady: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accent,
+  },
+  sourceHealthChipText: {
+    color: Colors.accent,
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  sourceHealthChipTextReady: {
+    color: Colors.black,
   },
   registryBadge: {
     borderRadius: 999,
