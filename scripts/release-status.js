@@ -245,8 +245,12 @@ const storeSubmissionSmokeOk = (
   storeSubmissionSmoke?.googlePlay?.dataSafety?.ads === false &&
   storeSubmissionSmoke?.googlePlay?.dataSafety?.encryptedInTransit === true &&
   Array.isArray(storeSubmissionSmoke?.googlePlay?.dataSafety?.requiredPermissions) &&
-  storeSubmissionSmoke.googlePlay.dataSafety.requiredPermissions.length === 1 &&
-  storeSubmissionSmoke.googlePlay.dataSafety.requiredPermissions[0] === 'android.permission.CAMERA' &&
+  [
+    'android.permission.CAMERA',
+    'android.permission.READ_EXTERNAL_STORAGE',
+    'android.permission.READ_MEDIA_IMAGES',
+  ].every(permission => storeSubmissionSmoke.googlePlay.dataSafety.requiredPermissions.includes(permission)) &&
+  storeSubmissionSmoke.googlePlay.dataSafety.requiredPermissions.length === 3 &&
   storeSubmissionSmoke?.screenshots?.nativeRequired === true &&
   Number(storeSubmissionSmoke?.screenshots?.requiredSetCount || 0) >= 5 &&
   Number(storeSubmissionSmoke?.openGatesCount || 0) >= 5
@@ -269,7 +273,9 @@ const storeReviewSafetyOk = (
   storeReviewSafety?.summary?.fieldPassCount === storeReviewSafety?.summary?.fieldCount &&
   storeReviewSafety?.phraseChecks?.some(check => check.phrase === 'explicit human review' && check.found === true) &&
   storeReviewSafety?.phraseChecks?.some(check => check.phrase === 'does not automatically submit' && check.found === true) &&
-  storeReviewSafety?.fieldChecks?.some(check => check.field === 'android.permissions.cameraOnly' && check.pass === true)
+  storeReviewSafety?.fieldChecks?.some(check => check.field === 'android.permissions.cameraConfigured' && check.pass === true) &&
+  storeReviewSafety?.fieldChecks?.some(check => check.field === 'expoImagePicker.pluginConfigured' && check.pass === true) &&
+  storeReviewSafety?.fieldChecks?.some(check => check.field === 'android.profilePhotoPermission.READ_MEDIA_IMAGES.allowed' && check.pass === true)
 );
 addGate(
   'store-local',
@@ -289,16 +295,14 @@ const permissionOk = (
   androidPermissions.includes('android.permission.CAMERA') &&
   [
     'android.permission.RECORD_AUDIO',
-    'android.permission.READ_EXTERNAL_STORAGE',
     'android.permission.WRITE_EXTERNAL_STORAGE',
-    'android.permission.READ_MEDIA_IMAGES',
     'android.permission.READ_MEDIA_VIDEO',
   ].every(permission => blockedPermissions.includes(permission))
 );
 addGate(
   'store-local',
-  'camera-only-permissions',
-  'Android permission story is camera-only with broad media/microphone permissions blocked',
+  'camera-and-profile-photo-permissions',
+  'Android permission story keeps camera explicit and broad media/microphone permissions blocked',
   permissionOk ? 'pass' : 'blocked',
   `permissions=${androidPermissions.join(',') || '(none)'}`,
   permissionOk ? '' : 'Fix app.json android.permissions and blockedPermissions.'
