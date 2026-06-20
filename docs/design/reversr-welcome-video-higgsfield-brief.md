@@ -9,6 +9,9 @@ Current review asset:
 - Video replacement path: `assets/welcome/reversr-welcome-intro.mp4`
 - Poster replacement path: `assets/welcome/reversr-welcome-poster.png`
 - App component: `components/WelcomeIntroScreen.tsx`
+- Local generator: `npm run welcome:asset:generate`
+
+The current committed MP4 is a locally generated production-review asset using the approved logo. If a Higgsfield render is produced later, replace the MP4 and poster at the same paths so the app code does not need to change.
 
 ## Approved Direction
 

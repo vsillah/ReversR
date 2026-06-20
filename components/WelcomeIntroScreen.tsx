@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Image,
+  Animated,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,6 +24,9 @@ interface WelcomeIntroScreenProps {
 export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps) {
   const { colors: Colors } = useAppTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const brandOpacity = React.useRef(new Animated.Value(0)).current;
+  const footerOpacity = React.useRef(new Animated.Value(0)).current;
+  const [actionsEnabled, setActionsEnabled] = React.useState(false);
   const player = useVideoPlayer(WELCOME_VIDEO, videoPlayer => {
     videoPlayer.loop = true;
     videoPlayer.muted = true;
@@ -38,6 +42,44 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       player.pause();
     };
   }, [player]);
+
+  React.useEffect(() => {
+    brandOpacity.setValue(0);
+    footerOpacity.setValue(0);
+    setActionsEnabled(false);
+
+    const actionsTimer = setTimeout(() => setActionsEnabled(true), 4800);
+    const animation = Animated.parallel([
+      Animated.timing(brandOpacity, {
+        toValue: 1,
+        duration: 620,
+        delay: 4200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(footerOpacity, {
+        toValue: 1,
+        duration: 620,
+        delay: 4700,
+        useNativeDriver: true,
+      }),
+    ]);
+
+    animation.start();
+
+    return () => {
+      clearTimeout(actionsTimer);
+      animation.stop();
+    };
+  }, [brandOpacity, footerOpacity]);
+
+  const brandTranslateY = brandOpacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [16, 0],
+  });
+  const footerTranslateY = footerOpacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [18, 0],
+  });
 
   return (
     <View style={styles.container} testID="welcome-intro-screen">
@@ -79,15 +121,26 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
 
-      <View style={styles.brandLockup}>
+      <Animated.View
+        style={[
+          styles.brandLockup,
+          { opacity: brandOpacity, transform: [{ translateY: brandTranslateY }] },
+        ]}
+      >
         <ReversRLogoMark colors={Colors} size={62} />
         <Text style={styles.wordmark}>
           REVERS<Text style={styles.wordmarkAccent}>R</Text>
         </Text>
         <Text style={styles.subtitle}>Machine Reconstruction</Text>
-      </View>
+      </Animated.View>
 
-      <View style={styles.footer}>
+      <Animated.View
+        pointerEvents={actionsEnabled ? 'auto' : 'none'}
+        style={[
+          styles.footer,
+          { opacity: footerOpacity, transform: [{ translateY: footerTranslateY }] },
+        ]}
+      >
         <Text style={styles.kicker}>Custom Engineered</Text>
         <Text style={styles.headline}>Scan the machine. Rebuild the system.</Text>
         <TouchableOpacity
@@ -100,7 +153,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
           <Text style={styles.enterButtonText}>Enter ReversR</Text>
           <Ionicons name="arrow-forward" size={18} color={Colors.onPrimary} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </View>
   );
 }
