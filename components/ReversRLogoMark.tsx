@@ -12,7 +12,7 @@ export default function ReversRLogoMark({
   size?: number;
 }) {
   const isDark = colors.mode === 'dark';
-  const imageScale = isDark ? 1.92 : 1.84;
+  const imageScale = 1.12;
 
   return (
     <View
@@ -23,10 +23,10 @@ export default function ReversRLogoMark({
           height: size,
           borderRadius: Math.min(Radii.md, size / 3),
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)',
-          backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'transparent',
+          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.panel,
           shadowColor: colors.shadowColor,
-          shadowOpacity: isDark ? 0.08 : 0,
-          elevation: isDark ? 1 : 0,
+          shadowOpacity: isDark ? 0.12 : 0.08,
+          elevation: 2,
         },
       ]}
       accessible
