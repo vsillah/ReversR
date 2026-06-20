@@ -71,7 +71,7 @@ Use these as the source package before generating video:
    - **C: Quiet Premium Macro**: minimal camera movement, close-up machining detail, controlled teal glow.
 8. Claude selects the strongest candidate or requests another Higgsfield iteration.
 9. Codex performs technical QA against the acceptance criteria before bringing the candidate to human review.
-10. Export the final MP4 and a poster frame from the final hold.
+10. Export the final MP4, an inert opening poster frame for the pre-play state, and a final-hold still for review.
 11. Replace `assets/welcome/reversr-welcome-intro.mp4` and `assets/welcome/reversr-welcome-poster.png`.
 12. Run `npm run typecheck`, app smoke, and `npm run web:export`.
 
@@ -97,7 +97,8 @@ Avoid:
 - Preferred production resolution: 2160 x 3840.
 - Minimum acceptable app asset: 1080 x 1920.
 - H.264 MP4, yuv420p, web/native compatible.
-- Poster frame: PNG from the final hold frame.
+- Poster frame: PNG from the inert opening frame, before teal ignition.
+- Review still: PNG from the final hold frame.
 - No generated text, subtitles, labels, UI, or watermarks.
 
 ## Timeline
@@ -121,4 +122,5 @@ The output is usable only if:
 - No generated text, fake UI, labels, subtitles, or watermark appear.
 - The native title/tagline only appear after the logo is assembled.
 - The lower area remains clean enough for the native CTA.
-- A still frame from the final hold is strong enough to use as the poster.
+- The opening poster is strong enough to use before playback without revealing the final teal payoff.
+- A still frame from the final hold is strong enough to use in review notes.

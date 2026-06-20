@@ -101,7 +101,8 @@ text, letters, captions, subtitles, watermark, logo text, brand name, typography
 - Codec: H.264, yuv420p, faststart.
 - Audio: none. Strip audio track entirely.
 - MP4 budget: target 4-6 Mbps, under 4 MB if possible.
-- Poster: PNG from final hold frame, ideally at or after 6.0s.
+- Poster: PNG from the inert opening frame, ideally around 0.1s, before teal ignition.
+- Review still: PNG from final hold frame, ideally at or after 6.0s.
 
 ## Review Checklist
 
@@ -129,11 +130,11 @@ After a candidate passes review:
    - `assets/welcome/reversr-welcome-poster.png`
 2. Preferred packaging command:
    ```bash
-   npm run welcome:asset:package -- /path/to/higgsfield-candidate.mp4 --poster-at 6.2
+   npm run welcome:asset:package -- /path/to/higgsfield-candidate.mp4 --poster-at 0.1
    ```
 3. To validate without changing app assets:
    ```bash
-   npm run welcome:asset:package -- /path/to/higgsfield-candidate.mp4 --poster-at 6.2 --dry-run
+   npm run welcome:asset:package -- /path/to/higgsfield-candidate.mp4 --poster-at 0.1 --dry-run
    ```
 4. Manual fallback if needed:
    ```bash
@@ -143,7 +144,7 @@ After a candidate passes review:
    ```
 5. Re-export poster manually:
    ```bash
-   ffmpeg -ss 6.2 -i assets/welcome/reversr-welcome-intro.mp4 \
+   ffmpeg -ss 0.1 -i assets/welcome/reversr-welcome-intro.mp4 \
      -frames:v 1 -update 1 assets/welcome/reversr-welcome-poster.png
    ```
 6. Check `components/WelcomeIntroScreen.tsx`.
