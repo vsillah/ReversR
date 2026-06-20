@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-18T21:54:41.618Z",
-  "urlMode": "placeholder-allowed",
+  "generatedAt": "2026-06-20T03:00:41.508Z",
+  "urlMode": "strict",
   "warnings": [],
   "appIdentity": {
     "name": "ReversR Rebuild",
