@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-20T03:00:41.508Z",
-  "urlMode": "strict",
+  "generatedAt": "2026-06-20T09:32:12.787Z",
+  "urlMode": "placeholder-allowed",
   "warnings": [],
   "appIdentity": {
     "name": "ReversR Rebuild",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "iosBundleId": "com.vsillah.reversrrebuild",
     "androidPackage": "com.vsillah.reversrrebuild",
     "sku": "reversr-rebuild-001",

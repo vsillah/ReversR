@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-18T21:54:36.666Z",
+  "generatedAt": "2026-06-20T09:32:07.541Z",
   "releaseStatus": {
-    "generatedAt": "2026-06-18T21:54:36.661Z",
+    "generatedAt": "2026-06-20T09:32:07.536Z",
     "summary": {
       "pass": 34,
       "pending": 4,
@@ -19,7 +19,7 @@
   },
   "appIdentity": {
     "name": "ReversR Rebuild",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "iosBundleId": "com.vsillah.reversrrebuild",
     "androidPackage": "com.vsillah.reversrrebuild",
     "sku": "reversr-rebuild-001",

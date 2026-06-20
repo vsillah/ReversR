@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pending",
-  "generatedAt": "2026-06-18T21:54:38.793Z",
+  "generatedAt": "2026-06-20T09:32:10.013Z",
   "objective": "Clone the original ReversR app, remove the Systematic Inventive Thinking step, replace it with admin machine inventory matching from image/scan to reconstruction package, and get as close as possible to Google Play and Apple App Store readiness.",
   "completionClaim": {
     "fullObjectiveComplete": false,
@@ -21,7 +21,7 @@
     "blockedRequirementIds": []
   },
   "releaseStatus": {
-    "generatedAt": "2026-06-18T21:54:38.764Z",
+    "generatedAt": "2026-06-20T09:32:09.982Z",
     "summary": {
       "pass": 34,
       "pending": 4,
@@ -35,7 +35,7 @@
       "status": "pass",
       "evidence": [
         "git.remote.origin=https://github.com/vsillah/ReversR-Rebuild.git",
-        "git.branch=codex/native-settings-profile-access"
+        "git.branch=codex/reversr-welcome-video"
       ],
       "gates": [],
       "nextStep": ""
@@ -227,21 +227,21 @@
           "id": "store-operator-packet",
           "status": "pass",
           "title": "Store operator handoff packet is generated for App Store Connect and Google Play setup",
-          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-18T21:54:36.666Z.",
+          "evidence": "docs/store-operator-packet/manifest.json packages 16 source artifacts at 2026-06-20T09:32:07.541Z.",
           "nextStep": ""
         },
         {
           "id": "hosted-operator-packet",
           "status": "pass",
           "title": "Hosted API, policy, preview, and connector handoff packet is generated",
-          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-18T21:54:37.385Z.",
+          "evidence": "docs/hosted-operator-packet/manifest.json packages 4 hosted gates at 2026-06-20T09:32:08.381Z.",
           "nextStep": ""
         },
         {
           "id": "release-next-actions-packet",
           "status": "pass",
           "title": "Durable external-gate next action packet is generated",
-          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-18T21:54:38.076Z.",
+          "evidence": "docs/release-next-actions.json and docs/release-next-actions.md list 1 external gates at 2026-06-20T09:32:09.209Z.",
           "nextStep": ""
         },
         {
@@ -255,14 +255,14 @@
           "id": "native-release-config-evidence",
           "status": "pass",
           "title": "Native release config evidence is recorded with current EAS linkage state",
-          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-18T21:51:11.554Z.",
+          "evidence": "docs/native-release-config-evidence.json proves native identity, permissions, EAS profiles, project linkage, and remaining account gates at 2026-06-20T09:31:16.412Z.",
           "nextStep": ""
         },
         {
           "id": "store-console-pending-evidence",
           "status": "pass",
           "title": "Store console pending evidence records account-side setup requirements",
-          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-18T21:51:09.689Z.",
+          "evidence": "docs/store-console-pending-evidence.json records pending App Store Connect and Google Play setup at 2026-06-20T09:31:14.472Z.",
           "nextStep": ""
         }
       ],
