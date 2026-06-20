@@ -676,6 +676,106 @@ const normalizeReferenceImages = (value) => {
     .filter(image => image?.url);
 };
 
+const normalizeStringList = (value) => splitList(value);
+
+const normalizeProviderMetadata = (record = {}) => {
+  const cad = record.cad && typeof record.cad === 'object' ? record.cad : {};
+  const render = record.render && typeof record.render === 'object' ? record.render : {};
+  const visual = record.visual && typeof record.visual === 'object' ? record.visual : {};
+  const sourceProvider = normalizeName(
+    record.sourceProvider || record.provider || record.providerName || record.catalogProvider || ''
+  );
+  const renderProvider = normalizeName(
+    record.renderProvider || render.provider || visual.provider || sourceProvider
+  );
+  const renderUrl = normalizeName(
+    record.renderUrl || render.url || render.renderUrl || visual.renderUrl || visual.previewUrl || ''
+  );
+  const viewerUrl = normalizeName(
+    record.viewerUrl || render.viewerUrl || visual.viewerUrl || cad.viewerUrl || ''
+  );
+  const cadModelUrl = normalizeName(
+    record.cadModelUrl || record.cadUrl || cad.url || cad.modelUrl || cad.downloadUrl || ''
+  );
+  const cadFormats = normalizeStringList(
+    record.cadFormats || cad.formats || record.availableFormats || record.downloadFormats
+  );
+  const renderKind = normalizeName(
+    record.renderKind || render.kind || visual.kind || (viewerUrl ? 'provider-hosted-viewer' : renderUrl ? 'provider-render' : cadModelUrl ? 'cad-preview-reference' : '')
+  );
+  const hasDatabase3DRender = Boolean(renderUrl || viewerUrl || cadModelUrl);
+
+  return {
+    sourceProvider,
+    sourceRecordId: normalizeName(record.sourceRecordId || record.providerRecordId || record.catalogId || record.partId || ''),
+    manufacturer: normalizeName(record.manufacturer || record.brand || ''),
+    manufacturerPartNumber: normalizeName(record.manufacturerPartNumber || record.mpn || record.partNumber || ''),
+    renderProvider,
+    renderUrl,
+    viewerUrl,
+    cadModelUrl,
+    cadFormats,
+    renderKind,
+    renderProvenance: normalizeName(record.renderProvenance || render.provenance || visual.provenance || (hasDatabase3DRender ? 'provider_catalog_metadata' : '')),
+    licenseNote: normalizeName(record.licenseNote || record.sourceLicenseNote || cad.licenseNote || render.licenseNote || ''),
+    lastSyncedAt: normalizeName(record.lastSyncedAt || record.updatedAt || record.updateDate || ''),
+    hasDatabase3DRender,
+    visualSourceType: hasDatabase3DRender ? 'database_3d_render' : '',
+  };
+};
+
+const getVisualEvidenceFlags = (record = {}) => {
+  if (record.hasDatabase3DRender || record.renderUrl || record.viewerUrl || record.cadModelUrl) {
+    return {
+      hasDatabase3DRender: true,
+      usedAiVisualFallback: false,
+      visualEvidenceSource: 'database_3d_render',
+    };
+  }
+
+  if (Array.isArray(record.referenceImages) && record.referenceImages.length > 0) {
+    return {
+      hasDatabase3DRender: false,
+      usedAiVisualFallback: false,
+      visualEvidenceSource: 'database_reference_image',
+    };
+  }
+
+  return {
+    hasDatabase3DRender: false,
+    usedAiVisualFallback: true,
+    visualEvidenceSource: 'ai_visual_fallback',
+  };
+};
+
+const buildSourceBacked3DScene = (innovation = {}) => {
+  const visualFlags = getVisualEvidenceFlags(innovation);
+  if (!visualFlags.hasDatabase3DRender) return null;
+
+  return {
+    objects: [],
+    sourceRender: {
+      sourceProvider: normalizeName(innovation.sourceProvider || ''),
+      sourceRecordId: normalizeName(innovation.sourceRecordId || ''),
+      machineId: normalizeName(innovation.machineId || ''),
+      machineName: normalizeName(innovation.machineName || innovation.conceptName || ''),
+      renderProvider: normalizeName(innovation.renderProvider || innovation.sourceProvider || ''),
+      renderUrl: normalizeName(innovation.renderUrl || ''),
+      viewerUrl: normalizeName(innovation.viewerUrl || ''),
+      cadModelUrl: normalizeName(innovation.cadModelUrl || ''),
+      cadFormats: normalizeStringList(innovation.cadFormats),
+      renderKind: normalizeName(innovation.renderKind || 'provider-hosted-viewer'),
+      renderProvenance: normalizeName(innovation.renderProvenance || 'provider_catalog_metadata'),
+      licenseNote: normalizeName(innovation.licenseNote || ''),
+      visualSourceType: 'database_3d_render',
+    },
+    renderSourceType: 'database_3d_render',
+    hasDatabase3DRender: true,
+    usedAiVisualFallback: false,
+    visualEvidenceSource: 'database_3d_render',
+  };
+};
+
 const normalizeMachineRecord = (record = {}, index = 0) => {
   const machineId = normalizeName(record.machineId || record.id || record.sku || record.assetId || `INV-${String(index + 1).padStart(4, '0')}`);
   const machineName = normalizeName(record.machineName || record.name || record.title || record.model || 'Unnamed Machine');
@@ -687,6 +787,8 @@ const normalizeMachineRecord = (record = {}, index = 0) => {
   const pricing = normalizePricing(record.pricing || record.pricingSnapshot);
   const sourceLinks = normalizeSourceLinks(record.sourceLinks || record.links || record.sources);
   const referenceImages = normalizeReferenceImages(record.referenceImages || record.referenceImage || record.imageUrl || record.images);
+  const providerMetadata = normalizeProviderMetadata(record);
+  const visualFlags = getVisualEvidenceFlags({ ...providerMetadata, referenceImages });
 
   return {
     machineId,
@@ -700,6 +802,8 @@ const normalizeMachineRecord = (record = {}, index = 0) => {
     fulfillmentOptions: vendors,
     sourceLinks,
     referenceImages,
+    ...providerMetadata,
+    ...visualFlags,
     notes: normalizeName(record.notes || record.description || ''),
     sourceRow: index + 1,
   };
@@ -1021,6 +1125,12 @@ const findInventoryMatchCandidates = (analysis, records) => {
     machineName: match.record.machineName,
     revision: match.record.revision,
     partCount: match.record.parts.length,
+    sourceProvider: match.record.sourceProvider,
+    sourceRecordId: match.record.sourceRecordId,
+    renderProvider: match.record.renderProvider,
+    hasDatabase3DRender: match.record.hasDatabase3DRender,
+    hasCadModelLink: Boolean(match.record.cadModelUrl),
+    visualEvidenceSource: match.record.visualEvidenceSource,
     confidenceScore: match.score,
     matchPercent: Math.round(match.score * 100),
     evidence: buildMatchEvidence(match),
@@ -1174,6 +1284,20 @@ const buildInventoryReconstruction = (analysis, connector = {}, match) => {
     fulfillmentOptions: record.fulfillmentOptions,
     sourceLinks: record.sourceLinks,
     referenceImages: record.referenceImages,
+    sourceProvider: record.sourceProvider,
+    sourceRecordId: record.sourceRecordId,
+    manufacturer: record.manufacturer,
+    manufacturerPartNumber: record.manufacturerPartNumber,
+    renderProvider: record.renderProvider,
+    renderUrl: record.renderUrl,
+    viewerUrl: record.viewerUrl,
+    cadModelUrl: record.cadModelUrl,
+    cadFormats: record.cadFormats,
+    renderKind: record.renderKind,
+    renderProvenance: record.renderProvenance,
+    licenseNote: record.licenseNote,
+    lastSyncedAt: record.lastSyncedAt,
+    ...getVisualEvidenceFlags(record),
   };
 };
 
@@ -1195,6 +1319,22 @@ const applyDeterministicInventoryMatch = (result = {}, analysis, connector = {},
     fulfillmentOptions: deterministic.fulfillmentOptions,
     sourceLinks: deterministic.sourceLinks,
     referenceImages: deterministic.referenceImages,
+    sourceProvider: deterministic.sourceProvider,
+    sourceRecordId: deterministic.sourceRecordId,
+    manufacturer: deterministic.manufacturer,
+    manufacturerPartNumber: deterministic.manufacturerPartNumber,
+    renderProvider: deterministic.renderProvider,
+    renderUrl: deterministic.renderUrl,
+    viewerUrl: deterministic.viewerUrl,
+    cadModelUrl: deterministic.cadModelUrl,
+    cadFormats: deterministic.cadFormats,
+    renderKind: deterministic.renderKind,
+    renderProvenance: deterministic.renderProvenance,
+    licenseNote: deterministic.licenseNote,
+    lastSyncedAt: deterministic.lastSyncedAt,
+    hasDatabase3DRender: deterministic.hasDatabase3DRender,
+    usedAiVisualFallback: deterministic.usedAiVisualFallback,
+    visualEvidenceSource: deterministic.visualEvidenceSource,
     constraint: deterministic.constraint,
     marketBenefit: result.marketBenefit || deterministic.marketBenefit,
     conceptName: result.conceptName || deterministic.conceptName,
@@ -1387,7 +1527,23 @@ app.post('/api/inventory/validate', async (req, res) => {
         machineName: record.machineName,
         revision: record.revision,
         partCount: record.parts.length,
+        sourceProvider: record.sourceProvider,
+        renderProvider: record.renderProvider,
+        hasDatabase3DRender: record.hasDatabase3DRender,
+        hasCadModelLink: Boolean(record.cadModelUrl),
+        visualEvidenceSource: record.visualEvidenceSource,
       })),
+      sourceHealth: {
+        hasDatabase3DRender: records.some(record => record.hasDatabase3DRender),
+        hasCadModelLink: records.some(record => Boolean(record.cadModelUrl)),
+        usedAiVisualFallback: records.every(record => getVisualEvidenceFlags(record).usedAiVisualFallback),
+        visualEvidenceSource: records.some(record => record.hasDatabase3DRender)
+          ? 'database_3d_render'
+          : records.some(record => Array.isArray(record.referenceImages) && record.referenceImages.length > 0)
+            ? 'database_reference_image'
+            : 'ai_visual_fallback',
+        providers: Array.from(new Set(records.map(record => record.sourceProvider).filter(Boolean))).sort(),
+      },
       matchCandidates,
     });
   } catch (error) {
@@ -1837,10 +1993,14 @@ const getDataUrlFromSourceBackedImage = (sourceBackedImage) => {
 // Generate 3D scene
 app.post('/api/gemini/generate-3d', async (req, res) => {
   try {
+    const { innovation, provider, ollamaModel } = req.body;
+    const sourceBackedScene = buildSourceBacked3DScene(innovation);
+    if (sourceBackedScene) {
+      return res.json(sourceBackedScene);
+    }
+
     const charge = await chargeCommercialCredits(req, res, 'generate-3d');
     if (!charge.ok) return;
-
-    const { innovation, provider, ollamaModel } = req.body;
     
     const prompt = `
       Generate a 3D reconstruction schematic for: ${innovation.conceptName}
@@ -1902,11 +2062,23 @@ app.post('/api/gemini/generate-3d', async (req, res) => {
       }, cacheKey);
     }
 
-    res.json(result);
+    res.json({
+      ...result,
+      renderSourceType: 'ai_generated_scene',
+      hasDatabase3DRender: false,
+      usedAiVisualFallback: true,
+      visualEvidenceSource: 'ai_generated_scene',
+    });
   } catch (error) {
     console.error('Generate 3D error:', error);
     if (shouldUseDeterministicAiFallback(error)) {
-      return res.json(buildFallbackScene());
+      return res.json({
+        ...buildFallbackScene(),
+        renderSourceType: 'built_in_fallback_scene',
+        hasDatabase3DRender: false,
+        usedAiVisualFallback: true,
+        visualEvidenceSource: 'built_in_fallback_scene',
+      });
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate 3D scene');
     res.status(statusCode).json(body);

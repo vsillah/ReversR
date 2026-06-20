@@ -165,6 +165,9 @@ type ManufacturerQuotePacket = {
     has2D: boolean;
     angleLabels: string[];
     has3DScene: boolean;
+    hasDatabase3DRender: boolean;
+    visualEvidenceSource?: string;
+    sourceRender?: ThreeDSceneDescriptor['sourceRender'];
     expectedFileTypes: string[];
   };
   aiCadGate: ManufacturingHandoff['aiCadGate'];
@@ -207,6 +210,8 @@ export default function PhaseFour({
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
+  const hasDatabase3DRender = Boolean(threeDScene?.sourceRender || innovation.hasDatabase3DRender);
+  const visualEvidenceSource = threeDScene?.visualEvidenceSource || innovation.visualEvidenceSource || (hasDatabase3DRender ? 'database_3d_render' : has3D ? 'ai_generated_scene' : has2D ? 'database_or_ai_2d_reference' : 'pending');
   const [status, setStatus] = useState<'idle' | 'generating' | 'complete'>(
     bom ? 'complete' : 'idle'
   );
@@ -413,6 +418,9 @@ export default function PhaseFour({
         has2D,
         angleLabels,
         has3DScene: has3D,
+        hasDatabase3DRender,
+        visualEvidenceSource,
+        sourceRender: threeDScene?.sourceRender,
         expectedFileTypes: ['BOM CSV', 'quote packet JSON', 'assembly notes', 'CAD draft source when generated', 'STEP/native CAD after CAD qualification', 'PDF detail drawings', 'material treatment notes', 'STL/3MF CAD draft if generated', 'PNG visual references if generated'],
       },
       aiCadGate: manufacturingHandoff.aiCadGate,
@@ -573,7 +581,7 @@ export default function PhaseFour({
       '- Material treatment guidance',
       '- Reviewer approval record',
       has2D ? '- 2D visual references' : '- 2D visual references: pending',
-      has3D ? '- 3D scene visual reference' : '- 3D scene visual reference: pending',
+      hasDatabase3DRender ? '- Source-backed 3D database render/CAD viewer' : has3D ? '- 3D scene visual reference' : '- 3D scene visual reference: pending',
       '',
       'Inventory match:',
       `- Machine: ${innovation.machineName || innovation.conceptName}`,
@@ -645,7 +653,9 @@ export default function PhaseFour({
       id: 'manufacturing',
       label: 'Manufacturing studio',
       detail: has2D || has3D
-        ? `${has2D ? '2D' : ''}${has2D && has3D ? ' + ' : ''}${has3D ? '3D' : ''} references feed CAD readiness and DfM review.`
+        ? hasDatabase3DRender
+          ? 'Source-backed 3D render/CAD evidence feeds CAD readiness and DfM review.'
+          : `${has2D ? '2D' : ''}${has2D && has3D ? ' + ' : ''}${has3D ? '3D' : ''} references feed CAD readiness and DfM review.`
         : 'Generate visual references before manufacturing review.',
       ready: has2D || has3D,
       icon: 'cube-outline',
@@ -844,7 +854,7 @@ export default function PhaseFour({
               </View>
               <View style={styles.packageSummaryTile}>
                 <Text style={styles.packageSummaryTileLabel}>Visuals</Text>
-                <Text style={styles.packageSummaryTileValue}>{has2D && has3D ? '2D + 3D' : has2D ? '2D only' : has3D ? '3D only' : 'Pending'}</Text>
+                <Text style={styles.packageSummaryTileValue}>{hasDatabase3DRender ? 'Source 3D' : has2D && has3D ? '2D + 3D' : has2D ? '2D only' : has3D ? '3D only' : 'Pending'}</Text>
               </View>
             </View>
           </View>

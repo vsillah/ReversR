@@ -148,6 +148,11 @@ const run = async () => {
   assert(match.parsed.pricing?.totalEstimate, 'Machine match should include pricing.totalEstimate.');
   assert(Array.isArray(match.parsed.fulfillmentOptions), 'Machine match should include fulfillmentOptions.');
 
+  if (process.env.CONNECTOR_SMOKE_EXPECT_DATABASE_3D_RENDER === 'true') {
+    assert(match.parsed.hasDatabase3DRender === true, 'Expected machine match to include source-backed database 3D render metadata.');
+    assert(match.parsed.usedAiVisualFallback === false, 'Expected source-backed database 3D render to prevent AI visual fallback.');
+  }
+
   const expectedMachineId = process.env.CONNECTOR_SMOKE_EXPECTED_MACHINE_ID;
   if (expectedMachineId) {
     assert(match.parsed.machineId === expectedMachineId, `Expected machineId ${expectedMachineId}, found ${match.parsed.machineId}.`);
@@ -164,6 +169,17 @@ const run = async () => {
   assert(Array.isArray(bom.parsed.items) && bom.parsed.items.length >= 1, 'BOM should include at least one item.');
   assert(bom.parsed.totalEstimatedCost, 'BOM should include totalEstimatedCost.');
   assert(!/NaN/i.test(String(bom.parsed.totalEstimatedCost)), `BOM totalEstimatedCost must be numeric, found ${bom.parsed.totalEstimatedCost}.`);
+
+  let scene = null;
+  if (match.parsed.hasDatabase3DRender || process.env.CONNECTOR_SMOKE_EXPECT_DATABASE_3D_RENDER === 'true') {
+    scene = await postJson(`${apiBase}/api/gemini/generate-3d`, {
+      innovation: match.parsed,
+    });
+    assert(scene.response.ok, `/api/gemini/generate-3d failed with ${scene.response.status}: ${JSON.stringify(scene.parsed)}`);
+    assert(scene.parsed.hasDatabase3DRender === true, '3D endpoint should return database 3D render proof when source metadata exists.');
+    assert(scene.parsed.usedAiVisualFallback === false, '3D endpoint should not use AI visual fallback when source metadata exists.');
+    assert(scene.parsed.sourceRender?.viewerUrl || scene.parsed.sourceRender?.renderUrl || scene.parsed.sourceRender?.cadModelUrl, '3D endpoint should include provider render/viewer/CAD metadata.');
+  }
 
   const evidence = {
     schemaVersion: 1,
@@ -193,10 +209,22 @@ const run = async () => {
       assemblyStepCount: Array.isArray(match.parsed.assemblySteps) ? match.parsed.assemblySteps.length : 0,
       fulfillmentOptionCount: Array.isArray(match.parsed.fulfillmentOptions) ? match.parsed.fulfillmentOptions.length : 0,
       totalEstimate: match.parsed.pricing?.totalEstimate || '',
+      hasDatabase3DRender: Boolean(match.parsed.hasDatabase3DRender),
+      usedAiVisualFallback: Boolean(match.parsed.usedAiVisualFallback),
+      visualEvidenceSource: match.parsed.visualEvidenceSource || '',
     },
     bom: {
       itemCount: bom.parsed.items.length,
       totalEstimatedCost: bom.parsed.totalEstimatedCost,
+    },
+    sourceBacked3D: scene ? {
+      status: 'verified',
+      renderProvider: scene.parsed.sourceRender?.renderProvider || '',
+      visualEvidenceSource: scene.parsed.visualEvidenceSource || '',
+      hasViewerOrCadLink: Boolean(scene.parsed.sourceRender?.viewerUrl || scene.parsed.sourceRender?.renderUrl || scene.parsed.sourceRender?.cadModelUrl),
+    } : {
+      status: 'not_applicable',
+      reason: 'Matched source did not report database 3D render metadata.',
     },
     safety: {
       rawSecretsIncluded: false,

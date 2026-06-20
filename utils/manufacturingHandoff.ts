@@ -379,7 +379,7 @@ export const buildManufacturingHandoff = ({
       requiredFiles: ['CAD draft source or KCL/CadQuery script', 'STEP assembly', 'native CAD or Parasolid export', 'PDF detail drawings', 'BOM CSV', 'material treatment notes', 'inspection plan', 'quote packet JSON'],
       availableReferences: [
         has2D ? `2D views: ${angleLabels.length ? angleLabels.join(', ') : 'single generated view'}` : '2D views pending',
-        scene ? `3D scene descriptor with ${scene.objects.length} visual-reference objects` : '3D scene pending',
+        scene?.sourceRender ? `Source-backed 3D render: ${scene.sourceRender.renderProvider || scene.sourceRender.sourceProvider || 'provider catalog'}${scene.sourceRender.cadFormats?.length ? ` (${scene.sourceRender.cadFormats.join(', ')})` : ''}` : scene ? `3D scene descriptor with ${scene.objects.length} visual-reference objects` : '3D scene pending',
         bom ? `BOM v${bom.version} with ${bom.items.length} line items` : 'BOM pending',
         `AI CAD gate: ${aiCadGate.status}`,
       ],

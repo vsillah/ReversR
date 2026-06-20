@@ -259,6 +259,10 @@ export default function PhaseThree({
   const activeImageSource = currentAngleImage?.imageSource || innovation.referenceImages?.[0] || null;
   const activeImageSourceType = activeImageSource?.sourceType || activeImageSource?.kind || '';
   const isAiFallbackImage = activeImageSourceType === 'ai_generated_fallback' || activeImageSourceType === 'mock-tour-ai-fallback';
+  const database3DRenderUrl = innovation.viewerUrl || innovation.renderUrl || innovation.cadModelUrl || '';
+  const database3DProvider = innovation.renderProvider || innovation.sourceProvider || 'approved database';
+  const sourceRender = threeDScene?.sourceRender || null;
+  const sourceRenderUrl = sourceRender?.viewerUrl || sourceRender?.renderUrl || sourceRender?.cadModelUrl || '';
 
   const rawDisplayImageUri = useMemo(() => {
     return normalizeImageUri(currentAngleImage?.imageData) || derivedImageUri;
@@ -543,7 +547,16 @@ export default function PhaseThree({
       setThreeDScene(scene);
       setStatus('complete');
       onComplete(spec, scene, derivedImageUri);
-      setAlert({visible: true, title: '3D Scene Generated', message: `Created ${scene.objects.length} objects. Export to view in desktop apps.`, type: 'success'});
+      if (scene.hasDatabase3DRender || scene.sourceRender) {
+        setAlert({
+          visible: true,
+          title: 'Source-backed 3D render',
+          message: `Loaded ${scene.sourceRender?.renderProvider || database3DProvider} 3D evidence from the inventory source. No AI 3D scene was generated.`,
+          type: 'success',
+        });
+      } else {
+        setAlert({visible: true, title: '3D Scene Generated', message: `Created ${scene.objects.length} objects. Export to view in desktop apps.`, type: 'success'});
+      }
     } catch (err: unknown) {
       console.error('Error generating 3D:', err);
       applyRequestError(err);
@@ -958,15 +971,54 @@ export default function PhaseThree({
           ) : (
             threeDScene ? (
               <View style={styles.scene3dContainer}>
+                {sourceRender ? (
+                  <>
+                    <View style={styles.sourceRenderPanel}>
+                      <View style={styles.sourceRenderHeader}>
+                        <Ionicons name="cube" size={28} color={Colors.black} />
+                        <View style={styles.sourceRenderTextBlock}>
+                          <Text style={styles.sourceRenderTitle}>Source-backed 3D render</Text>
+                          <Text style={styles.sourceRenderMeta}>
+                            {sourceRender.renderProvider || database3DProvider}
+                            {sourceRender.sourceRecordId ? ` | ${sourceRender.sourceRecordId}` : ''}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.sourceRenderDesc}>
+                        ReversR used database CAD/viewer metadata from the matched inventory record instead of generating an AI 3D scene.
+                      </Text>
+                      {sourceRender.cadFormats?.length ? (
+                        <Text style={styles.sourceRenderMeta}>Formats: {sourceRender.cadFormats.join(', ')}</Text>
+                      ) : null}
+                      {sourceRender.licenseNote ? (
+                        <Text style={styles.sourceRenderLicense}>{sourceRender.licenseNote}</Text>
+                      ) : null}
+                      {sourceRenderUrl ? (
+                        <TouchableOpacity
+                          style={styles.sourceRenderButton}
+                          onPress={() => Linking.openURL(sourceRenderUrl)}
+                          accessibilityRole="link"
+                          accessibilityLabel="Open source-backed 3D render"
+                        >
+                          <Ionicons name="open-outline" size={16} color={Colors.black} />
+                          <Text style={styles.sourceRenderButtonText}>Open Provider 3D View</Text>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  </>
+                ) : null}
                 <View style={styles.scene3dHeader}>
                   <Ionicons name="cube" size={32} color={Colors.accent} />
                   <View style={styles.scene3dHeaderText}>
-                    <Text style={styles.scene3dTitle}>3D Scene Generated</Text>
-                    <Text style={styles.scene3dSubtitle}>{threeDScene.objects.length} objects ready for export</Text>
+                    <Text style={styles.scene3dTitle}>{sourceRender ? 'Provider 3D Evidence Ready' : '3D Scene Generated'}</Text>
+                    <Text style={styles.scene3dSubtitle}>
+                      {sourceRender ? 'Database render/viewer metadata is ready for review' : `${threeDScene.objects.length} objects ready for export`}
+                    </Text>
                   </View>
                 </View>
 
-                <View style={styles.exportSection}>
+                {!sourceRender && (
+                  <View style={styles.exportSection}>
                   <Text style={styles.exportSectionTitle}>Export Format</Text>
                   <View style={styles.exportButtons}>
                     <TouchableOpacity
@@ -984,11 +1036,16 @@ export default function PhaseThree({
                       <Text style={styles.exportButtonText}>.STL</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
+                  </View>
+                )}
 
                 <View style={styles.viewerSection}>
-                  <Text style={styles.viewerTitle}>View Your 3D Model</Text>
-                  <Text style={styles.viewerDesc}>Open the exported file in any of these apps:</Text>
+                  <Text style={styles.viewerTitle}>{sourceRender ? 'Visual Provenance' : 'View Your 3D Model'}</Text>
+                  <Text style={styles.viewerDesc}>
+                    {sourceRender
+                      ? 'This visual came from the approved database record. AI remains a fallback only when no provider render exists.'
+                      : 'Open the exported file in any of these apps:'}
+                  </Text>
                   <View style={styles.viewerList}>
                     <View style={styles.viewerItem}>
                       <Ionicons name="desktop-outline" size={14} color={Colors.blue[500]} />
@@ -1014,27 +1071,31 @@ export default function PhaseThree({
                   onPress={handleGenerate3D}
                   disabled={mockMode}
                   accessibilityRole="button"
-                  accessibilityLabel={mockMode ? 'Mock 3D scene is preloaded' : 'Regenerate 3D wireframe'}
+                  accessibilityLabel={mockMode ? 'Mock 3D scene is preloaded' : sourceRender ? 'Reload source-backed 3D render' : 'Regenerate 3D wireframe'}
                   accessibilityState={{ disabled: mockMode }}
                 >
                   <Ionicons name="refresh" size={14} color={Colors.gray[400]} />
-                  <Text style={styles.regenerateText}>{mockMode ? 'Mock scene preloaded' : 'Regenerate'}</Text>
+                  <Text style={styles.regenerateText}>{mockMode ? 'Mock scene preloaded' : sourceRender ? 'Reload source render' : 'Regenerate'}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.generatePrompt}>
                 <Ionicons name="cube-outline" size={48} color={Colors.gray[600]} />
-                <Text style={styles.generatePromptTitle}>Generate 3D wireframe</Text>
+                <Text style={styles.generatePromptTitle}>
+                  {database3DRenderUrl ? 'Use source-backed 3D render' : 'Generate 3D wireframe'}
+                </Text>
                 <Text style={styles.generatePromptDesc}>
-                  Exportable 3D scene description for CAD software
+                  {database3DRenderUrl
+                    ? `Load provider-hosted 3D/CAD evidence from ${database3DProvider}.`
+                    : 'Exportable 3D scene description for CAD software'}
                 </Text>
                 <TouchableOpacity
                   style={styles.generateButton}
                   onPress={handleGenerate3D}
                   accessibilityRole="button"
-                  accessibilityLabel="Generate 3D wireframe"
+                  accessibilityLabel={database3DRenderUrl ? 'Use source-backed 3D render' : 'Generate 3D wireframe'}
                 >
-                  <Text style={styles.generateButtonText}>Generate 3D</Text>
+                  <Text style={styles.generateButtonText}>{database3DRenderUrl ? 'Use Source 3D' : 'Generate 3D'}</Text>
                 </TouchableOpacity>
               </View>
             )
@@ -1770,6 +1831,60 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   },
   scene3dContainer: {
     padding: Spacing.md,
+  },
+  sourceRenderPanel: {
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: Radii.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    backgroundColor: Colors.accent,
+    gap: Spacing.sm,
+  },
+  sourceRenderHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  sourceRenderTextBlock: {
+    flex: 1,
+  },
+  sourceRenderTitle: {
+    color: Colors.black,
+    fontSize: FontSizes.md,
+    fontWeight: '800',
+  },
+  sourceRenderMeta: {
+    color: Colors.black,
+    fontSize: FontSizes.xs,
+    opacity: 0.82,
+  },
+  sourceRenderDesc: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    lineHeight: 19,
+  },
+  sourceRenderLicense: {
+    color: Colors.black,
+    fontSize: FontSizes.xs,
+    lineHeight: 17,
+    opacity: 0.75,
+  },
+  sourceRenderButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    borderWidth: 1,
+    borderColor: Colors.black,
+    borderRadius: Radii.sm,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  sourceRenderButtonText: {
+    color: Colors.black,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
   },
   scene3dHeader: {
     flexDirection: 'row',

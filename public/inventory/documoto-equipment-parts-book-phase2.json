@@ -1,0 +1,86 @@
+{
+  "sourceName": "Documoto Equipment Parts Book Phase 2 Pilot",
+  "sourceProvider": "Documoto",
+  "sourceLinks": {
+    "provider": "https://www.documoto.com/",
+    "partsCatalogs": "https://www.documoto.com/create-digital-parts-catalogs"
+  },
+  "machines": [
+    {
+      "machineId": "DOCUMOTO-PACKAGING-CONVEYOR-PARTS-BOOK",
+      "machineName": "Documoto Packaging Conveyor Parts Book",
+      "revision": "phase2-pilot-2026-06",
+      "aliases": ["packaging conveyor", "service parts book", "equipment parts catalog", "conveyor rebuild"],
+      "parts": ["Drive roller", "Idler roller", "Belt section", "Gearmotor", "Guard panel", "Photoelectric sensor", "Control enclosure", "Fastener kit"],
+      "materials": ["powder coated steel", "urethane belt", "stainless fasteners", "polycarbonate guard"],
+      "sourceProvider": "Documoto",
+      "sourceRecordId": "documoto-phase2-conveyor-parts-book",
+      "manufacturer": "Documoto customer equipment reference",
+      "manufacturerPartNumber": "DOC-PILOT-CONV-001",
+      "renderProvider": "Documoto",
+      "viewerUrl": "https://www.documoto.com/",
+      "cadFormats": ["provider parts-book view", "exploded diagram reference"],
+      "renderKind": "provider-hosted-parts-book-viewer",
+      "renderProvenance": "Documoto equipment parts-book viewer reference for phase 2 validation.",
+      "licenseNote": "Phase 2 pilot stores provider links and metadata only. Confirm Documoto account/export terms before caching diagrams, parts books, or customer equipment data.",
+      "lastSyncedAt": "2026-06-20T00:00:00Z",
+      "assemblySteps": [
+        {
+          "stepNumber": 1,
+          "title": "Confirm equipment parts book",
+          "instructions": "Verify model, serial range, revision, and parts-book source before BOM generation.",
+          "parts": ["Drive roller", "Idler roller", "Belt section"],
+          "estimatedTime": "25 min",
+          "qualityCheck": "Equipment identity and parts-book revision are recorded."
+        },
+        {
+          "stepNumber": 2,
+          "title": "Map exploded-view assemblies",
+          "instructions": "Use the provider parts-book view to group rollers, belt, guarding, drive, sensing, and enclosure items into build-sheet steps.",
+          "parts": ["Gearmotor", "Guard panel", "Photoelectric sensor", "Control enclosure"],
+          "estimatedTime": "1 hr",
+          "qualityCheck": "Build sheet reflects whole-machine assemblies, not isolated component guesses."
+        },
+        {
+          "stepNumber": 3,
+          "title": "Queue service documentation review",
+          "instructions": "Carry Documoto source links, serial applicability, and reviewer notes into the quote packet for admin/vendor review.",
+          "parts": ["Fastener kit", "Belt section", "Control enclosure"],
+          "estimatedTime": "30 min",
+          "qualityCheck": "Reviewer can trace each BOM line back to the provider parts-book reference."
+        }
+      ],
+      "pricing": {
+        "partsSubtotal": "$900-$3,400",
+        "modelingEstimate": "$0-$900",
+        "fabricationEstimate": "$700-$2,800",
+        "assemblyLaborEstimate": "$500-$1,500",
+        "totalEstimate": "$2,100-$8,600",
+        "confidence": "medium"
+      },
+      "modelingVendors": [
+        {
+          "vendorName": "Xometry",
+          "serviceType": "equipment rebuild quote and fabrication review",
+          "url": "https://www.xometry.com",
+          "packageRequired": ["BOM CSV", "parts-book viewer links", "assembly notes", "serial applicability notes"]
+        }
+      ],
+      "sourceLinks": {
+        "provider": "https://www.documoto.com/",
+        "partsCatalogs": "https://www.documoto.com/create-digital-parts-catalogs"
+      },
+      "referenceImages": [
+        {
+          "id": "documoto-parts-book-provider-reference",
+          "label": "Documoto parts-book provider reference",
+          "url": "https://www.documoto.com/",
+          "sourceUrl": "https://www.documoto.com/create-digital-parts-catalogs",
+          "kind": "provider-parts-book-reference",
+          "licenseNote": "Use as linked provenance only until parts-book diagram reuse rights are confirmed."
+        }
+      ],
+      "notes": "Phase 2 fixture for proving ReversR can map whole-equipment parts books into BOM and build-sheet records after TraceParts and CADENAS."
+    }
+  ]
+}
