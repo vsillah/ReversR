@@ -19,6 +19,7 @@ import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
 import ReversRLogoMark from "../components/ReversRLogoMark";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
+import WelcomeIntroScreen from "../components/WelcomeIntroScreen";
 import PhaseOne from "../components/PhaseOne";
 import PhaseTwo from "../components/PhaseTwo";
 import PhaseThree from "../components/PhaseThree";
@@ -512,6 +513,7 @@ export default function HomeScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const styles = createStyles(Colors);
   const [started, setStarted] = useState(false);
+  const [welcomeIntroVisible, setWelcomeIntroVisible] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [context, setContext] = useState<MutationContext>(createEmptyContext());
@@ -1384,6 +1386,10 @@ export default function HomeScreen() {
     setStarted(false);
   }, []);
 
+  const enterHome = useCallback(() => {
+    setWelcomeIntroVisible(false);
+  }, []);
+
   const tabBarInset = safeAreaInsets.bottom + 84;
 
   const renderTourGuide = () => (
@@ -1409,6 +1415,14 @@ export default function HomeScreen() {
     />
   );
   const contentBottomPadding = tabBarInset + Spacing.md;
+
+  if (welcomeIntroVisible) {
+    return (
+      <View style={styles.container}>
+        <WelcomeIntroScreen onEnter={enterHome} />
+      </View>
+    );
+  }
 
   if (!started) {
     return (
