@@ -18,6 +18,7 @@ const checks = [
   ['components/PhaseOne.tsx', 'Sample machine'],
   ['components/PhaseOne.tsx', 'Sample'],
   ['components/PhaseOne.tsx', 'Point at a machine, model plate, or visible assembly'],
+  ['components/SettingsModal.tsx', 'Choose known source'],
   ['components/SettingsModal.tsx', 'Inventory source name'],
   ['components/SettingsModal.tsx', 'Inventory connector URL'],
   ['components/SettingsModal.tsx', 'Inventory backend credential reference'],

@@ -24,6 +24,8 @@ Private-network connectors remain disabled unless the API host is explicitly con
 
 The prototype Settings screen includes an admin credential registry panel. It lets an admin enter the API admin token for the current session, list redacted backend credential references, save an API-key/OAuth credential reference, and delete registry-file references. Raw credential values are sent to the backend only for the save request and are not persisted by the app.
 
+The Inventory settings editor includes a known-source dropdown for fast setup. Selecting FarmBot, TraceParts, CADENAS, or Documoto fills the connector, authentication, URI, credential reference, and admin notes fields. The last dropdown item is `Add New +`; selecting it clears the form into a custom source entry flow for a new CSV, JSON, API, or ERP connector.
+
 ## CSV Columns
 
 Required:
