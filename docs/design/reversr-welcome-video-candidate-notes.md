@@ -39,6 +39,7 @@ Status: packaged into the app welcome flow for branch review.
 - Higgsfield generated the source at `716x1284`, below the preferred production resolution.
 - The packaging script normalized the app asset to `1080x1920`, H.264, yuv420p, no audio.
 - The caliper geometry is recognizable but should still be judged by human review before treating this as final brand creative.
+- The current candidate does not clearly show the left structural half and right structural half torquing together; the center tool spins, but the hero closure beat is still missing.
 - Veo 3.1 was the preferred model but required a Pro/Ultimate Higgsfield plan on this account.
 - The final push-in is present but restrained; the material transformation is stronger than the camera move.
 

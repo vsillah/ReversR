@@ -20,11 +20,11 @@ Do not use `assets/logo-transparent.png` for welcome-video generation until a ne
 
 - Mode: image-to-video.
 - Source references: R1 or R2 as the visual seed, R5 as the logo identity reference.
-- Camera: slow dolly-in, subtle orbit no more than 25-30 degrees, optional macro rack focus.
+- First pass camera: mostly locked frontal three-quarter product view with a very slow push-in only.
 - Duration: 7-8 seconds.
 - Aspect: 9:16.
 - No audio.
-- Generate variants by changing one variable at a time: camera move, lighting, machine framing, or knob timing.
+- First retry strategy: change one variable at a time only after the closure beat works. Do not spend credits on macro inserts, orbit, or extra assembly beats before the left/right closure is visible.
 
 Recommended model:
 
@@ -42,48 +42,62 @@ Avoid:
 Use for Variant A.
 
 ```text
-A 7-second cinematic vertical 9:16 product reveal set inside a dark premium precision machine shop. Brushed steel surfaces, soft overhead key light, low teal rim light, no people.
+8-second vertical 9:16 cinematic product shot in a premium precision machine shop. Photoreal brushed steel, dark fixture bed, CNC tooling, no people, no text.
 
-On a polished steel platen at center frame, standard manufacturing machines assemble a single brushed-steel caliper-shaped R mark from separate machined parts. Two caliper jaws slide in from the sides. A diagonal machined leg locks between them. A central hex bolt drops vertically and seats with a quiet mechanical click. A knurled steel calibration knob at the center of the caliper then rotates one quarter turn, closing the jaws to their final spacing and locking the mark's geometry.
+Show the approved ReversR metal logo as two separate machined structural halves on a clamp fixture:
+1. a left caliper-jaw half,
+2. a right rounded R-body half.
+At the start, there is a clear physical gap between the left half and the right half. They are not touching. The center knob is visible but the logo is not yet locked.
 
-The instant the knob completes its turn, a thin teal-blue accent ring and the diagonal slot ignite with controlled luminescent light, pulse once softly, and hold steady. Final 3 seconds: camera settles dead-center on the finished brushed-steel caliper-R mark, lower 40 percent of frame intentionally empty and low-contrast for native app UI overlay.
+Main action:
+A torque driver engages the center knob. As the knob turns, the mechanism visibly pulls the left half inward and seats the right half into final alignment. The viewer must clearly see the two halves move together and mechanically close the gap. This closure is the hero moment. The knob rotation causes the closure. The halves lock flush into one finished ReversR mark.
 
-Camera: slow 25-degree lateral orbit combined with a gentle dolly-in, finishing locked center. Cinematic macro detail on the bolt seat and knob knurl. Shallow depth of field on machine parts, sharp on the logo at the end.
+Only after the halves fully close and lock:
+the brushed steel finish brightens from matte dark machined metal to polished brushed metal,
+then the teal accent appears inside the center ring and diagonal slot,
+then the teal gives one restrained glow pulse and holds steady.
 
-Style: premium precision engineering, realistic brushed metal, controlled teal-blue accent only, deep blacks, no neon, no sparks, no smoke, modern mobile app intro, photoreal.
+Camera:
+mostly locked frontal three-quarter product view, very slow push-in only, no orbit that hides the closure, no cutaways, no macro insert, no second angle.
+
+Composition:
+logo centered, fixture visible, premium machine context in soft focus behind, lower 35 to 40 percent of frame kept clean and dark for app UI overlay during the final hold.
+
+Style:
+real factory cinematography, premium industrial commercial, believable machining hardware, controlled reflections, shallow depth of field, crisp metal edges.
 ```
 
 ## Shot Variants
 
 ### Variant A: Precision Assembly
 
-Best first pass.
+Best first pass. This is the only recommended next credit burn until the closure beat works.
 
-- Seed: R1 end-frame.
-- Camera: subtle lateral orbit plus slow dolly-in.
-- 0.0-1.5s: factory environment establishes, parts staged on precision platen.
-- 1.5-3.0s: jaws slide in, diagonal leg locks, bolt drops and seats.
-- 3.0-4.0s: center knob rotates one quarter turn, caliper jaws close to final spacing, teal accent ignites.
-- 4.0-7.0s: camera settles centered, glow pulses once, hold.
+- Seed: R1 end-frame plus R5 identity reference.
+- Camera: locked or nearly locked product shot, very slow push-in only.
+- 0.0-1.5s: factory environment establishes, left half and right half are visibly separate with a clear gap.
+- 1.5-4.0s: torque driver engages the center knob; the left half travels inward and the right half seats into place; the gap visibly shrinks to zero.
+- 4.0-5.2s: the halves lock flush; brushed metal brightens from matte dark to polished steel.
+- 5.2-7.0s: teal appears only after closure, pulses once softly, then holds.
 
 ### Variant B: Center Knob Calibration
 
-Most premium if the knob action lands.
+Use only if Variant A already shows a correct visible left/right closure.
 
 - Seed: R2 mid-assembly plus R4 knob macro.
-- Camera: locked macro on knob, then rack-focus pull to finished logo.
-- 0.0-2.0s: macro on knurled knob as the machine head approaches.
-- 2.0-4.0s: torque driver rotates knob, jaws complete closure, glow ignites.
-- 4.0-7.0s: held wide on finished logo.
+- Camera: slightly tighter framing on the knob and gap, but still wide enough to clearly show both logo halves closing.
+- 0.0-2.0s: machine head approaches; clear gap remains visible.
+- 2.0-4.0s: torque driver rotates knob; the two halves close and lock flush.
+- 4.0-7.0s: polished metal, then teal ignition, then final hold.
 
 ### Variant C: Conveyor Reveal
 
-Most factory-forward, highest drift risk.
+Defer. Highest drift risk and not recommended until the core closure action is solved.
 
 - Seed: R3 establishing still plus R1 end-frame.
-- Camera: slow dolly down conveyor/assembly line.
-- 0.0-2.5s: parts travel toward assembly station.
-- 2.5-4.2s: press seats parts, jaws clamp, knob turns, logo resolves.
+- Camera: minimal travel only if the closure action remains obvious.
+- 0.0-2.5s: parts stage on the line.
+- 2.5-4.2s: left half and right half close through center-knob torque.
 - 4.2-7.0s: hold centered.
 
 ## Negative Prompt
@@ -91,7 +105,7 @@ Most factory-forward, highest drift risk.
 Paste this into the negative field.
 
 ```text
-text, letters, captions, subtitles, watermark, logo text, brand name, typography, fake UI, buttons, menus, status bar, phone mockup, human, hand, finger, face, body, robot arm as the only machine, sci-fi, holograms, neon signs, glitch, lens flare overload, sparks, flames, smoke, dust storm, debris, gears, cogs, clockwork, steampunk, warped letters, distorted logo, multiple logos, alternate logo, deformed parts, cluttered factory, messy workshop, oil stains, rust, grime, cartoon, illustration, low-poly, plastic look, chromatic aberration, heavy film grain, vignette, blur on final logo
+text, letters, captions, subtitles, watermark, logo text, brand name, typography, fake UI, buttons, menus, status bar, phone mockup, human, hand, finger, face, body, robot arm as the only machine, sci-fi, holograms, neon signs, glitch, lens flare overload, sparks, flames, smoke, dust storm, debris, gears, cogs, clockwork, steampunk, warped letters, distorted logo, multiple logos, alternate logo, deformed parts, cluttered factory, messy workshop, oil stains, rust, grime, cartoon, illustration, low-poly, plastic look, chromatic aberration, heavy film grain, vignette, blur on final logo, abstract assembly, floating parts, shape morphing, generic circular monogram, invented logo geometry, early teal glow, hidden closure, cutaway to another angle before the two halves lock
 ```
 
 ## Output Specs
@@ -112,10 +126,13 @@ Reject the candidate if any item fails.
 
 - Logo identity matches the approved hero/reference still package used for the run.
 - No invented R shape, alternate mark, or second logo.
+- At 0.5s, the left half and right half are clearly readable as separate structural bodies.
+- By 3.0-4.0s, the gap between the two halves visibly shrinks because of center-knob torque.
 - Assembly resolves to a stable logo by 4.0s.
 - Logo holds clean and motion-stable from 4.5s to 7.0s.
 - Center knob visibly spins or is visibly turned by a machine.
 - Caliper jaws visibly adjust or lock.
+- The two halves visibly seat flush into one structure before teal appears.
 - Factory background reads premium and minimal, not cluttered or unsafe.
 - No generated text, subtitles, fake UI, watermark, or human body parts.
 - Teal accent is a thin controlled glow, not broad neon decoration.

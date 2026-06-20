@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create a premium 9:16 welcome video for ReversR that plays before the Home screen. The video should feel like a real factory production shot: standard manufacturing machines assemble the ReversR caliper-R logo, then the center knob spins to adjust the caliper before the final brand lockup appears in native app UI.
+Create a premium 9:16 welcome video for ReversR that plays before the Home screen. The video should feel like a real factory production shot: standard manufacturing machines visibly torque the left and right structural halves of the ReversR caliper-R logo together, then the center knob locks the mark before the final brand lockup appears in native app UI.
 
 The current committed MP4 is the approved metal-to-teal welcome candidate for app review. It proves playback, timing, bundling, and fallback behavior in the app while preserving the selected factory composition.
 
@@ -65,11 +65,12 @@ Use these as the source package before generating video:
 4. In Higgsfield, use image-to-video first. Avoid text-only video generation.
 5. Use Cinema Studio if available.
 6. Set output to vertical 9:16, no audio, 7-8 seconds.
-7. Generate three variants:
-   - **A: Precision Assembly**: robotic arms and CNC head assemble logo parts.
-   - **B: Center Knob Calibration**: logo is mostly assembled; torque driver spins the center knob and caliper jaws adjust.
-   - **C: Quiet Premium Macro**: minimal camera movement, close-up machining detail, controlled teal glow.
-8. Claude selects the strongest candidate or requests another Higgsfield iteration.
+7. First run one constrained variant only:
+   - locked or nearly locked camera
+   - visible left half and right half with a clear starting gap
+   - center-knob torque visibly closes that gap
+   - teal appears only after closure
+8. Claude rejects the candidate immediately if the first 4 seconds do not show the two halves and their visible closure. Only then should secondary variants be explored.
 9. Codex performs technical QA against the acceptance criteria before bringing the candidate to human review.
 10. Export the final MP4, an inert opening poster frame for the pre-play state, and a final-hold still for review.
 11. Replace `assets/welcome/reversr-welcome-intro.mp4` and `assets/welcome/reversr-welcome-poster.png`.
@@ -103,11 +104,11 @@ Avoid:
 
 ## Timeline
 
-- **0.0-1.0s:** Establish a dark precision factory bay. Logo parts sit in a fixture on a brushed steel workbench. Native title/tagline are not visible yet.
-- **1.0-2.8s:** CNC head, gantry rail, and robotic arm move parts into place. Caliper jaws align. Motion is smooth and mechanical.
-- **2.8-4.4s:** A torque driver or spindle lowers to the center. The center knob spins, tightening and calibrating the caliper. The jaws subtly adjust.
-- **4.4-5.7s:** The completed logo locks into position. Blue-teal center ring and diagonal slot glow once with controlled luminescence.
-- **5.7-7.5s:** Camera settles into the final hold. Native app title, subtitle, tagline, and CTA fade in over the video.
+- **0.0-1.0s:** Establish a dark precision factory bay. The left caliper-jaw half and the right rounded R-body half sit in a fixture with a clear visible gap between them. Native title/tagline are not visible yet.
+- **1.0-4.0s:** A torque driver engages the center knob. The viewer must clearly see the left half move inward and the right half seat into final alignment. The gap visibly closes to zero because of the knob torque.
+- **4.0-5.2s:** The completed logo locks flush into position. The metal brightens from matte dark machined steel to polished brushed steel.
+- **5.2-6.2s:** Blue-teal center ring and diagonal slot appear only after closure and pulse once with controlled luminescence.
+- **6.2-7.5s:** Camera settles into the final hold. Native app title, subtitle, tagline, and CTA fade in over the video.
 
 ## Acceptance Criteria
 
@@ -115,9 +116,12 @@ The output is usable only if:
 
 - It looks like a real premium manufacturing scene, not a vector animation or generic tech background.
 - Standard manufacturing machines are visible and purposeful: CNC head, lathe spindle, torque driver, robotic arm, clamp fixture, or gantry rail.
+- At the start, the left half and right half of the logo are visibly separate with a clear gap.
 - The center knob visibly spins to adjust or lock the caliper.
+- The knob torque visibly causes the two halves to move together and close the gap.
 - The ReversR logo remains recognizable as the approved brushed-steel caliper-R used in the selected metal-to-teal candidate.
 - Caliper jaws, center knob, and teal accents are readable on mobile.
+- The two halves seat flush before teal appears.
 - The blue-teal glow is controlled and material-aware, not neon decoration.
 - No generated text, fake UI, labels, subtitles, or watermark appear.
 - The native title/tagline only appear after the logo is assembled.
