@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-21T10:42:11Z",
+  "generatedAt": "2026-06-21T15:31:00Z",
   "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 48 and iOS TestFlight build 24.",
   "sourceCommit": "ec305e19e393448be3e2d322ac9bf5779f0b03a0",
   "otaUpdate": {
@@ -11,6 +11,32 @@
     "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/2c29cd56-f9fd-4de5-bea7-018d03e45594",
     "message": "Disable welcome intro on launch"
   },
+  "appliedOtaUpdates": [
+    {
+      "channel": "production",
+      "runtimeVersion": "1.0.1",
+      "groupId": "2c29cd56-f9fd-4de5-bea7-018d03e45594",
+      "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/2c29cd56-f9fd-4de5-bea7-018d03e45594",
+      "message": "Disable welcome intro on launch",
+      "commit": "ec305e19e393448be3e2d322ac9bf5779f0b03a0"
+    },
+    {
+      "channel": "production",
+      "runtimeVersion": "1.0.1",
+      "groupId": "b87d378d-6daf-47d5-9fc1-72c62403f6ea",
+      "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/b87d378d-6daf-47d5-9fc1-72c62403f6ea",
+      "message": "Update inventory matching and visual fallback provenance",
+      "commit": "56b99c310e2ed67c74113e7c5285360f5593ff90"
+    },
+    {
+      "channel": "production",
+      "runtimeVersion": "1.0.1",
+      "groupId": "70138ac7-dbce-4c2f-a0e4-95019e8aa560",
+      "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/70138ac7-dbce-4c2f-a0e4-95019e8aa560",
+      "message": "Add source-backed 2D provider readiness",
+      "commit": "0cb2f685c30d37c3cb430fa9542b4c4fb99a8435"
+    }
+  ],
   "builds": {
     "android": {
       "id": "f984e29b-2da6-4008-a85c-72d30d8d8c56",
@@ -69,6 +95,8 @@
     "git diff --check",
     "Playwright web smoke on localhost:5004: welcome intro count 0, home content visible",
     "npx eas-cli update --branch production --environment production --message \"Disable welcome intro on launch\" --non-interactive",
+    "npx eas-cli update --branch production --environment production --message \"Update inventory matching and visual fallback provenance\" --non-interactive",
+    "npx eas-cli update --branch production --environment production --message \"Add source-backed 2D provider readiness\" --non-interactive",
     "npx eas-cli build --platform all --profile production --non-interactive --no-wait",
     "npx eas-cli submit --platform android --profile production --id f984e29b-2da6-4008-a85c-72d30d8d8c56 --non-interactive",
     "xcrun altool --upload-app -f /tmp/reversr-builds/reversr-ios-24.ipa --apiKey FZ4LLB2243 --apiIssuer d4e5bef0-4168-4aad-b41e-fcd8079e9bfc --p8-file-path /Users/vambahsillah/.config/reversr/eas-submit/AuthKey_FZ4LLB2243.p8 --output-format json",
