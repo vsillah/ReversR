@@ -36,6 +36,7 @@ type MatchCandidate = NonNullable<InventoryValidationResult['matchCandidates']>[
 
 interface Props {
   analysis: AnalysisResult;
+  scanInput?: string;
   capturedImage?: string | null;
   onComplete: (innovation: InnovationResult) => void;
   isLoading: boolean;
@@ -52,6 +53,7 @@ const percentLabel = (value: number) => `${Math.round(value)}% match`;
 
 export default function PhaseTwo({
   analysis,
+  scanInput,
   capturedImage,
   onComplete,
   isLoading,
@@ -101,7 +103,7 @@ export default function PhaseTwo({
       try {
         const nextConnector = await loadInventoryConnector();
         setConnector(nextConnector);
-        const result = await validateInventoryConnector(nextConnector, analysis);
+        const result = await validateInventoryConnector(nextConnector, analysis, scanInput);
         setValidation(result);
         setSelectedMachineId(result.matchCandidates?.[0]?.machineId || null);
         setExpandedMachineIds(new Set());
@@ -116,7 +118,7 @@ export default function PhaseTwo({
     };
 
     loadAndValidate();
-  }, [analysis, mockMode, mockValidation]);
+  }, [analysis, scanInput, mockMode, mockValidation]);
 
   useEffect(() => {
     if (isLoading) {
@@ -145,7 +147,7 @@ export default function PhaseTwo({
       const nextConnector = await loadInventoryConnector();
       setConnector(nextConnector);
       await saveInventoryConnector(nextConnector);
-      const result = await validateInventoryConnector(nextConnector, analysis);
+      const result = await validateInventoryConnector(nextConnector, analysis, scanInput);
       setValidation(result);
       setSelectedMachineId(result.matchCandidates?.[0]?.machineId || null);
       setExpandedMachineIds(new Set());
@@ -176,7 +178,7 @@ export default function PhaseTwo({
       }
 
       await saveInventoryConnector(connector);
-      const result = await identifyMachineFromInventory(analysis, connector, capturedImage, selectedMachineId);
+      const result = await identifyMachineFromInventory(analysis, connector, capturedImage, selectedMachineId, scanInput);
       onComplete(result);
     } catch (e: any) {
       console.error('Inventory match failed:', e);

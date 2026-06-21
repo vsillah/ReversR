@@ -40,6 +40,7 @@
     "inventory:farmbot:validate": "npm run inventory:farmbot:generate && npm run inventory:source:validate -- public/inventory/farmbot-genesis-v1.8.json",
     "inventory:source:validate": "node scripts/validate-machine-inventory.js",
     "inventory:professional:validate": "npm run inventory:source:validate -- public/inventory/traceparts-industrial-components.json && npm run inventory:source:validate -- public/inventory/cadenas-industrial-components.json && npm run inventory:source:validate -- public/inventory/documoto-equipment-parts-book-phase2.json",
+    "inventory:professional:match-smoke": "node scripts/professional-inventory-match-smoke.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
     "cadquery:proof": "node scripts/generate-cadquery-proof.js",
     "cad:qualification:smoke": "node scripts/cad-qualification-export-smoke.js",

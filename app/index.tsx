@@ -1648,6 +1648,7 @@ export default function HomeScreen() {
         {context.phase === 2 && context.analysis && (
           <PhaseTwo
             analysis={context.analysis}
+            scanInput={context.input}
             capturedImage={context.capturedImage}
             onComplete={handlePhaseTwoComplete}
             isLoading={isLoading}

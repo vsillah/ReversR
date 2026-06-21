@@ -473,7 +473,8 @@ export const identifyMachineFromInventory = async (
   analysis: AnalysisResult, 
   connector: InventoryConnector,
   capturedImage?: string | null,
-  selectedMachineId?: string
+  selectedMachineId?: string,
+  scanInput?: string
 ): Promise<InnovationResult> => {
   const config = await getAiConfig();
   const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
@@ -485,6 +486,7 @@ export const identifyMachineFromInventory = async (
       connector,
       image: capturedImage,
       selectedMachineId,
+      scanInput,
       ...config
     })
   });
@@ -492,12 +494,13 @@ export const identifyMachineFromInventory = async (
 
 export const validateInventoryConnector = async (
   connector: InventoryConnector,
-  analysis?: AnalysisResult
+  analysis?: AnalysisResult,
+  scanInput?: string
 ): Promise<InventoryValidationResult> => {
   return fetchWithRetry(`${API_BASE}/api/inventory/validate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ connector, analysis })
+    body: JSON.stringify({ connector, analysis, scanInput })
   });
 };
 
