@@ -20,6 +20,18 @@
       "renderProvider": "Documoto",
       "viewerUrl": "https://www.documoto.com/",
       "cadFormats": ["provider parts-book view", "exploded diagram reference"],
+      "provider2DExport": {
+        "status": "requires_tenant_api_or_widget_export",
+        "provider": "Documoto",
+        "documentation": [
+          "https://www.documoto.com/create-digital-parts-catalogs",
+          "https://www.documoto.com/blog/unleashing-the-power-of-integration-how-documotos-headless-api-and-widgets-drive-real-world-results"
+        ],
+        "credentialRefs": ["DOCUMOTO_TENANT_URL", "DOCUMOTO_API_TOKEN"],
+        "requiredRecordFields": ["tenant catalog identifier", "equipment model or serial-range identifier", "approved exploded diagram or widget export URL"],
+        "candidate2DFormats": ["exploded diagram reference", "2D interactive parts catalog diagram", "PDF parts page"],
+        "nextAction": "Confirm Documoto tenant/API or widget export access and supply an approved diagram asset URL before treating this pilot as source-backed 2D."
+      },
       "renderKind": "provider-hosted-parts-book-viewer",
       "renderProvenance": "Documoto equipment parts-book viewer reference for phase 2 validation.",
       "licenseNote": "Phase 2 pilot stores provider links and metadata only. Confirm Documoto account/export terms before caching diagrams, parts books, or customer equipment data.",
