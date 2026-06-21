@@ -10,6 +10,11 @@ const {
   handleStripeWebhook,
   registerCommercialRoutes,
 } = require('./commercialization');
+const {
+  MIN_MATCH_CANDIDATE_SCORE,
+  buildMatchEvidence,
+  scoreInventoryRecord,
+} = require('./inventoryMatcher');
 
 const ollama = new Ollama({ host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434' });
 const app = express();
@@ -482,7 +487,6 @@ const buildSupportIssueRemediation = async (issue = {}) => {
 const RECONSTRUCTION_SYSTEM_INSTRUCTION = `You are a manufacturing reconstruction analyst. Identify machines from approved inventory, preserve evidence, avoid inventing unsupported parts, and produce practical bills of materials, assembly steps, pricing estimates, and 3D modeling handoff notes.`;
 
 const normalizeName = (value = '') => value.trim().replace(/\s+/g, ' ');
-const normalizeToken = (value = '') => normalizeName(String(value)).toLowerCase();
 
 const splitList = (value) => {
   if (Array.isArray(value)) return value.map(item => normalizeName(String(item))).filter(Boolean);
@@ -1060,37 +1064,6 @@ const listCredentialSummaries = async () => {
   }));
 };
 
-const scoreInventoryRecord = (analysis, record, scanInput = '') => {
-  const analysisText = normalizeToken([
-    scanInput,
-    analysis?.productName,
-    analysis?.rawAnalysis,
-    ...(analysis?.components || []).map(component => component.name),
-  ].join(' '));
-  const componentTokens = new Set((analysis?.components || []).map(component => normalizeToken(component.name)));
-  const recordParts = record.parts.map(normalizeToken);
-  const recordAliases = [record.machineName, ...record.aliases].map(normalizeToken);
-
-  const partHits = recordParts.filter(part => componentTokens.has(part) || analysisText.includes(part));
-  const aliasHits = recordAliases.filter(alias => alias && analysisText.includes(alias));
-  const materialHits = record.materials.map(normalizeToken).filter(material => material && analysisText.includes(material));
-  const analysisComponentCount = Math.max(componentTokens.size, 1);
-  const partScore = Math.min(partHits.length / analysisComponentCount, 1) * 0.3;
-  const aliasScore = aliasHits.length > 0 ? 0.6 : 0;
-  const materialScore = Math.min(materialHits.length, 2) * 0.05;
-  const hasExactMachineName = normalizeToken(record.machineName) && analysisText.includes(normalizeToken(record.machineName));
-  const hasRevision = record.revision && analysisText.includes(normalizeToken(record.revision));
-  const exactBonus = hasExactMachineName ? (hasRevision || partHits.length > 0 ? 0.1 : 0.05) : 0;
-  const score = Math.min(1, partScore + aliasScore + materialScore + exactBonus);
-
-  return {
-    score: Number(score.toFixed(2)),
-    partHits,
-    aliasHits,
-    materialHits,
-  };
-};
-
 const findBestInventoryMatch = (analysis, records, scanInput = '') => {
   const scored = records.map(record => ({
     record,
@@ -1098,15 +1071,6 @@ const findBestInventoryMatch = (analysis, records, scanInput = '') => {
   })).sort((a, b) => b.score - a.score);
 
   return scored[0] || null;
-};
-
-const buildMatchEvidence = (match = {}) => {
-  const evidence = [
-    match.aliasHits?.length ? `name/alias: ${match.aliasHits.join(', ')}` : '',
-    match.partHits?.length ? `parts: ${match.partHits.join(', ')}` : '',
-    match.materialHits?.length ? `materials: ${match.materialHits.join(', ')}` : '',
-  ].filter(Boolean);
-  return evidence.join('; ') || 'No strong inventory signals matched the scan.';
 };
 
 const findInventoryMatchCandidates = (analysis, records, scanInput = '') => {
@@ -1119,7 +1083,7 @@ const findInventoryMatchCandidates = (analysis, records, scanInput = '') => {
   const top = scored[0];
   const candidates = top?.score === 1
     ? [top]
-    : scored.filter(match => match.score >= 0.8);
+    : scored.filter(match => match.score >= MIN_MATCH_CANDIDATE_SCORE);
 
   return candidates.map(match => ({
     machineId: match.record.machineId,
@@ -1135,6 +1099,7 @@ const findInventoryMatchCandidates = (analysis, records, scanInput = '') => {
     confidenceScore: match.score,
     matchPercent: Math.round(match.score * 100),
     evidence: buildMatchEvidence(match),
+    matchDiagnostics: match.matchDiagnostics,
   }));
 };
 
@@ -1258,12 +1223,13 @@ const buildFallbackReconstruction = (analysis, connector = {}) => {
 const buildInventoryReconstruction = (analysis, connector = {}, match) => {
   if (!match?.record) return buildFallbackReconstruction(analysis, connector);
 
-  const { record, score, partHits, aliasHits, materialHits } = match;
+  const { record, score, partHits, aliasHits, materialHits, synonymHits } = match;
   const sourceName = resolveInventorySourceName(connector);
   const evidenceParts = [
     partHits.length ? `parts: ${partHits.join(', ')}` : '',
     aliasHits.length ? `aliases: ${aliasHits.join(', ')}` : '',
     materialHits.length ? `materials: ${materialHits.join(', ')}` : '',
+    synonymHits?.length ? `semantic equivalents: ${synonymHits.join(', ')}` : '',
   ].filter(Boolean);
 
   return {
