@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-21T03:34:00Z",
+  "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 47 and iOS TestFlight build 23.",
+  "sourceCommit": "12fdde29439619b783dc7c30da798641cf409f7b",
+  "otaUpdate": {
+    "channel": "production",
+    "runtimeVersion": "1.0.1",
+    "groupId": "c33c749f-17f7-448e-a205-3d11daca23a4",
+    "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/c33c749f-17f7-448e-a205-3d11daca23a4",
+    "message": "Harden welcome intro exit path"
+  },
+  "builds": {
+    "android": {
+      "id": "bf9baf7b-1134-41a5-aeaf-f9d8bacfd456",
+      "status": "FINISHED",
+      "versionCode": "47",
+      "appVersion": "1.0.1",
+      "runtimeVersion": "1.0.1",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/bf9baf7b-1134-41a5-aeaf-f9d8bacfd456",
+      "artifactUrl": "https://expo.dev/artifacts/eas/_gGSamuFlUTRprsIa5aVtBq2zk5i9jebwvY9FPHJDyc.aab",
+      "completedAt": "2026-06-21T03:28:15.153Z",
+      "fingerprint": "eee477a52f1f8a4e75977305e472c06fbe5a80fa"
+    },
+    "ios": {
+      "id": "b9b6209e-fcec-4ee6-b64b-ba7cc82a23d9",
+      "status": "FINISHED",
+      "buildNumber": "23",
+      "appVersion": "1.0.1",
+      "runtimeVersion": "1.0.1",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/b9b6209e-fcec-4ee6-b64b-ba7cc82a23d9",
+      "artifactUrl": "https://expo.dev/artifacts/eas/0nJHDpZV513h5miVdBHbUEzRcf61Vme3JjsjXi9ov-k.ipa",
+      "completedAt": "2026-06-21T03:09:33.487Z",
+      "fingerprint": "7b039a7758e85b1a0eec3a9839b8d9ca336f0a48"
+    }
+  },
+  "submissions": {
+    "android": {
+      "id": "8c666fbd-1a8c-4505-bbae-c61c5913eced",
+      "status": "SUBMITTED_BY_EAS",
+      "track": "internal",
+      "releaseStatus": "COMPLETED",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/8c666fbd-1a8c-4505-bbae-c61c5913eced",
+      "notes": [
+        "EAS reported: Submitted your app to Google Play Store.",
+        "Google Play tester availability can lag after successful upload while Play processes the internal-track artifact."
+      ]
+    },
+    "ios": {
+      "status": "UPLOADED_VALID_BY_ALTOOL",
+      "ascAppId": "6777091538",
+      "deliveryUuid": "546cc7e2-90a7-4b80-b4fe-95ca4dbcf5cd",
+      "uploadedAt": "2026-06-21T03:12:24Z",
+      "notes": [
+        "The IPA was uploaded with xcrun altool using the approved local App Store Connect API key.",
+        "altool build-status reported import-status VALID, build-status VALID, processingState VALID, and is-on-app-store-connect true for build 23."
+      ]
+    }
+  },
+  "testerInstallLinks": {
+    "googlePlayInternalTesting": "https://play.google.com/apps/internaltest/4700334027214849380",
+    "testFlight": "https://testflight.apple.com/join/twj2dNQY"
+  },
+  "validation": [
+    "npm run typecheck",
+    "npx expo export --platform web",
+    "npm run accessibility:preflight",
+    "Browser smoke: intro visible on load, gone after 12s, home visible",
+    "npx eas-cli update --branch production --environment production --message \"Harden welcome intro exit path\" --non-interactive",
+    "npx eas-cli build --platform all --profile production --non-interactive --no-wait",
+    "npx eas-cli submit --platform android --profile production --id bf9baf7b-1134-41a5-aeaf-f9d8bacfd456 --non-interactive",
+    "xcrun altool --upload-app -f /tmp/reversr-builds/reversr-ios-23.ipa --apiKey FZ4LLB2243 --apiIssuer d4e5bef0-4168-4aad-b41e-fcd8079e9bfc --p8-file-path /Users/vambahsillah/.config/reversr/eas-submit/AuthKey_FZ4LLB2243.p8 --output-format json",
+    "xcrun altool --build-status --delivery-id 546cc7e2-90a7-4b80-b4fe-95ca4dbcf5cd --apiKey FZ4LLB2243 --apiIssuer d4e5bef0-4168-4aad-b41e-fcd8079e9bfc --p8-file-path /Users/vambahsillah/.config/reversr/eas-submit/AuthKey_FZ4LLB2243.p8 --output-format json"
+  ],
+  "openGates": [
+    "Confirm Google Play Internal Testing processing and tester availability from Play Console or a tester account.",
+    "Confirm TestFlight processing and tester availability in App Store Connect/TestFlight.",
+    "Public App Review and production release remain separate human approval gates."
+  ]
+}
