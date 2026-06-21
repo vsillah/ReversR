@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const { MIN_MATCH_CANDIDATE_SCORE } = require('../server/inventoryMatcher');
 
 const apiPort = Number(process.env.PROFESSIONAL_MATCH_SMOKE_API_PORT || 3014);
 const apiBase = `http://127.0.0.1:${apiPort}`;
@@ -169,7 +170,10 @@ const run = async () => {
     assert(validation.response.ok, `${item.label} validation failed: ${validation.body.error || validation.response.status}`);
     const candidate = validation.body.matchCandidates?.[0];
     assert(candidate?.machineId === item.expectedMachineId, `${item.label} expected ${item.expectedMachineId}, found ${candidate?.machineId || '(none)'}.`);
-    assert(Number(candidate.confidenceScore || 0) >= 0.8, `${item.label} candidate confidence was below threshold.`);
+    assert(
+      Number(candidate.confidenceScore || 0) >= MIN_MATCH_CANDIDATE_SCORE,
+      `${item.label} candidate confidence was below semantic threshold.`
+    );
     assert(candidate.hasDatabase3DRender === true, `${item.label} candidate should retain source-backed 3D evidence.`);
 
     const match = await postJson('/api/gemini/match-machine', {
@@ -180,7 +184,10 @@ const run = async () => {
     });
     assert(match.response.ok, `${item.label} match failed: ${match.body.error || match.response.status}`);
     assert(match.body.machineId === item.expectedMachineId, `${item.label} match returned ${match.body.machineId || '(none)'}.`);
-    assert(Number(match.body.confidenceScore || 0) >= 0.8, `${item.label} match confidence was below threshold.`);
+    assert(
+      Number(match.body.confidenceScore || 0) >= MIN_MATCH_CANDIDATE_SCORE,
+      `${item.label} match confidence was below semantic threshold.`
+    );
   }
 
   console.log('Professional inventory source sample match smoke passed.');

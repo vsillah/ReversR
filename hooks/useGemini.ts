@@ -187,6 +187,15 @@ export interface InventoryValidationResult {
     confidenceScore: number;
     matchPercent: number;
     evidence: string;
+    matchDiagnostics?: {
+      scoreBreakdown?: Record<string, number>;
+      exactHits?: string[];
+      phraseHits?: string[];
+      synonymHits?: string[];
+      missingHighValueTerms?: string[];
+      queryTokenCount?: number;
+      recordTokenCount?: number;
+    };
   }>;
   error?: string;
 }
