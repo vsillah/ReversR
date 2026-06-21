@@ -51,6 +51,8 @@ import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
 import { useCommercialization } from "../hooks/useCommercialization";
 import { formatJourneyCreditShortLabel, formatResetCountdown } from "../utils/commercialUsage";
 
+const WELCOME_INTRO_ENABLED = false;
+
 interface MutationContext {
   id: string;
   createdAt: string;
@@ -512,7 +514,7 @@ export default function HomeScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const styles = createStyles(Colors);
   const [started, setStarted] = useState(false);
-  const [welcomeIntroLoaded, setWelcomeIntroLoaded] = useState(false);
+  const [welcomeIntroLoaded, setWelcomeIntroLoaded] = useState(!WELCOME_INTRO_ENABLED);
   const [welcomeIntroVisible, setWelcomeIntroVisible] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
@@ -678,6 +680,7 @@ export default function HomeScreen() {
   ]);
 
   useEffect(() => {
+    if (!WELCOME_INTRO_ENABLED) return;
     setWelcomeIntroVisible(true);
     setWelcomeIntroLoaded(true);
   }, []);
