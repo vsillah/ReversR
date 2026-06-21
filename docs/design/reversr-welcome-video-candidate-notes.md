@@ -4,6 +4,99 @@
 
 Status: packaged into the app welcome flow for branch review.
 
+## Candidate 2026-06-21: Explicit Frame-Control Retry
+
+Status: setup prepared; live run not yet completed.
+
+### What Changed
+
+- Switched away from the freeform prompt-only composer path.
+- Confirmed that Higgsfield exposes dedicated `START FRAME` and `END FRAME` slots on `Kling 3.0`.
+- Built a local frame packet to force the metallic `R` identity and the structural open/closed states:
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-clean-base-v1.png`
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-start-frame-v6.png`
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-end-frame-v6.png`
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-framepack-sheet-v6.png`
+- Verified a temporary fallback path using already-uploaded project assets:
+  - start: `b038c245-b27a-435b-b5a5-5f6caed957cf.png`
+  - end: `e104fc52-207a-48e7-9cb0-c039780feee4.png`
+
+### Live Setup Snapshot
+
+- Model: `Kling 3.0`
+- Aspect: `9:16`
+- Resolution: `720p`
+- Duration target for validation: `5s`
+- Multi-shot: `Off`
+- Prompt mode: motion-only, with the identity carried by the frame slots rather than extra prompt references
+
+### Current Blocker
+
+- Higgsfield repeatedly fell into a Chrome `Page Unresponsive` state while the duration popover remained active.
+- The explicit frame workflow is now the correct production path, but the first validation render was not cleanly launched from this session because the page became unstable before the final `Generate` action could be confirmed.
+
+### Prompt Corrections After Live Account Review
+
+- The live prompt had drifted into over-specific machining language such as `center circle`, `outer circle`, and multiple machine actions.
+- That wording encourages the model to reinterpret the approved `R` as a circular coin or monogram instead of preserving the asymmetrical silhouette from the frame slots.
+- The revised prompt now does three things:
+  - tells the model to preserve the exact start/end-frame silhouette and never become circular
+  - treats the main R body as fixed and the left caliper jaw as the primary moving part
+  - limits teal to the existing inset channels already present in the end frame
+
+## Candidate 2026-06-21: bac3cd62 Frame-Control Test
+
+Source file: `/Users/vambahsillah/Downloads/hf_20260621_024656_bac3cd62-b8c3-4239-b34e-1bc87a69a799.mp4`
+
+Status: rejected after motion review.
+
+### Observed Failures
+
+- The `R` reshapes before the torque drill reaches the knob. The top-left structure visibly morphs during approach instead of holding the start frame.
+- The metal brightens to brushed silver on its own before the causal assembly beat is complete.
+- Teal appears while the tool is still active, which weakens the intended sequence.
+
+### Prompt Implications
+
+- The next prompt must explicitly freeze the start state until tool contact.
+- The next prompt must prohibit any pre-contact geometry change.
+- The next prompt must prohibit autonomous metal brightening before full closure.
+- The next prompt must make the event order explicit:
+  1. stable dark matte start frame
+  2. tool approach
+  3. tool contact
+  4. jaw closure
+  5. brushed-metal transition
+  6. teal reveal
+
+## Candidate 2026-06-21: 55f80d11 Frame-Control Test
+
+Source file: `/private/tmp/reversr-higgsfield-review/hf_20260621_030642_55f80d11-57ca-4dac-806a-bc8995be3dd6.mp4`
+
+Status: improved, but still rejected.
+
+### What Improved
+
+- The start state holds much more faithfully through the first second.
+- The dark matte finish no longer jumps to brushed silver before the tool arrives.
+- The silhouette stays materially closer to the intended `R` during approach.
+
+### Remaining Failures
+
+- The tool remains too dominant through the payoff and obscures the closure beat.
+- The left-jaw travel is still not reading clearly enough as the hero motion.
+- Brushed silver and teal still arrive while the tool is effectively still active on the knob.
+
+### Prompt Implications
+
+- The next prompt must explicitly force a short tool-contact beat followed by tool retraction.
+- The next prompt must require visible left-jaw travel after contact, not just implied torque.
+- The next prompt must delay both the brushed-silver transition and teal reveal until the tool has lifted away.
+
+### Live Blocker
+
+- The next iteration could not be launched because the Higgsfield session hit an `OUT OF CREDITS` modal after this pass.
+
 ## Source Files
 
 - Approved candidate video: `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`
@@ -39,6 +132,7 @@ Status: packaged into the app welcome flow for branch review.
 - Higgsfield generated the source at `716x1284`, below the preferred production resolution.
 - The packaging script normalized the app asset to `1080x1920`, H.264, yuv420p, no audio.
 - The caliper geometry is recognizable but should still be judged by human review before treating this as final brand creative.
+- The current candidate does not clearly show the left structural half and right structural half torquing together; the center tool spins, but the hero closure beat is still missing.
 - Veo 3.1 was the preferred model but required a Pro/Ultimate Higgsfield plan on this account.
 - The final push-in is present but restrained; the material transformation is stronger than the camera move.
 
