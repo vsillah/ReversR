@@ -104,6 +104,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       <VideoView
         player={player}
         style={styles.video}
+        surfaceType="textureView"
         nativeControls={false}
         contentFit="cover"
         allowsPictureInPicture={false}
@@ -194,6 +195,7 @@ const createStyles = (Colors: AppColors) => {
       width: '100%',
       height: '100%',
       opacity: 0.92,
+      zIndex: 0,
     },
     video: {
       position: 'absolute',
@@ -203,6 +205,7 @@ const createStyles = (Colors: AppColors) => {
       left: 0,
       width: '100%',
       height: '100%',
+      zIndex: 1,
     },
     glow: {
       position: 'absolute',
@@ -212,6 +215,7 @@ const createStyles = (Colors: AppColors) => {
       height: 360,
       borderRadius: 999,
       opacity: isDark ? 0.82 : 0.62,
+      zIndex: 2,
     },
     skipButton: {
       position: 'absolute',

@@ -103,6 +103,7 @@ const PHASE_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
 
 const TOUR_STORAGE_KEY = 'reversr-rebuild-guided-tour:v2';
 const MOCK_TOUR_FIXTURE_CACHE_KEY = 'reversr-rebuild-mock-tour:farmbot-genesis-v1.8:v1';
+const WELCOME_INTRO_SAFETY_TIMEOUT_MS = 10500;
 type TourSavedState = {
   active: boolean;
   stepIndex: number;
@@ -681,6 +682,16 @@ export default function HomeScreen() {
     setWelcomeIntroVisible(true);
     setWelcomeIntroLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!welcomeIntroVisible) return undefined;
+
+    const safetyTimer = setTimeout(() => {
+      setWelcomeIntroVisible(false);
+    }, WELCOME_INTRO_SAFETY_TIMEOUT_MS);
+
+    return () => clearTimeout(safetyTimer);
+  }, [welcomeIntroVisible]);
 
   useEffect(() => {
     const loadTourState = async () => {
