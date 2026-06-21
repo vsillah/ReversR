@@ -18,6 +18,9 @@ import ReversRLogoMark from './ReversRLogoMark';
 const WELCOME_VIDEO = require('../assets/welcome/reversr-welcome-intro.mp4');
 const WELCOME_POSTER = require('../assets/welcome/reversr-welcome-poster.png');
 const INTRO_FALLBACK_TIMEOUT_MS = 9000;
+const INTRO_MIN_TIMEOUT_MS = 6500;
+const INTRO_TIMEOUT_BUFFER_MS = 600;
+const INTRO_END_THRESHOLD_SECONDS = 0.18;
 
 interface WelcomeIntroScreenProps {
   onEnter: () => void;
@@ -29,36 +32,74 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
   const brandOpacity = React.useRef(new Animated.Value(0)).current;
   const footerOpacity = React.useRef(new Animated.Value(0)).current;
   const hasEnteredRef = React.useRef(false);
+  const fallbackTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [actionsEnabled, setActionsEnabled] = React.useState(false);
   const player = useVideoPlayer(WELCOME_VIDEO, videoPlayer => {
     videoPlayer.loop = false;
     videoPlayer.muted = true;
+    videoPlayer.timeUpdateEventInterval = 0.25;
     videoPlayer.play();
   });
 
   const handleEnter = React.useCallback(() => {
     if (hasEnteredRef.current) return;
     hasEnteredRef.current = true;
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
     player.pause();
     onEnter();
   }, [onEnter, player]);
 
+  const scheduleFallback = React.useCallback((durationSeconds?: number) => {
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
+
+    const timeoutMs = durationSeconds && Number.isFinite(durationSeconds) && durationSeconds > 0
+      ? Math.max(INTRO_MIN_TIMEOUT_MS, Math.ceil(durationSeconds * 1000) + INTRO_TIMEOUT_BUFFER_MS)
+      : INTRO_FALLBACK_TIMEOUT_MS;
+
+    fallbackTimerRef.current = setTimeout(handleEnter, timeoutMs);
+  }, [handleEnter]);
+
   React.useEffect(() => {
     player.loop = false;
     player.muted = true;
+    player.timeUpdateEventInterval = 0.25;
     player.play();
+    scheduleFallback(player.duration);
 
     return () => {
+      if (fallbackTimerRef.current) {
+        clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+      }
       player.pause();
     };
-  }, [player]);
+  }, [player, scheduleFallback]);
 
   useEventListener(player, 'playToEnd', handleEnter);
+  useEventListener(player, 'sourceLoad', ({ duration }) => {
+    scheduleFallback(duration);
+  });
+  useEventListener(player, 'timeUpdate', ({ currentTime }) => {
+    const duration = player.duration;
+    if (!Number.isFinite(duration) || duration <= 0) return;
+    if (currentTime >= duration - INTRO_END_THRESHOLD_SECONDS) {
+      handleEnter();
+    }
+  });
 
   React.useEffect(() => {
-    const fallbackTimer = setTimeout(handleEnter, INTRO_FALLBACK_TIMEOUT_MS);
-    return () => clearTimeout(fallbackTimer);
-  }, [handleEnter]);
+    return () => {
+      if (fallbackTimerRef.current) {
+        clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     brandOpacity.setValue(0);
