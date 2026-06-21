@@ -18,17 +18,29 @@ Do not use `assets/logo-transparent.png` for welcome-video generation until a ne
 
 ## Higgsfield Setup
 
-- Mode: image-to-video.
-- Source references: R1 or R2 as the visual seed, R5 as the logo identity reference.
+- Mode: explicit frame-controlled video, not freeform prompt-only generation.
+- Primary workflow:
+  - model: `Kling 3.0`
+  - use Higgsfield's dedicated `START FRAME` and `END FRAME` slots
+  - keep the text prompt motion-only
+- Preferred local frame packet:
+  - start: `/private/tmp/reversr-higgsfield-framepack/reversr-start-frame-v6.png`
+  - end: `/private/tmp/reversr-higgsfield-framepack/reversr-end-frame-v6.png`
+  - review sheet: `/private/tmp/reversr-higgsfield-framepack/reversr-framepack-sheet-v6.png`
+- Temporary project-asset fallback when upload is unstable:
+  - start frame: `b038c245-b27a-435b-b5a5-5f6caed957cf.png`
+  - end frame: `e104fc52-207a-48e7-9cb0-c039780feee4.png`
 - First pass camera: mostly locked frontal three-quarter product view with a very slow push-in only.
-- Duration: 7-8 seconds.
+- First structural test duration: 5 seconds.
+- Upgrade to 7-8 seconds only after the closure beat is proven.
 - Aspect: 9:16.
 - No audio.
 - First retry strategy: change one variable at a time only after the closure beat works. Do not spend credits on macro inserts, orbit, or extra assembly beats before the left/right closure is visible.
 
 Recommended model:
 
-- Veo 3.1 or Kling 3.0 for cinematic realism and controlled machinery.
+- Kling 3.0 first, because the current Higgsfield surface exposes explicit frame slots there.
+- Veo 3.1 after the closure beat is proven, if higher-end realism is still needed and credits/plan allow it.
 - Seedance 2.0 only if logo adherence beats movement quality in testing.
 
 Avoid:
@@ -37,35 +49,20 @@ Avoid:
 - Fast social presets.
 - Text/logo generation modes that invent wordmarks.
 
-## Primary Mobile Prompt
+## Primary Motion-Only Prompt
 
-Use for Variant A.
+Use for the first explicit start/end-frame pass. Do not use this without populated frame slots.
 
 ```text
-8-second vertical 9:16 cinematic product shot in a premium precision machine shop. Photoreal brushed steel, dark fixture bed, CNC tooling, no people, no text.
-
-Show the approved ReversR metal logo as two separate machined structural halves on a clamp fixture:
-1. a left caliper-jaw half,
-2. a right rounded R-body half.
-At the start, there is a clear physical gap between the left half and the right half. They are not touching. The center knob is visible but the logo is not yet locked.
-
-Main action:
-A torque driver engages the center knob. As the knob turns, the mechanism visibly pulls the left half inward and seats the right half into final alignment. The viewer must clearly see the two halves move together and mechanically close the gap. This closure is the hero moment. The knob rotation causes the closure. The halves lock flush into one finished ReversR mark.
-
-Only after the halves fully close and lock:
-the brushed steel finish brightens from matte dark machined metal to polished brushed metal,
-then the teal accent appears inside the center ring and diagonal slot,
-then the teal gives one restrained glow pulse and holds steady.
-
-Camera:
-mostly locked frontal three-quarter product view, very slow push-in only, no orbit that hides the closure, no cutaways, no macro insert, no second angle.
-
-Composition:
-logo centered, fixture visible, premium machine context in soft focus behind, lower 35 to 40 percent of frame kept clean and dark for app UI overlay during the final hold.
-
-Style:
-real factory cinematography, premium industrial commercial, believable machining hardware, controlled reflections, shallow depth of field, crisp metal edges.
+Locked premium factory shot. The left caliper jaw half and right rounded R body start visibly separated. Center knob torque pulls both halves inward until the gap fully closes into the exact metallic ReversR mark. Keep the camera nearly locked with a slow push-in. Real machined steel, clean fixture, no text. Teal appears only after full closure and gives one restrained glow pulse.
 ```
+
+## Frame-Control Rules
+
+- The frame slots, not the text prompt, are responsible for logo identity.
+- Do not attach extra logo references inside the freeform prompt box once `START FRAME` and `END FRAME` are populated.
+- If the page becomes unstable while uploading local frame assets, fall back to the already-uploaded project images for one 5-second validation pass instead of forcing another freeform run.
+- Reject any run that drifts away from the exact approved metallic `R` silhouette even if the motion improves.
 
 ## Shot Variants
 
@@ -73,12 +70,12 @@ real factory cinematography, premium industrial commercial, believable machining
 
 Best first pass. This is the only recommended next credit burn until the closure beat works.
 
-- Seed: R1 end-frame plus R5 identity reference.
+- Seed path: explicit `START FRAME` and `END FRAME` slots.
 - Camera: locked or nearly locked product shot, very slow push-in only.
-- 0.0-1.5s: factory environment establishes, left half and right half are visibly separate with a clear gap.
-- 1.5-4.0s: torque driver engages the center knob; the left half travels inward and the right half seats into place; the gap visibly shrinks to zero.
-- 4.0-5.2s: the halves lock flush; brushed metal brightens from matte dark to polished steel.
-- 5.2-7.0s: teal appears only after closure, pulses once softly, then holds.
+- 0.0-1.0s: frame obeys the start anchor; the halves are visibly separate with a clear gap.
+- 1.0-3.2s: center-knob torque drives closure; the gap visibly shrinks to zero.
+- 3.2-4.2s: the halves lock flush and the brushed metal brightens.
+- 4.2-5.0s: teal appears only after closure, pulses once softly, then holds.
 
 ### Variant B: Center Knob Calibration
 
@@ -111,7 +108,8 @@ text, letters, captions, subtitles, watermark, logo text, brand name, typography
 ## Output Specs
 
 - Aspect: 9:16.
-- Duration: 7.0 seconds preferred; 7-8 seconds acceptable.
+- Duration: 5.0 seconds for the first frame-control validation pass.
+- Duration: 7.0 seconds preferred only after the frame-control pass succeeds.
 - Resolution: 2160 x 3840 preferred; 1080 x 1920 minimum.
 - Frame rate: 30 fps preferred.
 - Codec: H.264, yuv420p, faststart.

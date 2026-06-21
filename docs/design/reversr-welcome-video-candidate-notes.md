@@ -4,6 +4,37 @@
 
 Status: packaged into the app welcome flow for branch review.
 
+## Candidate 2026-06-21: Explicit Frame-Control Retry
+
+Status: setup prepared; live run not yet completed.
+
+### What Changed
+
+- Switched away from the freeform prompt-only composer path.
+- Confirmed that Higgsfield exposes dedicated `START FRAME` and `END FRAME` slots on `Kling 3.0`.
+- Built a local frame packet to force the metallic `R` identity and the structural open/closed states:
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-clean-base-v1.png`
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-start-frame-v6.png`
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-end-frame-v6.png`
+  - `/private/tmp/reversr-higgsfield-framepack/reversr-framepack-sheet-v6.png`
+- Verified a temporary fallback path using already-uploaded project assets:
+  - start: `b038c245-b27a-435b-b5a5-5f6caed957cf.png`
+  - end: `e104fc52-207a-48e7-9cb0-c039780feee4.png`
+
+### Live Setup Snapshot
+
+- Model: `Kling 3.0`
+- Aspect: `9:16`
+- Resolution: `720p`
+- Duration target for validation: `5s`
+- Multi-shot: `Off`
+- Prompt mode: motion-only, with the identity carried by the frame slots rather than extra prompt references
+
+### Current Blocker
+
+- Higgsfield repeatedly fell into a Chrome `Page Unresponsive` state while the duration popover remained active.
+- The explicit frame workflow is now the correct production path, but the first validation render was not cleanly launched from this session because the page became unstable before the final `Generate` action could be confirmed.
+
 ## Source Files
 
 - Approved candidate video: `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`
