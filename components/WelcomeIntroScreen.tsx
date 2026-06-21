@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Image,
   Animated,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,7 +18,8 @@ import ReversRLogoMark from './ReversRLogoMark';
 
 const WELCOME_VIDEO = require('../assets/welcome/reversr-welcome-intro.mp4');
 const WELCOME_POSTER = require('../assets/welcome/reversr-welcome-poster.png');
-const INTRO_FALLBACK_TIMEOUT_MS = 9000;
+const ACTIONS_FALLBACK_TIMEOUT_MS = 7000;
+const EXIT_HANDOFF_DELAY_MS = 260;
 
 interface WelcomeIntroScreenProps {
   onEnter: () => void;
@@ -29,36 +31,50 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
   const brandOpacity = React.useRef(new Animated.Value(0)).current;
   const footerOpacity = React.useRef(new Animated.Value(0)).current;
   const hasEnteredRef = React.useRef(false);
+  const exitTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [actionsEnabled, setActionsEnabled] = React.useState(false);
+  const [videoEnded, setVideoEnded] = React.useState(false);
+  const [renderVideo, setRenderVideo] = React.useState(true);
+  const [isExiting, setIsExiting] = React.useState(false);
   const player = useVideoPlayer(WELCOME_VIDEO, videoPlayer => {
     videoPlayer.loop = false;
     videoPlayer.muted = true;
-    videoPlayer.play();
+    if (Platform.OS !== 'web') {
+      videoPlayer.play();
+    }
   });
 
   const handleEnter = React.useCallback(() => {
     if (hasEnteredRef.current) return;
     hasEnteredRef.current = true;
-    player.pause();
-    onEnter();
-  }, [onEnter, player]);
+    setIsExiting(true);
+    setActionsEnabled(false);
+    setRenderVideo(false);
+
+    exitTimerRef.current = setTimeout(onEnter, EXIT_HANDOFF_DELAY_MS);
+  }, [onEnter]);
+
+  React.useEffect(() => () => {
+    if (exitTimerRef.current) {
+      clearTimeout(exitTimerRef.current);
+    }
+  }, []);
 
   React.useEffect(() => {
     player.loop = false;
     player.muted = true;
     player.play();
-
-    return () => {
-      player.pause();
-    };
   }, [player]);
 
-  useEventListener(player, 'playToEnd', handleEnter);
+  useEventListener(player, 'playToEnd', () => {
+    setVideoEnded(true);
+    setActionsEnabled(true);
+  });
 
   React.useEffect(() => {
-    const fallbackTimer = setTimeout(handleEnter, INTRO_FALLBACK_TIMEOUT_MS);
+    const fallbackTimer = setTimeout(() => setActionsEnabled(true), ACTIONS_FALLBACK_TIMEOUT_MS);
     return () => clearTimeout(fallbackTimer);
-  }, [handleEnter]);
+  }, []);
 
   React.useEffect(() => {
     brandOpacity.setValue(0);
@@ -101,16 +117,19 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
   return (
     <View style={styles.container} testID="welcome-intro-screen">
       <Image source={WELCOME_POSTER} style={styles.poster} resizeMode="cover" />
-      <VideoView
-        player={player}
-        style={styles.video}
-        surfaceType="textureView"
-        nativeControls={false}
-        contentFit="cover"
-        allowsPictureInPicture={false}
-        playsInline
-        pointerEvents="none"
-      />
+      {renderVideo ? (
+        <VideoView
+          player={player}
+          style={[styles.video, isExiting && styles.videoExiting]}
+          surfaceType="textureView"
+          nativeControls={false}
+          contentFit="cover"
+          allowsPictureInPicture={false}
+          playsInline
+          pointerEvents="none"
+          testID="welcome-intro-video"
+        />
+      ) : null}
       <LinearGradient
         colors={[
           'rgba(4,8,13,0.18)',
@@ -161,6 +180,9 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       >
         <Text style={styles.kicker}>Custom Engineered</Text>
         <Text style={styles.headline}>Scan the machine. Rebuild the system.</Text>
+        {videoEnded ? (
+          <Text style={styles.readyText}>Intro complete</Text>
+        ) : null}
         <TouchableOpacity
           style={styles.enterButton}
           onPress={handleEnter}
@@ -206,6 +228,9 @@ const createStyles = (Colors: AppColors) => {
       width: '100%',
       height: '100%',
       zIndex: 1,
+    },
+    videoExiting: {
+      opacity: 0,
     },
     glow: {
       position: 'absolute',
@@ -288,6 +313,12 @@ const createStyles = (Colors: AppColors) => {
       lineHeight: 33,
       letterSpacing: 0,
       color: '#f4f7fb',
+    },
+    readyText: {
+      fontFamily: Fonts.medium,
+      fontSize: FontSizes.sm,
+      color: 'rgba(238,241,246,0.72)',
+      textAlign: 'center',
     },
     enterButton: {
       width: '100%',

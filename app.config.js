@@ -28,6 +28,7 @@ module.exports = ({ config }) => {
       enableLocalProviderSettings: process.env.EXPO_PUBLIC_ENABLE_LOCAL_PROVIDER_SETTINGS || config.extra?.enableLocalProviderSettings || appJson.expo.extra.enableLocalProviderSettings,
       enableAdminCredentialSettings: process.env.EXPO_PUBLIC_ENABLE_ADMIN_CREDENTIAL_SETTINGS || config.extra?.enableAdminCredentialSettings || appJson.expo.extra.enableAdminCredentialSettings,
       forceManagedAiSettings: process.env.EXPO_PUBLIC_FORCE_MANAGED_AI_SETTINGS || config.extra?.forceManagedAiSettings || appJson.expo.extra.forceManagedAiSettings,
+      enableWelcomeIntro: process.env.EXPO_PUBLIC_ENABLE_WELCOME_INTRO || config.extra?.enableWelcomeIntro || appJson.expo.extra.enableWelcomeIntro,
       androidPlayProductProShop: process.env.EXPO_PUBLIC_ANDROID_PLAY_PRODUCT_PRO_SHOP || config.extra?.androidPlayProductProShop || appJson.expo.extra.androidPlayProductProShop,
       androidPlayProductTeam: process.env.EXPO_PUBLIC_ANDROID_PLAY_PRODUCT_TEAM || config.extra?.androidPlayProductTeam || appJson.expo.extra.androidPlayProductTeam,
     },

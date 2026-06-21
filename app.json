@@ -76,6 +76,7 @@
       "privacyPolicyUrl": "https://reversr.vercel.app/privacy",
       "termsUrl": "https://reversr.vercel.app/terms",
       "supportUrl": "https://reversr.vercel.app/support",
+      "enableWelcomeIntro": false,
       "androidPlayProductProShop": "reversr_pro_shop_monthly",
       "androidPlayProductTeam": "reversr_team_monthly",
       "router": {},
