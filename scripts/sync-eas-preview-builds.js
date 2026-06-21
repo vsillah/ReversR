@@ -68,14 +68,14 @@ const updateBuildEvidence = (target, build) => {
   target.status = buildStatus(build.status);
   target.profile = build.buildProfile || target.profile || 'preview';
   target.buildUrl = buildPageUrl(build) || target.buildUrl || '';
-  target.artifactUrl = build.artifacts?.applicationArchiveUrl || build.artifacts?.buildUrl || target.artifactUrl || '';
+  target.artifactUrl = build.artifacts?.applicationArchiveUrl || build.artifacts?.buildUrl || '';
   target.artifactType = artifactType(platform, build);
   if (platform === 'ANDROID') {
     target.versionCode = Number(build.appBuildVersion || target.versionCode || 0);
   } else {
     target.buildNumber = String(build.appBuildVersion || target.buildNumber || '');
   }
-  target.completedAt = build.completedAt || target.completedAt || '';
+  target.completedAt = build.completedAt || '';
 };
 
 const result = run('npx', [
