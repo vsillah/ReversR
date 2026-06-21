@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
 
 const apiPort = Number(process.env.VISUAL_FALLBACK_SMOKE_API_PORT || 3015);
 const apiBase = `http://127.0.0.1:${apiPort}`;
@@ -117,16 +118,34 @@ const tracepartsInnovation = {
   }],
 };
 
-const sourceBacked2DInnovation = {
-  conceptName: 'Direct reference image machine',
-  machineId: 'DIRECT-IMAGE-001',
-  referenceImages: [{
-    id: 'inline-reference',
-    label: 'Inline source-backed image',
-    url: 'data:image/png;base64,iVBORw0KGgo=',
-    kind: 'public-source-reference',
-    contentType: 'image/png',
-  }],
+const loadSourceBacked2DProofInnovation = () => {
+  const proof = JSON.parse(fs.readFileSync('public/inventory/source-backed-2d-proof.json', 'utf8'));
+  return proof.machines[0];
+};
+
+const sourceBacked2DProofConnector = {
+  sourceName: 'ReversR Source-Backed 2D Proof Fixture',
+  sourceUrl: '/inventory/source-backed-2d-proof.json',
+  connectorType: 'api',
+  authMode: 'none',
+};
+
+const sourceBacked2DProofScanInput = 'A source-backed 2D proof actuator module with ball screw actuator, linear guide rail, stepper motor, mounting bracket, limit switch, flexible coupling, and controlled source drawing evidence.';
+
+const sourceBacked2DProofAnalysis = {
+  productName: 'Source-backed 2D proof actuator module',
+  rawAnalysis: sourceBacked2DProofScanInput,
+  components: [
+    { name: 'Ball screw actuator', description: 'Primary linear drive.', isEssential: true },
+    { name: 'Linear guide rail', description: 'Motion guide rail.', isEssential: true },
+    { name: 'Stepper motor', description: 'Drive motor.', isEssential: true },
+    { name: 'Mounting bracket', description: 'Actuator support bracket.', isEssential: true },
+  ],
+  neighborhoodResources: ['source-backed 2D fixture', 'inventory reference image'],
+  attributes: [
+    { name: 'Visual source', value: 'controlled source-backed 2D drawing', type: 'Qualitative' },
+  ],
+  closedWorldBoundary: 'This proof should match the controlled source-backed 2D fixture.',
 };
 
 const run = async () => {
@@ -152,7 +171,7 @@ const run = async () => {
   assert(multi.body.images.every(image => image.imageSource?.sourceType === 'built_in_placeholder'), 'All no-key multi-angle images should disclose placeholder fallback.');
 
   const sourceBacked = await postJson('/api/gemini/generate-2d-single-angle', {
-    innovation: sourceBacked2DInnovation,
+    innovation: loadSourceBacked2DProofInnovation(),
     angleId: 'front',
   });
   assert(sourceBacked.response.ok, `source-backed 2D failed: ${sourceBacked.body.error || sourceBacked.response.status}`);
@@ -161,6 +180,37 @@ const run = async () => {
     'Explicit data image should be treated as source-backed 2D.'
   );
   assert(sourceBacked.body.imageSource?.sourceBacked2DAvailable === true, 'Source-backed 2D should disclose direct 2D availability.');
+
+  const proofValidation = await postJson('/api/inventory/validate', {
+    connector: sourceBacked2DProofConnector,
+    analysis: sourceBacked2DProofAnalysis,
+    scanInput: sourceBacked2DProofScanInput,
+  });
+  assert(proofValidation.response.ok, `source-backed 2D proof validation failed: ${proofValidation.body.error || proofValidation.response.status}`);
+  assert(
+    proofValidation.body.matchCandidates?.[0]?.machineId === 'SOURCE-BACKED-2D-ACTUATOR-PROOF',
+    `source-backed 2D proof validation did not return the proof fixture.`
+  );
+
+  const proofMatch = await postJson('/api/gemini/match-machine', {
+    connector: sourceBacked2DProofConnector,
+    analysis: sourceBacked2DProofAnalysis,
+    selectedMachineId: 'SOURCE-BACKED-2D-ACTUATOR-PROOF',
+    scanInput: sourceBacked2DProofScanInput,
+  });
+  assert(proofMatch.response.ok, `source-backed 2D proof match failed: ${proofMatch.body.error || proofMatch.response.status}`);
+  assert(proofMatch.body.machineId === 'SOURCE-BACKED-2D-ACTUATOR-PROOF', 'source-backed 2D proof match returned the wrong machine.');
+  assert(proofMatch.body.referenceImages?.[0]?.url?.startsWith('data:image/'), 'source-backed 2D proof match should retain the direct source image.');
+
+  const matchedProofImage = await postJson('/api/gemini/generate-2d-single-angle', {
+    innovation: proofMatch.body,
+    angleId: 'front',
+  });
+  assert(matchedProofImage.response.ok, `matched source-backed 2D proof generation failed: ${matchedProofImage.body.error || matchedProofImage.response.status}`);
+  assert(
+    ['inventory_reference', 'public_source_reference'].includes(matchedProofImage.body.imageSource?.sourceType),
+    'Matched source-backed 2D proof should bypass AI fallback.'
+  );
 
   console.log('Visual fallback transparency smoke passed.');
 };

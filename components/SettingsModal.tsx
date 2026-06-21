@@ -189,8 +189,10 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
   const inventorySourceHealth = React.useMemo(() => {
     const descriptor = `${inventoryConnector.sourceName} ${inventoryConnector.sourceUrl} ${inventoryConnector.notes || ''}`.toLowerCase();
     const isProfessional3DSource = /traceparts|cadenas|3dfindit|partsolutions|documoto|partful|farmbot|onshape/.test(descriptor);
+    const isSourceBacked2DProof = /source-backed 2d|source2d|2d proof/.test(descriptor);
     const provider =
-      descriptor.includes('traceparts') ? 'TraceParts'
+      isSourceBacked2DProof ? '2D proof fixture'
+        : descriptor.includes('traceparts') ? 'TraceParts'
         : descriptor.includes('cadenas') || descriptor.includes('3dfindit') || descriptor.includes('partsolutions') ? 'CADENAS'
           : descriptor.includes('documoto') ? 'Documoto'
             : descriptor.includes('partful') ? 'Partful'
@@ -201,7 +203,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
       provider,
       hasDatabase3DRender: isProfessional3DSource,
       hasCadModelLink: isProfessional3DSource,
-      usedAiVisualFallback: !isProfessional3DSource,
+      usedAiVisualFallback: !(isProfessional3DSource || isSourceBacked2DProof),
     };
   }, [inventoryConnector]);
   const [aiRuntimeStatus, setAiRuntimeStatus] = useState<AiRuntimeStatus | null>(null);

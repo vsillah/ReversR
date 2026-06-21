@@ -42,6 +42,8 @@
     "inventory:professional:validate": "npm run inventory:source:validate -- public/inventory/traceparts-industrial-components.json && npm run inventory:source:validate -- public/inventory/cadenas-industrial-components.json && npm run inventory:source:validate -- public/inventory/documoto-equipment-parts-book-phase2.json",
     "inventory:professional:match-smoke": "node scripts/professional-inventory-match-smoke.js",
     "inventory:semantic:benchmark": "node scripts/inventory-semantic-match-benchmark.js",
+    "inventory:visual:audit": "node scripts/audit-source-backed-2d-images.js public/inventory/traceparts-industrial-components.json public/inventory/cadenas-industrial-components.json public/inventory/documoto-equipment-parts-book-phase2.json public/inventory/source-backed-2d-proof.json",
+    "inventory:source2d:proof": "npm run inventory:source:validate -- public/inventory/source-backed-2d-proof.json && node scripts/audit-source-backed-2d-images.js --require-source-2d public/inventory/source-backed-2d-proof.json && npm run visual:fallback:smoke",
     "visual:fallback:smoke": "node scripts/visual-fallback-transparency-smoke.js",
     "inventory:preflight": "node scripts/inventory-connector-preflight.js",
     "cadquery:proof": "node scripts/generate-cadquery-proof.js",

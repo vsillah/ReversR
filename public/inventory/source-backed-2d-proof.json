@@ -1,0 +1,87 @@
+{
+  "sourceName": "ReversR Source-Backed 2D Proof Fixture",
+  "sourceProvider": "ReversR Proof Fixture",
+  "sourceLinks": {
+    "tracepartsApiDocs": "https://developers.traceparts.com/docs/api-related-to-the-product-content",
+    "cadenas3dfindit": "https://www.3dfindit.com/",
+    "documotoPartsCatalogs": "https://www.documoto.com/create-digital-parts-catalogs"
+  },
+  "machines": [
+    {
+      "machineId": "SOURCE-BACKED-2D-ACTUATOR-PROOF",
+      "machineName": "Source-Backed 2D Actuator Proof Module",
+      "revision": "proof-2026-06",
+      "aliases": ["source-backed 2d proof", "actuator proof module", "2d drawing proof", "schematic proof", "linear actuator proof"],
+      "parts": ["Ball screw actuator", "Linear guide rail", "Stepper motor", "Mounting bracket", "Limit switch", "Flexible coupling"],
+      "materials": ["anodized aluminum", "hardened steel", "stainless fasteners"],
+      "sourceProvider": "ReversR Proof Fixture",
+      "sourceRecordId": "source-backed-2d-proof-actuator",
+      "manufacturer": "ReversR controlled proof data",
+      "manufacturerPartNumber": "RVR-PROOF-2D-001",
+      "renderProvider": "ReversR Proof Fixture",
+      "renderKind": "controlled-source-backed-2d-reference",
+      "renderProvenance": "Controlled fixture that proves the source-backed 2D path without requiring AI generation or third-party CAD redistribution.",
+      "licenseNote": "Internal ReversR proof fixture. This SVG is authored for validation and is not a TraceParts, CADENAS, Documoto, or OEM asset.",
+      "lastSyncedAt": "2026-06-21T00:00:00Z",
+      "assemblySteps": [
+        {
+          "stepNumber": 1,
+          "title": "Confirm proof record",
+          "instructions": "Verify the controlled source-backed 2D reference is present before running the 2D generation endpoint.",
+          "parts": ["Ball screw actuator", "Linear guide rail", "Stepper motor"],
+          "estimatedTime": "10 min",
+          "qualityCheck": "The 2D endpoint returns inventory_reference or public_source_reference, not ai_generated_fallback."
+        },
+        {
+          "stepNumber": 2,
+          "title": "Check source drawing provenance",
+          "instructions": "Confirm the drawing source is a direct data image with content type image/svg+xml and a license note.",
+          "parts": ["Mounting bracket", "Limit switch", "Flexible coupling"],
+          "estimatedTime": "10 min",
+          "qualityCheck": "Audit command classifies this record as source_2d_available."
+        },
+        {
+          "stepNumber": 3,
+          "title": "Prepare fallback comparison",
+          "instructions": "Compare this proof record with TraceParts and CADENAS pilot records that currently carry provider pages and CAD metadata only.",
+          "parts": ["Ball screw actuator", "Linear guide rail", "Mounting bracket"],
+          "estimatedTime": "15 min",
+          "qualityCheck": "Provider pilot records remain marked as requiring direct source image or authenticated provider export."
+        }
+      ],
+      "pricing": {
+        "partsSubtotal": "$420-$1,200",
+        "modelingEstimate": "$0",
+        "fabricationEstimate": "$300-$900",
+        "assemblyLaborEstimate": "$180-$520",
+        "totalEstimate": "$900-$2,620",
+        "confidence": "medium"
+      },
+      "modelingVendors": [
+        {
+          "vendorName": "Xometry",
+          "serviceType": "proof fixture fabrication review",
+          "url": "https://www.xometry.com",
+          "packageRequired": ["BOM CSV", "source-backed 2D reference", "assembly notes", "proof audit output"]
+        }
+      ],
+      "sourceLinks": {
+        "provider": "reversr://proof-fixtures/source-backed-2d-actuator",
+        "proofPolicy": "reversr://proof-fixtures/source-backed-2d-policy"
+      },
+      "referenceImages": [
+        {
+          "id": "source-backed-2d-actuator-proof-front",
+          "label": "Controlled source-backed 2D actuator proof drawing",
+          "url": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NjAiIGhlaWdodD0iNjQwIiB2aWV3Qm94PSIwIDAgOTYwIDY0MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJTb3VyY2UgYmFja2VkIDJEIGFjdHVhdG9yIHByb29mIGRyYXdpbmciPjxyZWN0IHdpZHRoPSI5NjAiIGhlaWdodD0iNjQwIiBmaWxsPSIjZjhmYWZjIi8+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGYxNzJhIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMTIwIiB5PSIyNTUiIHdpZHRoPSI1NjAiIGhlaWdodD0iMTMwIiByeD0iMTAiLz48cGF0aCBkPSJNMTYwIDMyMGg0ODAiLz48cmVjdCB4PSI2OTAiIHk9IjI4MCIgd2lkdGg9IjEwNSIgaGVpZ2h0PSI4MCIgcng9IjgiLz48Y2lyY2xlIGN4PSI3NDIiIGN5PSIzMjAiIHI9IjI4Ii8+PHBhdGggZD0iTTk1IDQxNWg3MzAiLz48cGF0aCBkPSJNMTcwIDQxNXYtNDBNNjIwIDQxNXYtNDBNNzQwIDQxNXYtNTUiLz48cmVjdCB4PSIxODUiIHk9IjE4NSIgd2lkdGg9IjMzMCIgaGVpZ2h0PSI0NiIgcng9IjgiLz48cGF0aCBkPSJNMjMwIDIzMXYyNE00NzAgMjMxdjI0Ii8+PHJlY3QgeD0iMjIwIiB5PSI0NDgiIHdpZHRoPSI5MCIgaGVpZ2h0PSI1MCIgcng9IjgiLz48cmVjdCB4PSI1NDAiIHk9IjQ0OCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjUwIiByeD0iOCIvPjxwYXRoIGQ9Ik0xNzAgMTYwaDY1ME0xNzAgMTYwdjIyTTgyMCAxNjB2MjJNNTE1IDExMnY4OCIvPjxwYXRoIGQ9Ik04MDAgMzIwaDUyTTg1MiAzMjB2LTQ0TTg1MiAzMjB2NDQiLz48L2c+PGcgZmlsbD0iIzBmMTcyYSIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSI3MDAiPjx0ZXh0IHg9Ijg4IiB5PSIxMDQiPjE8L3RleHQ+PHRleHQgeD0iMzQ0IiB5PSIxNTEiPjI8L3RleHQ+PHRleHQgeD0iODQwIiB5PSIzMTUiPjM8L3RleHQ+PHRleHQgeD0iMTEyIiB5PSI0NzAiPjQ8L3RleHQ+PHRleHQgeD0iNjY1IiB5PSI0NzAiPjU8L3RleHQ+PC9nPjwvc3ZnPg==",
+          "sourceUrl": "reversr://proof-fixtures/source-backed-2d-actuator",
+          "kind": "inventory-reference",
+          "contentType": "image/svg+xml",
+          "sourceType": "inventory_reference",
+          "licenseNote": "Internal ReversR validation drawing. Use only for source-backed 2D path verification."
+        }
+      ],
+      "notes": "Controlled source-backed 2D fixture for proving ReversR can bypass AI image generation when an inventory record contains a direct source image."
+    }
+  ]
+}
