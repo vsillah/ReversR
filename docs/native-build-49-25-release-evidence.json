@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-21T18:20:00Z",
+  "scope": "Native tester release evidence for ReversR Rebuild Android versionCode 49 and iOS TestFlight build 25 with fixed in-app and launcher logo sizing.",
+  "sourceCommit": "59dd746ca206dfcaa9a370190f4961cb379b5c60",
+  "otaUpdate": {
+    "channel": "production",
+    "runtimeVersion": "1.0.1",
+    "groupId": "283b129f-bc9f-47f6-a043-f7a61b0d9ca2",
+    "dashboardUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/updates/283b129f-bc9f-47f6-a043-f7a61b0d9ca2",
+    "message": "Fix ReversR logo sizing",
+    "commit": "59dd746ca206dfcaa9a370190f4961cb379b5c60"
+  },
+  "builds": {
+    "android": {
+      "id": "bb72f71b-b2f6-4448-a172-c49f8e364664",
+      "status": "FINISHED",
+      "versionCode": "49",
+      "appVersion": "1.0.1",
+      "runtimeVersion": "1.0.1",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/bb72f71b-b2f6-4448-a172-c49f8e364664",
+      "artifactUrl": "https://expo.dev/artifacts/eas/yK_BfQpjpDRS39irzmEvgmt_rSJInudJj7wMafEjSvk.aab",
+      "completedAt": "2026-06-21T18:09:44.558Z",
+      "fingerprint": "f2807f5a11d7483438cfe30e4dbec4b2bc4faf16"
+    },
+    "ios": {
+      "id": "3ce2e91a-1482-4c9a-b7b2-a36495dd1f3c",
+      "status": "FINISHED",
+      "buildNumber": "25",
+      "appVersion": "1.0.1",
+      "runtimeVersion": "1.0.1",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/3ce2e91a-1482-4c9a-b7b2-a36495dd1f3c",
+      "artifactUrl": "https://expo.dev/artifacts/eas/R9yuO8yxUZnWC1PxzERlttKC3aHDtiYO4KcIYJs9k3E.ipa",
+      "completedAt": "2026-06-21T17:49:30.649Z",
+      "fingerprint": "1b4b26a44b0ba625f7dccde56bbf26f594a06c00"
+    }
+  },
+  "submissions": {
+    "android": {
+      "id": "fa1b679a-d520-4e76-9ca1-60e17c287ba4",
+      "status": "SUBMITTED_BY_EAS",
+      "track": "internal",
+      "releaseStatus": "COMPLETED",
+      "submissionUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/submissions/fa1b679a-d520-4e76-9ca1-60e17c287ba4",
+      "notes": [
+        "EAS reported: Submitted your app to Google Play Store.",
+        "Google Play tester availability can lag after successful upload while Play processes the internal-track artifact."
+      ]
+    },
+    "ios": {
+      "status": "UPLOADED_VALID_BY_ALTOOL",
+      "ascAppId": "6777091538",
+      "deliveryUuid": "3489cf42-6714-43c4-823e-0979881d4648",
+      "uploadedAt": "2026-06-21T17:56:03Z",
+      "notes": [
+        "The IPA was uploaded with xcrun altool using the approved local App Store Connect API key.",
+        "altool build-status reported import-status VALID, build-status VALID, processingState VALID, is-on-app-store-connect true, and an AppIcon asset token for build 25."
+      ]
+    }
+  },
+  "testerInstallLinks": {
+    "googlePlayInternalTesting": "https://play.google.com/apps/internaltest/4700334027214849380",
+    "testFlight": "https://testflight.apple.com/join/twj2dNQY"
+  },
+  "validation": [
+    "npm run typecheck -- --pretty false",
+    "npm run accessibility:preflight",
+    "npm run store:assets:preflight",
+    "npx expo export --platform web",
+    "npx expo config --json verified icon=./assets/icon.png and android.adaptiveIcon.foregroundImage=./assets/adaptive-icon.png",
+    "Browser smoke on localhost:5004: header image loads assets/adaptive-icon.png at 40x40; zero console errors",
+    "PNG checks: icon/adaptive-icon are 1024x1024; adaptive-icon has transparent corners for Android dark background",
+    "npx eas-cli update --branch production --environment production --message \"Fix ReversR logo sizing\" --non-interactive",
+    "npx eas-cli build --platform all --profile production --non-interactive --no-wait",
+    "npx eas-cli submit --platform android --profile production --id bb72f71b-b2f6-4448-a172-c49f8e364664 --non-interactive",
+    "xcrun altool --upload-app -f /tmp/reversr-builds/reversr-ios-25.ipa --apiKey FZ4LLB2243 --apiIssuer d4e5bef0-4168-4aad-b41e-fcd8079e9bfc --p8-file-path /Users/vambahsillah/.config/reversr/eas-submit/AuthKey_FZ4LLB2243.p8 --output-format json",
+    "xcrun altool --build-status --delivery-id 3489cf42-6714-43c4-823e-0979881d4648 --apiKey FZ4LLB2243 --apiIssuer d4e5bef0-4168-4aad-b41e-fcd8079e9bfc --p8-file-path /Users/vambahsillah/.config/reversr/eas-submit/AuthKey_FZ4LLB2243.p8 --output-format json"
+  ],
+  "openGates": [
+    "Confirm Google Play Internal Testing processing and tester availability from Play Console or a tester account.",
+    "Confirm TestFlight processing and tester availability in App Store Connect/TestFlight.",
+    "Public App Review and production release remain separate human approval gates.",
+    "Welcome video repair continues on codex/welcome-video-stabilization and is intentionally not part of this stable tester build."
+  ]
+}
