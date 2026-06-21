@@ -51,7 +51,7 @@ import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
 import { useCommercialization } from "../hooks/useCommercialization";
 import { formatJourneyCreditShortLabel, formatResetCountdown } from "../utils/commercialUsage";
 
-const WELCOME_INTRO_ENABLED = false;
+const WELCOME_INTRO_ENABLED = process.env.EXPO_PUBLIC_ENABLE_WELCOME_INTRO === 'true';
 
 interface MutationContext {
   id: string;
