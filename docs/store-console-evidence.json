@@ -576,7 +576,7 @@
     "releaseOwner": "",
     "storeReviewer": "",
     "signedAt": "",
-    "notes": "Partial console evidence only. No production submission is approved. App Store Connect verification confirms current iOS build 1.0.1 (25) is uploaded, valid, not expired, internally ready for beta testing, and ready for external beta submission; current build 25 has not been submitted for external TestFlight beta review. Google Play internal testing submission succeeded for Android versionCode 49. Remaining blockers are current-build TestFlight readiness or an explicit internal-only testing decision, Google Play public-review/production decision gates, final store review signoff, and public review actions."
+    "notes": "Partial console evidence only. No production submission is approved. App Store Connect verification confirms current iOS build 1.0.1 (25) is uploaded, valid, not expired, internally ready for beta testing, and ready for external beta submission; current build 25 has not been submitted for external TestFlight beta review. Google Play internal testing submission succeeded for Android versionCode 50. Remaining blockers are current-build TestFlight readiness or an explicit internal-only testing decision, Google Play public-review/production decision gates, final store review signoff, and public review actions."
   },
   "generatedAt": "2026-06-21T18:20:00Z",
   "consoleActions": [

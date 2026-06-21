@@ -1,7 +1,7 @@
 {
   "version": "1.0.1",
   "releaseDate": "2026-06-21",
-  "androidVersionCode": 49,
+  "androidVersionCode": 50,
   "iosBuildNumber": "25",
   "testerBuildAvailable": true,
   "androidTesterBuildAvailable": true,

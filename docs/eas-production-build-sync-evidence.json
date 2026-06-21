@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
   "status": "pass",
-  "generatedAt": "2026-06-21T18:14:20.673Z",
+  "generatedAt": "2026-06-21T21:03:22.449Z",
   "dryRun": false,
   "command": "npx eas-cli@20.0.0 build:list --platform all --limit 20 --json --non-interactive",
   "buildsChecked": 20,
   "productionBuildsChecked": 19,
   "latestProductionBuilds": {
     "android": {
-      "id": "bb72f71b-b2f6-4448-a172-c49f8e364664",
+      "id": "5f61dedb-59e9-40ac-bb11-694b323a12bf",
       "status": "FINISHED",
       "readinessStatus": "pass",
       "platform": "ANDROID",
       "distribution": "STORE",
       "buildProfile": "production",
-      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/bb72f71b-b2f6-4448-a172-c49f8e364664",
-      "artifactUrl": "https://expo.dev/artifacts/eas/yK_BfQpjpDRS39irzmEvgmt_rSJInudJj7wMafEjSvk.aab",
+      "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/5f61dedb-59e9-40ac-bb11-694b323a12bf",
+      "artifactUrl": "https://expo.dev/artifacts/eas/zUXxBqSjq4ycJncCdyIvbhXp3KTE_4_9DUrCQv02iKg.aab",
       "artifactType": "aab",
       "appVersion": "1.0.1",
-      "appBuildVersion": "49",
-      "gitCommitHash": "59dd746ca206dfcaa9a370190f4961cb379b5c60",
-      "gitCommitMessage": "Fix in-app and launcher logo sizing (#109)\n\n* Fix in-app and launcher logo sizing\n\n* Retrigger logo icon preview checks\n\n---------\n\nCo-authored-by: Vambah Sillah <vambahsillah@Vambahs-MacBook-Pro.local>",
-      "createdAt": "2026-06-21T17:44:48.082Z",
-      "updatedAt": "2026-06-21T18:09:44.702Z",
-      "completedAt": "2026-06-21T18:09:44.558Z",
-      "expirationDate": "2026-07-21T17:44:48.104Z"
+      "appBuildVersion": "50",
+      "gitCommitHash": "c3149886630c5b25894514f06ab9ef1e4f9d7201",
+      "gitCommitMessage": "Fix Android adaptive launcher icon (#111)\n\nCo-authored-by: Vambah Sillah <vambahsillah@Vambahs-MacBook-Pro.local>",
+      "createdAt": "2026-06-21T20:34:35.968Z",
+      "updatedAt": "2026-06-21T20:58:56.589Z",
+      "completedAt": "2026-06-21T20:58:56.438Z",
+      "expirationDate": "2026-07-21T20:34:35.991Z"
     },
     "ios": {
       "id": "3ce2e91a-1482-4c9a-b7b2-a36495dd1f3c",
@@ -41,7 +41,7 @@
       "gitCommitHash": "59dd746ca206dfcaa9a370190f4961cb379b5c60",
       "gitCommitMessage": "Fix in-app and launcher logo sizing (#109)\n\n* Fix in-app and launcher logo sizing\n\n* Retrigger logo icon preview checks\n\n---------\n\nCo-authored-by: Vambah Sillah <vambahsillah@Vambahs-MacBook-Pro.local>",
       "createdAt": "2026-06-21T17:45:16.933Z",
-      "updatedAt": "2026-06-21T17:49:35.029Z",
+      "updatedAt": "2026-06-21T21:00:49.649Z",
       "completedAt": "2026-06-21T17:49:30.649Z",
       "expirationDate": "2026-07-21T17:45:16.959Z"
     }
