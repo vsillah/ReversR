@@ -1647,7 +1647,6 @@ export default function HomeScreen() {
             initialInput={context.input}
             initialImage={context.capturedImage}
             mockAnalysis={mockJourneyActive ? MOCK_TOUR_ANALYSIS : null}
-            mockInput={mockJourneyActive ? MOCK_TOUR_INPUT : undefined}
             inventoryRefreshKey={inventorySampleRefreshKey}
           />
         )}
