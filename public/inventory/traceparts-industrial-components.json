@@ -22,6 +22,22 @@
       "viewerUrl": "https://www.traceparts.com/",
       "cadModelUrl": "https://www.traceparts.com/",
       "cadFormats": ["STEP", "IGES", "STL", "3D PDF"],
+      "provider2DExport": {
+        "status": "requires_api_key_and_catalog_identifiers",
+        "provider": "TraceParts",
+        "documentation": [
+          "https://developers.traceparts.com/reference/get_v3-product-caddataavailability",
+          "https://developers.traceparts.com/reference/post_v3-product-cadrequest",
+          "https://developers.traceparts.com/reference/get_v2-product-cadfileurl"
+        ],
+        "availabilityEndpoint": "GET https://api-gateway.traceparts.com/v3/Product/CadDataAvailability",
+        "requestEndpoint": "POST https://api-gateway.traceparts.com/v3/Product/cadRequest",
+        "fileUrlEndpoint": "GET https://api-gateway.traceparts.com/v2/Product/cadFileUrl",
+        "credentialRefs": ["TRACEPARTS_API_KEY", "TRACEPARTS_USER_EMAIL"],
+        "requiredRecordFields": ["partFamilyCode plus selectionPath, or classificationCode plus partNumber", "cadFormatId for a verified 2D drawing/export format"],
+        "candidate2DFormats": ["2D AutoCAD", "DWG", "DXF"],
+        "nextAction": "Replace this pilot placeholder with provider catalog identifiers from an approved TraceParts record, then run the provider readiness audit with TraceParts credentials configured server-side."
+      },
       "renderKind": "provider-hosted-cad-viewer",
       "renderProvenance": "TraceParts provider-hosted CAD/viewer reference for pilot validation.",
       "licenseNote": "Pilot fixture keeps vendor CAD/render assets as provider links only. Verify TraceParts license terms before storing, redistributing, or exporting CAD files.",

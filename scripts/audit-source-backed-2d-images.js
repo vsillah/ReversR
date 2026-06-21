@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const args = process.argv.slice(2);
 const requireSource2D = args.includes('--require-source-2d');
+const requireProviderReady = args.includes('--require-provider-ready');
 const jsonOutput = args.includes('--json');
 const sourcePaths = args.filter(arg => !arg.startsWith('--'));
 
@@ -42,6 +43,51 @@ const normalizeReferenceImages = (value) => {
     label: 'Single reference image',
     url: String(value),
   }];
+};
+
+const normalizeProvider2DExport = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  return {
+    status: String(value.status || '').trim(),
+    provider: String(value.provider || '').trim(),
+    documentation: splitList(value.documentation),
+    availabilityEndpoint: String(value.availabilityEndpoint || '').trim(),
+    requestEndpoint: String(value.requestEndpoint || '').trim(),
+    fileUrlEndpoint: String(value.fileUrlEndpoint || '').trim(),
+    credentialRefs: splitList(value.credentialRefs),
+    requiredRecordFields: splitList(value.requiredRecordFields),
+    candidate2DFormats: splitList(value.candidate2DFormats),
+    nextAction: String(value.nextAction || '').trim(),
+  };
+};
+
+const getCredentialReadiness = (provider2DExport) => {
+  if (!provider2DExport?.credentialRefs?.length) {
+    return {
+      required: [],
+      configured: [],
+      missing: [],
+      status: provider2DExport ? 'no_credentials_declared' : 'not_applicable',
+    };
+  }
+
+  const configured = provider2DExport.credentialRefs.filter(ref => Boolean(process.env[ref]));
+  const missing = provider2DExport.credentialRefs.filter(ref => !process.env[ref]);
+
+  return {
+    required: provider2DExport.credentialRefs,
+    configured,
+    missing,
+    status: missing.length === 0 ? 'configured' : 'missing_credentials',
+  };
+};
+
+const getProviderReadinessStatus = ({ hasSource2D, provider2DExport, credentialReadiness }) => {
+  if (hasSource2D) return 'ready_direct_source_2d';
+  if (!provider2DExport) return 'no_provider_export_plan';
+  if (credentialReadiness.status === 'configured') return 'provider_export_credentials_configured';
+  if (credentialReadiness.status === 'missing_credentials') return 'waiting_for_provider_credentials';
+  return provider2DExport.status || 'provider_export_plan_incomplete';
 };
 
 const safeFetchContentType = async (url) => {
@@ -136,7 +182,10 @@ const classifyRecord = async (record, file) => {
   }
 
   const cadFormats = splitList(record.cadFormats || record.availableFormats);
+  const provider2DExport = normalizeProvider2DExport(record.provider2DExport);
+  const credentialReadiness = getCredentialReadiness(provider2DExport);
   const candidate2DFormats = cadFormats.filter(format => candidate2DFormatPattern.test(format) && !non2DFormatPattern.test(format));
+  const providerCandidate2DFormats = provider2DExport?.candidate2DFormats || [];
   const hasSource2D = referenceAudit.some(reference => reference.status === 'source_2d_available');
   const has3DOrCadLink = Boolean(record.renderUrl || record.viewerUrl || record.cadModelUrl || record.cadUrl);
   const hasProviderReference = references.some(reference => /provider|catalog|parts-book/i.test(`${reference.kind || ''} ${reference.label || ''}`));
@@ -160,9 +209,12 @@ const classifyRecord = async (record, file) => {
     sourceProvider: record.sourceProvider || record.provider || '',
     sourceRecordId: record.sourceRecordId || '',
     status,
+    providerReadinessStatus: getProviderReadinessStatus({ hasSource2D, provider2DExport, credentialReadiness }),
     hasSourceBacked2DImage: hasSource2D,
-    candidate2DFormats,
+    candidate2DFormats: Array.from(new Set([...candidate2DFormats, ...providerCandidate2DFormats])),
     has3DOrCadLink,
+    provider2DExport,
+    credentialReadiness,
     referenceAudit,
   };
 };
@@ -196,6 +248,13 @@ const run = async () => {
       if (requireSource2D && !result.hasSourceBacked2DImage) {
         failures.push(`${result.machineId || result.machineName || file} does not have a verified source-backed 2D image.`);
       }
+      if (
+        requireProviderReady
+        && !result.hasSourceBacked2DImage
+        && result.providerReadinessStatus !== 'provider_export_credentials_configured'
+      ) {
+        failures.push(`${result.machineId || result.machineName || file} is not ready for real provider 2D export (${result.providerReadinessStatus}).`);
+      }
     }
   }
 
@@ -206,6 +265,13 @@ const run = async () => {
       console.log(`${result.status}: ${result.machineId} (${result.sourceProvider || 'unknown provider'})`);
       if (result.candidate2DFormats.length > 0) {
         console.log(`  candidate 2D/CAD formats: ${result.candidate2DFormats.join(', ')}`);
+      }
+      console.log(`  provider readiness: ${result.providerReadinessStatus}`);
+      if (result.credentialReadiness?.missing?.length > 0) {
+        console.log(`  missing credentials: ${result.credentialReadiness.missing.join(', ')}`);
+      }
+      if (result.provider2DExport?.nextAction) {
+        console.log(`  next action: ${result.provider2DExport.nextAction}`);
       }
       for (const reference of result.referenceAudit) {
         const detail = reference.url || reference.urlKind || reference.contentType || 'reference';

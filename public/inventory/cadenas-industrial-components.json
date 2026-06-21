@@ -22,6 +22,18 @@
       "viewerUrl": "https://www.3dfindit.com/",
       "cadModelUrl": "https://www.3dfindit.com/",
       "cadFormats": ["STEP", "SAT", "IGES", "DWG", "STL"],
+      "provider2DExport": {
+        "status": "requires_partner_export_connector_or_approved_direct_asset",
+        "provider": "CADENAS 3Dfindit",
+        "documentation": [
+          "https://www.3dfindit.com/",
+          "https://www.cadenas.de/en/products/ecatalogsolutions/innovative-marketing-strategies/3dfindit-com"
+        ],
+        "credentialRefs": ["CADENAS_EXPORT_CREDENTIAL_REF"],
+        "requiredRecordFields": ["approved direct 2D asset URL, provider-hosted export URL, or configured partner export connector", "selected 2D export format such as DWG or DXF when available"],
+        "candidate2DFormats": ["DWG", "DXF"],
+        "nextAction": "Confirm the CADENAS/PARTsolutions export agreement and supply an approved direct 2D export URL or backend connector credential reference before treating this pilot as source-backed 2D."
+      },
       "renderKind": "provider-hosted-3d-configurator",
       "renderProvenance": "CADENAS/3Dfindit provider-hosted 3D configurator reference for pilot validation.",
       "licenseNote": "Pilot fixture stores provider links and metadata only. Verify CADENAS/PARTsolutions terms before downloading, caching, redistributing, or transmitting CAD assets.",
