@@ -1060,8 +1060,9 @@ const listCredentialSummaries = async () => {
   }));
 };
 
-const scoreInventoryRecord = (analysis, record) => {
+const scoreInventoryRecord = (analysis, record, scanInput = '') => {
   const analysisText = normalizeToken([
+    scanInput,
     analysis?.productName,
     analysis?.rawAnalysis,
     ...(analysis?.components || []).map(component => component.name),
@@ -1090,10 +1091,10 @@ const scoreInventoryRecord = (analysis, record) => {
   };
 };
 
-const findBestInventoryMatch = (analysis, records) => {
+const findBestInventoryMatch = (analysis, records, scanInput = '') => {
   const scored = records.map(record => ({
     record,
-    ...scoreInventoryRecord(analysis, record),
+    ...scoreInventoryRecord(analysis, record, scanInput),
   })).sort((a, b) => b.score - a.score);
 
   return scored[0] || null;
@@ -1108,11 +1109,11 @@ const buildMatchEvidence = (match = {}) => {
   return evidence.join('; ') || 'No strong inventory signals matched the scan.';
 };
 
-const findInventoryMatchCandidates = (analysis, records) => {
+const findInventoryMatchCandidates = (analysis, records, scanInput = '') => {
   if (!analysis || !records?.length) return [];
   const scored = records.map(record => ({
     record,
-    ...scoreInventoryRecord(analysis, record),
+    ...scoreInventoryRecord(analysis, record, scanInput),
   })).sort((a, b) => b.score - a.score);
 
   const top = scored[0];
@@ -1509,11 +1510,11 @@ app.post('/api/gemini/analyze', async (req, res) => {
 
 app.post('/api/inventory/validate', async (req, res) => {
   try {
-    const { connector, analysis } = req.body;
+    const { connector, analysis, scanInput } = req.body;
     const records = await loadInventoryRecords(connector || {});
     const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
     const sourceName = resolveInventorySourceName(connector || {});
-    const matchCandidates = findInventoryMatchCandidates(analysis, records);
+    const matchCandidates = findInventoryMatchCandidates(analysis, records, scanInput);
     res.json({
       status: 'ok',
       sourceName,
@@ -1667,14 +1668,14 @@ app.post('/api/gemini/match-machine', async (req, res) => {
     const charge = await chargeCommercialCredits(req, res, 'match-machine');
     if (!charge.ok) return;
 
-    const { analysis, connector, image, provider, ollamaModel, selectedMachineId } = req.body;
+    const { analysis, connector, image, provider, ollamaModel, selectedMachineId, scanInput } = req.body;
     const inventoryRecords = await loadInventoryRecords(connector || {});
     const selectedRecord = selectedMachineId
       ? inventoryRecords.find(record => record.machineId === selectedMachineId)
       : null;
     deterministicMatch = selectedRecord
-      ? { record: selectedRecord, ...scoreInventoryRecord(analysis, selectedRecord) }
-      : findBestInventoryMatch(analysis, inventoryRecords);
+      ? { record: selectedRecord, ...scoreInventoryRecord(analysis, selectedRecord, scanInput) }
+      : findBestInventoryMatch(analysis, inventoryRecords, scanInput);
     const credentialStatus = await getConnectorCredentialStatusAsync(connector || {});
 
     const prompt = `
