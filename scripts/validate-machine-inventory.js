@@ -127,6 +127,7 @@ let recordsWithPricing = 0;
 let recordsWithVendors = 0;
 let recordsWithDatabase3DRender = 0;
 let recordsWithCadModelLink = 0;
+let recordsWithSourceBacked2DImage = 0;
 let totalParts = 0;
 
 records.forEach((record, index) => {
@@ -192,6 +193,18 @@ records.forEach((record, index) => {
   const cadModelUrl = String(record.cadModelUrl || record.cadUrl || '').trim();
   const cadFormats = splitList(record.cadFormats || record.availableFormats);
   const hasDatabase3DRender = Boolean(renderUrl || viewerUrl || cadModelUrl);
+  const referenceImages = parseJsonField(record, 'referenceImages', 'array') || [];
+  const hasSourceBacked2DImage = Array.isArray(referenceImages) && referenceImages.some(reference => {
+    const referenceUrl = String(reference?.url || '').trim();
+    const referenceContentType = String(reference?.contentType || '').trim().toLowerCase();
+    return referenceUrl.startsWith('data:image/')
+      || /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(referenceUrl)
+      || referenceContentType.startsWith('image/');
+  });
+
+  if (hasSourceBacked2DImage) {
+    recordsWithSourceBacked2DImage += 1;
+  }
 
   if (hasDatabase3DRender) {
     recordsWithDatabase3DRender += 1;
@@ -232,3 +245,4 @@ console.log(`Records with pricing: ${recordsWithPricing}`);
 console.log(`Records with modeling vendors: ${recordsWithVendors}`);
 console.log(`Records with database 3D render evidence: ${recordsWithDatabase3DRender}`);
 console.log(`Records with CAD model links or formats: ${recordsWithCadModelLink}`);
+console.log(`Records with source-backed 2D image evidence: ${recordsWithSourceBacked2DImage}`);

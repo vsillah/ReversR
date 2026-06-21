@@ -6,13 +6,15 @@ export const FARMBOT_PUBLIC_INVENTORY_URL = 'https://raw.githubusercontent.com/v
 export const TRACEPARTS_PUBLIC_INVENTORY_URL = 'https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/traceparts-industrial-components.json';
 export const CADENAS_PUBLIC_INVENTORY_URL = 'https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/cadenas-industrial-components.json';
 export const DOCUMOTO_PUBLIC_INVENTORY_URL = 'https://raw.githubusercontent.com/vsillah/ReversR-Rebuild/main/public/inventory/documoto-equipment-parts-book-phase2.json';
+export const SOURCE_BACKED_2D_PROOF_INVENTORY_URL = '/inventory/source-backed-2d-proof.json';
 export const INVENTORY_SOURCE_ADD_NEW_VALUE = 'add-new';
 
 export type KnownInventorySourceValue =
   | 'farmbot-public'
   | 'traceparts-industrial'
   | 'cadenas-industrial'
-  | 'documoto-parts-book';
+  | 'documoto-parts-book'
+  | 'source-backed-2d-proof';
 
 export type InventorySourceOptionValue = KnownInventorySourceValue | typeof INVENTORY_SOURCE_ADD_NEW_VALUE;
 
@@ -97,6 +99,19 @@ export const KNOWN_INVENTORY_SOURCE_OPTIONS: KnownInventorySourceOption[] = [
       notes: 'Phase 2 Documoto pilot fixture for whole-machine parts books, exploded-view references, BOMs, and service build sheets. Confirm account/export rights before caching diagrams or customer equipment data.',
     },
   },
+  {
+    value: 'source-backed-2d-proof',
+    label: '2D Proof Fixture',
+    detail: 'Controlled source-backed 2D image fixture for proving AI is skipped.',
+    connector: {
+      sourceName: 'ReversR Source-Backed 2D Proof Fixture',
+      sourceUrl: SOURCE_BACKED_2D_PROOF_INVENTORY_URL,
+      connectorType: 'api',
+      authMode: 'none',
+      credentialRef: '',
+      notes: 'Controlled ReversR fixture with an explicit source-backed 2D drawing. Use it to confirm the app displays source-backed 2D references before AI fallback.',
+    },
+  },
 ];
 
 export const INVENTORY_SOURCE_OPTIONS: Array<{
@@ -168,6 +183,13 @@ export const INVENTORY_SOURCE_SAMPLE_SETS: Record<KnownInventorySourceValue, Inv
     samples: [
       'A packaging conveyor parts-book assembly with drive roller, idler roller, belt section, gearmotor, guard panel, photoelectric sensor, control enclosure, fastener kit, and provider parts-book viewer reference.',
       'A whole-machine conveyor rebuild record with exploded-view service parts, serial-range parts-book notes, belt and roller assemblies, guarding, motor drive, sensors, and control enclosure.',
+    ],
+  },
+  'source-backed-2d-proof': {
+    sourceLabel: '2D Proof Fixture',
+    samples: [
+      'A source-backed 2D proof actuator module with ball screw actuator, linear guide rail, stepper motor, mounting bracket, limit switch, flexible coupling, and controlled source drawing evidence.',
+      'A linear actuator proof module with an explicit source-backed 2D schematic, guide rail, actuator body, motor coupling, mounting brackets, endstop switch, and BOM-ready validation notes.',
     ],
   },
 };

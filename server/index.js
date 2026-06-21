@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs/promises');
 const crypto = require('crypto');
+const path = require('path');
 const { GoogleGenAI, Type, Modality } = require('@google/genai');
 const { Ollama } = require('ollama');
 const farmBotInventory = require('../public/inventory/farmbot-genesis-v1.8.json');
@@ -675,6 +676,8 @@ const normalizeReferenceImages = (value) => {
         sourceUrl: normalizeName(image.sourceUrl || image.pageUrl || ''),
         licenseNote: normalizeName(image.licenseNote || image.license || ''),
         kind: normalizeName(image.kind || 'source-reference'),
+        contentType: normalizeName(image.contentType || ''),
+        sourceType: normalizeName(image.sourceType || ''),
       };
     })
     .filter(image => image?.url);
@@ -1020,6 +1023,19 @@ const readConnectorText = async (connector = {}) => {
     return { text, sourceKind: filePath.endsWith('.csv') ? 'csv' : 'json' };
   }
 
+  if (sourceUrl.startsWith('/inventory/')) {
+    if (connector.authMode && connector.authMode !== 'none') {
+      throw new Error('Authenticated inventory connectors must use http(s) sources. Use authMode "none" for bundled inventory fixtures.');
+    }
+    const publicInventoryRoot = path.resolve(__dirname, '..', 'public', 'inventory');
+    const requestedPath = path.resolve(publicInventoryRoot, `.${sourceUrl.replace('/inventory/', '/')}`);
+    if (!requestedPath.startsWith(`${publicInventoryRoot}${path.sep}`)) {
+      throw new Error('Inventory fixture path must stay under /inventory/.');
+    }
+    const text = await fs.readFile(requestedPath, 'utf8');
+    return { text, sourceKind: requestedPath.endsWith('.csv') ? 'csv' : 'json' };
+  }
+
   if (/^https?:\/\//i.test(sourceUrl)) {
     const credentialHeaders = await buildCredentialHeaders(connector);
     const response = await fetch(sourceUrl, {
@@ -1038,7 +1054,7 @@ const readConnectorText = async (connector = {}) => {
     };
   }
 
-  throw new Error('Unsupported inventory connector URL. Use demo://, file://, http://, or https://.');
+  throw new Error('Unsupported inventory connector URL. Use demo://, file://, /inventory/, http://, or https://.');
 };
 
 const loadInventoryRecords = async (connector = {}) => {
