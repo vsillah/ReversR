@@ -54,13 +54,15 @@ Avoid:
 Use for the first explicit start/end-frame pass. Do not use this without populated frame slots.
 
 ```text
-Locked premium factory shot. The left caliper jaw half and right rounded R body start visibly separated. Center knob torque pulls both halves inward until the gap fully closes into the exact metallic ReversR mark. Keep the camera nearly locked with a slow push-in. Real machined steel, clean fixture, no text. Teal appears only after full closure and gives one restrained glow pulse.
+Keep the exact silhouette from the start and end frames. Do not redesign the logo. The mark must remain an asymmetrical metallic R in every frame, never a circle, coin, medallion, monogram, or full outer ring. Locked premium factory shot. The main R body stays fixed in the fixture. The left caliper-jaw carriage begins offset outward with a clear visible gap. A torque driver turns the center knob, and that knob action slides only the left jaw inward until it seats flush against the fixed R body. Preserve the top bar, rounded bowl, diagonal leg, and open caliper jaws throughout. Do not drill new holes, cut new grooves, or create new channels. After the jaw fully seats, the metal finish brightens from dark machined steel to polished brushed steel. Then teal appears only inside the existing inset channels already visible in the end frame and gives one restrained glow pulse. Camera nearly locked, slow push-in, no close-up, no text.
 ```
 
 ## Frame-Control Rules
 
 - The frame slots, not the text prompt, are responsible for logo identity.
 - Do not attach extra logo references inside the freeform prompt box once `START FRAME` and `END FRAME` are populated.
+- If the model starts inventing circular or monogram geometry, simplify the motion prompt further instead of adding more machining verbs.
+- Treat the right R body as fixed unless the selected start frame clearly shows a second moving structural body. Too many moving pieces are causing geometry drift.
 - If the page becomes unstable while uploading local frame assets, fall back to the already-uploaded project images for one 5-second validation pass instead of forcing another freeform run.
 - Reject any run that drifts away from the exact approved metallic `R` silhouette even if the motion improves.
 
@@ -102,7 +104,7 @@ Defer. Highest drift risk and not recommended until the core closure action is s
 Paste this into the negative field.
 
 ```text
-text, letters, captions, subtitles, watermark, logo text, brand name, typography, fake UI, buttons, menus, status bar, phone mockup, human, hand, finger, face, body, robot arm as the only machine, sci-fi, holograms, neon signs, glitch, lens flare overload, sparks, flames, smoke, dust storm, debris, gears, cogs, clockwork, steampunk, warped letters, distorted logo, multiple logos, alternate logo, deformed parts, cluttered factory, messy workshop, oil stains, rust, grime, cartoon, illustration, low-poly, plastic look, chromatic aberration, heavy film grain, vignette, blur on final logo, abstract assembly, floating parts, shape morphing, generic circular monogram, invented logo geometry, early teal glow, hidden closure, cutaway to another angle before the two halves lock
+text, letters, captions, subtitles, watermark, logo text, brand name, typography, fake UI, buttons, menus, status bar, phone mockup, human, hand, finger, face, body, robot arm as the only machine, sci-fi, holograms, neon signs, glitch, lens flare overload, sparks, flames, smoke, dust storm, debris, gears, cogs, clockwork, steampunk, warped letters, distorted logo, multiple logos, alternate logo, deformed parts, cluttered factory, messy workshop, oil stains, rust, grime, cartoon, illustration, low-poly, plastic look, chromatic aberration, heavy film grain, vignette, blur on final logo, abstract assembly, floating parts, shape morphing, generic circular monogram, coin logo, medallion, disc emblem, full outer ring, symmetric circle, C-shaped symbol, invented logo geometry, drilling into the logo face, cutting new grooves, new channels, early teal glow, hidden closure, cutaway to another angle before the two halves lock
 ```
 
 ## Output Specs
@@ -124,6 +126,7 @@ Reject the candidate if any item fails.
 
 - Logo identity matches the approved hero/reference still package used for the run.
 - No invented R shape, alternate mark, or second logo.
+- No circular collapse into a coin, medallion, monogram, or full-ring emblem.
 - At 0.5s, the left half and right half are clearly readable as separate structural bodies.
 - By 3.0-4.0s, the gap between the two halves visibly shrinks because of center-knob torque.
 - Assembly resolves to a stable logo by 4.0s.

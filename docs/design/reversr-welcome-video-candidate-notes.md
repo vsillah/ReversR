@@ -35,6 +35,15 @@ Status: setup prepared; live run not yet completed.
 - Higgsfield repeatedly fell into a Chrome `Page Unresponsive` state while the duration popover remained active.
 - The explicit frame workflow is now the correct production path, but the first validation render was not cleanly launched from this session because the page became unstable before the final `Generate` action could be confirmed.
 
+### Prompt Corrections After Live Account Review
+
+- The live prompt had drifted into over-specific machining language such as `center circle`, `outer circle`, and multiple machine actions.
+- That wording encourages the model to reinterpret the approved `R` as a circular coin or monogram instead of preserving the asymmetrical silhouette from the frame slots.
+- The revised prompt now does three things:
+  - tells the model to preserve the exact start/end-frame silhouette and never become circular
+  - treats the main R body as fixed and the left caliper jaw as the primary moving part
+  - limits teal to the existing inset channels already present in the end frame
+
 ## Source Files
 
 - Approved candidate video: `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`
