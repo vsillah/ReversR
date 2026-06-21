@@ -69,6 +69,34 @@ Status: rejected after motion review.
   5. brushed-metal transition
   6. teal reveal
 
+## Candidate 2026-06-21: 55f80d11 Frame-Control Test
+
+Source file: `/private/tmp/reversr-higgsfield-review/hf_20260621_030642_55f80d11-57ca-4dac-806a-bc8995be3dd6.mp4`
+
+Status: improved, but still rejected.
+
+### What Improved
+
+- The start state holds much more faithfully through the first second.
+- The dark matte finish no longer jumps to brushed silver before the tool arrives.
+- The silhouette stays materially closer to the intended `R` during approach.
+
+### Remaining Failures
+
+- The tool remains too dominant through the payoff and obscures the closure beat.
+- The left-jaw travel is still not reading clearly enough as the hero motion.
+- Brushed silver and teal still arrive while the tool is effectively still active on the knob.
+
+### Prompt Implications
+
+- The next prompt must explicitly force a short tool-contact beat followed by tool retraction.
+- The next prompt must require visible left-jaw travel after contact, not just implied torque.
+- The next prompt must delay both the brushed-silver transition and teal reveal until the tool has lifted away.
+
+### Live Blocker
+
+- The next iteration could not be launched because the Higgsfield session hit an `OUT OF CREDITS` modal after this pass.
+
 ## Source Files
 
 - Approved candidate video: `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`

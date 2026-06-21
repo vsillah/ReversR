@@ -80,7 +80,7 @@ Use these as the source package before generating video:
    - visible left half and right half with a clear starting gap
    - center-knob torque visibly closes that gap
    - teal appears only after closure
-9. Claude rejects the candidate immediately if the first 3-4 seconds do not show the two halves and their visible closure. Also reject immediately if the logo collapses toward a circular coin, monogram, or full-ring emblem, if the geometry morphs before tool contact, or if the metal turns brushed silver before closure is earned. Only then should secondary variants be explored.
+9. Claude rejects the candidate immediately if the first 3-4 seconds do not show the two halves and their visible closure. Also reject immediately if the logo collapses toward a circular coin, monogram, or full-ring emblem, if the geometry morphs before tool contact, if the metal turns brushed silver before closure is earned, or if teal appears while the tool is still touching the knob. Only then should secondary variants be explored.
 10. Codex performs technical QA against the acceptance criteria before bringing the candidate to human review.
 11. Export the final MP4, an inert opening poster frame for the pre-play state, and a final-hold still for review.
 12. Replace `assets/welcome/reversr-welcome-intro.mp4` and `assets/welcome/reversr-welcome-poster.png`.
@@ -135,6 +135,7 @@ The output is usable only if:
 - Caliper jaws, center knob, and teal accents are readable on mobile.
 - The two halves seat flush before teal appears.
 - The brushed-steel transition happens only after closure, not autonomously during approach.
+- The torque tool retracts enough for the closure and payoff to remain readable; it does not dominate the final silver/teal beats.
 - The blue-teal glow is controlled and material-aware, not neon decoration.
 - No generated text, fake UI, labels, subtitles, or watermark appear.
 - The native title/tagline only appear after the logo is assembled.
