@@ -86,6 +86,7 @@ export default function PhaseThree({
   const styles = createStyles(Colors);
   const [spec, setSpec] = useState<TechnicalSpec | null>(existingSpec || null);
   const [localImageBase64, setLocalImageBase64] = useState<string | null>(null);
+  const [localImageSource, setLocalImageSource] = useState<AngleImage['imageSource'] | null>(null);
   const [threeDScene, setThreeDScene] = useState<ThreeDSceneDescriptor | null>(existingThreeDScene || null);
   
   const hasExistingData = !!(existingSpec);
@@ -256,9 +257,26 @@ export default function PhaseThree({
   const currentAngleImage = availableAngles.find(img => img.id === selectedAngleId) || availableAngles[0] || null;
   const currentAngleIndex = availableAngles.findIndex(img => img.id === selectedAngleId);
   const pendingAnglesCount = imageGenerating ? (3 - availableAngles.length) : 0;
-  const activeImageSource = currentAngleImage?.imageSource || innovation.referenceImages?.[0] || null;
+  const activeImageSource = currentAngleImage?.imageSource || localImageSource || innovation.referenceImages?.[0] || null;
   const activeImageSourceType = activeImageSource?.sourceType || activeImageSource?.kind || '';
   const isAiFallbackImage = activeImageSourceType === 'ai_generated_fallback' || activeImageSourceType === 'mock-tour-ai-fallback';
+  const isPlaceholderImage = activeImageSourceType === 'built_in_placeholder';
+  const isSourceReferenceImage = activeImageSourceType === 'inventory_reference' || activeImageSourceType === 'public_source_reference';
+  const visualProvenanceLabel = isSourceReferenceImage
+    ? 'Source-backed 2D reference'
+    : isAiFallbackImage
+      ? 'AI-generated visual fallback'
+      : isPlaceholderImage
+        ? 'Built-in placeholder fallback'
+        : 'Visual provenance pending';
+  const visualProvenanceTone = isSourceReferenceImage ? 'source' : isAiFallbackImage ? 'fallback' : isPlaceholderImage ? 'placeholder' : 'pending';
+  const visualProvenanceMessage = isSourceReferenceImage
+    ? 'Loaded from an explicit inventory reference image. Verify source rights before reuse outside the reconstruction package.'
+    : isAiFallbackImage
+      ? `No source-backed 2D schematic was available${activeImageSource?.sourceBacked3DAvailable ? '; provider 3D/CAD metadata is available for verification.' : '.'} Treat this as a review aid, not fabrication authority.`
+      : isPlaceholderImage
+        ? `No source-backed 2D image or usable AI image is available. Use the provider CAD/viewer links and BOM as the source of truth.`
+        : '';
   const database3DRenderUrl = innovation.viewerUrl || innovation.renderUrl || innovation.cadModelUrl || '';
   const database3DProvider = innovation.renderProvider || innovation.sourceProvider || 'approved database';
   const sourceRender = threeDScene?.sourceRender || null;
@@ -512,9 +530,10 @@ export default function PhaseThree({
     setCreditUpgradeUrl(null);
 
     try {
-      const imageData = await generate2DImage(innovation);
-      const imageUri = normalizeImageUri(imageData);
-      setLocalImageBase64(imageData);
+      const imageResult = await generate2DImage(innovation);
+      const imageUri = normalizeImageUri(imageResult.imageData);
+      setLocalImageBase64(imageResult.imageData);
+      setLocalImageSource(imageResult.imageSource || null);
       setStatus('complete');
       onComplete(spec, threeDScene, imageUri);
     } catch (err: unknown) {
@@ -832,18 +851,29 @@ export default function PhaseThree({
                   );
                 })()}
 
-                {mockMode && activeImageSource ? (
-                  <View style={[styles.mockSourceNotice, isAiFallbackImage && styles.mockFallbackNotice]}>
+                {activeImageSource ? (
+                  <View
+                    style={[
+                      styles.mockSourceNotice,
+                      visualProvenanceTone !== 'source' && styles.mockFallbackNotice,
+                    ]}
+                  >
                     <Ionicons
-                      name={isAiFallbackImage ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+                      name={visualProvenanceTone === 'source' ? 'checkmark-circle-outline' : 'alert-circle-outline'}
                       size={15}
-                      color={isAiFallbackImage ? Colors.orange[300] : Colors.accent}
+                      color={visualProvenanceTone === 'source' ? Colors.accent : Colors.orange[300]}
                     />
-                    <Text style={styles.mockSourceNoticeText}>
-                      {isAiFallbackImage
-                        ? 'AI-generated fallback mock reference. Not a source-backed schematic.'
-                        : 'Source-backed FarmBot reference loaded from the mock API fixture.'}
-                    </Text>
+                    <View style={styles.visualProvenanceTextBlock}>
+                      <Text style={styles.mockSourceNoticeText}>{visualProvenanceLabel}</Text>
+                      {visualProvenanceMessage ? (
+                        <Text style={styles.visualProvenanceDetail}>{visualProvenanceMessage}</Text>
+                      ) : null}
+                      {activeImageSource?.qualityGate?.length ? (
+                        <Text style={styles.visualProvenanceDetail}>
+                          Gate: {activeImageSource.qualityGate[0]}
+                        </Text>
+                      ) : null}
+                    </View>
                   </View>
                 ) : null}
                 
@@ -956,7 +986,7 @@ export default function PhaseThree({
                 <Ionicons name="image-outline" size={48} color={Colors.gray[600]} />
                 <Text style={styles.generatePromptTitle}>Generate a 2D reconstruction reference</Text>
                 <Text style={styles.generatePromptDesc}>
-                  AI-generated sketch visualization of the matched machine
+                  Uses source-backed 2D images when available. If not, AI fallback is clearly marked and must be verified against CAD, BOM, and provider records.
                 </Text>
                 <TouchableOpacity
                   style={styles.generateButton}
@@ -1677,11 +1707,19 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.orange[300] + '45',
   },
   mockSourceNoticeText: {
-    flex: 1,
     color: Colors.gray[300],
     fontSize: FontSizes.xs,
     lineHeight: 18,
     fontWeight: '700',
+  },
+  visualProvenanceTextBlock: {
+    flex: 1,
+    gap: 2,
+  },
+  visualProvenanceDetail: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    lineHeight: 17,
   },
   mockVisualButton: {
     alignSelf: 'center',

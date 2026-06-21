@@ -244,12 +244,21 @@ export interface FulfillmentOption {
 export interface ReferenceImage {
   id?: string;
   label: string;
-  url: string;
+  url?: string;
   sourceUrl?: string;
   licenseNote?: string;
   kind?: string;
   contentType?: string;
   sourceType?: string;
+  fallbackReason?: string;
+  factoryUseStatus?: string;
+  sourceBacked2DAvailable?: boolean;
+  sourceBacked3DAvailable?: boolean;
+  renderProvider?: string;
+  viewerUrl?: string;
+  cadFormats?: string[];
+  qualityGate?: string[];
+  requiresReview?: boolean;
 }
 
 export interface InnovationResult {
@@ -574,15 +583,19 @@ export const generate3DScene = async (innovation: InnovationResult): Promise<Thr
   });
 };
 
-export const generate2DImage = async (innovation: InnovationResult): Promise<string> => {
+export interface Generated2DImage {
+  imageData: string;
+  imageSource?: ReferenceImage;
+}
+
+export const generate2DImage = async (innovation: InnovationResult): Promise<Generated2DImage> => {
   const config = await getAiConfig();
   const headers = await getCommercialRequestHeaders({ 'Content-Type': 'application/json' });
-  const response = await fetchWithRetry<{ imageData: string; imageSource?: ReferenceImage }>(`${API_BASE}/api/gemini/generate-2d`, {
+  return fetchWithRetry<Generated2DImage>(`${API_BASE}/api/gemini/generate-2d`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ innovation, ...config })
   });
-  return response.imageData;
 };
 
 export const generateBOM = async (innovation: InnovationResult, analysis?: AnalysisResult): Promise<BillOfMaterials> => {

@@ -1828,28 +1828,6 @@ app.post('/api/gemini/technical-spec', async (req, res) => {
   }
 });
 
-const extractPublicReferenceImageUrl = (html = '', pageUrl = '') => {
-  const patterns = [
-    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["'][^>]*>/i,
-    /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i,
-    /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["'][^>]*>/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (!match?.[1]) continue;
-
-    try {
-      return new URL(match[1], pageUrl).toString();
-    } catch {
-      return '';
-    }
-  }
-
-  return '';
-};
-
 const getSourceBackedImage = async (innovation = {}) => {
   const references = Array.isArray(innovation.referenceImages) ? innovation.referenceImages : [];
 
@@ -1906,48 +1884,6 @@ const getSourceBackedImage = async (innovation = {}) => {
     }
   }
 
-  const sourceLinks = innovation.sourceLinks && typeof innovation.sourceLinks === 'object'
-    ? Object.values(innovation.sourceLinks).filter(url => /^https?:\/\//i.test(String(url)))
-    : [];
-
-  for (const pageUrl of sourceLinks.slice(0, 4)) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    try {
-      const response = await fetch(pageUrl, {
-        signal: controller.signal,
-        headers: {
-          Accept: 'text/html,*/*;q=0.8',
-          'User-Agent': 'ReversR-Rebuild/1.0 deterministic-public-reference-discovery',
-        },
-      });
-
-      if (!response.ok) continue;
-
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.toLowerCase().includes('text/html')) continue;
-
-      const imageUrl = extractPublicReferenceImageUrl(await response.text(), pageUrl);
-      if (!imageUrl) continue;
-
-      const publicImage = await getSourceBackedImage({
-        referenceImages: [{
-          id: 'public-source-reference',
-          label: 'Public source reference image',
-          url: imageUrl,
-          sourceUrl: pageUrl,
-          kind: 'public-source-reference',
-        }],
-      });
-
-      if (publicImage) return publicImage;
-    } catch (error) {
-      console.warn(`Public reference discovery failed for ${pageUrl}:`, error.message);
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-
   return null;
 };
 
@@ -1955,6 +1891,117 @@ const getDataUrlFromSourceBackedImage = (sourceBackedImage) => {
   if (!sourceBackedImage?.imageData) return null;
   const contentType = sourceBackedImage.imageSource?.contentType || 'image/png';
   return `data:${contentType};base64,${sourceBackedImage.imageData}`;
+};
+
+const get2DVisualContext = (innovation = {}) => {
+  const hasExplicit2DReference = Array.isArray(innovation.referenceImages)
+    && innovation.referenceImages.some(reference => {
+      const url = normalizeName(reference?.url);
+      const contentType = normalizeName(reference?.contentType || '').toLowerCase();
+      return url.startsWith('data:image/')
+        || /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(url)
+        || contentType.startsWith('image/');
+    });
+  const hasDatabase3D = Boolean(innovation.hasDatabase3DRender || innovation.renderUrl || innovation.viewerUrl || innovation.cadModelUrl);
+
+  return {
+    hasExplicit2DReference,
+    hasDatabase3D,
+    provider: normalizeName(innovation.renderProvider || innovation.sourceProvider || ''),
+    viewerUrl: normalizeName(innovation.viewerUrl || innovation.renderUrl || innovation.cadModelUrl || ''),
+    cadFormats: normalizeStringList(innovation.cadFormats),
+    sourceRecordId: normalizeName(innovation.sourceRecordId || ''),
+    licenseNote: normalizeName(innovation.licenseNote || ''),
+  };
+};
+
+const build2DImageSource = (innovation = {}, sourceType, label, extra = {}) => {
+  const context = get2DVisualContext(innovation);
+  return {
+    id: `${normalizeName(innovation.machineId || innovation.conceptName || 'reversr-visual').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${sourceType}`,
+    label,
+    sourceType,
+    kind: sourceType,
+    sourceBacked2DAvailable: context.hasExplicit2DReference,
+    sourceBacked3DAvailable: context.hasDatabase3D,
+    renderProvider: context.provider,
+    sourceRecordId: context.sourceRecordId,
+    viewerUrl: context.viewerUrl,
+    cadFormats: context.cadFormats,
+    licenseNote: context.licenseNote,
+    requiresReview: true,
+    factoryUseStatus: sourceType === 'inventory_reference'
+      ? 'source_reference_review_required'
+      : sourceType === 'ai_generated_fallback'
+        ? 'ai_fallback_review_required'
+        : 'not_factory_ready',
+    ...extra,
+  };
+};
+
+const buildPlaceholder2DResponse = (innovation = {}, angle = null, reason = 'gemini_unavailable') => ({
+  imageData: FALLBACK_IMAGE_BASE64,
+  imageSource: build2DImageSource(
+    innovation,
+    'built_in_placeholder',
+    angle ? `${angle.label} built-in placeholder` : 'Built-in placeholder reconstruction sketch',
+    {
+      fallbackReason: reason,
+      qualityGate: [
+        'No source-backed 2D image was available.',
+        'No AI image was generated for this response.',
+        'Use provider CAD/viewer links or regenerate when image credentials are available.',
+      ],
+    }
+  ),
+});
+
+const buildAi2DImageSource = (innovation = {}, angle = null, reason = 'source_2d_unavailable') => build2DImageSource(
+  innovation,
+  'ai_generated_fallback',
+  angle ? `${angle.label} AI-generated fallback` : 'AI-generated 2D fallback',
+  {
+    fallbackReason: reason,
+    qualityGate: [
+      'AI image is a visual reconstruction aid, not a source-backed schematic.',
+      'Verify geometry against source CAD/viewer links before fabrication.',
+      'Use BOM, assembly steps, and provider records as the manufacturing source of truth.',
+    ],
+  }
+);
+
+const build2DGenerationPrompt = (innovation = {}, angle = null) => {
+  const assemblyParts = Array.from(new Set((innovation.assemblySteps || []).flatMap(step => step.parts || []))).slice(0, 18);
+  const assemblySteps = (innovation.assemblySteps || []).slice(0, 6).map(step => ({
+    title: step.title,
+    parts: step.parts,
+    qualityCheck: step.qualityCheck,
+  }));
+  const sourceContext = get2DVisualContext(innovation);
+
+  return `Create a manufacturing-review 2D technical reference for a matched inventory record.
+
+Machine: ${innovation.machineName || innovation.conceptName || 'Matched machine'}
+Machine ID: ${innovation.machineId || 'pending'}
+Inventory source: ${innovation.inventorySource || 'approved inventory'}
+Source provider: ${innovation.sourceProvider || sourceContext.provider || 'not specified'}
+Source record ID: ${innovation.sourceRecordId || 'not specified'}
+Manufacturer part number: ${innovation.manufacturerPartNumber || 'not specified'}
+CAD formats available: ${sourceContext.cadFormats.length ? sourceContext.cadFormats.join(', ') : 'not specified'}
+Provider viewer/CAD URL available: ${sourceContext.viewerUrl ? 'yes' : 'no'}
+Description: ${innovation.conceptDescription || 'Inventory-matched reconstruction package'}
+Assembly parts: ${assemblyParts.join(', ') || 'not specified'}
+Assembly checkpoints: ${JSON.stringify(assemblySteps)}
+View: ${angle?.prompt || 'single-page orthographic reference with front, side, and isometric panels'}
+
+Generate a clean factory-review technical drawing, not marketing art:
+- white or light background, high contrast dark technical linework
+- orthographic geometry with consistent scale and stable perspective
+- show only the machine/components from the inventory record
+- include visible structural subassemblies, mounting brackets, rails, drives, sensors, fasteners, guards, and control enclosure when present in the source data
+- use callout leader lines and simple numeric markers only; do not render readable words, logos, brand labels, watermarks, paragraphs, or decorative typography
+- avoid fantasy parts, dramatic lighting, people, workshop scenes, product-ad style backgrounds, explosions, smoke, or glossy hero rendering
+- make it suitable as a shop-floor review aid that must be checked against CAD/BOM before fabrication`;
 };
 
 // Generate 3D scene
@@ -2062,31 +2109,28 @@ app.post('/api/gemini/generate-2d', async (req, res) => {
 
     const sourceBackedImage = await getSourceBackedImage(innovation);
     if (sourceBackedImage) {
-      return res.json(sourceBackedImage);
+      return res.json({
+        ...sourceBackedImage,
+        imageSource: build2DImageSource(
+          innovation,
+          'inventory_reference',
+          sourceBackedImage.imageSource?.label || 'Source-backed 2D inventory reference',
+          sourceBackedImage.imageSource
+        ),
+      });
     }
 
     if (!hasConfiguredGeminiKey()) {
-      return res.json({
-        imageData: FALLBACK_IMAGE_BASE64,
-        imageSource: {
-          sourceType: 'built_in_placeholder',
-          label: 'Built-in placeholder reconstruction sketch',
-        },
-      });
+      return res.json(buildPlaceholder2DResponse(
+        innovation,
+        null,
+        get2DVisualContext(innovation).hasDatabase3D
+          ? 'source_3d_metadata_available_but_no_source_2d_or_ai_key'
+          : 'no_source_2d_or_ai_key'
+      ));
     }
     
-    const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
-    
-Description: ${innovation.conceptDescription}
-Machine ID: ${innovation.machineId || 'pending'}
-Rebuild Outcome: ${innovation.marketBenefit}
-
-Generate a clean, professional machine reconstruction sketch with:
-- Clear line drawings showing the matched machine from multiple angles
-- Technical/blueprint aesthetic with a modern feel
-- DO NOT include any text, labels, annotations, or written words in the image
-- Use visual indicators like arrows or lines instead of text labels
-- Pure visual illustration only, no typography`;
+    const prompt = build2DGenerationPrompt(innovation);
 
     // Note: Don't cache images as they can be large and vary
     const result = await callGeminiWithRetry(async (ai) => {
@@ -2105,7 +2149,16 @@ Generate a clean, professional machine reconstruction sketch with:
         throw new Error("No image generated");
       }
 
-      return { imageData: imagePart.inlineData.data };
+      return {
+        imageData: imagePart.inlineData.data,
+        imageSource: buildAi2DImageSource(
+          innovation,
+          null,
+          get2DVisualContext(innovation).hasDatabase3D
+            ? 'source_3d_metadata_available_but_no_source_2d_image'
+            : 'no_source_backed_2d_image'
+        ),
+      };
     }, null, 4); // More retries for image generation
 
     res.json(result);
@@ -2113,13 +2166,7 @@ Generate a clean, professional machine reconstruction sketch with:
     console.error('Generate 2D error:', error);
 
     if (shouldUseDeterministicAiFallback(error)) {
-      return res.json({
-        imageData: FALLBACK_IMAGE_BASE64,
-        imageSource: {
-          sourceType: 'built_in_placeholder',
-          label: 'Built-in placeholder reconstruction sketch',
-        },
-      });
+      return res.json(buildPlaceholder2DResponse(req.body?.innovation || {}, null, 'ai_generation_failed_placeholder_used'));
     }
     
     // For image generation, provide a fallback option
@@ -2288,34 +2335,31 @@ app.post('/api/gemini/generate-2d-single-angle', async (req, res) => {
       return res.json({
         id: angle.id,
         label: `${angle.label} Reference`,
-        ...sourceBackedImage,
+        imageData: sourceBackedImage.imageData,
+        imageSource: build2DImageSource(
+          innovation,
+          'inventory_reference',
+          sourceBackedImage.imageSource?.label || `${angle.label} source-backed 2D reference`,
+          sourceBackedImage.imageSource
+        ),
       });
     }
 
     if (!hasConfiguredGeminiKey()) {
       return res.json({
         id: angle.id,
-        label: angle.label,
-        imageData: FALLBACK_IMAGE_BASE64,
+        label: `${angle.label} Placeholder`,
+        ...buildPlaceholder2DResponse(
+          innovation,
+          angle,
+          get2DVisualContext(innovation).hasDatabase3D
+            ? 'source_3d_metadata_available_but_no_source_2d_or_ai_key'
+            : 'no_source_2d_or_ai_key'
+        ),
       });
     }
     
-    const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
-
-Description: ${innovation.conceptDescription}
-Machine ID: ${innovation.machineId || 'pending'}
-Rebuild Outcome: ${innovation.marketBenefit || 'Reconstruction package'}
-
-VIEW ANGLE: ${angle.prompt}
-
-Generate a clean, professional machine reconstruction sketch with:
-- ${angle.label} showing the matched machine clearly
-- Clean technical line drawings
-- Technical/blueprint aesthetic with a modern feel
-- White or light background for clarity
-- DO NOT include any text, labels, annotations, or written words in the image
-- Use visual indicators like arrows or lines instead of text labels
-- Pure visual illustration only, no typography`;
+    const prompt = build2DGenerationPrompt(innovation, angle);
 
     const imageResult = await callGeminiWithRetry(async (ai) => {
       const response = await ai.models.generateContent({
@@ -2338,16 +2382,23 @@ Generate a clean, professional machine reconstruction sketch with:
 
     res.json({
       id: angle.id,
-      label: angle.label,
+      label: `${angle.label} AI Fallback`,
       imageData: imageResult,
+      imageSource: buildAi2DImageSource(
+        innovation,
+        angle,
+        get2DVisualContext(innovation).hasDatabase3D
+          ? 'source_3d_metadata_available_but_no_source_2d_image'
+          : 'no_source_backed_2d_image'
+      ),
     });
   } catch (error) {
     console.error(`Generate single angle error:`, error.message);
     if (shouldUseDeterministicAiFallback(error)) {
       return res.json({
         id: req.body?.angleId || 'front',
-        label: ANGLES.find(angle => angle.id === req.body?.angleId)?.label || 'Front View',
-        imageData: FALLBACK_IMAGE_BASE64,
+        label: `${ANGLES.find(angle => angle.id === req.body?.angleId)?.label || 'Front View'} Placeholder`,
+        ...buildPlaceholder2DResponse(req.body?.innovation || {}, ANGLES.find(angle => angle.id === req.body?.angleId), 'ai_generation_failed_placeholder_used'),
       });
     }
     const { statusCode, body } = createErrorResponse(error, 'Failed to generate angle view');
@@ -2369,7 +2420,13 @@ app.post('/api/gemini/generate-2d-angles', async (req, res) => {
         images: selectedAngles.map(angle => ({
           id: angle.id,
           label: `${angle.label} Reference`,
-          ...sourceBackedImage,
+          imageData: sourceBackedImage.imageData,
+          imageSource: build2DImageSource(
+            innovation,
+            'inventory_reference',
+            sourceBackedImage.imageSource?.label || `${angle.label} source-backed 2D reference`,
+            sourceBackedImage.imageSource
+          ),
         })),
       });
     }
@@ -2378,8 +2435,14 @@ app.post('/api/gemini/generate-2d-angles', async (req, res) => {
       return res.json({
         images: selectedAngles.map(angle => ({
           id: angle.id,
-          label: angle.label,
-          imageData: FALLBACK_IMAGE_BASE64,
+          label: `${angle.label} Placeholder`,
+          ...buildPlaceholder2DResponse(
+            innovation,
+            angle,
+            get2DVisualContext(innovation).hasDatabase3D
+              ? 'source_3d_metadata_available_but_no_source_2d_or_ai_key'
+              : 'no_source_2d_or_ai_key'
+          ),
         })),
       });
     }
@@ -2387,22 +2450,7 @@ app.post('/api/gemini/generate-2d-angles', async (req, res) => {
     const results = [];
     
     for (const angle of selectedAngles) {
-      const prompt = `Create a detailed technical sketch/blueprint illustration of: ${innovation.conceptName}
-
-Description: ${innovation.conceptDescription}
-Machine ID: ${innovation.machineId || 'pending'}
-Rebuild Outcome: ${innovation.marketBenefit || 'Reconstruction package'}
-
-VIEW ANGLE: ${angle.prompt}
-
-Generate a clean, professional machine reconstruction sketch with:
-- ${angle.label} showing the matched machine clearly
-- Clean technical line drawings
-- Technical/blueprint aesthetic with a modern feel
-- White or light background for clarity
-- DO NOT include any text, labels, annotations, or written words in the image
-- Use visual indicators like arrows or lines instead of text labels
-- Pure visual illustration only, no typography`;
+      const prompt = build2DGenerationPrompt(innovation, angle);
 
       try {
         const imageResult = await callGeminiWithRetry(async (ai) => {
@@ -2426,15 +2474,25 @@ Generate a clean, professional machine reconstruction sketch with:
 
         results.push({
           id: angle.id,
-          label: angle.label,
+          label: `${angle.label} AI Fallback`,
           imageData: imageResult,
+          imageSource: buildAi2DImageSource(
+            innovation,
+            angle,
+            get2DVisualContext(innovation).hasDatabase3D
+              ? 'source_3d_metadata_available_but_no_source_2d_image'
+              : 'no_source_backed_2d_image'
+          ),
         });
       } catch (angleError) {
         console.error(`Failed to generate ${angle.label}:`, angleError.message);
         results.push({
           id: angle.id,
-          label: angle.label,
+          label: shouldUseDeterministicAiFallback(angleError) ? `${angle.label} Placeholder` : angle.label,
           imageData: shouldUseDeterministicAiFallback(angleError) ? FALLBACK_IMAGE_BASE64 : null,
+          imageSource: shouldUseDeterministicAiFallback(angleError)
+            ? buildPlaceholder2DResponse(innovation, angle, 'ai_generation_failed_placeholder_used').imageSource
+            : undefined,
           error: shouldUseDeterministicAiFallback(angleError) ? undefined : 'Failed to generate this view',
         });
       }
