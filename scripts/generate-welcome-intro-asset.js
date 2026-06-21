@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const logo = path.join(root, 'assets/logo-transparent.png');
+const logo = path.join(root, 'assets/adaptive-icon.png');
 const outputDir = path.join(root, 'assets/welcome');
 const videoOut = path.join(outputDir, 'reversr-welcome-intro.mp4');
 const posterOut = path.join(outputDir, 'reversr-welcome-poster.png');
