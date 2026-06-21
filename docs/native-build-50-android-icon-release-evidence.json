@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T21:05:00Z",
+  "scope": "Android tester release evidence for ReversR Rebuild versionCode 50 with corrected Android adaptive launcher icon.",
+  "sourceCommit": "c3149886630c5b25894514f06ab9ef1e4f9d7201",
+  "pullRequest": {
+    "number": 111,
+    "title": "Fix Android adaptive launcher icon",
+    "url": "https://github.com/vsillah/ReversR-Rebuild/pull/111"
+  },
+  "android": {
+    "id": "5f61dedb-59e9-40ac-bb11-694b323a12bf",
+    "platform": "android",
+    "versionCode": "50",
+    "status": "finished",
+    "buildUrl": "https://expo.dev/accounts/vsillah/projects/reversr-rebuild/builds/5f61dedb-59e9-40ac-bb11-694b323a12bf",
+    "artifactUrl": "https://expo.dev/artifacts/eas/zUXxBqSjq4ycJncCdyIvbhXp3KTE_4_9DUrCQv02iKg.aab",
+    "fingerprint": "73ecac08ee2cc4e9695d8ddf221db81fa41cf630",
+    "completedAt": "2026-06-21T20:58:56.438Z"
+  },
+  "googlePlayInternalTesting": {
+    "submissionId": "03f5fd75-31d5-4010-99d5-1dd2669ac6ff",
+    "status": "submitted",
+    "track": "internal",
+    "releaseStatus": "COMPLETED",
+    "installUrl": "https://play.google.com/apps/internaltest/4700334027214849380"
+  },
+  "iconValidation": {
+    "config": {
+      "androidAdaptiveForeground": "./assets/android-adaptive-icon.png",
+      "androidAdaptiveBackgroundColor": "#ffffff",
+      "inAppLogoAsset": "./assets/adaptive-icon.png"
+    },
+    "artifactChecks": [
+      "Downloaded Android build 50 AAB from EAS artifact URL.",
+      "Extracted base/res/mipmap-xxxhdpi-v4/ic_launcher.webp and ic_launcher_foreground.webp from the AAB.",
+      "Converted embedded WebP launcher resources to PNG with ffmpeg for visual inspection.",
+      "Measured embedded adaptive foreground content at approximately 45.1% canvas width and 42.6% canvas height, reduced from build 49's approximately 51.4% width and 48.6% height.",
+      "Confirmed the in-app logo path was left unchanged because the OTA in-app logo fix was already verified on device."
+    ],
+    "previewFiles": [
+      "/tmp/reversr-icon-audit/android-50-launcher.png",
+      "/tmp/reversr-icon-audit/android-50-foreground.png",
+      "/tmp/reversr-icon-audit/android-adaptive-white-preview.png"
+    ]
+  },
+  "validation": [
+    "npm run typecheck -- --pretty false",
+    "npm run accessibility:preflight",
+    "npm run store:assets:preflight",
+    "npx expo export --platform web",
+    "git diff --check",
+    "npx expo config --json verified android.adaptiveIcon.foregroundImage=./assets/android-adaptive-icon.png and backgroundColor=#ffffff"
+  ],
+  "remainingGates": [
+    "Android tester must install internal testing versionCode 50 to validate the home-screen icon on device.",
+    "Google Play propagation may take several minutes after successful internal testing submission."
+  ]
+}
