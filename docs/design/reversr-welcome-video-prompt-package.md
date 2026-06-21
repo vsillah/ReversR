@@ -54,7 +54,7 @@ Avoid:
 Use for the first explicit start/end-frame pass. Do not use this without populated frame slots.
 
 ```text
-Keep the exact silhouette from the start and end frames. Do not redesign the logo. The mark must remain an asymmetrical metallic R in every frame, never a circle, coin, medallion, monogram, or full outer ring. Locked premium factory shot. The main R body stays fixed in the fixture. The left caliper-jaw carriage begins offset outward with a clear visible gap. A torque driver turns the center knob, and that knob action slides only the left jaw inward until it seats flush against the fixed R body. Preserve the top bar, rounded bowl, diagonal leg, and open caliper jaws throughout. Do not drill new holes, cut new grooves, or create new channels. After the jaw fully seats, the metal finish brightens from dark machined steel to polished brushed steel. Then teal appears only inside the existing inset channels already visible in the end frame and gives one restrained glow pulse. Camera nearly locked, slow push-in, no close-up, no text.
+Follow the start frame exactly until tool contact. No morphing before contact. No metal brightening before contact. Keep the exact silhouette from the start and end frames. Do not redesign the logo. The mark must remain an asymmetrical metallic R in every frame, never a circle, coin, medallion, monogram, or full outer ring. The first second should look almost frozen: dark matte machined logo, same geometry as the start frame, same gap, same finish, while the torque tool moves into position. The main R body stays fixed in the fixture. Only the left caliper-jaw carriage is allowed to move. When the torque driver makes contact with the center knob, that contact causes the left jaw to slide inward until it seats flush against the fixed R body. Preserve the top bar, rounded bowl, diagonal leg, and open caliper jaws throughout. Do not drill into the logo face. Do not cut new holes, grooves, or channels. Only after the jaw is fully seated and the gap is fully closed may the dark matte metal turn into polished brushed steel. Only after the polished-metal state is complete may teal appear inside the existing inset channels already visible in the end frame. One restrained teal glow pulse only after full assembly. Camera nearly locked, slow push-in, no close-up, no text.
 ```
 
 ## Frame-Control Rules
@@ -63,6 +63,8 @@ Keep the exact silhouette from the start and end frames. Do not redesign the log
 - Do not attach extra logo references inside the freeform prompt box once `START FRAME` and `END FRAME` are populated.
 - If the model starts inventing circular or monogram geometry, simplify the motion prompt further instead of adding more machining verbs.
 - Treat the right R body as fixed unless the selected start frame clearly shows a second moving structural body. Too many moving pieces are causing geometry drift.
+- The first second is a causality gate: the start frame should remain visually stable until the torque tool reaches the knob.
+- Do not ask for material transformation, teal injection, or glow in the same sentence as tool approach. Those must happen strictly after closure.
 - If the page becomes unstable while uploading local frame assets, fall back to the already-uploaded project images for one 5-second validation pass instead of forcing another freeform run.
 - Reject any run that drifts away from the exact approved metallic `R` silhouette even if the motion improves.
 
@@ -75,9 +77,9 @@ Best first pass. This is the only recommended next credit burn until the closure
 - Seed path: explicit `START FRAME` and `END FRAME` slots.
 - Camera: locked or nearly locked product shot, very slow push-in only.
 - 0.0-1.0s: frame obeys the start anchor; the halves are visibly separate with a clear gap.
-- 1.0-3.2s: center-knob torque drives closure; the gap visibly shrinks to zero.
-- 3.2-4.2s: the halves lock flush and the brushed metal brightens.
-- 4.2-5.0s: teal appears only after closure, pulses once softly, then holds.
+- 1.0-3.2s: after visible tool contact, center-knob torque drives closure; the gap visibly shrinks to zero.
+- 3.2-4.2s: the halves lock flush and only then the brushed metal brightens.
+- 4.2-5.0s: teal appears only after closure and after the polished-metal state is established, pulses once softly, then holds.
 
 ### Variant B: Center Knob Calibration
 
@@ -104,7 +106,7 @@ Defer. Highest drift risk and not recommended until the core closure action is s
 Paste this into the negative field.
 
 ```text
-text, letters, captions, subtitles, watermark, logo text, brand name, typography, fake UI, buttons, menus, status bar, phone mockup, human, hand, finger, face, body, robot arm as the only machine, sci-fi, holograms, neon signs, glitch, lens flare overload, sparks, flames, smoke, dust storm, debris, gears, cogs, clockwork, steampunk, warped letters, distorted logo, multiple logos, alternate logo, deformed parts, cluttered factory, messy workshop, oil stains, rust, grime, cartoon, illustration, low-poly, plastic look, chromatic aberration, heavy film grain, vignette, blur on final logo, abstract assembly, floating parts, shape morphing, generic circular monogram, coin logo, medallion, disc emblem, full outer ring, symmetric circle, C-shaped symbol, invented logo geometry, drilling into the logo face, cutting new grooves, new channels, early teal glow, hidden closure, cutaway to another angle before the two halves lock
+text, letters, captions, subtitles, watermark, logo text, brand name, typography, fake UI, buttons, menus, status bar, phone mockup, human, hand, finger, face, body, robot arm as the only machine, sci-fi, holograms, neon signs, glitch, lens flare overload, sparks, flames, smoke, dust storm, debris, gears, cogs, clockwork, steampunk, warped letters, distorted logo, multiple logos, alternate logo, deformed parts, cluttered factory, messy workshop, oil stains, rust, grime, cartoon, illustration, low-poly, plastic look, chromatic aberration, heavy film grain, vignette, blur on final logo, abstract assembly, floating parts, shape morphing, generic circular monogram, coin logo, medallion, disc emblem, full outer ring, symmetric circle, C-shaped symbol, invented logo geometry, drilling into the logo face, cutting new grooves, new channels, pre-contact morphing, autonomous metal brightening, early polished steel, early teal glow, hidden closure, cutaway to another angle before the two halves lock
 ```
 
 ## Output Specs
@@ -127,6 +129,8 @@ Reject the candidate if any item fails.
 - Logo identity matches the approved hero/reference still package used for the run.
 - No invented R shape, alternate mark, or second logo.
 - No circular collapse into a coin, medallion, monogram, or full-ring emblem.
+- No visible geometry change before the torque tool contacts the center knob.
+- No brushed-steel transition before closure is complete.
 - At 0.5s, the left half and right half are clearly readable as separate structural bodies.
 - By 3.0-4.0s, the gap between the two halves visibly shrinks because of center-knob torque.
 - Assembly resolves to a stable logo by 4.0s.

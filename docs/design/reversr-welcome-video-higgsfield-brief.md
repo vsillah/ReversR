@@ -80,7 +80,7 @@ Use these as the source package before generating video:
    - visible left half and right half with a clear starting gap
    - center-knob torque visibly closes that gap
    - teal appears only after closure
-9. Claude rejects the candidate immediately if the first 3-4 seconds do not show the two halves and their visible closure. Also reject immediately if the logo collapses toward a circular coin, monogram, or full-ring emblem. Only then should secondary variants be explored.
+9. Claude rejects the candidate immediately if the first 3-4 seconds do not show the two halves and their visible closure. Also reject immediately if the logo collapses toward a circular coin, monogram, or full-ring emblem, if the geometry morphs before tool contact, or if the metal turns brushed silver before closure is earned. Only then should secondary variants be explored.
 10. Codex performs technical QA against the acceptance criteria before bringing the candidate to human review.
 11. Export the final MP4, an inert opening poster frame for the pre-play state, and a final-hold still for review.
 12. Replace `assets/welcome/reversr-welcome-intro.mp4` and `assets/welcome/reversr-welcome-poster.png`.
@@ -131,8 +131,10 @@ The output is usable only if:
 - The knob torque visibly causes the two halves to move together and close the gap.
 - The ReversR logo remains recognizable as the approved brushed-steel caliper-R used in the selected metal-to-teal candidate.
 - The asymmetrical `R` silhouette remains intact; the model must not reinterpret the mark as a centered circular emblem.
+- Before the torque tool touches the knob, the logo remains visually stable in the dark matte start state.
 - Caliper jaws, center knob, and teal accents are readable on mobile.
 - The two halves seat flush before teal appears.
+- The brushed-steel transition happens only after closure, not autonomously during approach.
 - The blue-teal glow is controlled and material-aware, not neon decoration.
 - No generated text, fake UI, labels, subtitles, or watermark appear.
 - The native title/tagline only appear after the logo is assembled.

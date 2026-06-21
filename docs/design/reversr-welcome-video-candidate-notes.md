@@ -44,6 +44,31 @@ Status: setup prepared; live run not yet completed.
   - treats the main R body as fixed and the left caliper jaw as the primary moving part
   - limits teal to the existing inset channels already present in the end frame
 
+## Candidate 2026-06-21: bac3cd62 Frame-Control Test
+
+Source file: `/Users/vambahsillah/Downloads/hf_20260621_024656_bac3cd62-b8c3-4239-b34e-1bc87a69a799.mp4`
+
+Status: rejected after motion review.
+
+### Observed Failures
+
+- The `R` reshapes before the torque drill reaches the knob. The top-left structure visibly morphs during approach instead of holding the start frame.
+- The metal brightens to brushed silver on its own before the causal assembly beat is complete.
+- Teal appears while the tool is still active, which weakens the intended sequence.
+
+### Prompt Implications
+
+- The next prompt must explicitly freeze the start state until tool contact.
+- The next prompt must prohibit any pre-contact geometry change.
+- The next prompt must prohibit autonomous metal brightening before full closure.
+- The next prompt must make the event order explicit:
+  1. stable dark matte start frame
+  2. tool approach
+  3. tool contact
+  4. jaw closure
+  5. brushed-metal transition
+  6. teal reveal
+
 ## Source Files
 
 - Approved candidate video: `/private/tmp/reversr-higgsfield/reversr-kling-metal-teal-glow.mp4`
