@@ -41,7 +41,6 @@ interface Props {
   initialInput?: string;
   initialImage?: string | null;
   mockAnalysis?: AnalysisResult | null;
-  mockInput?: string;
   inventoryRefreshKey?: number;
 }
 
@@ -60,7 +59,6 @@ export default function PhaseOne({
   initialInput,
   initialImage,
   mockAnalysis,
-  mockInput,
   inventoryRefreshKey = 0,
 }: Props) {
   const { colors: Colors } = useAppTheme();
@@ -154,7 +152,7 @@ export default function PhaseOne({
   };
 
   const handleAnalyze = async () => {
-    const activeInput = getActiveInput() || mockInput || '';
+    const activeInput = getActiveInput();
     if (!activeInput.trim() && !capturedImage) return;
     if (mockAnalysis) {
       setError(null);
@@ -370,6 +368,9 @@ export default function PhaseOne({
                 numberOfLines={4}
                 editable={!isLoading}
               />
+              <Text style={styles.inputHint}>
+                Suggested example only. ReversR uses this field only after you enter your own text.
+              </Text>
             </View>
           )}
 
@@ -594,7 +595,14 @@ const createStyles = (Colors: AppColors) => {
     color: Colors.mutedText,
     marginBottom: Spacing.sm,
   },
-  typeContent: {},
+  typeContent: {
+    gap: Spacing.sm,
+  },
+  inputHint: {
+    fontSize: FontSizes.xs,
+    color: Colors.dimText,
+    lineHeight: 18,
+  },
   scanContent: {
     gap: Spacing.md,
   },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image, Alert, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -1322,7 +1322,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
+      >
         <View style={styles.modalContent} testID="reversr-tour-settings">
           <View style={styles.header}>
             <Text style={styles.title}>Settings</Text>
@@ -1365,7 +1369,14 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             onChange: handleProfileImageSelected,
           })}
 
-          <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.body}
+            contentContainerStyle={styles.bodyContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          >
             {settingsSection === 'profile' && (
               <View style={styles.profilePanel}>
                 <View style={styles.policyHeader}>
@@ -2763,7 +2774,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
             </TouchableOpacity>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

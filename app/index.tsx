@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Modal,
   Linking,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppColors, Spacing, FontSizes, Radii, Fonts, makeShadows } from '../constants/theme';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { LinearGradient } from "expo-linear-gradient";
-import { BottomTabBar, HorizontalStepper, ScoreRing } from "../components/ui";
+import { BottomTabBar, HorizontalStepper } from "../components/ui";
 import ReversRLogoMark from "../components/ReversRLogoMark";
 import AlertModal from "../components/AlertModal";
 import WelcomeScreen from "../components/WelcomeScreen";
@@ -1502,7 +1504,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? safeAreaInsets.top + 12 : 0}
+    >
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <ReversRLogoMark colors={Colors} size={40} />
@@ -1625,33 +1631,15 @@ export default function HomeScreen() {
       )}
 
       <View style={styles.progressBar}>
-        <LinearGradient
-          colors={Colors.mode === 'dark'
-            ? ['rgba(0,255,157,0.14)', 'rgba(16,18,24,0.25)']
-            : ['rgba(0,122,85,0.10)', 'rgba(255,255,255,0)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.currentStepCard}
-        >
-          <ScoreRing
-            progress={context.phase / 4}
-            value={`${Math.min(context.phase, 4)}/4`}
-            caption="Step"
-            size={72}
-            strokeWidth={8}
+        <View style={styles.phaseStepperCard}>
+          <HorizontalStepper
+            steps={PHASE_STEP_LABELS}
+            subLabels={PHASE_STEP_HINTS}
+            currentStep={context.phase}
+            onStepPress={(step) => setPhaseActionModal(step)}
+            testID="reversr-tour-phase-nav"
           />
-          <View style={styles.currentStepInfo}>
-            <Text style={styles.currentStepOverline}>Current step</Text>
-            <Text style={styles.currentStepName}>{PHASE_STEP_LABELS[Math.min(context.phase, 4) - 1]}</Text>
-          </View>
-        </LinearGradient>
-        <HorizontalStepper
-          steps={PHASE_STEP_LABELS}
-          subLabels={PHASE_STEP_HINTS}
-          currentStep={context.phase}
-          onStepPress={(step) => setPhaseActionModal(step)}
-          testID="reversr-tour-phase-nav"
-        />
+        </View>
       </View>
 
       <ScrollView
@@ -1661,6 +1649,9 @@ export default function HomeScreen() {
           tourActive && styles.contentWithTour,
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
       >
         {context.phase === 1 && (
           <PhaseOne
@@ -1670,7 +1661,6 @@ export default function HomeScreen() {
             initialInput={context.input}
             initialImage={context.capturedImage}
             mockAnalysis={mockJourneyActive ? MOCK_TOUR_ANALYSIS : null}
-            mockInput={mockJourneyActive ? MOCK_TOUR_INPUT : undefined}
             inventoryRefreshKey={inventorySampleRefreshKey}
           />
         )}
@@ -1876,7 +1866,7 @@ export default function HomeScreen() {
         onMore={() => openSettings('account')}
         bottomInset={safeAreaInsets.bottom}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -2059,38 +2049,15 @@ const createStyles = (Colors: AppColors) => {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.md,
-    gap: Spacing.md,
   },
-  currentStepCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    padding: Spacing.md,
+  phaseStepperCard: {
     borderRadius: Radii.lg,
     borderWidth: 1,
-    borderColor: Colors.mode === 'dark' ? 'rgba(0,255,157,0.30)' : Colors.border,
-  },
-  currentStepInfo: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  currentStepOverline: {
-    fontFamily: Fonts.bold,
-    fontSize: 11,
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
-    color: Colors.accent,
-  },
-  currentStepName: {
-    fontFamily: Fonts.display,
-    fontSize: FontSizes.xl,
-    color: Colors.text,
-  },
-  currentStepHint: {
-    fontSize: FontSizes.sm,
-    color: Colors.mutedText,
-    lineHeight: 18,
+    borderColor: Colors.border,
+    backgroundColor: Colors.panel,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.lg,
+    ...shadows.card,
   },
   content: {
     flex: 1,
