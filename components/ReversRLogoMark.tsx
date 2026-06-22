@@ -12,7 +12,7 @@ export default function ReversRLogoMark({
   size?: number;
 }) {
   const isDark = colors.mode === 'dark';
-  const imageScale = 1.06;
+  const imageScale = 1.01;
   const imageOffsetX = size * 0.035;
 
   return (
