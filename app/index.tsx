@@ -594,6 +594,8 @@ export default function HomeScreen() {
     message: string;
     buttons: Array<{ text: string; onPress: () => void; style?: 'default' | 'destructive' | 'cancel' }>;
   } | null>(null);
+  const workflowScrollRef = useRef<ScrollView>(null);
+  const pendingWorkflowScrollResetRef = useRef(false);
   
   const { generate2DVisualization } = useGemini();
   const tourStep = TOUR_STEPS[tourStepIndex];
@@ -682,6 +684,22 @@ export default function HomeScreen() {
   useEffect(() => {
     setWelcomeIntroVisible(true);
     setWelcomeIntroLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!started || showHistory || welcomeIntroVisible) return;
+
+    pendingWorkflowScrollResetRef.current = true;
+    requestAnimationFrame(() => {
+      workflowScrollRef.current?.scrollTo({ y: 0, animated: false });
+    });
+  }, [context.id, context.phase, showHistory, started, welcomeIntroVisible]);
+
+  const flushWorkflowScrollReset = useCallback(() => {
+    if (!pendingWorkflowScrollResetRef.current) return;
+
+    workflowScrollRef.current?.scrollTo({ y: 0, animated: false });
+    pendingWorkflowScrollResetRef.current = false;
   }, []);
 
   useEffect(() => {
@@ -1638,6 +1656,8 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView
+        key={`workflow-surface:${context.id}:${context.phase}`}
+        ref={workflowScrollRef}
         style={styles.content}
         contentContainerStyle={[
           { paddingBottom: contentBottomPadding },
@@ -1647,6 +1667,7 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
         automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        onContentSizeChange={flushWorkflowScrollReset}
       >
         {context.phase === 1 && (
           <PhaseOne
