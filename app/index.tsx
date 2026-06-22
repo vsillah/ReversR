@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Modal,
   Linking,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -1502,7 +1504,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? safeAreaInsets.top + 12 : 0}
+    >
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <ReversRLogoMark colors={Colors} size={40} />
@@ -1643,6 +1649,9 @@ export default function HomeScreen() {
           tourActive && styles.contentWithTour,
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
       >
         {context.phase === 1 && (
           <PhaseOne
@@ -1857,7 +1866,7 @@ export default function HomeScreen() {
         onMore={() => openSettings('account')}
         bottomInset={safeAreaInsets.bottom}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

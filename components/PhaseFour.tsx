@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Linking,
   TextInput,
+  Platform,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -1271,7 +1272,15 @@ export default function PhaseFour({
   };
 
   return (
-    <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false} testID="reversr-tour-build">
+    <ScrollView
+      ref={scrollViewRef}
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      testID="reversr-tour-build"
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+    >
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerIcon}>
