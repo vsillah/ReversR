@@ -41,14 +41,6 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
     videoPlayer.play();
   });
 
-  const pausePlayer = React.useCallback(() => {
-    try {
-      player.pause();
-    } catch (error) {
-      console.warn('Failed to pause welcome intro video', error);
-    }
-  }, [player]);
-
   const handleEnter = React.useCallback(() => {
     if (hasEnteredRef.current) return;
     hasEnteredRef.current = true;
@@ -57,8 +49,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       fallbackTimerRef.current = null;
     }
     onEnter();
-    setTimeout(pausePlayer, 0);
-  }, [onEnter, pausePlayer]);
+  }, [onEnter]);
 
   const scheduleFallback = React.useCallback((durationSeconds?: number) => {
     if (fallbackTimerRef.current) {
@@ -84,9 +75,8 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
         clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
       }
-      pausePlayer();
     };
-  }, [pausePlayer, player, scheduleFallback]);
+  }, [player, scheduleFallback]);
 
   useEventListener(player, 'playToEnd', handleEnter);
   useEventListener(player, 'sourceLoad', ({ duration }) => {
