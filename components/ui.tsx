@@ -593,9 +593,10 @@ export function HorizontalStepper({
 }) {
   const { colors } = useAppTheme();
   const connectorInset = `${100 / (steps.length * 2)}%` as ViewStyle['left'];
+  const stepColumnMinHeight = subLabels?.length ? 82 : 62;
   return (
     <View
-      style={{ position: 'relative', flexDirection: 'row', alignItems: 'flex-start' }}
+      style={{ position: 'relative', flexDirection: 'row', alignItems: 'flex-start', paddingBottom: 4 }}
       testID={testID}
     >
       {steps.length > 1 ? (
@@ -652,8 +653,18 @@ export function HorizontalStepper({
           </View>
         );
         return (
-          <View key={label} style={{ flex: 1, minWidth: 0 }}>
-            <View style={{ flex: 1, minWidth: 0, alignItems: 'center', gap: 5, paddingHorizontal: 3 }}>
+          <View key={label} style={{ flex: 1, minWidth: 0, alignItems: 'center' }}>
+            <View
+              style={{
+                width: '100%',
+                minWidth: 0,
+                minHeight: stepColumnMinHeight,
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: 5,
+                paddingHorizontal: 3,
+              }}
+            >
               {canPress ? (
                 <TouchableOpacity
                   onPress={() => onStepPress?.(step)}
