@@ -6,6 +6,8 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes, Radii } from '../constants/theme';
@@ -537,10 +539,18 @@ export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarI
         </View>
       )}
 
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+      >
       <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: bottomBarInset }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
       >
         {loading ? (
           <View style={styles.emptyState}>
@@ -761,6 +771,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarI
           ))
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <AlertModal
         visible={deleteAlert?.visible || false}

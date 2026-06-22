@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '../constants/theme';
 import { CommercialPlanId, useCommercialization } from '../hooks/useCommercialization';
@@ -71,7 +71,18 @@ export default function AccountScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+    >
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+    >
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.kicker}>ReversR Commercial Account</Text>
@@ -210,6 +221,7 @@ export default function AccountScreen() {
 
       {(status || error) && <Text style={styles.statusText}>{status || error}</Text>}
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
