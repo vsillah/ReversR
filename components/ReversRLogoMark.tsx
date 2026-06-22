@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { AppColors, Radii } from '../constants/theme';
 
-const LOGO_MARK = require('../assets/adaptive-icon.png');
+const LOGO_MARK = require('../assets/logo-transparent.png');
 
 export default function ReversRLogoMark({
   colors,
@@ -12,7 +12,8 @@ export default function ReversRLogoMark({
   size?: number;
 }) {
   const isDark = colors.mode === 'dark';
-  const imageScale = 0.92;
+  const imageScale = 1.01;
+  const imageOffsetX = size * 0.035;
 
   return (
     <View
@@ -41,6 +42,7 @@ export default function ReversRLogoMark({
             width: size * imageScale,
             height: size * imageScale,
             opacity: 1,
+            transform: [{ translateX: imageOffsetX }],
           },
         ]}
         resizeMode="contain"
