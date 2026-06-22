@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-06-22T19:55:55.485Z",
+  "appUrl": "http://localhost:5001",
+  "outputDir": "docs/store-screenshots/traceparts-current",
+  "note": "Web preview screenshots for store-review planning. Final App Store and Google Play submissions still require native device screenshots from EAS preview builds.",
+  "viewports": [
+    {
+      "name": "phone",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "tablet",
+      "width": 1024,
+      "height": 1366
+    }
+  ],
+  "expectedScreenIds": [
+    "welcome",
+    "scan",
+    "inventory-validation",
+    "design-match",
+    "build-handoff",
+    "privacy"
+  ],
+  "capturedByViewport": {
+    "phone": true,
+    "tablet": true
+  },
+  "captures": [
+    {
+      "file": "docs/store-screenshots/traceparts-current/phone-01-welcome.png",
+      "viewport": "phone",
+      "sequence": 1,
+      "screenId": "welcome",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/phone-02-scan.png",
+      "viewport": "phone",
+      "sequence": 2,
+      "screenId": "scan",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/phone-03-inventory-validation.png",
+      "viewport": "phone",
+      "sequence": 3,
+      "screenId": "inventory-validation",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/phone-04-design-match.png",
+      "viewport": "phone",
+      "sequence": 4,
+      "screenId": "design-match",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/phone-05-build-handoff.png",
+      "viewport": "phone",
+      "sequence": 5,
+      "screenId": "build-handoff",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/phone-06-privacy.png",
+      "viewport": "phone",
+      "sequence": 6,
+      "screenId": "privacy",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/tablet-01-welcome.png",
+      "viewport": "tablet",
+      "sequence": 1,
+      "screenId": "welcome",
+      "width": 1024,
+      "height": 1366
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/tablet-02-scan.png",
+      "viewport": "tablet",
+      "sequence": 2,
+      "screenId": "scan",
+      "width": 1024,
+      "height": 1366
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/tablet-03-inventory-validation.png",
+      "viewport": "tablet",
+      "sequence": 3,
+      "screenId": "inventory-validation",
+      "width": 1024,
+      "height": 1366
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/tablet-04-design-match.png",
+      "viewport": "tablet",
+      "sequence": 4,
+      "screenId": "design-match",
+      "width": 1024,
+      "height": 1366
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/tablet-05-build-handoff.png",
+      "viewport": "tablet",
+      "sequence": 5,
+      "screenId": "build-handoff",
+      "width": 1024,
+      "height": 1366
+    },
+    {
+      "file": "docs/store-screenshots/traceparts-current/tablet-06-privacy.png",
+      "viewport": "tablet",
+      "sequence": 6,
+      "screenId": "privacy",
+      "width": 1024,
+      "height": 1366
+    }
+  ],
+  "nativeRequirement": {
+    "finalNativeScreenshotsStillRequired": true,
+    "directory": "docs/store-screenshots/native/",
+    "filenames": [
+      "android-01-welcome.png",
+      "android-02-scan.png",
+      "android-03-inventory-validation.png",
+      "android-04-design-match.png",
+      "android-05-build-handoff.png",
+      "ios-01-welcome.png",
+      "ios-02-scan.png",
+      "ios-03-inventory-validation.png",
+      "ios-04-design-match.png",
+      "ios-05-build-handoff.png"
+    ]
+  }
+}

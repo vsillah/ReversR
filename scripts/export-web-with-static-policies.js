@@ -24,23 +24,23 @@ const tracePartsAssets = [
     target: 'traceparts-assets/reversr-welcome-intro.mp4',
   },
   {
-    source: 'docs/store-screenshots/google-play-phone/google-play-phone-01-welcome.png',
+    source: 'docs/store-screenshots/traceparts-current/phone-01-welcome.png',
     target: 'traceparts-assets/screenshots/welcome.png',
   },
   {
-    source: 'docs/store-screenshots/google-play-phone/google-play-phone-02-scan.png',
+    source: 'docs/store-screenshots/traceparts-current/phone-02-scan.png',
     target: 'traceparts-assets/screenshots/scan.png',
   },
   {
-    source: 'docs/store-screenshots/google-play-phone/google-play-phone-03-inventory-validation.png',
+    source: 'docs/store-screenshots/traceparts-current/phone-03-inventory-validation.png',
     target: 'traceparts-assets/screenshots/inventory-validation.png',
   },
   {
-    source: 'docs/store-screenshots/google-play-phone/google-play-phone-04-design-match.png',
+    source: 'docs/store-screenshots/traceparts-current/phone-04-design-match.png',
     target: 'traceparts-assets/screenshots/design-match.png',
   },
   {
-    source: 'docs/store-screenshots/google-play-phone/google-play-phone-05-build-handoff.png',
+    source: 'docs/store-screenshots/traceparts-current/phone-05-build-handoff.png',
     target: 'traceparts-assets/screenshots/build-handoff.png',
   },
 ];

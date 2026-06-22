@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-06-22T19:55:55.485Z",
+  "appUrl": "http://localhost:5001",
+  "note": "Web preview screenshots for store-review planning. Final App Store and Google Play submissions still require native device screenshots from EAS preview builds.",
+  "files": [
+    "docs/store-screenshots/traceparts-current/phone-01-welcome.png",
+    "docs/store-screenshots/traceparts-current/phone-02-scan.png",
+    "docs/store-screenshots/traceparts-current/phone-03-inventory-validation.png",
+    "docs/store-screenshots/traceparts-current/phone-04-design-match.png",
+    "docs/store-screenshots/traceparts-current/phone-05-build-handoff.png",
+    "docs/store-screenshots/traceparts-current/phone-06-privacy.png",
+    "docs/store-screenshots/traceparts-current/tablet-01-welcome.png",
+    "docs/store-screenshots/traceparts-current/tablet-02-scan.png",
+    "docs/store-screenshots/traceparts-current/tablet-03-inventory-validation.png",
+    "docs/store-screenshots/traceparts-current/tablet-04-design-match.png",
+    "docs/store-screenshots/traceparts-current/tablet-05-build-handoff.png",
+    "docs/store-screenshots/traceparts-current/tablet-06-privacy.png"
+  ]
+}

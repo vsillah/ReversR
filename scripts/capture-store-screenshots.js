@@ -47,10 +47,52 @@ const clickText = async (page, label, occurrence = 'last') => {
   await wait(800);
 };
 
+const clickTextIfPresent = async (page, label, occurrence = 'last') => {
+  const group = page.getByText(label, { exact: false });
+  const locator = occurrence === 'first' ? group.first() : group.last();
+  if (!(await locator.count())) {
+    return false;
+  }
+  await locator.scrollIntoViewIfNeeded().catch(() => {});
+  await locator.click({ timeout: 15000 });
+  await wait(800);
+  return true;
+};
+
+const waitForAnyText = async (page, labels, timeout = 20000) => {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    for (const label of labels) {
+      if (await page.getByText(label, { exact: false }).first().count()) {
+        return label;
+      }
+    }
+    await wait(250);
+  }
+
+  const body = await page.locator('body').innerText().catch(() => '');
+  throw new Error(`Could not find any of: ${labels.join(', ')}. Current page text: ${body.slice(0, 1200)}`);
+};
+
 const fillFirstTextarea = async (page, value) => {
   const textarea = page.locator('textarea').first();
   if (!(await textarea.count())) throw new Error('Could not find machine description textarea.');
   await textarea.fill(value);
+};
+
+const enterAppIfIntroVisible = async (page) => {
+  const enterButton = page.getByText('Enter ReversR', { exact: false }).first();
+  if (await enterButton.count()) {
+    await enterButton.click({ timeout: 15000 });
+    await wait(1200);
+    return;
+  }
+
+  const skipButton = page.getByText('Skip', { exact: true }).first();
+  if (await skipButton.count()) {
+    await skipButton.click({ timeout: 15000 });
+    await wait(1200);
+  }
 };
 
 const screenshot = async (page, fileName) => {
@@ -89,6 +131,7 @@ const captureViewport = async (browser, viewport) => {
   const files = [];
 
   await page.goto(APP_URL, { waitUntil: 'networkidle', timeout: 45000 });
+  await enterAppIfIntroVisible(page);
   files.push(await screenshot(page, `${viewport.name}-01-welcome.png`));
 
   await clickText(page, 'New Reconstruction');
@@ -97,16 +140,22 @@ const captureViewport = async (browser, viewport) => {
 
   await clickText(page, 'Start Machine Scan');
   await wait(2500);
-  await clickText(page, 'Validate Connector');
-  await wait(1200);
+  if (await clickTextIfPresent(page, 'Validate Connector')) {
+    await wait(1200);
+  }
+  await waitForAnyText(page, ['Inventory Match', 'Phase 2: Inventory'], 30000);
   files.push(await screenshot(page, `${viewport.name}-03-inventory-validation.png`));
 
-  await clickText(page, 'Match Machine & Build Plan');
+  if (!(await clickTextIfPresent(page, 'Use Selected Machine'))) {
+    await clickText(page, 'Match Machine & Build Plan');
+  }
   await wait(2500);
+  await waitForAnyText(page, ['Phase 3: Design', 'Continue to Build'], 30000);
   files.push(await screenshot(page, `${viewport.name}-04-design-match.png`));
 
   await clickText(page, 'Continue to Build');
   await wait(1500);
+  await waitForAnyText(page, ['Phase 4: Build', 'Generate BOM'], 30000);
   await clickText(page, 'Generate BOM', 'first');
   await wait(4000);
   await page.mouse.wheel(0, 4000);
