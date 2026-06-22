@@ -1401,7 +1401,9 @@ export default function HomeScreen() {
 
   const enterHome = useCallback(() => {
     setWelcomeIntroVisible(false);
-    setStarted(true);
+    setShowSettings(false);
+    setShowHistory(false);
+    setStarted(false);
   }, []);
   const tabBarInset = safeAreaInsets.bottom + 84;
 

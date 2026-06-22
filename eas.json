@@ -17,6 +17,17 @@
         "buildType": "apk"
       }
     },
+    "welcome-intro-preview": {
+      "environment": "preview",
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_ENABLE_WELCOME_INTRO": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "production": {
       "environment": "production",
       "channel": "production",
