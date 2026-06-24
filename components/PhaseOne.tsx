@@ -38,6 +38,7 @@ interface Props {
   onComplete: (input: string, analysis: AnalysisResult, capturedImage?: string | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  onInputFocus?: (event?: any) => void;
   initialInput?: string;
   initialImage?: string | null;
   mockAnalysis?: AnalysisResult | null;
@@ -56,6 +57,7 @@ export default function PhaseOne({
   onComplete,
   isLoading,
   setIsLoading,
+  onInputFocus,
   initialInput,
   initialImage,
   mockAnalysis,
@@ -361,6 +363,7 @@ export default function PhaseOne({
                 style={styles.textInput}
                 value={input}
                 onChangeText={setInput}
+                onFocus={onInputFocus}
                 accessibilityLabel="Machine description"
                 placeholder="e.g., A FarmBot Genesis gantry farming robot with tracks, gantry beam, z-axis, Farmduino, Raspberry Pi, motors, camera, tools, and power supply..."
                 placeholderTextColor={Colors.gray[500]}
@@ -417,6 +420,7 @@ export default function PhaseOne({
                 style={[styles.textInput, styles.scanTextInput]}
                 value={input}
                 onChangeText={setInput}
+                onFocus={onInputFocus}
                 accessibilityLabel="Optional machine scan notes"
                 placeholder="Optional: Add model number, visible assemblies, damage, or inventory clues..."
                 placeholderTextColor={Colors.gray[500]}

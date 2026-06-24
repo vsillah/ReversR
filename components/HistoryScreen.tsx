@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import {
   getLatestSavedVendorApproval,
 } from '../utils/reviewerApprovalRecords';
 import AlertModal from './AlertModal';
+import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 
 const LABEL_TO_WORKFLOW: Record<string, MachineWorkflowKey> = {
   'Inventory Match': 'inventory_match',
@@ -128,6 +129,11 @@ interface Props {
 export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarInset = 0 }: Props) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
+  const historyScrollRef = useRef<ScrollView>(null);
+  const historyFocusVisibilityProps = {
+    onFocusCapture: (event: any) => ensureFocusedFieldVisible(historyScrollRef, event),
+  } as any;
+  const handleHistoryFieldFocus = (event?: any) => ensureFocusedFieldVisible(historyScrollRef, event);
   const [innovations, setInnovations] = useState<SavedInnovation[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteAlert, setDeleteAlert] = useState<{
@@ -418,6 +424,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarI
               placeholderTextColor={Colors.gray[600]}
               value={searchQuery}
               onChangeText={setSearchQuery}
+              onFocus={handleHistoryFieldFocus}
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
@@ -545,12 +552,14 @@ export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarI
         keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
       >
       <ScrollView
+        ref={historyScrollRef}
         style={styles.content}
         contentContainerStyle={{ paddingBottom: bottomBarInset }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
         automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        {...historyFocusVisibilityProps}
       >
         {loading ? (
           <View style={styles.emptyState}>

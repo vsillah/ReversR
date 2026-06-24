@@ -28,6 +28,7 @@ import {
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 import ManufacturingStudio from './ManufacturingStudio';
 import { InfoTooltip } from './ui';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
@@ -206,6 +207,9 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
+  const buildFocusVisibilityProps = {
+    onFocusCapture: (event: any) => ensureFocusedFieldVisible(scrollViewRef, event),
+  } as any;
   const [activeBuildSection, setActiveBuildSection] = useState<ActiveBuildSection>(null);
   const [handoffDetailsExpanded, setHandoffDetailsExpanded] = useState(false);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
@@ -1280,6 +1284,7 @@ export default function PhaseFour({
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
       automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+      {...buildFocusVisibilityProps}
     >
       <View style={styles.header}>
         <View style={styles.headerLeft}>

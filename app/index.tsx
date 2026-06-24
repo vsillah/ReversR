@@ -52,6 +52,7 @@ import {
 import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
 import { useCommercialization } from "../hooks/useCommercialization";
 import { formatJourneyCreditShortLabel, formatResetCountdown } from "../utils/commercialUsage";
+import { ensureFocusedFieldVisible } from "../utils/focusVisibility";
 
 const WELCOME_INTRO_ENABLED = process.env.EXPO_PUBLIC_ENABLE_WELCOME_INTRO !== 'false';
 
@@ -1450,6 +1451,12 @@ export default function HomeScreen() {
     />
   );
   const contentBottomPadding = tabBarInset + Spacing.md;
+  const workflowFocusVisibilityProps = {
+    onFocusCapture: (event: any) => ensureFocusedFieldVisible(workflowScrollRef, event),
+  } as any;
+  const handleWorkflowFieldFocus = useCallback((event?: any) => {
+    ensureFocusedFieldVisible(workflowScrollRef, event);
+  }, []);
 
   if (!welcomeIntroLoaded) {
     return <View style={styles.container} />;
@@ -1673,12 +1680,14 @@ export default function HomeScreen() {
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
         automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         onContentSizeChange={flushWorkflowScrollReset}
+        {...workflowFocusVisibilityProps}
       >
         {context.phase === 1 && (
           <PhaseOne
             onComplete={handlePhaseOneComplete}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
+            onInputFocus={handleWorkflowFieldFocus}
             initialInput={context.input}
             initialImage={context.capturedImage}
             mockAnalysis={mockJourneyActive ? MOCK_TOUR_ANALYSIS : null}

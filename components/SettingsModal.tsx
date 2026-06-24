@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Linking, ScrollView, Platform, Image, Alert, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,6 +70,7 @@ import {
   loadInventoryConnector,
   saveInventoryConnector,
 } from '../utils/inventoryConnector';
+import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 
 export type SettingsSection = 'profile' | 'account' | 'ai' | 'inventory' | 'support' | 'admin' | 'legal';
 type SettingsTooltip =
@@ -168,6 +169,11 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     clearAccessPassword,
   } = useCommercialization();
   const styles = createStyles(Colors);
+  const settingsScrollRef = useRef<ScrollView>(null);
+  const settingsFocusVisibilityProps = {
+    onFocusCapture: (event: any) => ensureFocusedFieldVisible(settingsScrollRef, event),
+  } as any;
+  const handleSettingsFieldFocus = (event?: any) => ensureFocusedFieldVisible(settingsScrollRef, event);
   const [provider, setProvider] = useState<'gemini' | 'ollama'>('gemini');
   const [ollamaModel, setOllamaModel] = useState('qwen3.5:0.8b');
   const [inventoryConnector, setInventoryConnector] = useState<InventoryConnector>(defaultConnector);
@@ -1370,12 +1376,14 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
           })}
 
           <ScrollView
+            ref={settingsScrollRef}
             style={styles.body}
             contentContainerStyle={styles.bodyContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
             automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+            {...settingsFocusVisibilityProps}
           >
             {settingsSection === 'profile' && (
               <View style={styles.profilePanel}>
@@ -2146,6 +2154,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   style={styles.input}
                   value={supportTitle}
                   onChangeText={setSupportTitle}
+                  onFocus={handleSettingsFieldFocus}
                   accessibilityLabel="Issue report title"
                   placeholder="What went wrong?"
                   placeholderTextColor={Colors.gray[500]}
@@ -2174,6 +2183,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
                   style={[styles.input, styles.textArea]}
                   value={supportDescription}
                   onChangeText={setSupportDescription}
+                  onFocus={handleSettingsFieldFocus}
                   accessibilityLabel="Issue report description"
                   placeholder="Describe the screen, action, error, and what you expected."
                   placeholderTextColor={Colors.gray[500]}
