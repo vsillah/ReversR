@@ -9,6 +9,7 @@ import {
   Linking,
   TextInput,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -68,14 +69,26 @@ interface Props {
 type BuildReadinessItem = {
   id: string;
   label: string;
-  detail: string;
-  ready: boolean;
+  summary: string;
+  complete: boolean;
   icon: keyof typeof Ionicons.glyphMap;
   section: BuildSectionKey;
+  isUnlocked: boolean;
+  unlockReason?: string;
+  status: 'complete' | 'current' | 'available' | 'locked';
 };
 
 type BuildSectionKey = 'inventory' | 'bom' | 'assembly' | 'manufacturing' | 'exports' | 'approval' | 'handoff';
-type ActiveBuildSection = BuildSectionKey | 'none' | null;
+
+const BUILD_SECTION_ORDER: BuildSectionKey[] = [
+  'inventory',
+  'bom',
+  'assembly',
+  'manufacturing',
+  'exports',
+  'approval',
+  'handoff',
+];
 
 const MANUFACTURERS = [
   {
@@ -206,16 +219,16 @@ export default function PhaseFour({
 }: Props) {
   const { colors: Colors } = useAppTheme();
   const { account } = useCommercialization();
+  const { width } = useWindowDimensions();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
-  const sectionOffsetsRef = useRef<Partial<Record<BuildSectionKey, number>>>({});
+  const workspaceOffsetRef = useRef(0);
   const keyboardInset = useAndroidKeyboardInset(32);
   const buildFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(scrollViewRef, event),
   } as any;
   const handleBuildFieldFocus = (event: any) => ensureFocusedFieldVisible(scrollViewRef, event);
-  const [activeBuildSection, setActiveBuildSection] = useState<ActiveBuildSection>(null);
-  const [handoffDetailsExpanded, setHandoffDetailsExpanded] = useState(false);
+  const [selectedBuildStep, setSelectedBuildStep] = useState<BuildSectionKey | null>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
@@ -227,7 +240,7 @@ export default function PhaseFour({
   const [error, setError] = useState<string | null>(null);
   const [creditUpgradeUrl, setCreditUpgradeUrl] = useState<string | null>(null);
   const [alert, setAlert] = useState<{visible: boolean, title: string, message: string, type: 'info' | 'error' | 'success'} | null>(null);
-  const [bomExpanded, setBomExpanded] = useState(false);
+  const [showAllBomItems, setShowAllBomItems] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('analyzing');
   const [selectedVendorName, setSelectedVendorName] = useState('');
   const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('');
@@ -237,6 +250,8 @@ export default function PhaseFour({
   const [reviewerRole, setReviewerRole] = useState('');
   const [reviewerNotes, setReviewerNotes] = useState('');
   const [savedReviewRecords, setSavedReviewRecords] = useState<ReviewerApprovalRecord[]>(reviewerApprovalRecords);
+  const isWideLayout = width >= 1024;
+  const keyboardOpen = keyboardInset > 0;
   const angleLabels = useMemo(() => (
     multiAngleImages
       .filter(image => !!image.imageData)
@@ -375,6 +390,10 @@ export default function PhaseFour({
     const nextRecords = [record, ...savedReviewRecords];
     setSavedReviewRecords(nextRecords);
     await onReviewerApprovalRecordSaved(record);
+    if (reviewerApprovalStatus === 'approved_for_vendor_review') {
+      setSelectedBuildStep('handoff');
+      setTimeout(() => scrollToWorkspace(), 80);
+    }
     setAlert({
       visible: true,
       title: 'Review Record Saved',
@@ -457,9 +476,17 @@ export default function PhaseFour({
     try {
       const bomResult = await generateBOM(innovation);
       setLocalBom(bomResult);
-      setBomExpanded(false);
+      setShowAllBomItems(false);
       setStatus('complete');
       onBOMGenerated(bomResult);
+      setSelectedBuildStep(
+        !hasAssembly
+          ? 'assembly'
+          : !hasManufacturingEvidence
+            ? 'manufacturing'
+            : 'exports'
+      );
+      setTimeout(() => scrollToWorkspace(), 80);
     } catch (err: unknown) {
       console.error('Error generating BOM:', err);
       setCreditUpgradeUrl(getCommercialUpgradeUrlFromError(err));
@@ -629,130 +656,218 @@ export default function PhaseFour({
     }
   };
 
-  const buildReadinessItems: BuildReadinessItem[] = [
-    {
-      id: 'inventory',
-      label: 'Tour inventory',
-      detail: innovation.machineId || innovation.inventorySource
-        ? `${innovation.machineId || 'Matched machine'}${innovation.inventorySource ? ` | ${innovation.inventorySource}` : ''}`
-        : 'Confirm machine revision and source evidence.',
-      ready: !!spec && (!!innovation.machineId || !!innovation.inventorySource || !!innovation.machineName),
-      icon: 'document-text-outline',
-      section: 'inventory',
-    },
-    {
-      id: 'bom',
-      label: 'Bill of materials',
-      detail: localBom
-        ? `${localBom.items.length} line items ready for material and supplier review.`
-        : 'Generate parts, materials, costs, and supplier list.',
-      ready: !!localBom,
-      icon: 'list-outline',
-      section: 'bom',
-    },
-    {
-      id: 'assembly',
-      label: 'Assembly sequence',
-      detail: `${innovation.assemblySteps?.length || 0} assembly step${(innovation.assemblySteps?.length || 0) === 1 ? '' : 's'} available.`,
-      ready: (innovation.assemblySteps?.length || 0) > 0,
-      icon: 'construct-outline',
-      section: 'assembly',
-    },
-    {
-      id: 'manufacturing',
-      label: 'Manufacturing studio',
-      detail: has2D || has3D
-        ? hasDatabase3DRender
-          ? 'Source-backed 3D render/CAD evidence feeds CAD readiness and DfM review.'
-          : `${has2D ? '2D' : ''}${has2D && has3D ? ' + ' : ''}${has3D ? '3D' : ''} references feed CAD readiness and DfM review.`
-        : 'Generate visual references before manufacturing review.',
-      ready: has2D || has3D,
-      icon: 'cube-outline',
-      section: 'manufacturing',
-    },
-    {
-      id: 'exports',
-      label: 'Export options',
-      detail: localBom
-        ? 'BOM, complete package, and quote packet exports are available.'
-        : 'Generate the BOM before export options unlock.',
-      ready: !!localBom,
-      icon: 'archive-outline',
-      section: 'exports',
-    },
-    {
-      id: 'approval',
-      label: 'Reviewer approval',
-      detail: savedVendorApprovalRecord
-        ? `${getReviewStatusLabel(savedVendorApprovalRecord.status)} | ${formatReviewDate(savedVendorApprovalRecord.savedAt)}`
-        : 'Save an Approved for vendor review record before vendor request.',
-      ready: hasSavedVendorApproval,
-      icon: 'shield-checkmark-outline',
-      section: 'approval',
-    },
-    {
-      id: 'handoff',
-      label: 'Manufacturer handoff',
-      detail: canPrepareVendorRequest
-        ? 'Vendor request draft is ready for packet attachment and review.'
-        : vendorRequestBlockedMessage,
-      ready: canPrepareVendorRequest,
-      icon: 'business-outline',
-      section: 'handoff',
-    },
-  ];
-  const readinessReadyCount = buildReadinessItems.filter(item => item.ready).length;
-  const readinessPercent = Math.round((readinessReadyCount / buildReadinessItems.length) * 100);
-  const isVendorReviewReady = readinessReadyCount === buildReadinessItems.length;
-  const defaultBuildSection = buildReadinessItems.find(item => !item.ready)?.section ?? 'inventory';
-  const activeReceiptSection = activeBuildSection === null
-    ? defaultBuildSection
-    : activeBuildSection === 'none'
-      ? null
-      : activeBuildSection;
+  const hasInventorySummary = !!spec && (!!innovation.machineId || !!innovation.inventorySource || !!innovation.machineName);
+  const hasAssembly = (innovation.assemblySteps?.length || 0) > 0;
+  const hasManufacturingEvidence = has2D || has3D;
 
-  const scrollToBuildSection = (section: BuildSectionKey, offset = Spacing.lg) => {
-    const y = sectionOffsetsRef.current[section];
-    if (typeof y !== 'number') return;
+  const getUnlockReason = (section: BuildSectionKey): string | undefined => {
+    switch (section) {
+      case 'inventory':
+      case 'bom':
+        return undefined;
+      case 'assembly':
+        return hasBom ? undefined : 'Generate BOM to unlock assembly sequence.';
+      case 'manufacturing':
+        if (!hasBom) return 'Generate BOM to unlock manufacturing studio.';
+        if (!hasAssembly) return 'Confirm assembly sequence to unlock manufacturing studio.';
+        return hasManufacturingEvidence ? undefined : 'Return to Design to generate 2D or 3D references.';
+      case 'exports':
+        if (!hasBom) return 'Generate BOM to unlock export options.';
+        if (!hasAssembly) return 'Confirm assembly sequence to unlock export options.';
+        return hasManufacturingEvidence ? undefined : 'Return to Design to generate manufacturing references before export review.';
+      case 'approval':
+        if (!hasBom) return 'Generate BOM to unlock reviewer approval.';
+        if (!hasAssembly) return 'Confirm assembly sequence to unlock reviewer approval.';
+        return hasManufacturingEvidence ? undefined : 'Return to Design to finish the review package before reviewer approval.';
+      case 'handoff':
+        if (!hasBom) return 'Generate BOM to unlock manufacturer handoff.';
+        if (!hasAssembly) return 'Confirm assembly sequence to unlock manufacturer handoff.';
+        if (!hasManufacturingEvidence) return 'Return to Design to finish the review package before manufacturer handoff.';
+        return hasSavedVendorApproval ? undefined : 'Save an Approved for vendor review record to unlock manufacturer handoff.';
+      default:
+        return undefined;
+    }
+  };
+
+  const buildReadinessItems: BuildReadinessItem[] = BUILD_SECTION_ORDER.map(section => {
+    let item: Omit<BuildReadinessItem, 'isUnlocked' | 'unlockReason' | 'status'>;
+
+    switch (section) {
+      case 'inventory':
+        item = {
+          id: 'inventory',
+          label: 'Tour inventory',
+          summary: innovation.machineId || innovation.inventorySource
+            ? `${innovation.machineId || 'Matched machine'}${innovation.inventorySource ? ` | ${innovation.inventorySource}` : ''}`
+            : 'Confirm machine revision and source evidence.',
+          complete: hasInventorySummary,
+          icon: 'document-text-outline',
+          section,
+        };
+        break;
+      case 'bom':
+        item = {
+          id: 'bom',
+          label: 'Bill of materials',
+          summary: localBom
+            ? `${localBom.items.length} line items ready for material and supplier review.`
+            : 'Generate parts, materials, costs, and supplier list.',
+          complete: hasBom,
+          icon: 'list-outline',
+          section,
+        };
+        break;
+      case 'assembly':
+        item = {
+          id: 'assembly',
+          label: 'Assembly sequence',
+          summary: `${innovation.assemblySteps?.length || 0} assembly step${(innovation.assemblySteps?.length || 0) === 1 ? '' : 's'} available.`,
+          complete: hasAssembly,
+          icon: 'construct-outline',
+          section,
+        };
+        break;
+      case 'manufacturing':
+        item = {
+          id: 'manufacturing',
+          label: 'Manufacturing studio',
+          summary: hasManufacturingEvidence
+            ? hasDatabase3DRender
+              ? 'Source-backed 3D render/CAD evidence feeds CAD readiness and DfM review.'
+              : `${has2D ? '2D' : ''}${has2D && has3D ? ' + ' : ''}${has3D ? '3D' : ''} references feed CAD readiness and DfM review.`
+            : 'Generate visual references before manufacturing review.',
+          complete: hasManufacturingEvidence,
+          icon: 'cube-outline',
+          section,
+        };
+        break;
+      case 'exports':
+        item = {
+          id: 'exports',
+          label: 'Export options',
+          summary: hasBom
+            ? 'BOM, complete package, and quote packet exports are available.'
+            : 'Generate the BOM before export options unlock.',
+          complete: hasBom,
+          icon: 'archive-outline',
+          section,
+        };
+        break;
+      case 'approval':
+        item = {
+          id: 'approval',
+          label: 'Reviewer approval',
+          summary: savedVendorApprovalRecord
+            ? `${getReviewStatusLabel(savedVendorApprovalRecord.status)} | ${formatReviewDate(savedVendorApprovalRecord.savedAt)}`
+            : 'Save an Approved for vendor review record before vendor request.',
+          complete: hasSavedVendorApproval,
+          icon: 'shield-checkmark-outline',
+          section,
+        };
+        break;
+      case 'handoff':
+      default:
+        item = {
+          id: 'handoff',
+          label: 'Manufacturer handoff',
+          summary: canPrepareVendorRequest
+            ? 'Vendor request draft is ready for packet attachment and review.'
+            : vendorRequestBlockedMessage,
+          complete: canPrepareVendorRequest,
+          icon: 'business-outline',
+          section: 'handoff',
+        };
+        break;
+    }
+
+    return {
+      ...item,
+      isUnlocked: !getUnlockReason(section),
+      unlockReason: getUnlockReason(section),
+      status: 'available',
+    };
+  });
+
+  const recommendedBuildStep = buildReadinessItems.find(item => item.isUnlocked && !item.complete)?.section
+    ?? buildReadinessItems.find(item => !item.isUnlocked)?.section
+    ?? 'handoff';
+
+  const activeBuildStep = selectedBuildStep ?? recommendedBuildStep;
+
+  const buildStepIndex = BUILD_SECTION_ORDER.indexOf(activeBuildStep);
+  const previousBuildStep = buildStepIndex > 0 ? BUILD_SECTION_ORDER[buildStepIndex - 1] : null;
+  const nextBuildStep = buildStepIndex < BUILD_SECTION_ORDER.length - 1 ? BUILD_SECTION_ORDER[buildStepIndex + 1] : null;
+
+  const buildStepByKey = Object.fromEntries(
+    buildReadinessItems.map(item => [item.section, item])
+  ) as Record<BuildSectionKey, BuildReadinessItem>;
+
+  const activeBuildMeta = {
+    ...buildStepByKey[activeBuildStep],
+    status: buildStepByKey[activeBuildStep].section === recommendedBuildStep
+      ? 'current'
+      : buildStepByKey[activeBuildStep].isUnlocked
+        ? buildStepByKey[activeBuildStep].complete
+          ? 'complete'
+          : 'available'
+        : 'locked',
+  } as BuildReadinessItem;
+
+  const buildSteps = buildReadinessItems.map(item => ({
+    ...item,
+    status: item.section === recommendedBuildStep
+      ? 'current'
+      : item.isUnlocked
+        ? item.complete
+          ? 'complete'
+          : 'available'
+        : 'locked',
+  }));
+
+  const readinessReadyCount = buildSteps.filter(item => item.complete).length;
+  const readinessPercent = Math.round((readinessReadyCount / buildSteps.length) * 100);
+  const isVendorReviewReady = readinessReadyCount === buildSteps.length;
+
+  useEffect(() => {
+    setShowAllBomItems(false);
+  }, [activeBuildStep]);
+
+  const scrollToWorkspace = (offset = Spacing.lg) => {
+    const y = workspaceOffsetRef.current;
     scrollViewRef.current?.scrollTo({
       y: Math.max(0, y - offset),
       animated: true,
     });
   };
 
-  useEffect(() => {
-    if (activeReceiptSection !== 'handoff') return;
+  const openBuildStep = (section: BuildSectionKey) => {
+    setSelectedBuildStep(section);
+    setTimeout(() => scrollToWorkspace(), 80);
+  };
 
-    const timers = [setTimeout(() => scrollToBuildSection('handoff'), 80)];
-
-    if (handoffDetailsExpanded) {
-      timers.push(setTimeout(() => scrollToBuildSection('handoff'), 220));
-    }
-
-    return () => {
-      timers.forEach(timer => clearTimeout(timer));
-    };
-  }, [activeReceiptSection, handoffDetailsExpanded]);
-
-  const toggleBuildSection = (section: BuildSectionKey) => {
-    if (section === 'handoff') {
-      setHandoffDetailsExpanded(false);
-    }
-    const currentSection = activeBuildSection === null
-      ? defaultBuildSection
-      : activeBuildSection === 'none'
-        ? null
-        : activeBuildSection;
-    setActiveBuildSection(current => {
-      const currentValue = current === null
-        ? defaultBuildSection
-        : current === 'none'
-          ? null
-          : current;
-      return currentValue === section ? 'none' : section;
-    });
-    if (currentSection !== section) {
-      setTimeout(() => scrollToBuildSection(section), 80);
+  const getLockedAction = (section: BuildSectionKey): { label: string; action: () => void } | null => {
+    switch (section) {
+      case 'assembly':
+        return !hasBom ? { label: 'Open Bill of Materials', action: () => openBuildStep('bom') } : null;
+      case 'manufacturing':
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        return !hasManufacturingEvidence ? { label: 'Return to Design', action: onGoToDesign } : null;
+      case 'exports':
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        return !hasManufacturingEvidence ? { label: 'Return to Design', action: onGoToDesign } : null;
+      case 'approval':
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        return !hasManufacturingEvidence ? { label: 'Return to Design', action: onGoToDesign } : null;
+      case 'handoff':
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        if (!hasManufacturingEvidence) return { label: 'Return to Design', action: onGoToDesign };
+        return !hasSavedVendorApproval ? { label: 'Open Reviewer Approval', action: () => openBuildStep('approval') } : null;
+      default:
+        return null;
     }
   };
 
@@ -906,14 +1021,7 @@ export default function PhaseFour({
         return (
           <>
             <View style={styles.bomPanel}>
-              <TouchableOpacity
-                style={styles.panelHeader}
-                onPress={() => localBom && setBomExpanded(!bomExpanded)}
-                activeOpacity={localBom ? 0.7 : 1}
-                accessibilityRole="button"
-                accessibilityLabel={localBom ? 'Toggle bill of materials details' : 'Bill of materials panel'}
-                accessibilityState={{ disabled: !localBom, expanded: localBom ? bomExpanded : undefined }}
-              >
+              <View style={styles.panelHeader}>
                 <View style={styles.terminalDots}>
                   <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
                   <View style={[styles.dot, { backgroundColor: '#eab308' }]} />
@@ -923,14 +1031,9 @@ export default function PhaseFour({
                 {localBom && (
                   <View style={styles.bomToggleContainer}>
                     <Text style={styles.bomItemCount}>{localBom.items.length} items</Text>
-                    <Ionicons
-                      name={bomExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={20}
-                      color={Colors.gray[400]}
-                    />
                   </View>
                 )}
-              </TouchableOpacity>
+              </View>
 
               {status === 'generating' ? (
                 <View style={styles.loadingContainer}>
@@ -939,45 +1042,12 @@ export default function PhaseFour({
                   <Text style={styles.loadingSubtext}>Calculating parts, costs & suppliers</Text>
                 </View>
               ) : localBom ? (
-                bomExpanded ? (
-                  <View style={styles.bomContent}>
-                    <View style={styles.bomHeader}>
-                      <Text style={styles.bomProjectName}>{localBom.projectName}</Text>
-                      <Text style={styles.bomMeta}>v{localBom.version} | {localBom.dateGenerated}</Text>
-                    </View>
-
-                    <View style={styles.bomItemsContainer}>
-                      {localBom.items.map((item, index) => (
-                        <View key={index} style={styles.bomItem}>
-                          <View style={styles.bomItemHeader}>
-                            <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
-                            <Text style={styles.bomQuantity}>x{item.quantity}</Text>
-                          </View>
-                          <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
-                          <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
-                          <View style={styles.bomItemMeta}>
-                            <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
-                            <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
-                          </View>
-                          <View style={styles.bomItemFooter}>
-                            <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
-                            <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-
-                    <View style={styles.bomTotalSection}>
-                      <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
-                      <Text style={styles.bomTotalValue}>{localBom.totalEstimatedCost}</Text>
-                    </View>
-
-                    <View style={styles.bomNotesSection}>
-                      <Text style={styles.bomNotesLabel}>Manufacturing Notes</Text>
-                      <Text style={styles.bomNotes}>{localBom.manufacturingNotes}</Text>
-                    </View>
+                <View style={styles.bomContent}>
+                  <View style={styles.bomHeader}>
+                    <Text style={styles.bomProjectName}>{localBom.projectName}</Text>
+                    <Text style={styles.bomMeta}>v{localBom.version} | {localBom.dateGenerated}</Text>
                   </View>
-                ) : (
+
                   <View style={styles.bomCollapsed}>
                     <View style={styles.bomCollapsedRow}>
                       <Ionicons name="checkmark-circle" size={18} color={Colors.accent} />
@@ -985,9 +1055,54 @@ export default function PhaseFour({
                       <Text style={styles.bomCollapsedDivider}>|</Text>
                       <Text style={styles.bomCollapsedCost}>{localBom.totalEstimatedCost}</Text>
                     </View>
-                    <Text style={styles.bomCollapsedHint}>Tap header to expand</Text>
+                    <Text style={styles.bomCollapsedHint}>Material and supplier review package is ready.</Text>
                   </View>
-                )
+
+                  <View style={styles.bomItemsContainer}>
+                    {(showAllBomItems ? localBom.items : localBom.items.slice(0, 5)).map((item, index) => (
+                      <View key={index} style={styles.bomItem}>
+                        <View style={styles.bomItemHeader}>
+                          <Text style={styles.bomPartNumber} numberOfLines={1}>{item.partNumber}</Text>
+                          <Text style={styles.bomQuantity}>x{item.quantity}</Text>
+                        </View>
+                        <Text style={styles.bomPartName} numberOfLines={2}>{item.partName}</Text>
+                        <Text style={styles.bomPartDesc} numberOfLines={3}>{item.description}</Text>
+                        <View style={styles.bomItemMeta}>
+                          <Text style={styles.bomItemMetaText} numberOfLines={1}>{item.material}</Text>
+                          <Text style={styles.bomItemCost}>{item.estimatedCost}</Text>
+                        </View>
+                        <View style={styles.bomItemFooter}>
+                          <Text style={styles.bomSupplier} numberOfLines={1}>{item.supplier}</Text>
+                          <Text style={styles.bomLeadTime} numberOfLines={1}>{item.leadTime}</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+
+                  {localBom.items.length > 5 ? (
+                    <TouchableOpacity
+                      style={styles.showMoreButton}
+                      onPress={() => setShowAllBomItems(current => !current)}
+                      accessibilityRole="button"
+                      accessibilityLabel={showAllBomItems ? 'Show fewer BOM line items' : 'Show all BOM line items'}
+                    >
+                      <Text style={styles.showMoreButtonText}>
+                        {showAllBomItems ? 'Show fewer line items' : `Show all ${localBom.items.length} line items`}
+                      </Text>
+                      <Ionicons name={showAllBomItems ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.accent} />
+                    </TouchableOpacity>
+                  ) : null}
+
+                  <View style={styles.bomTotalSection}>
+                    <Text style={styles.bomTotalLabel}>Total Estimated Cost</Text>
+                    <Text style={styles.bomTotalValue}>{localBom.totalEstimatedCost}</Text>
+                  </View>
+
+                  <View style={styles.bomNotesSection}>
+                    <Text style={styles.bomNotesLabel}>Manufacturing Notes</Text>
+                    <Text style={styles.bomNotes}>{localBom.manufacturingNotes}</Text>
+                  </View>
+                </View>
               ) : (
                 <View style={styles.generateContainer}>
                   <Ionicons name="list-outline" size={48} color={Colors.gray[600]} />
@@ -1071,7 +1186,7 @@ export default function PhaseFour({
           </View>
         );
       case 'manufacturing':
-        return <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} initiallyExpanded={false} />;
+        return <ManufacturingStudio handoff={manufacturingHandoff} scene={threeDScene} collapsible={false} />;
       case 'exports':
         return localBom ? (
           <View style={styles.exportPanel}>
@@ -1144,170 +1259,111 @@ export default function PhaseFour({
                 <Ionicons name="business-outline" size={18} color={Colors.gray[400]} />
                 <Text style={styles.manufacturerTitle}>Manufacturer Handoff</Text>
               </View>
-              {handoffDetailsExpanded ? (
-                <TouchableOpacity
-                  style={styles.handoffHeaderAction}
-                  onPress={() => setHandoffDetailsExpanded(false)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Hide manufacturer handoff details"
-                >
-                  <Text style={styles.handoffHeaderActionText}>Hide details</Text>
-                </TouchableOpacity>
-              ) : null}
             </View>
-            {handoffDetailsExpanded ? (
-              <>
-                <View style={styles.quotePacketCard}>
-                  <View style={styles.quotePacketHeader}>
-                    <Ionicons name="send-outline" size={20} color={Colors.accent} />
-                    <Text style={styles.quotePacketTitle}>Quote Packet</Text>
-                  </View>
-                  <Text style={styles.quotePacketText}>
-                    Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
-                    onPress={handleExportQuotePacket}
-                    disabled={!localBom}
-                    accessibilityRole="button"
-                    accessibilityLabel="Export manufacturer quote packet"
-                    accessibilityState={{ disabled: !localBom }}
-                  >
-                    <Text style={styles.quotePacketButtonText}>
-                      {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.quoteRequestCard}>
-                  <View style={styles.quotePacketHeader}>
-                    <Ionicons name="mail-outline" size={20} color={Colors.accent} />
-                    <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
-                  </View>
-                  <Text style={styles.quotePacketText}>
-                    Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
-                  </Text>
-                  <Text style={styles.quoteFieldLabel}>Vendor target</Text>
-                  <View style={styles.vendorChoiceGrid}>
-                    {getVendorTargets().map(vendor => {
-                      const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
-                      return (
-                        <TouchableOpacity
-                          key={`${vendor.vendorName}-${vendor.url}`}
-                          style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
-                          onPress={() => setSelectedVendorName(vendor.vendorName)}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
-                          accessibilityState={{ selected: isSelected }}
-                        >
-                          <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
-                            {vendor.vendorName}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                  <Text style={styles.quoteFieldLabel}>Recipient email</Text>
-                  <TextInput
-                    style={styles.quoteInput}
-                    value={quoteRecipientEmail}
-                    onChangeText={setQuoteRecipientEmail}
-                    onFocus={handleBuildFieldFocus}
-                    accessibilityLabel="Vendor quote recipient email"
-                    placeholder="quotes@vendor.com"
-                    placeholderTextColor={Colors.gray[600]}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                  />
-                  <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
-                  <TextInput
-                    style={[styles.quoteInput, styles.quoteNotesInput]}
-                    value={quoteAdminNotes}
-                    onChangeText={setQuoteAdminNotes}
-                    onFocus={handleBuildFieldFocus}
-                    accessibilityLabel="Admin notes for vendor quote request"
-                    placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
-                    placeholderTextColor={Colors.gray[600]}
-                    multiline
-                  />
-                  <TouchableOpacity
-                    style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
-                    onPress={handlePrepareQuoteEmail}
-                    disabled={!canPrepareVendorRequest}
-                    accessibilityRole="button"
-                    accessibilityLabel="Prepare vendor quote request email"
-                    accessibilityState={{ disabled: !canPrepareVendorRequest }}
-                  >
-                    <Text style={styles.quotePacketButtonText}>
-                      {vendorRequestCtaLabel}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.manufacturerGrid}>
-                  {MANUFACTURERS.map((mfr) => (
-                    <TouchableOpacity
-                      key={mfr.id}
-                      style={styles.manufacturerCard}
-                      onPress={() => Linking.openURL(mfr.url)}
-                      accessibilityRole="link"
-                      accessibilityLabel={`Open ${mfr.name} vendor website`}
-                    >
-                      <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
-                      <Text style={styles.manufacturerName}>{mfr.name}</Text>
-                      <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
-                      <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <Text style={styles.manufacturerNote}>
-                  Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
-                </Text>
-              </>
-            ) : (
-              <View style={styles.handoffCompactCard}>
-                <View style={[styles.handoffSummaryRow, localBom && styles.handoffSummaryRowReady]}>
-                  <View style={[styles.handoffSummaryIcon, localBom && styles.handoffSummaryIconReady]}>
-                    <Ionicons name={localBom ? 'checkmark' : 'document-text-outline'} size={15} color={localBom ? Colors.black : Colors.gray[400]} />
-                  </View>
-                  <View style={styles.handoffSummaryText}>
-                    <Text style={styles.handoffSummaryLabel}>Quote packet</Text>
-                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
-                      {localBom ? 'BOM-backed packet can be exported.' : 'Generate BOM before packet export.'}
-                    </Text>
-                  </View>
-                </View>
-                <View style={[styles.handoffSummaryRow, canPrepareVendorRequest && styles.handoffSummaryRowReady]}>
-                  <View style={[styles.handoffSummaryIcon, canPrepareVendorRequest && styles.handoffSummaryIconReady]}>
-                    <Ionicons name={canPrepareVendorRequest ? 'checkmark' : 'mail-outline'} size={15} color={canPrepareVendorRequest ? Colors.black : Colors.gray[400]} />
-                  </View>
-                  <View style={styles.handoffSummaryText}>
-                    <Text style={styles.handoffSummaryLabel}>Vendor request</Text>
-                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
-                      {vendorRequestBlockedMessage}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.handoffSummaryRow}>
-                  <View style={styles.handoffSummaryIcon}>
-                    <Ionicons name="business-outline" size={15} color={Colors.gray[400]} />
-                  </View>
-                  <View style={styles.handoffSummaryText}>
-                    <Text style={styles.handoffSummaryLabel}>Vendor targets</Text>
-                    <Text style={styles.handoffSummaryValue} numberOfLines={1}>
-                      {getVendorTargets().length} target{getVendorTargets().length === 1 ? '' : 's'} available for quote routing.
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.handoffCompactButton}
-                  onPress={() => setHandoffDetailsExpanded(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Open manufacturer handoff details"
-                >
-                  <Text style={styles.handoffCompactButtonText}>Open handoff details</Text>
-                  <Ionicons name="chevron-down" size={16} color={Colors.black} />
-                </TouchableOpacity>
+            <View style={styles.quotePacketCard}>
+              <View style={styles.quotePacketHeader}>
+                <Ionicons name="send-outline" size={20} color={Colors.accent} />
+                <Text style={styles.quotePacketTitle}>Quote Packet</Text>
               </View>
-            )}
+              <Text style={styles.quotePacketText}>
+                Export a review-ready packet with the matched machine, BOM, assembly steps, pricing envelope, AI CAD gate, material treatment notes, required files, and a vendor request message.
+              </Text>
+              <TouchableOpacity
+                style={[styles.quotePacketButton, !localBom && styles.quotePacketButtonDisabled]}
+                onPress={handleExportQuotePacket}
+                disabled={!localBom}
+                accessibilityRole="button"
+                accessibilityLabel="Export manufacturer quote packet"
+                accessibilityState={{ disabled: !localBom }}
+              >
+                <Text style={styles.quotePacketButtonText}>
+                  {localBom ? 'Export Quote Packet' : 'Generate BOM First'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.quoteRequestCard}>
+              <View style={styles.quotePacketHeader}>
+                <Ionicons name="mail-outline" size={20} color={Colors.accent} />
+                <Text style={styles.quotePacketTitle}>Vendor Request Draft</Text>
+              </View>
+              <Text style={styles.quotePacketText}>
+                Select a vendor target and prepare a reviewable email draft after a reviewer approval record is saved. Attach the exported packet and files before sending.
+              </Text>
+              <Text style={styles.quoteFieldLabel}>Vendor target</Text>
+              <View style={styles.vendorChoiceGrid}>
+                {getVendorTargets().map(vendor => {
+                  const isSelected = (selectedVendorName || getVendorTargets()[0]?.vendorName) === vendor.vendorName;
+                  return (
+                    <TouchableOpacity
+                      key={`${vendor.vendorName}-${vendor.url}`}
+                      style={[styles.vendorChoiceButton, isSelected && styles.vendorChoiceButtonActive]}
+                      onPress={() => setSelectedVendorName(vendor.vendorName)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select ${vendor.vendorName} as quote request vendor`}
+                      accessibilityState={{ selected: isSelected }}
+                    >
+                      <Text style={[styles.vendorChoiceText, isSelected && styles.vendorChoiceTextActive]} numberOfLines={1}>
+                        {vendor.vendorName}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Text style={styles.quoteFieldLabel}>Recipient email</Text>
+              <TextInput
+                style={styles.quoteInput}
+                value={quoteRecipientEmail}
+                onChangeText={setQuoteRecipientEmail}
+                onFocus={handleBuildFieldFocus}
+                accessibilityLabel="Vendor quote recipient email"
+                placeholder="quotes@vendor.com"
+                placeholderTextColor={Colors.gray[600]}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              <Text style={styles.quoteFieldLabel}>Admin notes for vendor</Text>
+              <TextInput
+                style={[styles.quoteInput, styles.quoteNotesInput]}
+                value={quoteAdminNotes}
+                onChangeText={setQuoteAdminNotes}
+                onFocus={handleBuildFieldFocus}
+                accessibilityLabel="Admin notes for vendor quote request"
+                placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
+                placeholderTextColor={Colors.gray[600]}
+                multiline
+              />
+              <TouchableOpacity
+                style={[styles.quotePacketButton, !canPrepareVendorRequest && styles.quotePacketButtonDisabled]}
+                onPress={handlePrepareQuoteEmail}
+                disabled={!canPrepareVendorRequest}
+                accessibilityRole="button"
+                accessibilityLabel="Prepare vendor quote request email"
+                accessibilityState={{ disabled: !canPrepareVendorRequest }}
+              >
+                <Text style={styles.quotePacketButtonText}>
+                  {vendorRequestCtaLabel}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.manufacturerGrid}>
+              {MANUFACTURERS.map((mfr) => (
+                <TouchableOpacity
+                  key={mfr.id}
+                  style={styles.manufacturerCard}
+                  onPress={() => Linking.openURL(mfr.url)}
+                  accessibilityRole="link"
+                  accessibilityLabel={`Open ${mfr.name} vendor website`}
+                >
+                  <Ionicons name={mfr.icon} size={24} color={Colors.gray[400]} />
+                  <Text style={styles.manufacturerName}>{mfr.name}</Text>
+                  <Text style={styles.manufacturerSubtitle}>{mfr.subtitle}</Text>
+                  <Ionicons name="open-outline" size={12} color={Colors.gray[600]} style={styles.externalIcon} />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.manufacturerNote}>
+              Open a vendor site after exporting the quote packet. Upload the packet, BOM, assembly sequence, manufacturing handoff, CAD draft files when available, and visual references to request CAD qualification, treatment review, fabrication review, and quotes.
+            </Text>
           </View>
         );
       default:
@@ -1315,103 +1371,227 @@ export default function PhaseFour({
     }
   };
 
-  return (
-    <ScrollView
-      ref={scrollViewRef}
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: Spacing.xl + keyboardInset }}
-      showsVerticalScrollIndicator={false}
-      testID="reversr-tour-build"
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-      {...buildFocusVisibilityProps}
-    >
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.headerIcon}>
-            <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
-          </View>
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Phase 4: Build</Text>
-          </View>
+  const renderLockedStepContent = (item: BuildReadinessItem) => {
+    const lockedAction = getLockedAction(item.section);
+    return (
+      <View style={styles.lockedStepCard}>
+        <View style={styles.lockedStepHeader}>
+          <Ionicons name="lock-closed-outline" size={18} color={Colors.orange[300]} />
+          <Text style={styles.lockedStepTitle}>{item.label} is locked</Text>
         </View>
+        <Text style={styles.lockedStepText}>{item.unlockReason}</Text>
+        <Text style={styles.lockedStepHint}>{item.summary}</Text>
+        {lockedAction ? (
+          <TouchableOpacity
+            style={styles.lockedStepButton}
+            onPress={lockedAction.action}
+            accessibilityRole="button"
+            accessibilityLabel={lockedAction.label}
+          >
+            <Text style={styles.lockedStepButtonText}>{lockedAction.label}</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
+    );
+  };
 
-      <View style={styles.readinessPanel}>
-        <View style={styles.readinessHeader}>
-          <View style={styles.readinessLeft}>
-            <Ionicons name={isVendorReviewReady ? 'checkmark-circle-outline' : 'alert-circle-outline'} size={22} color={isVendorReviewReady ? Colors.accent : Colors.orange[300]} />
-            <View style={styles.readinessHeadingText}>
-              <Text style={styles.readinessTitle}>Build Readiness</Text>
-              <Text style={styles.readinessSubtitle}>
-                {isVendorReviewReady
-                  ? 'Ready for vendor review. Fabrication still requires qualified CAD and DfM signoff.'
-                  : `${buildReadinessItems.length - readinessReadyCount} gate${buildReadinessItems.length - readinessReadyCount === 1 ? '' : 's'} open before vendor review.`}
-              </Text>
+  const nextStepMeta = nextBuildStep ? buildStepByKey[nextBuildStep] : null;
+  const nextStepLocked = !!nextStepMeta && !nextStepMeta.isUnlocked;
+  const nextStepLabel = nextStepMeta
+    ? nextStepLocked
+      ? nextStepMeta.unlockReason || `Unlock ${nextStepMeta.label}`
+      : `Next: ${nextStepMeta.label}`
+    : 'Build sequence complete';
+
+  return (
+    <View style={styles.screen}>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: keyboardOpen ? Spacing.xxl + keyboardInset : 160 + keyboardInset }}
+        showsVerticalScrollIndicator={false}
+        testID="reversr-tour-build"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        {...buildFocusVisibilityProps}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="hammer-outline" size={24} color={Colors.primary} />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={styles.title}>Phase 4: Build</Text>
             </View>
           </View>
-          <View style={[styles.readinessBadge, isVendorReviewReady && styles.readinessBadgeReady]}>
-            <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
-          </View>
         </View>
-        <View style={styles.readinessList}>
-          {buildReadinessItems.map(item => {
-            const isExpanded = activeReceiptSection === item.section;
-            return (
-              <View
-                key={item.id}
-                style={[styles.readinessAccordionItem, item.ready && styles.readinessItemReady]}
-                onLayout={(event) => {
-                  sectionOffsetsRef.current[item.section] = event.nativeEvent.layout.y;
-                }}
-              >
-                <TouchableOpacity
-                  style={styles.readinessItemHeader}
-                  onPress={() => toggleBuildSection(item.section)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${item.label}: ${item.ready ? 'complete' : 'incomplete'}`}
-                  accessibilityHint={`${isExpanded ? 'Collapse' : 'Expand'} ${item.label}. ${item.detail}`}
-                  accessibilityState={{ expanded: isExpanded, selected: item.ready }}
-                >
-                  <View style={[styles.readinessItemIcon, item.ready && styles.readinessItemIconReady]}>
-                    <Ionicons name={item.ready ? 'checkmark' : item.icon} size={17} color={item.ready ? Colors.black : Colors.gray[400]} />
-                  </View>
-                  <View style={styles.readinessItemText}>
-                    <Text style={styles.readinessItemLabel}>{item.label}</Text>
-                    <Text style={styles.readinessItemDetail} numberOfLines={1}>{item.detail}</Text>
-                  </View>
-                  <Text style={styles.readinessItemAction}>{isExpanded ? 'Hide' : 'Open'}</Text>
-                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray[400]} />
-                </TouchableOpacity>
-                {isExpanded ? (
-                  <View style={styles.readinessAccordionBody}>
-                    {renderBuildSectionContent(item.section)}
-                  </View>
-                ) : null}
+
+        <View style={[styles.buildWorkspaceShell, isWideLayout && styles.buildWorkspaceShellDesktop]}>
+          <View style={[styles.readinessPanel, isWideLayout && styles.readinessPanelDesktop]}>
+            <View style={styles.readinessHeader}>
+              <View style={styles.readinessLeft}>
+                <Ionicons name={isVendorReviewReady ? 'checkmark-circle-outline' : 'alert-circle-outline'} size={22} color={isVendorReviewReady ? Colors.accent : Colors.orange[300]} />
+                <View style={styles.readinessHeadingText}>
+                  <Text style={styles.readinessTitle}>Build Readiness</Text>
+                  <Text style={styles.readinessSubtitle}>
+                    {isVendorReviewReady
+                      ? 'Ready for vendor review. Fabrication still requires qualified CAD and DfM signoff.'
+                      : `${buildSteps.length - readinessReadyCount} gate${buildSteps.length - readinessReadyCount === 1 ? '' : 's'} open before vendor review.`}
+                  </Text>
+                </View>
               </View>
-            );
-          })}
-        </View>
-      </View>
-
-      <View style={styles.actionsPanel}>
-        <Text style={styles.actionsTitle}>What's Next?</Text>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={onReset}
-          accessibilityRole="button"
-          accessibilityLabel="Start a new reconstruction"
-        >
-          <Ionicons name="add-circle" size={20} color={Colors.accent} />
-          <View style={styles.actionContent}>
-            <Text style={styles.actionButtonText}>New Reconstruction</Text>
-            <Text style={styles.actionButtonSubtext}>Start fresh with a new product</Text>
+              <View style={[styles.readinessBadge, isVendorReviewReady && styles.readinessBadgeReady]}>
+                <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
+              </View>
+            </View>
+            <View style={styles.readinessList}>
+              {buildSteps.map(item => {
+                const isSelected = activeBuildStep === item.section;
+                const statusIcon = item.status === 'locked'
+                  ? 'lock-closed-outline'
+                  : item.complete
+                    ? 'checkmark'
+                    : item.status === 'current'
+                      ? 'play'
+                      : item.icon;
+                return (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.readinessAccordionItem,
+                      item.complete && styles.readinessItemReady,
+                      item.status === 'locked' && styles.readinessItemLocked,
+                      isSelected && styles.readinessItemSelected,
+                    ]}
+                  >
+                    <TouchableOpacity
+                      style={styles.readinessItemHeader}
+                      onPress={() => openBuildStep(item.section)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${item.label}: ${item.status}`}
+                      accessibilityHint={item.isUnlocked ? `Open ${item.label}. ${item.summary}` : item.unlockReason}
+                      accessibilityState={{ selected: isSelected, disabled: false }}
+                    >
+                      <View style={[
+                        styles.readinessItemIcon,
+                        item.complete && styles.readinessItemIconReady,
+                        item.status === 'locked' && styles.readinessItemIconLocked,
+                        item.status === 'current' && styles.readinessItemIconCurrent,
+                      ]}>
+                        <Ionicons
+                          name={statusIcon as keyof typeof Ionicons.glyphMap}
+                          size={17}
+                          color={item.complete ? Colors.black : item.status === 'locked' ? Colors.orange[300] : Colors.gray[400]}
+                        />
+                      </View>
+                      <View style={styles.readinessItemText}>
+                        <View style={styles.readinessItemTitleRow}>
+                          <Text style={styles.readinessItemLabel}>{item.label}</Text>
+                          <View style={[
+                            styles.stepStatusBadge,
+                            item.status === 'complete' && styles.stepStatusBadgeComplete,
+                            item.status === 'current' && styles.stepStatusBadgeCurrent,
+                            item.status === 'locked' && styles.stepStatusBadgeLocked,
+                          ]}>
+                            <Text style={styles.stepStatusText}>
+                              {item.status === 'current' ? 'Current' : item.status === 'complete' ? 'Complete' : item.status === 'locked' ? 'Locked' : 'Available'}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={styles.readinessItemDetail} numberOfLines={2}>
+                          {item.isUnlocked ? item.summary : item.unlockReason}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </View>
           </View>
-        </TouchableOpacity>
-      </View>
+          <View
+            style={[styles.workspacePanel, isWideLayout && styles.workspacePanelDesktop]}
+            onLayout={(event) => {
+              workspaceOffsetRef.current = event.nativeEvent.layout.y;
+            }}
+          >
+            <View style={styles.workspaceHeader}>
+              <View style={styles.workspaceHeaderText}>
+                <Text style={styles.workspaceTitle}>{activeBuildMeta.label}</Text>
+                <Text style={styles.workspaceSubtitle}>
+                  {activeBuildMeta.isUnlocked ? activeBuildMeta.summary : activeBuildMeta.unlockReason}
+                </Text>
+              </View>
+              <View style={[
+                styles.workspaceStatusBadge,
+                activeBuildMeta.status === 'complete' && styles.workspaceStatusBadgeComplete,
+                activeBuildMeta.status === 'current' && styles.workspaceStatusBadgeCurrent,
+                activeBuildMeta.status === 'locked' && styles.workspaceStatusBadgeLocked,
+              ]}>
+                <Text style={styles.workspaceStatusText}>
+                  {activeBuildMeta.status === 'current' ? 'Current' : activeBuildMeta.status === 'complete' ? 'Complete' : activeBuildMeta.status === 'locked' ? 'Locked' : 'Available'}
+                </Text>
+              </View>
+            </View>
+            {activeBuildMeta.isUnlocked
+              ? renderBuildSectionContent(activeBuildMeta.section)
+              : renderLockedStepContent(activeBuildMeta)}
+          </View>
+        </View>
 
-      <View style={{ height: 50 }} />
+        <View style={styles.actionsPanel}>
+          <Text style={styles.actionsTitle}>What's Next?</Text>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={onReset}
+            accessibilityRole="button"
+            accessibilityLabel="Start a new reconstruction"
+          >
+            <Ionicons name="add-circle" size={20} color={Colors.accent} />
+            <View style={styles.actionContent}>
+              <Text style={styles.actionButtonText}>New Reconstruction</Text>
+              <Text style={styles.actionButtonSubtext}>Start fresh with a new product</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ height: 32 }} />
+      </ScrollView>
+
+      {!keyboardOpen ? (
+        <View style={styles.buildStepFooter}>
+          <TouchableOpacity
+            style={[styles.stepFooterButton, !previousBuildStep && styles.stepFooterButtonDisabled]}
+            onPress={() => previousBuildStep && openBuildStep(previousBuildStep)}
+            disabled={!previousBuildStep}
+            accessibilityRole="button"
+            accessibilityLabel="Go to previous build step"
+            accessibilityState={{ disabled: !previousBuildStep }}
+          >
+            <Ionicons name="arrow-back" size={16} color={previousBuildStep ? Colors.text : Colors.gray[600]} />
+            <Text style={[styles.stepFooterButtonText, !previousBuildStep && styles.stepFooterButtonTextDisabled]}>Previous</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.stepFooterLink}
+            onPress={() => scrollViewRef.current?.scrollTo({ y: 0, animated: true })}
+            accessibilityRole="button"
+            accessibilityLabel="Back to build readiness"
+          >
+            <Text style={styles.stepFooterLinkText}>Back to readiness</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.stepFooterPrimary, nextStepLocked && styles.stepFooterPrimaryDisabled, !nextBuildStep && styles.stepFooterPrimaryDisabled]}
+            onPress={() => nextBuildStep && !nextStepLocked && openBuildStep(nextBuildStep)}
+            disabled={!nextBuildStep || nextStepLocked}
+            accessibilityRole="button"
+            accessibilityLabel={nextStepLabel}
+            accessibilityState={{ disabled: !nextBuildStep || nextStepLocked }}
+          >
+            <Text style={styles.stepFooterPrimaryText}>{nextBuildStep && !nextStepLocked ? 'Next' : 'Locked'}</Text>
+            <Text style={styles.stepFooterPrimaryHint} numberOfLines={2}>{nextStepLabel}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       <AlertModal
         visible={alert?.visible || false}
@@ -1427,14 +1607,24 @@ export default function PhaseFour({
         currentStep={loadingStep}
         steps={BUILD_STEPS}
       />
-    </ScrollView>
+    </View>
   );
 }
 
 const createStyles = (Colors: AppColors) => StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     paddingVertical: Spacing.lg,
+  },
+  buildWorkspaceShell: {
+    gap: Spacing.lg,
+  },
+  buildWorkspaceShellDesktop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
   header: {
     flexDirection: 'row',
@@ -1554,6 +1744,10 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
   },
+  readinessPanelDesktop: {
+    width: 360,
+    marginBottom: 0,
+  },
   readinessHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1608,9 +1802,17 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 8,
     overflow: 'visible',
   },
+  readinessItemSelected: {
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+  },
+  readinessItemLocked: {
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    borderColor: 'rgba(245, 158, 11, 0.25)',
+  },
   readinessItemHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Spacing.sm,
     padding: Spacing.sm,
   },
@@ -1640,10 +1842,24 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: Colors.accent,
     borderColor: Colors.accent,
   },
+  readinessItemIconLocked: {
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+  },
+  readinessItemIconCurrent: {
+    borderColor: Colors.primary,
+  },
   readinessItemText: {
     flex: 1,
     minWidth: 0,
     justifyContent: 'center',
+  },
+  readinessItemTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: 2,
+    flexWrap: 'wrap',
   },
   readinessItemLabel: {
     color: Colors.white,
@@ -1661,6 +1877,93 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xs,
     fontWeight: 'bold',
     alignSelf: 'center',
+  },
+  stepStatusBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    backgroundColor: Colors.black,
+  },
+  stepStatusBadgeComplete: {
+    borderColor: Colors.accent,
+    backgroundColor: 'rgba(0, 255, 136, 0.14)',
+  },
+  stepStatusBadgeCurrent: {
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(59, 130, 246, 0.16)',
+  },
+  stepStatusBadgeLocked: {
+    borderColor: Colors.orange[300],
+    backgroundColor: 'rgba(245, 158, 11, 0.14)',
+  },
+  stepStatusText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  workspacePanel: {
+    flex: 1,
+    backgroundColor: Colors.panel,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  workspacePanelDesktop: {
+    marginBottom: 0,
+    minHeight: 680,
+  },
+  workspaceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  workspaceHeaderText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  workspaceTitle: {
+    fontSize: FontSizes.lg,
+    color: Colors.white,
+    fontFamily: Fonts.display,
+  },
+  workspaceSubtitle: {
+    marginTop: Spacing.xs,
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+    color: Colors.gray[400],
+  },
+  workspaceStatusBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    backgroundColor: Colors.black,
+  },
+  workspaceStatusBadgeComplete: {
+    borderColor: Colors.accent,
+    backgroundColor: 'rgba(0, 255, 136, 0.14)',
+  },
+  workspaceStatusBadgeCurrent: {
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(59, 130, 246, 0.16)',
+  },
+  workspaceStatusBadgeLocked: {
+    borderColor: Colors.orange[300],
+    backgroundColor: 'rgba(245, 158, 11, 0.14)',
+  },
+  workspaceStatusText: {
+    color: Colors.white,
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   bomPanel: {
     backgroundColor: Colors.black,
@@ -1873,6 +2176,63 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.gray[300],
     lineHeight: 20,
+  },
+  showMoreButton: {
+    marginBottom: Spacing.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+  },
+  showMoreButtonText: {
+    color: Colors.accent,
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+  },
+  lockedStepCard: {
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.25)',
+    borderRadius: 12,
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  lockedStepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  lockedStepTitle: {
+    color: Colors.white,
+    fontSize: FontSizes.md,
+    fontWeight: '700',
+  },
+  lockedStepText: {
+    color: Colors.orange[300],
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+  },
+  lockedStepHint: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.sm,
+    lineHeight: 20,
+  },
+  lockedStepButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.orange[300],
+    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  lockedStepButtonText: {
+    color: Colors.black,
+    fontWeight: '700',
+    fontSize: FontSizes.sm,
   },
   generateContainer: {
     alignItems: 'center',
@@ -2456,6 +2816,75 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     color: Colors.gray[500],
     textAlign: 'center',
     lineHeight: 16,
+  },
+  buildStepFooter: {
+    position: 'absolute',
+    left: Spacing.lg,
+    right: Spacing.lg,
+    bottom: Spacing.lg,
+    backgroundColor: Colors.panel,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: Spacing.sm,
+  },
+  stepFooterButton: {
+    minWidth: 92,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 10,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.surface,
+  },
+  stepFooterButtonDisabled: {
+    opacity: 0.4,
+  },
+  stepFooterButtonText: {
+    color: Colors.text,
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+  },
+  stepFooterButtonTextDisabled: {
+    color: Colors.gray[600],
+  },
+  stepFooterLink: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+  },
+  stepFooterLinkText: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    fontWeight: '600',
+  },
+  stepFooterPrimary: {
+    flex: 1,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    justifyContent: 'center',
+  },
+  stepFooterPrimaryDisabled: {
+    backgroundColor: Colors.gray[700],
+  },
+  stepFooterPrimaryText: {
+    color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
+  },
+  stepFooterPrimaryHint: {
+    color: 'rgba(255,255,255,0.82)',
+    fontSize: FontSizes.xs,
+    marginTop: 2,
   },
   actionsPanel: {
     backgroundColor: Colors.panel,

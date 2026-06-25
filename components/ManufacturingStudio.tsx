@@ -14,6 +14,7 @@ type Props = {
   handoff: ManufacturingHandoff;
   scene: ThreeDSceneDescriptor | null;
   initiallyExpanded?: boolean;
+  collapsible?: boolean;
 };
 
 type ThreeModule = typeof import('three');
@@ -251,10 +252,10 @@ function MeasurementRow({ item }: { item: ManufacturingPartMeasurement }) {
   );
 }
 
-export default function ManufacturingStudio({ handoff, scene, initiallyExpanded = true }: Props) {
+export default function ManufacturingStudio({ handoff, scene, initiallyExpanded = true, collapsible = true }: Props) {
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
-  const [expanded, setExpanded] = useState(initiallyExpanded);
+  const [expanded, setExpanded] = useState(collapsible ? initiallyExpanded : true);
   const [selectedPartIndex, setSelectedPartIndex] = useState(0);
   const selectedPart = handoff.partMeasurements[selectedPartIndex] || handoff.partMeasurements[0];
   const selectedTreatment = selectedPart
@@ -265,25 +266,43 @@ export default function ManufacturingStudio({ handoff, scene, initiallyExpanded 
     [handoff.sceneMeasurements]
   );
 
+  useEffect(() => {
+    if (!collapsible) {
+      setExpanded(true);
+    }
+  }, [collapsible]);
+
   return (
     <View style={styles.panel}>
-      <TouchableOpacity
-        style={styles.header}
-        onPress={() => setExpanded(current => !current)}
-        activeOpacity={0.8}
-        accessibilityRole="button"
-        accessibilityLabel={expanded ? 'Collapse manufacturing studio details' : 'Expand manufacturing studio details'}
-        accessibilityState={{ expanded }}
-      >
-        <View style={styles.headerIcon}>
-          <Ionicons name="cube-outline" size={20} color={Colors.primary} />
+      {collapsible ? (
+        <TouchableOpacity
+          style={styles.header}
+          onPress={() => setExpanded(current => !current)}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={expanded ? 'Collapse manufacturing studio details' : 'Expand manufacturing studio details'}
+          accessibilityState={{ expanded }}
+        >
+          <View style={styles.headerIcon}>
+            <Ionicons name="cube-outline" size={20} color={Colors.primary} />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Manufacturing Studio</Text>
+            <Text style={styles.subtitle}>Visual references, CAD readiness, material treatments, datums, and DfM gates</Text>
+          </View>
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.dimText} />
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.headerStatic}>
+          <View style={styles.headerIcon}>
+            <Ionicons name="cube-outline" size={20} color={Colors.primary} />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Manufacturing Studio</Text>
+            <Text style={styles.subtitle}>Visual references, CAD readiness, material treatments, datums, and DfM gates</Text>
+          </View>
         </View>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Manufacturing Studio</Text>
-          <Text style={styles.subtitle}>Visual references, CAD readiness, material treatments, datums, and DfM gates</Text>
-        </View>
-        <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.dimText} />
-      </TouchableOpacity>
+      )}
 
       {!expanded ? (
         <>
@@ -475,6 +494,12 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  headerStatic: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
