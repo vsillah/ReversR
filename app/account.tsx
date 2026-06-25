@@ -27,8 +27,9 @@ export default function AccountScreen() {
   const [status, setStatus] = useState<string | null>(null);
   const [countdownNow, setCountdownNow] = useState(Date.now());
   const accountScrollRef = useRef<ScrollView>(null);
+  const handleAccountFieldFocus = (event: any) => ensureFocusedFieldVisible(accountScrollRef, event);
   const accountFocusVisibilityProps = {
-    onFocusCapture: (event: any) => ensureFocusedFieldVisible(accountScrollRef, event),
+    onFocusCapture: handleAccountFieldFocus,
   } as any;
 
   useEffect(() => {
@@ -149,6 +150,7 @@ export default function AccountScreen() {
           style={styles.input}
           value={name}
           onChangeText={setName}
+          onFocus={handleAccountFieldFocus}
           accessibilityLabel="Profile name"
           placeholder="Repair shop owner"
           placeholderTextColor={Colors.gray[500]}
@@ -158,6 +160,7 @@ export default function AccountScreen() {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
+          onFocus={handleAccountFieldFocus}
           accessibilityLabel="Profile email"
           placeholder="owner@example.com"
           placeholderTextColor={Colors.gray[500]}
@@ -169,6 +172,7 @@ export default function AccountScreen() {
           style={styles.input}
           value={shopName}
           onChangeText={setShopName}
+          onFocus={handleAccountFieldFocus}
           accessibilityLabel="Shop name"
           placeholder="Precision Repair Shop"
           placeholderTextColor={Colors.gray[500]}

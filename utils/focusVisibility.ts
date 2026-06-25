@@ -1,10 +1,11 @@
 import type { RefObject } from 'react';
-import { Platform, type NativeSyntheticEvent, type ScrollView, type TargetedEvent } from 'react-native';
+import { findNodeHandle, Platform, TextInput, type NativeSyntheticEvent, type ScrollView, type TargetedEvent } from 'react-native';
 
 type FocusEventLike = NativeSyntheticEvent<TargetedEvent> | { nativeEvent?: { target?: unknown }; target?: unknown } | undefined;
 
 const WEB_REFOCUS_DELAY_MS = 260;
-const NATIVE_KEYBOARD_OFFSET = 180;
+const NATIVE_REFOCUS_DELAY_MS = 420;
+const NATIVE_KEYBOARD_OFFSET = Platform.OS === 'android' ? 280 : 180;
 
 const scrollWebFocusIntoView = () => {
   if (typeof document === 'undefined') return;
@@ -30,10 +31,16 @@ const scrollNativeFocusIntoView = (
   scrollRef: RefObject<ScrollView | null>,
   target: unknown,
 ) => {
-  if (!target) return;
+  const focusedInput = (TextInput as any).State?.currentlyFocusedInput?.();
+  const focusedField = (TextInput as any).State?.currentlyFocusedField?.();
+  const resolvedTarget =
+    target ||
+    findNodeHandle(focusedInput) ||
+    focusedField;
+  if (!resolvedTarget) return;
   const scrollResponder = (scrollRef.current as any)?.scrollResponderScrollNativeHandleToKeyboard;
   if (typeof scrollResponder !== 'function') return;
-  scrollResponder(target, NATIVE_KEYBOARD_OFFSET, true);
+  scrollResponder(resolvedTarget, NATIVE_KEYBOARD_OFFSET, true);
 };
 
 export const ensureFocusedFieldVisible = (
@@ -52,4 +59,7 @@ export const ensureFocusedFieldVisible = (
 
   requestAnimationFrame(run);
   setTimeout(run, WEB_REFOCUS_DELAY_MS);
+  if (Platform.OS !== 'web') {
+    setTimeout(run, NATIVE_REFOCUS_DELAY_MS);
+  }
 };
