@@ -697,10 +697,16 @@ export default function HomeScreen() {
     if (Platform.OS === 'web') {
       return undefined;
     }
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setWorkflowInputActive(true);
+    });
     const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
       setWorkflowInputActive(false);
     });
-    return () => hideSubscription.remove();
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -1464,6 +1470,7 @@ export default function HomeScreen() {
     />
   );
   const keyboardInset = useAndroidKeyboardInset(32);
+  const keyboardOpen = workflowInputActive || keyboardInset > 0;
   const contentBottomPadding = tabBarInset + Spacing.md + keyboardInset;
   const workflowFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(workflowScrollRef, event),
@@ -1471,12 +1478,28 @@ export default function HomeScreen() {
   const handleWorkflowFieldFocus = useCallback((event?: any) => {
     setWorkflowInputActive(true);
     ensureFocusedFieldVisible(workflowScrollRef, event);
-    if (Platform.OS !== 'web' && context.phase === 1) {
-      const nudgePhaseOneIntoView = () => workflowScrollRef.current?.scrollToEnd({ animated: true });
-      setTimeout(nudgePhaseOneIntoView, 240);
-      setTimeout(nudgePhaseOneIntoView, 520);
-    }
   }, [context.phase]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !keyboardOpen || context.phase !== 1) {
+      return;
+    }
+
+    const nudgePhaseOneIntoView = () => {
+      ensureFocusedFieldVisible(workflowScrollRef);
+      workflowScrollRef.current?.scrollToEnd({ animated: true });
+    };
+
+    const firstPass = setTimeout(nudgePhaseOneIntoView, 120);
+    const secondPass = setTimeout(nudgePhaseOneIntoView, 360);
+    const thirdPass = setTimeout(nudgePhaseOneIntoView, 720);
+
+    return () => {
+      clearTimeout(firstPass);
+      clearTimeout(secondPass);
+      clearTimeout(thirdPass);
+    };
+  }, [context.phase, keyboardOpen]);
 
   if (!welcomeIntroLoaded) {
     return <View style={styles.container} />;
@@ -1535,15 +1558,17 @@ export default function HomeScreen() {
           bottomBarInset={tabBarInset}
         />
         {renderTourGuide()}
-        <BottomTabBar
-          active="projects"
-          onHome={goHome}
-          onProjects={openHistory}
-          onNew={handleStartNew}
-          onTour={startTour}
-          onMore={() => openSettings('account')}
-          bottomInset={safeAreaInsets.bottom}
-        />
+        {keyboardInset === 0 && (
+          <BottomTabBar
+            active="projects"
+            onHome={goHome}
+            onProjects={openHistory}
+            onNew={handleStartNew}
+            onTour={startTour}
+            onMore={() => openSettings('account')}
+            bottomInset={safeAreaInsets.bottom}
+          />
+        )}
       </View>
     );
   }
@@ -1655,7 +1680,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {isGuestPlan && !workflowInputActive && (
+      {isGuestPlan && !keyboardOpen && (
         <View style={styles.guestCreditBar} testID="reversr-guest-credit-bar">
           <Text style={styles.guestCreditText} numberOfLines={2}>
             {guestCreditCopySegments.map((segment, index) => (
@@ -1675,7 +1700,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {!workflowInputActive && (
+      {!keyboardOpen && (
         <View style={styles.progressBar}>
           <View style={styles.phaseStepperCard}>
             <HorizontalStepper
@@ -1909,7 +1934,7 @@ export default function HomeScreen() {
         initialSection={settingsInitialSection}
       />
       {renderTourGuide()}
-      {!workflowInputActive && keyboardInset === 0 && (
+      {!keyboardOpen && (
         <BottomTabBar
           active={null}
           onHome={goHome}
