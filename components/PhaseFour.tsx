@@ -208,6 +208,7 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
+  const sectionOffsetsRef = useRef<Partial<Record<BuildSectionKey, number>>>({});
   const keyboardInset = useAndroidKeyboardInset(32);
   const buildFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(scrollViewRef, event),
@@ -710,18 +711,49 @@ export default function PhaseFour({
       ? null
       : activeBuildSection;
 
+  const scrollToBuildSection = (section: BuildSectionKey, offset = Spacing.lg) => {
+    const y = sectionOffsetsRef.current[section];
+    if (typeof y !== 'number') return;
+    scrollViewRef.current?.scrollTo({
+      y: Math.max(0, y - offset),
+      animated: true,
+    });
+  };
+
+  useEffect(() => {
+    if (activeReceiptSection !== 'handoff') return;
+
+    const timers = [setTimeout(() => scrollToBuildSection('handoff'), 80)];
+
+    if (handoffDetailsExpanded) {
+      timers.push(setTimeout(() => scrollToBuildSection('handoff'), 220));
+    }
+
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+    };
+  }, [activeReceiptSection, handoffDetailsExpanded]);
+
   const toggleBuildSection = (section: BuildSectionKey) => {
     if (section === 'handoff') {
       setHandoffDetailsExpanded(false);
     }
+    const currentSection = activeBuildSection === null
+      ? defaultBuildSection
+      : activeBuildSection === 'none'
+        ? null
+        : activeBuildSection;
     setActiveBuildSection(current => {
-      const currentSection = current === null
+      const currentValue = current === null
         ? defaultBuildSection
         : current === 'none'
           ? null
           : current;
-      return currentSection === section ? 'none' : section;
+      return currentValue === section ? 'none' : section;
     });
+    if (currentSection !== section) {
+      setTimeout(() => scrollToBuildSection(section), 80);
+    }
   };
 
   const renderReviewerApprovalCard = () => (
@@ -1330,6 +1362,9 @@ export default function PhaseFour({
               <View
                 key={item.id}
                 style={[styles.readinessAccordionItem, item.ready && styles.readinessItemReady]}
+                onLayout={(event) => {
+                  sectionOffsetsRef.current[item.section] = event.nativeEvent.layout.y;
+                }}
               >
                 <TouchableOpacity
                   style={styles.readinessItemHeader}
