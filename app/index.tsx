@@ -1508,34 +1508,39 @@ export default function HomeScreen() {
   if (!started) {
     return (
       <View style={styles.container}>
-        <WelcomeScreen
-          onStart={handleStartNew}
-          onHistory={openHistory}
-          onSettings={() => openSettings('account')}
-          onProfile={() => openSettings('profile')}
-          onTour={startTour}
-          onSupport={() => openSettings('support')}
-          onResume={handleResume}
-          userDisplayName={userDisplayName}
-          userIsAuthenticated={userIsAuthenticated}
-          userAvatarUri={userAvatarUri}
-          bottomBarInset={tabBarInset}
-        />
-        <SettingsModal
-          visible={showSettings}
-          onClose={closeSettings}
-          initialSection={settingsInitialSection}
-        />
-        {renderTourGuide()}
-        <BottomTabBar
-          active="home"
-          onHome={goHome}
-          onProjects={openHistory}
-          onNew={handleStartNew}
-          onTour={startTour}
-          onMore={() => openSettings('account')}
-          bottomInset={safeAreaInsets.bottom}
-        />
+        <View
+          style={styles.homeContentLayer}
+          pointerEvents={welcomeIntroVisible ? 'none' : 'auto'}
+        >
+          <WelcomeScreen
+            onStart={handleStartNew}
+            onHistory={openHistory}
+            onSettings={() => openSettings('account')}
+            onProfile={() => openSettings('profile')}
+            onTour={startTour}
+            onSupport={() => openSettings('support')}
+            onResume={handleResume}
+            userDisplayName={userDisplayName}
+            userIsAuthenticated={userIsAuthenticated}
+            userAvatarUri={userAvatarUri}
+            bottomBarInset={tabBarInset}
+          />
+          <SettingsModal
+            visible={showSettings}
+            onClose={closeSettings}
+            initialSection={settingsInitialSection}
+          />
+          {renderTourGuide()}
+          <BottomTabBar
+            active="home"
+            onHome={goHome}
+            onProjects={openHistory}
+            onNew={handleStartNew}
+            onTour={startTour}
+            onMore={() => openSettings('account')}
+            bottomInset={safeAreaInsets.bottom}
+          />
+        </View>
         {welcomeIntroVisible ? (
           <View style={styles.welcomeIntroOverlay}>
             <WelcomeIntroScreen onEnter={enterHome} />
@@ -1958,6 +1963,9 @@ const createStyles = (Colors: AppColors) => {
   welcomeIntroOverlay: {
     ...StyleSheet.absoluteFill,
     zIndex: 120,
+  },
+  homeContentLayer: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",

@@ -210,7 +210,6 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       </Animated.View>
 
       <Animated.View
-        pointerEvents={actionsEnabled ? 'auto' : 'none'}
         style={[
           styles.footer,
           { opacity: footerOpacity, transform: [{ translateY: footerTranslateY }] },
@@ -219,10 +218,12 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
         <Text style={styles.kicker}>Custom Engineered</Text>
         <Text style={styles.headline}>Scan the machine. Rebuild the system.</Text>
         <TouchableOpacity
-          style={styles.enterButton}
+          style={[styles.enterButton, !actionsEnabled ? styles.enterButtonDisabled : null]}
           onPress={handleEnter}
+          disabled={!actionsEnabled}
           accessibilityRole="button"
           accessibilityLabel="Enter ReversR home"
+          accessibilityState={{ disabled: !actionsEnabled }}
           testID="welcome-intro-enter"
         >
           <Text style={styles.enterButtonText}>Enter ReversR</Text>
@@ -357,6 +358,9 @@ const createStyles = (Colors: AppColors) => {
       gap: Spacing.sm,
       backgroundColor: Colors.primary,
       ...shadows.elevated,
+    },
+    enterButtonDisabled: {
+      opacity: 0.72,
     },
     enterButtonText: {
       fontFamily: Fonts.bold,
