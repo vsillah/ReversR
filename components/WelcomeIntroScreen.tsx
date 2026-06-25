@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useEventListener } from 'expo';
@@ -29,6 +30,7 @@ interface WelcomeIntroScreenProps {
 export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps) {
   const { colors: Colors } = useAppTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const screenOpacity = React.useRef(new Animated.Value(1)).current;
   const brandOpacity = React.useRef(new Animated.Value(0)).current;
   const footerOpacity = React.useRef(new Animated.Value(0)).current;
   const hasEnteredRef = React.useRef(false);
@@ -38,7 +40,6 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
     videoPlayer.loop = false;
     videoPlayer.muted = true;
     videoPlayer.timeUpdateEventInterval = 0.25;
-    videoPlayer.play();
   });
 
   const handleEnter = React.useCallback(() => {
@@ -48,8 +49,25 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
       clearTimeout(fallbackTimerRef.current);
       fallbackTimerRef.current = null;
     }
-    onEnter();
-  }, [onEnter]);
+
+    if (Platform.OS === 'web') {
+      try {
+        player.pause();
+      } catch (error) {
+        console.warn('Failed to pause welcome intro during web handoff', error);
+      }
+    }
+
+    setActionsEnabled(false);
+    Animated.timing(screenOpacity, {
+      toValue: 0,
+      duration: 280,
+      useNativeDriver: true,
+    }).start(() => {
+      onEnter();
+      screenOpacity.setValue(1);
+    });
+  }, [onEnter, player, screenOpacity]);
 
   const scheduleFallback = React.useCallback((durationSeconds?: number) => {
     if (fallbackTimerRef.current) {
@@ -138,7 +156,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
   });
 
   return (
-    <View style={styles.container} testID="welcome-intro-screen">
+    <Animated.View style={[styles.container, { opacity: screenOpacity }]} testID="welcome-intro-screen">
       <Image source={WELCOME_POSTER} style={styles.poster} resizeMode="cover" />
       <VideoView
         player={player}
@@ -211,7 +229,7 @@ export default function WelcomeIntroScreen({ onEnter }: WelcomeIntroScreenProps)
           <Ionicons name="arrow-forward" size={18} color={Colors.onPrimary} />
         </TouchableOpacity>
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 

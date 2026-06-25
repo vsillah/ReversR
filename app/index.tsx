@@ -1505,14 +1505,6 @@ export default function HomeScreen() {
     return <View style={styles.container} />;
   }
 
-  if (welcomeIntroVisible) {
-    return (
-      <View style={styles.container}>
-        <WelcomeIntroScreen onEnter={enterHome} />
-      </View>
-    );
-  }
-
   if (!started) {
     return (
       <View style={styles.container}>
@@ -1544,6 +1536,11 @@ export default function HomeScreen() {
           onMore={() => openSettings('account')}
           bottomInset={safeAreaInsets.bottom}
         />
+        {welcomeIntroVisible ? (
+          <View style={styles.welcomeIntroOverlay}>
+            <WelcomeIntroScreen onEnter={enterHome} />
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -1957,6 +1954,10 @@ const createStyles = (Colors: AppColors) => {
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  welcomeIntroOverlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 120,
   },
   header: {
     flexDirection: "row",
