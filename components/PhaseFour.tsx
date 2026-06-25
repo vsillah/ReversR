@@ -14,6 +14,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes, Radii, Fonts } from '../constants/theme';
+import { useAndroidKeyboardInset } from '../hooks/useAndroidKeyboardInset';
 import { useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
@@ -28,6 +29,7 @@ import {
 } from '../hooks/useGemini';
 import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
+import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 import ManufacturingStudio from './ManufacturingStudio';
 import { InfoTooltip } from './ui';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
@@ -206,6 +208,11 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
+  const keyboardInset = useAndroidKeyboardInset(32);
+  const buildFocusVisibilityProps = {
+    onFocusCapture: (event: any) => ensureFocusedFieldVisible(scrollViewRef, event),
+  } as any;
+  const handleBuildFieldFocus = (event: any) => ensureFocusedFieldVisible(scrollViewRef, event);
   const [activeBuildSection, setActiveBuildSection] = useState<ActiveBuildSection>(null);
   const [handoffDetailsExpanded, setHandoffDetailsExpanded] = useState(false);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
@@ -757,6 +764,7 @@ export default function PhaseFour({
         style={styles.quoteInput}
         value={reviewerName}
         onChangeText={setReviewerName}
+        onFocus={handleBuildFieldFocus}
         accessibilityLabel="Reviewer name"
         placeholder="Reviewer name"
         placeholderTextColor={Colors.gray[600]}
@@ -766,6 +774,7 @@ export default function PhaseFour({
         style={styles.quoteInput}
         value={reviewerRole}
         onChangeText={setReviewerRole}
+        onFocus={handleBuildFieldFocus}
         accessibilityLabel="Reviewer role"
         placeholder="CAD reviewer, machinist, engineer, or vendor"
         placeholderTextColor={Colors.gray[600]}
@@ -775,6 +784,7 @@ export default function PhaseFour({
         style={[styles.quoteInput, styles.quoteNotesInput]}
         value={reviewerNotes}
         onChangeText={setReviewerNotes}
+        onFocus={handleBuildFieldFocus}
         accessibilityLabel="Reviewer approval notes"
         placeholder="Record source-dimension, CAD, material treatment, DfM, or release concerns."
         placeholderTextColor={Colors.gray[600]}
@@ -1169,6 +1179,7 @@ export default function PhaseFour({
                     style={styles.quoteInput}
                     value={quoteRecipientEmail}
                     onChangeText={setQuoteRecipientEmail}
+                    onFocus={handleBuildFieldFocus}
                     accessibilityLabel="Vendor quote recipient email"
                     placeholder="quotes@vendor.com"
                     placeholderTextColor={Colors.gray[600]}
@@ -1180,6 +1191,7 @@ export default function PhaseFour({
                     style={[styles.quoteInput, styles.quoteNotesInput]}
                     value={quoteAdminNotes}
                     onChangeText={setQuoteAdminNotes}
+                    onFocus={handleBuildFieldFocus}
                     accessibilityLabel="Admin notes for vendor quote request"
                     placeholder="Tolerance concerns, preferred materials, target lead time, or missing files to ask about."
                     placeholderTextColor={Colors.gray[600]}
@@ -1275,11 +1287,13 @@ export default function PhaseFour({
     <ScrollView
       ref={scrollViewRef}
       style={styles.container}
+      contentContainerStyle={{ paddingBottom: Spacing.xl + keyboardInset }}
       showsVerticalScrollIndicator={false}
       testID="reversr-tour-build"
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
       automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+      {...buildFocusVisibilityProps}
     >
       <View style={styles.header}>
         <View style={styles.headerLeft}>

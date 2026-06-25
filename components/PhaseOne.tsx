@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Linking,
+  Platform,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,6 +39,7 @@ interface Props {
   onComplete: (input: string, analysis: AnalysisResult, capturedImage?: string | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  onInputFocus?: (event?: any) => void;
   initialInput?: string;
   initialImage?: string | null;
   mockAnalysis?: AnalysisResult | null;
@@ -56,6 +58,7 @@ export default function PhaseOne({
   onComplete,
   isLoading,
   setIsLoading,
+  onInputFocus,
   initialInput,
   initialImage,
   mockAnalysis,
@@ -78,6 +81,7 @@ export default function PhaseOne({
   const cameraRef = useRef<CameraView>(null);
   const [alert, setAlert] = useState<PhaseOneAlert | null>(null);
   const [loadingStep, setLoadingStep] = useState<string>('capture');
+  const [focusedField, setFocusedField] = useState<'type' | 'scan' | null>(null);
 
   useEffect(() => {
     if (isLoading) {
@@ -114,6 +118,15 @@ export default function PhaseOne({
     if (inputMode === 'lucky') return luckyProduct;
     if (inputMode === 'scan') return input;
     return input;
+  };
+
+  const handleFieldFocus = (field: 'type' | 'scan', event?: any) => {
+    setFocusedField(field);
+    onInputFocus?.(event);
+  };
+
+  const handleFieldBlur = () => {
+    setFocusedField(null);
   };
 
   const hasValidInput = () => {
@@ -358,9 +371,14 @@ export default function PhaseOne({
             <View style={styles.typeContent}>
               <Text style={styles.contentLabel}>Describe the machine</Text>
               <TextInput
-                style={styles.textInput}
+                style={[
+                  styles.textInput,
+                  focusedField === 'type' && Platform.OS !== 'web' && styles.textInputFocusedCompact,
+                ]}
                 value={input}
                 onChangeText={setInput}
+                onFocus={(event) => handleFieldFocus('type', event)}
+                onBlur={handleFieldBlur}
                 accessibilityLabel="Machine description"
                 placeholder="e.g., A FarmBot Genesis gantry farming robot with tracks, gantry beam, z-axis, Farmduino, Raspberry Pi, motors, camera, tools, and power supply..."
                 placeholderTextColor={Colors.gray[500]}
@@ -414,9 +432,15 @@ export default function PhaseOne({
                 </TouchableOpacity>
               )}
               <TextInput
-                style={[styles.textInput, styles.scanTextInput]}
+                style={[
+                  styles.textInput,
+                  styles.scanTextInput,
+                  focusedField === 'scan' && Platform.OS !== 'web' && styles.scanTextInputFocusedCompact,
+                ]}
                 value={input}
                 onChangeText={setInput}
+                onFocus={(event) => handleFieldFocus('scan', event)}
+                onBlur={handleFieldBlur}
                 accessibilityLabel="Optional machine scan notes"
                 placeholder="Optional: Add model number, visible assemblies, damage, or inventory clues..."
                 placeholderTextColor={Colors.gray[500]}
@@ -687,6 +711,9 @@ const createStyles = (Colors: AppColors) => {
   scanTextInput: {
     minHeight: 60,
   },
+  scanTextInputFocusedCompact: {
+    minHeight: 84,
+  },
   textInput: {
     backgroundColor: Colors.input,
     borderRadius: Radii.md,
@@ -698,6 +725,9 @@ const createStyles = (Colors: AppColors) => {
     fontSize: FontSizes.sm,
     minHeight: 150,
     textAlignVertical: 'top',
+  },
+  textInputFocusedCompact: {
+    minHeight: 112,
   },
   imagePreview: {
     backgroundColor: Colors.surface,

@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '../constants/theme';
+import { useAndroidKeyboardInset } from '../hooks/useAndroidKeyboardInset';
 import { CommercialPlanId, useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { formatCreditPeriod, formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
+import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 
 export default function AccountScreen() {
   const { colors: Colors } = useAppTheme();
@@ -25,6 +27,12 @@ export default function AccountScreen() {
   const [shopName, setShopName] = useState(profile.shopName);
   const [status, setStatus] = useState<string | null>(null);
   const [countdownNow, setCountdownNow] = useState(Date.now());
+  const accountScrollRef = useRef<ScrollView>(null);
+  const keyboardInset = useAndroidKeyboardInset(24);
+  const handleAccountFieldFocus = (event: any) => ensureFocusedFieldVisible(accountScrollRef, event);
+  const accountFocusVisibilityProps = {
+    onFocusCapture: handleAccountFieldFocus,
+  } as any;
 
   useEffect(() => {
     setName(profile.name);
@@ -77,11 +85,13 @@ export default function AccountScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
     >
     <ScrollView
+      ref={accountScrollRef}
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingBottom: 20 + keyboardInset }]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
       automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+      {...accountFocusVisibilityProps}
     >
       <View style={styles.headerRow}>
         <View>
@@ -142,6 +152,7 @@ export default function AccountScreen() {
           style={styles.input}
           value={name}
           onChangeText={setName}
+          onFocus={handleAccountFieldFocus}
           accessibilityLabel="Profile name"
           placeholder="Repair shop owner"
           placeholderTextColor={Colors.gray[500]}
@@ -151,6 +162,7 @@ export default function AccountScreen() {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
+          onFocus={handleAccountFieldFocus}
           accessibilityLabel="Profile email"
           placeholder="owner@example.com"
           placeholderTextColor={Colors.gray[500]}
@@ -162,6 +174,7 @@ export default function AccountScreen() {
           style={styles.input}
           value={shopName}
           onChangeText={setShopName}
+          onFocus={handleAccountFieldFocus}
           accessibilityLabel="Shop name"
           placeholder="Precision Repair Shop"
           placeholderTextColor={Colors.gray[500]}
