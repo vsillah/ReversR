@@ -64,6 +64,7 @@ interface Props {
   onGoToDesign: () => void;
   onBack: () => void;
   onReset: () => void;
+  bottomBarInset?: number;
 }
 
 type BuildReadinessItem = {
@@ -216,6 +217,7 @@ export default function PhaseFour({
   onGoToDesign,
   onBack,
   onReset,
+  bottomBarInset = 0,
 }: Props) {
   const { colors: Colors } = useAppTheme();
   const { account } = useCommercialization();
@@ -793,10 +795,10 @@ export default function PhaseFour({
     ?? 'handoff';
 
   const activeBuildStep = selectedBuildStep ?? recommendedBuildStep;
-
-  const buildStepIndex = BUILD_SECTION_ORDER.indexOf(activeBuildStep);
-  const previousBuildStep = buildStepIndex > 0 ? BUILD_SECTION_ORDER[buildStepIndex - 1] : null;
-  const nextBuildStep = buildStepIndex < BUILD_SECTION_ORDER.length - 1 ? BUILD_SECTION_ORDER[buildStepIndex + 1] : null;
+  const activeBuildStepIndex = BUILD_SECTION_ORDER.indexOf(activeBuildStep);
+  const nextBuildStep = activeBuildStepIndex < BUILD_SECTION_ORDER.length - 1
+    ? BUILD_SECTION_ORDER[activeBuildStepIndex + 1]
+    : null;
 
   const buildStepByKey = Object.fromEntries(
     buildReadinessItems.map(item => [item.section, item])
@@ -827,6 +829,8 @@ export default function PhaseFour({
   const readinessReadyCount = buildSteps.filter(item => item.complete).length;
   const readinessPercent = Math.round((readinessReadyCount / buildSteps.length) * 100);
   const isVendorReviewReady = readinessReadyCount === buildSteps.length;
+  const nextBuildMeta = nextBuildStep ? buildStepByKey[nextBuildStep] : null;
+  const nextBuildIsLocked = !!nextBuildMeta && !nextBuildMeta.isUnlocked;
 
   useEffect(() => {
     setShowAllBomItems(false);
@@ -840,32 +844,34 @@ export default function PhaseFour({
     });
   };
 
-  const openBuildStep = (section: BuildSectionKey) => {
+  const openBuildStep = (section: BuildSectionKey, options: { scrollToWorkspace?: boolean } = {}) => {
     setSelectedBuildStep(section);
-    setTimeout(() => scrollToWorkspace(), 80);
+    if (options.scrollToWorkspace) {
+      setTimeout(() => scrollToWorkspace(), 80);
+    }
   };
 
   const getLockedAction = (section: BuildSectionKey): { label: string; action: () => void } | null => {
     switch (section) {
       case 'assembly':
-        return !hasBom ? { label: 'Open Bill of Materials', action: () => openBuildStep('bom') } : null;
+        return !hasBom ? { label: 'Open Bill of Materials', action: () => openBuildStep('bom', { scrollToWorkspace: true }) } : null;
       case 'manufacturing':
-        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
-        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom', { scrollToWorkspace: true }) };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly', { scrollToWorkspace: true }) };
         return !hasManufacturingEvidence ? { label: 'Return to Design', action: onGoToDesign } : null;
       case 'exports':
-        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
-        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom', { scrollToWorkspace: true }) };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly', { scrollToWorkspace: true }) };
         return !hasManufacturingEvidence ? { label: 'Return to Design', action: onGoToDesign } : null;
       case 'approval':
-        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
-        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom', { scrollToWorkspace: true }) };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly', { scrollToWorkspace: true }) };
         return !hasManufacturingEvidence ? { label: 'Return to Design', action: onGoToDesign } : null;
       case 'handoff':
-        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom') };
-        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly') };
+        if (!hasBom) return { label: 'Open Bill of Materials', action: () => openBuildStep('bom', { scrollToWorkspace: true }) };
+        if (!hasAssembly) return { label: 'Open Assembly Sequence', action: () => openBuildStep('assembly', { scrollToWorkspace: true }) };
         if (!hasManufacturingEvidence) return { label: 'Return to Design', action: onGoToDesign };
-        return !hasSavedVendorApproval ? { label: 'Open Reviewer Approval', action: () => openBuildStep('approval') } : null;
+        return !hasSavedVendorApproval ? { label: 'Open Reviewer Approval', action: () => openBuildStep('approval', { scrollToWorkspace: true }) } : null;
       default:
         return null;
     }
@@ -1395,20 +1401,12 @@ export default function PhaseFour({
     );
   };
 
-  const nextStepMeta = nextBuildStep ? buildStepByKey[nextBuildStep] : null;
-  const nextStepLocked = !!nextStepMeta && !nextStepMeta.isUnlocked;
-  const nextStepLabel = nextStepMeta
-    ? nextStepLocked
-      ? nextStepMeta.unlockReason || `Unlock ${nextStepMeta.label}`
-      : `Next: ${nextStepMeta.label}`
-    : 'Build sequence complete';
-
   return (
     <View style={styles.screen}>
       <ScrollView
         ref={scrollViewRef}
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: keyboardOpen ? Spacing.xxl + keyboardInset : 160 + keyboardInset }}
+        contentContainerStyle={{ paddingBottom: keyboardOpen ? Spacing.xxl + keyboardInset : bottomBarInset + Spacing.xl + keyboardInset }}
         showsVerticalScrollIndicator={false}
         testID="reversr-tour-build"
         keyboardShouldPersistTaps="handled"
@@ -1445,69 +1443,53 @@ export default function PhaseFour({
                 <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
               </View>
             </View>
-            <View style={styles.readinessList}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.readinessRailContent}
+              accessibilityRole="tablist"
+            >
               {buildSteps.map(item => {
                 const isSelected = activeBuildStep === item.section;
                 const statusIcon = item.status === 'locked'
                   ? 'lock-closed-outline'
                   : item.complete
-                    ? 'checkmark'
+                    ? 'checkmark-circle'
                     : item.status === 'current'
                       ? 'play'
                       : item.icon;
                 return (
-                  <View
+                  <TouchableOpacity
                     key={item.id}
                     style={[
-                      styles.readinessAccordionItem,
-                      item.complete && styles.readinessItemReady,
-                      item.status === 'locked' && styles.readinessItemLocked,
-                      isSelected && styles.readinessItemSelected,
+                      styles.readinessRailChip,
+                      item.complete && styles.readinessRailChipComplete,
+                      item.status === 'locked' && styles.readinessRailChipLocked,
+                      isSelected && styles.readinessRailChipSelected,
                     ]}
+                    onPress={() => openBuildStep(item.section)}
+                    disabled={!item.isUnlocked}
+                    accessibilityRole="tab"
+                    accessibilityLabel={`${item.label}: ${item.status}`}
+                    accessibilityHint={item.isUnlocked ? `Show ${item.label}. ${item.summary}` : item.unlockReason}
+                    accessibilityState={{ selected: isSelected, disabled: !item.isUnlocked }}
                   >
-                    <TouchableOpacity
-                      style={styles.readinessItemHeader}
-                      onPress={() => openBuildStep(item.section)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${item.label}: ${item.status}`}
-                      accessibilityHint={item.isUnlocked ? `Open ${item.label}. ${item.summary}` : item.unlockReason}
-                      accessibilityState={{ selected: isSelected, disabled: false }}
-                    >
-                      <View style={[
-                        styles.readinessItemIcon,
-                        item.complete && styles.readinessItemIconReady,
-                        item.status === 'locked' && styles.readinessItemIconLocked,
-                        item.status === 'current' && styles.readinessItemIconCurrent,
-                      ]}>
-                        <Ionicons
-                          name={statusIcon as keyof typeof Ionicons.glyphMap}
-                          size={17}
-                          color={item.complete ? Colors.black : item.status === 'locked' ? Colors.orange[300] : Colors.gray[400]}
-                        />
-                      </View>
-                      <View style={styles.readinessItemText}>
-                        <View style={styles.readinessItemTitleRow}>
-                          <Text style={styles.readinessItemLabel}>{item.label}</Text>
-                          <View style={[
-                            styles.stepStatusBadge,
-                            item.status === 'complete' && styles.stepStatusBadgeComplete,
-                            item.status === 'current' && styles.stepStatusBadgeCurrent,
-                            item.status === 'locked' && styles.stepStatusBadgeLocked,
-                          ]}>
-                            <Text style={styles.stepStatusText}>
-                              {item.status === 'current' ? 'Current' : item.status === 'complete' ? 'Complete' : item.status === 'locked' ? 'Locked' : 'Available'}
-                            </Text>
-                          </View>
-                        </View>
-                        <Text style={styles.readinessItemDetail} numberOfLines={2}>
-                          {item.isUnlocked ? item.summary : item.unlockReason}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+                    <Ionicons
+                      name={statusIcon as keyof typeof Ionicons.glyphMap}
+                      size={16}
+                      color={item.status === 'locked' ? Colors.orange[300] : item.complete ? Colors.accent : Colors.primary}
+                    />
+                    <Text style={[
+                      styles.readinessRailChipText,
+                      item.status === 'locked' && styles.readinessRailChipTextLocked,
+                      isSelected && styles.readinessRailChipTextSelected,
+                    ]} numberOfLines={1}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
                 );
               })}
-            </View>
+            </ScrollView>
           </View>
           <View
             style={[styles.workspacePanel, isWideLayout && styles.workspacePanelDesktop]}
@@ -1541,6 +1523,49 @@ export default function PhaseFour({
 
         <View style={styles.actionsPanel}>
           <Text style={styles.actionsTitle}>What's Next?</Text>
+          {nextBuildMeta ? (
+            <TouchableOpacity
+              style={[styles.nextSectionButton, nextBuildIsLocked && styles.nextSectionButtonLocked]}
+              onPress={() => {
+                if (!nextBuildStep || nextBuildIsLocked) return;
+                openBuildStep(nextBuildStep, { scrollToWorkspace: true });
+              }}
+              disabled={nextBuildIsLocked}
+              accessibilityRole="button"
+              accessibilityLabel={nextBuildIsLocked ? `${nextBuildMeta.label} locked` : `Open ${nextBuildMeta.label}`}
+              accessibilityHint={nextBuildIsLocked ? nextBuildMeta.unlockReason : `Show ${nextBuildMeta.label}. ${nextBuildMeta.summary}`}
+              accessibilityState={{ disabled: nextBuildIsLocked }}
+            >
+              <View style={[
+                styles.nextSectionIcon,
+                nextBuildMeta.complete && styles.nextSectionIconComplete,
+                nextBuildIsLocked && styles.nextSectionIconLocked,
+              ]}>
+                <Ionicons
+                  name={nextBuildIsLocked ? 'lock-closed-outline' : nextBuildMeta.complete ? 'checkmark-circle' : nextBuildMeta.icon}
+                  size={18}
+                  color={nextBuildIsLocked ? Colors.orange[300] : nextBuildMeta.complete ? Colors.accent : Colors.primary}
+                />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={styles.actionButtonText}>{nextBuildMeta.label}</Text>
+                <Text style={styles.actionButtonSubtext} numberOfLines={2}>
+                  {nextBuildIsLocked ? nextBuildMeta.unlockReason : nextBuildMeta.summary}
+                </Text>
+              </View>
+              {!nextBuildIsLocked ? (
+                <Ionicons name="arrow-forward" size={18} color={Colors.primary} />
+              ) : null}
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.nextSectionCompleteCard}>
+              <Ionicons name="checkmark-circle-outline" size={20} color={Colors.accent} />
+              <View style={styles.actionContent}>
+                <Text style={styles.actionButtonText}>Build review complete</Text>
+                <Text style={styles.actionButtonSubtext}>All build sections have been reviewed.</Text>
+              </View>
+            </View>
+          )}
           <TouchableOpacity
             style={styles.actionButton}
             onPress={onReset}
@@ -1557,41 +1582,6 @@ export default function PhaseFour({
 
         <View style={{ height: 32 }} />
       </ScrollView>
-
-      {!keyboardOpen ? (
-        <View style={styles.buildStepFooter}>
-          <TouchableOpacity
-            style={[styles.stepFooterButton, !previousBuildStep && styles.stepFooterButtonDisabled]}
-            onPress={() => previousBuildStep && openBuildStep(previousBuildStep)}
-            disabled={!previousBuildStep}
-            accessibilityRole="button"
-            accessibilityLabel="Go to previous build step"
-            accessibilityState={{ disabled: !previousBuildStep }}
-          >
-            <Ionicons name="arrow-back" size={16} color={previousBuildStep ? Colors.text : Colors.gray[600]} />
-            <Text style={[styles.stepFooterButtonText, !previousBuildStep && styles.stepFooterButtonTextDisabled]}>Previous</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.stepFooterLink}
-            onPress={() => scrollViewRef.current?.scrollTo({ y: 0, animated: true })}
-            accessibilityRole="button"
-            accessibilityLabel="Back to build readiness"
-          >
-            <Text style={styles.stepFooterLinkText}>Back to readiness</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.stepFooterPrimary, nextStepLocked && styles.stepFooterPrimaryDisabled, !nextBuildStep && styles.stepFooterPrimaryDisabled]}
-            onPress={() => nextBuildStep && !nextStepLocked && openBuildStep(nextBuildStep)}
-            disabled={!nextBuildStep || nextStepLocked}
-            accessibilityRole="button"
-            accessibilityLabel={nextStepLabel}
-            accessibilityState={{ disabled: !nextBuildStep || nextStepLocked }}
-          >
-            <Text style={styles.stepFooterPrimaryText}>{nextBuildStep && !nextStepLocked ? 'Next' : 'Locked'}</Text>
-            <Text style={styles.stepFooterPrimaryHint} numberOfLines={2}>{nextStepLabel}</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
 
       <AlertModal
         visible={alert?.visible || false}
@@ -1792,85 +1782,49 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   readinessBadgeReady: {
     backgroundColor: 'rgba(0, 255, 136, 0.22)',
   },
-  readinessList: {
+  readinessRailContent: {
     gap: Spacing.sm,
+    paddingRight: Spacing.sm,
   },
-  readinessAccordionItem: {
-    backgroundColor: Colors.surface,
+  readinessRailChip: {
+    minWidth: 142,
+    maxWidth: 180,
+    minHeight: 44,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
-    overflow: 'visible',
-  },
-  readinessItemSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
-  },
-  readinessItemLocked: {
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
-    borderColor: 'rgba(245, 158, 11, 0.25)',
-  },
-  readinessItemHeader: {
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-    padding: Spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
   },
-  readinessItemReady: {
-    borderColor: 'rgba(0, 255, 157, 0.35)',
+  readinessRailChipSelected: {
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+  },
+  readinessRailChipComplete: {
+    borderColor: 'rgba(0, 255, 157, 0.4)',
     backgroundColor: 'rgba(0, 255, 136, 0.08)',
   },
-  readinessItemActionable: {
-    borderStyle: 'dashed',
+  readinessRailChipLocked: {
+    borderColor: 'rgba(245, 158, 11, 0.25)',
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    opacity: 0.72,
   },
-  readinessAccordionBody: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    padding: Spacing.sm,
-  },
-  readinessItemIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.black,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  readinessItemIconReady: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  readinessItemIconLocked: {
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-  },
-  readinessItemIconCurrent: {
-    borderColor: Colors.primary,
-  },
-  readinessItemText: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: 'center',
-  },
-  readinessItemTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    marginBottom: 2,
-    flexWrap: 'wrap',
-  },
-  readinessItemLabel: {
+  readinessRailChipText: {
+    flexShrink: 1,
     color: Colors.white,
-    fontSize: FontSizes.sm,
-    fontWeight: 'bold',
-    marginBottom: 0,
-  },
-  readinessItemDetail: {
-    color: Colors.gray[500],
     fontSize: FontSizes.xs,
-    lineHeight: 16,
+    fontWeight: '800',
+  },
+  readinessRailChipTextSelected: {
+    color: Colors.white,
+  },
+  readinessRailChipTextLocked: {
+    color: Colors.gray[500],
   },
   readinessItemAction: {
     color: Colors.accent,
@@ -2817,75 +2771,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
   },
-  buildStepFooter: {
-    position: 'absolute',
-    left: Spacing.lg,
-    right: Spacing.lg,
-    bottom: Spacing.lg,
-    backgroundColor: Colors.panel,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: Spacing.sm,
-  },
-  stepFooterButton: {
-    minWidth: 92,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    backgroundColor: Colors.surface,
-  },
-  stepFooterButtonDisabled: {
-    opacity: 0.4,
-  },
-  stepFooterButtonText: {
-    color: Colors.text,
-    fontSize: FontSizes.sm,
-    fontWeight: '600',
-  },
-  stepFooterButtonTextDisabled: {
-    color: Colors.gray[600],
-  },
-  stepFooterLink: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.sm,
-  },
-  stepFooterLinkText: {
-    color: Colors.gray[400],
-    fontSize: FontSizes.xs,
-    fontWeight: '600',
-  },
-  stepFooterPrimary: {
-    flex: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    justifyContent: 'center',
-  },
-  stepFooterPrimaryDisabled: {
-    backgroundColor: Colors.gray[700],
-  },
-  stepFooterPrimaryText: {
-    color: Colors.white,
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-  },
-  stepFooterPrimaryHint: {
-    color: 'rgba(255,255,255,0.82)',
-    fontSize: FontSizes.xs,
-    marginTop: 2,
-  },
   actionsPanel: {
     backgroundColor: Colors.panel,
     borderRadius: 12,
@@ -2912,6 +2797,53 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.border,
     marginBottom: Spacing.sm,
     maxWidth: '100%',
+  },
+  nextSectionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    marginBottom: Spacing.sm,
+    maxWidth: '100%',
+  },
+  nextSectionButtonLocked: {
+    borderColor: 'rgba(245, 158, 11, 0.35)',
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    opacity: 0.85,
+  },
+  nextSectionCompleteCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    marginBottom: Spacing.sm,
+    maxWidth: '100%',
+  },
+  nextSectionIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.35)',
+  },
+  nextSectionIconComplete: {
+    backgroundColor: 'rgba(0, 255, 136, 0.12)',
+    borderColor: 'rgba(0, 255, 157, 0.35)',
+  },
+  nextSectionIconLocked: {
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   actionContent: {
     flex: 1,

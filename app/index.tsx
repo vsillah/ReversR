@@ -1789,6 +1789,7 @@ export default function HomeScreen() {
               onGoToDesign={handleGoToDesign}
               onBack={handleBack}
               onReset={handleReset}
+              bottomBarInset={tabBarInset}
             />
           ) : (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
