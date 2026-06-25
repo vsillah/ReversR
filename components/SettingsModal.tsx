@@ -6,6 +6,7 @@ import Constants from 'expo-constants';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '../constants/theme';
+import { useAndroidKeyboardInset } from '../hooks/useAndroidKeyboardInset';
 import {
   CommercialAccessGrantSummary,
   CommercialPlan,
@@ -169,6 +170,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
     clearAccessPassword,
   } = useCommercialization();
   const styles = createStyles(Colors);
+  const keyboardInset = useAndroidKeyboardInset(24);
   const settingsScrollRef = useRef<ScrollView>(null);
   const settingsFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(settingsScrollRef, event),
@@ -1378,7 +1380,7 @@ export default function SettingsModal({ visible, onClose, initialSection = 'acco
           <ScrollView
             ref={settingsScrollRef}
             style={styles.body}
-            contentContainerStyle={styles.bodyContent}
+            contentContainerStyle={[styles.bodyContent, { paddingBottom: 144 + keyboardInset }]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}

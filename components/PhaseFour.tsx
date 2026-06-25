@@ -14,6 +14,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes, Radii, Fonts } from '../constants/theme';
+import { useAndroidKeyboardInset } from '../hooks/useAndroidKeyboardInset';
 import { useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import {
@@ -207,6 +208,7 @@ export default function PhaseFour({
   const { account } = useCommercialization();
   const styles = createStyles(Colors);
   const scrollViewRef = useRef<ScrollView>(null);
+  const keyboardInset = useAndroidKeyboardInset(32);
   const buildFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(scrollViewRef, event),
   } as any;
@@ -1285,6 +1287,7 @@ export default function PhaseFour({
     <ScrollView
       ref={scrollViewRef}
       style={styles.container}
+      contentContainerStyle={{ paddingBottom: Spacing.xl + keyboardInset }}
       showsVerticalScrollIndicator={false}
       testID="reversr-tour-build"
       keyboardShouldPersistTaps="handled"

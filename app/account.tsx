@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '../constants/theme';
+import { useAndroidKeyboardInset } from '../hooks/useAndroidKeyboardInset';
 import { CommercialPlanId, useCommercialization } from '../hooks/useCommercialization';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { formatCreditPeriod, formatJourneyCreditLabel, formatResetCountdown } from '../utils/commercialUsage';
@@ -27,6 +28,7 @@ export default function AccountScreen() {
   const [status, setStatus] = useState<string | null>(null);
   const [countdownNow, setCountdownNow] = useState(Date.now());
   const accountScrollRef = useRef<ScrollView>(null);
+  const keyboardInset = useAndroidKeyboardInset(24);
   const handleAccountFieldFocus = (event: any) => ensureFocusedFieldVisible(accountScrollRef, event);
   const accountFocusVisibilityProps = {
     onFocusCapture: handleAccountFieldFocus,
@@ -85,7 +87,7 @@ export default function AccountScreen() {
     <ScrollView
       ref={accountScrollRef}
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingBottom: 20 + keyboardInset }]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
       automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}

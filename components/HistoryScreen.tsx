@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes, Radii } from '../constants/theme';
+import { useAndroidKeyboardInset } from '../hooks/useAndroidKeyboardInset';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { SavedInnovation, getAllInnovations, deleteInnovation } from '../hooks/useStorage';
 import { MACHINE_WORKFLOW_LABELS, MachineWorkflowKey } from '../hooks/useGemini';
@@ -130,6 +131,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarI
   const { colors: Colors } = useAppTheme();
   const styles = createStyles(Colors);
   const historyScrollRef = useRef<ScrollView>(null);
+  const keyboardInset = useAndroidKeyboardInset(24);
   const historyFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(historyScrollRef, event),
   } as any;
@@ -554,7 +556,7 @@ export default function HistoryScreen({ onBack, onResume, refreshKey, bottomBarI
       <ScrollView
         ref={historyScrollRef}
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: bottomBarInset }}
+        contentContainerStyle={{ paddingBottom: bottomBarInset + keyboardInset }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}

@@ -5,6 +5,7 @@ type FocusEventLike = NativeSyntheticEvent<TargetedEvent> | { nativeEvent?: { ta
 
 const WEB_REFOCUS_DELAY_MS = 260;
 const NATIVE_REFOCUS_DELAY_MS = 420;
+const NATIVE_FINAL_REFOCUS_DELAY_MS = 900;
 const NATIVE_KEYBOARD_OFFSET = Platform.OS === 'android' ? 280 : 180;
 
 const scrollWebFocusIntoView = () => {
@@ -59,5 +60,6 @@ export const ensureFocusedFieldVisible = (
   setTimeout(run, WEB_REFOCUS_DELAY_MS);
   if (Platform.OS !== 'web') {
     setTimeout(run, NATIVE_REFOCUS_DELAY_MS);
+    setTimeout(run, NATIVE_FINAL_REFOCUS_DELAY_MS);
   }
 };

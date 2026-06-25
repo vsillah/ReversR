@@ -9,6 +9,7 @@ import {
   Modal,
   Linking,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,6 +52,7 @@ import {
 } from "../hooks/useStorage";
 import { ReviewerApprovalRecord } from "../utils/reviewerApprovalRecords";
 import { useCommercialization } from "../hooks/useCommercialization";
+import { useAndroidKeyboardInset } from "../hooks/useAndroidKeyboardInset";
 import { formatJourneyCreditShortLabel, formatResetCountdown } from "../utils/commercialUsage";
 import { ensureFocusedFieldVisible } from "../utils/focusVisibility";
 
@@ -599,6 +601,7 @@ export default function HomeScreen() {
   } | null>(null);
   const workflowScrollRef = useRef<ScrollView>(null);
   const pendingWorkflowScrollResetRef = useRef(false);
+  const [workflowInputActive, setWorkflowInputActive] = useState(false);
   
   const { generate2DVisualization } = useGemini();
   const tourStep = TOUR_STEPS[tourStepIndex];
@@ -688,6 +691,16 @@ export default function HomeScreen() {
     if (!WELCOME_INTRO_ENABLED) return;
     setWelcomeIntroVisible(true);
     setWelcomeIntroLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      return undefined;
+    }
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setWorkflowInputActive(false);
+    });
+    return () => hideSubscription.remove();
   }, []);
 
   useEffect(() => {
@@ -1450,11 +1463,13 @@ export default function HomeScreen() {
       onExit={closeTour}
     />
   );
-  const contentBottomPadding = tabBarInset + Spacing.md;
+  const keyboardInset = useAndroidKeyboardInset(32);
+  const contentBottomPadding = tabBarInset + Spacing.md + keyboardInset;
   const workflowFocusVisibilityProps = {
     onFocusCapture: (event: any) => ensureFocusedFieldVisible(workflowScrollRef, event),
   } as any;
   const handleWorkflowFieldFocus = useCallback((event?: any) => {
+    setWorkflowInputActive(true);
     ensureFocusedFieldVisible(workflowScrollRef, event);
     if (Platform.OS !== 'web' && context.phase === 1) {
       const nudgePhaseOneIntoView = () => workflowScrollRef.current?.scrollToEnd({ animated: true });
@@ -1640,7 +1655,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {isGuestPlan && (
+      {isGuestPlan && !workflowInputActive && (
         <View style={styles.guestCreditBar} testID="reversr-guest-credit-bar">
           <Text style={styles.guestCreditText} numberOfLines={2}>
             {guestCreditCopySegments.map((segment, index) => (
@@ -1660,17 +1675,19 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <View style={styles.progressBar}>
-        <View style={styles.phaseStepperCard}>
-          <HorizontalStepper
-            steps={PHASE_STEP_LABELS}
-            subLabels={PHASE_STEP_HINTS}
-            currentStep={context.phase}
-            onStepPress={(step) => setPhaseActionModal(step)}
-            testID="reversr-tour-phase-nav"
-          />
+      {!workflowInputActive && (
+        <View style={styles.progressBar}>
+          <View style={styles.phaseStepperCard}>
+            <HorizontalStepper
+              steps={PHASE_STEP_LABELS}
+              subLabels={PHASE_STEP_HINTS}
+              currentStep={context.phase}
+              onStepPress={(step) => setPhaseActionModal(step)}
+              testID="reversr-tour-phase-nav"
+            />
+          </View>
         </View>
-      </View>
+      )}
 
       <ScrollView
         key={`workflow-surface:${context.id}:${context.phase}`}
@@ -1892,15 +1909,17 @@ export default function HomeScreen() {
         initialSection={settingsInitialSection}
       />
       {renderTourGuide()}
-      <BottomTabBar
-        active={null}
-        onHome={goHome}
-        onProjects={openHistory}
-        onNew={handleStartNew}
-        onTour={startTour}
-        onMore={() => openSettings('account')}
-        bottomInset={safeAreaInsets.bottom}
-      />
+      {!workflowInputActive && keyboardInset === 0 && (
+        <BottomTabBar
+          active={null}
+          onHome={goHome}
+          onProjects={openHistory}
+          onNew={handleStartNew}
+          onTour={startTour}
+          onMore={() => openSettings('account')}
+          bottomInset={safeAreaInsets.bottom}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }
