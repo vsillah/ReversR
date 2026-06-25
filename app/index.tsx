@@ -1456,7 +1456,12 @@ export default function HomeScreen() {
   } as any;
   const handleWorkflowFieldFocus = useCallback((event?: any) => {
     ensureFocusedFieldVisible(workflowScrollRef, event);
-  }, []);
+    if (Platform.OS !== 'web' && context.phase === 1) {
+      const nudgePhaseOneIntoView = () => workflowScrollRef.current?.scrollToEnd({ animated: true });
+      setTimeout(nudgePhaseOneIntoView, 240);
+      setTimeout(nudgePhaseOneIntoView, 520);
+    }
+  }, [context.phase]);
 
   if (!welcomeIntroLoaded) {
     return <View style={styles.container} />;
