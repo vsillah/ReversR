@@ -795,6 +795,10 @@ export default function PhaseFour({
     ?? 'handoff';
 
   const activeBuildStep = selectedBuildStep ?? recommendedBuildStep;
+  const activeBuildStepIndex = BUILD_SECTION_ORDER.indexOf(activeBuildStep);
+  const nextBuildStep = activeBuildStepIndex < BUILD_SECTION_ORDER.length - 1
+    ? BUILD_SECTION_ORDER[activeBuildStepIndex + 1]
+    : null;
 
   const buildStepByKey = Object.fromEntries(
     buildReadinessItems.map(item => [item.section, item])
@@ -825,6 +829,8 @@ export default function PhaseFour({
   const readinessReadyCount = buildSteps.filter(item => item.complete).length;
   const readinessPercent = Math.round((readinessReadyCount / buildSteps.length) * 100);
   const isVendorReviewReady = readinessReadyCount === buildSteps.length;
+  const nextBuildMeta = nextBuildStep ? buildStepByKey[nextBuildStep] : null;
+  const nextBuildIsLocked = !!nextBuildMeta && !nextBuildMeta.isUnlocked;
 
   useEffect(() => {
     setShowAllBomItems(false);
@@ -1517,6 +1523,49 @@ export default function PhaseFour({
 
         <View style={styles.actionsPanel}>
           <Text style={styles.actionsTitle}>What's Next?</Text>
+          {nextBuildMeta ? (
+            <TouchableOpacity
+              style={[styles.nextSectionButton, nextBuildIsLocked && styles.nextSectionButtonLocked]}
+              onPress={() => {
+                if (!nextBuildStep || nextBuildIsLocked) return;
+                openBuildStep(nextBuildStep, { scrollToWorkspace: true });
+              }}
+              disabled={nextBuildIsLocked}
+              accessibilityRole="button"
+              accessibilityLabel={nextBuildIsLocked ? `${nextBuildMeta.label} locked` : `Open ${nextBuildMeta.label}`}
+              accessibilityHint={nextBuildIsLocked ? nextBuildMeta.unlockReason : `Show ${nextBuildMeta.label}. ${nextBuildMeta.summary}`}
+              accessibilityState={{ disabled: nextBuildIsLocked }}
+            >
+              <View style={[
+                styles.nextSectionIcon,
+                nextBuildMeta.complete && styles.nextSectionIconComplete,
+                nextBuildIsLocked && styles.nextSectionIconLocked,
+              ]}>
+                <Ionicons
+                  name={nextBuildIsLocked ? 'lock-closed-outline' : nextBuildMeta.complete ? 'checkmark-circle' : nextBuildMeta.icon}
+                  size={18}
+                  color={nextBuildIsLocked ? Colors.orange[300] : nextBuildMeta.complete ? Colors.accent : Colors.primary}
+                />
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={styles.actionButtonText}>{nextBuildMeta.label}</Text>
+                <Text style={styles.actionButtonSubtext} numberOfLines={2}>
+                  {nextBuildIsLocked ? nextBuildMeta.unlockReason : nextBuildMeta.summary}
+                </Text>
+              </View>
+              {!nextBuildIsLocked ? (
+                <Ionicons name="arrow-forward" size={18} color={Colors.primary} />
+              ) : null}
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.nextSectionCompleteCard}>
+              <Ionicons name="checkmark-circle-outline" size={20} color={Colors.accent} />
+              <View style={styles.actionContent}>
+                <Text style={styles.actionButtonText}>Build review complete</Text>
+                <Text style={styles.actionButtonSubtext}>All build sections have been reviewed.</Text>
+              </View>
+            </View>
+          )}
           <TouchableOpacity
             style={styles.actionButton}
             onPress={onReset}
@@ -2748,6 +2797,53 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.border,
     marginBottom: Spacing.sm,
     maxWidth: '100%',
+  },
+  nextSectionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    marginBottom: Spacing.sm,
+    maxWidth: '100%',
+  },
+  nextSectionButtonLocked: {
+    borderColor: 'rgba(245, 158, 11, 0.35)',
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    opacity: 0.85,
+  },
+  nextSectionCompleteCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    marginBottom: Spacing.sm,
+    maxWidth: '100%',
+  },
+  nextSectionIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.35)',
+  },
+  nextSectionIconComplete: {
+    backgroundColor: 'rgba(0, 255, 136, 0.12)',
+    borderColor: 'rgba(0, 255, 157, 0.35)',
+  },
+  nextSectionIconLocked: {
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   actionContent: {
     flex: 1,
