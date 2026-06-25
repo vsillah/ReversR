@@ -32,11 +32,9 @@ const scrollNativeFocusIntoView = (
   target: unknown,
 ) => {
   const focusedInput = (TextInput as any).State?.currentlyFocusedInput?.();
-  const focusedField = (TextInput as any).State?.currentlyFocusedField?.();
   const resolvedTarget =
     target ||
-    findNodeHandle(focusedInput) ||
-    focusedField;
+    findNodeHandle(focusedInput);
   if (!resolvedTarget) return;
   const scrollResponder = (scrollRef.current as any)?.scrollResponderScrollNativeHandleToKeyboard;
   if (typeof scrollResponder !== 'function') return;

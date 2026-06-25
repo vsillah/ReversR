@@ -116,6 +116,28 @@ export interface CommercialCreditConfig {
   }>;
 }
 
+let androidIapModuleAvailable: boolean | null = null;
+
+const isExpoIapMissingModuleError = (error: unknown) => {
+  return error instanceof Error && error.message.includes("Cannot find native module 'ExpoIap'");
+};
+
+const isAndroidIapModuleAvailable = () => {
+  if (Platform.OS !== 'android') return false;
+  if (androidIapModuleAvailable !== null) return androidIapModuleAvailable;
+  try {
+    const { requireNativeModule } = require('expo-modules-core') as {
+      requireNativeModule: (moduleName: string) => unknown;
+    };
+    requireNativeModule('ExpoIap');
+    androidIapModuleAvailable = true;
+  } catch (error) {
+    if (!isExpoIapMissingModuleError(error)) throw error;
+    androidIapModuleAvailable = false;
+  }
+  return androidIapModuleAvailable;
+};
+
 export interface CommercialAccessGrantSummary {
   grantId: string;
   clientId: string;
@@ -446,17 +468,20 @@ const verifyAndroidPlaySubscription = async ({
 };
 
 export function CommercialProvider({ children }: { children: React.ReactNode }) {
+  const androidIapAvailable = isAndroidIapModuleAvailable();
   const [account, setAccount] = useState<CommercialAccount | null>(null);
   const [profile, setProfileState] = useState<CommercialProfile>(defaultProfile);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [androidInAppBillingStatus, setAndroidInAppBillingStatus] = useState<AndroidInAppBillingStatus>(
-    Platform.OS === 'android' ? 'connecting' : 'unavailable'
+    androidIapAvailable ? 'connecting' : 'unavailable'
   );
   const [androidInAppBillingMessage, setAndroidInAppBillingMessage] = useState(
-    Platform.OS === 'android'
+    androidIapAvailable
       ? 'Connecting to Google Play Billing.'
-      : 'Google Play in-app billing is available only in the Android app.'
+      : Platform.OS === 'android'
+        ? 'Google Play in-app billing is unavailable in this runtime.'
+        : 'Google Play in-app billing is available only in the Android app.'
   );
   const [androidBillingBridge, setAndroidBillingBridge] = useState<AndroidInAppBillingBridge | null>(null);
 
@@ -645,7 +670,7 @@ export function CommercialProvider({ children }: { children: React.ReactNode }) 
   return (
     <CommercialContext.Provider value={value}>
       {children}
-      {Platform.OS === 'android' && (
+      {androidIapAvailable && (
         <AndroidInAppBillingBridgeHost
           account={account}
           setAccount={setAccount}
@@ -676,6 +701,9 @@ function AndroidInAppBillingBridgeHost({
 }) {
   const pendingPlanRef = React.useRef<CommercialPlanId | null>(null);
   const finishTransactionRef = React.useRef<((args: { purchase: Purchase; isConsumable?: boolean }) => Promise<void>) | null>(null);
+  const beginUpgradeRef = React.useRef<(planId: CommercialPlanId) => Promise<void>>(async () => {
+    throw new Error('Google Play Billing is still connecting.');
+  });
 
   const iap = useIAP({
     onPurchaseSuccess: async (purchase) => {
@@ -786,10 +814,14 @@ function AndroidInAppBillingBridgeHost({
     });
   }, [account?.plans, iap]);
 
+  beginUpgradeRef.current = beginUpgrade;
+
   useEffect(() => {
-    setBridge({ beginUpgrade });
+    setBridge(() => ({
+      beginUpgrade: (planId) => beginUpgradeRef.current(planId),
+    }));
     return () => setBridge(null);
-  }, [beginUpgrade, setBridge]);
+  }, [setBridge]);
 
   return null;
 }
