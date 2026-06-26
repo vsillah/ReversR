@@ -211,8 +211,20 @@ export default function PhaseOne({
 
   const handleShuffle = (nextPresets = productPresets) => {
     const presets = nextPresets.length > 0 ? nextPresets : DEFAULT_SAMPLE_SET.samples;
-    const randomIndex = Math.floor(Math.random() * presets.length);
-    setLuckyProduct(presets[randomIndex]);
+    if (presets.length === 0) {
+      setLuckyProduct('');
+      return;
+    }
+
+    if (presets.length === 1) {
+      setLuckyProduct(presets[0]);
+      return;
+    }
+
+    const candidates = presets.filter((preset) => preset !== luckyProduct);
+    const nextPool = candidates.length > 0 ? candidates : presets;
+    const randomIndex = Math.floor(Math.random() * nextPool.length);
+    setLuckyProduct(nextPool[randomIndex]);
   };
 
   const openSampleMode = async () => {
