@@ -33,7 +33,7 @@ import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 import ManufacturingStudio from './ManufacturingStudio';
-import { Badge, InfoTooltip } from './ui';
+import { InfoTooltip } from './ui';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
 import {
   ReviewerApproval,
@@ -954,6 +954,9 @@ export default function PhaseFour({
   const actionBuildStep = nextBuildStep ?? (!activeBuildMeta.complete ? activeBuildStep : null);
   const actionBuildMeta = actionBuildStep ? buildStepByKey[actionBuildStep] : null;
   const actionBuildIsLocked = !!actionBuildMeta && !actionBuildMeta.isUnlocked;
+  const readinessGateText = isVendorReviewReady
+    ? 'Ready for vendor review'
+    : `${buildSteps.length - readinessReadyCount} gate${buildSteps.length - readinessReadyCount === 1 ? '' : 's'} open`;
 
   useEffect(() => {
     setShowAllBomItems(false);
@@ -1556,9 +1559,7 @@ export default function PhaseFour({
                 <View style={styles.readinessHeadingText}>
                   <Text style={styles.readinessTitle}>Build Readiness</Text>
                   <Text style={styles.readinessSubtitle}>
-                    {isVendorReviewReady
-                      ? 'Ready for vendor review. Fabrication still requires qualified CAD and DfM signoff.'
-                      : `${buildSteps.length - readinessReadyCount} gate${buildSteps.length - readinessReadyCount === 1 ? '' : 's'} open before vendor review.`}
+                    {readinessGateText}
                   </Text>
                 </View>
               </View>
@@ -1566,21 +1567,25 @@ export default function PhaseFour({
                 <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
               </View>
             </View>
-            <View style={styles.readinessSummaryRow}>
-              <Badge label={`${readinessReadyCount}/${buildSteps.length} complete`} tone="success" icon="checkmark-circle" />
-              <Badge label={`${readinessRemainingCount} remaining`} tone="primary" icon="arrow-forward-circle" />
-              <Badge label={`${readinessLockedCount} locked`} tone="warning" icon="lock-closed" />
+            <View style={styles.readinessMetaRow}>
+              <Text style={styles.readinessMetaText}>{`${readinessReadyCount}/${buildSteps.length} complete`}</Text>
+              <View style={styles.readinessMetaDot} />
+              <Text style={styles.readinessMetaText}>{`${readinessRemainingCount} remaining`}</Text>
+              <View style={styles.readinessMetaDot} />
+              <Text style={styles.readinessMetaText}>{`${readinessLockedCount} locked`}</Text>
             </View>
             <View style={styles.readinessStatusStrip}>
-              <View style={styles.readinessStatusLine} />
+              <View style={[styles.readinessStatusLine, styles.readinessStatusLineBase]} />
+              <View
+                style={[
+                  styles.readinessStatusLine,
+                  styles.readinessStatusLineProgress,
+                  { width: `${((BUILD_SECTION_ORDER.indexOf(recommendedBuildStep) + 1) / buildSteps.length) * 100}%` },
+                ]}
+              />
               {buildSteps.map(item => {
                 const isSelected = activeBuildStep === item.section;
                 const isHovered = Platform.OS === 'web' && isWideLayout && hoveredBuildStep === item.section;
-                const statusIcon = item.status === 'locked'
-                  ? 'lock-closed'
-                  : item.complete
-                    ? 'checkmark'
-                    : undefined;
                 return (
                   <Pressable
                     key={item.id}
@@ -1602,83 +1607,43 @@ export default function PhaseFour({
                         isSelected && styles.readinessNodeButtonSelected,
                       ]}
                     >
-                      {statusIcon ? (
-                        <Ionicons
-                          name={statusIcon as keyof typeof Ionicons.glyphMap}
-                          size={item.status === 'locked' ? 14 : 17}
-                          color={item.status === 'locked' ? Colors.orange[300] : item.complete ? Colors.black : Colors.white}
-                        />
-                      ) : (
-                        <Text
-                          style={[
-                            styles.readinessNodeIndex,
-                            item.status === 'current' && styles.readinessNodeIndexCurrent,
-                            item.status === 'locked' && styles.readinessNodeIndexLocked,
-                          ]}
-                        >
-                          {BUILD_SECTION_ORDER.indexOf(item.section) + 1}
-                        </Text>
-                      )}
+                      <Ionicons
+                        name={item.icon}
+                        size={16}
+                        color={
+                          item.status === 'locked'
+                            ? Colors.orange[300]
+                            : item.complete
+                              ? Colors.black
+                              : item.status === 'current'
+                                ? Colors.primary
+                                : Colors.gray[300]
+                        }
+                      />
+                      {item.complete ? (
+                        <View style={[styles.readinessNodeBadge, styles.readinessNodeBadgeComplete]}>
+                          <Ionicons name="checkmark" size={10} color={Colors.black} />
+                        </View>
+                      ) : item.status === 'locked' ? (
+                        <View style={[styles.readinessNodeBadge, styles.readinessNodeBadgeLocked]}>
+                          <Ionicons name="lock-closed" size={9} color={Colors.orange[300]} />
+                        </View>
+                      ) : null}
+                      {/*
+                        Preserve desktop hover detail without adding mobile text density.
+                      */}
+                      {isHovered ? (
+                        <View style={styles.readinessNodeTooltip}>
+                          <Text style={styles.readinessNodeTooltipTitle}>{item.label}</Text>
+                          <Text style={styles.readinessNodeTooltipText} numberOfLines={2}>
+                            {item.isUnlocked ? item.summary : item.unlockReason}
+                          </Text>
+                        </View>
+                      ) : null}
                     </View>
-                    <View
-                      style={[
-                        styles.readinessNodeStateDot,
-                        item.complete && styles.readinessNodeStateDotComplete,
-                        item.status === 'current' && styles.readinessNodeStateDotCurrent,
-                        item.status === 'locked' && styles.readinessNodeStateDotLocked,
-                      ]}
-                    />
-                    {isHovered ? (
-                      <View style={styles.readinessNodeTooltip}>
-                        <Text style={styles.readinessNodeTooltipTitle}>{item.label}</Text>
-                        <Text style={styles.readinessNodeTooltipText} numberOfLines={2}>
-                          {item.isUnlocked ? item.summary : item.unlockReason}
-                        </Text>
-                      </View>
-                    ) : null}
                   </Pressable>
                 );
               })}
-            </View>
-            <View style={styles.readinessActiveDetail}>
-              <View style={[
-                styles.readinessActiveDetailIcon,
-                activeBuildMeta.status === 'complete' && styles.readinessActiveDetailIconComplete,
-                activeBuildMeta.status === 'current' && styles.readinessActiveDetailIconCurrent,
-                activeBuildMeta.status === 'locked' && styles.readinessActiveDetailIconLocked,
-              ]}>
-                <Ionicons
-                  name={
-                    activeBuildMeta.status === 'locked'
-                      ? 'lock-closed'
-                      : activeBuildMeta.complete
-                        ? 'checkmark'
-                        : activeBuildMeta.icon
-                  }
-                  size={16}
-                  color={
-                    activeBuildMeta.status === 'locked'
-                      ? Colors.orange[300]
-                      : activeBuildMeta.complete
-                        ? Colors.black
-                        : Colors.primary
-                  }
-                />
-              </View>
-              <View style={styles.readinessActiveDetailText}>
-                <Text style={styles.readinessActiveDetailTitle}>{activeBuildMeta.label}</Text>
-                <Text style={styles.readinessActiveDetailSummary} numberOfLines={2}>
-                  {activeBuildMeta.isUnlocked ? activeBuildMeta.summary : activeBuildMeta.unlockReason}
-                </Text>
-              </View>
-              <View style={[
-                styles.stepStatusBadge,
-                activeBuildMeta.status === 'complete' && styles.stepStatusBadgeComplete,
-                activeBuildMeta.status === 'current' && styles.stepStatusBadgeCurrent,
-                activeBuildMeta.status === 'locked' && styles.stepStatusBadgeLocked,
-              ]}>
-                <Text style={styles.stepStatusText}>{getBuildStatusLabel(activeBuildMeta)}</Text>
-              </View>
             </View>
           </View>
           <View
@@ -1921,7 +1886,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     marginBottom: Spacing.lg,
   },
   readinessPanelDesktop: {
@@ -1932,7 +1897,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   readinessLeft: {
     flexDirection: 'row',
@@ -1954,6 +1919,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.gray[500],
     marginTop: 2,
+    lineHeight: 16,
   },
   readinessBadge: {
     backgroundColor: 'rgba(0, 255, 136, 0.15)',
@@ -1972,27 +1938,45 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   readinessBadgeReady: {
     backgroundColor: 'rgba(0, 255, 136, 0.22)',
   },
-  readinessSummaryRow: {
+  readinessMetaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.xs,
-    marginBottom: Spacing.md,
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: Spacing.sm,
+  },
+  readinessMetaText: {
+    color: Colors.gray[500],
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  readinessMetaDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.gray[600],
   },
   readinessStatusStrip: {
     position: 'relative',
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.sm,
-    marginBottom: Spacing.md,
+    paddingTop: Spacing.xs,
+    paddingBottom: 0,
+    marginBottom: 0,
   },
   readinessStatusLine: {
     position: 'absolute',
     left: 18,
     right: 18,
-    top: 24,
+    top: 20,
     height: 2,
+  },
+  readinessStatusLineBase: {
     backgroundColor: Colors.border,
+  },
+  readinessStatusLineProgress: {
+    backgroundColor: Colors.primary,
   },
   readinessNodeSlot: {
     flex: 1,
@@ -2023,7 +2007,7 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     borderColor: Colors.accent,
   },
   readinessNodeButtonCurrent: {
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    backgroundColor: Colors.surface,
     borderColor: Colors.primary,
     borderWidth: 2,
   },
@@ -2031,36 +2015,28 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     backgroundColor: 'rgba(245, 158, 11, 0.12)',
     borderColor: 'rgba(245, 158, 11, 0.35)',
   },
-  readinessNodeIndex: {
-    color: Colors.gray[400],
-    fontSize: 12,
-    fontWeight: '800',
+  readinessNodeBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
   },
-  readinessNodeIndexCurrent: {
-    color: Colors.white,
-  },
-  readinessNodeIndexLocked: {
-    color: Colors.orange[300],
-  },
-  readinessNodeStateDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.gray[500],
-    marginTop: Spacing.xs,
-  },
-  readinessNodeStateDotComplete: {
+  readinessNodeBadgeComplete: {
     backgroundColor: Colors.accent,
+    borderColor: Colors.black,
   },
-  readinessNodeStateDotCurrent: {
-    backgroundColor: Colors.primary,
-  },
-  readinessNodeStateDotLocked: {
-    backgroundColor: Colors.orange[300],
+  readinessNodeBadgeLocked: {
+    backgroundColor: Colors.black,
+    borderColor: 'rgba(245, 158, 11, 0.35)',
   },
   readinessNodeTooltip: {
     position: 'absolute',
-    bottom: 52,
+    bottom: 46,
     width: 156,
     left: '50%',
     marginLeft: -78,
@@ -2089,54 +2065,6 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     textAlign: 'center',
-  },
-  readinessActiveDetail: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: Spacing.md,
-  },
-  readinessActiveDetailIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.black,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
-  readinessActiveDetailIconComplete: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  readinessActiveDetailIconCurrent: {
-    borderColor: Colors.primary,
-    backgroundColor: 'rgba(59, 130, 246, 0.16)',
-  },
-  readinessActiveDetailIconLocked: {
-    borderColor: 'rgba(245, 158, 11, 0.35)',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
-  },
-  readinessActiveDetailText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  readinessActiveDetailTitle: {
-    color: Colors.white,
-    fontSize: FontSizes.sm,
-    fontWeight: '800',
-    marginBottom: 2,
-  },
-  readinessActiveDetailSummary: {
-    color: Colors.gray[400],
-    fontSize: FontSizes.xs,
-    lineHeight: 18,
   },
   readinessItemAction: {
     color: Colors.accent,
