@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
@@ -32,7 +33,7 @@ import AlertModal from './AlertModal';
 import LoadingOverlay, { LoadingStep } from './LoadingOverlay';
 import { ensureFocusedFieldVisible } from '../utils/focusVisibility';
 import ManufacturingStudio from './ManufacturingStudio';
-import { InfoTooltip } from './ui';
+import { Badge, InfoTooltip } from './ui';
 import { buildManufacturingHandoff, ManufacturingHandoff } from '../utils/manufacturingHandoff';
 import {
   ReviewerApproval,
@@ -320,6 +321,7 @@ export default function PhaseFour({
   } as any;
   const handleBuildFieldFocus = (event: any) => ensureFocusedFieldVisible(scrollViewRef, event);
   const [selectedBuildStep, setSelectedBuildStep] = useState<BuildSectionKey | null>(null);
+  const [hoveredBuildStep, setHoveredBuildStep] = useState<BuildSectionKey | null>(null);
   const [localBom, setLocalBom] = useState<BillOfMaterials | null>(bom);
   const has2D = !!imageUrl || multiAngleImages.some(img => !!img.imageData);
   const has3D = !!threeDScene;
@@ -911,7 +913,17 @@ export default function PhaseFour({
     buildReadinessItems.map(item => [item.section, item])
   ) as Record<BuildSectionKey, BuildReadinessItem>;
 
-  const activeBuildMeta = {
+  const getBuildStatusLabel = (item: BuildReadinessItem) => (
+    item.status === 'current'
+      ? 'Current'
+      : item.status === 'complete'
+        ? 'Complete'
+        : item.status === 'locked'
+          ? 'Locked'
+          : 'Available'
+  );
+
+  const activeBuildMeta: BuildReadinessItem = {
     ...buildStepByKey[activeBuildStep],
     status: buildStepByKey[activeBuildStep].section === recommendedBuildStep
       ? 'current'
@@ -922,7 +934,7 @@ export default function PhaseFour({
         : 'locked',
   } as BuildReadinessItem;
 
-  const buildSteps = buildReadinessItems.map(item => ({
+  const buildSteps: BuildReadinessItem[] = buildReadinessItems.map(item => ({
     ...item,
     status: item.section === recommendedBuildStep
       ? 'current'
@@ -934,10 +946,14 @@ export default function PhaseFour({
   }));
 
   const readinessReadyCount = buildSteps.filter(item => item.complete).length;
+  const readinessLockedCount = buildSteps.filter(item => item.status === 'locked').length;
+  const readinessRemainingCount = buildSteps.filter(item => !item.complete && item.status !== 'locked').length;
   const readinessPercent = Math.round((readinessReadyCount / buildSteps.length) * 100);
   const isVendorReviewReady = readinessReadyCount === buildSteps.length;
   const nextBuildMeta = nextBuildStep ? buildStepByKey[nextBuildStep] : null;
-  const nextBuildIsLocked = !!nextBuildMeta && !nextBuildMeta.isUnlocked;
+  const actionBuildStep = nextBuildStep ?? (!activeBuildMeta.complete ? activeBuildStep : null);
+  const actionBuildMeta = actionBuildStep ? buildStepByKey[actionBuildStep] : null;
+  const actionBuildIsLocked = !!actionBuildMeta && !actionBuildMeta.isUnlocked;
 
   useEffect(() => {
     setShowAllBomItems(false);
@@ -1550,53 +1566,120 @@ export default function PhaseFour({
                 <Text style={styles.readinessPercent}>{readinessPercent}%</Text>
               </View>
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.readinessRailContent}
-              accessibilityRole="tablist"
-            >
+            <View style={styles.readinessSummaryRow}>
+              <Badge label={`${readinessReadyCount}/${buildSteps.length} complete`} tone="success" icon="checkmark-circle" />
+              <Badge label={`${readinessRemainingCount} remaining`} tone="primary" icon="arrow-forward-circle" />
+              <Badge label={`${readinessLockedCount} locked`} tone="warning" icon="lock-closed" />
+            </View>
+            <View style={styles.readinessStatusStrip}>
+              <View style={styles.readinessStatusLine} />
               {buildSteps.map(item => {
                 const isSelected = activeBuildStep === item.section;
+                const isHovered = Platform.OS === 'web' && isWideLayout && hoveredBuildStep === item.section;
                 const statusIcon = item.status === 'locked'
-                  ? 'lock-closed-outline'
+                  ? 'lock-closed'
                   : item.complete
-                    ? 'checkmark-circle'
-                    : item.status === 'current'
-                      ? 'play'
-                      : item.icon;
+                    ? 'checkmark'
+                    : undefined;
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={item.id}
-                    style={[
-                      styles.readinessRailChip,
-                      item.complete && styles.readinessRailChipComplete,
-                      item.status === 'locked' && styles.readinessRailChipLocked,
-                      isSelected && styles.readinessRailChipSelected,
-                    ]}
+                    style={styles.readinessNodeSlot}
                     onPress={() => openBuildStep(item.section)}
-                    disabled={!item.isUnlocked}
-                    accessibilityRole="tab"
-                    accessibilityLabel={`${item.label}: ${item.status}`}
-                    accessibilityHint={item.isUnlocked ? `Show ${item.label}. ${item.summary}` : item.unlockReason}
-                    accessibilityState={{ selected: isSelected, disabled: !item.isUnlocked }}
+                    onHoverIn={Platform.OS === 'web' ? () => setHoveredBuildStep(item.section) : undefined}
+                    onHoverOut={Platform.OS === 'web' ? () => setHoveredBuildStep(current => current === item.section ? null : current) : undefined}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${item.label}: ${getBuildStatusLabel(item)}`}
+                    accessibilityHint={item.isUnlocked ? `Show ${item.label}. ${item.summary}` : `Locked. ${item.unlockReason}`}
+                    accessibilityState={{ selected: isSelected }}
                   >
-                    <Ionicons
-                      name={statusIcon as keyof typeof Ionicons.glyphMap}
-                      size={16}
-                      color={item.status === 'locked' ? Colors.orange[300] : item.complete ? Colors.accent : Colors.primary}
+                    <View
+                      style={[
+                        styles.readinessNodeButton,
+                        item.complete && styles.readinessNodeButtonComplete,
+                        item.status === 'current' && styles.readinessNodeButtonCurrent,
+                        item.status === 'locked' && styles.readinessNodeButtonLocked,
+                        isSelected && styles.readinessNodeButtonSelected,
+                      ]}
+                    >
+                      {statusIcon ? (
+                        <Ionicons
+                          name={statusIcon as keyof typeof Ionicons.glyphMap}
+                          size={item.status === 'locked' ? 14 : 17}
+                          color={item.status === 'locked' ? Colors.orange[300] : item.complete ? Colors.black : Colors.white}
+                        />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.readinessNodeIndex,
+                            item.status === 'current' && styles.readinessNodeIndexCurrent,
+                            item.status === 'locked' && styles.readinessNodeIndexLocked,
+                          ]}
+                        >
+                          {BUILD_SECTION_ORDER.indexOf(item.section) + 1}
+                        </Text>
+                      )}
+                    </View>
+                    <View
+                      style={[
+                        styles.readinessNodeStateDot,
+                        item.complete && styles.readinessNodeStateDotComplete,
+                        item.status === 'current' && styles.readinessNodeStateDotCurrent,
+                        item.status === 'locked' && styles.readinessNodeStateDotLocked,
+                      ]}
                     />
-                    <Text style={[
-                      styles.readinessRailChipText,
-                      item.status === 'locked' && styles.readinessRailChipTextLocked,
-                      isSelected && styles.readinessRailChipTextSelected,
-                    ]} numberOfLines={1}>
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
+                    {isHovered ? (
+                      <View style={styles.readinessNodeTooltip}>
+                        <Text style={styles.readinessNodeTooltipTitle}>{item.label}</Text>
+                        <Text style={styles.readinessNodeTooltipText} numberOfLines={2}>
+                          {item.isUnlocked ? item.summary : item.unlockReason}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </Pressable>
                 );
               })}
-            </ScrollView>
+            </View>
+            <View style={styles.readinessActiveDetail}>
+              <View style={[
+                styles.readinessActiveDetailIcon,
+                activeBuildMeta.status === 'complete' && styles.readinessActiveDetailIconComplete,
+                activeBuildMeta.status === 'current' && styles.readinessActiveDetailIconCurrent,
+                activeBuildMeta.status === 'locked' && styles.readinessActiveDetailIconLocked,
+              ]}>
+                <Ionicons
+                  name={
+                    activeBuildMeta.status === 'locked'
+                      ? 'lock-closed'
+                      : activeBuildMeta.complete
+                        ? 'checkmark'
+                        : activeBuildMeta.icon
+                  }
+                  size={16}
+                  color={
+                    activeBuildMeta.status === 'locked'
+                      ? Colors.orange[300]
+                      : activeBuildMeta.complete
+                        ? Colors.black
+                        : Colors.primary
+                  }
+                />
+              </View>
+              <View style={styles.readinessActiveDetailText}>
+                <Text style={styles.readinessActiveDetailTitle}>{activeBuildMeta.label}</Text>
+                <Text style={styles.readinessActiveDetailSummary} numberOfLines={2}>
+                  {activeBuildMeta.isUnlocked ? activeBuildMeta.summary : activeBuildMeta.unlockReason}
+                </Text>
+              </View>
+              <View style={[
+                styles.stepStatusBadge,
+                activeBuildMeta.status === 'complete' && styles.stepStatusBadgeComplete,
+                activeBuildMeta.status === 'current' && styles.stepStatusBadgeCurrent,
+                activeBuildMeta.status === 'locked' && styles.stepStatusBadgeLocked,
+              ]}>
+                <Text style={styles.stepStatusText}>{getBuildStatusLabel(activeBuildMeta)}</Text>
+              </View>
+            </View>
           </View>
           <View
             style={[styles.workspacePanel, isWideLayout && styles.workspacePanelDesktop]}
@@ -1618,7 +1701,7 @@ export default function PhaseFour({
                 activeBuildMeta.status === 'locked' && styles.workspaceStatusBadgeLocked,
               ]}>
                 <Text style={styles.workspaceStatusText}>
-                  {activeBuildMeta.status === 'current' ? 'Current' : activeBuildMeta.status === 'complete' ? 'Complete' : activeBuildMeta.status === 'locked' ? 'Locked' : 'Available'}
+                  {getBuildStatusLabel(activeBuildMeta)}
                 </Text>
               </View>
             </View>
@@ -1630,37 +1713,37 @@ export default function PhaseFour({
 
         <View style={styles.actionsPanel}>
           <Text style={styles.actionsTitle}>What's Next?</Text>
-          {nextBuildMeta ? (
+          {actionBuildMeta ? (
             <TouchableOpacity
-              style={[styles.nextSectionButton, nextBuildIsLocked && styles.nextSectionButtonLocked]}
+              style={[styles.nextSectionButton, actionBuildIsLocked && styles.nextSectionButtonLocked]}
               onPress={() => {
-                if (!nextBuildStep || nextBuildIsLocked) return;
-                openBuildStep(nextBuildStep, { scrollToWorkspace: true });
+                if (!actionBuildStep || actionBuildIsLocked) return;
+                openBuildStep(actionBuildStep, { scrollToWorkspace: true });
               }}
-              disabled={nextBuildIsLocked}
+              disabled={actionBuildIsLocked}
               accessibilityRole="button"
-              accessibilityLabel={nextBuildIsLocked ? `${nextBuildMeta.label} locked` : `Open ${nextBuildMeta.label}`}
-              accessibilityHint={nextBuildIsLocked ? nextBuildMeta.unlockReason : `Show ${nextBuildMeta.label}. ${nextBuildMeta.summary}`}
-              accessibilityState={{ disabled: nextBuildIsLocked }}
+              accessibilityLabel={actionBuildIsLocked ? `${actionBuildMeta.label} locked` : `Open ${actionBuildMeta.label}`}
+              accessibilityHint={actionBuildIsLocked ? actionBuildMeta.unlockReason : `Show ${actionBuildMeta.label}. ${actionBuildMeta.summary}`}
+              accessibilityState={{ disabled: actionBuildIsLocked }}
             >
               <View style={[
                 styles.nextSectionIcon,
-                nextBuildMeta.complete && styles.nextSectionIconComplete,
-                nextBuildIsLocked && styles.nextSectionIconLocked,
+                actionBuildMeta.complete && styles.nextSectionIconComplete,
+                actionBuildIsLocked && styles.nextSectionIconLocked,
               ]}>
                 <Ionicons
-                  name={nextBuildIsLocked ? 'lock-closed-outline' : nextBuildMeta.complete ? 'checkmark-circle' : nextBuildMeta.icon}
+                  name={actionBuildIsLocked ? 'lock-closed-outline' : actionBuildMeta.complete ? 'checkmark-circle' : actionBuildMeta.icon}
                   size={18}
-                  color={nextBuildIsLocked ? Colors.orange[300] : nextBuildMeta.complete ? Colors.accent : Colors.primary}
+                  color={actionBuildIsLocked ? Colors.orange[300] : actionBuildMeta.complete ? Colors.accent : Colors.primary}
                 />
               </View>
               <View style={styles.actionContent}>
-                <Text style={styles.actionButtonText}>{nextBuildMeta.label}</Text>
+                <Text style={styles.actionButtonText}>{actionBuildMeta.label}</Text>
                 <Text style={styles.actionButtonSubtext} numberOfLines={2}>
-                  {nextBuildIsLocked ? nextBuildMeta.unlockReason : nextBuildMeta.summary}
+                  {actionBuildIsLocked ? actionBuildMeta.unlockReason : actionBuildMeta.summary}
                 </Text>
               </View>
-              {!nextBuildIsLocked ? (
+              {!actionBuildIsLocked ? (
                 <Ionicons name="arrow-forward" size={18} color={Colors.primary} />
               ) : null}
             </TouchableOpacity>
@@ -1889,49 +1972,171 @@ const createStyles = (Colors: AppColors) => StyleSheet.create({
   readinessBadgeReady: {
     backgroundColor: 'rgba(0, 255, 136, 0.22)',
   },
-  readinessRailContent: {
-    gap: Spacing.sm,
-    paddingRight: Spacing.sm,
-  },
-  readinessRailChip: {
-    minWidth: 142,
-    maxWidth: 180,
-    minHeight: 44,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+  readinessSummaryRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  readinessStatusStrip: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  readinessStatusLine: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    top: 24,
+    height: 2,
+    backgroundColor: Colors.border,
+  },
+  readinessNodeSlot: {
+    flex: 1,
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 2,
+  },
+  readinessNodeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.xs,
   },
-  readinessRailChipSelected: {
+  readinessNodeButtonSelected: {
     borderColor: Colors.primary,
-    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
   },
-  readinessRailChipComplete: {
-    borderColor: 'rgba(0, 255, 157, 0.4)',
-    backgroundColor: 'rgba(0, 255, 136, 0.08)',
+  readinessNodeButtonComplete: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
-  readinessRailChipLocked: {
-    borderColor: 'rgba(245, 158, 11, 0.25)',
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
-    opacity: 0.72,
+  readinessNodeButtonCurrent: {
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    borderColor: Colors.primary,
+    borderWidth: 2,
   },
-  readinessRailChipText: {
-    flexShrink: 1,
+  readinessNodeButtonLocked: {
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderColor: 'rgba(245, 158, 11, 0.35)',
+  },
+  readinessNodeIndex: {
+    color: Colors.gray[400],
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  readinessNodeIndexCurrent: {
+    color: Colors.white,
+  },
+  readinessNodeIndexLocked: {
+    color: Colors.orange[300],
+  },
+  readinessNodeStateDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.gray[500],
+    marginTop: Spacing.xs,
+  },
+  readinessNodeStateDotComplete: {
+    backgroundColor: Colors.accent,
+  },
+  readinessNodeStateDotCurrent: {
+    backgroundColor: Colors.primary,
+  },
+  readinessNodeStateDotLocked: {
+    backgroundColor: Colors.orange[300],
+  },
+  readinessNodeTooltip: {
+    position: 'absolute',
+    bottom: 52,
+    width: 156,
+    left: '50%',
+    marginLeft: -78,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.elevated,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    shadowColor: '#000',
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 20,
+    zIndex: 20,
+  },
+  readinessNodeTooltipTitle: {
     color: Colors.white,
     fontSize: FontSizes.xs,
     fontWeight: '800',
+    marginBottom: 2,
+    textAlign: 'center',
   },
-  readinessRailChipTextSelected: {
+  readinessNodeTooltipText: {
+    color: Colors.gray[400],
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: 'center',
+  },
+  readinessActiveDetail: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: Spacing.md,
+  },
+  readinessActiveDetailIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.black,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  readinessActiveDetailIconComplete: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  readinessActiveDetailIconCurrent: {
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(59, 130, 246, 0.16)',
+  },
+  readinessActiveDetailIconLocked: {
+    borderColor: 'rgba(245, 158, 11, 0.35)',
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+  },
+  readinessActiveDetailText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  readinessActiveDetailTitle: {
     color: Colors.white,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
+    marginBottom: 2,
   },
-  readinessRailChipTextLocked: {
-    color: Colors.gray[500],
+  readinessActiveDetailSummary: {
+    color: Colors.gray[400],
+    fontSize: FontSizes.xs,
+    lineHeight: 18,
   },
   readinessItemAction: {
     color: Colors.accent,
