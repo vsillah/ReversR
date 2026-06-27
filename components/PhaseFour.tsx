@@ -11,7 +11,7 @@ import {
   Platform,
   useWindowDimensions,
 } from 'react-native';
-import * as FileSystem from 'expo-file-system/legacy';
+import { Directory, EncodingType, File as ExpoFile, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors, Spacing, FontSizes, Radii, Fonts } from '../constants/theme';
@@ -154,6 +154,95 @@ type QuoteVendor = {
   serviceType: string;
   url: string;
   packageRequired: string[];
+};
+
+type PhaseFourExportKind = 'bom' | 'completePackage' | 'quotePacket';
+
+type PhaseFourExportFile = {
+  fileName: string;
+  fileUri: string;
+};
+
+const EXPORT_CONFIG: Record<PhaseFourExportKind, {
+  suffix: string;
+  mimeType: string;
+  uti: string;
+  dialogTitle: string;
+}> = {
+  bom: {
+    suffix: 'BOM.csv',
+    mimeType: 'text/csv',
+    uti: 'public.comma-separated-values-text',
+    dialogTitle: 'Share ReversR BOM CSV',
+  },
+  completePackage: {
+    suffix: 'complete.json',
+    mimeType: 'application/json',
+    uti: 'public.json',
+    dialogTitle: 'Share ReversR reconstruction package',
+  },
+  quotePacket: {
+    suffix: 'manufacturer_quote_packet.json',
+    mimeType: 'application/json',
+    uti: 'public.json',
+    dialogTitle: 'Share ReversR manufacturer quote packet',
+  },
+};
+
+const sanitizeExportFilenamePart = (value?: string | null): string => {
+  const normalized = (value || 'reversr-reconstruction')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80);
+
+  return normalized || 'reversr-reconstruction';
+};
+
+const formatExportErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string' && error.trim()) return error.trim();
+  return 'Unknown export error';
+};
+
+const toCsvValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '""';
+  const text = String(value).replace(/"/g, '""');
+  return `"${text}"`;
+};
+
+const buildBomCsv = (bom: BillOfMaterials): string => {
+  const rows = [
+    [
+      'Part Number',
+      'Part Name',
+      'Description',
+      'Quantity',
+      'Material',
+      'Est. Cost',
+      'Supplier',
+      'Lead Time',
+      'Notes',
+    ],
+    ...bom.items.map(item => [
+      item.partNumber,
+      item.partName,
+      item.description,
+      item.quantity,
+      item.material,
+      item.estimatedCost,
+      item.supplier,
+      item.leadTime,
+      item.notes,
+    ]),
+    [],
+    ['Summary', 'Value'],
+    ['Total Estimated Cost', bom.totalEstimatedCost],
+    ['Manufacturing Notes', bom.manufacturingNotes],
+  ];
+
+  return rows.map(row => row.map(toCsvValue).join(',')).join('\n');
 };
 
 type ManufacturerQuotePacket = {
@@ -302,6 +391,51 @@ export default function PhaseFour({
       type: 'info',
     });
     return false;
+  };
+
+  const writePhaseFourExportFile = (
+    kind: PhaseFourExportKind,
+    content: string
+  ): PhaseFourExportFile => {
+    const exportDirectory = new Directory(Paths.document, 'reversr-exports');
+    exportDirectory.create({ idempotent: true, intermediates: true });
+
+    const config = EXPORT_CONFIG[kind];
+    const baseName = sanitizeExportFilenamePart(innovation.conceptName || innovation.machineName);
+    const fileName = `${baseName}_${config.suffix}`;
+    const file = new ExpoFile(exportDirectory, fileName);
+    file.create({ overwrite: true, intermediates: true });
+    file.write(content, { encoding: EncodingType.UTF8 });
+
+    return {
+      fileName,
+      fileUri: file.uri,
+    };
+  };
+
+  const shareOrShowSavedFile = async (
+    kind: PhaseFourExportKind,
+    exportedFile: PhaseFourExportFile,
+    fallbackLabel: string
+  ) => {
+    const config = EXPORT_CONFIG[kind];
+    const canShare = await Sharing.isAvailableAsync();
+
+    if (canShare) {
+      await Sharing.shareAsync(exportedFile.fileUri, {
+        mimeType: config.mimeType,
+        UTI: config.uti,
+        dialogTitle: config.dialogTitle,
+      });
+      return;
+    }
+
+    setAlert({
+      visible: true,
+      title: 'Saved',
+      message: `${fallbackLabel} saved to app storage as ${exportedFile.fileName}. Native sharing is not available on this device.`,
+      type: 'success',
+    });
   };
 
   useEffect(() => {
@@ -501,24 +635,11 @@ export default function PhaseFour({
     if (!localBom) return;
 
     try {
-      const csvHeader = 'Part Number,Part Name,Description,Quantity,Material,Est. Cost,Supplier,Lead Time,Notes\n';
-      const csvRows = localBom.items.map(item =>
-        `"${item.partNumber}","${item.partName}","${item.description}",${item.quantity},"${item.material}","${item.estimatedCost}","${item.supplier}","${item.leadTime}","${item.notes}"`
-      ).join('\n');
-      const csvContent = csvHeader + csvRows + `\n\nTotal Estimated Cost: ${localBom.totalEstimatedCost}\nManufacturing Notes: ${localBom.manufacturingNotes}`;
-
-      const name = innovation.conceptName.replace(/\s+/g, '_');
-      const fileUri = FileSystem.documentDirectory + `${name}_BOM.csv`;
-      await FileSystem.writeAsStringAsync(fileUri, csvContent);
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
-      } else {
-        setAlert({visible: true, title: 'Saved', message: 'Bill of Materials saved to device.', type: 'success'});
-      }
+      const exportedFile = writePhaseFourExportFile('bom', buildBomCsv(localBom));
+      await shareOrShowSavedFile('bom', exportedFile, 'Bill of Materials CSV');
     } catch (e) {
       console.error('BOM Export error:', e);
-      setAlert({visible: true, title: 'Error', message: 'Failed to export Bill of Materials.', type: 'error'});
+      setAlert({visible: true, title: 'BOM Export Failed', message: `Could not export Bill of Materials: ${formatExportErrorMessage(e)}`, type: 'error'});
     }
   };
 
@@ -553,18 +674,11 @@ export default function PhaseFour({
         };
       }
 
-      const name = innovation.conceptName.replace(/\s+/g, '_');
-      const fileUri = FileSystem.documentDirectory + `${name}_complete.json`;
-      await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
-      } else {
-        setAlert({visible: true, title: 'Saved', message: 'Complete reconstruction package saved to device.', type: 'success'});
-      }
+      const exportedFile = writePhaseFourExportFile('completePackage', JSON.stringify(exportData, null, 2));
+      await shareOrShowSavedFile('completePackage', exportedFile, 'Complete reconstruction package');
     } catch (e) {
       console.error('Export error:', e);
-      setAlert({visible: true, title: 'Error', message: 'Failed to export package.', type: 'error'});
+      setAlert({visible: true, title: 'Package Export Failed', message: `Could not export complete reconstruction package: ${formatExportErrorMessage(e)}`, type: 'error'});
     }
   };
 
@@ -578,18 +692,11 @@ export default function PhaseFour({
 
     try {
       const packet = buildQuotePacket(localBom);
-      const name = innovation.conceptName.replace(/\s+/g, '_');
-      const fileUri = FileSystem.documentDirectory + `${name}_manufacturer_quote_packet.json`;
-      await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(packet, null, 2));
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
-      } else {
-        setAlert({visible: true, title: 'Saved', message: 'Manufacturer quote packet saved to device.', type: 'success'});
-      }
+      const exportedFile = writePhaseFourExportFile('quotePacket', JSON.stringify(packet, null, 2));
+      await shareOrShowSavedFile('quotePacket', exportedFile, 'Manufacturer quote packet');
     } catch (e) {
       console.error('Quote packet export error:', e);
-      setAlert({visible: true, title: 'Error', message: 'Failed to export manufacturer quote packet.', type: 'error'});
+      setAlert({visible: true, title: 'Quote Packet Export Failed', message: `Could not export manufacturer quote packet: ${formatExportErrorMessage(e)}`, type: 'error'});
     }
   };
 
