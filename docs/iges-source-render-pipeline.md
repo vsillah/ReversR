@@ -113,7 +113,7 @@ The August 8 calibration pass compared the controlled IGES renders against the a
 Observed gaps:
 
 - Assembly: source geometry imports correctly, but the JPG resembles a SolidWorks assembly display with the bracket/isolator relationship shown through hidden-line or component-emphasis styling. The current candidate is a normal shaded assembly, so both parts render as equally solid and prominent.
-- Bracket: geometry is present and the shaded/edge renderer now removes most tessellation bands, but the current best candidates still disagree with the JPG's display semantics. The JPG reads as a view where the holed flange is the lower/front plate and the upright wall is dominant; several render candidates still present the holed plate as a vertical surface.
+- Bracket: geometry is present and the shaded/edge renderer now removes most tessellation bands, but the current best candidates still disagree with the JPG's display semantics. The JPG reads as a view where the holed flange is the lower/front plate and the upright wall is dominant. IGES-derived circular-cutout evidence currently places the hole candidates on the upright flange, so this is treated as a source/reference alignment blocker rather than a camera-only gap.
 - Isolator: the candidate is close on geometry, material, background, and edge style. Remaining differences are mostly camera angle, framing, and SolidWorks-like face lighting.
 
 Implemented gap closures in this lane:
@@ -125,19 +125,21 @@ Implemented gap closures in this lane:
 - added bounded Euler camera and render-only axis-remap experiments without changing IGES source geometry
 - added render-only display-state experiments, including assembly node styling where `bracket-1` remains shaded and `isolator-1` can render as faint hidden-line reference geometry
 - added semantic visual QA flags so numeric visual scores cannot silently clear known display/orientation risks
+- added IGES-derived bracket hole-placement evidence so the visual QA packet can flag a possible source/reference mismatch without treating the JPG as source geometry
 
 Current visual calibration evidence:
 
 - `assem-1`: best candidate `assembly-bracket-shaded-isolator-hidden-line`, `visual_fidelity_score` 85, `source_confidence_score` 98, semantic gate `blocked_human_semantic_review`
-- `bracket-1`: best automated candidate `axis-remap-base-holes-c`, `visual_fidelity_score` 84, `source_confidence_score` 98, semantic gate `blocked_human_semantic_review`
+- `bracket-1`: best automated candidate `axis-remap-base-holes-c`, `visual_fidelity_score` 84, `source_confidence_score` 98, semantic gate `blocked_human_semantic_review`, with `source_reference_hole_plane_mismatch` recorded from IGES-derived geometry evidence
 - `isolator-1`: best candidate `side-isometric-camera`, `visual_fidelity_score` 84, `source_confidence_score` 98
 
 Plan to close remaining gaps:
 
 1. Capture mesh-to-subfigure/display-state mappings as first-class evidence for production source records, not only controlled fixtures.
-2. Improve the visual scorer so high-level feature scores cannot hide semantic display mismatches such as "holes appear on the vertical plate instead of the base flange." The first semantic flags are present; the next step is image-derived orientation detection instead of conservative human-review blocking.
-3. Expand bounded camera search around the human-preferred bracket view now that display-state and source confidence are separated.
-4. Require human approval before promoting any candidate preset to production or marking an output golden-ready.
+2. Confirm whether `bracket-1.JPG` is the correct golden reference for `bracket-1.IGS`. Current IGES-derived evidence places the hole geometry on the upright flange, while the JPG visually reads as holes on the lower/front flange. If the JPG is correct, the source IGES binding may be wrong; if the IGES is correct, the JPG should not be used as a golden-ready target for that asset.
+3. Improve the visual scorer so high-level feature scores cannot hide semantic display mismatches such as "holes appear on the vertical plate instead of the base flange." The first semantic flags are present; the next step is image-derived orientation detection instead of conservative human-review blocking.
+4. Expand bounded camera search around the human-preferred bracket view only after the bracket source/reference alignment is resolved.
+5. Require human approval before promoting any candidate preset to production or marking an output golden-ready.
 
 ## Remaining Product Gate
 

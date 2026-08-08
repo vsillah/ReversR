@@ -543,6 +543,7 @@ const buildSemanticVisualFlags = ({
   experiment,
   componentScores,
   visualFidelityScore,
+  sourceGeometrySemantics,
 }) => {
   const flags = [];
   const experimentId = experiment?.id || '';
@@ -572,6 +573,16 @@ const buildSemanticVisualFlags = ({
   }
 
   if (assetId === 'bracket-1') {
+    if (sourceGeometrySemantics?.holePlacement?.likelyPlane === 'upright_flange') {
+      flags.push({
+        id: 'source_reference_hole_plane_mismatch',
+        severity: 'blocking',
+        category: 'source/reference alignment',
+        message: 'IGES-derived geometry places the bracket hole candidates on the upright flange; the JPG reference visually reads as holes on the lower/front base flange. Do not distort source geometry to satisfy the JPG.',
+        evidence: sourceGeometrySemantics.holePlacement,
+        blocksGoldenReady: true,
+      });
+    }
     flags.push({
       id: 'bracket_plate_orientation_requires_human_review',
       severity: 'blocking',
@@ -603,6 +614,81 @@ const buildSemanticVisualFlags = ({
 
   return flags;
 };
+
+const inferSourceGeometrySemantics = sceneManifest => {
+  if (sceneManifest.sourceAssetId !== 'bracket-1') {
+    return {
+      sourceAssetId: sceneManifest.sourceAssetId,
+      applicable: false,
+      reason: 'No asset-specific geometry semantic extractor is defined for this source asset.',
+    };
+  }
+
+  const overall = sceneManifest.boundingBox;
+  if (!overall) {
+    return {
+      sourceAssetId: sceneManifest.sourceAssetId,
+      applicable: false,
+      reason: 'Scene manifest has no bounding box.',
+    };
+  }
+
+  const candidateHoleFaces = (sceneManifest.meshStats || [])
+    .filter(mesh => {
+      const size = mesh.boundingBox?.size || [];
+      const sorted = [...size].sort((a, b) => a - b);
+      return mesh.triangleCount >= 32
+        && sorted[0] > 0
+        && sorted[0] <= 6.5
+        && sorted[1] <= 12.5
+        && sorted[2] <= 14;
+    })
+    .map(mesh => ({
+      meshIndex: mesh.meshIndex,
+      triangleCount: mesh.triangleCount,
+      size: mesh.boundingBox.size,
+      center: mesh.boundingBox.center,
+      normalizedCenter: normalizePointToBounds(mesh.boundingBox.center, overall),
+    }));
+
+  const avgNormalizedCenter = candidateHoleFaces.length
+    ? candidateHoleFaces.reduce((acc, item) => {
+      acc.x += item.normalizedCenter.x;
+      acc.y += item.normalizedCenter.y;
+      acc.z += item.normalizedCenter.z;
+      return acc;
+    }, { x: 0, y: 0, z: 0 })
+    : null;
+  if (avgNormalizedCenter) {
+    avgNormalizedCenter.x = round(avgNormalizedCenter.x / candidateHoleFaces.length);
+    avgNormalizedCenter.y = round(avgNormalizedCenter.y / candidateHoleFaces.length);
+    avgNormalizedCenter.z = round(avgNormalizedCenter.z / candidateHoleFaces.length);
+  }
+
+  const likelyPlane = avgNormalizedCenter && avgNormalizedCenter.z > 0.45 && avgNormalizedCenter.y < 0.12
+    ? 'upright_flange'
+    : avgNormalizedCenter && avgNormalizedCenter.z < 0.28
+      ? 'base_flange'
+      : 'undetermined';
+
+  return {
+    sourceAssetId: sceneManifest.sourceAssetId,
+    applicable: true,
+    holePlacement: {
+      candidateCount: candidateHoleFaces.length,
+      likelyPlane,
+      averageNormalizedCenter: avgNormalizedCenter,
+      candidates: candidateHoleFaces,
+      inferenceRule: 'Bracket circular-cutout face candidates with high normalized Z and very low normalized Y indicate holes through the upright flange rather than the lower base flange.',
+    },
+  };
+};
+
+const normalizePointToBounds = (point, bounds) => ({
+  x: round((point[0] - bounds.min[0]) / Math.max(bounds.size[0], 1e-6)),
+  y: round((point[1] - bounds.min[1]) / Math.max(bounds.size[1], 1e-6)),
+  z: round((point[2] - bounds.min[2]) / Math.max(bounds.size[2], 1e-6)),
+});
 
 const describeDifferences = (componentScores, renderFeatures, referenceFeatures) => {
   const differences = [];
@@ -685,7 +771,8 @@ const runVisualCalibrationForAsset = async ({
     });
     const renderImage = loadImage(result.render.outputPath);
     const renderFeatures = imageFeatures(renderImage);
-    const comparison = compareFeatureSets(renderFeatures, referenceFeatures, { assetId, experiment });
+    const sourceGeometrySemantics = inferSourceGeometrySemantics(result.sceneManifest);
+    const comparison = compareFeatureSets(renderFeatures, referenceFeatures, { assetId, experiment, sourceGeometrySemantics });
     experiments.push({
       id: experiment.id,
       label: experiment.label,
@@ -700,6 +787,7 @@ const runVisualCalibrationForAsset = async ({
         sceneManifestHash: result.confidence.sceneManifestHash,
         referenceImagesUsedForScore: result.confidence.referenceImagesUsedForScore,
       },
+      sourceGeometrySemantics,
       comparison,
       result,
     });
@@ -726,6 +814,7 @@ const runVisualCalibrationForAsset = async ({
       renderArtifact: experiment.renderArtifact,
       source_confidence_score: experiment.source_confidence_score,
       sourceConfidence: experiment.sourceConfidence,
+      sourceGeometrySemantics: experiment.sourceGeometrySemantics,
       visual_fidelity_score: experiment.comparison.visual_fidelity_score,
       visualCalibration: experiment.comparison,
     })),
