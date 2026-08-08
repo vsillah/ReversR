@@ -29,11 +29,13 @@ Run:
 
 ```bash
 npm run iges:calibration:corpus:preflight
+npm run iges:calibration:corpus:smoke
 ```
 
-The preflight writes:
+The checks write:
 
 - `docs/iges-calibration-corpus-preflight-evidence.json`
+- `docs/iges-calibration-corpus-smoke-evidence.json`
 
 ## Target Mix
 
@@ -46,6 +48,20 @@ The initial calibration set should contain 12 to 20 reviewed samples:
 - 1 surface or wireframe stress sample
 
 This mix directly targets the current renderer gaps: camera framing, face shading, crease and hidden-line treatment, circular cutout placement, and assembly display states.
+
+## First Admitted Sample
+
+The first admitted sample is the `occt-import-js` `Cube 10x10mm` dependency fixture.
+
+It gives the lane a small, checksumed IGES plus PNG reference pair that can run without catalog login, scraping, or unclear item download terms:
+
+- source package: `occt-import-js`
+- package version: `0.0.23`
+- package license: `LGPL-2.1`
+- source IGES: `node_modules/occt-import-js/test/testfiles/cube-10x10mm/Cube 10x10.igs`
+- reference PNG: `node_modules/occt-import-js/test/testfiles/cube-10x10mm/Cube 10x10.png`
+
+The PNG remains visual QA only. The corpus smoke asserts it is not used for source confidence.
 
 ## Candidate Sources
 
@@ -90,4 +106,3 @@ The first pass should remain human-reviewed. A sample becomes golden-ready only 
 - fixture and database-source-record routes produce equivalent source-only evidence
 - visual fidelity is evaluated downstream
 - no reference image has influenced source confidence
-

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "manifest": "docs/iges-calibration-corpus.seed.json",
+  "outputDir": ".local/iges-source-pipeline/calibration-corpus",
+  "admittedSampleCount": 1,
+  "results": [
+    {
+      "slotId": "simple-plate-001",
+      "sampleId": "occt-cube-10x10mm",
+      "category": "simple_block_or_plate",
+      "sourcePackage": "occt-import-js",
+      "sourcePackageVersion": "0.0.23",
+      "sourcePackageLicense": "LGPL-2.1",
+      "sourceSha256": "5bc09d9b7a163ed8052af1fffebf953e000dc0d48cd7d700c064dacce1f2e7b3",
+      "referenceImageRole": "post_render_visual_calibration_only",
+      "referenceImageUsedForSourceConfidence": false,
+      "sourceConfidenceScore": 100,
+      "sceneManifestHash": "ea5b24948dec8dffde34d861dc259d1bc32c740d8faa0a1531e819b90c9dceab",
+      "sourceUnits": "millimeter",
+      "totalTriangles": 12,
+      "boundingBox": {
+        "min": [
+          -5,
+          0,
+          -5
+        ],
+        "max": [
+          5,
+          10,
+          5
+        ],
+        "size": [
+          10,
+          10,
+          10
+        ],
+        "center": [
+          0,
+          5,
+          0
+        ]
+      },
+      "renderOutput": ".local/iges-source-pipeline/calibration-corpus/occt-cube-10x10mm-calibration_corpus_fixture-source-iges-isometric-v1.png",
+      "stlOutput": ".local/iges-source-pipeline/calibration-corpus/occt-cube-10x10mm-calibration_corpus_fixture-source-iges-binary-stl-v1.stl",
+      "stlIntegrity": {
+        "nonEmptyMesh": true,
+        "finiteCoordinates": true,
+        "triangleCountBounds": {
+          "min": 1,
+          "max": 200000,
+          "withinBounds": true
+        },
+        "degenerateTriangles": 0,
+        "byteLengthMatchesTriangleCount": true
+      }
+    }
+  ],
+  "sourceBoundary": {
+    "productionInput": "IGES_ONLY",
+    "referenceImageRole": "post_render_visual_calibration_only",
+    "referenceImagesExcludedFrom": [
+      "source binding",
+      "IGES ingestion",
+      "scene assembly",
+      "renderer source data",
+      "STL export",
+      "source confidence score"
+    ],
+    "visualFidelityIsSeparateFromSourceConfidence": true
+  }
+}

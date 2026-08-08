@@ -181,7 +181,27 @@
         "traceparts",
         "3dfindit"
       ],
-      "status": "pending_acquisition"
+      "status": "admitted",
+      "admittedSample": {
+        "id": "occt-cube-10x10mm",
+        "title": "OCCT import-js Cube 10x10mm",
+        "sourceType": "dependency_fixture",
+        "sourcePackage": "occt-import-js",
+        "sourcePackageVersion": "0.0.23",
+        "sourcePackageLicense": "LGPL-2.1",
+        "sourceRepository": "https://github.com/kovacsv/occt-import-js",
+        "sourcePath": "node_modules/occt-import-js/test/testfiles/cube-10x10mm/Cube 10x10.igs",
+        "sourceSha256": "5bc09d9b7a163ed8052af1fffebf953e000dc0d48cd7d700c064dacce1f2e7b3",
+        "expectedUnits": "millimeter",
+        "expectedSubfigures": [],
+        "referenceImage": {
+          "role": "post_render_visual_calibration_only",
+          "path": "node_modules/occt-import-js/test/testfiles/cube-10x10mm/Cube 10x10.png",
+          "sha256": "f5f71a0df71d594d681fb64dafde7a2cff05caad0fa5cd5667f1281b71ccecd8",
+          "excludedFromSourceConfidence": true
+        },
+        "admissionNotes": "Admitted as a dependency fixture for baseline render/cube sanity checks. It is not a production fixture and does not change approved ReversR source bindings."
+      }
     },
     {
       "id": "simple-plate-002",
