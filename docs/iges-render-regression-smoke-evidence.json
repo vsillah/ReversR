@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "render": {
+    "outputPath": "/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild.worktrees/iges-render-pipeline/.local/iges-source-pipeline/render-regression-first/assem-1-controlled_fixture-source-iges-isometric-v1.png",
+    "mimeType": "image/png",
+    "width": 1024,
+    "height": 768,
+    "sha256": "601efab8e8d9d0c9c722021d7832a3a2ba50ccc072dd8a9b01f26d034cd19943",
+    "renderPresetId": "source-iges-isometric-v1",
+    "rendererVersion": "iges-source-png-wire-renderer-v1",
+    "deterministic": true,
+    "outputCompleteness": {
+      "nonBackgroundPixels": 76035,
+      "nonBackgroundRatio": 0.096684,
+      "nonEmpty": true
+    },
+    "usesJpgReference": false
+  },
+  "repeatedRenderSha256": "601efab8e8d9d0c9c722021d7832a3a2ba50ccc072dd8a9b01f26d034cd19943",
+  "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+  "confidence": {
+    "rubricId": "iges-source-confidence-v1",
+    "status": "warn",
+    "score": 98,
+    "maxScore": 100,
+    "componentScores": [
+      {
+        "id": "source_binding_checksum",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "parse_and_assembly_resolution",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "units_transforms_scene_validity",
+        "maxScore": 16,
+        "score": 16,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "geometry_mesh_integrity",
+        "maxScore": 18,
+        "score": 16,
+        "status": "warn",
+        "warnings": [
+          "mesh is not fully watertight; report retained for reviewer"
+        ],
+        "failures": []
+      },
+      {
+        "id": "renderer_determinism_output",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      }
+    ],
+    "thresholds": {
+      "pass": 90,
+      "warn": 70,
+      "failBelow": 70
+    },
+    "sourceAssetId": "assem-1",
+    "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+    "renderPresetId": "source-iges-isometric-v1",
+    "rendererVersion": "iges-source-png-wire-renderer-v1",
+    "reasons": [
+      {
+        "severity": "warning",
+        "component": "geometry_mesh_integrity",
+        "message": "mesh is not fully watertight; report retained for reviewer"
+      }
+    ],
+    "referenceImagesUsedForScore": false,
+    "note": "Source-only QA confidence. This is not engineering certification, CAD qualification, dimensional inspection, or manufacturing approval."
+  },
+  "usesJpgReference": false
+}

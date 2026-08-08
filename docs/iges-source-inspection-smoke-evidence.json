@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "sourceAsset": {
+    "id": "assem-1",
+    "path": "/Users/vambahsillah/Downloads/Assem-1.IGS",
+    "fileName": "Assem-1.IGS",
+    "fileType": "model/iges",
+    "sha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "approvedSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "expectedUnits": "millimeter",
+    "expectedSubfigures": [
+      "isolator-1",
+      "bracket-1"
+    ]
+  },
+  "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+  "sourceUnits": "millimeter",
+  "assemblySubfigures": [
+    "bracket-1",
+    "isolator-1"
+  ],
+  "meshIntegrity": {
+    "nonEmptyMesh": true,
+    "finiteCoordinates": true,
+    "triangleCount": 392,
+    "vertexCount": 432,
+    "triangleCountBounds": {
+      "min": 1,
+      "max": 200000,
+      "withinBounds": true
+    },
+    "boundingBox": {
+      "min": [
+        -51.150348,
+        -17.64707,
+        10.023568
+      ],
+      "max": [
+        112.849652,
+        77.35293,
+        65.963568
+      ],
+      "size": [
+        164,
+        95,
+        55.94
+      ],
+      "center": [
+        30.849652,
+        29.85293,
+        37.993568
+      ]
+    },
+    "connectedComponentCount": 2,
+    "degenerateTriangles": 0,
+    "manifoldReport": {
+      "applicable": true,
+      "meshReports": [
+        {
+          "meshIndex": 0,
+          "boundaryEdges": 0,
+          "nonManifoldEdges": 0,
+          "watertight": true
+        },
+        {
+          "meshIndex": 1,
+          "boundaryEdges": 344,
+          "nonManifoldEdges": 0,
+          "watertight": false
+        }
+      ],
+      "boundaryEdges": 344,
+      "nonManifoldEdges": 0,
+      "watertight": false
+    }
+  },
+  "usesJpgReference": false
+}

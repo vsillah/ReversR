@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "sourceAsset": {
+    "id": "assem-1",
+    "path": "/Users/vambahsillah/Downloads/Assem-1.IGS",
+    "fileName": "Assem-1.IGS",
+    "fileType": "model/iges",
+    "sha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "approvedSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "expectedUnits": "millimeter",
+    "expectedSubfigures": [
+      "isolator-1",
+      "bracket-1"
+    ]
+  },
+  "stl": {
+    "outputPath": "/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild.worktrees/iges-render-pipeline/.local/iges-source-pipeline/stl-export/assem-1-controlled_fixture-source-iges-binary-stl-v1.stl",
+    "mimeType": "model/stl",
+    "fileType": "binary_stl",
+    "stlFormat": "binary",
+    "sha256": "4338a86beb5cfdaef964846ea0df8fcd097942d61011a5f7346d9d3794ac2856",
+    "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "units": "millimeter",
+    "scalingPolicy": "no_rescale_source_units_recorded_as_millimeters",
+    "exportPresetId": "source-iges-binary-stl-v1",
+    "triangleCount": 392,
+    "expectedByteLength": 19684,
+    "actualByteLength": 19684,
+    "noSilentRepair": true,
+    "noSilentRescale": true,
+    "boundingBox": {
+      "min": [
+        -51.150348,
+        -17.64707,
+        10.023568
+      ],
+      "max": [
+        112.849652,
+        77.35293,
+        65.963568
+      ],
+      "size": [
+        164,
+        95,
+        55.94
+      ],
+      "center": [
+        30.849652,
+        29.85293,
+        37.993568
+      ]
+    },
+    "connectedComponentCount": 2,
+    "manifoldReport": {
+      "applicable": true,
+      "meshReports": [
+        {
+          "meshIndex": 0,
+          "boundaryEdges": 0,
+          "nonManifoldEdges": 0,
+          "watertight": true
+        },
+        {
+          "meshIndex": 1,
+          "boundaryEdges": 344,
+          "nonManifoldEdges": 0,
+          "watertight": false
+        }
+      ],
+      "boundaryEdges": 344,
+      "nonManifoldEdges": 0,
+      "watertight": false
+    },
+    "integrity": {
+      "nonEmptyMesh": true,
+      "finiteCoordinates": true,
+      "triangleCountBounds": {
+        "min": 1,
+        "max": 200000,
+        "withinBounds": true
+      },
+      "degenerateTriangles": 0,
+      "byteLengthMatchesTriangleCount": true
+    },
+    "usesJpgReference": false
+  },
+  "meshIntegrity": {
+    "nonEmptyMesh": true,
+    "finiteCoordinates": true,
+    "triangleCount": 392,
+    "vertexCount": 432,
+    "triangleCountBounds": {
+      "min": 1,
+      "max": 200000,
+      "withinBounds": true
+    },
+    "boundingBox": {
+      "min": [
+        -51.150348,
+        -17.64707,
+        10.023568
+      ],
+      "max": [
+        112.849652,
+        77.35293,
+        65.963568
+      ],
+      "size": [
+        164,
+        95,
+        55.94
+      ],
+      "center": [
+        30.849652,
+        29.85293,
+        37.993568
+      ]
+    },
+    "connectedComponentCount": 2,
+    "degenerateTriangles": 0,
+    "manifoldReport": {
+      "applicable": true,
+      "meshReports": [
+        {
+          "meshIndex": 0,
+          "boundaryEdges": 0,
+          "nonManifoldEdges": 0,
+          "watertight": true
+        },
+        {
+          "meshIndex": 1,
+          "boundaryEdges": 344,
+          "nonManifoldEdges": 0,
+          "watertight": false
+        }
+      ],
+      "boundaryEdges": 344,
+      "nonManifoldEdges": 0,
+      "watertight": false
+    }
+  },
+  "confidence": {
+    "rubricId": "iges-source-confidence-v1",
+    "status": "warn",
+    "score": 96,
+    "maxScore": 100,
+    "componentScores": [
+      {
+        "id": "source_binding_checksum",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "parse_and_assembly_resolution",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "units_transforms_scene_validity",
+        "maxScore": 16,
+        "score": 16,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "geometry_mesh_integrity",
+        "maxScore": 18,
+        "score": 16,
+        "status": "warn",
+        "warnings": [
+          "mesh is not fully watertight; report retained for reviewer"
+        ],
+        "failures": []
+      },
+      {
+        "id": "renderer_determinism_output",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "stl_conversion_integrity",
+        "maxScore": 12,
+        "score": 10,
+        "status": "warn",
+        "warnings": [
+          "STL mesh is not fully watertight; report retained for reviewer"
+        ],
+        "failures": []
+      }
+    ],
+    "thresholds": {
+      "pass": 90,
+      "warn": 70,
+      "failBelow": 70
+    },
+    "sourceAssetId": "assem-1",
+    "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+    "renderPresetId": "source-iges-isometric-v1",
+    "rendererVersion": "iges-source-png-wire-renderer-v1",
+    "reasons": [
+      {
+        "severity": "warning",
+        "component": "geometry_mesh_integrity",
+        "message": "mesh is not fully watertight; report retained for reviewer"
+      },
+      {
+        "severity": "warning",
+        "component": "stl_conversion_integrity",
+        "message": "STL mesh is not fully watertight; report retained for reviewer"
+      }
+    ],
+    "referenceImagesUsedForScore": false,
+    "note": "Source-only QA confidence. This is not engineering certification, CAD qualification, dimensional inspection, or manufacturing approval."
+  },
+  "usesJpgReference": false
+}

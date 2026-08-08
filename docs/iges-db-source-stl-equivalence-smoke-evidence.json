@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "equivalence": {
+    "equivalent": true,
+    "comparableHash": "55468c57effd87b330d36c0687af9ea6bcac6f7327d738bc9b336e160d6e83a0"
+  },
+  "stlTriangleCount": 392,
+  "stlUnits": "millimeter",
+  "stlScalingPolicy": "no_rescale_source_units_recorded_as_millimeters",
+  "connectedComponentCount": 2,
+  "manifoldReport": {
+    "applicable": true,
+    "meshReports": [
+      {
+        "meshIndex": 0,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "watertight": true
+      },
+      {
+        "meshIndex": 1,
+        "boundaryEdges": 344,
+        "nonManifoldEdges": 0,
+        "watertight": false
+      }
+    ],
+    "boundaryEdges": 344,
+    "nonManifoldEdges": 0,
+    "watertight": false
+  },
+  "usesJpgReference": false
+}

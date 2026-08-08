@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "equivalence": {
+    "equivalent": true,
+    "comparableHash": "55468c57effd87b330d36c0687af9ea6bcac6f7327d738bc9b336e160d6e83a0"
+  },
+  "confidenceScore": 96,
+  "componentScores": [
+    {
+      "id": "source_binding_checksum",
+      "maxScore": 18,
+      "score": 18,
+      "status": "pass",
+      "warnings": [],
+      "failures": []
+    },
+    {
+      "id": "parse_and_assembly_resolution",
+      "maxScore": 18,
+      "score": 18,
+      "status": "pass",
+      "warnings": [],
+      "failures": []
+    },
+    {
+      "id": "units_transforms_scene_validity",
+      "maxScore": 16,
+      "score": 16,
+      "status": "pass",
+      "warnings": [],
+      "failures": []
+    },
+    {
+      "id": "geometry_mesh_integrity",
+      "maxScore": 18,
+      "score": 16,
+      "status": "warn",
+      "warnings": [
+        "mesh is not fully watertight; report retained for reviewer"
+      ],
+      "failures": []
+    },
+    {
+      "id": "renderer_determinism_output",
+      "maxScore": 18,
+      "score": 18,
+      "status": "pass",
+      "warnings": [],
+      "failures": []
+    },
+    {
+      "id": "stl_conversion_integrity",
+      "maxScore": 12,
+      "score": 10,
+      "status": "warn",
+      "warnings": [
+        "STL mesh is not fully watertight; report retained for reviewer"
+      ],
+      "failures": []
+    }
+  ],
+  "rubricId": "iges-source-confidence-v1",
+  "usesJpgReference": false
+}
