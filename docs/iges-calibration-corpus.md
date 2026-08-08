@@ -63,6 +63,14 @@ It gives the lane a small, checksumed IGES plus PNG reference pair that can run 
 
 The PNG remains visual QA only. The corpus smoke asserts it is not used for source confidence.
 
+## First External Acquisition Pass
+
+The first external acquisition pass is documented in:
+
+- `docs/iges-calibration-corpus-acquisition-2026-08-08.md`
+
+It records five Ideal Standard product-page candidates that expose useful IGES/JPG pairings, but all remain blocked until permission or terms clearance is obtained.
+
 ## Candidate Sources
 
 High-priority sources:

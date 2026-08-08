@@ -137,6 +137,24 @@
       "notes": "Good narrow-domain set for cylindrical rendering and hole/silhouette tests."
     },
     {
+      "id": "ideal_standard",
+      "label": "Ideal Standard product CAD resources",
+      "url": "https://www.idealstandard.ie/products",
+      "priority": "blocked_until_permission_or_terms_clearance",
+      "candidateCategories": [
+        "simple_block_or_plate",
+        "bracket_or_flange_with_holes",
+        "small_assembly"
+      ],
+      "expectedAssets": [
+        "downloadable IGES or IGS",
+        "product image or price-list drawing JPG"
+      ],
+      "termsStatus": "blocked_personal_non_commercial_extract_terms",
+      "acquisitionMode": "manual_permission_required_before_committing_assets",
+      "notes": "Product pages expose useful IGES/JPG pairs, but terms currently limit downloads to personal non-commercial extracts and prohibit broader storage/reuse without permission."
+    },
+    {
       "id": "grabcad",
       "label": "GrabCAD STEP / IGES community library",
       "url": "https://grabcad.com/library/software/step-slash-iges",
@@ -170,6 +188,182 @@
       "termsStatus": "public_domain_collection_but_file_format_pairing_unconfirmed",
       "acquisitionMode": "narrow_repo_inspection_required",
       "notes": "Useful for reproducible parser and translation tests. Initial shallow inspection was stopped due repository size; inspect narrowly before adding."
+    }
+  ],
+  "candidateSampleFindings": [
+    {
+      "id": "ideal-standard-t4892-bracing-bracket",
+      "sourceId": "ideal_standard",
+      "status": "blocked",
+      "blockedState": "terms_unclear",
+      "category": "bracket_or_flange_with_holes",
+      "title": "T4892 i.life Bracing bracket 35x1500x15 mm",
+      "productUrl": "https://www.idealstandard.ie/products/t4892",
+      "termsUrl": "https://www.idealstandard.ie/terms-of-use",
+      "observedAttributes": {
+        "heightMm": 15,
+        "widthMm": 35,
+        "lengthProjectionMm": 1500,
+        "material": "Metal",
+        "shape": "Squared / geometric",
+        "type": "Bracing bracket"
+      },
+      "observedAssets": [
+        {
+          "role": "post_render_visual_calibration_only",
+          "format": "JPG",
+          "label": "Price List Drawing",
+          "size": "299.1 KB",
+          "downloadUrlCandidate": "https://www.idealstandard.ie/dfsmedia/9e07a8a15f014cab9f19c3786cffba89/302288-50034/options/download/is-ilife-t4892-prlistdrw-nn-brktfixceilingstrght",
+          "downloadVerificationStatus": "browser_preview_observed_terminal_head_blocked_by_cloudflare_403"
+        },
+        {
+          "role": "source_candidate_requires_permission",
+          "format": "IGS",
+          "label": "CAD 3D Planning File",
+          "size": "691.23 KB",
+          "downloadUrlCandidate": "https://www.idealstandard.ie/dfsmedia/9e07a8a15f014cab9f19c3786cffba89/300481-source/options/download/is-ilife-t4892-3dpl-nn",
+          "downloadVerificationStatus": "download_action_observed_on_product_page_terminal_head_blocked_by_cloudflare_403"
+        }
+      ],
+      "whyUseful": "Long bracket geometry with clear dimensions and a matching drawing/reference asset; useful for camera and edge-style checks once terms are cleared.",
+      "blockerEvidence": "Terms permit downloads only for personal, non-commercial extract use and prohibit broader storage/reuse without permission.",
+      "nextAction": "Request written permission for internal renderer calibration use or keep as non-asset planning reference only."
+    },
+    {
+      "id": "ideal-standard-k9381-connect-bracing-bracket",
+      "sourceId": "ideal_standard",
+      "status": "blocked",
+      "blockedState": "terms_unclear",
+      "category": "bracket_or_flange_with_holes",
+      "title": "K9381 Connect 2 Bracing bracket 962x309x20 mm",
+      "productUrl": "https://www.idealstandard.ie/products/k9381",
+      "termsUrl": "https://www.idealstandard.ie/terms-of-use",
+      "observedAttributes": {
+        "heightMm": 20,
+        "widthMm": 962,
+        "lengthProjectionMm": 309,
+        "material": "Metal",
+        "shape": "Squared / geometric",
+        "type": "Bracing bracket"
+      },
+      "observedAssets": [
+        {
+          "role": "post_render_visual_calibration_only",
+          "format": "JPG",
+          "label": "Price List Drawing",
+          "size": "117.6 KB"
+        },
+        {
+          "role": "source_candidate_requires_permission",
+          "format": "IGS",
+          "label": "CAD 3D Planning File",
+          "size": "1.05 MB"
+        }
+      ],
+      "whyUseful": "Bracket-like source with different proportions than T4892; useful for camera/framing diversity.",
+      "blockerEvidence": "Same Ideal Standard terms limitation as T4892.",
+      "nextAction": "Request permission before downloading or committing assets."
+    },
+    {
+      "id": "ideal-standard-bc770-shower-bracket",
+      "sourceId": "ideal_standard",
+      "status": "blocked",
+      "blockedState": "terms_unclear",
+      "category": "bracket_or_flange_with_holes",
+      "title": "BC770 Idealrain Shower bracket 30x60x30 mm",
+      "productUrl": "https://www.idealstandard.ie/products/bc770",
+      "termsUrl": "https://www.idealstandard.ie/terms-of-use",
+      "observedAttributes": {
+        "heightMm": 30,
+        "widthMm": 60,
+        "lengthProjectionMm": 30,
+        "material": "Brass",
+        "type": "Shower bracket"
+      },
+      "observedAssets": [
+        {
+          "role": "post_render_visual_calibration_only",
+          "format": "JPG",
+          "label": "Product or drawing JPG",
+          "size": "63.1 KB"
+        },
+        {
+          "role": "source_candidate_requires_permission",
+          "format": "IGS",
+          "label": "CAD 3D Planning File",
+          "size": "157.11 KB"
+        }
+      ],
+      "whyUseful": "Compact bracket geometry for testing small part framing and edge rendering.",
+      "blockerEvidence": "Same Ideal Standard terms limitation as T4892.",
+      "nextAction": "Request permission before downloading or committing assets."
+    },
+    {
+      "id": "ideal-standard-b9446-shower-arm",
+      "sourceId": "ideal_standard",
+      "status": "blocked",
+      "blockedState": "terms_unclear",
+      "category": "cylindrical_or_bearing",
+      "title": "B9446 Idealrain Overhead shower arm 55x180x55 mm",
+      "productUrl": "https://www.idealstandard.ie/products/b9446",
+      "termsUrl": "https://www.idealstandard.ie/terms-of-use",
+      "observedAttributes": {
+        "heightMm": 55,
+        "widthMm": 180,
+        "lengthProjectionMm": 55,
+        "type": "Overhead shower arm"
+      },
+      "observedAssets": [
+        {
+          "role": "post_render_visual_calibration_only",
+          "format": "JPG",
+          "label": "Product or drawing JPG",
+          "size": "111.4 KB"
+        },
+        {
+          "role": "source_candidate_requires_permission",
+          "format": "IGS",
+          "label": "CAD 3D Planning File",
+          "size": "99.62 KB"
+        }
+      ],
+      "whyUseful": "Curved or cylindrical fixture geometry for non-bracket silhouette and tube-like render tests.",
+      "blockerEvidence": "Same Ideal Standard terms limitation as T4892.",
+      "nextAction": "Request permission before downloading or committing assets."
+    },
+    {
+      "id": "ideal-standard-t4107-cabinet",
+      "sourceId": "ideal_standard",
+      "status": "blocked",
+      "blockedState": "terms_unclear",
+      "category": "small_assembly",
+      "title": "T4107 Conca Cabinet 720x250x1400 mm, 2 doors",
+      "productUrl": "https://www.idealstandard.ie/products/t4107",
+      "termsUrl": "https://www.idealstandard.ie/terms-of-use",
+      "observedAttributes": {
+        "heightMm": 1400,
+        "widthMm": 720,
+        "lengthProjectionMm": 250,
+        "type": "Cabinet"
+      },
+      "observedAssets": [
+        {
+          "role": "post_render_visual_calibration_only",
+          "format": "JPG",
+          "label": "Product or drawing JPG",
+          "size": "125.2 KB"
+        },
+        {
+          "role": "source_candidate_requires_permission",
+          "format": "IGS",
+          "label": "CAD 3D Planning File",
+          "size": "197.95 KB"
+        }
+      ],
+      "whyUseful": "Simple assembly-like cabinet geometry for testing multi-face object framing and display-state handling.",
+      "blockerEvidence": "Same Ideal Standard terms limitation as T4892.",
+      "nextAction": "Request permission before downloading or committing assets."
     }
   ],
   "sampleSlots": [

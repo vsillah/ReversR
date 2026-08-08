@@ -2,7 +2,9 @@
   "schemaVersion": 1,
   "status": "pass",
   "manifest": "docs/iges-calibration-corpus.seed.json",
-  "candidateSourceCount": 7,
+  "candidateSourceCount": 8,
+  "candidateFindingCount": 5,
+  "blockedCandidateFindingCount": 5,
   "sampleSlotCount": 12,
   "categoryCounts": {
     "simple_block_or_plate": 2,
