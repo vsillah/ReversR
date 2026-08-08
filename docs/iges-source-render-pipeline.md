@@ -42,6 +42,7 @@ Everything after source resolution is shared code in `utils/igesSourcePipeline.j
 - source-only 0-100 render-confidence evidence
 - fixture/database equivalence smokes for render, STL, and confidence
 - blocked/invalid source-binding examples for missing source, invalid hash, unsupported image binding, and missing render preset
+- downstream visual-calibration evidence packet with bounded render-preset experiments
 
 ## Validation
 
@@ -61,6 +62,7 @@ npm run iges:stl:smoke
 npm run iges:stl:db-equivalence
 npm run iges:confidence:smoke
 npm run iges:confidence:db-equivalence
+npm run iges:visual-calibration:smoke
 ```
 
 Generated local artifacts are written under `.local/iges-source-pipeline/`.
@@ -81,6 +83,28 @@ The score is computed only from:
 - STL conversion integrity when STL is requested
 
 No reference image affects the score.
+
+## Post-Render Visual Calibration
+
+Visual calibration is a separate downstream loop. It starts only after the IGES-only render completes.
+
+It may use the approved JPG as a golden visual reference for comparison, but only inside the calibration agent. The JPG remains excluded from source binding, IGES ingestion, scene assembly, renderer source data, STL export, and source-confidence scoring.
+
+The visual calibration packet reports:
+
+- `source_confidence_score`: source-only IGES/scene/render health score
+- `visual_fidelity_score`: post-render visual similarity score against the golden reference
+- camera/framing differences
+- object placement/orientation differences
+- silhouette differences
+- lighting/material/background differences
+- line/edge treatment differences
+- resolution/aspect differences
+- ranked render-preset hypotheses
+
+Bounded experiments may change render presets and re-render. They must not change IGES geometry. The visual score must not be promoted into source confidence.
+
+Human approval is required before changing a production render preset or calling an output golden-ready.
 
 ## Remaining Product Gate
 

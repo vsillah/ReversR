@@ -1,0 +1,829 @@
+{
+  "schemaVersion": 1,
+  "packetType": "iges_post_render_visual_calibration",
+  "rubricId": "iges-post-render-visual-calibration-v1",
+  "status": "human_approval_required",
+  "generatedAt": "2026-08-08T00:47:16.158Z",
+  "strictSeparation": {
+    "sourceConfidenceRule": "IGES-only source confidence remains source/geometry/render health only.",
+    "visualCalibrationRule": "Golden JPG is used only by this downstream visual QA/calibration loop.",
+    "sourceConfidenceUsesReferenceImage": false,
+    "geometryModifiedByCalibration": false,
+    "visualScorePromotedToSourceConfidence": false
+  },
+  "goldenReference": {
+    "id": "assem-1-solidworks-jpg-golden-v1",
+    "path": "/Users/vambahsillah/Downloads/Assem-1.JPG",
+    "sha256": "7dbc28dc5e066c2ced4b617ca2d6765ed613493674f02574d6adf9fed3563948",
+    "role": "post_render_visual_calibration_only",
+    "excludedFrom": [
+      "IGES ingestion",
+      "scene assembly",
+      "renderer source data",
+      "STL export",
+      "source confidence score"
+    ],
+    "descriptor": {
+      "width": 1486,
+      "height": 854,
+      "aspectRatio": 1.74,
+      "edgeCount": 797,
+      "edgeRatio": 0.054144,
+      "edgeBoundingBox": {
+        "x": 0.01875,
+        "y": 0.043478,
+        "width": 0.73125,
+        "height": 0.717391
+      },
+      "edgeAspectRatio": 1.0193,
+      "edgeCentroid": {
+        "x": 0.377509,
+        "y": 0.404547
+      },
+      "weightedCentroid": {
+        "x": 300.875,
+        "y": 322.423913
+      },
+      "sampleWidth": 160,
+      "sampleHeight": 92,
+      "meanLuminance": 220.827,
+      "luminanceStdDev": 27.46
+    }
+  },
+  "experiments": [
+    {
+      "id": "baseline-source-render",
+      "label": "Current source-only render preset",
+      "hypothesis": "Baseline technical wire render proves source geometry but will differ from the SolidWorks golden view in camera, line treatment, and background.",
+      "preset": {
+        "id": "source-iges-isometric-v1",
+        "width": 1024,
+        "height": 768,
+        "camera": "isometric-front-top",
+        "lighting": "matte-source-wire",
+        "background": [
+          247,
+          250,
+          252,
+          255
+        ],
+        "foreground": [
+          15,
+          23,
+          42,
+          255
+        ],
+        "accent": [
+          0,
+          143,
+          143,
+          255
+        ],
+        "margin": 60,
+        "projection": {
+          "ySkew": 0.55,
+          "zLift": 1,
+          "xyLift": 0.28
+        }
+      },
+      "renderArtifact": {
+        "outputPath": "/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild.worktrees/iges-render-pipeline/.local/iges-source-pipeline/visual-calibration/baseline-source-render/assem-1-controlled_fixture-source-iges-isometric-v1.png",
+        "mimeType": "image/png",
+        "width": 1024,
+        "height": 768,
+        "sha256": "601efab8e8d9d0c9c722021d7832a3a2ba50ccc072dd8a9b01f26d034cd19943",
+        "renderPresetId": "source-iges-isometric-v1",
+        "rendererVersion": "iges-source-png-wire-renderer-v1",
+        "deterministic": true,
+        "outputCompleteness": {
+          "nonBackgroundPixels": 76035,
+          "nonBackgroundRatio": 0.096684,
+          "nonEmpty": true
+        },
+        "usesJpgReference": false
+      },
+      "source_confidence_score": 98,
+      "sourceConfidence": {
+        "score": 98,
+        "rubricId": "iges-source-confidence-v1",
+        "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+        "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+        "referenceImagesUsedForScore": false
+      },
+      "visual_fidelity_score": 57,
+      "visualCalibration": {
+        "visual_fidelity_score": 57,
+        "componentScores": [
+          {
+            "id": "camera_framing",
+            "score": 82,
+            "inputs": {
+              "bboxDelta": 0.09076075000000003,
+              "centroidDelta": 0.16937594268667558,
+              "resolutionDelta": 0.40670000000000006
+            }
+          },
+          {
+            "id": "object_placement_orientation",
+            "score": 85,
+            "inputs": {
+              "centroidDelta": 0.16937594268667558,
+              "bboxDelta": 0.09076075000000003
+            }
+          },
+          {
+            "id": "silhouette_alignment",
+            "score": 28,
+            "inputs": {
+              "edgeMaskIou": 0.062328,
+              "aspectDelta": 0.30689999999999995
+            }
+          },
+          {
+            "id": "lighting_material_background",
+            "score": 86,
+            "inputs": {
+              "lightingDelta": 0.03884313725490197,
+              "contrastDelta": 0.24228125
+            }
+          },
+          {
+            "id": "line_edge_treatment",
+            "score": 0,
+            "inputs": {
+              "lineDensityDelta": 0.153397
+            }
+          },
+          {
+            "id": "resolution_aspect",
+            "score": 59,
+            "inputs": {
+              "renderAspect": 1.3333,
+              "referenceAspect": 1.74
+            }
+          }
+        ],
+        "differences": {
+          "summary": "Visual calibration found differences between the source render and golden JPG reference. These do not affect source confidence.",
+          "renderDescriptor": {
+            "width": 1024,
+            "height": 768,
+            "aspectRatio": 1.3333,
+            "edgeCount": 3055,
+            "edgeRatio": 0.207541,
+            "edgeBoundingBox": {
+              "x": 0.05625,
+              "y": 0.163043,
+              "width": 0.89375,
+              "height": 0.673913
+            },
+            "edgeAspectRatio": 1.3262,
+            "edgeCentroid": {
+              "x": 0.51749,
+              "y": 0.499907
+            },
+            "weightedCentroid": {
+              "x": 1580.93125,
+              "y": 1527.217391
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 230.732,
+            "luminanceStdDev": 58.472
+          },
+          "referenceDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 797,
+            "edgeRatio": 0.054144,
+            "edgeBoundingBox": {
+              "x": 0.01875,
+              "y": 0.043478,
+              "width": 0.73125,
+              "height": 0.717391
+            },
+            "edgeAspectRatio": 1.0193,
+            "edgeCentroid": {
+              "x": 0.377509,
+              "y": 0.404547
+            },
+            "weightedCentroid": {
+              "x": 300.875,
+              "y": 322.423913
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 220.827,
+            "luminanceStdDev": 27.46
+          },
+          "differences": [
+            {
+              "category": "silhouette",
+              "message": "Silhouette edge overlap is low. This is a visual preset issue unless source assembly evidence also fails.",
+              "priority": 1
+            },
+            {
+              "category": "line/edge treatment",
+              "message": "Line density and edge styling differ from the golden reference; consider monochrome thin-outline preset and hidden-line treatment in a later renderer.",
+              "priority": 2
+            },
+            {
+              "category": "resolution",
+              "message": "Output aspect ratio differs from the golden reference dimensions.",
+              "priority": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "golden-aspect-monochrome-outline",
+      "label": "Match golden aspect and monochrome outline",
+      "hypothesis": "Using the golden image aspect ratio, monochrome lines, and neutral grey background should improve visual presentation similarity without changing geometry.",
+      "preset": {
+        "id": "source-iges-visual-calibration-golden-aspect-v1",
+        "width": 1486,
+        "height": 854,
+        "camera": "isometric-front-top",
+        "lighting": "matte-source-wire",
+        "background": [
+          232,
+          232,
+          232,
+          255
+        ],
+        "foreground": [
+          15,
+          15,
+          15,
+          255
+        ],
+        "accent": [
+          72,
+          72,
+          72,
+          255
+        ],
+        "margin": 34,
+        "projection": {
+          "ySkew": 0.55,
+          "zLift": 1,
+          "xyLift": 0.28
+        }
+      },
+      "renderArtifact": {
+        "outputPath": "/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild.worktrees/iges-render-pipeline/.local/iges-source-pipeline/visual-calibration/golden-aspect-monochrome-outline/assem-1-controlled_fixture-source-iges-visual-calibration-golden-aspect-v1.png",
+        "mimeType": "image/png",
+        "width": 1486,
+        "height": 854,
+        "sha256": "51e16a34667729aa9a4ead165e2a292c176bbadda371aa3909305c177ec2b485",
+        "renderPresetId": "source-iges-visual-calibration-golden-aspect-v1",
+        "rendererVersion": "iges-source-png-wire-renderer-v1",
+        "deterministic": true,
+        "outputCompleteness": {
+          "nonBackgroundPixels": 133484,
+          "nonBackgroundRatio": 0.105185,
+          "nonEmpty": true
+        },
+        "usesJpgReference": false
+      },
+      "source_confidence_score": 98,
+      "sourceConfidence": {
+        "score": 98,
+        "rubricId": "iges-source-confidence-v1",
+        "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+        "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+        "referenceImagesUsedForScore": false
+      },
+      "visual_fidelity_score": 67,
+      "visualCalibration": {
+        "visual_fidelity_score": 67,
+        "componentScores": [
+          {
+            "id": "camera_framing",
+            "score": 89,
+            "inputs": {
+              "bboxDelta": 0.11331525,
+              "centroidDelta": 0.15610971742335583,
+              "resolutionDelta": 0
+            }
+          },
+          {
+            "id": "object_placement_orientation",
+            "score": 86,
+            "inputs": {
+              "centroidDelta": 0.15610971742335583,
+              "bboxDelta": 0.11331525
+            }
+          },
+          {
+            "id": "silhouette_alignment",
+            "score": 39,
+            "inputs": {
+              "edgeMaskIou": 0.062187,
+              "aspectDelta": 0.0030000000000001137
+            }
+          },
+          {
+            "id": "lighting_material_background",
+            "score": 85,
+            "inputs": {
+              "lightingDelta": 0.03605098039215691,
+              "contrastDelta": 0.2559140625
+            }
+          },
+          {
+            "id": "line_edge_treatment",
+            "score": 0,
+            "inputs": {
+              "lineDensityDelta": 0.179484
+            }
+          },
+          {
+            "id": "resolution_aspect",
+            "score": 100,
+            "inputs": {
+              "renderAspect": 1.74,
+              "referenceAspect": 1.74
+            }
+          }
+        ],
+        "differences": {
+          "summary": "Visual calibration found differences between the source render and golden JPG reference. These do not affect source confidence.",
+          "renderDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 3439,
+            "edgeRatio": 0.233628,
+            "edgeBoundingBox": {
+              "x": 0.025,
+              "y": 0.032609,
+              "width": 0.95,
+              "height": 0.934783
+            },
+            "edgeAspectRatio": 1.0163,
+            "edgeCentroid": {
+              "x": 0.513614,
+              "y": 0.481004
+            },
+            "weightedCentroid": {
+              "x": 1766.31875,
+              "y": 1654.173913
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 211.634,
+            "luminanceStdDev": 60.217
+          },
+          "referenceDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 797,
+            "edgeRatio": 0.054144,
+            "edgeBoundingBox": {
+              "x": 0.01875,
+              "y": 0.043478,
+              "width": 0.73125,
+              "height": 0.717391
+            },
+            "edgeAspectRatio": 1.0193,
+            "edgeCentroid": {
+              "x": 0.377509,
+              "y": 0.404547
+            },
+            "weightedCentroid": {
+              "x": 300.875,
+              "y": 322.423913
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 220.827,
+            "luminanceStdDev": 27.46
+          },
+          "differences": [
+            {
+              "category": "silhouette",
+              "message": "Silhouette edge overlap is low. This is a visual preset issue unless source assembly evidence also fails.",
+              "priority": 1
+            },
+            {
+              "category": "line/edge treatment",
+              "message": "Line density and edge styling differ from the golden reference; consider monochrome thin-outline preset and hidden-line treatment in a later renderer.",
+              "priority": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "side-isometric-camera",
+      "label": "Side/isometric camera hypothesis",
+      "hypothesis": "Changing only the projection preset may better align the assembly silhouette and placement with the golden CAD viewport.",
+      "preset": {
+        "id": "source-iges-visual-calibration-side-isometric-v1",
+        "width": 1486,
+        "height": 854,
+        "camera": "isometric-front-top",
+        "lighting": "matte-source-wire",
+        "background": [
+          232,
+          232,
+          232,
+          255
+        ],
+        "foreground": [
+          10,
+          10,
+          10,
+          255
+        ],
+        "accent": [
+          96,
+          96,
+          96,
+          255
+        ],
+        "margin": 28,
+        "projection": {
+          "ySkew": 0.12,
+          "zLift": 0.82,
+          "xyLift": 0.52
+        }
+      },
+      "renderArtifact": {
+        "outputPath": "/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild.worktrees/iges-render-pipeline/.local/iges-source-pipeline/visual-calibration/side-isometric-camera/assem-1-controlled_fixture-source-iges-visual-calibration-side-isometric-v1.png",
+        "mimeType": "image/png",
+        "width": 1486,
+        "height": 854,
+        "sha256": "21b0f4a391956b6623b401fd8988421e93aa40ac909a0e1de7291af902e5d4f9",
+        "renderPresetId": "source-iges-visual-calibration-side-isometric-v1",
+        "rendererVersion": "iges-source-png-wire-renderer-v1",
+        "deterministic": true,
+        "outputCompleteness": {
+          "nonBackgroundPixels": 89991,
+          "nonBackgroundRatio": 0.070912,
+          "nonEmpty": true
+        },
+        "usesJpgReference": false
+      },
+      "source_confidence_score": 98,
+      "sourceConfidence": {
+        "score": 98,
+        "rubricId": "iges-source-confidence-v1",
+        "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+        "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+        "referenceImagesUsedForScore": false
+      },
+      "visual_fidelity_score": 65,
+      "visualCalibration": {
+        "visual_fidelity_score": 65,
+        "componentScores": [
+          {
+            "id": "camera_framing",
+            "score": 88,
+            "inputs": {
+              "bboxDelta": 0.15000000000000002,
+              "centroidDelta": 0.1362434455304181,
+              "resolutionDelta": 0
+            }
+          },
+          {
+            "id": "object_placement_orientation",
+            "score": 86,
+            "inputs": {
+              "centroidDelta": 0.1362434455304181,
+              "bboxDelta": 0.15000000000000002
+            }
+          },
+          {
+            "id": "silhouette_alignment",
+            "score": 25,
+            "inputs": {
+              "edgeMaskIou": 0.062694,
+              "aspectDelta": 0.4113000000000001
+            }
+          },
+          {
+            "id": "lighting_material_background",
+            "score": 91,
+            "inputs": {
+              "lightingDelta": 0.00835294117647057,
+              "contrastDelta": 0.17057812499999997
+            }
+          },
+          {
+            "id": "line_edge_treatment",
+            "score": 0,
+            "inputs": {
+              "lineDensityDelta": 0.10129099999999999
+            }
+          },
+          {
+            "id": "resolution_aspect",
+            "score": 100,
+            "inputs": {
+              "renderAspect": 1.74,
+              "referenceAspect": 1.74
+            }
+          }
+        ],
+        "differences": {
+          "summary": "Visual calibration found differences between the source render and golden JPG reference. These do not affect source confidence.",
+          "renderDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 2288,
+            "edgeRatio": 0.155435,
+            "edgeBoundingBox": {
+              "x": 0.2125,
+              "y": 0.021739,
+              "width": 0.575,
+              "height": 0.945652
+            },
+            "edgeAspectRatio": 0.608,
+            "edgeCentroid": {
+              "x": 0.490262,
+              "y": 0.481026
+            },
+            "weightedCentroid": {
+              "x": 1121.71875,
+              "y": 1100.586957
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 218.697,
+            "luminanceStdDev": 49.294
+          },
+          "referenceDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 797,
+            "edgeRatio": 0.054144,
+            "edgeBoundingBox": {
+              "x": 0.01875,
+              "y": 0.043478,
+              "width": 0.73125,
+              "height": 0.717391
+            },
+            "edgeAspectRatio": 1.0193,
+            "edgeCentroid": {
+              "x": 0.377509,
+              "y": 0.404547
+            },
+            "weightedCentroid": {
+              "x": 300.875,
+              "y": 322.423913
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 220.827,
+            "luminanceStdDev": 27.46
+          },
+          "differences": [
+            {
+              "category": "silhouette",
+              "message": "Silhouette edge overlap is low. This is a visual preset issue unless source assembly evidence also fails.",
+              "priority": 1
+            },
+            {
+              "category": "line/edge treatment",
+              "message": "Line density and edge styling differ from the golden reference; consider monochrome thin-outline preset and hidden-line treatment in a later renderer.",
+              "priority": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "tall-upright-camera",
+      "label": "Upright bracket emphasis hypothesis",
+      "hypothesis": "Increasing vertical lift may better emphasize the upright bracket panel seen in the golden reference.",
+      "preset": {
+        "id": "source-iges-visual-calibration-upright-v1",
+        "width": 1486,
+        "height": 854,
+        "camera": "isometric-front-top",
+        "lighting": "matte-source-wire",
+        "background": [
+          232,
+          232,
+          232,
+          255
+        ],
+        "foreground": [
+          10,
+          10,
+          10,
+          255
+        ],
+        "accent": [
+          120,
+          120,
+          120,
+          255
+        ],
+        "margin": 30,
+        "projection": {
+          "ySkew": 0.4,
+          "zLift": 1.35,
+          "xyLift": 0.38
+        }
+      },
+      "renderArtifact": {
+        "outputPath": "/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild.worktrees/iges-render-pipeline/.local/iges-source-pipeline/visual-calibration/tall-upright-camera/assem-1-controlled_fixture-source-iges-visual-calibration-upright-v1.png",
+        "mimeType": "image/png",
+        "width": 1486,
+        "height": 854,
+        "sha256": "ef0aec49b592f9e6cd4dc53770ef86d6950095b54e0898f8dc6b3322a9d4988b",
+        "renderPresetId": "source-iges-visual-calibration-upright-v1",
+        "rendererVersion": "iges-source-png-wire-renderer-v1",
+        "deterministic": true,
+        "outputCompleteness": {
+          "nonBackgroundPixels": 102591,
+          "nonBackgroundRatio": 0.080841,
+          "nonEmpty": true
+        },
+        "usesJpgReference": false
+      },
+      "source_confidence_score": 98,
+      "sourceConfidence": {
+        "score": 98,
+        "rubricId": "iges-source-confidence-v1",
+        "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+        "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+        "referenceImagesUsedForScore": false
+      },
+      "visual_fidelity_score": 66,
+      "visualCalibration": {
+        "visual_fidelity_score": 66,
+        "componentScores": [
+          {
+            "id": "camera_framing",
+            "score": 90,
+            "inputs": {
+              "bboxDelta": 0.11175275000000001,
+              "centroidDelta": 0.14521155322149823,
+              "resolutionDelta": 0
+            }
+          },
+          {
+            "id": "object_placement_orientation",
+            "score": 86,
+            "inputs": {
+              "centroidDelta": 0.14521155322149823,
+              "bboxDelta": 0.11175275000000001
+            }
+          },
+          {
+            "id": "silhouette_alignment",
+            "score": 29,
+            "inputs": {
+              "edgeMaskIou": 0.069086,
+              "aspectDelta": 0.3106000000000001
+            }
+          },
+          {
+            "id": "lighting_material_background",
+            "score": 90,
+            "inputs": {
+              "lightingDelta": 0.012670588235294097,
+              "contrastDelta": 0.18422656249999997
+            }
+          },
+          {
+            "id": "line_edge_treatment",
+            "score": 0,
+            "inputs": {
+              "lineDensityDelta": 0.119837
+            }
+          },
+          {
+            "id": "resolution_aspect",
+            "score": 100,
+            "inputs": {
+              "renderAspect": 1.74,
+              "referenceAspect": 1.74
+            }
+          }
+        ],
+        "differences": {
+          "summary": "Visual calibration found differences between the source render and golden JPG reference. These do not affect source confidence.",
+          "renderDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 2561,
+            "edgeRatio": 0.173981,
+            "edgeBoundingBox": {
+              "x": 0.16875,
+              "y": 0.032609,
+              "width": 0.6625,
+              "height": 0.934783
+            },
+            "edgeAspectRatio": 0.7087,
+            "edgeCentroid": {
+              "x": 0.502492,
+              "y": 0.478477
+            },
+            "weightedCentroid": {
+              "x": 1286.88125,
+              "y": 1225.380435
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 217.596,
+            "luminanceStdDev": 51.041
+          },
+          "referenceDescriptor": {
+            "width": 1486,
+            "height": 854,
+            "aspectRatio": 1.74,
+            "edgeCount": 797,
+            "edgeRatio": 0.054144,
+            "edgeBoundingBox": {
+              "x": 0.01875,
+              "y": 0.043478,
+              "width": 0.73125,
+              "height": 0.717391
+            },
+            "edgeAspectRatio": 1.0193,
+            "edgeCentroid": {
+              "x": 0.377509,
+              "y": 0.404547
+            },
+            "weightedCentroid": {
+              "x": 300.875,
+              "y": 322.423913
+            },
+            "sampleWidth": 160,
+            "sampleHeight": 92,
+            "meanLuminance": 220.827,
+            "luminanceStdDev": 27.46
+          },
+          "differences": [
+            {
+              "category": "silhouette",
+              "message": "Silhouette edge overlap is low. This is a visual preset issue unless source assembly evidence also fails.",
+              "priority": 1
+            },
+            {
+              "category": "line/edge treatment",
+              "message": "Line density and edge styling differ from the golden reference; consider monochrome thin-outline preset and hidden-line treatment in a later renderer.",
+              "priority": 2
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "rankedHypotheses": [
+    {
+      "experimentId": "golden-aspect-monochrome-outline",
+      "label": "Match golden aspect and monochrome outline",
+      "hypothesis": "Using the golden image aspect ratio, monochrome lines, and neutral grey background should improve visual presentation similarity without changing geometry.",
+      "visual_fidelity_score": 67,
+      "source_confidence_score": 98,
+      "priority": "needs_more_preset_work",
+      "recommendedNextAction": "Continue bounded camera/line/background preset experiments; do not alter IGES geometry."
+    },
+    {
+      "experimentId": "tall-upright-camera",
+      "label": "Upright bracket emphasis hypothesis",
+      "hypothesis": "Increasing vertical lift may better emphasize the upright bracket panel seen in the golden reference.",
+      "visual_fidelity_score": 66,
+      "source_confidence_score": 98,
+      "priority": "needs_more_preset_work",
+      "recommendedNextAction": "Continue bounded camera/line/background preset experiments; do not alter IGES geometry."
+    },
+    {
+      "experimentId": "side-isometric-camera",
+      "label": "Side/isometric camera hypothesis",
+      "hypothesis": "Changing only the projection preset may better align the assembly silhouette and placement with the golden CAD viewport.",
+      "visual_fidelity_score": 65,
+      "source_confidence_score": 98,
+      "priority": "needs_more_preset_work",
+      "recommendedNextAction": "Continue bounded camera/line/background preset experiments; do not alter IGES geometry."
+    },
+    {
+      "experimentId": "baseline-source-render",
+      "label": "Current source-only render preset",
+      "hypothesis": "Baseline technical wire render proves source geometry but will differ from the SolidWorks golden view in camera, line treatment, and background.",
+      "visual_fidelity_score": 57,
+      "source_confidence_score": 98,
+      "priority": "needs_more_preset_work",
+      "recommendedNextAction": "Continue bounded camera/line/background preset experiments; do not alter IGES geometry."
+    }
+  ],
+  "recommendation": {
+    "bestExperimentId": "golden-aspect-monochrome-outline",
+    "bestVisualFidelityScore": 67,
+    "productionPresetChangeApproved": false,
+    "goldenReady": false,
+    "nextHumanGate": "Human approval is required before changing a production preset or calling any output golden-ready."
+  }
+}

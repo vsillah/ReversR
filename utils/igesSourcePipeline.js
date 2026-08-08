@@ -23,6 +23,11 @@ const DEFAULT_RENDER_PRESET = Object.freeze({
   foreground: [15, 23, 42, 255],
   accent: [0, 143, 143, 255],
   margin: 60,
+  projection: {
+    ySkew: 0.55,
+    zLift: 1,
+    xyLift: 0.28,
+  },
 });
 
 const APPROVED_FIXTURE_PACKAGE = Object.freeze({
@@ -519,11 +524,14 @@ const buildEdgeReport = meshes => {
   };
 };
 
-const projectPoint = point => {
+const projectPoint = (point, projection = DEFAULT_RENDER_PRESET.projection) => {
   const [x, y, z] = point;
+  const ySkew = projection.ySkew ?? DEFAULT_RENDER_PRESET.projection.ySkew;
+  const zLift = projection.zLift ?? DEFAULT_RENDER_PRESET.projection.zLift;
+  const xyLift = projection.xyLift ?? DEFAULT_RENDER_PRESET.projection.xyLift;
   return [
-    x - y * 0.55,
-    -z + (x + y) * 0.28,
+    x - y * ySkew,
+    -z * zLift + (x + y) * xyLift,
   ];
 };
 
@@ -543,7 +551,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   for (const mesh of scene.importResult.meshes || []) {
     const positions = Array.from(mesh.attributes?.position?.array || []);
     for (let i = 0; i < positions.length; i += 3) {
-      projected.push(projectPoint([positions[i], positions[i + 1], positions[i + 2]]));
+      projected.push(projectPoint([positions[i], positions[i + 1], positions[i + 2]], preset.projection));
     }
   }
 
@@ -561,7 +569,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const offsetX = (width - spanX * scale) / 2 - bounds2d.min[0] * scale;
   const offsetY = (height - spanY * scale) / 2 - bounds2d.min[1] * scale;
   const toScreen = point => {
-    const projectedPoint = projectPoint(point);
+    const projectedPoint = projectPoint(point, preset.projection);
     return [
       Math.round(projectedPoint[0] * scale + offsetX),
       Math.round(projectedPoint[1] * scale + offsetY),
