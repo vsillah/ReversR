@@ -208,7 +208,7 @@
     "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
     "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
     "renderPresetId": "source-iges-isometric-v1",
-    "rendererVersion": "iges-source-png-wire-renderer-v1",
+    "rendererVersion": "iges-source-shaded-edge-renderer-v2",
     "reasons": [
       {
         "severity": "warning",

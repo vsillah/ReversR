@@ -26,26 +26,55 @@ const APPROVED_GOLDEN_REFERENCES = Object.freeze({
       'source confidence score',
     ],
   },
+  'bracket-1': {
+    id: 'bracket-1-solidworks-jpg-golden-v1',
+    path: '/Users/vambahsillah/Downloads/bracket-1.JPG',
+    sha256: 'b850d8b3f26dc642c9f30147a71cdf13bb63802c05bbbd8adf0f3f2459759c6c',
+    role: 'post_render_visual_calibration_only',
+    excludedFrom: [
+      'IGES ingestion',
+      'scene assembly',
+      'renderer source data',
+      'STL export',
+      'source confidence score',
+    ],
+  },
+  'isolator-1': {
+    id: 'isolator-1-solidworks-jpg-golden-v1',
+    path: '/Users/vambahsillah/Downloads/isolator-1.JPG',
+    sha256: '9e0edf6957677fdc505ad871401115a54948e3bd33386085522b8287a514dd62',
+    role: 'post_render_visual_calibration_only',
+    excludedFrom: [
+      'IGES ingestion',
+      'scene assembly',
+      'renderer source data',
+      'STL export',
+      'source confidence score',
+    ],
+  },
 });
 
 const CALIBRATION_EXPERIMENTS = Object.freeze([
   {
     id: 'baseline-source-render',
     label: 'Current source-only render preset',
-    hypothesis: 'Baseline technical wire render proves source geometry but will differ from the SolidWorks golden view in camera, line treatment, and background.',
+    hypothesis: 'Baseline shaded source render proves source geometry but may differ from the SolidWorks golden view in camera, line treatment, and background.',
     preset: {},
   },
   {
-    id: 'golden-aspect-monochrome-outline',
-    label: 'Match golden aspect and monochrome outline',
-    hypothesis: 'Using the golden image aspect ratio, monochrome lines, and neutral grey background should improve visual presentation similarity without changing geometry.',
+    id: 'golden-aspect-shaded-cad',
+    label: 'Match golden aspect and shaded CAD material',
+    hypothesis: 'Using the golden image aspect ratio, grey gradient background, blue-grey material, and crease-only black edges should improve SolidWorks-style similarity without changing geometry.',
     preset: {
-      id: 'source-iges-visual-calibration-golden-aspect-v1',
+      id: 'source-iges-visual-calibration-shaded-cad-v1',
       width: 1486,
       height: 854,
-      background: [232, 232, 232, 255],
-      foreground: [15, 15, 15, 255],
-      accent: [72, 72, 72, 255],
+      material: {
+        base: [88, 93, 109, 255],
+        top: [195, 203, 224, 255],
+        side: [130, 136, 154, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
       margin: 34,
     },
   },
@@ -57,9 +86,12 @@ const CALIBRATION_EXPERIMENTS = Object.freeze([
       id: 'source-iges-visual-calibration-side-isometric-v1',
       width: 1486,
       height: 854,
-      background: [232, 232, 232, 255],
-      foreground: [10, 10, 10, 255],
-      accent: [96, 96, 96, 255],
+      material: {
+        base: [88, 93, 109, 255],
+        top: [195, 203, 224, 255],
+        side: [130, 136, 154, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
       margin: 28,
       projection: {
         ySkew: 0.12,
@@ -76,14 +108,185 @@ const CALIBRATION_EXPERIMENTS = Object.freeze([
       id: 'source-iges-visual-calibration-upright-v1',
       width: 1486,
       height: 854,
-      background: [232, 232, 232, 255],
-      foreground: [10, 10, 10, 255],
-      accent: [120, 120, 120, 255],
+      material: {
+        base: [88, 93, 109, 255],
+        top: [195, 203, 224, 255],
+        side: [130, 136, 154, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
       margin: 30,
       projection: {
         ySkew: 0.4,
         zLift: 1.35,
         xyLift: 0.38,
+      },
+    },
+  },
+  {
+    id: 'solidworks-trimetric-a',
+    label: 'SolidWorks trimetric camera A',
+    hypothesis: 'A bounded Euler camera hypothesis may better match the SolidWorks reference orientation while keeping IGES geometry unchanged.',
+    preset: {
+      id: 'source-iges-visual-calibration-trimetric-a-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        mode: 'euler',
+        yawDeg: -34,
+        pitchDeg: 0,
+        rollDeg: -24,
+      },
+    },
+  },
+  {
+    id: 'solidworks-trimetric-b',
+    label: 'SolidWorks trimetric camera B',
+    hypothesis: 'Mirroring the horizontal camera direction may close the bracket/isolator orientation gap visible against the part references.',
+    preset: {
+      id: 'source-iges-visual-calibration-trimetric-b-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        mode: 'euler',
+        yawDeg: 34,
+        pitchDeg: 0,
+        rollDeg: -24,
+      },
+    },
+  },
+  {
+    id: 'solidworks-trimetric-c',
+    label: 'SolidWorks trimetric camera C',
+    hypothesis: 'A steeper vertical camera angle may better match the tall bracket wall in the assembly and part references.',
+    preset: {
+      id: 'source-iges-visual-calibration-trimetric-c-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        mode: 'euler',
+        yawDeg: -24,
+        pitchDeg: 0,
+        rollDeg: -34,
+      },
+    },
+  },
+  {
+    id: 'solidworks-trimetric-d',
+    label: 'SolidWorks trimetric camera D',
+    hypothesis: 'A lower, longer side camera may improve isolator block alignment while preserving source geometry.',
+    preset: {
+      id: 'source-iges-visual-calibration-trimetric-d-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        mode: 'euler',
+        yawDeg: 24,
+        pitchDeg: 0,
+        rollDeg: -18,
+      },
+    },
+  },
+  {
+    id: 'axis-remap-base-holes-a',
+    label: 'CAD axis remap: holed plate horizontal A',
+    hypothesis: 'A render-only axis remap may match the SolidWorks reference frame where the holed bracket plate reads as the horizontal base.',
+    preset: {
+      id: 'source-iges-visual-calibration-axis-remap-base-holes-a-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        modelPitchDeg: 90,
+        ySkew: 0.55,
+        zLift: 0.42,
+        xyLift: 0.2,
+      },
+    },
+  },
+  {
+    id: 'axis-remap-base-holes-b',
+    label: 'CAD axis remap: holed plate horizontal B',
+    hypothesis: 'The opposite render-only pitch remap tests whether the IGES axis convention is inverted relative to the SolidWorks golden viewport.',
+    preset: {
+      id: 'source-iges-visual-calibration-axis-remap-base-holes-b-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        modelPitchDeg: -90,
+        ySkew: 0.55,
+        zLift: 0.42,
+        xyLift: 0.2,
+      },
+    },
+  },
+  {
+    id: 'axis-remap-base-holes-c',
+    label: 'CAD axis remap: holed plate horizontal C',
+    hypothesis: 'A render-only roll remap tests another likely CAD axis convention without changing source geometry.',
+    preset: {
+      id: 'source-iges-visual-calibration-axis-remap-base-holes-c-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        modelRollDeg: 90,
+        ySkew: 0.55,
+        zLift: 0.42,
+        xyLift: 0.2,
+      },
+    },
+  },
+  {
+    id: 'axis-remap-base-holes-d',
+    label: 'CAD axis remap: holed plate horizontal D',
+    hypothesis: 'The opposite render-only roll remap tests the mirrored SolidWorks viewport frame for the bracket and assembly.',
+    preset: {
+      id: 'source-iges-visual-calibration-axis-remap-base-holes-d-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        modelRollDeg: -90,
+        ySkew: 0.55,
+        zLift: 0.42,
+        xyLift: 0.2,
       },
     },
   },
@@ -291,28 +494,34 @@ const buildHypotheses = experiments => experiments
   }))
   .sort((a, b) => b.visual_fidelity_score - a.visual_fidelity_score);
 
-const runVisualCalibrationLoop = async ({
-  outputDir = path.join(defaultOutputDir, 'visual-calibration'),
-  goldenReference = APPROVED_GOLDEN_REFERENCES['assem-1'],
-} = {}) => {
+const runVisualCalibrationForAsset = async ({
+  assetId,
+  outputDir,
+  goldenReference,
+}) => {
   assert(fs.existsSync(goldenReference.path), `Golden reference is missing: ${goldenReference.path}`);
   const actualReferenceHash = sha256File(goldenReference.path);
-  assert(actualReferenceHash === goldenReference.sha256, 'Golden reference checksum does not match approved binding.');
+  assert(actualReferenceHash === goldenReference.sha256, `Golden reference checksum does not match approved binding for ${assetId}.`);
 
   const referenceImage = loadImage(goldenReference.path);
   const referenceFeatures = imageFeatures(referenceImage);
-  const baseBinding = buildControlledFixtureBinding();
-  assert(baseBinding.ok, baseBinding.reason || 'Controlled fixture binding failed.');
+  const baseBinding = buildControlledFixtureBinding(assetId);
+  assert(baseBinding.ok, baseBinding.reason || `Controlled fixture binding failed for ${assetId}.`);
 
   const experiments = [];
   for (const experiment of CALIBRATION_EXPERIMENTS) {
+    const referenceSizedPreset = {
+      ...(experiment.preset || {}),
+      width: referenceImage.width,
+      height: referenceImage.height,
+    };
     const sourceBinding = {
       ...baseBinding,
-      renderPreset: mergePreset(baseBinding.renderPreset, experiment.preset),
+      renderPreset: mergePreset(baseBinding.renderPreset, referenceSizedPreset),
     };
     const result = await runIgesSourcePipeline({
       sourceBinding,
-      outputDir: path.join(outputDir, experiment.id),
+      outputDir: path.join(outputDir, assetId, experiment.id),
       includeStl: false,
     });
     const renderImage = loadImage(result.render.outputPath);
@@ -339,20 +548,8 @@ const runVisualCalibrationLoop = async ({
 
   const rankedHypotheses = buildHypotheses(experiments);
   const best = rankedHypotheses[0];
-
   return {
-    schemaVersion: 1,
-    packetType: 'iges_post_render_visual_calibration',
-    rubricId: VISUAL_CALIBRATION_RUBRIC_ID,
-    status: 'human_approval_required',
-    generatedAt: new Date().toISOString(),
-    strictSeparation: {
-      sourceConfidenceRule: 'IGES-only source confidence remains source/geometry/render health only.',
-      visualCalibrationRule: 'Golden JPG is used only by this downstream visual QA/calibration loop.',
-      sourceConfidenceUsesReferenceImage: false,
-      geometryModifiedByCalibration: false,
-      visualScorePromotedToSourceConfidence: false,
-    },
+    assetId,
     goldenReference: {
       id: goldenReference.id,
       path: goldenReference.path,
@@ -374,6 +571,53 @@ const runVisualCalibrationLoop = async ({
     })),
     rankedHypotheses,
     recommendation: {
+      bestExperimentId: best?.experimentId || null,
+      bestVisualFidelityScore: best?.visual_fidelity_score ?? null,
+      productionPresetChangeApproved: false,
+      goldenReady: false,
+      nextHumanGate: 'Human approval is required before changing a production preset or calling any output golden-ready.',
+    },
+  };
+};
+
+const runVisualCalibrationLoop = async ({
+  outputDir = path.join(defaultOutputDir, 'visual-calibration'),
+  assetIds = Object.keys(APPROVED_GOLDEN_REFERENCES),
+} = {}) => {
+  const assetReports = [];
+  for (const assetId of assetIds) {
+    const goldenReference = APPROVED_GOLDEN_REFERENCES[assetId];
+    assert(goldenReference, `No approved golden reference configured for ${assetId}.`);
+    assetReports.push(await runVisualCalibrationForAsset({ assetId, outputDir, goldenReference }));
+  }
+
+  const allHypotheses = assetReports.flatMap(report => report.rankedHypotheses.map(item => ({
+    ...item,
+    assetId: report.assetId,
+  }))).sort((a, b) => b.visual_fidelity_score - a.visual_fidelity_score);
+  const best = allHypotheses[0];
+
+  return {
+    schemaVersion: 1,
+    packetType: 'iges_post_render_visual_calibration',
+    rubricId: VISUAL_CALIBRATION_RUBRIC_ID,
+    status: 'human_approval_required',
+    generatedAt: new Date().toISOString(),
+    strictSeparation: {
+      sourceConfidenceRule: 'IGES-only source confidence remains source/geometry/render health only.',
+      visualCalibrationRule: 'Golden JPG is used only by this downstream visual QA/calibration loop.',
+      sourceConfidenceUsesReferenceImage: false,
+      geometryModifiedByCalibration: false,
+      visualScorePromotedToSourceConfidence: false,
+    },
+    assetReports,
+    experiments: assetReports.flatMap(report => report.experiments.map(experiment => ({
+      ...experiment,
+      assetId: report.assetId,
+    }))),
+    rankedHypotheses: allHypotheses,
+    recommendation: {
+      bestAssetId: best?.assetId || null,
       bestExperimentId: best?.experimentId || null,
       bestVisualFidelityScore: best?.visual_fidelity_score ?? null,
       productionPresetChangeApproved: false,

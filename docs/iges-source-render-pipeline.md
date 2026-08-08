@@ -106,6 +106,37 @@ Bounded experiments may change render presets and re-render. They must not chang
 
 Human approval is required before changing a production render preset or calling an output golden-ready.
 
+### Current Candidate Comparison
+
+The August 8 calibration pass compared the controlled IGES renders against the approved JPG references as downstream visual QA only.
+
+Observed gaps:
+
+- Assembly: source geometry imports correctly, but the JPG resembles a SolidWorks assembly display with the bracket/isolator relationship shown through hidden-line or component-emphasis styling. The current candidate is a normal shaded assembly, so both parts render as equally solid and prominent.
+- Bracket: geometry is present and the shaded/edge renderer now removes most tessellation bands, but the current best candidates still disagree with the JPG's display semantics. The JPG reads as a view where the holed flange is the lower/front plate and the upright wall is dominant; several render candidates still present the holed plate as a vertical surface.
+- Isolator: the candidate is close on geometry, material, background, and edge style. Remaining differences are mostly camera angle, framing, and SolidWorks-like face lighting.
+
+Implemented gap closures in this lane:
+
+- switched from raw triangle-wire rendering to shaded CAD faces with crease/boundary outlines
+- added a z-buffer and visibility-aware edge drawing to suppress hidden triangle bleed-through
+- reduced per-triangle lighting contrast so CAD faces read as cleaner surfaces
+- added reference-sized, part-specific visual calibration for `assem-1`, `bracket-1`, and `isolator-1`
+- added bounded Euler camera and render-only axis-remap experiments without changing IGES source geometry
+
+Current visual calibration evidence:
+
+- `assem-1`: best candidate `solidworks-trimetric-a`, `visual_fidelity_score` 83, `source_confidence_score` 98
+- `bracket-1`: best automated candidate `axis-remap-base-holes-c`, `visual_fidelity_score` 84, `source_confidence_score` 98, but human inspection still flags the plate/display orientation as not golden-ready
+- `isolator-1`: best candidate `side-isometric-camera`, `visual_fidelity_score` 84, `source_confidence_score` 98
+
+Plan to close remaining gaps:
+
+1. Add a CAD display-state layer that can render selected assembly bodies as shaded, hidden-line, ghosted, or suppressed according to an approved preset. This is needed for the assembly reference and must remain downstream of source ingestion.
+2. Improve the visual scorer so high-level feature scores cannot hide semantic display mismatches such as "holes appear on the vertical plate instead of the base flange." Add explicit orientation/display flags alongside the numeric score.
+3. Expand bounded camera search around the human-preferred bracket view, but only after the display-state layer can distinguish camera mismatch from component/axis-display mismatch.
+4. Require human approval before promoting any candidate preset to production or marking an output golden-ready.
+
 ## Remaining Product Gate
 
 This slice is a scripted proof. It does not yet expose the pipeline through app UI, production API routes, persistent database tables, source upload flows, or user-facing export screens.

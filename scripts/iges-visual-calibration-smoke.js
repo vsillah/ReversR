@@ -29,7 +29,7 @@ const assert = (condition, message) => {
   const evidencePath = writeJson(evidenceFile, evidence);
   console.log('IGES visual calibration smoke passed.');
   console.log(`Evidence: ${evidencePath}`);
-  console.log(`Best experiment: ${evidence.recommendation.bestExperimentId} (${evidence.recommendation.bestVisualFidelityScore})`);
+  console.log(`Best experiment: ${evidence.recommendation.bestAssetId}/${evidence.recommendation.bestExperimentId} (${evidence.recommendation.bestVisualFidelityScore})`);
 })().catch(error => {
   console.error(`IGES visual calibration smoke failed: ${error.message}`);
   process.exit(1);

@@ -6,18 +6,19 @@
     "mimeType": "image/png",
     "width": 1024,
     "height": 768,
-    "sha256": "601efab8e8d9d0c9c722021d7832a3a2ba50ccc072dd8a9b01f26d034cd19943",
+    "sha256": "b3b291aaa884ee002eeeae3382929ff78a69915c78618a476cb73f18eee97e73",
     "renderPresetId": "source-iges-isometric-v1",
-    "rendererVersion": "iges-source-png-wire-renderer-v1",
+    "rendererVersion": "iges-source-shaded-edge-renderer-v2",
     "deterministic": true,
     "outputCompleteness": {
-      "nonBackgroundPixels": 76035,
-      "nonBackgroundRatio": 0.096684,
-      "nonEmpty": true
+      "nonBackgroundPixels": 652891,
+      "nonBackgroundRatio": 0.830194,
+      "nonEmpty": true,
+      "edgeCount": 382
     },
     "usesJpgReference": false
   },
-  "repeatedRenderSha256": "601efab8e8d9d0c9c722021d7832a3a2ba50ccc072dd8a9b01f26d034cd19943",
+  "repeatedRenderSha256": "b3b291aaa884ee002eeeae3382929ff78a69915c78618a476cb73f18eee97e73",
   "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
   "confidence": {
     "rubricId": "iges-source-confidence-v1",
@@ -77,7 +78,7 @@
     "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
     "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
     "renderPresetId": "source-iges-isometric-v1",
-    "rendererVersion": "iges-source-png-wire-renderer-v1",
+    "rendererVersion": "iges-source-shaded-edge-renderer-v2",
     "reasons": [
       {
         "severity": "warning",

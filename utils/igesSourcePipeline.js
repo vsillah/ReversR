@@ -22,6 +22,19 @@ const DEFAULT_RENDER_PRESET = Object.freeze({
   background: [247, 250, 252, 255],
   foreground: [15, 23, 42, 255],
   accent: [0, 143, 143, 255],
+  material: {
+    base: [91, 96, 112, 255],
+    top: [194, 202, 222, 255],
+    side: [125, 131, 148, 255],
+  },
+  edgeColor: [8, 8, 8, 255],
+  backgroundGradient: {
+    top: [188, 188, 188, 255],
+    middle: [232, 232, 232, 255],
+    bottom: [250, 250, 250, 255],
+  },
+  edgeMode: 'crease',
+  creaseAngleDeg: 18,
   margin: 60,
   projection: {
     ySkew: 0.55,
@@ -105,8 +118,24 @@ const extractIgesSubfigureNames = content => {
   return [...names].sort((a, b) => a.localeCompare(b));
 };
 
-const buildControlledFixtureBinding = () => {
-  const sourcePath = APPROVED_FIXTURE_PACKAGE.assembly.path;
+const getApprovedFixtureAsset = (assetId = APPROVED_FIXTURE_PACKAGE.assembly.id) => {
+  if (assetId === APPROVED_FIXTURE_PACKAGE.assembly.id) {
+    return {
+      ...APPROVED_FIXTURE_PACKAGE.assembly,
+      expectedSubfigures: [...APPROVED_FIXTURE_PACKAGE.assembly.expectedSubfigures],
+    };
+  }
+  const part = APPROVED_FIXTURE_PACKAGE.parts.find(item => item.id === assetId);
+  if (!part) throw new Error(`Unknown controlled IGES fixture asset: ${assetId}`);
+  return {
+    ...part,
+    expectedSubfigures: [],
+  };
+};
+
+const buildControlledFixtureBinding = (assetId = APPROVED_FIXTURE_PACKAGE.assembly.id) => {
+  const fixtureAsset = getApprovedFixtureAsset(assetId);
+  const sourcePath = fixtureAsset.path;
   assertNonJpgSource(sourcePath);
   if (!fs.existsSync(sourcePath)) {
     return {
@@ -117,12 +146,12 @@ const buildControlledFixtureBinding = () => {
   }
 
   const actualHash = sha256File(sourcePath);
-  if (actualHash !== APPROVED_FIXTURE_PACKAGE.assembly.sha256) {
+  if (actualHash !== fixtureAsset.sha256) {
     return {
       ok: false,
       status: 'invalid_binding',
-      reason: 'Controlled fixture checksum does not match the approved Assem-1.IGS binding.',
-      expectedSha256: APPROVED_FIXTURE_PACKAGE.assembly.sha256,
+      reason: `Controlled fixture checksum does not match the approved ${fixtureAsset.id}.IGS binding.`,
+      expectedSha256: fixtureAsset.sha256,
       actualSha256: actualHash,
     };
   }
@@ -132,14 +161,14 @@ const buildControlledFixtureBinding = () => {
     resolverType: 'controlled_fixture',
     sourceRecordId: null,
     sourceAsset: {
-      id: APPROVED_FIXTURE_PACKAGE.assembly.id,
+      id: fixtureAsset.id,
       path: sourcePath,
       fileName: path.basename(sourcePath),
       fileType: 'model/iges',
       sha256: actualHash,
-      approvedSha256: APPROVED_FIXTURE_PACKAGE.assembly.sha256,
+      approvedSha256: fixtureAsset.sha256,
       expectedUnits: APPROVED_FIXTURE_PACKAGE.units,
-      expectedSubfigures: [...APPROVED_FIXTURE_PACKAGE.assembly.expectedSubfigures],
+      expectedSubfigures: [...fixtureAsset.expectedSubfigures],
     },
     renderPreset: { ...DEFAULT_RENDER_PRESET },
     stlExportPreset: {
@@ -151,18 +180,21 @@ const buildControlledFixtureBinding = () => {
   };
 };
 
-const buildDatabaseSourceRecord = () => ({
-  id: 'db-source-assem-1-approved',
-  status: 'approved',
-  sourceType: 'iges',
-  sourceAssetId: APPROVED_FIXTURE_PACKAGE.assembly.id,
-  sourcePath: APPROVED_FIXTURE_PACKAGE.assembly.path,
-  approvedSha256: APPROVED_FIXTURE_PACKAGE.assembly.sha256,
-  expectedUnits: APPROVED_FIXTURE_PACKAGE.units,
-  expectedSubfigures: [...APPROVED_FIXTURE_PACKAGE.assembly.expectedSubfigures],
-  renderPresetId: DEFAULT_RENDER_PRESET.id,
-  stlExportPresetId: 'source-iges-binary-stl-v1',
-});
+const buildDatabaseSourceRecord = (assetId = APPROVED_FIXTURE_PACKAGE.assembly.id) => {
+  const fixtureAsset = getApprovedFixtureAsset(assetId);
+  return {
+    id: `db-source-${fixtureAsset.id}-approved`,
+    status: 'approved',
+    sourceType: 'iges',
+    sourceAssetId: fixtureAsset.id,
+    sourcePath: fixtureAsset.path,
+    approvedSha256: fixtureAsset.sha256,
+    expectedUnits: APPROVED_FIXTURE_PACKAGE.units,
+    expectedSubfigures: [...fixtureAsset.expectedSubfigures],
+    renderPresetId: DEFAULT_RENDER_PRESET.id,
+    stlExportPresetId: 'source-iges-binary-stl-v1',
+  };
+};
 
 const buildDatabaseSourceBinding = record => {
   if (!record) {
@@ -524,28 +556,87 @@ const buildEdgeReport = meshes => {
   };
 };
 
-const projectPoint = (point, projection = DEFAULT_RENDER_PRESET.projection) => {
-  const [x, y, z] = point;
+const projectPointWithDepth = (point, projection = DEFAULT_RENDER_PRESET.projection) => {
+  const renderPoint = transformRenderPoint(point, projection);
+  if (projection.mode === 'euler') {
+    const rotated = rotatePoint(renderPoint, projection);
+    return {
+      point: [
+        rotated[0],
+        -rotated[2],
+      ],
+      depth: rotated[1],
+    };
+  }
+
+  const [x, y, z] = renderPoint;
   const ySkew = projection.ySkew ?? DEFAULT_RENDER_PRESET.projection.ySkew;
   const zLift = projection.zLift ?? DEFAULT_RENDER_PRESET.projection.zLift;
   const xyLift = projection.xyLift ?? DEFAULT_RENDER_PRESET.projection.xyLift;
-  return [
-    x - y * ySkew,
-    -z * zLift + (x + y) * xyLift,
-  ];
+  return {
+    point: [
+      x - y * ySkew,
+      -z * zLift + (x + y) * xyLift,
+    ],
+    depth: x + y + z,
+  };
 };
+
+const projectPoint = (point, projection = DEFAULT_RENDER_PRESET.projection) => {
+  return projectPointWithDepth(point, projection).point;
+};
+
+const transformRenderPoint = (point, projection = {}) => {
+  if (!projection.modelYawDeg && !projection.modelPitchDeg && !projection.modelRollDeg) return point;
+  return rotatePoint(point, {
+    yawDeg: projection.modelYawDeg || 0,
+    pitchDeg: projection.modelPitchDeg || 0,
+    rollDeg: projection.modelRollDeg || 0,
+  });
+};
+
+const transformRenderNormal = (normal, projection = {}) => {
+  return normalizeVector(transformRenderPoint(normal, projection));
+};
+
+const rotatePoint = (point, projection) => {
+  let [x, y, z] = point;
+  const yaw = degreesToRadians(projection.yawDeg || 0);
+  const pitch = degreesToRadians(projection.pitchDeg || 0);
+  const roll = degreesToRadians(projection.rollDeg || 0);
+
+  if (yaw) {
+    const nextX = x * Math.cos(yaw) - y * Math.sin(yaw);
+    const nextY = x * Math.sin(yaw) + y * Math.cos(yaw);
+    x = nextX;
+    y = nextY;
+  }
+  if (pitch) {
+    const nextY = y * Math.cos(pitch) - z * Math.sin(pitch);
+    const nextZ = y * Math.sin(pitch) + z * Math.cos(pitch);
+    y = nextY;
+    z = nextZ;
+  }
+  if (roll) {
+    const nextX = x * Math.cos(roll) + z * Math.sin(roll);
+    const nextZ = -x * Math.sin(roll) + z * Math.cos(roll);
+    x = nextX;
+    z = nextZ;
+  }
+
+  return [x, y, z];
+};
+
+const degreesToRadians = degrees => (degrees * Math.PI) / 180;
 
 const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const preset = sourceBinding.renderPreset;
   const width = preset.width;
   const height = preset.height;
   const pixels = Buffer.alloc(width * height * 4);
-  for (let i = 0; i < pixels.length; i += 4) {
-    pixels[i] = preset.background[0];
-    pixels[i + 1] = preset.background[1];
-    pixels[i + 2] = preset.background[2];
-    pixels[i + 3] = preset.background[3];
-  }
+  const zBuffer = new Float64Array(width * height);
+  zBuffer.fill(Number.NEGATIVE_INFINITY);
+  drawBackground(pixels, width, height, preset);
 
   const projected = [];
   for (const mesh of scene.importResult.meshes || []) {
@@ -569,10 +660,12 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const offsetX = (width - spanX * scale) / 2 - bounds2d.min[0] * scale;
   const offsetY = (height - spanY * scale) / 2 - bounds2d.min[1] * scale;
   const toScreen = point => {
-    const projectedPoint = projectPoint(point, preset.projection);
+    const projectedWithDepth = projectPointWithDepth(point, preset.projection);
+    const projectedPoint = projectedWithDepth.point;
     return [
       Math.round(projectedPoint[0] * scale + offsetX),
       Math.round(projectedPoint[1] * scale + offsetY),
+      projectedWithDepth.depth,
     ];
   };
 
@@ -580,19 +673,28 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   for (const mesh of scene.importResult.meshes || []) {
     for (const triangle of triangleIterator(mesh)) {
       const centerDepth = triangle.reduce((sum, point) => sum + point[0] + point[1] + point[2], 0) / 3;
-      triangles.push({ triangle, centerDepth });
+      const normal = normalizeVector(crossProduct(
+        [triangle[1][0] - triangle[0][0], triangle[1][1] - triangle[0][1], triangle[1][2] - triangle[0][2]],
+        [triangle[2][0] - triangle[0][0], triangle[2][1] - triangle[0][1], triangle[2][2] - triangle[0][2]],
+      ));
+      triangles.push({ triangle, normal: transformRenderNormal(normal, preset.projection), centerDepth });
     }
   }
   triangles.sort((a, b) => a.centerDepth - b.centerDepth);
 
-  for (const { triangle } of triangles) {
+  let coveredPixels = 0;
+  for (const { triangle, normal } of triangles) {
     const points = triangle.map(toScreen);
-    drawLine(pixels, width, height, points[0], points[1], preset.foreground);
-    drawLine(pixels, width, height, points[1], points[2], preset.foreground);
-    drawLine(pixels, width, height, points[2], points[0], preset.accent);
+    coveredPixels += fillTriangle(pixels, width, height, points, shadeMaterial(normal, preset), zBuffer);
   }
 
-  const nonBackground = countNonBackgroundPixels(pixels, preset.background);
+  const renderableEdges = buildRenderableEdges(scene.importResult.meshes || [], preset);
+  for (const edge of renderableEdges) {
+    const start = toScreen(edge.start);
+    const end = toScreen(edge.end);
+    coveredPixels += drawLine(pixels, width, height, start, end, edge.color || preset.edgeColor || preset.foreground, edge.lineWidth || 1, zBuffer);
+  }
+
   const pngBuffer = encodePng(width, height, pixels);
   const outputPath = path.join(outputDir, `${sourceBinding.sourceAsset.id}-${sourceBinding.resolverType}-${preset.id}.png`);
   ensureDir(path.dirname(outputPath));
@@ -605,18 +707,151 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     height,
     sha256: sha256Buffer(pngBuffer),
     renderPresetId: preset.id,
-    rendererVersion: 'iges-source-png-wire-renderer-v1',
+    rendererVersion: 'iges-source-shaded-edge-renderer-v2',
     deterministic: true,
     outputCompleteness: {
-      nonBackgroundPixels: nonBackground,
-      nonBackgroundRatio: round(nonBackground / (width * height), 6),
-      nonEmpty: nonBackground > 0,
+      nonBackgroundPixels: coveredPixels,
+      nonBackgroundRatio: round(coveredPixels / (width * height), 6),
+      nonEmpty: coveredPixels > 0,
+      edgeCount: renderableEdges.length,
     },
     usesJpgReference: false,
   };
 };
 
-const drawLine = (pixels, width, height, a, b, color) => {
+const drawBackground = (pixels, width, height, preset) => {
+  const gradient = preset.backgroundGradient;
+  for (let y = 0; y < height; y += 1) {
+    const t = y / Math.max(1, height - 1);
+    const topColor = gradient?.top || preset.background;
+    const middleColor = gradient?.middle || preset.background;
+    const bottomColor = gradient?.bottom || preset.background;
+    const color = t < 0.55
+      ? mixColor(topColor, middleColor, t / 0.55)
+      : mixColor(middleColor, bottomColor, (t - 0.55) / 0.45);
+    for (let x = 0; x < width; x += 1) {
+      const index = (y * width + x) * 4;
+      pixels[index] = color[0];
+      pixels[index + 1] = color[1];
+      pixels[index + 2] = color[2];
+      pixels[index + 3] = color[3];
+    }
+  }
+};
+
+const shadeMaterial = (normal, preset) => {
+  const material = preset.material || {};
+  const base = material.base || preset.foreground;
+  const top = material.top || base;
+  const side = material.side || base;
+  const light = normalizeVector([-0.35, -0.45, 0.82]);
+  const facing = Math.max(0, dotProduct(normal, light));
+  const topness = Math.max(0, normal[2]);
+  const sideBase = mixColor(side, base, 0.42);
+  const color = mixColor(sideBase, top, topness * 0.34);
+  return mixColor(color, [255, 255, 255, 255], 0.06 + facing * 0.12);
+};
+
+const mixColor = (a, b, t) => {
+  const clamped = Math.max(0, Math.min(1, t));
+  return [0, 1, 2, 3].map(index => Math.round(a[index] + (b[index] - a[index]) * clamped));
+};
+
+const buildRenderableEdges = (meshes, preset) => {
+  if (preset.edgeMode === 'all') return buildAllTriangleEdges(meshes, preset);
+
+  const creaseThreshold = Math.cos(((preset.creaseAngleDeg ?? 18) * Math.PI) / 180);
+  const edges = new Map();
+  for (const mesh of meshes) {
+    for (const triangle of triangleIterator(mesh)) {
+      const normal = normalizeVector(crossProduct(
+        [triangle[1][0] - triangle[0][0], triangle[1][1] - triangle[0][1], triangle[1][2] - triangle[0][2]],
+        [triangle[2][0] - triangle[0][0], triangle[2][1] - triangle[0][1], triangle[2][2] - triangle[0][2]],
+      ));
+      for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
+        const key = edgeKey(vertexKey(start), vertexKey(end));
+        const entry = edges.get(key) || { start, end, normals: [] };
+        entry.normals.push(normal);
+        edges.set(key, entry);
+      }
+    }
+  }
+
+  const renderable = [];
+  for (const edge of edges.values()) {
+    const isBoundary = edge.normals.length === 1;
+    const isNonManifold = edge.normals.length > 2;
+    let isCrease = false;
+    for (let i = 0; i < edge.normals.length; i += 1) {
+      for (let j = i + 1; j < edge.normals.length; j += 1) {
+        if (dotProduct(edge.normals[i], edge.normals[j]) < creaseThreshold) isCrease = true;
+      }
+    }
+    if (isBoundary || isCrease || isNonManifold) {
+      renderable.push({
+        start: edge.start,
+        end: edge.end,
+        color: preset.edgeColor || preset.foreground,
+        lineWidth: isBoundary ? 1 : 0.8,
+      });
+    }
+  }
+  return renderable;
+};
+
+const buildAllTriangleEdges = (meshes, preset) => {
+  const edges = [];
+  for (const mesh of meshes) {
+    for (const triangle of triangleIterator(mesh)) {
+      edges.push(
+        { start: triangle[0], end: triangle[1], color: preset.edgeColor || preset.foreground, lineWidth: 1 },
+        { start: triangle[1], end: triangle[2], color: preset.edgeColor || preset.foreground, lineWidth: 1 },
+        { start: triangle[2], end: triangle[0], color: preset.edgeColor || preset.foreground, lineWidth: 1 },
+      );
+    }
+  }
+  return edges;
+};
+
+const fillTriangle = (pixels, width, height, points, color, zBuffer) => {
+  const minX = Math.max(0, Math.floor(Math.min(points[0][0], points[1][0], points[2][0])));
+  const maxX = Math.min(width - 1, Math.ceil(Math.max(points[0][0], points[1][0], points[2][0])));
+  const minY = Math.max(0, Math.floor(Math.min(points[0][1], points[1][1], points[2][1])));
+  const maxY = Math.min(height - 1, Math.ceil(Math.max(points[0][1], points[1][1], points[2][1])));
+  const area = edgeFunction(points[0], points[1], points[2]);
+  if (Math.abs(area) < 1e-6) return 0;
+
+  let covered = 0;
+  for (let y = minY; y <= maxY; y += 1) {
+    for (let x = minX; x <= maxX; x += 1) {
+      const p = [x + 0.5, y + 0.5];
+      const w0 = edgeFunction(points[1], points[2], p);
+      const w1 = edgeFunction(points[2], points[0], p);
+      const w2 = edgeFunction(points[0], points[1], p);
+      const hasNegative = w0 < 0 || w1 < 0 || w2 < 0;
+      const hasPositive = w0 > 0 || w1 > 0 || w2 > 0;
+      if (hasNegative && hasPositive) continue;
+      const alpha = w0 / area;
+      const beta = w1 / area;
+      const gamma = w2 / area;
+      const depth = alpha * points[0][2] + beta * points[1][2] + gamma * points[2][2];
+      const zIndex = y * width + x;
+      if (depth < zBuffer[zIndex]) continue;
+      zBuffer[zIndex] = depth;
+      const index = zIndex * 4;
+      pixels[index] = color[0];
+      pixels[index + 1] = color[1];
+      pixels[index + 2] = color[2];
+      pixels[index + 3] = color[3];
+      covered += 1;
+    }
+  }
+  return covered;
+};
+
+const edgeFunction = (a, b, c) => (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0]);
+
+const drawLine = (pixels, width, height, a, b, color, lineWidth = 1, zBuffer = null) => {
   let [x0, y0] = a;
   const [x1, y1] = b;
   const dx = Math.abs(x1 - x0);
@@ -624,9 +859,14 @@ const drawLine = (pixels, width, height, a, b, color) => {
   const dy = -Math.abs(y1 - y0);
   const sy = y0 < y1 ? 1 : -1;
   let err = dx + dy;
+  let covered = 0;
+  const steps = Math.max(dx, Math.abs(y1 - y0), 1);
+  let step = 0;
 
   for (;;) {
-    drawPoint(pixels, width, height, x0, y0, color);
+    const t = step / steps;
+    const depth = (a[2] ?? 0) + ((b[2] ?? 0) - (a[2] ?? 0)) * t;
+    covered += drawPoint(pixels, width, height, x0, y0, color, lineWidth, zBuffer, depth);
     if (x0 === x1 && y0 === y1) break;
     const e2 = 2 * err;
     if (e2 >= dy) {
@@ -637,33 +877,28 @@ const drawLine = (pixels, width, height, a, b, color) => {
       err += dx;
       y0 += sy;
     }
+    step += 1;
   }
+  return covered;
 };
 
-const drawPoint = (pixels, width, height, x, y, color) => {
-  for (let yy = y - 1; yy <= y + 1; yy += 1) {
-    for (let xx = x - 1; xx <= x + 1; xx += 1) {
+const drawPoint = (pixels, width, height, x, y, color, lineWidth = 1, zBuffer = null, depth = 0) => {
+  const radius = lineWidth > 1 ? Math.round(lineWidth) : 0;
+  let covered = 0;
+  for (let yy = y - radius; yy <= y + radius; yy += 1) {
+    for (let xx = x - radius; xx <= x + radius; xx += 1) {
       if (xx < 0 || yy < 0 || xx >= width || yy >= height) continue;
-      const index = (yy * width + xx) * 4;
+      const zIndex = yy * width + xx;
+      if (zBuffer && depth < zBuffer[zIndex] - 1e-4) continue;
+      const index = zIndex * 4;
       pixels[index] = color[0];
       pixels[index + 1] = color[1];
       pixels[index + 2] = color[2];
       pixels[index + 3] = color[3];
+      covered += 1;
     }
   }
-};
-
-const countNonBackgroundPixels = (pixels, background) => {
-  let count = 0;
-  for (let i = 0; i < pixels.length; i += 4) {
-    if (
-      pixels[i] !== background[0] ||
-      pixels[i + 1] !== background[1] ||
-      pixels[i + 2] !== background[2] ||
-      pixels[i + 3] !== background[3]
-    ) count += 1;
-  }
-  return count;
+  return covered;
 };
 
 const encodePng = (width, height, rgba) => {
