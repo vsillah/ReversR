@@ -40,6 +40,24 @@ const validate = manifest => {
     assert(source.acquisitionMode !== 'automated_bulk_scrape', `Candidate source ${source.id} must not use automated bulk scraping.`);
   }
 
+  for (const finding of manifest.candidateSampleFindings || []) {
+    assert(sourceIds.has(finding.sourceId), `Candidate finding ${finding.id} references unknown source ${finding.sourceId}.`);
+    assert(['blocked', 'pending_acquisition', 'admitted'].includes(finding.status), `Candidate finding ${finding.id} has unsupported status ${finding.status}.`);
+    if (finding.status === 'blocked') {
+      assert(manifest.blockedStates.includes(finding.blockedState), `Candidate finding ${finding.id} has unknown blocked state ${finding.blockedState}.`);
+      assert(finding.nextAction, `Blocked candidate finding ${finding.id} needs a nextAction.`);
+    }
+    assert(/^https:\/\//.test(finding.productUrl), `Candidate finding ${finding.id} needs an HTTPS product URL.`);
+    for (const asset of finding.observedAssets || []) {
+      if (/JPG|PNG|JPEG/i.test(asset.format)) {
+        assert(asset.role === 'post_render_visual_calibration_only', `Image asset for ${finding.id} must remain visual-calibration-only.`);
+      }
+      if (/IGS|IGES/i.test(asset.format)) {
+        assert(asset.role !== 'source_input_admitted', `IGES asset for ${finding.id} cannot be admitted while finding status is ${finding.status}.`);
+      }
+    }
+  }
+
   const categoryCounts = countBy(manifest.sampleSlots, 'category');
   for (const category of manifest.targetMix.categories) {
     assert((categoryCounts[category.id] || 0) >= category.minimum, `Category ${category.id} has fewer than ${category.minimum} sample slots.`);
@@ -62,6 +80,8 @@ const validate = manifest => {
     status: 'pass',
     manifest: path.relative(repoRoot, manifestPath),
     candidateSourceCount: manifest.candidateSources.length,
+    candidateFindingCount: (manifest.candidateSampleFindings || []).length,
+    blockedCandidateFindingCount: (manifest.candidateSampleFindings || []).filter(finding => finding.status === 'blocked').length,
     sampleSlotCount: manifest.sampleSlots.length,
     categoryCounts,
     sourceBoundary: manifest.sourceBoundary,
