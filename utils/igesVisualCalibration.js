@@ -18,6 +18,10 @@ const APPROVED_GOLDEN_REFERENCES = Object.freeze({
     path: '/Users/vambahsillah/Downloads/Assem-1.JPG',
     sha256: '7dbc28dc5e066c2ced4b617ca2d6765ed613493674f02574d6adf9fed3563948',
     role: 'post_render_visual_calibration_only',
+    expectedDisplaySemantics: [
+      'SolidWorks-style assembly view may use hidden-line or ghosted component emphasis.',
+      'Bracket/isolator relationship should be visually inspectable without treating the JPG as source geometry.',
+    ],
     excludedFrom: [
       'IGES ingestion',
       'scene assembly',
@@ -31,6 +35,10 @@ const APPROVED_GOLDEN_REFERENCES = Object.freeze({
     path: '/Users/vambahsillah/Downloads/bracket-1.JPG',
     sha256: 'b850d8b3f26dc642c9f30147a71cdf13bb63802c05bbbd8adf0f3f2459759c6c',
     role: 'post_render_visual_calibration_only',
+    expectedDisplaySemantics: [
+      'Holed flange should read as the lower/front base plate in the approved reference view.',
+      'Upright wall should remain visually dominant but should not hide the base-flange relationship.',
+    ],
     excludedFrom: [
       'IGES ingestion',
       'scene assembly',
@@ -44,6 +52,9 @@ const APPROVED_GOLDEN_REFERENCES = Object.freeze({
     path: '/Users/vambahsillah/Downloads/isolator-1.JPG',
     sha256: '9e0edf6957677fdc505ad871401115a54948e3bd33386085522b8287a514dd62',
     role: 'post_render_visual_calibration_only',
+    expectedDisplaySemantics: [
+      'Rectangular block should read as a shaded SolidWorks-style part with clean outlines.',
+    ],
     excludedFrom: [
       'IGES ingestion',
       'scene assembly',
@@ -290,6 +301,70 @@ const CALIBRATION_EXPERIMENTS = Object.freeze([
       },
     },
   },
+  {
+    id: 'assembly-bracket-shaded-isolator-hidden-line',
+    label: 'Assembly display state: bracket shaded, isolator hidden-line',
+    hypothesis: 'The assembly reference appears closer to a SolidWorks display-state view than a fully shaded render; render the bracket as shaded and the isolator as faint hidden-line through-geometry.',
+    preset: {
+      id: 'source-iges-visual-calibration-assembly-display-state-v1',
+      material: {
+        base: [88, 93, 109, 255],
+        top: [196, 204, 225, 255],
+        side: [128, 134, 152, 255],
+      },
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        mode: 'euler',
+        yawDeg: -34,
+        pitchDeg: 0,
+        rollDeg: -24,
+      },
+      displayState: {
+        mode: 'shaded',
+        opacity: 1,
+        edgeOpacity: 1,
+        nodeStyles: {
+          'bracket-1': {
+            mode: 'shaded',
+            opacity: 1,
+            edgeOpacity: 1,
+          },
+          'isolator-1': {
+            mode: 'hidden_line',
+            edgeMode: 'all',
+            edgeOpacity: 0.16,
+            edgeColor: [142, 148, 158, 255],
+            edgeLineWidth: 1,
+            visibleThrough: true,
+          },
+        },
+      },
+    },
+  },
+  {
+    id: 'global-hidden-line-cad',
+    label: 'Global hidden-line CAD display',
+    hypothesis: 'A hidden-line display-state preset may better match wire/outline-heavy SolidWorks exports without changing source geometry.',
+    preset: {
+      id: 'source-iges-visual-calibration-global-hidden-line-v1',
+      edgeColor: [8, 8, 8, 255],
+      margin: 44,
+      projection: {
+        mode: 'euler',
+        yawDeg: -34,
+        pitchDeg: 0,
+        rollDeg: -24,
+      },
+      displayState: {
+        mode: 'hidden_line',
+        edgeMode: 'all',
+        edgeOpacity: 0.82,
+        edgeLineWidth: 1,
+        visibleThrough: true,
+      },
+    },
+  },
 ]);
 
 const sha256File = filePath => {
@@ -416,7 +491,7 @@ const imageFeatures = image => {
   };
 };
 
-const compareFeatureSets = (renderFeatures, referenceFeatures) => {
+const compareFeatureSets = (renderFeatures, referenceFeatures, context = {}) => {
   const iou = maskIou(renderFeatures.edgeMask, referenceFeatures.edgeMask);
   const bboxDelta = bboxDistance(renderFeatures.edgeBoundingBox, referenceFeatures.edgeBoundingBox);
   const centroidDelta = pointDistance(renderFeatures.edgeCentroid, referenceFeatures.edgeCentroid);
@@ -443,12 +518,90 @@ const compareFeatureSets = (renderFeatures, referenceFeatures) => {
   ];
 
   const visualFidelityScore = Math.round(componentScores.reduce((sum, item) => sum + item.score, 0) / componentScores.length);
+  const semanticVisualFlags = buildSemanticVisualFlags({
+    ...context,
+    componentScores,
+    visualFidelityScore,
+    renderFeatures,
+    referenceFeatures,
+  });
 
   return {
     visual_fidelity_score: visualFidelityScore,
     componentScores,
+    semanticVisualFlags,
+    semanticGate: {
+      status: semanticVisualFlags.some(flag => flag.blocksGoldenReady) ? 'blocked_human_semantic_review' : 'clear_for_human_visual_review',
+      blocksGoldenReady: semanticVisualFlags.some(flag => flag.blocksGoldenReady),
+    },
     differences: describeDifferences(componentScores, renderFeatures, referenceFeatures),
   };
+};
+
+const buildSemanticVisualFlags = ({
+  assetId,
+  experiment,
+  componentScores,
+  visualFidelityScore,
+}) => {
+  const flags = [];
+  const experimentId = experiment?.id || '';
+  const preset = experiment?.preset || {};
+  const displayState = preset.displayState || {};
+  const hasNodeDisplayState = displayState.nodeStyles && Object.keys(displayState.nodeStyles).length > 0;
+  const scoreById = id => componentScores.find(item => item.id === id)?.score ?? 0;
+
+  if (assetId === 'assem-1' && !hasNodeDisplayState) {
+    flags.push({
+      id: 'assembly_display_state_not_modeled',
+      severity: 'warning',
+      category: 'display-state',
+      message: 'Assembly candidate uses a normal global display state; golden reference appears to need component emphasis, ghosting, or hidden-line handling.',
+      blocksGoldenReady: visualFidelityScore >= 80,
+    });
+  }
+
+  if (assetId === 'assem-1' && hasNodeDisplayState && scoreById('silhouette_alignment') < 75) {
+    flags.push({
+      id: 'assembly_display_state_needs_camera_followup',
+      severity: 'warning',
+      category: 'display-state',
+      message: 'Assembly display-state preset is present, but silhouette alignment remains low; continue camera/display-state calibration before production promotion.',
+      blocksGoldenReady: true,
+    });
+  }
+
+  if (assetId === 'bracket-1') {
+    flags.push({
+      id: 'bracket_plate_orientation_requires_human_review',
+      severity: 'blocking',
+      category: 'object placement/orientation',
+      message: 'Bracket reference expects the holed flange to read as the lower/front base plate. Current scorer cannot certify that semantic orientation from edge metrics alone.',
+      blocksGoldenReady: true,
+    });
+  }
+
+  if (experimentId.startsWith('axis-remap')) {
+    flags.push({
+      id: 'render_axis_remap_experiment',
+      severity: 'info',
+      category: 'camera/framing',
+      message: 'This candidate uses a render-only axis remap. It is allowed for calibration, but requires explicit human approval before any production preset change.',
+      blocksGoldenReady: false,
+    });
+  }
+
+  if (displayState.mode === 'hidden_line' || hasNodeDisplayState) {
+    flags.push({
+      id: 'display_state_experiment',
+      severity: 'info',
+      category: 'display-state',
+      message: 'This candidate changes render display state only. It does not alter IGES ingestion, scene geometry, source confidence, or STL output.',
+      blocksGoldenReady: false,
+    });
+  }
+
+  return flags;
 };
 
 const describeDifferences = (componentScores, renderFeatures, referenceFeatures) => {
@@ -487,10 +640,16 @@ const buildHypotheses = experiments => experiments
     hypothesis: experiment.hypothesis,
     visual_fidelity_score: experiment.comparison.visual_fidelity_score,
     source_confidence_score: experiment.result.confidence.score,
-    priority: experiment.comparison.visual_fidelity_score >= 80 ? 'review_for_human_approval' : 'needs_more_preset_work',
-    recommendedNextAction: experiment.comparison.visual_fidelity_score >= 80
-      ? 'Human reviewer may inspect this preset candidate before any production preset change.'
-      : 'Continue bounded camera/line/background preset experiments; do not alter IGES geometry.',
+    semanticGateStatus: experiment.comparison.semanticGate.status,
+    semanticVisualFlags: experiment.comparison.semanticVisualFlags,
+    priority: experiment.comparison.semanticGate.blocksGoldenReady
+      ? 'semantic_human_review_required'
+      : experiment.comparison.visual_fidelity_score >= 80 ? 'review_for_human_approval' : 'needs_more_preset_work',
+    recommendedNextAction: experiment.comparison.semanticGate.blocksGoldenReady
+      ? 'Do not promote this preset yet; resolve or explicitly approve the semantic visual flags first.'
+      : experiment.comparison.visual_fidelity_score >= 80
+        ? 'Human reviewer may inspect this preset candidate before any production preset change.'
+        : 'Continue bounded camera/line/background preset experiments; do not alter IGES geometry.',
   }))
   .sort((a, b) => b.visual_fidelity_score - a.visual_fidelity_score);
 
@@ -526,7 +685,7 @@ const runVisualCalibrationForAsset = async ({
     });
     const renderImage = loadImage(result.render.outputPath);
     const renderFeatures = imageFeatures(renderImage);
-    const comparison = compareFeatureSets(renderFeatures, referenceFeatures);
+    const comparison = compareFeatureSets(renderFeatures, referenceFeatures, { assetId, experiment });
     experiments.push({
       id: experiment.id,
       label: experiment.label,
@@ -555,6 +714,7 @@ const runVisualCalibrationForAsset = async ({
       path: goldenReference.path,
       sha256: actualReferenceHash,
       role: goldenReference.role,
+      expectedDisplaySemantics: goldenReference.expectedDisplaySemantics,
       excludedFrom: goldenReference.excludedFrom,
       descriptor: stripMask(referenceFeatures),
     },
@@ -573,6 +733,7 @@ const runVisualCalibrationForAsset = async ({
     recommendation: {
       bestExperimentId: best?.experimentId || null,
       bestVisualFidelityScore: best?.visual_fidelity_score ?? null,
+      bestSemanticGateStatus: best?.semanticGateStatus || null,
       productionPresetChangeApproved: false,
       goldenReady: false,
       nextHumanGate: 'Human approval is required before changing a production preset or calling any output golden-ready.',
@@ -620,6 +781,7 @@ const runVisualCalibrationLoop = async ({
       bestAssetId: best?.assetId || null,
       bestExperimentId: best?.experimentId || null,
       bestVisualFidelityScore: best?.visual_fidelity_score ?? null,
+      bestSemanticGateStatus: best?.semanticGateStatus || null,
       productionPresetChangeApproved: false,
       goldenReady: false,
       nextHumanGate: 'Human approval is required before changing a production preset or calling any output golden-ready.',

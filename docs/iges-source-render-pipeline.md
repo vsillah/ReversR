@@ -123,18 +123,20 @@ Implemented gap closures in this lane:
 - reduced per-triangle lighting contrast so CAD faces read as cleaner surfaces
 - added reference-sized, part-specific visual calibration for `assem-1`, `bracket-1`, and `isolator-1`
 - added bounded Euler camera and render-only axis-remap experiments without changing IGES source geometry
+- added render-only display-state experiments, including assembly node styling where `bracket-1` remains shaded and `isolator-1` can render as faint hidden-line reference geometry
+- added semantic visual QA flags so numeric visual scores cannot silently clear known display/orientation risks
 
 Current visual calibration evidence:
 
-- `assem-1`: best candidate `solidworks-trimetric-a`, `visual_fidelity_score` 83, `source_confidence_score` 98
-- `bracket-1`: best automated candidate `axis-remap-base-holes-c`, `visual_fidelity_score` 84, `source_confidence_score` 98, but human inspection still flags the plate/display orientation as not golden-ready
+- `assem-1`: best candidate `assembly-bracket-shaded-isolator-hidden-line`, `visual_fidelity_score` 85, `source_confidence_score` 98, semantic gate `blocked_human_semantic_review`
+- `bracket-1`: best automated candidate `axis-remap-base-holes-c`, `visual_fidelity_score` 84, `source_confidence_score` 98, semantic gate `blocked_human_semantic_review`
 - `isolator-1`: best candidate `side-isometric-camera`, `visual_fidelity_score` 84, `source_confidence_score` 98
 
 Plan to close remaining gaps:
 
-1. Add a CAD display-state layer that can render selected assembly bodies as shaded, hidden-line, ghosted, or suppressed according to an approved preset. This is needed for the assembly reference and must remain downstream of source ingestion.
-2. Improve the visual scorer so high-level feature scores cannot hide semantic display mismatches such as "holes appear on the vertical plate instead of the base flange." Add explicit orientation/display flags alongside the numeric score.
-3. Expand bounded camera search around the human-preferred bracket view, but only after the display-state layer can distinguish camera mismatch from component/axis-display mismatch.
+1. Capture mesh-to-subfigure/display-state mappings as first-class evidence for production source records, not only controlled fixtures.
+2. Improve the visual scorer so high-level feature scores cannot hide semantic display mismatches such as "holes appear on the vertical plate instead of the base flange." The first semantic flags are present; the next step is image-derived orientation detection instead of conservative human-review blocking.
+3. Expand bounded camera search around the human-preferred bracket view now that display-state and source confidence are separated.
 4. Require human approval before promoting any candidate preset to production or marking an output golden-ready.
 
 ## Remaining Product Gate

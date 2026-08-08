@@ -33,6 +33,13 @@ const DEFAULT_RENDER_PRESET = Object.freeze({
     middle: [232, 232, 232, 255],
     bottom: [250, 250, 250, 255],
   },
+  displayState: {
+    mode: 'shaded',
+    opacity: 1,
+    edgeOpacity: 1,
+    visibleThrough: false,
+    nodeStyles: {},
+  },
   edgeMode: 'crease',
   creaseAngleDeg: 18,
   margin: 60,
@@ -637,6 +644,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const zBuffer = new Float64Array(width * height);
   zBuffer.fill(Number.NEGATIVE_INFINITY);
   drawBackground(pixels, width, height, preset);
+  const meshDisplayStyles = buildMeshDisplayStyles(scene, preset);
 
   const projected = [];
   for (const mesh of scene.importResult.meshes || []) {
@@ -670,29 +678,45 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   };
 
   const triangles = [];
-  for (const mesh of scene.importResult.meshes || []) {
+  for (const [meshIndex, mesh] of (scene.importResult.meshes || []).entries()) {
     for (const triangle of triangleIterator(mesh)) {
       const centerDepth = triangle.reduce((sum, point) => sum + point[0] + point[1] + point[2], 0) / 3;
       const normal = normalizeVector(crossProduct(
         [triangle[1][0] - triangle[0][0], triangle[1][1] - triangle[0][1], triangle[1][2] - triangle[0][2]],
         [triangle[2][0] - triangle[0][0], triangle[2][1] - triangle[0][1], triangle[2][2] - triangle[0][2]],
       ));
-      triangles.push({ triangle, normal: transformRenderNormal(normal, preset.projection), centerDepth });
+      triangles.push({
+        triangle,
+        normal: transformRenderNormal(normal, preset.projection),
+        centerDepth,
+        displayStyle: meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState),
+      });
     }
   }
   triangles.sort((a, b) => a.centerDepth - b.centerDepth);
 
   let coveredPixels = 0;
-  for (const { triangle, normal } of triangles) {
+  for (const { triangle, normal, displayStyle } of triangles) {
+    if (displayStyle.mode === 'hidden_line' || displayStyle.mode === 'wireframe') continue;
     const points = triangle.map(toScreen);
-    coveredPixels += fillTriangle(pixels, width, height, points, shadeMaterial(normal, preset), zBuffer);
+    const material = shadeMaterial(normal, displayStyle.material ? { ...preset, material: displayStyle.material } : preset);
+    coveredPixels += fillTriangle(pixels, width, height, points, colorWithOpacity(material, displayStyle.opacity), zBuffer);
   }
 
-  const renderableEdges = buildRenderableEdges(scene.importResult.meshes || [], preset);
+  const renderableEdges = buildRenderableEdges(scene.importResult.meshes || [], preset, meshDisplayStyles);
   for (const edge of renderableEdges) {
     const start = toScreen(edge.start);
     const end = toScreen(edge.end);
-    coveredPixels += drawLine(pixels, width, height, start, end, edge.color || preset.edgeColor || preset.foreground, edge.lineWidth || 1, zBuffer);
+    coveredPixels += drawLine(
+      pixels,
+      width,
+      height,
+      start,
+      end,
+      colorWithOpacity(edge.color || preset.edgeColor || preset.foreground, edge.opacity ?? 1),
+      edge.lineWidth || 1,
+      edge.visibleThrough ? null : zBuffer,
+    );
   }
 
   const pngBuffer = encodePng(width, height, pixels);
@@ -757,20 +781,76 @@ const mixColor = (a, b, t) => {
   return [0, 1, 2, 3].map(index => Math.round(a[index] + (b[index] - a[index]) * clamped));
 };
 
-const buildRenderableEdges = (meshes, preset) => {
-  if (preset.edgeMode === 'all') return buildAllTriangleEdges(meshes, preset);
+const buildMeshDisplayStyles = (scene, preset) => {
+  const defaultStyle = normalizeDisplayStyle(preset.displayState);
+  const nodeStyles = preset.displayState?.nodeStyles || {};
+  const meshStyles = new Map();
+  for (const node of scene.sceneManifest.nodes || []) {
+    const styleOverride = nodeStyles[node.name] || nodeStyles[node.path];
+    for (const meshIndex of node.meshes || []) {
+      meshStyles.set(meshIndex, normalizeDisplayStyle(styleOverride, defaultStyle));
+    }
+  }
+  for (const [meshIndex] of (scene.importResult.meshes || []).entries()) {
+    if (!meshStyles.has(meshIndex)) meshStyles.set(meshIndex, defaultStyle);
+  }
+  return meshStyles;
+};
+
+const normalizeDisplayStyle = (override = {}, base = {}) => {
+  const style = {
+    mode: override.mode || base.mode || DEFAULT_RENDER_PRESET.displayState.mode,
+    opacity: override.opacity ?? base.opacity ?? DEFAULT_RENDER_PRESET.displayState.opacity,
+    edgeOpacity: override.edgeOpacity ?? base.edgeOpacity ?? DEFAULT_RENDER_PRESET.displayState.edgeOpacity,
+    visibleThrough: override.visibleThrough ?? base.visibleThrough ?? DEFAULT_RENDER_PRESET.displayState.visibleThrough,
+    edgeMode: override.edgeMode || base.edgeMode || null,
+    edgeColor: override.edgeColor || base.edgeColor || null,
+    edgeLineWidth: override.edgeLineWidth ?? base.edgeLineWidth ?? null,
+    material: override.material || base.material || null,
+  };
+  if (style.mode === 'ghosted' && override.opacity === undefined && base.opacity === undefined) style.opacity = 0.16;
+  if (style.mode === 'ghosted' && override.edgeOpacity === undefined && base.edgeOpacity === undefined) style.edgeOpacity = 0.28;
+  if (style.mode === 'hidden_line' && override.opacity === undefined && base.opacity === undefined) style.opacity = 0;
+  if (style.mode === 'hidden_line' && override.edgeOpacity === undefined && base.edgeOpacity === undefined) style.edgeOpacity = 0.22;
+  if (style.mode === 'hidden_line' && !style.edgeMode) style.edgeMode = 'all';
+  return style;
+};
+
+const colorWithOpacity = (color, opacity = 1) => {
+  const clamped = Math.max(0, Math.min(1, opacity));
+  return [color[0], color[1], color[2], Math.round((color[3] ?? 255) * clamped)];
+};
+
+const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => {
+  if (preset.edgeMode === 'all') return buildAllTriangleEdges(meshes, preset, meshDisplayStyles);
 
   const creaseThreshold = Math.cos(((preset.creaseAngleDeg ?? 18) * Math.PI) / 180);
   const edges = new Map();
-  for (const mesh of meshes) {
+  for (const [meshIndex, mesh] of meshes.entries()) {
+    const displayStyle = meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState);
+    if (displayStyle.edgeMode === 'all') {
+      for (const triangle of triangleIterator(mesh)) {
+        for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
+          const key = `${meshIndex}:${edgeKey(vertexKey(start), vertexKey(end))}`;
+          edges.set(key, {
+            start,
+            end,
+            normals: [],
+            displayStyle,
+            forceVisible: true,
+          });
+        }
+      }
+      continue;
+    }
     for (const triangle of triangleIterator(mesh)) {
       const normal = normalizeVector(crossProduct(
         [triangle[1][0] - triangle[0][0], triangle[1][1] - triangle[0][1], triangle[1][2] - triangle[0][2]],
         [triangle[2][0] - triangle[0][0], triangle[2][1] - triangle[0][1], triangle[2][2] - triangle[0][2]],
       ));
       for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
-        const key = edgeKey(vertexKey(start), vertexKey(end));
-        const entry = edges.get(key) || { start, end, normals: [] };
+        const key = `${meshIndex}:${edgeKey(vertexKey(start), vertexKey(end))}`;
+        const entry = edges.get(key) || { start, end, normals: [], displayStyle };
         entry.normals.push(normal);
         edges.set(key, entry);
       }
@@ -787,26 +867,30 @@ const buildRenderableEdges = (meshes, preset) => {
         if (dotProduct(edge.normals[i], edge.normals[j]) < creaseThreshold) isCrease = true;
       }
     }
-    if (isBoundary || isCrease || isNonManifold) {
+    if (edge.forceVisible || isBoundary || isCrease || isNonManifold) {
+      const displayStyle = edge.displayStyle || normalizeDisplayStyle(preset.displayState);
       renderable.push({
         start: edge.start,
         end: edge.end,
-        color: preset.edgeColor || preset.foreground,
-        lineWidth: isBoundary ? 1 : 0.8,
+        color: displayStyle.edgeColor || preset.edgeColor || preset.foreground,
+        opacity: displayStyle.edgeOpacity,
+        lineWidth: displayStyle.edgeLineWidth || (isBoundary ? 1 : 0.8),
+        visibleThrough: displayStyle.visibleThrough,
       });
     }
   }
   return renderable;
 };
 
-const buildAllTriangleEdges = (meshes, preset) => {
+const buildAllTriangleEdges = (meshes, preset, meshDisplayStyles = new Map()) => {
   const edges = [];
-  for (const mesh of meshes) {
+  for (const [meshIndex, mesh] of meshes.entries()) {
+    const displayStyle = meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState);
     for (const triangle of triangleIterator(mesh)) {
       edges.push(
-        { start: triangle[0], end: triangle[1], color: preset.edgeColor || preset.foreground, lineWidth: 1 },
-        { start: triangle[1], end: triangle[2], color: preset.edgeColor || preset.foreground, lineWidth: 1 },
-        { start: triangle[2], end: triangle[0], color: preset.edgeColor || preset.foreground, lineWidth: 1 },
+        { start: triangle[0], end: triangle[1], color: displayStyle.edgeColor || preset.edgeColor || preset.foreground, opacity: displayStyle.edgeOpacity, lineWidth: displayStyle.edgeLineWidth || 1, visibleThrough: displayStyle.visibleThrough },
+        { start: triangle[1], end: triangle[2], color: displayStyle.edgeColor || preset.edgeColor || preset.foreground, opacity: displayStyle.edgeOpacity, lineWidth: displayStyle.edgeLineWidth || 1, visibleThrough: displayStyle.visibleThrough },
+        { start: triangle[2], end: triangle[0], color: displayStyle.edgeColor || preset.edgeColor || preset.foreground, opacity: displayStyle.edgeOpacity, lineWidth: displayStyle.edgeLineWidth || 1, visibleThrough: displayStyle.visibleThrough },
       );
     }
   }
@@ -839,10 +923,7 @@ const fillTriangle = (pixels, width, height, points, color, zBuffer) => {
       if (depth < zBuffer[zIndex]) continue;
       zBuffer[zIndex] = depth;
       const index = zIndex * 4;
-      pixels[index] = color[0];
-      pixels[index + 1] = color[1];
-      pixels[index + 2] = color[2];
-      pixels[index + 3] = color[3];
+      blendPixel(pixels, index, color);
       covered += 1;
     }
   }
@@ -891,14 +972,32 @@ const drawPoint = (pixels, width, height, x, y, color, lineWidth = 1, zBuffer = 
       const zIndex = yy * width + xx;
       if (zBuffer && depth < zBuffer[zIndex] - 1e-4) continue;
       const index = zIndex * 4;
-      pixels[index] = color[0];
-      pixels[index + 1] = color[1];
-      pixels[index + 2] = color[2];
-      pixels[index + 3] = color[3];
+      blendPixel(pixels, index, color);
       covered += 1;
     }
   }
   return covered;
+};
+
+const blendPixel = (pixels, index, color) => {
+  const sourceAlpha = Math.max(0, Math.min(255, color[3] ?? 255)) / 255;
+  if (sourceAlpha <= 0) return;
+  if (sourceAlpha >= 1) {
+    pixels[index] = color[0];
+    pixels[index + 1] = color[1];
+    pixels[index + 2] = color[2];
+    pixels[index + 3] = 255;
+    return;
+  }
+
+  const destAlpha = pixels[index + 3] / 255;
+  const outAlpha = sourceAlpha + destAlpha * (1 - sourceAlpha);
+  for (let channel = 0; channel < 3; channel += 1) {
+    const source = color[channel] * sourceAlpha;
+    const dest = pixels[index + channel] * destAlpha * (1 - sourceAlpha);
+    pixels[index + channel] = Math.round((source + dest) / Math.max(outAlpha, 1e-6));
+  }
+  pixels[index + 3] = Math.round(outAlpha * 255);
 };
 
 const encodePng = (width, height, rgba) => {
