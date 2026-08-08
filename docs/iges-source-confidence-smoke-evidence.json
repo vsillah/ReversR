@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "confidence": {
+    "rubricId": "iges-source-confidence-v1",
+    "status": "warn",
+    "score": 96,
+    "maxScore": 100,
+    "componentScores": [
+      {
+        "id": "source_binding_checksum",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "parse_and_assembly_resolution",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "units_transforms_scene_validity",
+        "maxScore": 16,
+        "score": 16,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "geometry_mesh_integrity",
+        "maxScore": 18,
+        "score": 16,
+        "status": "warn",
+        "warnings": [
+          "mesh is not fully watertight; report retained for reviewer"
+        ],
+        "failures": []
+      },
+      {
+        "id": "renderer_determinism_output",
+        "maxScore": 18,
+        "score": 18,
+        "status": "pass",
+        "warnings": [],
+        "failures": []
+      },
+      {
+        "id": "stl_conversion_integrity",
+        "maxScore": 12,
+        "score": 10,
+        "status": "warn",
+        "warnings": [
+          "STL mesh is not fully watertight; report retained for reviewer"
+        ],
+        "failures": []
+      }
+    ],
+    "thresholds": {
+      "pass": 90,
+      "warn": 70,
+      "failBelow": 70
+    },
+    "sourceAssetId": "assem-1",
+    "sourceSha256": "28a15d323c764878e7b41398bf51a46efb1ec98108c00f42e41072681e2fcf68",
+    "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+    "renderPresetId": "source-iges-isometric-v1",
+    "rendererVersion": "iges-source-shaded-edge-renderer-v2",
+    "reasons": [
+      {
+        "severity": "warning",
+        "component": "geometry_mesh_integrity",
+        "message": "mesh is not fully watertight; report retained for reviewer"
+      },
+      {
+        "severity": "warning",
+        "component": "stl_conversion_integrity",
+        "message": "STL mesh is not fully watertight; report retained for reviewer"
+      }
+    ],
+    "referenceImagesUsedForScore": false,
+    "note": "Source-only QA confidence. This is not engineering certification, CAD qualification, dimensional inspection, or manufacturing approval."
+  },
+  "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+  "renderSha256": "b3b291aaa884ee002eeeae3382929ff78a69915c78618a476cb73f18eee97e73",
+  "stlSha256": "4338a86beb5cfdaef964846ea0df8fcd097942d61011a5f7346d9d3794ac2856",
+  "usesJpgReference": false
+}

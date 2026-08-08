@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "equivalence": {
+    "equivalent": true,
+    "comparableHash": "4abbff0a1bc5ad037cd537b8161288bf626a7a4b83a7cb9c41ed4f320cd07204"
+  },
+  "fixtureResolver": "controlled_fixture",
+  "databaseResolver": "database_source_record",
+  "sceneManifestHash": "9d6b9fc6a94db7765bd7e0b677c2b94f634a8ed6b9664e1feeaa8ff4d4de99be",
+  "renderSha256": "b3b291aaa884ee002eeeae3382929ff78a69915c78618a476cb73f18eee97e73",
+  "confidenceScore": 98,
+  "sharedPipeline": "resolver -> IGES ingestion -> scene assembly -> renderer -> source-only scorer",
+  "usesJpgReference": false
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "manifest": "docs/iges-calibration-corpus.seed.json",
+  "candidateSourceCount": 7,
+  "sampleSlotCount": 12,
+  "categoryCounts": {
+    "simple_block_or_plate": 2,
+    "bracket_or_flange_with_holes": 4,
+    "cylindrical_or_bearing": 3,
+    "small_assembly": 2,
+    "surface_or_wireframe_stress": 1
+  },
+  "sourceBoundary": {
+    "productionInput": "IGES_ONLY",
+    "referenceImageRole": "post_render_visual_calibration_only",
+    "referenceImagesExcludedFrom": [
+      "source binding",
+      "IGES ingestion",
+      "scene assembly",
+      "renderer source data",
+      "STL export",
+      "source confidence score"
+    ],
+    "visualFidelityIsSeparateFromSourceConfidence": true
+  },
+  "blockedStates": [
+    "no_iges_download",
+    "no_reference_preview",
+    "terms_unclear",
+    "source_checksum_missing",
+    "image_only_source",
+    "reference_promoted_to_source_confidence",
+    "db_route_not_equivalent_to_fixture_route"
+  ]
+}
