@@ -106,6 +106,26 @@ Bounded experiments may change render presets and re-render. They must not chang
 
 Human approval is required before changing a production render preset or calling an output golden-ready.
 
+### Calibration Corpus Expansion
+
+The follow-on calibration set is planned in `docs/iges-calibration-corpus.md` and seeded by `docs/iges-calibration-corpus.seed.json`.
+
+The target set is 12 to 20 reviewed IGES samples covering:
+
+- simple block or plate geometry
+- bracket or flange geometry with holes
+- cylindrical or bearing-style parts
+- small assemblies
+- surface or wireframe stress cases
+
+Every admitted sample must preserve the same source boundary: IGES/IGS is the only geometry source, and any JPG/PNG preview is post-render visual QA only.
+
+Run the corpus manifest guard with:
+
+```bash
+npm run iges:calibration:corpus:preflight
+```
+
 ### Current Candidate Comparison
 
 The August 8 calibration pass compared the controlled IGES renders against the approved JPG references as downstream visual QA only.

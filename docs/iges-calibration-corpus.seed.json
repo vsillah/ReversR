@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "status": "seed_manifest_pending_acquisition",
+  "ownerLane": "codex/iges-source-render-pipeline",
+  "purpose": "Curated external IGES samples for renderer visual-calibration and parser stress testing.",
+  "sourceBoundary": {
+    "productionInput": "IGES_ONLY",
+    "referenceImageRole": "post_render_visual_calibration_only",
+    "referenceImagesExcludedFrom": [
+      "source binding",
+      "IGES ingestion",
+      "scene assembly",
+      "renderer source data",
+      "STL export",
+      "source confidence score"
+    ],
+    "visualFidelityIsSeparateFromSourceConfidence": true
+  },
+  "targetMix": {
+    "minimumSamples": 12,
+    "preferredSamples": 20,
+    "categories": [
+      {
+        "id": "simple_block_or_plate",
+        "minimum": 2,
+        "reason": "Baseline units, bounds, face shading, edge cleanliness, and camera framing."
+      },
+      {
+        "id": "bracket_or_flange_with_holes",
+        "minimum": 4,
+        "reason": "Directly exercises the current bracket source/reference ambiguity and hole-plane detection."
+      },
+      {
+        "id": "cylindrical_or_bearing",
+        "minimum": 3,
+        "reason": "Exercises circular silhouette, tessellation quality, center holes, and shaded curvature."
+      },
+      {
+        "id": "small_assembly",
+        "minimum": 2,
+        "reason": "Exercises subfigure/name resolution, display states, and component relationship rendering."
+      },
+      {
+        "id": "surface_or_wireframe_stress",
+        "minimum": 1,
+        "reason": "Exercises legacy IGES surface/wireframe import behavior without pretending visual QA is golden-ready."
+      }
+    ]
+  },
+  "candidateSources": [
+    {
+      "id": "traceparts",
+      "label": "TraceParts supplier CAD catalog",
+      "url": "https://www.traceparts.com/en",
+      "priority": "high",
+      "candidateCategories": [
+        "bracket_or_flange_with_holes",
+        "cylindrical_or_bearing",
+        "small_assembly"
+      ],
+      "expectedAssets": [
+        "downloadable IGES or IGS",
+        "catalog preview image or captured product preview"
+      ],
+      "termsStatus": "review_required_before_committing_assets",
+      "acquisitionMode": "manual_reviewed_download",
+      "notes": "Good fit for supplier-like mechanical components and repeatable product pages. Treat preview image as visual QA only."
+    },
+    {
+      "id": "3dfindit",
+      "label": "3Dfindit / CADENAS catalogs",
+      "url": "https://www.3dfindit.com/",
+      "priority": "high",
+      "candidateCategories": [
+        "bracket_or_flange_with_holes",
+        "cylindrical_or_bearing",
+        "small_assembly"
+      ],
+      "expectedAssets": [
+        "downloadable IGES or IGS",
+        "catalog preview image or captured product preview"
+      ],
+      "termsStatus": "review_required_before_committing_assets",
+      "acquisitionMode": "manual_reviewed_download",
+      "notes": "Use manufacturer catalog entries where source product identity, units, and preview are clear."
+    },
+    {
+      "id": "3dcontentcentral",
+      "label": "3D ContentCentral",
+      "url": "https://www.3dcontentcentral.com/",
+      "priority": "medium",
+      "candidateCategories": [
+        "bracket_or_flange_with_holes",
+        "small_assembly",
+        "surface_or_wireframe_stress"
+      ],
+      "expectedAssets": [
+        "downloadable IGES or IGS",
+        "model preview image"
+      ],
+      "termsStatus": "review_required_before_committing_assets",
+      "acquisitionMode": "manual_reviewed_download",
+      "notes": "SolidWorks-adjacent source pool; verify license and model provenance per item."
+    },
+    {
+      "id": "mcmaster_carr",
+      "label": "McMaster-Carr CAD models",
+      "url": "https://www.mcmaster.com/cad-models/",
+      "priority": "medium",
+      "candidateCategories": [
+        "simple_block_or_plate",
+        "bracket_or_flange_with_holes",
+        "cylindrical_or_bearing"
+      ],
+      "expectedAssets": [
+        "downloadable neutral CAD when IGES is offered",
+        "product image or CAD preview"
+      ],
+      "termsStatus": "review_required_before_committing_assets",
+      "acquisitionMode": "manual_reviewed_download",
+      "notes": "Useful for high-quality part geometry. Use only after confirming item-level format availability and allowed internal use."
+    },
+    {
+      "id": "ast_bearings",
+      "label": "AST Bearings CAD models",
+      "url": "https://www.astbearings.com/free-3d-cad-models-for-bearings.html",
+      "priority": "medium",
+      "candidateCategories": [
+        "cylindrical_or_bearing"
+      ],
+      "expectedAssets": [
+        "downloadable IGES or IGS",
+        "bearing preview"
+      ],
+      "termsStatus": "review_required_before_committing_assets",
+      "acquisitionMode": "manual_reviewed_download",
+      "notes": "Good narrow-domain set for cylindrical rendering and hole/silhouette tests."
+    },
+    {
+      "id": "grabcad",
+      "label": "GrabCAD STEP / IGES community library",
+      "url": "https://grabcad.com/library/software/step-slash-iges",
+      "priority": "low",
+      "candidateCategories": [
+        "simple_block_or_plate",
+        "bracket_or_flange_with_holes",
+        "small_assembly",
+        "surface_or_wireframe_stress"
+      ],
+      "expectedAssets": [
+        "downloadable IGES or IGS",
+        "model preview image"
+      ],
+      "termsStatus": "item_license_required_before_use",
+      "acquisitionMode": "manual_reviewed_download",
+      "notes": "High volume but mixed provenance. Keep out of committed corpus unless item license is clear."
+    },
+    {
+      "id": "nist_engineering_design_models",
+      "label": "NIST Engineering Design Model Repository",
+      "url": "https://github.com/usnistgov/engineering-design-models",
+      "priority": "parser_stress_follow_up",
+      "candidateCategories": [
+        "surface_or_wireframe_stress",
+        "small_assembly"
+      ],
+      "expectedAssets": [
+        "public-domain CAD where compatible files are available"
+      ],
+      "termsStatus": "public_domain_collection_but_file_format_pairing_unconfirmed",
+      "acquisitionMode": "narrow_repo_inspection_required",
+      "notes": "Useful for reproducible parser and translation tests. Initial shallow inspection was stopped due repository size; inspect narrowly before adding."
+    }
+  ],
+  "sampleSlots": [
+    {
+      "id": "simple-plate-001",
+      "category": "simple_block_or_plate",
+      "preferredSources": [
+        "mcmaster_carr",
+        "traceparts",
+        "3dfindit"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "simple-plate-002",
+      "category": "simple_block_or_plate",
+      "preferredSources": [
+        "mcmaster_carr",
+        "traceparts",
+        "3dfindit"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bracket-flange-001",
+      "category": "bracket_or_flange_with_holes",
+      "preferredSources": [
+        "traceparts",
+        "3dfindit",
+        "3dcontentcentral"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bracket-flange-002",
+      "category": "bracket_or_flange_with_holes",
+      "preferredSources": [
+        "traceparts",
+        "3dfindit",
+        "mcmaster_carr"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bracket-flange-003",
+      "category": "bracket_or_flange_with_holes",
+      "preferredSources": [
+        "traceparts",
+        "3dfindit",
+        "grabcad"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bracket-flange-004",
+      "category": "bracket_or_flange_with_holes",
+      "preferredSources": [
+        "traceparts",
+        "3dfindit",
+        "3dcontentcentral"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bearing-cylinder-001",
+      "category": "cylindrical_or_bearing",
+      "preferredSources": [
+        "ast_bearings",
+        "traceparts",
+        "3dfindit"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bearing-cylinder-002",
+      "category": "cylindrical_or_bearing",
+      "preferredSources": [
+        "ast_bearings",
+        "traceparts",
+        "3dfindit"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "bearing-cylinder-003",
+      "category": "cylindrical_or_bearing",
+      "preferredSources": [
+        "ast_bearings",
+        "traceparts",
+        "3dfindit"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "small-assembly-001",
+      "category": "small_assembly",
+      "preferredSources": [
+        "traceparts",
+        "3dfindit",
+        "3dcontentcentral"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "small-assembly-002",
+      "category": "small_assembly",
+      "preferredSources": [
+        "traceparts",
+        "3dfindit",
+        "3dcontentcentral"
+      ],
+      "status": "pending_acquisition"
+    },
+    {
+      "id": "surface-wireframe-001",
+      "category": "surface_or_wireframe_stress",
+      "preferredSources": [
+        "nist_engineering_design_models",
+        "3dcontentcentral",
+        "grabcad"
+      ],
+      "status": "pending_acquisition"
+    }
+  ],
+  "admissionChecklist": [
+    "Capture source URL and item title.",
+    "Capture license or terms status before committing any external asset.",
+    "Save IGES/IGS as the only source geometry input.",
+    "Save preview JPG/PNG only as post-render visual QA reference.",
+    "Record SHA-256 for source IGES and reference image.",
+    "Record units if declared by source or detected by parser.",
+    "Run source inspection, render, STL export, source confidence, and visual calibration paths through the same pipeline contract."
+  ],
+  "blockedStates": [
+    "no_iges_download",
+    "no_reference_preview",
+    "terms_unclear",
+    "source_checksum_missing",
+    "image_only_source",
+    "reference_promoted_to_source_confidence",
+    "db_route_not_equivalent_to_fixture_route"
+  ]
+}
