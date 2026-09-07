@@ -114,3 +114,10 @@ The first pass should remain human-reviewed. A sample becomes golden-ready only 
 - fixture and database-source-record routes produce equivalent source-only evidence
 - visual fidelity is evaluated downstream
 - no reference image has influenced source confidence
+
+## Frozen cross-model gate
+
+See [the cross-model gate](iges-generalization-gate.md) for source-family splits,
+immutable exposure records, offline evaluation and explicit coverage gaps.
+A missing reference blocks visual comparison only; source-only ingestion remains
+eligible. Previously tested fixtures never count as new heldout families.

@@ -376,10 +376,19 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-const loadImage = filePath => {
+const loadImage = (filePath, limits = null) => {
+  if (limits) {
+    assert([limits.maxBytes, limits.maxPixels, limits.maxMemoryUsageInMB].every(v => Number.isFinite(v) && v > 0), 'Positive image resource bounds required');
+    assert(fs.statSync(filePath).size <= limits.maxBytes, 'Image exceeds byte budget');
+  }
   const buffer = fs.readFileSync(filePath);
   const extension = path.extname(filePath).toLowerCase();
   if (extension === '.png') {
+    if (limits) {
+      assert(buffer.length >= 24 && buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])), 'Invalid PNG header');
+      const width = buffer.readUInt32BE(16), height = buffer.readUInt32BE(20);
+      assert(width > 0 && height > 0 && width * height <= limits.maxPixels, 'Image exceeds pixel budget');
+    }
     const decoded = PNG.sync.read(buffer);
     return {
       width: decoded.width,
@@ -389,7 +398,7 @@ const loadImage = filePath => {
     };
   }
   if (extension === '.jpg' || extension === '.jpeg') {
-    const decoded = jpeg.decode(buffer, { useTArray: true });
+    const decoded = jpeg.decode(buffer, { useTArray: true, ...(limits ? { maxResolutionInMP: limits.maxPixels / 1000000, maxMemoryUsageInMB: limits.maxMemoryUsageInMB } : {}) });
     return {
       width: decoded.width,
       height: decoded.height,
