@@ -314,3 +314,85 @@ assembly evidence, basis-camera mathematics, bounded execution, invariants and
 review/provenance gates. Existing historical fixture-specific calibration remains
 in the legacy calibration module; the arbitrary-source runner does not call its
 asset-specific semantic rules or use historical filename-based camera choices.
+
+### Opt-in rendering quality v1
+
+`renderPreset.renderQuality` enables display-only improvements. Omitting it keeps
+legacy PNG output unchanged. No production preset enables this automatically.
+
+```js
+renderQuality: {
+  version: 'iges-quality-v1',
+  edges: 'topology',
+  shading: 'occt-normals',
+  materialModel: 'diffuse',
+  faceForwardLighting: true,
+  // Optional: plane is explicit source-mesh space, in OCCT millimeters.
+  shadow: { normal: [0, 0, 1], offset: 0, radiusPixels: 5, opacity: 0.22 },
+}
+```
+
+Each setting is independent. Native OCCT vertex normals supply Gouraud shading;
+missing, invalid or near-tangent normals fall back to the triangle normal. This
+path does not weld vertices or smooth across an inferred crease. Two-sided
+`faceForwardLighting` orients shading normals toward the observer because imported
+surface winding need not describe a consistently outward solid. Source normals,
+triangle indices and coordinates remain untouched. Diffuse material uses the
+preset's side color as albedo; it is not enabled by the normal/edge settings alone.
+
+Surface light lives in model-rotated world space. Camera rotation does not rotate
+the light. Shadow projection applies inverse model rotation to that light and
+uses the explicit source-space plane. A ground plane crossing visible opaque
+triangles fails; light below/parallel to the plane or an edge-on ground projection
+reports a skipped shadow. Only opaque shaded triangles cast shadows. Three
+separable box-blur passes soften the projected triangle union. Radius is bounded
+to 0–24 pixels, opacity to 0–0.4. This is a directional ground shadow, not ambient
+occlusion, contact-shadow reconstruction, self-shadowing or a reference-derived
+mask. An unsuitable ground/light preset can cast an overly long shadow and must
+be rejected visually.
+
+Topology edges retain mesh boundaries, real creases, nonmanifold edges and native
+BRep face boundaries, adding view silhouettes while suppressing coplanar
+within-face triangulation diagonals. Mesh-local coordinate keys use the existing
+five-decimal precision; topology is never repaired or merged across meshes. Native
+face boundaries may include CAD seams. Width-aware antialiasing supports positive
+line widths up to 8 pixels. Depth testing uses a local slope bias capped at one
+source-world pixel; very close surfaces remain a rasterization limitation.
+
+The renderer checks the complete position/index hash before and after drawing.
+Quality output also writes an unshadowed `geometryOnlyArtifact`; shadows are
+excluded from geometry coverage and source-component pixel ownership. Visual
+rubric scores for the full image and geometry-only artifact remain separate.
+Source confidence and STL qualification are independent of image fidelity.
+
+Validation commands:
+
+```sh
+node scripts/iges-render-quality-test.js
+node scripts/iges-local-calibration-test.js
+node scripts/iges-local-calibration-heldout.js .local/heldout-legacy-new
+node scripts/iges-local-calibration-heldout.js .local/heldout-quality-new --quality
+npm run typecheck
+```
+
+The quality held-out run exercises actual opt-in shading, topology edges and
+shadows, fixture/source-record parity, renamed sources, repeated cameras and
+relighting invariants. It freezes module hashes before running. Its available
+corpus remains three historical fixtures plus admitted local samples, not a claim
+of unseen supplier coverage. Focused tests cover flat/curved normals, winding,
+creases, occluded lines, widths, source/world light transforms, shadow separation,
+and empty/hidden/transparent scene rejection.
+
+For private fixed-view experiments, run
+`node scripts/iges-render-polish.js .local/polish-input.json`. Input specifies a
+pinned `beforeReport`, new `outputDir` and `sources` containing `id`, approved
+`record`, explicit `groundPlane` and `keyLight`. The runner compares four bounded
+variants, exactly repeats each legacy PNG, and asserts mesh/scene/STL hashes,
+source score, visible ownership and framing are unchanged. Reference bytes are
+read only after source-only rendering completes. It keeps every experiment and
+leaves selection pending. Run
+`python3 scripts/iges-render-polish-montage.py .local/new-run/report.json` with
+Pillow for fixed-camera comparison sheets. Source-specific lighting, plane,
+selection and reference crop data belong in ignored local artifacts. Human visual
+review chooses candidates and records rejected variants; the largest score alone
+cannot promote a preset.

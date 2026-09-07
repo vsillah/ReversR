@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const renderQuality = require('./igesRenderQuality');
 
 const repoRoot = path.resolve(__dirname, '..');
 const defaultOutputDir = path.join(repoRoot, '.local', 'iges-source-pipeline');
@@ -702,6 +703,11 @@ const degreesToRadians = degrees => (degrees * Math.PI) / 180;
 
 const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const preset = sourceBinding.renderPreset;
+  renderQuality.validateQuality(preset.renderQuality);
+  const quality = preset.renderQuality;
+  if (quality && preset.lightDirection && (!Array.isArray(preset.lightDirection) || preset.lightDirection.length !== 3 || !preset.lightDirection.every(Number.isFinite) || Math.hypot(...preset.lightDirection) < 1e-9)) throw new Error('Invalid quality light direction');
+  const meshSignature = () => sha256Text(stableStringify((scene.importResult.meshes || []).map(mesh => ({ positions: Array.from(mesh.attributes?.position?.array || []), indices: Array.from(mesh.index?.array || []) }))));
+  const meshGeometrySha256 = meshSignature();
   const width = preset.width;
   const height = preset.height;
   const pixels = Buffer.alloc(width * height * 4);
@@ -714,7 +720,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
 
   const projected = [];
   for (const [meshIndex, mesh] of (scene.importResult.meshes || []).entries()) {
-    if (meshDisplayStyles.get(meshIndex)?.visible === false) continue;
+    if (meshDisplayStyles.get(meshIndex)?.visible === false || (quality && meshDisplayStyles.get(meshIndex)?.opacity <= 0 && meshDisplayStyles.get(meshIndex)?.edgeOpacity <= 0)) continue;
     const positions = Array.from(mesh.attributes?.position?.array || []);
     for (let i = 0; i < positions.length; i += 3) {
       projected.push(projectPoint([positions[i], positions[i + 1], positions[i + 2]], preset.projection));
@@ -745,38 +751,53 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     ];
   };
 
+  const lightingProjection = { ...preset.projection, modelYawDeg: 0, modelPitchDeg: 0, modelRollDeg: 0 };
+  const lightingView = normalizeVector([[1,0,0],[0,1,0],[0,0,1]].map(axis => projectPointWithDepth(axis, lightingProjection).depth));
   const triangles = [];
   for (const [meshIndex, mesh] of (scene.importResult.meshes || []).entries()) {
-    if (meshDisplayStyles.get(meshIndex)?.visible === false) continue;
+    if (meshDisplayStyles.get(meshIndex)?.visible === false || (quality && meshDisplayStyles.get(meshIndex)?.opacity <= 0 && meshDisplayStyles.get(meshIndex)?.edgeOpacity <= 0)) continue;
+    let triangleIndex = 0;
     for (const triangle of triangleIterator(mesh)) {
       const centerDepth = triangle.reduce((sum, point) => sum + point[0] + point[1] + point[2], 0) / 3;
       const normal = normalizeVector(crossProduct(
         [triangle[1][0] - triangle[0][0], triangle[1][1] - triangle[0][1], triangle[1][2] - triangle[0][2]],
         [triangle[2][0] - triangle[0][0], triangle[2][1] - triangle[0][1], triangle[2][2] - triangle[0][2]],
       ));
+      const transformedNormal = transformRenderNormal(normal, preset.projection);
+      const facingSign = quality?.faceForwardLighting && dotProduct(transformedNormal, lightingView) < 0 ? -1 : 1;
+      const orientLightNormal = n => transformRenderNormal(n, preset.projection).map(v => v * facingSign);
       triangles.push({
         meshIndex,
         triangle,
-        normal: transformRenderNormal(normal, preset.projection),
+        normal: orientLightNormal(normal),
+        vertexNormals: quality?.shading === 'occt-normals' ? renderQuality.shadingNormals(mesh, triangleIndex, normal).map(orientLightNormal) : null,
         centerDepth,
         displayStyle: meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState),
       });
+      triangleIndex++;
     }
   }
   triangles.sort((a, b) => a.centerDepth - b.centerDepth);
 
   let coveredPixels = 0;
-  for (const { triangle, normal, displayStyle, meshIndex } of triangles) {
+  for (const { triangle, normal, vertexNormals, displayStyle, meshIndex } of triangles) {
     if (displayStyle.mode === 'hidden_line' || displayStyle.mode === 'wireframe') continue;
     const points = triangle.map(toScreen);
-    const material = shadeMaterial(normal, displayStyle.material ? { ...preset, material: displayStyle.material } : preset);
-    coveredPixels += fillTriangle(pixels, width, height, points, colorWithOpacity(material, displayStyle.opacity), zBuffer, pixelOwners, meshIndex);
+    const materialPreset = displayStyle.material ? { ...preset, material: displayStyle.material } : preset;
+    const shade = quality?.materialModel === 'diffuse' ? renderQuality.diffuseColor : shadeMaterial;
+    const material = shade(normal, materialPreset);
+    const vertexColors = vertexNormals?.map(n => colorWithOpacity(shade(n, materialPreset), displayStyle.opacity));
+    coveredPixels += fillTriangle(pixels, width, height, points, colorWithOpacity(material, displayStyle.opacity), zBuffer, pixelOwners, meshIndex, vertexColors);
   }
 
-  const renderableEdges = buildRenderableEdges(scene.importResult.meshes || [], preset, meshDisplayStyles);
+  const renderableEdges = buildRenderableEdges(scene.importResult.meshes || [], preset, meshDisplayStyles, toScreen, scale);
   for (const edge of renderableEdges) {
     const start = toScreen(edge.start);
     const end = toScreen(edge.end);
+    if (quality?.edges === 'topology') {
+      coveredPixels += renderQuality.rasterLine({ pixels, width, height, start, end, color: colorWithOpacity(edge.color || preset.edgeColor, edge.opacity ?? 1), zBuffer: edge.visibleThrough ? null : zBuffer, tolerance: edge.depthTolerance, lineWidth: edge.lineWidth || 1, blend: blendPixel });
+      continue;
+    }
     coveredPixels += drawLine(
       pixels,
       width,
@@ -789,13 +810,34 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     );
   }
 
+  const geometryOnlyPixels = quality ? Buffer.from(pixels) : null;
+  let shadowEvidence = null;
+  if (quality?.shadow) {
+    const displayLight = preset.lightDirection || [-0.35, -0.45, 0.82];
+    const shadowLight = renderQuality.sourceLight(displayLight, [[1,0,0],[0,1,0],[0,0,1]].map(axis => transformRenderPoint(axis, preset.projection)));
+    const shadow = renderQuality.shadowMask({ triangles: triangles.filter(t => t.displayStyle.opacity === 1 && t.displayStyle.mode === 'shaded').map(t => t.triangle), toScreen, width, height, settings: quality.shadow, lightDirection: shadowLight });
+    let affectedBackgroundPixels = 0;
+    for (let i = 0; i < shadow.mask.length; i++) if (pixelOwners[i] < 0 && shadow.mask[i] > 0) {
+      const alpha = Math.round(shadow.mask[i] * quality.shadow.opacity * 255);
+      if (alpha > 0) { blendPixel(pixels, i * 4, [0, 0, 0, alpha]); affectedBackgroundPixels++; }
+    }
+    shadowEvidence = { ...quality.shadow, lightSpace: 'surface light in model-rotated world; inverse model rotation supplies source-plane shadow light; camera rotation does not rotate the light', sourceLightDirection: shadowLight, displayLightDirection: displayLight, status: shadow.status, method: shadow.method, affectedBackgroundPixels, contributesToGeometryCoverage: false, contributesToComponentVisibility: false };
+  }
   const visibleMeshPixelCounts = {};
   for (const owner of pixelOwners) if (owner >= 0) visibleMeshPixelCounts[owner] = (visibleMeshPixelCounts[owner] || 0) + 1;
   const visibleNodePixels = Object.fromEntries(scene.sceneManifest.nodes.filter(node => node.name).map(node => [node.name, node.meshes.reduce((sum, index) => sum + (visibleMeshPixelCounts[index] || 0), 0)]));
+  if (meshSignature() !== meshGeometrySha256) throw new Error('Renderer mutated source mesh coordinates or indices');
   const pngBuffer = encodePng(width, height, pixels);
   const outputPath = path.join(outputDir, `${sourceBinding.sourceAsset.id}-${sourceBinding.resolverType}-${preset.id}.png`);
   ensureDir(path.dirname(outputPath));
   fs.writeFileSync(outputPath, pngBuffer);
+  let geometryOnlyArtifact = null;
+  if (quality) {
+    const geometryOnlyPath = outputPath.replace(/\.png$/, '-geometry-only.png');
+    const buffer = encodePng(width, height, geometryOnlyPixels);
+    fs.writeFileSync(geometryOnlyPath, buffer);
+    geometryOnlyArtifact = { outputPath: geometryOnlyPath, sha256: sha256Buffer(buffer) };
+  }
 
   return {
     outputPath,
@@ -806,7 +848,13 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     height,
     sha256: sha256Buffer(pngBuffer),
     renderPresetId: preset.id,
-    rendererVersion: 'iges-source-shaded-edge-renderer-v2',
+    rendererVersion: quality ? 'iges-source-shaded-edge-renderer-v3-opt-in' : 'iges-source-shaded-edge-renderer-v2',
+    qualityVersion: quality?.version || null,
+    lightingNormalPolicy: quality?.faceForwardLighting ? 'two-sided view-facing shading normals only; source normals unchanged' : 'source-oriented lighting',
+    meshGeometrySha256,
+    sourceMeshUnmodifiedByRenderer: true,
+    geometryOnlyArtifact,
+    shadowEvidence,
     viewport: { projectedBounds: bounds2d, scale, offsetX, offsetY, screenBounds: { min: bounds2d.min.map((v, i) => v * scale + (i ? offsetY : offsetX)), max: bounds2d.max.map((v, i) => v * scale + (i ? offsetY : offsetX)) }, allVisibleGeometryWithinFrame: projected.every(([x, y]) => x * scale + offsetX >= 1 && y * scale + offsetY >= 1 && x * scale + offsetX < width - 1 && y * scale + offsetY < height - 1) },
     deterministic: true,
     outputCompleteness: {
@@ -898,14 +946,17 @@ const colorWithOpacity = (color, opacity = 1) => {
   return [color[0], color[1], color[2], Math.round((color[3] ?? 255) * clamped)];
 };
 
-const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => {
+const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toScreen = null, scale = 1) => {
+  const enhanced = preset.renderQuality?.edges === 'topology';
+  const originDepth = projectPointWithDepth([0,0,0], preset.projection).depth;
+  const view = normalizeVector([[1,0,0],[0,1,0],[0,0,1]].map(v => projectPointWithDepth(v, preset.projection).depth - originDepth));
   if (preset.edgeMode === 'all') return buildAllTriangleEdges(meshes, preset, meshDisplayStyles);
 
   const creaseThreshold = Math.cos(((preset.creaseAngleDeg ?? 18) * Math.PI) / 180);
   const edges = new Map();
   for (const [meshIndex, mesh] of meshes.entries()) {
     const displayStyle = meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState);
-    if (displayStyle.visible === false) continue;
+    if (displayStyle.visible === false || (preset.renderQuality && displayStyle.opacity <= 0 && displayStyle.edgeOpacity <= 0)) continue;
     if (displayStyle.edgeMode === 'all') {
       for (const triangle of triangleIterator(mesh)) {
         for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
@@ -921,6 +972,7 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => 
       }
       continue;
     }
+    let triangleIndex = 0;
     for (const triangle of triangleIterator(mesh)) {
       const normal = normalizeVector(crossProduct(
         [triangle[1][0] - triangle[0][0], triangle[1][1] - triangle[0][1], triangle[1][2] - triangle[0][2]],
@@ -928,10 +980,16 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => 
       ));
       for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
         const key = `${meshIndex}:${edgeKey(vertexKey(start), vertexKey(end))}`;
-        const entry = edges.get(key) || { start, end, normals: [], displayStyle };
+        const entry = edges.get(key) || { start, end, normals: [], displayStyle, faceIds: new Set(), depthSlope: 0 };
         entry.normals.push(normal);
+        if (enhanced) {
+          const face = renderQuality.faceId(mesh, triangleIndex);
+          if (face >= 0) entry.faceIds.add(face);
+          entry.depthSlope = Math.max(entry.depthSlope, renderQuality.depthSlope(triangle.map(toScreen)));
+        }
         edges.set(key, entry);
       }
+      triangleIndex++;
     }
   }
 
@@ -945,7 +1003,9 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => 
         if (dotProduct(edge.normals[i], edge.normals[j]) < creaseThreshold) isCrease = true;
       }
     }
-    if (edge.forceVisible || isBoundary || isCrease || isNonManifold) {
+    const silhouette = enhanced && edge.normals.some(n => dotProduct(n, view) > 1e-8) && edge.normals.some(n => dotProduct(n, view) < -1e-8);
+    const brepBoundary = enhanced && edge.faceIds?.size > 1;
+    if (edge.forceVisible || isBoundary || isCrease || isNonManifold || silhouette || brepBoundary) {
       const displayStyle = edge.displayStyle || normalizeDisplayStyle(preset.displayState);
       renderable.push({
         start: edge.start,
@@ -954,6 +1014,8 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => 
         opacity: displayStyle.edgeOpacity,
         lineWidth: displayStyle.edgeLineWidth || (isBoundary ? 1 : 0.8),
         visibleThrough: displayStyle.visibleThrough,
+        classification: { isBoundary, isCrease, isNonManifold, silhouette, brepBoundary },
+        depthTolerance: enhanced ? Math.min((edge.depthSlope || 0) * 0.75, 1 / scale) + 1e-4 : 1e-4,
       });
     }
   }
@@ -964,7 +1026,7 @@ const buildAllTriangleEdges = (meshes, preset, meshDisplayStyles = new Map()) =>
   const edges = [];
   for (const [meshIndex, mesh] of meshes.entries()) {
     const displayStyle = meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState);
-    if (displayStyle.visible === false) continue;
+    if (displayStyle.visible === false || (preset.renderQuality && displayStyle.opacity <= 0 && displayStyle.edgeOpacity <= 0)) continue;
     for (const triangle of triangleIterator(mesh)) {
       edges.push(
         { start: triangle[0], end: triangle[1], color: displayStyle.edgeColor || preset.edgeColor || preset.foreground, opacity: displayStyle.edgeOpacity, lineWidth: displayStyle.edgeLineWidth || 1, visibleThrough: displayStyle.visibleThrough },
@@ -976,7 +1038,7 @@ const buildAllTriangleEdges = (meshes, preset, meshDisplayStyles = new Map()) =>
   return edges;
 };
 
-const fillTriangle = (pixels, width, height, points, color, zBuffer, pixelOwners, meshIndex) => {
+const fillTriangle = (pixels, width, height, points, color, zBuffer, pixelOwners, meshIndex, vertexColors = null) => {
   const minX = Math.max(0, Math.floor(Math.min(points[0][0], points[1][0], points[2][0])));
   const maxX = Math.min(width - 1, Math.ceil(Math.max(points[0][0], points[1][0], points[2][0])));
   const minY = Math.max(0, Math.floor(Math.min(points[0][1], points[1][1], points[2][1])));
@@ -1003,7 +1065,8 @@ const fillTriangle = (pixels, width, height, points, color, zBuffer, pixelOwners
       zBuffer[zIndex] = depth;
       if (pixelOwners) pixelOwners[zIndex] = meshIndex;
       const index = zIndex * 4;
-      blendPixel(pixels, index, color);
+      const shaded = vertexColors ? [0,1,2,3].map(channel => Math.round(alpha * vertexColors[0][channel] + beta * vertexColors[1][channel] + gamma * vertexColors[2][channel])) : color;
+      blendPixel(pixels, index, shaded);
       covered += 1;
     }
   }
@@ -1436,6 +1499,8 @@ module.exports = {
   buildDatabaseSourceRecord,
   buildDatabaseSourceBinding,
   runIgesSourcePipeline,
+  renderSceneToPng,
+  buildRenderableEdges,
   detectIgesUnits,
   inspectIgesGlobal,
   extractIgesSubfigureNames,

@@ -9,7 +9,8 @@ const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).di
   const outputDir = path.resolve(process.argv[2] || '.local/iges-heldout');
   assert(outputDir.split(path.sep).includes('.local'));
   fs.mkdirSync(outputDir, { recursive: true });
-  const logicFiles = ['utils/igesSourcePipeline.js', 'utils/igesVisualCalibration.js', 'utils/igesLocalCalibration.js'];
+  const qualityMode = process.argv.includes('--quality');
+  const logicFiles = ['utils/igesSourcePipeline.js', 'utils/igesVisualCalibration.js', 'utils/igesLocalCalibration.js', 'utils/igesRenderQuality.js'];
   const freeze = Object.fromEntries(logicFiles.map(file => [file, sha(file)]));
   p.writeJson(path.join(outputDir, 'frozen-logic.json'), freeze);
   const records = ['assem-1', 'bracket-1', 'isolator-1'].map(p.buildDatabaseSourceRecord);
@@ -18,10 +19,14 @@ const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).di
     const s = slot.admittedSample;
     records.push({ id: `heldout-${s.id}`, status: 'approved', sourceAssetId: s.id, sourcePath: path.resolve(s.sourcePath), approvedSha256: s.sourceSha256, expectedUnits: s.expectedUnits, expectedSubfigures: s.expectedSubfigures, renderPresetId: p.DEFAULT_RENDER_PRESET.id });
   }
-  const report = { frozenLogic: freeze, referenceImagesRead: false, interpretation: 'Regression held out from this calibration pass; historical fixtures are not previously unseen generalization evidence', sources: [], unavailableSupplierCoverage: 'Other corpus slots remain acquisition/terms gated; no claim of 12–20 sample coverage' };
+  const report = { qualityMode, frozenLogic: freeze, referenceImagesRead: false, interpretation: 'Regression held out from this calibration pass; historical fixtures are not previously unseen generalization evidence', sources: [], unavailableSupplierCoverage: 'Other corpus slots remain acquisition/terms gated; no claim of 12–20 sample coverage' };
   for (const record of records) {
     const binding = p.buildDatabaseSourceBinding(record); assert(binding.ok, binding.reason);
     const root = path.join(outputDir, record.sourceAssetId);
+    if (qualityMode) {
+      const sourceOnly = await p.runIgesSourcePipeline({ sourceBinding: binding, outputDir: path.join(root, 'legacy-source-inspection') });
+      binding.renderPreset = { ...binding.renderPreset, id: 'heldout-quality-v1', lightDirection: [0.7,-0.6,1], renderQuality: { version: 'iges-quality-v1', shading: 'occt-normals', edges: 'topology', materialModel: 'diffuse', faceForwardLighting: true, shadow: { normal: [0,0,1], offset: sourceOnly.sceneManifest.boundingBox.min[2], radiusPixels: 3, opacity: 0.22 } } };
+    }
     const baseline = await p.runIgesSourcePipeline({ sourceBinding: binding, outputDir: path.join(root, 'baseline') });
     const repeated = await p.runIgesSourcePipeline({ sourceBinding: binding, outputDir: path.join(root, 'repeat') });
     p.assertEquivalentResults(baseline, repeated);
@@ -30,12 +35,21 @@ const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).di
     const fixture = await p.runIgesSourcePipeline({ sourceBinding: { ...binding, resolverType: 'controlled_fixture', sourceRecordId: null }, outputDir: path.join(root, 'fixture') });
     const parity = p.assertEquivalentResults(fixture, baseline);
     const renamedPath = path.join(root, 'unrelated-renamed-source.IGS'); fs.copyFileSync(record.sourcePath, renamedPath);
-    const renamed = await p.runIgesSourcePipeline({ sourceBinding: p.buildDatabaseSourceBinding({ ...record, sourcePath: renamedPath }), outputDir: path.join(root, 'renamed') });
+    const renamed = await p.runIgesSourcePipeline({ sourceBinding: { ...p.buildDatabaseSourceBinding({ ...record, sourcePath: renamedPath }), renderPreset: binding.renderPreset }, outputDir: path.join(root, 'renamed') });
     assert.equal(renamed.render.sha256, baseline.render.sha256);
+    assert.equal(renamed.render.meshGeometrySha256, baseline.render.meshGeometrySha256);
     assert.equal(renamed.stl.sha256, baseline.stl.sha256);
     assert.equal(renamed.confidence.score, baseline.confidence.score);
     const withoutFileName = scene => { const { sourceFileName, ...geometry } = scene; return geometry; };
     assert.deepEqual(withoutFileName(renamed.sceneManifest), withoutFileName(baseline.sceneManifest));
+    if (qualityMode) {
+      const relit = await p.runIgesSourcePipeline({ sourceBinding: { ...binding, renderPreset: { ...binding.renderPreset, id: 'heldout-relit-quality-v1', lightDirection: [-0.7,0.6,1] } }, outputDir: path.join(root, 'relit') });
+      assert.equal(relit.sceneManifestHash, baseline.sceneManifestHash);
+      assert.equal(relit.render.meshGeometrySha256, baseline.render.meshGeometrySha256);
+      assert.equal(relit.stl.sha256, baseline.stl.sha256);
+      assert.deepEqual(relit.render.visibleMeshPixelCounts, baseline.render.visibleMeshPixelCounts);
+      assert.equal(relit.confidence.score, baseline.confidence.score);
+    }
     const rotations = [];
     for (const [i, [viewDirection, upDirection]] of [ [[1,1,1],[0,1,0]], [[-1,1,1],[0,0,1]], [[1,-1,1],[1,0,0]], [[0,0,1],[0,1,0]] ].entries()) {
       const sourceBinding = { ...binding, renderPreset: { ...binding.renderPreset, id: `heldout-basis-${i}`, projection: { mode: 'basis', viewDirection, upDirection } } };
@@ -44,6 +58,7 @@ const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).di
       assert.equal(result.render.sha256, repeat.render.sha256);
       assert.equal(result.stl.sha256, baseline.stl.sha256);
       assert.equal(result.sceneManifestHash, baseline.sceneManifestHash);
+      assert.equal(result.render.meshGeometrySha256, baseline.render.meshGeometrySha256);
       assert(result.render.viewport.allVisibleGeometryWithinFrame);
       assert(result.render.outputCompleteness.nonEmpty);
       rotations.push({ projection: sourceBinding.renderPreset.projection, render: result.render, deterministic: true, unchangedGeometry: true });
