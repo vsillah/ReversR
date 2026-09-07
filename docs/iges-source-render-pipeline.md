@@ -166,3 +166,272 @@ Plan to close remaining gaps:
 This slice is a scripted proof. It does not yet expose the pipeline through app UI, production API routes, persistent database tables, source upload flows, or user-facing export screens.
 
 Before launch usage, a follow-on lane should connect the source-record resolver to the real database model and add product UX/API gates around approved source-file records.
+
+## Arbitrary approved local sources and named-view calibration
+
+Run `node scripts/iges-local-calibration.js .local/calibration-input.json`.
+The private manifest is local-only and has this structure (paths and hashes below
+are placeholders, not a supplied dataset):
+
+```json
+{
+  "outputDir": ".local/calibration-review",
+  "candidateLimit": 256,
+  "sources": [{
+    "id": "sample",
+    "record": {
+      "id": "approved-local-sample",
+      "status": "approved",
+      "sourceAssetId": "sample",
+      "sourcePath": "/absolute/private/sample.IGS",
+      "approvedSha256": "<verified source SHA-256>",
+      "expectedUnits": "inch",
+      "expectedSubfigures": [],
+      "renderPresetId": "source-iges-isometric-v1"
+    },
+    "references": [{
+      "id": "front",
+      "path": "/absolute/private/sample_FRONT.JPG",
+      "sha256": "<verified reference SHA-256>",
+      "kind": "standalone_view"
+    }],
+    "unmatchedReferences": []
+  }]
+}
+```
+
+Pin source units from IGES inspection when preparing a new record. An existing
+record with mismatched units fails before import. Unknown units also fail.
+The importer normalizes to millimeters through its explicit `linearUnit` option;
+scene and STL evidence now distinguish native `sourceUnits` from `meshUnits`,
+record the conversion factor, and retain the installed importer version. STL
+coordinates are labeled millimeters. This corrects the earlier metadata behavior
+that labeled converted coordinates with native source units. No additional
+rescaling or geometry repair occurs. The installed `occt-import-js` README defines
+`linearUnit` as the output coordinate unit.
+
+Every source's untouched default 1024×768 baseline completes before any reference
+image is read. The runner exercises the same approved binding as a controlled
+fixture and a source-record resolution and verifies equivalent scene, render,
+STL and source confidence. Each subsequent candidate must retain baseline scene
+and STL hashes. Source-only confidence includes render health; the downstream
+image score is never a source-confidence input.
+
+Type 308 names are extracted from IGES parameter records, including continuation
+records and Hollerith strings. Scene evidence records expected/imported/missing
+component names, entity-type counts, 404/410 drawing/view metadata presence, and
+the explicit limitation that OCCT resolves transforms without a second independent
+matrix reconstruction. Raw imported mesh boundary/component reports are retained;
+separate face meshes do not establish a welded solid's connectedness or fabrication
+readiness. Calibration does not weld those meshes.
+
+Named standalone reference views use the entire supplied view image with recorded
+pixel bounds and SHA-256. Whole drawings require `kind: "drawing_view_crop"`, an
+explicit `{x,y,width,height}` crop and `mappingProvenance`; title blocks and dimensions
+must remain outside the crop. A standalone file is not asserted to be a crop of
+another sheet. Unmapped sheets, photographs and PDFs remain unscored with reasons.
+View labels do not establish the source coordinate axes.
+
+The bounded search uses at most 256 camera presets, then up to 27 angle refinements
+per isometric view, one reference-resolution render and three light/framing trials.
+Final framing is a uniform viewport fit with explicit normalized offsets. All
+presets remain experimental. The report preserves baseline, coarse/fine candidate,
+final render and reference provenance, including an experiment trace.
+
+The heuristic alignment score weights foreground silhouette IoU 65%, tolerant
+internal/boundary edge agreement 30%, framing 3% and luminance 2%. Blank backgrounds
+are unscorable. Independently segmented foregrounds are letterboxed without aspect
+distortion. This metric is not exact pixel agreement, component recognition or an
+engineering measurement. Shadows, selection marks, thin features and unmodeled
+CAD annotations can still affect it. A high score never clears human review.
+
+If a reference depicts only selected assembly components, an optional
+`displayHypothesis` provides `visibleNodes` (exact source node names) and a `reason`.
+The candidate hides other nodes only during rendering, including viewport fitting
+and occlusion. Full scene and STL hashes remain unchanged. The report names the
+hidden nodes and requires human confirmation of that display state. Missing parts,
+markings, dimensions or textures must not be invented from the reference.
+
+Local artifacts include `baselines.json`, `report.json`, `index.html`, PNG renders,
+reference crops and STL. Keep them ignored and private. The HTML uses local images
+and no network dependencies. If a browser rejects a local URL, use workspace-file
+review or local PNG comparison artifacts; do not route around the URL policy.
+
+Focused validation: `node scripts/iges-local-calibration-test.js`, the existing IGES
+pipeline/equivalence smokes, and `npm run typecheck`. Human review must confirm view
+identity, source component coverage, both sides of thin/cutting parts, and remaining
+mesh/display limitations before any golden-ready or production-preset decision.
+
+### Supported subset and reusable behavior
+
+The current local runner accepts approved `.igs`/`.iges` files whose Global unit
+flag and unit-name fields agree on inch (`1/IN` or `1/INCH`), millimeter (`2/MM`),
+or meter (`6/M`), with Global model scale exactly 1. Global Hollerith fields and
+custom parameter/record delimiters are consumed as fields; misleading product or
+filename text cannot select units. Unsupported units, flag/name disagreement,
+non-unit model scale, malformed bindings, changed checksums, unknown units and
+empty imports fail explicitly. This is a supported subset, not universal IGES
+support. OCCT's importable trimmed-surface/solid data supplies the triangulated
+scene. Wire-only geometry, text/dimension entities and unmeshed display annotations
+are not reconstructed by this renderer; such content does not become invented
+mesh geometry. Declared source transforms are resolved by OCCT, not independently
+certified here.
+
+The generic `basis` camera accepts `viewDirection` and `upDirection`, constructs
+orthogonal screen vectors with cross products, and measures depth toward the
+observer. Parallel up/view vectors fail. It has no model-specific axes. Optional
+source-local camera hypotheses are capped at 32 in addition to the coarse budget;
+reference views are capped at 24 per source and the complete run at 4096 estimated
+experiments. A run with no references stops after baseline and resolver parity,
+reports `not_assessed_no_reference`, and performs zero calibration experiments.
+
+Projected visible geometry must remain inside the output frame. Foreground touching
+the canvas and source-local required components with no surviving z-buffer face
+pixels reject a candidate regardless of score. If all final trials fail, they do
+not replace an eligible prior candidate. The finalizer regenerates reference pixels
+from pinned raw bytes and validated crops, verifies image hashes, and separates
+blocked/unscorable output from a selected candidate. Visible pixel counts establish
+source-node contribution only; they do not establish a complete semantic match.
+
+`node scripts/iges-local-calibration-heldout.js .local/iges-heldout` freezes generic
+module hashes and evaluates all three historical approved fixtures plus admitted
+local corpus sources without reading reference images. It checks repeated PNG/STL
+hashes, fixture/source-record parity, renamed-file invariance, units/bounds/assembly
+handling and four basis cameras per shape. The historical fixtures are regression
+held out from this pass, not previously unseen generalization evidence. The current
+admitted public corpus contains one dependency cube; supplier samples remain gated.
+No evidence claims a 12–20 model corpus has been validated.
+
+`node scripts/iges-local-calibration-finalize.js .local/finalize-manifest.json`
+consolidates review passes from `reportPaths` using pinned `sources` and an ignored
+`outputDir`. `python3 scripts/iges-calibration-montage.py .local/review/report.json`
+uses Pillow to create local, aspect-preserving comparison sheets. These review
+artifacts can be inspected without opening a blocked browser URL.
+
+Camera and display-subset choices learned from a reference remain per-view
+experiment data. Generalizable changes are source validation, explicit unit and
+assembly evidence, basis-camera mathematics, bounded execution, invariants and
+review/provenance gates. Existing historical fixture-specific calibration remains
+in the legacy calibration module; the arbitrary-source runner does not call its
+asset-specific semantic rules or use historical filename-based camera choices.
+
+### Opt-in rendering quality v1
+
+`renderPreset.renderQuality` enables display-only improvements. Omitting it keeps
+legacy PNG output unchanged. No production preset enables this automatically.
+
+```js
+renderQuality: {
+  version: 'iges-quality-v1',
+  edges: 'topology',
+  shading: 'occt-normals',
+  materialModel: 'diffuse',
+  faceForwardLighting: true,
+  // Optional: plane is explicit source-mesh space, in OCCT millimeters.
+  shadow: { normal: [0, 0, 1], offset: 0, radiusPixels: 5, opacity: 0.22 },
+}
+```
+
+Each setting is independent. Native OCCT vertex normals supply Gouraud shading;
+missing, invalid or near-tangent normals fall back to the triangle normal. This
+path does not weld vertices or smooth across an inferred crease. Two-sided
+`faceForwardLighting` orients shading normals toward the observer because imported
+surface winding need not describe a consistently outward solid. Source normals,
+triangle indices and coordinates remain untouched. Diffuse material uses the
+preset's side color as albedo; it is not enabled by the normal/edge settings alone.
+
+Surface light lives in model-rotated world space. Camera rotation does not rotate
+the light. Shadow projection applies inverse model rotation to that light and
+uses the explicit source-space plane. A ground plane crossing visible opaque
+triangles fails; light below/parallel to the plane or an edge-on ground projection
+reports a skipped shadow. Only opaque shaded triangles cast shadows. Three
+separable box-blur passes soften the projected triangle union. Radius is bounded
+to 0–24 pixels, opacity to 0–0.4. This is a directional ground shadow, not ambient
+occlusion, contact-shadow reconstruction, self-shadowing or a reference-derived
+mask. An unsuitable ground/light preset can cast an overly long shadow and must
+be rejected visually.
+
+Topology edges retain mesh boundaries, real creases, nonmanifold edges and native
+BRep face boundaries, adding view silhouettes while suppressing coplanar
+within-face triangulation diagonals. Mesh-local coordinate keys use the existing
+five-decimal precision; topology is never repaired or merged across meshes. Native
+face boundaries may include CAD seams. Width-aware antialiasing supports positive
+line widths up to 8 pixels. Depth testing uses a local slope bias capped at one
+source-world pixel; very close surfaces remain a rasterization limitation.
+
+The renderer checks the complete position/index hash before and after drawing.
+Quality output also writes an unshadowed `geometryOnlyArtifact`; shadows are
+excluded from geometry coverage and source-component pixel ownership. Visual
+rubric scores for the full image and geometry-only artifact remain separate.
+Source confidence and STL qualification are independent of image fidelity.
+
+Validation commands:
+
+```sh
+node scripts/iges-render-quality-test.js
+node scripts/iges-local-calibration-test.js
+node scripts/iges-local-calibration-heldout.js .local/heldout-legacy-new
+node scripts/iges-local-calibration-heldout.js .local/heldout-quality-new --quality
+npm run typecheck
+```
+
+The quality held-out run exercises actual opt-in shading, topology edges and
+shadows, fixture/source-record parity, renamed sources, repeated cameras and
+relighting invariants. It freezes module hashes before running. Its available
+corpus remains three historical fixtures plus admitted local samples, not a claim
+of unseen supplier coverage. Focused tests cover flat/curved normals, winding,
+creases, occluded lines, widths, source/world light transforms, shadow separation,
+and empty/hidden/transparent scene rejection.
+
+For private fixed-view experiments, run
+`node scripts/iges-render-polish.js .local/polish-input.json`. Input specifies a
+pinned `beforeReport`, new `outputDir` and `sources` containing `id`, approved
+`record`, explicit `groundPlane` and `keyLight`. The runner compares four bounded
+variants, exactly repeats each legacy PNG, and asserts mesh/scene/STL hashes,
+source score, visible ownership and framing are unchanged. Reference bytes are
+read only after source-only rendering completes. It keeps every experiment and
+leaves selection pending. Run
+`python3 scripts/iges-render-polish-montage.py .local/new-run/report.json` with
+Pillow for fixed-camera comparison sheets. Source-specific lighting, plane,
+selection and reference crop data belong in ignored local artifacts. Human visual
+review chooses candidates and records rejected variants; the largest score alone
+cannot promote a preset.
+
+### Correctness and provenance gates
+
+Oblique/skew camera facing and silhouette tests use the nullspace of the screen
+projection, oriented toward increasing depth. The depth-order gradient is not the
+viewing ray for skew projection. Basis/Euler cameras retain their orthogonal ray;
+lighting still separates camera coordinates from model/world coordinates.
+
+A fragment whose effective alpha rounds to zero cannot write depth, own a face
+pixel or contribute to nonempty evidence. This applies to legacy and opt-in
+rendering, including line coverage. A transparent foreground therefore cannot
+hide an opaque mesh or satisfy a required-component gate. The source confidence
+rubric is unchanged; corrected render evidence can expose previously false passes.
+
+Render metadata contains `nodeVisibility` entries with `nodeId: "node:<index>"`,
+name, source path and pixel count. IDs use the frozen scene-manifest node index and
+are stable for that exact source/import; they are not cross-source semantic IDs.
+The compatibility `visibleNodePixels` map contains only unique labels. Duplicate
+labels are listed in `ambiguousNodeNames`; they do not prevent an ordinary import.
+Required-component selectors accept a unique name string, `{nodeId:"node:3"}` or
+an unambiguous `{path:"root/component"}`. An ambiguous name/path fails the gate
+without combining different parts' evidence. Explicit node IDs should be reviewed
+against the pinned manifest before use.
+
+Per-reference and source-level required-component selectors are normalized into
+view provenance. Finalization retains the union of prior and pinned requirements;
+it cannot silently remove a component gate. All incoming reports must match the
+current approved source checksum, identity, record, path, unit and assembly
+expectations before any merge or rerender. Same-ID reports with different source
+bytes fail closed. Updated source geometry requires a fresh calibration report.
+
+Finalization regenerates both cropped reference pixels and their canonical crop,
+full-image dimensions, mapping and descriptor metadata from the pinned reference.
+The polish montage applies the same validated crop before fitting its reference
+panel, so drawing-sheet reviews show the target actually scored. The synthetic
+`python3 scripts/iges-render-polish-montage-test.py` verifies this without source
+CAD or private images. Camera/alpha/node regressions are in the render-quality
+suite; requirements/binding/crop integration tests are in the local-calibration
+suite.
