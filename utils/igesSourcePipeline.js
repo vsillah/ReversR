@@ -102,27 +102,62 @@ const getOcct = () => {
   return occtPromise;
 };
 
-const detectIgesUnits = content => {
-  const globalSection = content
-    .split(/\r?\n/)
-    .filter(line => line.charAt(72) === 'G' || /G\s*\d+\s*$/.test(line))
-    .map(line => line.slice(0, 72))
-    .join('');
-
-  if (/,2HMM,/.test(globalSection) || /2HMM/.test(globalSection)) return 'millimeter';
-  if (/,2HIN,/.test(globalSection) || /2HIN/.test(globalSection)) return 'inch';
-  if (/,1HM,/.test(globalSection) || /1HM/.test(globalSection)) return 'meter';
-  return 'unknown';
-};
-
-const extractIgesSubfigureNames = content => {
-  const names = new Set();
-  const regex = /\d+H([^,;]+?)(?=,)/g;
-  for (const match of content.matchAll(regex)) {
-    const name = String(match[1] || '').trim();
-    if (/^(assem|bracket|isolator)-?\d*$/i.test(name)) names.add(name);
+// Consume IGES Global fields rather than searching product/file-name text.
+// This runner supports explicit standard native units and model scale 1 only.
+const inspectIgesGlobal = content => {
+  const global = content.split(/\r?\n/).filter(line => line[72] === 'G').map(line => line.slice(0, 72)).join('');
+  const first = global.match(/^\s*1H(.)/i);
+  const delimiter = first ? first[1] : ',';
+  let cursor = 0;
+  const fields = [];
+  let terminator = ';';
+  while (cursor < global.length && fields.length < 40) {
+    while (/\s/.test(global[cursor] || '') && cursor < global.length) cursor++;
+    const match = global.slice(cursor).match(/^(\d+)H/i);
+    let value = '';
+    if (match) {
+      cursor += match[0].length;
+      const length = Number(match[1]);
+      if (length > global.length - cursor) return { units: 'unknown', reason: 'Truncated Global Hollerith string' };
+      value = global.slice(cursor, cursor + length); cursor += length;
+      while (cursor < global.length && /\s/.test(global[cursor])) cursor++;
+    } else {
+      while (cursor < global.length && global[cursor] !== delimiter && global[cursor] !== terminator) value += global[cursor++];
+      value = value.trim();
+    }
+    fields.push(value);
+    if (fields.length === 2 && value.length === 1) terminator = value;
+    if (global[cursor] === terminator) break;
+    if (global[cursor] !== delimiter) return { units: 'unknown', reason: 'Malformed Global field separator' };
+    cursor++;
   }
-  return [...names].sort((a, b) => a.localeCompare(b));
+  const flag = Number(fields[13]);
+  const unitName = String(fields[14] || '').trim().toUpperCase();
+  const modelScale = Number(String(fields[12] || '').replace(/[dD]/, 'e'));
+  const supported = { 1: { units: 'inch', names: ['IN', 'INCH'] }, 2: { units: 'millimeter', names: ['MM'] }, 6: { units: 'meter', names: ['M'] } };
+  const entry = supported[flag];
+  const valid = entry && entry.names.includes(unitName) && modelScale === 1;
+  return { units: valid ? entry.units : 'unknown', unitFlag: flag, unitName, modelScale, parameterDelimiter: delimiter, recordDelimiter: terminator, reason: valid ? null : 'Unsupported unit, flag/name disagreement, or non-unit model scale' };
+};
+const detectIgesUnits = content => inspectIgesGlobal(content).units;
+
+// Read type 308 parameter records, respecting Hollerith string lengths and
+// fixed-width continuation records. Names are source data, never fixture rules.
+const extractIgesSubfigureNames = content => {
+  const records = new Map();
+  for (const line of content.split(/\r?\n/)) {
+    if (line[72] !== 'P') continue;
+    const key = line.slice(64, 72).trim();
+    records.set(key, (records.get(key) || '') + line.slice(0, 64));
+  }
+  const names = new Set();
+  const delimiter = (inspectIgesGlobal(content).parameterDelimiter || ',').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const prefix = new RegExp('^\\s*308\\s*' + delimiter + '\\s*\\d+\\s*' + delimiter + '\\s*(\\d+)H', 'i');
+  for (const record of records.values()) {
+    const match = record.match(prefix);
+    if (match) names.add(record.slice(match[0].length, match[0].length + Number(match[1])).trim());
+  }
+  return [...names].filter(Boolean).sort((a, b) => a.localeCompare(b));
 };
 
 const getApprovedFixtureAsset = (assetId = APPROVED_FIXTURE_PACKAGE.assembly.id) => {
@@ -445,6 +480,8 @@ const normalizeVector = vector => {
 const inspectIgesSource = sourceBinding => {
   const content = fs.readFileSync(sourceBinding.sourceAsset.path, 'utf8');
   return {
+    entityTypeCounts: content.split(/\r?\n/).filter(line => line[72] === 'D' && Number(line.slice(73)) % 2 === 1).reduce((counts, line) => { const type = Number(line.slice(0, 8)); counts[type] = (counts[type] || 0) + 1; return counts; }, {}),
+    globalUnits: inspectIgesGlobal(content),
     detectedUnits: detectIgesUnits(content),
     subfigureNames: extractIgesSubfigureNames(content),
     lineCount: content.split(/\r?\n/).length,
@@ -455,6 +492,18 @@ const inspectIgesSource = sourceBinding => {
 const ingestIgesScene = async sourceBinding => {
   const fileBuffer = fs.readFileSync(sourceBinding.sourceAsset.path);
   const sourceInspection = inspectIgesSource(sourceBinding);
+  if (sourceInspection.detectedUnits !== sourceBinding.sourceAsset.expectedUnits) throw new Error(`Source unit binding mismatch: expected ${sourceBinding.sourceAsset.expectedUnits}, found ${sourceInspection.detectedUnits}`);
+  if (sha256Buffer(fileBuffer) !== sourceBinding.sourceAsset.approvedSha256) throw new Error('Source checksum changed after resolution');
+  const conversionFactors = { millimeter: 1, inch: 25.4, meter: 1000 };
+  if (!conversionFactors[sourceInspection.detectedUnits]) throw new Error('Unsupported or unknown IGES source units; explicit unit resolution required.');
+  const unitConversion = {
+    sourceUnits: sourceInspection.detectedUnits,
+    meshUnits: OCCT_PARAMS.linearUnit,
+    factor: conversionFactors[sourceInspection.detectedUnits],
+    appliedBy: 'OCCT ReadIgesFile linearUnit',
+    geometryRepair: false,
+    additionalRescale: false,
+  };
   const occt = await getOcct();
   const importResult = occt.ReadIgesFile(fileBuffer, OCCT_PARAMS);
 
@@ -476,11 +525,19 @@ const ingestIgesScene = async sourceBinding => {
     sourceSha256: sourceBinding.sourceAsset.sha256,
     sourceFileName: sourceBinding.sourceAsset.fileName,
     sourceUnits: sourceInspection.detectedUnits,
+    globalUnits: sourceInspection.globalUnits,
     expectedUnits: sourceBinding.sourceAsset.expectedUnits,
+    meshUnits: OCCT_PARAMS.linearUnit,
+    unitConversion,
+    transformPolicy: "OCCT resolves IGES entity and assembly transforms; renderer transforms are view-only",
     occtParams: { ...OCCT_PARAMS },
     rootName: importResult.root?.name || '',
     assemblySubfigures,
     sourceSubfigureNames: sourceInspection.subfigureNames,
+    entityTypeCounts: sourceInspection.entityTypeCounts,
+    importerVersion: require('occt-import-js/package.json').version,
+    assemblyResolution: { expected: sourceBinding.sourceAsset.expectedSubfigures || [], importedNames: assemblySubfigures, missing: (sourceBinding.sourceAsset.expectedSubfigures || []).filter(name => !assemblySubfigures.includes(name)), transformResolution: 'OCCT applies source instances; independent transform matrix reconstruction not performed' },
+    cameraMetadata: { viewEntities: sourceInspection.entityTypeCounts[410] || 0, drawingEntities: sourceInspection.entityTypeCounts[404] || 0 },
     nodes,
     meshStats: meshStats.meshStats,
     totalMeshCount: meshes.length,
@@ -565,6 +622,13 @@ const buildEdgeReport = meshes => {
 
 const projectPointWithDepth = (point, projection = DEFAULT_RENDER_PRESET.projection) => {
   const renderPoint = transformRenderPoint(point, projection);
+  if (projection.mode === 'basis') {
+    const depth = normalizeVector(projection.viewDirection);
+    const right = normalizeVector(crossProduct(projection.upDirection, depth));
+    if (!right.some(value => Math.abs(value) > 0)) throw new Error('Camera up and view directions must be independent');
+    const up = crossProduct(depth, right);
+    return { point: [dotProduct(renderPoint, right), -dotProduct(renderPoint, up)], depth: dotProduct(renderPoint, depth) };
+  }
   if (projection.mode === 'euler') {
     const rotated = rotatePoint(renderPoint, projection);
     return {
@@ -643,11 +707,14 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const pixels = Buffer.alloc(width * height * 4);
   const zBuffer = new Float64Array(width * height);
   zBuffer.fill(Number.NEGATIVE_INFINITY);
+  const pixelOwners = new Int32Array(width * height);
+  pixelOwners.fill(-1);
   drawBackground(pixels, width, height, preset);
   const meshDisplayStyles = buildMeshDisplayStyles(scene, preset);
 
   const projected = [];
-  for (const mesh of scene.importResult.meshes || []) {
+  for (const [meshIndex, mesh] of (scene.importResult.meshes || []).entries()) {
+    if (meshDisplayStyles.get(meshIndex)?.visible === false) continue;
     const positions = Array.from(mesh.attributes?.position?.array || []);
     for (let i = 0; i < positions.length; i += 3) {
       projected.push(projectPoint([positions[i], positions[i + 1], positions[i + 2]], preset.projection));
@@ -662,11 +729,12 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     return bounds;
   }, { min: [Infinity, Infinity], max: [-Infinity, -Infinity] });
 
+  if (!projected.length) throw new Error('No visible geometry to render');
   const spanX = Math.max(bounds2d.max[0] - bounds2d.min[0], 1e-6);
   const spanY = Math.max(bounds2d.max[1] - bounds2d.min[1], 1e-6);
-  const scale = Math.min((width - preset.margin * 2) / spanX, (height - preset.margin * 2) / spanY);
-  const offsetX = (width - spanX * scale) / 2 - bounds2d.min[0] * scale;
-  const offsetY = (height - spanY * scale) / 2 - bounds2d.min[1] * scale;
+  const scale = Math.min((width - preset.margin * 2) / spanX, (height - preset.margin * 2) / spanY) * (preset.framing?.scale ?? 1);
+  const offsetX = (width - spanX * scale) / 2 - bounds2d.min[0] * scale + (preset.framing?.offsetX ?? 0) * width;
+  const offsetY = (height - spanY * scale) / 2 - bounds2d.min[1] * scale + (preset.framing?.offsetY ?? 0) * height;
   const toScreen = point => {
     const projectedWithDepth = projectPointWithDepth(point, preset.projection);
     const projectedPoint = projectedWithDepth.point;
@@ -679,6 +747,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
 
   const triangles = [];
   for (const [meshIndex, mesh] of (scene.importResult.meshes || []).entries()) {
+    if (meshDisplayStyles.get(meshIndex)?.visible === false) continue;
     for (const triangle of triangleIterator(mesh)) {
       const centerDepth = triangle.reduce((sum, point) => sum + point[0] + point[1] + point[2], 0) / 3;
       const normal = normalizeVector(crossProduct(
@@ -686,6 +755,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
         [triangle[2][0] - triangle[0][0], triangle[2][1] - triangle[0][1], triangle[2][2] - triangle[0][2]],
       ));
       triangles.push({
+        meshIndex,
         triangle,
         normal: transformRenderNormal(normal, preset.projection),
         centerDepth,
@@ -696,11 +766,11 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   triangles.sort((a, b) => a.centerDepth - b.centerDepth);
 
   let coveredPixels = 0;
-  for (const { triangle, normal, displayStyle } of triangles) {
+  for (const { triangle, normal, displayStyle, meshIndex } of triangles) {
     if (displayStyle.mode === 'hidden_line' || displayStyle.mode === 'wireframe') continue;
     const points = triangle.map(toScreen);
     const material = shadeMaterial(normal, displayStyle.material ? { ...preset, material: displayStyle.material } : preset);
-    coveredPixels += fillTriangle(pixels, width, height, points, colorWithOpacity(material, displayStyle.opacity), zBuffer);
+    coveredPixels += fillTriangle(pixels, width, height, points, colorWithOpacity(material, displayStyle.opacity), zBuffer, pixelOwners, meshIndex);
   }
 
   const renderableEdges = buildRenderableEdges(scene.importResult.meshes || [], preset, meshDisplayStyles);
@@ -719,6 +789,9 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     );
   }
 
+  const visibleMeshPixelCounts = {};
+  for (const owner of pixelOwners) if (owner >= 0) visibleMeshPixelCounts[owner] = (visibleMeshPixelCounts[owner] || 0) + 1;
+  const visibleNodePixels = Object.fromEntries(scene.sceneManifest.nodes.filter(node => node.name).map(node => [node.name, node.meshes.reduce((sum, index) => sum + (visibleMeshPixelCounts[index] || 0), 0)]));
   const pngBuffer = encodePng(width, height, pixels);
   const outputPath = path.join(outputDir, `${sourceBinding.sourceAsset.id}-${sourceBinding.resolverType}-${preset.id}.png`);
   ensureDir(path.dirname(outputPath));
@@ -727,11 +800,14 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   return {
     outputPath,
     mimeType: 'image/png',
+    visibleMeshPixelCounts,
+    visibleNodePixels,
     width,
     height,
     sha256: sha256Buffer(pngBuffer),
     renderPresetId: preset.id,
     rendererVersion: 'iges-source-shaded-edge-renderer-v2',
+    viewport: { projectedBounds: bounds2d, scale, offsetX, offsetY, screenBounds: { min: bounds2d.min.map((v, i) => v * scale + (i ? offsetY : offsetX)), max: bounds2d.max.map((v, i) => v * scale + (i ? offsetY : offsetX)) }, allVisibleGeometryWithinFrame: projected.every(([x, y]) => x * scale + offsetX >= 1 && y * scale + offsetY >= 1 && x * scale + offsetX < width - 1 && y * scale + offsetY < height - 1) },
     deterministic: true,
     outputCompleteness: {
       nonBackgroundPixels: coveredPixels,
@@ -768,7 +844,7 @@ const shadeMaterial = (normal, preset) => {
   const base = material.base || preset.foreground;
   const top = material.top || base;
   const side = material.side || base;
-  const light = normalizeVector([-0.35, -0.45, 0.82]);
+  const light = normalizeVector(preset.lightDirection || [-0.35, -0.45, 0.82]);
   const facing = Math.max(0, dotProduct(normal, light));
   const topness = Math.max(0, normal[2]);
   const sideBase = mixColor(side, base, 0.42);
@@ -799,6 +875,7 @@ const buildMeshDisplayStyles = (scene, preset) => {
 
 const normalizeDisplayStyle = (override = {}, base = {}) => {
   const style = {
+    visible: override.visible ?? base.visible ?? true,
     mode: override.mode || base.mode || DEFAULT_RENDER_PRESET.displayState.mode,
     opacity: override.opacity ?? base.opacity ?? DEFAULT_RENDER_PRESET.displayState.opacity,
     edgeOpacity: override.edgeOpacity ?? base.edgeOpacity ?? DEFAULT_RENDER_PRESET.displayState.edgeOpacity,
@@ -828,6 +905,7 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map()) => 
   const edges = new Map();
   for (const [meshIndex, mesh] of meshes.entries()) {
     const displayStyle = meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState);
+    if (displayStyle.visible === false) continue;
     if (displayStyle.edgeMode === 'all') {
       for (const triangle of triangleIterator(mesh)) {
         for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
@@ -886,6 +964,7 @@ const buildAllTriangleEdges = (meshes, preset, meshDisplayStyles = new Map()) =>
   const edges = [];
   for (const [meshIndex, mesh] of meshes.entries()) {
     const displayStyle = meshDisplayStyles.get(meshIndex) || normalizeDisplayStyle(preset.displayState);
+    if (displayStyle.visible === false) continue;
     for (const triangle of triangleIterator(mesh)) {
       edges.push(
         { start: triangle[0], end: triangle[1], color: displayStyle.edgeColor || preset.edgeColor || preset.foreground, opacity: displayStyle.edgeOpacity, lineWidth: displayStyle.edgeLineWidth || 1, visibleThrough: displayStyle.visibleThrough },
@@ -897,7 +976,7 @@ const buildAllTriangleEdges = (meshes, preset, meshDisplayStyles = new Map()) =>
   return edges;
 };
 
-const fillTriangle = (pixels, width, height, points, color, zBuffer) => {
+const fillTriangle = (pixels, width, height, points, color, zBuffer, pixelOwners, meshIndex) => {
   const minX = Math.max(0, Math.floor(Math.min(points[0][0], points[1][0], points[2][0])));
   const maxX = Math.min(width - 1, Math.ceil(Math.max(points[0][0], points[1][0], points[2][0])));
   const minY = Math.max(0, Math.floor(Math.min(points[0][1], points[1][1], points[2][1])));
@@ -922,6 +1001,7 @@ const fillTriangle = (pixels, width, height, points, color, zBuffer) => {
       const zIndex = y * width + x;
       if (depth < zBuffer[zIndex]) continue;
       zBuffer[zIndex] = depth;
+      if (pixelOwners) pixelOwners[zIndex] = meshIndex;
       const index = zIndex * 4;
       blendPixel(pixels, index, color);
       covered += 1;
@@ -1087,8 +1167,10 @@ const exportSceneToBinaryStl = ({ scene, sourceBinding, outputDir }) => {
     stlFormat: 'binary',
     sha256: sha256Buffer(stlBuffer),
     sourceSha256: sourceBinding.sourceAsset.sha256,
-    units: scene.sceneManifest.sourceUnits,
-    scalingPolicy: sourceBinding.stlExportPreset.scalingPolicy,
+    units: scene.sceneManifest.meshUnits,
+    sourceUnits: scene.sceneManifest.sourceUnits,
+    unitConversion: scene.sceneManifest.unitConversion,
+    scalingPolicy: "OCCT_explicit_source_to_millimeter_no_additional_rescale",
     exportPresetId: sourceBinding.stlExportPreset.id,
     triangleCount: triangles.length,
     expectedByteLength: 84 + triangles.length * 50,
@@ -1354,6 +1436,9 @@ module.exports = {
   buildDatabaseSourceRecord,
   buildDatabaseSourceBinding,
   runIgesSourcePipeline,
+  detectIgesUnits,
+  inspectIgesGlobal,
+  extractIgesSubfigureNames,
   assertEquivalentResults,
   comparablePipelineResult,
 };

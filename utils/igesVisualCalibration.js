@@ -744,18 +744,18 @@ const runVisualCalibrationForAsset = async ({
   outputDir,
   goldenReference,
 }) => {
+  const baseBinding = buildControlledFixtureBinding(assetId);
+  assert(baseBinding.ok, baseBinding.reason || `Controlled fixture binding failed for ${assetId}.`);
+  const baseline = await runIgesSourcePipeline({ sourceBinding: baseBinding, outputDir: path.join(outputDir, assetId, 'baseline-source-render'), includeStl: false });
   assert(fs.existsSync(goldenReference.path), `Golden reference is missing: ${goldenReference.path}`);
   const actualReferenceHash = sha256File(goldenReference.path);
   assert(actualReferenceHash === goldenReference.sha256, `Golden reference checksum does not match approved binding for ${assetId}.`);
 
   const referenceImage = loadImage(goldenReference.path);
   const referenceFeatures = imageFeatures(referenceImage);
-  const baseBinding = buildControlledFixtureBinding(assetId);
-  assert(baseBinding.ok, baseBinding.reason || `Controlled fixture binding failed for ${assetId}.`);
-
   const experiments = [];
   for (const experiment of CALIBRATION_EXPERIMENTS) {
-    const referenceSizedPreset = {
+    const referenceSizedPreset = experiment.id === 'baseline-source-render' ? {} : {
       ...(experiment.preset || {}),
       width: referenceImage.width,
       height: referenceImage.height,
@@ -764,7 +764,7 @@ const runVisualCalibrationForAsset = async ({
       ...baseBinding,
       renderPreset: mergePreset(baseBinding.renderPreset, referenceSizedPreset),
     };
-    const result = await runIgesSourcePipeline({
+    const result = experiment.id === 'baseline-source-render' ? baseline : await runIgesSourcePipeline({
       sourceBinding,
       outputDir: path.join(outputDir, assetId, experiment.id),
       includeStl: false,
@@ -932,5 +932,9 @@ module.exports = {
   VISUAL_CALIBRATION_RUBRIC_ID,
   CALIBRATION_EXPERIMENTS,
   runVisualCalibrationLoop,
+  loadImage,
+  imageFeatures,
+  compareFeatureSets,
+  mergePreset,
   writeJson,
 };
