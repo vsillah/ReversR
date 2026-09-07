@@ -37,7 +37,7 @@ const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).diges
         assert.deepEqual(result.render.visibleMeshPixelCounts,baseline.render.visibleMeshPixelCounts,'Shading/shadows changed geometry ownership');
         const geometry=describeImage(loadImage(result.render.geometryOnlyArtifact.outputPath));
         assert(result.render.viewport.allVisibleGeometryWithinFrame);assert(!geometry.touchesCanvas);
-        for(const name of v.provenance.requiredVisibleNodes||[])assert(result.render.visibleNodePixels[name]>0,'Required component lost');
+        for(const name of v.provenance.requiredVisibleNodes||[])assert(p.resolveNodeVisibility(result.render,name).pixels>0,'Required component lost');
         view.experiments.push({id:experiment.id,preset,render:result.render,source_confidence_score:result.confidence.score,geometryInvariant:true,stlInvariant:true});
       }
     }

@@ -65,7 +65,9 @@ const rasterLine = ({ pixels, width, height, start, end, color, zBuffer, toleran
       if(distance>=radius) continue;
       const depth=start[2]+(end[2]-start[2])*t;
       if(zBuffer && depth<zBuffer[index]-tolerance) continue;
-      blend(pixels,index*4,[...color.slice(0,3),Math.round(color[3]*Math.min(1,radius-distance))]); covered++;
+      const alpha = Math.round(color[3]*Math.min(1,radius-distance));
+      if (alpha <= 0) continue;
+      blend(pixels,index*4,[...color.slice(0,3),alpha]); covered++;
     }
   }
   return covered;

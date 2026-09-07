@@ -396,3 +396,42 @@ Pillow for fixed-camera comparison sheets. Source-specific lighting, plane,
 selection and reference crop data belong in ignored local artifacts. Human visual
 review chooses candidates and records rejected variants; the largest score alone
 cannot promote a preset.
+
+### Correctness and provenance gates
+
+Oblique/skew camera facing and silhouette tests use the nullspace of the screen
+projection, oriented toward increasing depth. The depth-order gradient is not the
+viewing ray for skew projection. Basis/Euler cameras retain their orthogonal ray;
+lighting still separates camera coordinates from model/world coordinates.
+
+A fragment whose effective alpha rounds to zero cannot write depth, own a face
+pixel or contribute to nonempty evidence. This applies to legacy and opt-in
+rendering, including line coverage. A transparent foreground therefore cannot
+hide an opaque mesh or satisfy a required-component gate. The source confidence
+rubric is unchanged; corrected render evidence can expose previously false passes.
+
+Render metadata contains `nodeVisibility` entries with `nodeId: "node:<index>"`,
+name, source path and pixel count. IDs use the frozen scene-manifest node index and
+are stable for that exact source/import; they are not cross-source semantic IDs.
+The compatibility `visibleNodePixels` map contains only unique labels. Duplicate
+labels are listed in `ambiguousNodeNames`; they do not prevent an ordinary import.
+Required-component selectors accept a unique name string, `{nodeId:"node:3"}` or
+an unambiguous `{path:"root/component"}`. An ambiguous name/path fails the gate
+without combining different parts' evidence. Explicit node IDs should be reviewed
+against the pinned manifest before use.
+
+Per-reference and source-level required-component selectors are normalized into
+view provenance. Finalization retains the union of prior and pinned requirements;
+it cannot silently remove a component gate. All incoming reports must match the
+current approved source checksum, identity, record, path, unit and assembly
+expectations before any merge or rerender. Same-ID reports with different source
+bytes fail closed. Updated source geometry requires a fresh calibration report.
+
+Finalization regenerates both cropped reference pixels and their canonical crop,
+full-image dimensions, mapping and descriptor metadata from the pinned reference.
+The polish montage applies the same validated crop before fitting its reference
+panel, so drawing-sheet reviews show the target actually scored. The synthetic
+`python3 scripts/iges-render-polish-montage-test.py` verifies this without source
+CAD or private images. Camera/alpha/node regressions are in the render-quality
+suite; requirements/binding/crop integration tests are in the local-calibration
+suite.

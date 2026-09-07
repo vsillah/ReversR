@@ -75,10 +75,18 @@ const cameraPresets = () => {
   for (const yaw of [45, 135, 225, 315]) for (const pitch of [35, -35, 145, -145]) for (const roll of [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]) result.push({ id: `isometric-${yaw}-${pitch}-${roll}`, projection: { mode: 'euler', yawDeg: yaw, pitchDeg: pitch, rollDeg: roll } });
   return result;
 };
+const resolveRequiredNodes = (source, reference, prior = []) => {
+  const required = [...prior, ...(source.requiredVisibleNodes?.[reference.id] || []), ...(reference.requiredVisibleNodes || [])];
+  return [...new Map(required.map(selector => [JSON.stringify(selector), selector])).values()];
+};
 const applyRenderGates = (comparison, render, features, requiredVisibleNodes = []) => {
   const reasons = [];
   if (!render.viewport.allVisibleGeometryWithinFrame || features.touchesCanvas) reasons.push('Visible geometry or foreground touches/exceeds canvas');
-  for (const name of requiredVisibleNodes) if (!(render.visibleNodePixels[name] > 0)) reasons.push(`Required source component has no visible face pixels: ${name}`);
+  for (const selector of requiredVisibleNodes) {
+    const visibility = pipeline.resolveNodeVisibility(render, selector);
+    if (visibility.ambiguous) reasons.push(`Ambiguous required source component: ${JSON.stringify(selector)}`);
+    else if (!(visibility.pixels > 0)) reasons.push(`Required source component has no visible face pixels: ${JSON.stringify(selector)}`);
+  }
   return reasons.length ? { ...comparison, rejectedHeuristicScore: comparison.visual_fidelity_score, visual_fidelity_score: null, status: 'blocked_render_semantics', gateReasons: reasons } : { ...comparison, gateReasons: [], visibleComponentCheck: requiredVisibleNodes.length ? 'source node face pixels verified; human semantic review still required' : 'no component-specific pixel gate supplied' };
 };
 const escapeHtml = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -129,7 +137,7 @@ const runLocalCalibration = async ({ sources, outputDir, candidateLimit = 256 })
       fs.writeFileSync(refPath, PNG.sync.write(target));
       const features = describeImage(target), baselineComparison = compareImages(describeImage(loadImage(asset.baseline.render.outputPath)), features);
       referenceDescriptors.set(`${asset.id}/${reference.id}`, features);
-      asset.views.push({ id: reference.id, referenceArtifact: refPath, provenance: { ...reference, fullImageDimensions: [sheet.width, sheet.height], crop: reference.crop || { x: 0, y: 0, width: sheet.width, height: sheet.height }, mapping: reference.mappingProvenance || 'Supplier named standalone view, independent file; not inferred as a crop from drawing sheet' }, referenceDescriptor: descriptorEvidence(features), baselineComparison, experiments: [], best: null, residualIssues: ['Camera and component identity require visual confirmation.', 'Shadows, CAD selection marks and ruler graduations are not recreated from JPEG.', 'Patch-border lines and occlusion can differ from the source CAD viewport.'] });
+      asset.views.push({ id: reference.id, referenceArtifact: refPath, provenance: { ...reference, requiredVisibleNodes: resolveRequiredNodes(source, reference), fullImageDimensions: [sheet.width, sheet.height], crop: reference.crop || { x: 0, y: 0, width: sheet.width, height: sheet.height }, mapping: reference.mappingProvenance || 'Supplier named standalone view, independent file; not inferred as a crop from drawing sheet' }, referenceDescriptor: descriptorEvidence(features), baselineComparison, experiments: [], best: null, residualIssues: ['Camera and component identity require visual confirmation.', 'Shadows, CAD selection marks and ruler graduations are not recreated from JPEG.', 'Patch-border lines and occlusion can differ from the source CAD viewport.'] });
     }
     if (!asset.views.length) {
       asset.visual_fidelity_score = null;
@@ -212,4 +220,4 @@ const refineViews = async (asset, binding, outputDir, descriptors) => {
     view.residualIssues.push(`Final silhouette IoU ${(final.comparison.components.silhouetteIoU * 100).toFixed(1)}%; edge agreement ${(final.comparison.components.internalAndBoundaryEdgeAgreement * 100).toFixed(1)}%. Remaining gaps require human review.`);
   }
 };
-module.exports = { selectEligibleFinal, applyRenderGates, refineViews, runLocalCalibration, cropImage, describeImage, compareImages, cameraPresets, writeReview };
+module.exports = { descriptorEvidence, resolveRequiredNodes, selectEligibleFinal, applyRenderGates, refineViews, runLocalCalibration, cropImage, describeImage, compareImages, cameraPresets, writeReview };

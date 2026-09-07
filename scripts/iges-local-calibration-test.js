@@ -81,6 +81,33 @@ const rectangle = (width, height, rw, rh) => {
   const regenerated = runFinalizer();
   assert.deepEqual(PNG.sync.read(fs.readFileSync(regenerated.referenceArtifact)).data, PNG.sync.read(fs.readFileSync(rawPath)).data);
   assert.equal(regenerated.validation.status, 'ready_for_human_semantic_review');
+  // Ordinary per-reference runner requirements must survive finalization.
+  finalizeManifest.sources[0].references[0].requiredVisibleNodes = ['missing-component'];
+  const requiredBlocked = runFinalizer();
+  assert.equal(requiredBlocked.validation.status, 'blocked');
+  assert.deepEqual(requiredBlocked.provenance.requiredVisibleNodes, ['missing-component']);
+  const ordinary = await runLocalCalibration({sources:finalizeManifest.sources,outputDir:path.join(dir,'.local','ordinary-runner'),candidateLimit:1});
+  assert.deepEqual(ordinary.assets[0].views[0].provenance.requiredVisibleNodes,['missing-component']);
+  assert.equal(ordinary.assets[0].views[0].best,null);
+  delete finalizeManifest.sources[0].references[0].requiredVisibleNodes;
+  // Pinned crop and mapping replace stale metadata as well as derived pixels.
+  prior.assets[0].views[0].provenance.crop = {x:0,y:0,width:160,height:160};
+  Object.assign(finalizeManifest.sources[0].references[0], {kind:'drawing_view_crop',crop:{x:0,y:0,width:120,height:120},mappingProvenance:'explicit test crop'});
+  const cropped = runFinalizer();
+  const derived = PNG.sync.read(fs.readFileSync(cropped.referenceArtifact));
+  assert.equal(derived.width,120);assert.equal(derived.height,120);
+  assert.deepEqual(cropped.provenance.crop,finalizeManifest.sources[0].references[0].crop);
+  assert.equal(cropped.provenance.mapping,'explicit test crop');
+  delete finalizeManifest.sources[0].references[0].crop;
+  finalizeManifest.sources[0].references[0].kind='standalone_view';
+  const {validateSourceReports}=require('./iges-local-calibration-finalize');
+  const mismatched=JSON.parse(JSON.stringify(prior));mismatched.assets[0].baseline.sourceAsset.sha256='0'.repeat(64);
+  assert.throws(()=>validateSourceReports(finalizeManifest,[prior,mismatched]),/source sha256 mismatch/);
+  assert.throws(()=>validateSourceReports({...finalizeManifest,sources:[]},[prior]),/requires pinned|Missing pinned/);
+  const badSource={...finalizeManifest.sources[0],record:{...finalizeManifest.sources[0].record,approvedSha256:'0'.repeat(64)}};
+  assert.throws(()=>validateSourceReports({...finalizeManifest,sources:[badSource]},[prior]),/checksum/);
+  const noSource={...badSource,record:{...badSource.record,sourcePath:path.join(dir,'missing.igs')}};
+  assert.throws(()=>validateSourceReports({...finalizeManifest,sources:[noSource]},[prior]),/missing file/);
   fs.copyFileSync(stalePath, rawPath);
   prior.assets[0].views[0].provenance.sha256 = hash(rawPath);
   finalizeManifest.sources[0].references[0].sha256 = hash(rawPath);

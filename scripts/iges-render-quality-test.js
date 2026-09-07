@@ -58,3 +58,37 @@ const center=(64*128+64)*4;
 assert.deepEqual(aPixels.slice(center,center+4),bPixels.slice(center,center+4),'Two-sided shader must light visible reversed faces consistently');
 assert.deepEqual(reversed.index.array,[2,1,0,3,2,0],'Shading must never repair source winding');
 console.log('Quality tests passed: flat/curved normals, creases, occlusion, widths, world light, shadows, empty/hidden gates and repeatability.');
+// Oblique screen nullspace differs from the depth-order gradient.
+for (const projection of [p.DEFAULT_RENDER_PRESET.projection, {...p.DEFAULT_RENDER_PRESET.projection,modelYawDeg:31}, {mode:'basis',viewDirection:[1,2,3],upDirection:[0,0,1]}, {mode:'euler',yawDeg:22,pitchDeg:37}]) {
+  const ray=p.cameraViewRay(projection),a=p.projectPointWithDepth([0,0,0],projection),b=p.projectPointWithDepth(ray,projection);
+  assert(Math.hypot(b.point[0]-a.point[0],b.point[1]-a.point[1])<1e-12);
+  assert(b.depth>a.depth);
+}
+const skewRay=p.cameraViewRay(p.DEFAULT_RENDER_PRESET.projection);
+assert(dot([1,-.8,0],skewRay)<0);assert(dot([1,-.8,0],[1,1,1])>0);
+// Zero-effective-alpha faces must neither own pixels nor occlude other meshes.
+const {applyRenderGates}=require('../utils/igesLocalCalibration');
+for(const quality of [undefined,binding.renderPreset.renderQuality]) {
+ const transparentPreset={...binding.renderPreset,renderQuality:quality,displayState:{opacity:0,edgeOpacity:.001}};
+ const invisible=p.renderSceneToPng({scene,sourceBinding:{...binding,renderPreset:transparentPreset},outputDir:path.join(root,'zero-'+!!quality)});
+ assert.deepEqual(invisible.visibleMeshPixelCounts,{});assert.equal(invisible.outputCompleteness.nonEmpty,false);
+ assert.equal(applyRenderGates({visual_fidelity_score:99},invisible,{touchesCanvas:false},['plate']).visual_fidelity_score,null);
+ const mixedScene={importResult:{meshes:[flat,flat]},sceneManifest:{nodes:[{name:'solid',meshes:[0]},{name:'transparent',meshes:[1]}]}};
+ const mixed=p.renderSceneToPng({scene:mixedScene,sourceBinding:{...binding,renderPreset:{...binding.renderPreset,renderQuality:quality,displayState:{nodeStyles:{transparent:{opacity:0,edgeOpacity:0}}}}},outputDir:path.join(root,'mixed-'+!!quality)});
+ assert(mixed.visibleMeshPixelCounts[0]>0);assert(!mixed.visibleMeshPixelCounts[1]);
+ const recovered=p.renderSceneToPng({scene,sourceBinding:{...binding,renderPreset:{...transparentPreset,displayState:{opacity:.5,edgeOpacity:0}}},outputDir:path.join(root,'recovered-'+!!quality)});
+ assert(recovered.visibleMeshPixelCounts[0]>0);
+}
+for(const nodes of [[{name:'part',path:'root/part',meshes:[0]},{name:'part',path:'root/part',meshes:[1]}],[{name:'part',path:'root/part',meshes:[1]},{name:'part',path:'root/part',meshes:[0]}]]) {
+ const visibility=p.nodeVisibility(nodes,{0:2304});
+ const render={...visibility,viewport:{allVisibleGeometryWithinFrame:true}};
+ assert(!Object.hasOwn(render.visibleNodePixels,'part'));
+ assert.equal(applyRenderGates({visual_fidelity_score:99},render,{touchesCanvas:false},['part']).visual_fidelity_score,null);
+ assert(p.resolveNodeVisibility(render,{path:'root/part'}).ambiguous);
+ const visibleId=visibility.nodeVisibility.find(n=>n.pixels>0).nodeId;
+ assert.equal(applyRenderGates({visual_fidelity_score:99},render,{touchesCanvas:false},[{nodeId:visibleId}]).visual_fidelity_score,99);
+}
+console.log('Review regressions passed: skew/basis/euler rays, zero alpha in legacy/quality, mixed opacity recovery, duplicate labels and explicit selectors.');
+const skewCrease={attributes:{position:{array:[0,0,0,0,0,1,-.8,-1,0,0,1,0]}},index:{array:[0,1,2,1,0,3]},brep_faces:[{first:0,last:1}]};
+const skewEdges=p.buildRenderableEdges([skewCrease],{...binding.renderPreset,projection:p.DEFAULT_RENDER_PRESET.projection,creaseAngleDeg:180},new Map(),v=>v,1);
+assert(skewEdges.some(e=>e.classification.silhouette&&!e.classification.isBoundary&&!e.classification.isCrease),'Oblique viewing ray must reveal silhouette missed by depth gradient');

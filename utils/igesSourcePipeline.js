@@ -654,6 +654,31 @@ const projectPointWithDepth = (point, projection = DEFAULT_RENDER_PRESET.project
   };
 };
 
+// The depth gradient orders fragments; for an oblique camera it is not the
+// viewing ray. The ray is the nullspace of the two screen-coordinate rows.
+const cameraViewRay = (projection = DEFAULT_RENDER_PRESET.projection) => {
+  const origin = projectPointWithDepth([0,0,0], projection);
+  const axes = [[1,0,0],[0,1,0],[0,0,1]].map(v => projectPointWithDepth(v, projection));
+  const depth = axes.map(v => v.depth - origin.depth);
+  if (projection.mode === 'basis' || projection.mode === 'euler') return normalizeVector(depth);
+  const rows = [0,1].map(i => axes.map(v => v.point[i] - origin.point[i]));
+  const ray = crossProduct(rows[0], rows[1]);
+  if (!ray.some(v => Math.abs(v) > 1e-12)) throw new Error('Degenerate camera projection');
+  return normalizeVector(dotProduct(ray, depth) < 0 ? ray.map(v => -v) : ray);
+};
+
+const nodeVisibility = (nodes, counts) => {
+  const entries = nodes.map((node, index) => ({ nodeId: `node:${index}`, name: node.name, path: node.path, pixels: [...new Set(node.meshes || [])].reduce((sum, mesh) => sum + (counts[mesh] || 0), 0) }));
+  const names = new Map();
+  for (const entry of entries) if (entry.name) names.set(entry.name, [...(names.get(entry.name) || []), entry]);
+  return { nodeVisibility: entries, visibleNodePixels: Object.fromEntries([...names].filter(([,matches]) => matches.length === 1).map(([name,matches]) => [name,matches[0].pixels])), ambiguousNodeNames: [...names].filter(([,matches]) => matches.length > 1).map(([name]) => name) };
+};
+const resolveNodeVisibility = (render, selector) => {
+  if (!render.nodeVisibility) return { pixels: typeof selector === 'string' ? (Object.hasOwn(render.visibleNodePixels || {}, selector) ? render.visibleNodePixels[selector] : 0) : 0, ambiguous: false };
+  const matches = render.nodeVisibility.filter(node => typeof selector === 'string' ? node.name === selector : selector?.nodeId ? node.nodeId === selector.nodeId : selector?.path ? node.path === selector.path : false);
+  return { pixels: matches.length === 1 ? matches[0].pixels : 0, ambiguous: matches.length > 1 };
+};
+
 const projectPoint = (point, projection = DEFAULT_RENDER_PRESET.projection) => {
   return projectPointWithDepth(point, projection).point;
 };
@@ -752,7 +777,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   };
 
   const lightingProjection = { ...preset.projection, modelYawDeg: 0, modelPitchDeg: 0, modelRollDeg: 0 };
-  const lightingView = normalizeVector([[1,0,0],[0,1,0],[0,0,1]].map(axis => projectPointWithDepth(axis, lightingProjection).depth));
+  const lightingView = cameraViewRay(lightingProjection);
   const triangles = [];
   for (const [meshIndex, mesh] of (scene.importResult.meshes || []).entries()) {
     if (meshDisplayStyles.get(meshIndex)?.visible === false || (quality && meshDisplayStyles.get(meshIndex)?.opacity <= 0 && meshDisplayStyles.get(meshIndex)?.edgeOpacity <= 0)) continue;
@@ -825,7 +850,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   }
   const visibleMeshPixelCounts = {};
   for (const owner of pixelOwners) if (owner >= 0) visibleMeshPixelCounts[owner] = (visibleMeshPixelCounts[owner] || 0) + 1;
-  const visibleNodePixels = Object.fromEntries(scene.sceneManifest.nodes.filter(node => node.name).map(node => [node.name, node.meshes.reduce((sum, index) => sum + (visibleMeshPixelCounts[index] || 0), 0)]));
+  const visibility = nodeVisibility(scene.sceneManifest.nodes, visibleMeshPixelCounts);
   if (meshSignature() !== meshGeometrySha256) throw new Error('Renderer mutated source mesh coordinates or indices');
   const pngBuffer = encodePng(width, height, pixels);
   const outputPath = path.join(outputDir, `${sourceBinding.sourceAsset.id}-${sourceBinding.resolverType}-${preset.id}.png`);
@@ -843,7 +868,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     outputPath,
     mimeType: 'image/png',
     visibleMeshPixelCounts,
-    visibleNodePixels,
+    ...visibility,
     width,
     height,
     sha256: sha256Buffer(pngBuffer),
@@ -948,8 +973,7 @@ const colorWithOpacity = (color, opacity = 1) => {
 
 const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toScreen = null, scale = 1) => {
   const enhanced = preset.renderQuality?.edges === 'topology';
-  const originDepth = projectPointWithDepth([0,0,0], preset.projection).depth;
-  const view = normalizeVector([[1,0,0],[0,1,0],[0,0,1]].map(v => projectPointWithDepth(v, preset.projection).depth - originDepth));
+  const view = cameraViewRay(preset.projection);
   if (preset.edgeMode === 'all') return buildAllTriangleEdges(meshes, preset, meshDisplayStyles);
 
   const creaseThreshold = Math.cos(((preset.creaseAngleDeg ?? 18) * Math.PI) / 180);
@@ -1062,10 +1086,11 @@ const fillTriangle = (pixels, width, height, points, color, zBuffer, pixelOwners
       const depth = alpha * points[0][2] + beta * points[1][2] + gamma * points[2][2];
       const zIndex = y * width + x;
       if (depth < zBuffer[zIndex]) continue;
-      zBuffer[zIndex] = depth;
-      if (pixelOwners) pixelOwners[zIndex] = meshIndex;
       const index = zIndex * 4;
       const shaded = vertexColors ? [0,1,2,3].map(channel => Math.round(alpha * vertexColors[0][channel] + beta * vertexColors[1][channel] + gamma * vertexColors[2][channel])) : color;
+      if (!(shaded[3] > 0)) continue;
+      zBuffer[zIndex] = depth;
+      if (pixelOwners) pixelOwners[zIndex] = meshIndex;
       blendPixel(pixels, index, shaded);
       covered += 1;
     }
@@ -1107,6 +1132,7 @@ const drawLine = (pixels, width, height, a, b, color, lineWidth = 1, zBuffer = n
 };
 
 const drawPoint = (pixels, width, height, x, y, color, lineWidth = 1, zBuffer = null, depth = 0) => {
+  if (!(color[3] > 0)) return 0;
   const radius = lineWidth > 1 ? Math.round(lineWidth) : 0;
   let covered = 0;
   for (let yy = y - radius; yy <= y + radius; yy += 1) {
@@ -1499,6 +1525,10 @@ module.exports = {
   buildDatabaseSourceRecord,
   buildDatabaseSourceBinding,
   runIgesSourcePipeline,
+  cameraViewRay,
+  projectPointWithDepth,
+  nodeVisibility,
+  resolveNodeVisibility,
   renderSceneToPng,
   buildRenderableEdges,
   detectIgesUnits,
