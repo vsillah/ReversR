@@ -1390,7 +1390,7 @@ const computeSourceOnlyConfidence = ({ sourceBinding, scene, render, stl }) => {
   };
 };
 
-const runIgesSourcePipeline = async ({ sourceBinding, outputDir = defaultOutputDir, includeStl = true }) => {
+const runIgesSourcePipeline = async ({ sourceBinding, outputDir = defaultOutputDir, includeStl = true, includeBlockedStateExamples = false }) => {
   if (!sourceBinding.ok) return sourceBinding;
   ensureDir(outputDir);
 
@@ -1413,7 +1413,7 @@ const runIgesSourcePipeline = async ({ sourceBinding, outputDir = defaultOutputD
     render,
     stl,
     confidence,
-    blockedStates: buildBlockedStateExamples(),
+    blockedStates: includeBlockedStateExamples ? buildBlockedStateExamples() : null,
     generatedAt: new Date().toISOString(),
   };
 };

@@ -376,11 +376,36 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-const loadImage = filePath => {
+const loadImage = (filePath, limits = null) => {
+  if (limits) {
+    assert([limits.maxBytes, limits.maxPixels, limits.maxMemoryUsageInMB].every(v => Number.isFinite(v) && v > 0), 'Positive image resource bounds required');
+    assert(fs.statSync(filePath).size <= limits.maxBytes, 'Image exceeds byte budget');
+  }
   const buffer = fs.readFileSync(filePath);
   const extension = path.extname(filePath).toLowerCase();
   if (extension === '.png') {
+    if (limits) {
+      assert(buffer.length >= 24 && buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])), 'Invalid PNG header');
+      assert(buffer.readUInt32BE(8) === 13 && buffer.toString('ascii', 12, 16) === 'IHDR', 'First PNG chunk must be a 13-byte IHDR');
+      const width = buffer.readUInt32BE(16), height = buffer.readUInt32BE(20);
+      assert(width > 0 && height > 0 && width <= 0x7fffffff && height <= 0x7fffffff && width * height <= limits.maxPixels, 'Image exceeds pixel budget');
+      assert(buffer.length >= 33, 'Truncated PNG header');
+      const depths = { 0: [1,2,4,8,16], 2: [8,16], 3: [1,2,4,8], 4: [8,16], 6: [8,16] };
+      assert(depths[buffer[25]]?.includes(buffer[24]) && buffer[26] === 0 && buffer[27] === 0 && buffer[28] <= 1, 'Invalid PNG header semantics');
+      let offset = 8, headers = 0, imageData = false, ended = false;
+      while (offset < buffer.length) {
+        assert(offset + 12 <= buffer.length, 'Truncated PNG chunk');
+        const length = buffer.readUInt32BE(offset), type = buffer.toString('ascii', offset + 4, offset + 8);
+        assert(/^[A-Za-z]{4}$/.test(type) && offset + 12 + length <= buffer.length, 'Invalid PNG chunk bounds');
+        if (type === 'IHDR') { headers++; assert(headers === 1 && offset === 8 && length === 13, 'Duplicate/misplaced PNG IHDR'); }
+        if (type === 'IDAT') imageData = true;
+        offset += 12 + length;
+        if (type === 'IEND') { assert(length === 0 && offset === buffer.length, 'Invalid PNG end/trailing bytes'); ended = true; break; }
+      }
+      assert(headers === 1 && imageData && ended, 'Incomplete PNG chunk stream');
+    }
     const decoded = PNG.sync.read(buffer);
+    if (limits) assert(decoded.width === buffer.readUInt32BE(16) && decoded.height === buffer.readUInt32BE(20) && decoded.width * decoded.height <= limits.maxPixels, 'Decoded PNG dimensions differ from bounded header');
     return {
       width: decoded.width,
       height: decoded.height,
@@ -389,7 +414,7 @@ const loadImage = filePath => {
     };
   }
   if (extension === '.jpg' || extension === '.jpeg') {
-    const decoded = jpeg.decode(buffer, { useTArray: true });
+    const decoded = jpeg.decode(buffer, { useTArray: true, ...(limits ? { maxResolutionInMP: limits.maxPixels / 1000000, maxMemoryUsageInMB: limits.maxMemoryUsageInMB } : {}) });
     return {
       width: decoded.width,
       height: decoded.height,
