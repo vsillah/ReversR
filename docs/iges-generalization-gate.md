@@ -55,9 +55,12 @@ expected implementation files (including CLI/montage), Node platform/version,
 OCCT package/JavaScript/WASM and image decoder fingerprints to a random experiment
 identity. A canonical registry under `.local/iges-generalization-experiments`
 stores receipts independently of the freeze location. Copying a freeze cannot
-reset exposure. Atomic phase receipts prevent duplicate starts; source-family
-history blocks previously exposed holdouts in subsequent experiments. Use one
-coordinating CLI at a time. This is integrity checking for a trusted cooperative
+reset exposure. A fail-closed exclusive lock serializes freshness checks, exposure
+reservation and reconciliation. Immutable receipts containing both source hashes
+and families are authoritative; `history.json` is only a rebuildable index. Lost
+index files cannot restore freshness. A busy/stale lock rejects without retry or
+automatic bypass. Legacy receipts lacking source hashes require reconciliation
+before any fresh holdout can be established. This is integrity checking for a trusted cooperative
 workspace, not cryptographic resistance to an owner deliberately rewriting the
 registry and code.
 
@@ -71,7 +74,11 @@ eligibility and `gateAccepted: false`; independent review remains required.
 Preserve old failed/started/completed receipts. `reconcile receipts.json` appends
 hash-verified historical freeze/ledger records to canonical exposure history
 without rewriting originals. A receipt has `reason` and `attempts`, each containing
-`freezePath`, `freezeSha256`, `ledgerPath`, `ledgerSha256`. After holdout inspection,
+`freezePath`, `freezeSha256`, `ledgerPath`, `ledgerSha256`. Failed historical
+attempts retain their original ledger and add `reconciledStatus: "failed"`, the
+exact error, date/basis and hash-verified `evidence` entries. This writes a distinct
+immutable receipt. Decoder fingerprints include package version, package.json,
+entry point and the entire implementation lib tree. After holdout inspection,
 any replay uses `regression` with `priorExposure: true`; it is not fresh evidence.
 New tuning needs replacement holdout families or an explicit coverage shortfall.
 
@@ -81,7 +88,8 @@ The gate allows 1–20 sources, 20 MiB per source, safe preset/artifact IDs,
 64–2048-pixel render dimensions and at most four references per source. Output
 paths resolve real ancestors and reject `.local` symlink escapes before writes.
 References are bounded to 8 MiB and 4,194,304 decoded pixels. The existing image
-loader accepts optional bounds: PNG header checks before allocation and jpeg-js
+loader accepts optional bounds: PNG chunk bounds and header semantics checks before decoding, rejecting duplicate
+IHDR chunks, with a final decoded-dimension check; jpeg-js
 resolution/64 MiB decoder limits. Default loader behavior remains compatible.
 
 The CLI runs imports in a separate process with a 120-second timeout and 1536 MiB
@@ -122,3 +130,9 @@ component-visibility concerns can reject a deterministic candidate. Source score
 are not geometry-accuracy percentages. Montage panels verify image hashes, stamp
 manifest/experiment/report identity, apply recorded crops, size rows dynamically
 and show useful unavailable states for tampered, missing or invalid images.
+
+Validation limits: timeout kill and heap exhaustion are configured but have not
+been fault-injected. Only the null-source and approved-hash mismatch binding
+variants are explicitly fault-injected by the new gate test. Focused tests compare
+full source/PNG/STL/confidence evidence across no-reference, PNG, JPEG and missing
+reference runs; they do not prove independent geometric truth.

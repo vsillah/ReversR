@@ -7,7 +7,7 @@ const p = require('./igesSourcePipeline');
 const {loadImage} = require('./igesVisualCalibration');
 const {describeImage, compareImages, cropImage, applyRenderGates} = require('./igesLocalCalibration');
 const VERSION = 'iges-generalization-v2';
-const logicFiles = ['utils/igesGeneralizationGate.js','utils/igesSourcePipeline.js','utils/igesLocalCalibration.js','utils/igesRenderQuality.js','utils/igesVisualCalibration.js','scripts/iges-generalization-gate.js','scripts/iges-generalization-montage.py'];
+const logicFiles = ['utils/igesGeneralizationGate.js','utils/igesExposureStore.js','utils/igesSourcePipeline.js','utils/igesLocalCalibration.js','utils/igesRenderQuality.js','utils/igesVisualCalibration.js','scripts/iges-generalization-gate.js','scripts/iges-generalization-montage.py'];
 const repoRoot=path.resolve(__dirname,'..');
 const registryRoot=path.join(repoRoot,'.local','iges-generalization-experiments');
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -22,12 +22,19 @@ const privatePath = file => {
 };
 const writeOnce = (file,value) => {file=privatePath(file);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n',{flag:'wx'});};
 const safeId = id => typeof id==='string'&&/^[a-z0-9][a-z0-9-]{0,79}$/.test(id);
+const packageFingerprint = base => {
+  const entries=[];
+  const walk=(dir,prefix='')=>{for(const name of fs.readdirSync(dir).sort()){const file=path.join(dir,name),relative=prefix+name;if(fs.statSync(file).isDirectory())walk(file,relative+'/');else entries.push([relative,hash(file)]);}};
+  entries.push(['package.json',hash(path.join(base,'package.json'))]);
+  if(fs.existsSync(path.join(base,'index.js')))entries.push(['index.js',hash(path.join(base,'index.js'))]);
+  walk(path.join(base,'lib'),'lib/');entries.sort((a,b)=>a[0].localeCompare(b[0]));
+  return {version:JSON.parse(fs.readFileSync(path.join(base,'package.json'))).version,implementationHash:digest(entries),files:entries};
+};
 const runtimeIdentity = () => {
   const base=path.dirname(require.resolve('occt-import-js/package.json'));
-  return {node:process.version,platform:process.platform,arch:process.arch,importer:require('occt-import-js/package.json').version,pngDecoderHash:hash(require.resolve('pngjs/lib/png-sync.js')),jpegDecoderHash:hash(require.resolve('jpeg-js/lib/decoder.js')),packageHash:hash(path.join(base,'package.json')),javascriptHash:hash(path.join(base,'dist/occt-import-js.js')),wasmHash:hash(path.join(base,'dist/occt-import-js.wasm'))};
+  return {node:process.version,platform:process.platform,arch:process.arch,importer:require('occt-import-js/package.json').version,pngDecoder:packageFingerprint(path.dirname(require.resolve('pngjs/package.json'))),jpegDecoder:packageFingerprint(path.dirname(require.resolve('jpeg-js/package.json'))),packageHash:hash(path.join(base,'package.json')),javascriptHash:hash(path.join(base,'dist/occt-import-js.js')),wasmHash:hash(path.join(base,'dist/occt-import-js.wasm'))};
 };
-const readHistory=()=>fs.existsSync(path.join(registryRoot,'history.json'))?JSON.parse(fs.readFileSync(path.join(registryRoot,'history.json'))):{events:[]};
-const saveHistory=history=>p.writeJson(privatePath(path.join(registryRoot,'history.json')),history);
+const exposureStore=require('./igesExposureStore').createExposureStore(registryRoot);
 const validateManifest = manifest => {
   assert.equal(manifest.version,VERSION);assert(manifest.sources.length>0&&manifest.sources.length<=20,'Bounded 1-20 source gate');
   assert(manifest.preset&&manifest.candidatePreset&&Array.isArray(manifest.cameras)&&manifest.cameras.length<=4,'Frozen render presets required');
@@ -52,10 +59,10 @@ const validateManifest = manifest => {
 };
 const freezeGate = (manifestFile, outputFile) => {
   const manifest=JSON.parse(fs.readFileSync(manifestFile));validateManifest(manifest);outputFile=privatePath(outputFile);
-  const history=readHistory();for(const source of manifest.sources.filter(s=>s.split==='holdout'))assert(!history.events.some(e=>e.family===source.family||e.sourceSha256===source.sha256),'Holdout family/source previously exposed in canonical history');
+  const fresh=manifest.sources.filter(s=>s.split==='holdout');
   const frozen={version:VERSION,experimentId:crypto.randomUUID(),manifest,manifestHash:digest(manifest),logicHashes:Object.fromEntries(logicFiles.map(f=>[f,hash(path.join(repoRoot,f))])),runtime:runtimeIdentity(),createdAt:new Date().toISOString(),improvementCycles:0};
   assert(!fs.existsSync(outputFile),'Freeze already exists');
-  writeOnce(path.join(registryRoot,frozen.experimentId+'.json'),{experimentId:frozen.experimentId,freezeHash:digest(frozen),manifestHash:frozen.manifestHash,events:[],devAccepted:false});
+  exposureStore.withLock(()=>{if(fresh.length)exposureStore.assertFreshUnlocked(fresh);writeOnce(path.join(registryRoot,frozen.experimentId+'.json'),{experimentId:frozen.experimentId,freezeHash:digest(frozen),manifestHash:frozen.manifestHash,events:[],devAccepted:false});});
   writeOnce(outputFile,frozen);return frozen;
 };
 const loadExperiment = freezeFile => {
@@ -74,10 +81,15 @@ const acceptDev = (freezeFile,reason) => {
   assert(!ledger.events.some(e=>e.phase==='holdout'),'Holdout already exposed');ledger.devAccepted={at:new Date().toISOString(),reason};p.writeJson(ledgerPath,ledger);
 };
 const reconcileHistory = receiptFile => {
-  const receipt=JSON.parse(fs.readFileSync(privatePath(receiptFile))),history=readHistory();
-  assert(receipt.reason&&Array.isArray(receipt.attempts));
-  for(const attempt of receipt.attempts){assert.equal(hash(attempt.freezePath),attempt.freezeSha256);assert.equal(hash(attempt.ledgerPath),attempt.ledgerSha256);const old=JSON.parse(fs.readFileSync(attempt.freezePath)),ledger=JSON.parse(fs.readFileSync(attempt.ledgerPath));for(const event of ledger.events)for(const source of old.manifest.sources.filter(s=>s.split===event.phase))history.events.push({family:source.family,sourceSha256:source.sha256,phase:event.phase,status:event.status,receiptHash:hash(receiptFile),reason:receipt.reason});}
-  saveHistory(history);return history;
+  const receipt=JSON.parse(fs.readFileSync(privatePath(receiptFile)));assert(receipt.reason&&Array.isArray(receipt.attempts));
+  const sources=[];
+  for(const attempt of receipt.attempts){
+    assert.equal(hash(attempt.freezePath),attempt.freezeSha256);assert.equal(hash(attempt.ledgerPath),attempt.ledgerSha256);
+    for(const evidence of attempt.evidence||[])assert.equal(hash(evidence.path),evidence.sha256,'Reconciliation evidence changed');
+    const old=JSON.parse(fs.readFileSync(attempt.freezePath)),ledger=JSON.parse(fs.readFileSync(attempt.ledgerPath));
+    for(const event of ledger.events)for(const source of old.manifest.sources.filter(s=>s.split===event.phase))sources.push({family:source.family,sourceSha256:source.sha256,phase:event.phase,originalStatus:event.status,reconciledStatus:attempt.reconciledStatus||event.status});
+  }
+  return exposureStore.reconcile({sources,reason:receipt.reason,receiptPath:privatePath(receiptFile),receiptSha256:hash(receiptFile),attempts:receipt.attempts,supersedes:receipt.supersedes||[]});
 };
 const enforceOffline = () => {
   const externalRequests=[],restore=[];
@@ -108,12 +120,11 @@ const runGate = async (freezeFile,phase,outputDir,{resourceBounded=false}={}) =>
   const {frozen,ledger,ledgerPath}=loadExperiment(freezeFile);
   const inputs=frozen.manifest.sources.filter(s=>s.split===phase);assert(inputs.length>0,'Requested phase has zero sources');
   assert(!ledger.events.some(e=>e.phase===phase),'Phase already exposed; copied freeze cannot reset exposure');
-  if(phase==='holdout'){assert(ledger.devAccepted,'Explicit DEV acceptance required');const history=readHistory();for(const source of inputs)assert(!history.events.some(e=>e.family===source.family||e.sourceSha256===source.sha256),'Holdout family previously exposed');}
+  if(phase==='holdout')assert(ledger.devAccepted,'Explicit DEV acceptance required');
   assert(!fs.existsSync(outputDir),'Use a new output directory');
-  writeOnce(path.join(registryRoot,frozen.experimentId+'-'+phase+'-exposed.json'),{experimentId:frozen.experimentId,phase,sourceFamilies:inputs.map(s=>s.family),at:new Date().toISOString()});
+  exposureStore.reserve({experimentId:frozen.experimentId,phase,sources:inputs.map(s=>({family:s.family,sourceSha256:s.sha256})),at:new Date().toISOString()},phase==='holdout');
   fs.mkdirSync(outputDir,{recursive:true});
   const event={phase,status:'started',count:inputs.length,resourceBounded,at:new Date().toISOString(),logicHashes:frozen.logicHashes};ledger.events.push(event);p.writeJson(ledgerPath,ledger);
-  const history=readHistory();for(const source of inputs)history.events.push({experimentId:frozen.experimentId,family:source.family,sourceSha256:source.sha256,phase,status:'exposed'});saveHistory(history);
   const offline=enforceOffline();
   const report={version:VERSION,phase,runKind:phase==='holdout'?'first_declared_holdout':phase==='regression'?'exposed_replay':'development_or_synthetic',experimentId:frozen.experimentId,manifestHash:frozen.manifestHash,logicHashes:frozen.logicHashes,sourceRubric:'unchanged shared pipeline',visualRubric:'foreground-silhouette-edge-v1',productionPresetPromotion:false,improvementCycles:0,gateAccepted:false,resourceIsolation:resourceBounded?'CLI subprocess timeout 120s and heap cap 1536MiB':'unavailable in-process; not acceptable for holdout admission',externalRequests:offline.externalRequests,assets:[],trace:[]};
   try {
@@ -172,4 +183,4 @@ const runGate = async (freezeFile,phase,outputDir,{resourceBounded=false}={}) =>
     p.writeJson(path.join(outputDir,'report.json'),report);return report;
   }catch(error){event.status='failed';event.error=error.message;report.executionError=error.message;p.writeJson(path.join(outputDir,'failure-report.json'),report);throw error;}finally{offline.restore();event.finishedAt=new Date().toISOString();p.writeJson(ledgerPath,ledger);}
 };
-module.exports={VERSION,validateManifest,freezeGate,runGate,enforceOffline,privatePath,loadExperiment,acceptDev,reconcileHistory,invariant,confidenceState,assertForeground,fixtureBinding};
+module.exports={VERSION,validateManifest,freezeGate,runGate,enforceOffline,privatePath,packageFingerprint,loadExperiment,acceptDev,reconcileHistory,invariant,confidenceState,assertForeground,fixtureBinding};
