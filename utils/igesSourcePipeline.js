@@ -738,6 +738,8 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
   const pixels = Buffer.alloc(width * height * 4);
   const zBuffer = new Float64Array(width * height);
   zBuffer.fill(Number.NEGATIVE_INFINITY);
+  // Filled geometry ownership excludes antialiased edge-only coverage.
+  const edgeCoverage = quality?.shadow ? new Uint8Array(width * height) : null;
   const pixelOwners = new Int32Array(width * height);
   pixelOwners.fill(-1);
   drawBackground(pixels, width, height, preset);
@@ -820,7 +822,10 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     const start = toScreen(edge.start);
     const end = toScreen(edge.end);
     if (quality?.edges === 'topology') {
-      coveredPixels += renderQuality.rasterLine({ pixels, width, height, start, end, color: colorWithOpacity(edge.color || preset.edgeColor, edge.opacity ?? 1), zBuffer: edge.visibleThrough ? null : zBuffer, tolerance: edge.depthTolerance, lineWidth: edge.lineWidth || 1, blend: blendPixel });
+      coveredPixels += renderQuality.rasterLine({ pixels, width, height, start, end, color: colorWithOpacity(edge.color || preset.edgeColor, edge.opacity ?? 1), zBuffer: edge.visibleThrough ? null : zBuffer, tolerance: edge.depthTolerance, lineWidth: edge.lineWidth || 1, blend: (target, index, color) => {
+        if (edgeCoverage && color[3] > 0) edgeCoverage[index / 4] = 1;
+        blendPixel(target, index, color);
+      } });
       continue;
     }
     coveredPixels += drawLine(
@@ -832,6 +837,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
       colorWithOpacity(edge.color || preset.edgeColor || preset.foreground, edge.opacity ?? 1),
       edge.lineWidth || 1,
       edge.visibleThrough ? null : zBuffer,
+      edgeCoverage,
     );
   }
 
@@ -842,7 +848,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     const shadowLight = renderQuality.sourceLight(displayLight, [[1,0,0],[0,1,0],[0,0,1]].map(axis => transformRenderPoint(axis, preset.projection)));
     const shadow = renderQuality.shadowMask({ triangles: triangles.filter(t => t.displayStyle.opacity === 1 && t.displayStyle.mode === 'shaded').map(t => t.triangle), toScreen, width, height, settings: quality.shadow, lightDirection: shadowLight });
     let affectedBackgroundPixels = 0;
-    for (let i = 0; i < shadow.mask.length; i++) if (pixelOwners[i] < 0 && shadow.mask[i] > 0) {
+    for (let i = 0; i < shadow.mask.length; i++) if (pixelOwners[i] < 0 && !edgeCoverage[i] && shadow.mask[i] > 0) {
       const alpha = Math.round(shadow.mask[i] * quality.shadow.opacity * 255);
       if (alpha > 0) { blendPixel(pixels, i * 4, [0, 0, 0, alpha]); affectedBackgroundPixels++; }
     }
@@ -1100,7 +1106,7 @@ const fillTriangle = (pixels, width, height, points, color, zBuffer, pixelOwners
 
 const edgeFunction = (a, b, c) => (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0]);
 
-const drawLine = (pixels, width, height, a, b, color, lineWidth = 1, zBuffer = null) => {
+const drawLine = (pixels, width, height, a, b, color, lineWidth = 1, zBuffer = null, coverage = null) => {
   let [x0, y0] = a;
   const [x1, y1] = b;
   const dx = Math.abs(x1 - x0);
@@ -1115,7 +1121,7 @@ const drawLine = (pixels, width, height, a, b, color, lineWidth = 1, zBuffer = n
   for (;;) {
     const t = step / steps;
     const depth = (a[2] ?? 0) + ((b[2] ?? 0) - (a[2] ?? 0)) * t;
-    covered += drawPoint(pixels, width, height, x0, y0, color, lineWidth, zBuffer, depth);
+    covered += drawPoint(pixels, width, height, x0, y0, color, lineWidth, zBuffer, depth, coverage);
     if (x0 === x1 && y0 === y1) break;
     const e2 = 2 * err;
     if (e2 >= dy) {
@@ -1131,7 +1137,7 @@ const drawLine = (pixels, width, height, a, b, color, lineWidth = 1, zBuffer = n
   return covered;
 };
 
-const drawPoint = (pixels, width, height, x, y, color, lineWidth = 1, zBuffer = null, depth = 0) => {
+const drawPoint = (pixels, width, height, x, y, color, lineWidth = 1, zBuffer = null, depth = 0, coverage = null) => {
   if (!(color[3] > 0)) return 0;
   const radius = lineWidth > 1 ? Math.round(lineWidth) : 0;
   let covered = 0;
@@ -1141,6 +1147,7 @@ const drawPoint = (pixels, width, height, x, y, color, lineWidth = 1, zBuffer = 
       const zIndex = yy * width + xx;
       if (zBuffer && depth < zBuffer[zIndex] - 1e-4) continue;
       const index = zIndex * 4;
+      if (coverage) coverage[zIndex] = 1;
       blendPixel(pixels, index, color);
       covered += 1;
     }

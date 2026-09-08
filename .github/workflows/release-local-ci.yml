@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify synthetic shadow coverage
+        run: npm run iges:shadow:test
+
       - name: Run local release CI
         run: npm run release:local-ci
 
