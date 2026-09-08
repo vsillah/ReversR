@@ -9,6 +9,7 @@ const validateQuality = quality => {
   if (quality.shading && !['occt-normals', 'flat'].includes(quality.shading)) throw new Error('Unsupported quality shading');
   if (quality.materialModel && quality.materialModel !== 'diffuse') throw new Error('Unsupported quality material model');
   if (quality.edges && !['topology', 'legacy'].includes(quality.edges)) throw new Error('Unsupported quality edges');
+  if (quality.seamPolicy && (quality.seamPolicy !== 'smooth-manifold-v1' || quality.edges !== 'topology')) throw new Error('Smooth seam policy requires topology edges');
   if (quality.shadow) {
     const s = quality.shadow;
     if (!Array.isArray(s.normal) || s.normal.length !== 3 || !s.normal.every(Number.isFinite) || Math.hypot(...s.normal) < 1e-9 || !Number.isFinite(s.offset)) throw new Error('Shadow requires explicit finite source-space ground plane');
@@ -30,6 +31,32 @@ const shadingNormals = (mesh, triangleIndex, fallback) => {
     return alignment < 0 ? unit.map(x => -x) : unit;
   });
   return result;
+};
+// Missing/overlapping/out-of-range metadata cannot authorize seam suppression.
+const uniqueFaceOwnership = mesh => {
+  const count = (mesh.index?.array?.length || mesh.attributes?.position?.array?.length / 3 || 0) / 3;
+  if (!Number.isInteger(count) || count < 1 || !Array.isArray(mesh.brep_faces)) return null;
+  const owners = Array(count).fill(-1);
+  for (const [id, face] of mesh.brep_faces.entries()) {
+    if (!Number.isInteger(face.first) || !Number.isInteger(face.last) || face.first < 0 || face.last < face.first || face.last >= count) return null;
+    for (let i=face.first;i<=face.last;i++) {
+      if (owners[i] !== -1) return null;
+      owners[i] = id;
+    }
+  }
+  return owners;
+};
+// Display inference only: triangulated normals do not certify analytic continuity.
+const smoothManifoldJoin = uses => {
+  if (uses.length !== 2 || uses.some(u => !Number.isInteger(u.face) || u.face < 0) || uses[0].face === uses[1].face) return false;
+  const [a,b] = uses;
+  if (a.points !== b.points || !a.triangleKey || a.triangleKey === b.triangleKey || !a.direction || a.direction !== -b.direction) return false;
+  return [0,1].every(i => {
+    const x=a.normals[i],y=b.normals[i];
+    if (x?.length !== 3 || y?.length !== 3 || ![...x,...y].every(Number.isFinite) || Math.hypot(...x)<1e-9 || Math.hypot(...y)<1e-9) return false;
+    if (![a,b].every(u => u.geometricNormal?.length === 3 && u.geometricNormal.every(Number.isFinite) && Math.hypot(...u.geometricNormal)>1e-9 && dot(normalize(u.normals[i]),normalize(u.geometricNormal)) > 0.2)) return false;
+    return dot(normalize(x),normalize(y)) >= Math.cos(Math.PI/180);
+  });
 };
 const diffuseColor = (normal, preset) => {
   const light = normalize(preset.lightDirection || [-0.35,-0.45,0.82]);
@@ -114,4 +141,4 @@ const shadowMask = ({ triangles, toScreen, width, height, settings, lightDirecti
 };
 // Inverse of an orthonormal model rotation: columns are transformed source axes.
 const sourceLight = (displayLight, transformedSourceAxes) => transformedSourceAxes.map(axis => dot(axis, displayLight));
-module.exports={ sourceLight, VERSION,validateQuality,faceId,shadingNormals,diffuseColor,depthSlope,rasterLine,shadowMask,blurPass };
+module.exports={ uniqueFaceOwnership, smoothManifoldJoin, sourceLight, VERSION,validateQuality,faceId,shadingNormals,diffuseColor,depthSlope,rasterLine,shadowMask,blurPass };

@@ -881,6 +881,7 @@ const renderSceneToPng = ({ scene, sourceBinding, outputDir }) => {
     renderPresetId: preset.id,
     rendererVersion: quality ? 'iges-source-shaded-edge-renderer-v3-opt-in' : 'iges-source-shaded-edge-renderer-v2',
     qualityVersion: quality?.version || null,
+    ...(quality?.seamPolicy ? {edgePolicyEvidence: renderableEdges.seamEvidence || {version:quality.seamPolicy,suppressed:0,bypassedByAllEdges:true}} : {}),
     lightingNormalPolicy: quality?.faceForwardLighting ? 'two-sided view-facing shading normals only; source normals unchanged' : 'source-oriented lighting',
     meshGeometrySha256,
     sourceMeshUnmodifiedByRenderer: true,
@@ -979,6 +980,7 @@ const colorWithOpacity = (color, opacity = 1) => {
 
 const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toScreen = null, scale = 1) => {
   const enhanced = preset.renderQuality?.edges === 'topology';
+  const smoothSeams = enhanced && preset.renderQuality?.seamPolicy === 'smooth-manifold-v1';
   const view = cameraViewRay(preset.projection);
   if (preset.edgeMode === 'all') return buildAllTriangleEdges(meshes, preset, meshDisplayStyles);
 
@@ -1002,6 +1004,7 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toS
       }
       continue;
     }
+    const owners = smoothSeams ? renderQuality.uniqueFaceOwnership(mesh) : null;
     let triangleIndex = 0;
     for (const triangle of triangleIterator(mesh)) {
       const normal = normalizeVector(crossProduct(
@@ -1010,11 +1013,23 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toS
       ));
       for (const [start, end] of [[triangle[0], triangle[1]], [triangle[1], triangle[2]], [triangle[2], triangle[0]]]) {
         const key = `${meshIndex}:${edgeKey(vertexKey(start), vertexKey(end))}`;
-        const entry = edges.get(key) || { start, end, normals: [], displayStyle, faceIds: new Set(), depthSlope: 0 };
+        const entry = edges.get(key) || { start, end, normals: [], displayStyle, faceIds: new Set(), uses: [], depthSlope: 0 };
         entry.normals.push(normal);
         if (enhanced) {
           const face = renderQuality.faceId(mesh, triangleIndex);
           if (face >= 0) entry.faceIds.add(face);
+          if (smoothSeams) {
+            const positions=mesh.attributes.position.array, indices=mesh.index?.array;
+            const normalAt = point => {
+              for (let i=0;i<3;i++) {
+                const vertex=indices?.length?indices[triangleIndex*3+i]:triangleIndex*3+i;
+                if (point.every((v,k)=>v===positions[vertex*3+k])) return mesh.attributes.normal?.array?.slice(vertex*3,vertex*3+3);
+              }
+              return null;
+            };
+            const points=[start,end].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+            entry.uses.push({face:owners?.[triangleIndex] ?? -1,points:JSON.stringify(points),normals:points.map(normalAt),geometricNormal:normal,direction:points[0]===start?1:-1,triangleKey:JSON.stringify([...triangle].map(p=>JSON.stringify(p)).sort())});
+          }
           entry.depthSlope = Math.max(entry.depthSlope, renderQuality.depthSlope(triangle.map(toScreen)));
         }
         edges.set(key, entry);
@@ -1024,6 +1039,7 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toS
   }
 
   const renderable = [];
+  const seamEvidence = {version:'smooth-manifold-v1', suppressed:0, retainedAmbiguous:0};
   for (const edge of edges.values()) {
     const isBoundary = edge.normals.length === 1;
     const isNonManifold = edge.normals.length > 2;
@@ -1035,7 +1051,11 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toS
     }
     const silhouette = enhanced && edge.normals.some(n => dotProduct(n, view) > 1e-8) && edge.normals.some(n => dotProduct(n, view) < -1e-8);
     const brepBoundary = enhanced && edge.faceIds?.size > 1;
-    if (edge.forceVisible || isBoundary || isCrease || isNonManifold || silhouette || brepBoundary) {
+    const smoothJoin = smoothSeams && brepBoundary && renderQuality.smoothManifoldJoin(edge.uses || []);
+    const suppress = smoothJoin && !edge.forceVisible && !isBoundary && !isCrease && !isNonManifold && !silhouette;
+    if (smoothSeams && brepBoundary && !smoothJoin) seamEvidence.retainedAmbiguous++;
+    if (suppress) seamEvidence.suppressed++;
+    if (!suppress && (edge.forceVisible || isBoundary || isCrease || isNonManifold || silhouette || brepBoundary)) {
       const displayStyle = edge.displayStyle || normalizeDisplayStyle(preset.displayState);
       renderable.push({
         start: edge.start,
@@ -1049,6 +1069,7 @@ const buildRenderableEdges = (meshes, preset, meshDisplayStyles = new Map(), toS
       });
     }
   }
+  if (smoothSeams) renderable.seamEvidence = seamEvidence;
   return renderable;
 };
 
