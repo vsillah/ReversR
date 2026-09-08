@@ -82,7 +82,8 @@
     "store:console:preflight": "node scripts/store-console-preflight.js",
     "store:console:preflight:local": "node scripts/store-console-preflight.js --allow-pending",
     "store:preflight": "node scripts/store-preflight.js",
-    "store:preflight:local": "node scripts/store-preflight.js --allow-placeholder"
+    "store:preflight:local": "node scripts/store-preflight.js --allow-placeholder",
+    "iges:shadow:test": "node scripts/iges-shadow-coverage-test.js && node scripts/iges-shadow-overlay-test.js"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
